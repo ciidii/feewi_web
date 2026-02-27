@@ -1,0 +1,9 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+/* On peut ajouter ici des animations complexes ou des overrides Material si besoin */
+.animate-in {
+  animation-duration: 300ms;
+}

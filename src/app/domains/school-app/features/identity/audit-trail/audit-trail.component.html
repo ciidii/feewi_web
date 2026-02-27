@@ -15,11 +15,11 @@
   </header>
 
   <!-- Table Component -->
-  <app-smart-data-table
+  <app-data-list
     [data]="auditLogs()"
     [tabs]="auditTabs"
     [activeTab]="activeTab()"
     [total]="totalLogs()"
     (onTabChange)="onTabChange($event)"
-  ></app-smart-data-table>
+  ></app-data-list>
 </div>

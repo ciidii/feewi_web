@@ -1,12 +1,12 @@
 import { Component, signal, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SmartDataTableComponent, TableRow, TabItem } from '../../../shared/components/smart-data-table.component';
 import { LucideAngularModule, History, ShieldAlert, GraduationCap, CreditCard, Activity } from 'lucide-angular';
+import {DataListComponent, TabItem, TableRow} from '../../../../../shared/components/data-list/data-list.component';
 
 @Component({
   selector: 'app-audit-trail',
   standalone: true,
-  imports: [CommonModule, SmartDataTableComponent, LucideAngularModule],
+  imports: [CommonModule, DataListComponent, LucideAngularModule],
   templateUrl: './audit-trail.component.html',
   styleUrl: './audit-trail.component.scss',
   encapsulation: ViewEncapsulation.None

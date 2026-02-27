@@ -22,11 +22,11 @@
   </header>
 
   <!-- Table Component -->
-  <app-smart-data-table
+  <app-data-list
     [data]="tenants()"
     [tabs]="tenantTabs"
     [activeTab]="activeTab()"
     [total]="totalTenants()"
     (onTabChange)="onTabChange($event)"
-  ></app-smart-data-table>
+  ></app-data-list>
 </div>

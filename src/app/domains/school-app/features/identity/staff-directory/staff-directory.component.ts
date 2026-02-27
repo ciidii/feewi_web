@@ -1,12 +1,12 @@
 import { Component, signal, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SmartDataTableComponent, TableRow, TabItem } from '../../../shared/components/smart-data-table.component';
 import { LucideAngularModule, UserPlus, Shield, Filter, Download, Users, UserCheck, UserX } from 'lucide-angular';
+import {DataListComponent, TabItem, TableRow} from '../../../../../shared/components/data-list/data-list.component';
 
 @Component({
   selector: 'app-staff-directory',
   standalone: true,
-  imports: [CommonModule, SmartDataTableComponent, LucideAngularModule],
+  imports: [CommonModule, DataListComponent, LucideAngularModule],
   templateUrl: './staff-directory.component.html',
   styleUrl: './staff-directory.component.scss',
   encapsulation: ViewEncapsulation.None

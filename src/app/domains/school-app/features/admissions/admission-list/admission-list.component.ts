@@ -1,13 +1,13 @@
 import { Component, inject, signal, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { SmartDataTableComponent, TableRow, TabItem } from '../../../shared/components/smart-data-table.component';
 import { LucideAngularModule, Filter, Download, Layers, Clock, ShieldCheck, UserCheck } from 'lucide-angular';
+import {DataListComponent, TabItem, TableRow} from '../../../../../shared/components/data-list/data-list.component';
 
 @Component({
   selector: 'app-admissions',
   standalone: true,
-  imports: [CommonModule, SmartDataTableComponent, LucideAngularModule],
+  imports: [CommonModule, DataListComponent, LucideAngularModule],
   templateUrl: './admission-list.component.html',
   styleUrl: './admission-list.component.scss',
   encapsulation: ViewEncapsulation.None

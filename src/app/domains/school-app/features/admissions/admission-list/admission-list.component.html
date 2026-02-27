@@ -19,12 +19,12 @@
   </header>
 
   <!-- Table Component -->
-  <app-smart-data-table
+  <app-data-list
     [data]="admissions()"
     [tabs]="admissionTabs"
     [activeTab]="activeTab()"
     [total]="totalAdmissions()"
     (onTabChange)="onTabChange($event)"
     (onView)="viewDetails($event)"
-  ></app-smart-data-table>
+  ></app-data-list>
 </div>

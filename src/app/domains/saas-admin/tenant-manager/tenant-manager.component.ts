@@ -1,14 +1,14 @@
 import { Component, inject, signal, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { SmartDataTableComponent, TableRow, TabItem } from '../../../shared/components/smart-data-table.component';
+import { DataListComponent, TableRow, TabItem } from '../../../shared/components/data-list/data-list.component';
 import { LucideAngularModule, Building2, Plus, Globe, ShieldCheck, Activity } from 'lucide-angular';
 import { TenantFormComponent } from '../tenant-form/tenant-form.component';
 
 @Component({
   selector: 'app-tenant-manager',
   standalone: true,
-  imports: [CommonModule, SmartDataTableComponent, LucideAngularModule, MatDialogModule],
+  imports: [CommonModule, DataListComponent, LucideAngularModule, MatDialogModule],
   templateUrl: './tenant-manager.component.html',
   styleUrl: './tenant-manager.component.scss',
   encapsulation: ViewEncapsulation.None

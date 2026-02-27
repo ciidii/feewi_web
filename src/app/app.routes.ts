@@ -3,59 +3,29 @@ import { ShellComponent } from './core/layout/shell/shell.component';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
-  // 1. Routes d'authentification (sans le Shell)
+  // 1. MONDE PUBLIC (Pas de Shell)
   {
     path: 'auth',
-    children: [
-      {
-        path: 'login',
-        loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent)
-      }
-    ]
+    loadChildren: () => import('./domains/public/public.routes').then(m => m.PUBLIC_ROUTES)
   },
 
-  // 2. Routes protégées (dans le Shell)
+  // 2. MONDE SAAS ADMIN (Dans le Shell, uniquement pour ROLE_SUPER_ADMIN)
+  {
+    path: 'saas',
+    component: ShellComponent,
+    canActivate: [authGuard],
+    // Ici on pourra ajouter un CanMatch pour bloquer le téléchargement si non admin
+    loadChildren: () => import('./domains/saas-admin/saas-admin.routes').then(m => m.SAAS_ADMIN_ROUTES)
+  },
+
+  // 3. MONDE ÉCOLE (Dans le Shell, métier quotidien)
   {
     path: '',
     component: ShellComponent,
     canActivate: [authGuard],
-    children: [
-      {
-        path: '',
-        redirectTo: 'dashboard',
-        pathMatch: 'full'
-      },
-      {
-        path: 'dashboard',
-        loadComponent: () => import('./features/admin/dashboard/dashboard.component').then(m => m.DashboardComponent)
-      },
-      {
-        path: 'saas/tenants',
-        loadComponent: () => import('./features/admin/tenant-manager/tenant-manager.component').then(m => m.TenantManagerComponent)
-      },
-      {
-        path: 'identity/staff',
-        loadComponent: () => import('./features/admin/staff-directory/staff-directory.component').then(m => m.StaffDirectoryComponent)
-      },
-      {
-        path: 'identity/roles',
-        loadComponent: () => import('./features/admin/role-designer/role-designer.component').then(m => m.RoleDesignerComponent)
-      },
-      {
-        path: 'identity/audit',
-        loadComponent: () => import('./features/admin/audit-trail/audit-trail.component').then(m => m.AuditTrailComponent)
-      },
-      {
-        path: 'admissions',
-        loadComponent: () => import('./features/admissions/admission-list/admission-list.component').then(m => m.AdmissionsComponent)
-      },
-      {
-        path: 'admissions/:id',
-        loadComponent: () => import('./features/admissions/admission-detail/admission-detail.component').then(m => m.AdmissionDetailComponent)
-      }
-    ]
+    loadChildren: () => import('./domains/school-app/school-app.routes').then(m => m.SCHOOL_APP_ROUTES)
   },
 
-  // 3. Fallback
+  // 4. Fallback
   { path: '**', redirectTo: 'auth/login' }
 ];

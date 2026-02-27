@@ -6,19 +6,19 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { LucideAngularModule, Lock, Mail, Loader2, Eye, EyeOff } from 'lucide-angular';
-import { AuthService } from '../../../core/services/auth.service';
+import {AuthService} from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [
-    CommonModule, 
-    FormsModule, 
-    ReactiveFormsModule, 
-    RouterModule, 
-    MatFormFieldModule, 
-    MatInputModule, 
-    MatButtonModule, 
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    RouterModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
     LucideAngularModule
   ],
   templateUrl: './login.component.html',
