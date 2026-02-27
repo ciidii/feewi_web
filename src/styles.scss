@@ -1,1 +1,62 @@
-/* You can add global styles to this file, and also import other style files */
+/* Configuration de Angular Material 3 */
+@use '@angular/material' as mat;
+
+/* IMPORT DES TOKENS DE DESIGN SYSTEM FEEWI */
+@import "styles/tokens";
+
+/* --- THEMATISATION MATERIAL 3 (FEEWI Midnight Slate) --- */
+$feewi-primary: (
+  0: #000000,
+  10: #001945,
+  20: #002f68,
+  25: #003b7a,
+  30: #00478d,
+  35: #0053a0,
+  40: #005fb4,
+  50: #2563eb,
+  60: #5484ff,
+  70: #88a6ff,
+  80: #bac8ff,
+  90: #dee3ff,
+  95: #f0f0ff,
+  98: #f9f9ff,
+  99: #fdfbff,
+  100: #ffffff,
+);
+
+html {
+  @include mat.theme((
+    color: (
+      primary: $feewi-primary,
+      tertiary: mat.$blue-palette,
+    ),
+    typography: (
+      brand-family: "Lexend",
+      plain-family: "Inter",
+    ),
+    density: 0,
+  ));
+}
+
+/* --- STYLES GLOBAUX --- */
+body {
+  margin: 0;
+  height: 100%;
+  background-color: var(--fw-ice);
+  color: var(--fw-midnight);
+  font-family: var(--fw-font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+html { height: 100%; }
+
+/* --- CLASSES D'HARMONISATION (Utilitaires Globaux) --- */
+.fw-text-primary { color: var(--fw-primary); }
+.fw-text-midnight { color: var(--fw-midnight); }
+.fw-text-slate { color: var(--fw-slate-medium); }
+.fw-bg-primary { background-color: var(--fw-primary); }
+.fw-bg-ice { background-color: var(--fw-ice); }
+.fw-bg-white { background-color: var(--fw-white); }
+.fw-font-display { font-family: var(--fw-font-display); }
+.fw-radius-md { border-radius: var(--fw-radius-md); }
+.fw-border-subtle { border: 1px solid var(--fw-border); }

@@ -1,0 +1,50 @@
+:root {
+  /* --- COULEURS (Midnight Slate) --- */
+  --fw-primary: #2563eb;
+  --fw-primary-hover: #1d4ed8;
+  --fw-primary-alpha: rgba(37, 99, 235, 0.1);
+  
+  --fw-midnight: #0f172a;
+  --fw-slate-medium: #64748b;
+  --fw-ice: #f8fafc;
+  --fw-white: #ffffff;
+  --fw-border: #e2e8f0;
+
+  /* --- TYPOGRAPHIE --- */
+  --fw-font-display: "Lexend", sans-serif;
+  --fw-font-sans: "Inter", sans-serif;
+
+  /* --- ESPACEMENTS --- */
+  --fw-space-xs: 4px;
+  --fw-space-sm: 8px;
+  --fw-space-md: 16px;
+  --fw-space-lg: 24px;
+  --fw-space-xl: 32px;
+  --fw-space-2xl: 48px;
+  --fw-space-3xl: 64px;
+
+  /* --- ARRONDIS (Radii) --- */
+  --fw-radius-sm: 4px;
+  --fw-radius-md: 8px;
+  --fw-radius-lg: 16px;
+  --fw-radius-xl: 24px;
+  --fw-radius-full: 9999px;
+
+  /* --- OMBRES (Shadows) --- */
+  --fw-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --fw-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --fw-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+
+  /* --- TRANSITIONS --- */
+  --fw-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- MAPPAGE SCSS (Optionnel pour confort) --- */
+$primary: var(--fw-primary);
+$midnight: var(--fw-midnight);
+$slate: var(--fw-slate-medium);
+$ice: var(--fw-ice);
+$border: var(--fw-border);
+$radius-md: var(--fw-radius-md);
+$font-display: var(--fw-font-display);
+$font-sans: var(--fw-font-sans);
