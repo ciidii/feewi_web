@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TenantContextService } from '../../services/tenant-context.service';
 import { AuthService } from '../../services/auth.service';
+import { NavigationContextService } from '../../services/navigation-context.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { LucideAngularModule, Search, Grid, Bell, User, CalendarDays, ChevronDown, LogOut } from 'lucide-angular';
@@ -16,6 +17,7 @@ import { LucideAngularModule, Search, Grid, Bell, User, CalendarDays, ChevronDow
 export class HeaderComponent {
   tenantService = inject(TenantContextService);
   auth = inject(AuthService);
+  contextService = inject(NavigationContextService);
 
   readonly Search = Search;
   readonly Grid = Grid;

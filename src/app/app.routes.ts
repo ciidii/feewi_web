@@ -14,7 +14,6 @@ export const routes: Routes = [
     path: 'saas',
     component: ShellComponent,
     canActivate: [authGuard],
-    // Ici on pourra ajouter un CanMatch pour bloquer le téléchargement si non admin
     loadChildren: () => import('./domains/saas-admin/saas-admin.routes').then(m => m.SAAS_ADMIN_ROUTES)
   },
 
