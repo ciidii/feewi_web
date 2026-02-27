@@ -1,0 +1,97 @@
+import { Component, ViewEncapsulation } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { LucideAngularModule, Users, GraduationCap, TrendingUp, Activity } from 'lucide-angular';
+
+@Component({
+  selector: 'app-dashboard',
+  standalone: true,
+  imports: [CommonModule, LucideAngularModule],
+  template: `
+    <div class="space-y-8 animate-in fade-in duration-700">
+      <!-- Page Header -->
+      <div class="flex flex-col gap-1">
+        <h1 class="text-3xl font-display font-bold text-midnight tracking-tight">Tableau de bord global</h1>
+        <p class="text-sm text-slate-medium font-medium">Console de pilotage de l'établissement • Année 2024-2025</p>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Card: Total Students -->
+        <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hover:shadow-md transition-all group">
+          <div class="flex justify-between items-start mb-4">
+            <div class="p-2.5 bg-blue-50 rounded-xl text-primary group-hover:scale-110 transition-transform">
+              <lucide-icon [name]="Users" class="w-6 h-6"></lucide-icon>
+            </div>
+            <span class="text-[10px] font-bold uppercase tracking-widest text-green-600 bg-green-50 px-2 py-1 rounded-full">+12.5%</span>
+          </div>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-medium mb-1">Total Élèves</h3>
+          <div class="text-3xl font-display font-bold text-midnight">1,248</div>
+        </div>
+
+        <!-- Card: Admissions -->
+        <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hover:shadow-md transition-all group">
+          <div class="flex justify-between items-start mb-4">
+            <div class="p-2.5 bg-amber-50 rounded-xl text-amber-600 group-hover:scale-110 transition-transform">
+              <lucide-icon [name]="Activity" class="w-6 h-6"></lucide-icon>
+            </div>
+            <span class="text-[10px] font-bold uppercase tracking-widest text-amber-600 bg-amber-50 px-2 py-1 rounded-full">En cours</span>
+          </div>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-medium mb-1">Admissions</h3>
+          <div class="text-3xl font-display font-bold text-midnight">42</div>
+        </div>
+
+        <!-- Card: Attendance -->
+        <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hover:shadow-md transition-all group">
+          <div class="flex justify-between items-start mb-4">
+            <div class="p-2.5 bg-emerald-50 rounded-xl text-emerald-600 group-hover:scale-110 transition-transform">
+              <lucide-icon [name]="GraduationCap" class="w-6 h-6"></lucide-icon>
+            </div>
+            <span class="text-[10px] font-bold uppercase tracking-widest text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">Optimal</span>
+          </div>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-medium mb-1">Taux Présence</h3>
+          <div class="text-3xl font-display font-bold text-midnight">96.4%</div>
+        </div>
+
+        <!-- Card: Trending -->
+        <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hover:shadow-md transition-all group">
+          <div class="flex justify-between items-start mb-4">
+            <div class="p-2.5 bg-slate-50 rounded-xl text-slate-600 group-hover:scale-110 transition-transform">
+              <lucide-icon [name]="TrendingUp" class="w-6 h-6"></lucide-icon>
+            </div>
+            <span class="text-[10px] font-bold uppercase tracking-widest text-slate-medium bg-slate-50 px-2 py-1 rounded-full">Stabile</span>
+          </div>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-medium mb-1">Performance</h3>
+          <div class="text-3xl font-display font-bold text-midnight">A+</div>
+        </div>
+      </div>
+
+      <!-- Activity Section Placeholder -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 bg-white rounded-2xl border border-border-subtle shadow-sm p-6 h-80 flex flex-col items-center justify-center border-dashed group hover:border-primary/30 transition-colors">
+           <lucide-icon [name]="TrendingUp" class="w-12 h-12 text-slate-200 mb-4 group-hover:text-primary/20 transition-colors"></lucide-icon>
+           <span class="text-sm font-medium text-slate-400">Graphiques d'évolution en cours de préparation...</span>
+        </div>
+        
+        <div class="bg-white rounded-2xl border border-border-subtle shadow-sm p-6 h-80">
+          <h3 class="text-sm font-bold text-midnight uppercase tracking-wider mb-4">Activités Récentes</h3>
+          <div class="space-y-4">
+            <div *ngFor="let i of [1,2,3,4]" class="flex gap-3 items-center">
+              <div class="w-2 h-2 rounded-full bg-primary"></div>
+              <div class="flex-1">
+                <p class="text-xs font-bold text-midnight">Nouveau dossier d'admission</p>
+                <p class="text-[10px] text-slate-medium">Il y a 10 minutes</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+  encapsulation: ViewEncapsulation.None
+})
+export class DashboardComponent {
+  readonly Users = Users;
+  readonly GraduationCap = GraduationCap;
+  readonly TrendingUp = TrendingUp;
+  readonly Activity = Activity;
+}
