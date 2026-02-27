@@ -1,0 +1,98 @@
+<div class="space-y-6 animate-in fade-in duration-500 max-w-[1400px] mx-auto">
+  <!-- Page Header Compact -->
+  <header class="flex justify-between items-center bg-white p-4 rounded-2xl border border-border-subtle shadow-sm">
+    <div class="flex items-center gap-4">
+      <div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+        <lucide-icon [name]="ShieldCheck" class="w-5 h-5"></lucide-icon>
+      </div>
+      <div>
+        <h1 class="text-xl font-display font-bold text-midnight tracking-tight leading-none">Rôles & Permissions</h1>
+        <p class="text-[11px] text-slate-medium font-bold uppercase tracking-wider mt-1">Matrice de contrôle d'accès</p>
+      </div>
+    </div>
+    
+    <button class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-xs font-bold hover:bg-primary-hover transition-all shadow-md shadow-primary/10 active:scale-95">
+      <lucide-icon [name]="Save" class="w-3.5 h-3.5"></lucide-icon>
+      Enregistrer
+    </button>
+  </header>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <!-- Colonne Gauche : Liste des Rôles (Compacte) -->
+    <aside class="lg:col-span-3 space-y-3">
+      <div class="flex items-center justify-between px-2">
+        <span class="text-[10px] font-bold text-slate-medium uppercase tracking-widest">Profils</span>
+        <button class="w-6 h-6 flex items-center justify-center hover:bg-ice rounded-md text-primary transition-colors">
+          <lucide-icon [name]="Plus" class="w-3.5 h-3.5"></lucide-icon>
+        </button>
+      </div>
+      
+      <div class="space-y-1.5">
+        <div 
+          *ngFor="let role of roles" 
+          (click)="selectedRole.set(role)"
+          class="flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all group"
+          [class.bg-white]="selectedRole().id !== role.id"
+          [class.border-border-subtle]="selectedRole().id !== role.id"
+          [class.bg-midnight]="selectedRole().id === role.id"
+          [class.border-midnight]="selectedRole().id === role.id"
+          [class.shadow-md]="selectedRole().id === role.id"
+        >
+          <div class="flex items-center gap-3">
+            <div 
+              class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+              [class.bg-ice]="selectedRole().id !== role.id"
+              [class.text-slate-medium]="selectedRole().id !== role.id"
+              [class.bg-white/10]="selectedRole().id === role.id"
+              [class.text-white]="selectedRole().id === role.id"
+            >
+              <lucide-icon [name]="role.icon" class="w-4 h-4"></lucide-icon>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-xs font-bold" [class.text-midnight]="selectedRole().id !== role.id" [class.text-white]="selectedRole().id === role.id">{{ role.name }}</span>
+              <span class="text-[9px] font-bold uppercase tracking-tighter" [class.text-slate-medium]="selectedRole().id !== role.id" [class.text-white/50]="selectedRole().id === role.id">{{ role.memberCount }} membres</span>
+            </div>
+          </div>
+          <lucide-icon [name]="ChevronRight" class="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" [class.text-slate-200]="selectedRole().id !== role.id" [class.text-white/30]="selectedRole().id === role.id"></lucide-icon>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Colonne Droite : Configuration (Matrice épurée) -->
+    <main class="lg:col-span-9">
+      <div class="bg-white rounded-2xl border border-border-subtle shadow-sm overflow-hidden">
+        <div class="p-5 border-b border-border-subtle bg-slate-50/30 flex items-center gap-4">
+          <div class="w-10 h-10 bg-white rounded-xl border border-border-subtle flex items-center justify-center text-primary shadow-sm">
+            <lucide-icon [name]="selectedRole().icon || Shield" class="w-5 h-5"></lucide-icon>
+          </div>
+          <div>
+            <h2 class="text-sm font-bold text-midnight tracking-tight">Permissions : {{ selectedRole().name }}</h2>
+            <p class="text-[11px] text-slate-medium font-medium italic">Modifications appliquées en temps réel après enregistrement.</p>
+          </div>
+        </div>
+
+        <div class="p-0 divide-y divide-border-subtle">
+          <div *ngFor="let group of permissionGroups" class="p-5 space-y-4">
+            <h3 class="text-[10px] font-bold text-primary uppercase tracking-[0.15em] border-l-2 border-primary pl-3">{{ group.category }}</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-2">
+              <div *ngFor="let perm of group.permissions" class="flex items-center justify-between py-2 border-b border-slate-50 last:border-0 group/item">
+                <div class="space-y-0.5">
+                  <p class="text-[13px] font-bold text-midnight group-hover/item:text-primary transition-colors">{{ perm.label }}</p>
+                  <p class="text-[10px] text-slate-medium leading-tight max-w-[280px]">{{ perm.description }}</p>
+                </div>
+                
+                <!-- Interrupteur Éclatant & Compact -->
+                <mat-slide-toggle 
+                  [checked]="perm.granted" 
+                  color="primary"
+                  class="custom-compact-toggle"
+                ></mat-slide-toggle>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

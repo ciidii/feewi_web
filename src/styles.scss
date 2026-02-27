@@ -2,7 +2,7 @@
 @use '@angular/material' as mat;
 
 /* IMPORT DES TOKENS DE DESIGN SYSTEM FEEWI */
-@import "styles/tokens";
+@use "styles/tokens" as *;
 
 /* --- THEMATISATION MATERIAL 3 (FEEWI Midnight Slate) --- */
 $feewi-primary: (
@@ -50,13 +50,13 @@ body {
 
 html { height: 100%; }
 
-/* --- CLASSES D'HARMONISATION (Utilitaires Globaux) --- */
-.fw-text-primary { color: var(--fw-primary); }
-.fw-text-midnight { color: var(--fw-midnight); }
-.fw-text-slate { color: var(--fw-slate-medium); }
-.fw-bg-primary { background-color: var(--fw-primary); }
-.fw-bg-ice { background-color: var(--fw-ice); }
-.fw-bg-white { background-color: var(--fw-white); }
-.fw-font-display { font-family: var(--fw-font-display); }
-.fw-radius-md { border-radius: var(--fw-radius-md); }
-.fw-border-subtle { border: 1px solid var(--fw-border); }
+/* --- CUSTOM MATERIAL OVERRIDES --- */
+.mat-mdc-dialog-container .mdc-dialog__surface {
+  border-radius: 28px !important;
+  padding: 0 !important;
+}
+
+.feewi-dialog-panel .mat-mdc-dialog-surface {
+  border-radius: 28px !important;
+  background: white !important;
+}

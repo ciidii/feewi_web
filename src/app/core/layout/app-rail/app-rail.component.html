@@ -1,0 +1,45 @@
+<nav class="w-16 h-[calc(100vh-64px)] bg-slate-50 border-r border-border-subtle flex flex-col items-center py-4 gap-2 transition-all select-none">
+  
+  <!-- SaaS Admin Console (Visible uniquement pour ROLE_SUPER_ADMIN) -->
+  <a 
+    *ngIf="auth.currentUser()?.roles?.includes('ROLE_SUPER_ADMIN')"
+    routerLink="/saas/tenants"
+    routerLinkActive="active"
+    class="rail-link group"
+    title="Console SaaS"
+  >
+    <div class="active-indicator"></div>
+    <lucide-icon [name]="ShieldCheck" class="w-5 h-5 text-amber-600"></lucide-icon>
+    <span class="rail-label">SaaS</span>
+  </a>
+
+  <div *ngIf="auth.currentUser()?.roles?.includes('ROLE_SUPER_ADMIN')" class="w-8 h-[1px] bg-border-subtle my-1"></div>
+
+  <!-- Item: Dashboard -->
+  <a routerLink="/dashboard" routerLinkActive="active" class="rail-link group" title="Tableau de bord">
+    <div class="active-indicator"></div>
+    <lucide-icon [name]="Home" class="w-5 h-5"></lucide-icon>
+    <span class="rail-label">Accueil</span>
+  </a>
+
+  <!-- Item: Admissions -->
+  <a routerLink="/admissions" routerLinkActive="active" class="rail-link group" title="Admissions">
+    <div class="active-indicator"></div>
+    <lucide-icon [name]="Briefcase" class="w-5 h-5"></lucide-icon>
+    <span class="rail-label">Inscrits</span>
+  </a>
+
+  <!-- Item: Registry -->
+  <a class="rail-link group" title="Scolarité">
+    <lucide-icon [name]="GraduationCap" class="w-5 h-5"></lucide-icon>
+    <span class="rail-label">Scolarité</span>
+  </a>
+
+  <!-- Bottom: Settings -->
+  <div class="mt-auto">
+    <a class="rail-link group" title="Paramètres">
+      <lucide-icon [name]="Settings" class="w-5 h-5"></lucide-icon>
+      <span class="rail-label">Réglages</span>
+    </a>
+  </div>
+</nav>

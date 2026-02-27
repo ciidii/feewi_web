@@ -1,0 +1,30 @@
+<div class="space-y-8 animate-in fade-in duration-500">
+  <!-- Page Header -->
+  <header class="flex justify-between items-end">
+    <div class="space-y-1">
+      <h1 class="text-3xl font-display font-bold text-midnight tracking-tight">Dossiers d'Admissions</h1>
+      <p class="text-sm text-slate-medium font-medium">Gestion du workflow des nouvelles inscriptions • 2024-2025</p>
+    </div>
+    
+    <div class="flex gap-3">
+      <button class="flex items-center gap-2 px-5 py-2.5 bg-white border border-border-subtle rounded-xl text-[13px] font-bold text-slate-medium hover:bg-ice hover:text-midnight transition-all hover:shadow-sm active:scale-95">
+        <lucide-icon [name]="Filter" class="w-4 h-4"></lucide-icon>
+        Filtrer la vue
+      </button>
+      <button class="flex items-center gap-2 px-5 py-2.5 bg-white border border-border-subtle rounded-xl text-[13px] font-bold text-slate-medium hover:bg-ice hover:text-midnight transition-all hover:shadow-sm active:scale-95">
+        <lucide-icon [name]="Download" class="w-4 h-4"></lucide-icon>
+        Exporter (CSV)
+      </button>
+    </div>
+  </header>
+
+  <!-- Table Component -->
+  <app-smart-data-table
+    [data]="admissions()"
+    [tabs]="admissionTabs"
+    [activeTab]="activeTab()"
+    [total]="totalAdmissions()"
+    (onTabChange)="onTabChange($event)"
+    (onView)="viewDetails($event)"
+  ></app-smart-data-table>
+</div>

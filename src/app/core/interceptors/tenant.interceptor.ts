@@ -1,21 +1,30 @@
-import { HttpInterceptorFn } from '@angular/common/http';
+import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { TenantContextService } from '../services/tenant-context.service';
+import { Router } from '@angular/router';
+import { catchError, throwError } from 'rxjs';
 
 export const tenantInterceptor: HttpInterceptorFn = (req, next) => {
-  const tenantService = inject(TenantContextService);
-  const activeTenant = tenantService.activeTenant();
+  const router = inject(Router);
+  const token = localStorage.getItem('access_token');
 
-  // On récupère le token du localStorage (simulé pour l'instant)
-  const authToken = localStorage.getItem('auth_token') || '';
+  // On clone la requête pour ajouter le Bearer Token si présent
+  let authReq = req;
+  if (token) {
+    authReq = req.clone({
+      setHeaders: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+  }
 
-  // On clone la requête pour y ajouter les headers
-  let authReq = req.clone({
-    setHeaders: {
-      'Authorization': `Bearer ${authToken}`,
-      'X-Tenant-ID': activeTenant?.id || 'default-school'
-    }
-  });
-
-  return next(authReq);
+  return next(authReq).pipe(
+    catchError((error: HttpErrorResponse) => {
+      // Gestion des erreurs standard (Section 5 du Guide)
+      if (error.status === 401) {
+        localStorage.removeItem('access_token');
+        router.navigate(['/auth/login']);
+      }
+      return throwError(() => error);
+    })
+  );
 };

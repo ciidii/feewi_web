@@ -2,8 +2,8 @@
   <!-- Header / Toolbar -->
   <div class="table-toolbar">
     <div class="tabs-group">
-      <button 
-        *ngFor="let tab of tabs()" 
+      <button
+        *ngFor="let tab of tabs()"
         (click)="onTabChange.emit(tab)"
         class="tab-btn"
         [class.active]="activeTab() === tab"
@@ -11,7 +11,7 @@
         {{ tab }}
       </button>
     </div>
-    
+
     <div class="search-field" *ngIf="showSearch()">
       <lucide-icon [name]="Search" class="search-icon"></lucide-icon>
       <input type="text" placeholder="Rechercher par nom, dossier..." class="search-input" />
@@ -20,8 +20,8 @@
 
   <!-- Body / Row List -->
   <div class="table-body">
-    <div 
-      *ngFor="let row of data()" 
+    <div
+      *ngFor="let row of data()"
       class="row-item"
       (click)="onView.emit(row)"
     >
@@ -41,8 +41,8 @@
           <span class="row-subtitle">{{ row.subtitle }}</span>
         </div>
         <div class="badge-line">
-          <span 
-            *ngFor="let badge of row.badges" 
+          <span
+            *ngFor="let badge of row.badges"
             class="badge {{ badge.class }}"
           >
             {{ badge.label }}

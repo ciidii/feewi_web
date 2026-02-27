@@ -1,0 +1,15 @@
+/* Customization pour rendre le mat-slide-toggle plus élégant et compact */
+.custom-compact-toggle {
+  transform: scale(0.8); /* Réduction de taille globale */
+}
+
+.mat-mdc-slide-toggle.mat-primary {
+  --mdc-switch-selected-focus-state-layer-color: #2563eb;
+  --mdc-switch-selected-handle-color: #2563eb;
+  --mdc-switch-selected-track-color: rgba(37, 99, 235, 0.3);
+}
+
+/* Style pour les groupes de permissions */
+.lg\:col-span-9 main {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}

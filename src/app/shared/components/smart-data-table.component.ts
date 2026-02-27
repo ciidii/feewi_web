@@ -28,16 +28,16 @@ export interface TableRow {
   imports: [CommonModule, LucideAngularModule, MatButtonModule, MatCheckboxModule, FormsModule],
   template: `
     <div class="bg-white rounded-2xl border border-border-subtle shadow-sm overflow-hidden flex flex-col transition-shadow hover:shadow-md">
-      
+
       <!-- Toolbar Dynamique (Tabs OU Actions Groupées) -->
       <div class="flex items-center justify-between border-b border-border-subtle bg-slate-50/20 px-6 h-16 transition-all">
-        
-        <!-- Cas : Actions Groupées (Affiché si au moins une ligne est sélectionnée) -->
+
+        <!-- Cas : Actions Groupées -->
         <div *ngIf="selectedIds().size > 0" class="flex items-center gap-6 animate-in slide-in-from-left duration-200">
           <div class="flex items-center gap-4">
-            <mat-checkbox 
-              color="primary" 
-              [checked]="isAllSelected()" 
+            <mat-checkbox
+              color="primary"
+              [checked]="isAllSelected()"
               [indeterminate]="isPartiallySelected()"
               (change)="toggleAll()"
             ></mat-checkbox>
@@ -62,13 +62,13 @@ export interface TableRow {
           </div>
         </div>
 
-        <!-- Cas : Onglets Classiques (Affiché si rien n'est sélectionné) -->
+        <!-- Cas : Onglets Classiques -->
         <div *ngIf="selectedIds().size === 0" class="flex h-full gap-1 animate-in fade-in duration-300">
           <div class="flex items-center mr-4">
              <mat-checkbox color="primary" (change)="toggleAll()"></mat-checkbox>
           </div>
-          <button 
-            *ngFor="let tab of tabs()" 
+          <button
+            *ngFor="let tab of tabs()"
             (click)="onTabChange.emit(tab.label)"
             class="px-5 transition-all relative h-full flex items-center gap-3 border-b-2 border-transparent hover:bg-slate-100/50 group"
             [class.text-primary]="activeTab() === tab.label"
@@ -82,17 +82,17 @@ export interface TableRow {
             </span>
           </button>
         </div>
-        
-        <!-- Recherche (Toujours visible ou masquée selon besoin) -->
+
+        <!-- Recherche -->
         <div class="relative flex items-center group ml-4" *ngIf="showSearch() && selectedIds().size === 0">
           <div class="absolute left-3.5 z-10 pointer-events-none">
             <lucide-icon [name]="Search" class="w-4 h-4 text-slate-medium group-focus-within:text-primary transition-colors"></lucide-icon>
           </div>
-          <input 
-            type="text" 
+          <input
+            type="text"
             [(ngModel)]="searchQuery"
             (ngModelChange)="onSearch.emit($event)"
-            placeholder="Filtrer..." 
+            placeholder="Filtrer..."
             class="w-48 focus:w-64 bg-ice/50 border border-border-subtle rounded-xl py-2 pl-10 pr-10 text-xs outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary focus:bg-white transition-all font-bold placeholder:text-slate-400"
           />
           <button *ngIf="searchQuery()" (click)="clearSearch()" class="absolute right-10 p-1 hover:bg-slate-100 rounded-full transition-colors">
@@ -106,57 +106,69 @@ export interface TableRow {
 
       <!-- Table Body -->
       <div class="flex flex-col">
-        <div 
-          *ngFor="let row of data()" 
-          class="group flex items-center px-6 py-4 border-b border-border-subtle last:border-b-0 transition-all cursor-pointer relative"
+        <div
+          *ngFor="let row of data()"
+          class="group flex items-center px-6 py-3.5 border-b border-border-subtle last:border-b-0 transition-all cursor-pointer relative"
           [class.bg-blue-50/30]="selectedIds().has(row.id)"
           [class.hover:bg-ice/40]="!selectedIds().has(row.id)"
           (click)="toggleRow(row.id)"
         >
           <!-- Leading (Selection & Avatar) -->
           <div class="flex items-center gap-6 w-28 shrink-0" (click)="$event.stopPropagation()">
-            <mat-checkbox 
-              color="primary" 
+            <mat-checkbox
+              color="primary"
               [checked]="selectedIds().has(row.id)"
               (change)="toggleRow(row.id)"
               class="transition-opacity scale-90"
               [class.opacity-0]="!selectedIds().has(row.id)"
               [class.group-hover:opacity-100]="true"
             ></mat-checkbox>
-            <div class="w-11 h-11 rounded-full bg-slate-100 flex items-center justify-center border border-border-subtle shrink-0 shadow-inner overflow-hidden">
+            <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center border border-border-subtle shrink-0 shadow-inner overflow-hidden">
               <img *ngIf="row.avatarUrl" [src]="row.avatarUrl" class="w-full h-full object-cover" />
-              <span *ngIf="!row.avatarUrl" class="text-xs font-bold text-slate-medium uppercase">{{ row.avatarLabel || row.title.charAt(0) }}</span>
+              <span *ngIf="!row.avatarUrl" class="text-xs font-bold text-slate-medium uppercase tracking-tighter">{{ row.avatarLabel || row.title.charAt(0) }}</span>
             </div>
           </div>
 
-          <!-- Content -->
+          <!-- Content Unique Ligne (Nom • Infos • Badges) -->
           <div class="flex-1 min-w-0 pr-4">
-            <div class="flex items-baseline gap-3">
-              <span class="text-[15px] font-bold text-midnight tracking-tight">{{ row.title }}</span>
-              <span class="text-xs text-slate-medium truncate font-medium opacity-80">{{ row.subtitle }}</span>
-            </div>
-            <div class="flex gap-2 mt-2">
-              <span *ngFor="let badge of row.badges" class="text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider border shadow-sm" [ngClass]="getBadgeClass(badge.class)">
-                {{ badge.label }}
-              </span>
+            <div class="flex items-center gap-3 overflow-hidden">
+              <!-- Nom (Principal) -->
+              <span class="text-[14.5px] font-bold text-midnight tracking-tight shrink-0">{{ row.title }}</span>
+
+              <!-- Séparateur subtil -->
+              <span class="text-slate-200 shrink-0">•</span>
+
+              <!-- Sous-titre (Secondaire) -->
+              <span class="text-xs text-slate-medium truncate font-medium opacity-80 shrink">{{ row.subtitle }}</span>
+
+              <!-- Badges (Fin de flux) -->
+              <div class="flex gap-1.5 shrink-0 ml-2">
+                <span
+                  *ngFor="let badge of row.badges"
+                  class="text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border shadow-sm"
+                  [ngClass]="getBadgeClass(badge.class)"
+                >
+                  {{ badge.label }}
+                </span>
+              </div>
             </div>
           </div>
 
-          <!-- Meta -->
+          <!-- Meta (Date) -->
           <div class="text-right w-32 shrink-0 group-hover:opacity-0 transition-opacity">
-            <span class="text-xs font-bold text-slate-medium/70 uppercase tracking-tighter">{{ row.date }}</span>
+            <span class="text-[11px] font-bold text-slate-medium/60 uppercase tracking-tighter">{{ row.date }}</span>
           </div>
 
-          <!-- Hover Actions (Single Row) -->
+          <!-- Hover Actions Overlay -->
           <div class="absolute right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all flex items-center gap-1.5 bg-white p-1.5 rounded-2xl border border-border-subtle shadow-xl translate-x-4 group-hover:translate-x-0" (click)="$event.stopPropagation()">
             <button (click)="onView.emit(row)" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-ice text-slate-medium hover:text-primary transition-all active:scale-90" title="Voir">
-              <lucide-icon [name]="Eye" class="w-4.5 h-4.5"></lucide-icon>
+              <lucide-icon [name]="Eye" class="w-4 h-4"></lucide-icon>
             </button>
             <button (click)="onValidate.emit(row)" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-green-50 text-slate-medium hover:text-green-600 transition-all active:scale-90" title="Valider">
-              <lucide-icon [name]="CheckCircle" class="w-4.5 h-4.5"></lucide-icon>
+              <lucide-icon [name]="CheckCircle" class="w-4 h-4"></lucide-icon>
             </button>
             <button (click)="onPrint.emit(row)" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-ice text-slate-medium hover:text-midnight transition-all active:scale-90" title="Imprimer">
-              <lucide-icon [name]="Printer" class="w-4.5 h-4.5"></lucide-icon>
+              <lucide-icon [name]="Printer" class="w-4 h-4"></lucide-icon>
             </button>
             <button class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-ice text-slate-medium transition-all active:scale-90">
               <lucide-icon [name]="MoreHorizontal" class="w-4.5 h-4.5"></lucide-icon>
@@ -174,13 +186,13 @@ export interface TableRow {
       </div>
 
       <!-- Footer -->
-      <div class="px-8 py-5 border-t border-border-subtle flex items-center justify-between bg-slate-50/40 mt-auto">
+      <div class="px-8 py-4 border-t border-border-subtle flex items-center justify-between bg-slate-50/40 mt-auto">
         <span class="text-[11px] text-slate-medium font-bold uppercase tracking-widest">
           Affichage : <strong>{{ data().length }}</strong> sur <strong>{{ total() }}</strong> éléments
         </span>
         <div class="flex items-center gap-3">
-           <button class="h-9 px-5 rounded-xl border border-border-subtle bg-white text-xs font-bold text-slate-medium hover:text-midnight hover:border-slate-400 hover:shadow-sm disabled:opacity-30 transition-all" disabled>Précédent</button>
-           <button class="h-9 px-5 rounded-xl border border-border-subtle bg-white text-xs font-bold text-slate-medium hover:text-midnight hover:border-slate-400 hover:shadow-sm transition-all">Suivant</button>
+           <button class="h-8 px-4 rounded-xl border border-border-subtle bg-white text-xs font-bold text-slate-medium hover:text-midnight hover:border-slate-400 hover:shadow-sm disabled:opacity-30 transition-all" disabled>Précédent</button>
+           <button class="h-8 px-4 rounded-xl border border-border-subtle bg-white text-xs font-bold text-slate-medium hover:text-midnight hover:border-slate-400 hover:shadow-sm transition-all">Suivant</button>
         </div>
       </div>
     </div>
@@ -203,7 +215,6 @@ export class SmartDataTableComponent {
   searchQuery = signal('');
   selectedIds = signal<Set<string | number>>(new Set());
 
-  // Computed states for selection
   isAllSelected = computed(() => this.data().length > 0 && this.selectedIds().size === this.data().length);
   isPartiallySelected = computed(() => this.selectedIds().size > 0 && this.selectedIds().size < this.data().length);
 
