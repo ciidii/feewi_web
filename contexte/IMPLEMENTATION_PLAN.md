@@ -2,49 +2,45 @@
 
 Ce document détaille la stratégie technique et l'ordre d'exécution pour la mise en place de l'interface Feewi, basée sur les spécifications `FRONTEND_SPEC.md`.
 
-## Phase 1 : Fondations & Design System (Le Socle)
+## Phase 1 : Fondations & Design System (Le Socle) - ✅ TERMINÉE
 *Objectif : Établir l'infrastructure visuelle et technique conforme au style Google Workspace.*
 
-- [ ] **Dépendances & Tooling :**
-    - Installation de `@angular/material` (Support M3).
-    - Configuration de `tailwindcss`, `postcss`, et `lucide-angular`.
-- [ ] **Configuration du Thème M3 & Tailwind :**
-    - Création du thème Material 3 personnalisé via `@mat.theme`.
-    - Extension de `tailwind.config.js` avec la palette "Midnight Slate" (Indigo/Slate) et polices `Lexend` (Display) / `Inter` (Sans).
-    - Mise en place des Design Tokens (CSS Variables) pour le Dynamic Branding.
-- [ ] **Architecture de Dossiers (Pattern LIFT) :**
-    - `src/app/core/` : Services singletons (Auth, TenantContext, Interceptors).
-    - `src/app/shared/` : Composants UI atomiques (Buttons, SmartDataList, Layouts).
-    - `src/app/features/` : Modules métiers (Admissions, Scolarité, Admin).
+- [x] **Dépendances & Tooling :** Installation de Material 3, Tailwind v4, et Lucide Angular.
+- [x] **Configuration du Thème :** Mise en place des Design Tokens (Midnight Slate) et intégration PostCSS pour Tailwind v4.
+- [x] **Architecture de Dossiers :** Migration vers le pattern **Domain-Driven Contexts** (`public`, `saas-admin`, `school-app`).
 
-## Phase 2 : Le Shell & La Navigation (L'Orchestration)
+## Phase 2 : Le Shell & La Navigation (L'Orchestration) - ✅ TERMINÉE
 *Objectif : Créer le cadre permanent de l'application (Le Shell).*
 
-- [ ] **Services de Structure (Signals-based) :**
-    - `NavigationStateService` : État `expanded/collapsed` de la sidebar et fil d'ariane.
-    - `TenantContextService` : Gestion du `tenantId` actif, logo et injection du branding.
-- [ ] **Composants du Shell :**
-    - `ShellComponent` : Composant racine orchestrant le Header, le Rail et la Sidebar.
-    - `HeaderComponent` : Omnisearch (Ctrl+K) et App Launcher (Gaufrier).
-    - `AppRailComponent` : Navigation verticale étroite (64px) pour les icônes de haut niveau.
-    - `ContextualSidebarComponent` : Navigation interne du module avec le **Bouton d'Action Primaire (Hero Button)**.
+- [x] **Services de Structure :** `NavigationStateService` (Sidebar) et `NavigationContextService` (Domaines).
+- [x] **Navigation Contextuelle :** Séparation absolue des interfaces Super Admin (SaaS) et École (Métier).
+- [x] **Composants du Shell :** Header (Omnisearch + Sélecteur d'année), App Rail stable et Sidebar contextuelle.
 
-## Phase 3 : Composants Génériques "Workspace" (Le Framework UI)
+## Phase 3 : Composants Partagés & Framework UI - ✅ TERMINÉE
 *Objectif : Standardiser les interactions pour une réutilisation maximale.*
 
-- [ ] **BaseDataTableComponent (Smart Data-List) :**
-    - Implémentation du pattern "Gmail-style" : Leading (Avatar/Checkbox), Body (Primary/Secondary), Badges, et Hover Actions.
-    - Gestion de la pagination et du filtrage via TanStack Query ou Angular Signals.
-- [ ] **FluidDetailViewPattern :**
-    - Layout pour la consultation de fiches (ex: Dossier n°123).
-    - Barre de pilotage supérieure avec navigation séquentielle (`<` `>`) et actions atomiques.
+- [x] **DataListComponent (Gmail-style) :**
+    - Pattern "One-line" ultra-pro avec actions groupées et hover overlay.
+    - Support des onglets sémantiques avec icônes et compteurs.
+- [x] **FluidDetailViewPattern :** Layout expert pour la consultation de fiches avec barre de pilotage supérieure fixe.
 
-## Phase 4 : Modules Métiers & Sécurité (La Logique)
-*Objectif : Déployer les premières fonctionnalités métier.*
+## Phase 4 : Intégration Identity & Provisioning (SaaS Level) - 🔄 EN COURS
+*Objectif : Connecter le backend et outiller le Super Administrateur.*
 
-- [ ] **Sécurité & Interception :**
-    - `TenantInterceptor` : Injection automatique des headers `Authorization` et `X-Tenant-ID`.
-    - Pages d'Auth (Login, Reset Password) et Tenant Switcher.
-- [ ] **Features MVP :**
-    - **SaaS Admin** : Gestion des établissements (Tenants) et licences.
-    - **Registry (Scolarité)** : Gestion du référentiel élèves avec le pattern Smart Data-List.
+- [x] **Infrastructure Core :**
+    - [x] `AuthService` : Connexion réelle API et gestion du signal `currentUser`.
+    - [x] `AuthInterceptor` : Injection automatique du `Bearer access_token`.
+    - [x] `SchoolService` : Service métier pour le provisioning `/schools`.
+- [x] **Provisioning SaaS :**
+    - [x] `TenantManager` : Pilotage des écoles via le composant `DataList`.
+    - [x] `TenantForm` : Formulaire expert (Reactive Forms) avec validation temps réel et feedback visuel premium.
+- [ ] **Sécurité & RBAC :**
+    - [ ] `CanMatch` Guards : Isolation physique des bundles par rôle (SaaS vs École).
+    - [ ] Gestion des permissions granulaires dans l'UI.
+
+## Phase 5 : Métier École & Workflow (Registry Level) - 📅 À VENIR
+*Objectif : Déployer le cœur de valeur pour les établissements.*
+
+- [ ] **Scolarité (Registry) :** Gestion des Classes, Niveaux et Référentiel Élèves.
+- [ ] **Admissions :** Finalisation de l'intégration réelle (POST/PUT) pour le workflow d'inscription.
+- [ ] **Profil Utilisateur :** Paramètres personnels et sécurité du compte.

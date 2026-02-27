@@ -1,3 +1,48 @@
 :host {
   display: block;
 }
+
+/* Scrollbar élégante pour votre structure */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #cbd5e1;
+}
+
+/* Feedback visuel sur les bordures */
+.fw-input, input, textarea {
+  &.is-invalid {
+    border-color: #ef4444 !important;
+    &:focus {
+      box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1) !important;
+    }
+  }
+  
+  &.is-valid {
+    border-color: #22c55e !important;
+  }
+}
+
+/* Animation des erreurs */
+.animate-in {
+  animation-duration: 300ms;
+}
+
+@keyframes shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+.animate-in.shake {
+  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
