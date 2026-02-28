@@ -11,7 +11,8 @@ import {
   Calendar,
   MapPin,
   Mail,
-  Phone
+  Phone,
+  LayoutGrid, Globe, Check
 } from 'lucide-angular';
 import {TableRow} from '../../../../models/data-list.models';
 
@@ -40,8 +41,18 @@ export class CardsViewComponent {
   selectedIds = input<Set<string | number>>(new Set());
 
   /** Fonction pour obtenir la classe d'un badge */
-  getBadgeClass = input<(type: string) => string>();
+  getBadgeClass = input.required<(type: string) => string>();
+// Ajouter cette méthode
+  getInitials(title: string): string {
+    if (!title) return '?';
 
+    const words = title.split(' ');
+    if (words.length === 1) {
+      return title.substring(0, 2).toUpperCase();
+    }
+
+    return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
+  }
   // ===========================================
   // OUTPUTS
   // ===========================================
@@ -81,4 +92,7 @@ export class CardsViewComponent {
   protected readonly MapPin = MapPin;
   protected readonly Mail = Mail;
   protected readonly Phone = Phone;
+  protected readonly LayoutGrid = LayoutGrid;
+  protected readonly Globe = Globe;
+  protected readonly Check = Check;
 }

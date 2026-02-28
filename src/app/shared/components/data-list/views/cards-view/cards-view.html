@@ -8,133 +8,96 @@
   [class.ring-offset-2]="isSelected(row.id)"
   (click)="toggleRow.emit(row.id)"
   >
-  <!-- Checkbox flottante (apparaît au survol) -->
-  <div class="absolute -top-2 -left-2 opacity-0 group-hover:opacity-100 transition-all duration-200 z-20"
+  <!-- Checkbox - CORRIGÉE : position et radius -->
+  <div class="absolute top-3 left-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
        (click)="$event.stopPropagation()">
-    <div class="relative">
+    <div class="checkbox-container">
       <mat-checkbox
         color="primary"
         [checked]="isSelected(row.id)"
         (change)="toggleRow.emit(row.id)"
-        class="bg-white rounded-full shadow-lg"
+        class="custom-checkbox"
       ></mat-checkbox>
     </div>
   </div>
 
-  <!-- Badge de sélection permanente (si sélectionné) -->
+  <!-- Badge de sélection permanent -->
   <div *ngIf="isSelected(row.id)"
-       class="absolute top-3 left-3 z-10 bg-primary-500 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-lg">
-    <lucide-icon [name]="CheckCircle" class="w-4 h-4"></lucide-icon>
+       class="absolute top-3 left-3 z-10 bg-primary-500 text-white rounded-lg w-6 h-6 flex items-center justify-center shadow-lg">
+    <lucide-icon [name]="Check" class="w-4 h-4"></lucide-icon>
   </div>
 
-  <!-- En-tête de carte avec dégradé -->
+  <!-- En-tête avec dégradé -->
   <div class="h-24 bg-gradient-to-br from-primary-50 to-primary-100/50 relative overflow-hidden">
-    <!-- Pattern décoratif -->
-    <div class="absolute inset-0 opacity-10">
-      <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" stroke-width="0.5"/>
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#grid)" />
-      </svg>
-    </div>
-
-    <!-- Avatar flottant -->
-    <div class="absolute -bottom-8 left-5">
-      <div class="avatar-large shadow-lg border-2 border-white">
-        <img *ngIf="row.avatarUrl" [src]="row.avatarUrl" [alt]="row.title" class="avatar-img" />
-        <span *ngIf="!row.avatarUrl" class="avatar-fallback">
-            {{ row.avatarLabel || row.title?.charAt(0) || '?' }}
-          </span>
+    <!-- Avatar - CORRIGÉ : centrage parfait -->
+    <div class="absolute -bottom-10 left-5">
+      <div class="avatar-container">
+        <div class="avatar-circle">
+          <img *ngIf="row.avatarUrl" [src]="row.avatarUrl" [alt]="row.title" class="avatar-image" />
+          <span *ngIf="!row.avatarUrl" class="avatar-initials">
+              {{ getInitials(row.title) }}
+            </span>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- Corps de la carte -->
-  <div class="pt-10 p-5">
+  <div class="pt-12 p-5">
     <!-- Titre et sous-titre -->
-    <div class="mb-4">
-      <h3 class="font-semibold text-slate-900 text-lg leading-tight">{{ row.title }}</h3>
-      <p class="text-sm text-slate-500 mt-1 line-clamp-2">{{ row.subtitle || 'Aucune description' }}</p>
+    <div class="mb-3">
+      <h3 class="font-semibold text-slate-900 text-base leading-tight">{{ row.title }}</h3>
+      <p class="text-xs text-slate-500 mt-1 line-clamp-2">{{ row.subtitle || 'Aucune description' }}</p>
     </div>
 
-    <!-- Badges -->
-    <div class="flex flex-wrap gap-2 mb-4">
+    <!-- Badges de statut - alignés horizontalement -->
+    <div class="flex flex-wrap gap-2 mb-3">
         <span
           *ngFor="let badge of row.badges || []"
-          class="badge-card"
+          class="badge-status"
           [ngClass]="getBadgeClass()(badge.type)"
         >
           {{ badge.label }}
         </span>
-      <span *ngIf="!row.badges?.length" class="text-xs text-slate-400 italic">
-          Aucun statut
-        </span>
     </div>
 
     <!-- Métadonnées -->
-    <div class="space-y-2 text-sm border-t border-slate-100 pt-4">
-      <!-- Date -->
+    <div class="space-y-1.5 text-xs border-t border-slate-100 pt-3">
+      <!-- Domaine/Email -->
       <div class="flex items-center gap-2 text-slate-600">
-        <lucide-icon [name]="Calendar" class="w-4 h-4 text-slate-400"></lucide-icon>
-        <span>{{ formatDate(row.date) }}</span>
+        <lucide-icon [name]="Globe" class="w-3.5 h-3.5 text-slate-400"></lucide-icon>
+        <span class="truncate">{{ row.metadata?.['domain'] || row.subtitle || 'Non renseigné' }}</span>
       </div>
 
-      <!-- Métadonnées supplémentaires (si présentes) -->
-      <div *ngIf="row.metadata" class="space-y-2">
-        <div *ngIf="row.metadata['location']" class="flex items-center gap-2 text-slate-600">
-          <lucide-icon [name]="MapPin" class="w-4 h-4 text-slate-400"></lucide-icon>
-          <span class="truncate">{{ row.metadata['location'] }}</span>
-        </div>
-        <div *ngIf="row.metadata['email']" class="flex items-center gap-2 text-slate-600">
-          <lucide-icon [name]="Mail" class="w-4 h-4 text-slate-400"></lucide-icon>
-          <span class="truncate">{{ row.metadata['email'] }}</span>
-        </div>
-        <div *ngIf="row.metadata['phone']" class="flex items-center gap-2 text-slate-600">
-          <lucide-icon [name]="Phone" class="w-4 h-4 text-slate-400"></lucide-icon>
-          <span>{{ row.metadata['phone'] }}</span>
-        </div>
+      <!-- Localisation -->
+      <div *ngIf="row.metadata?.['location']" class="flex items-center gap-2 text-slate-600">
+        <lucide-icon [name]="MapPin" class="w-3.5 h-3.5 text-slate-400"></lucide-icon>
+        <span class="truncate">{{ row.metadata?.['location'] }}</span>
+      </div>
+
+      <!-- Date -->
+      <div class="flex items-center gap-2 text-slate-600">
+        <lucide-icon [name]="Calendar" class="w-3.5 h-3.5 text-slate-400"></lucide-icon>
+        <span>{{ formatDate(row.date) }}</span>
       </div>
     </div>
   </div>
 
-  <!-- Pied de carte avec actions -->
-  <div class="px-5 py-3 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between">
-    <!-- Indicateur de sélection (pour mobile) -->
-    <span *ngIf="isSelected(row.id)" class="text-xs font-medium text-primary-600">
-        Sélectionné
-      </span>
-    <span *ngIf="!isSelected(row.id)" class="text-xs text-slate-400">
-        Cliquer pour sélectionner
+  <!-- Pied de carte -->
+  <div class="px-5 py-2.5 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between">
+      <span class="text-[10px] text-slate-400">
+        {{ isSelected(row.id) ? 'Sélectionné' : 'Cliquer pour sélectionner' }}
       </span>
 
     <!-- Actions -->
     <div class="flex gap-1" (click)="$event.stopPropagation()">
-      <button (click)="onView.emit(row)"
-              class="card-action"
-              title="Voir les détails"
-              [class.bg-primary-50]="isSelected(row.id)">
-        <lucide-icon [name]="Eye" class="w-4 h-4"></lucide-icon>
+      <button (click)="onView.emit(row)" class="card-action" title="Voir">
+        <lucide-icon [name]="Eye" class="w-3.5 h-3.5"></lucide-icon>
       </button>
-      <button (click)="onValidate.emit(row)"
-              class="card-action validate"
-              title="Valider"
-              [class.bg-primary-50]="isSelected(row.id)">
-        <lucide-icon [name]="CheckCircle" class="w-4 h-4"></lucide-icon>
-      </button>
-      <button class="card-action more"
-              title="Plus d'options"
-              [class.bg-primary-50]="isSelected(row.id)">
-        <lucide-icon [name]="MoreHorizontal" class="w-4 h-4"></lucide-icon>
+      <button (click)="onValidate.emit(row)" class="card-action validate" title="Valider">
+        <lucide-icon [name]="CheckCircle" class="w-3.5 h-3.5"></lucide-icon>
       </button>
     </div>
-  </div>
-
-  <!-- Effet de brillance au survol -->
-  <div class="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
   </div>
 </div>
 </div>
@@ -143,7 +106,7 @@
 <div *ngIf="data().length === 0" class="py-20 text-center">
   <div class="inline-flex flex-col items-center gap-4">
     <div class="w-24 h-24 bg-slate-50 rounded-2xl flex items-center justify-center">
-      <lucide-icon [name]="'LayoutGrid'" class="w-12 h-12 text-slate-300"></lucide-icon>
+      <lucide-icon [name]="LayoutGrid" class="w-12 h-12 text-slate-300"></lucide-icon>
     </div>
     <div class="space-y-2">
       <p class="text-base font-semibold text-slate-700">Aucune carte à afficher</p>

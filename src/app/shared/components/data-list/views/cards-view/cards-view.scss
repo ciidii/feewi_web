@@ -1,99 +1,175 @@
-// Grille responsive
 :host {
   display: block;
   width: 100%;
 }
 
-// Avatar large pour les cartes
-.avatar-large {
-  width: 4rem;
-  height: 4rem;
-  border-radius: 1rem;
-  background: linear-gradient(135deg, #ffffff, #f8fafc);
+// ===========================================
+// AVATAR - CORRIGÉ
+// ===========================================
+.avatar-container {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: white;
+  border: 3px solid white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid white;
-  overflow: hidden;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
 
-  .avatar-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+.avatar-circle {
+  width: 100%;
+  height: 100%;
+  border-radius: 13px; // Légèrement moins que le container
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 13px;
+}
+
+.avatar-initials {
+  font-size: 24px;
+  font-weight: 600;
+  color: white;
+  text-transform: uppercase;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+// ===========================================
+// CHECKBOX - CORRIGÉE
+// ===========================================
+.checkbox-container {
+  background: white;
+  border-radius: 8px;  // Coins carrés
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  width: 28px;
+  height: 28px;
+}
+
+::ng-deep .custom-checkbox {
+  .mdc-checkbox {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 28px !important;
+    height: 28px !important;
+
+    .mdc-checkbox__background {
+      width: 28px !important;
+      height: 28px !important;
+      border-radius: 6px !important;  // Coins carrés
+      border-color: #cbd5e1 !important;
+    }
+
+    .mdc-checkbox__checkmark {
+      width: 22px !important;
+      height: 22px !important;
+    }
+
+    &.mdc-checkbox--selected .mdc-checkbox__background {
+      background-color: #2563eb !important;
+      border-color: #2563eb !important;
+    }
   }
 
-  .avatar-fallback {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #2563eb;
-    text-transform: uppercase;
+  .mat-mdc-checkbox-touch-target {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .mdc-checkbox__native-control {
+    width: 28px !important;
+    height: 28px !important;
   }
 }
 
-// Badges pour les cartes
-.badge-card {
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.7rem;
-  font-weight: 500;
-  background: white;
+// ===========================================
+// BADGES
+// ===========================================
+.badge-status {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
   border: 1px solid;
   display: inline-flex;
   align-items: center;
   letter-spacing: 0.01em;
+  line-height: 1;
+  text-transform: uppercase;
 
-  // Variantes de couleurs (appliquées via getBadgeClass)
-  &.badge-success {
+  // Variantes de couleurs
+  &.bg-green-50 {
     background-color: #f0fdf4;
     color: #166534;
     border-color: #86efac;
   }
 
-  &.badge-warning {
+  &.bg-amber-50 {
     background-color: #fffbeb;
     color: #92400e;
     border-color: #fcd34d;
   }
 
-  &.badge-danger {
+  &.bg-red-50 {
     background-color: #fef2f2;
     color: #991b1b;
     border-color: #fca5a5;
   }
 
-  &.badge-info {
+  &.bg-blue-50 {
     background-color: #eff6ff;
     color: #1e40af;
     border-color: #93c5fd;
   }
 
-  &.badge-default {
+  &.bg-slate-50 {
     background-color: #f8fafc;
     color: #475569;
     border-color: #cbd5e1;
   }
 }
 
-// Actions de carte
+// ===========================================
+// ACTIONS
+// ===========================================
 .card-action {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 0.5rem;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #64748b;
   transition: all 0.2s;
-  background: transparent;
-  border: none;
+  background: white;
+  border: 1px solid #e2e8f0;
   cursor: pointer;
 
   &:hover {
-    background-color: #ffffff;
+    background-color: #f8fafc;
     color: #2563eb;
-    transform: scale(1.1);
-    box-shadow: 0 2px 4px -1px rgb(0 0 0 / 0.1);
+    border-color: #94a3b8;
+    transform: scale(1.05);
   }
 
   &:active {
@@ -102,14 +178,14 @@
 
   &.validate:hover {
     color: #16a34a;
-  }
-
-  &.more:hover {
-    color: #475569;
+    border-color: #86efac;
+    background-color: #f0fdf4;
   }
 }
 
-// Utilitaires pour le texte tronqué
+// ===========================================
+// UTILITAIRES
+// ===========================================
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -117,10 +193,10 @@
   overflow: hidden;
 }
 
-// Animation d'entrée pour les cartes
+// Animation d'entrée
 .grid > * {
-  animation: cardAppear 0.3s ease-out;
-  animation-fill-mode: both;
+  animation: cardAppear 0.3s ease-out forwards;
+  opacity: 0;
 }
 
 @keyframes cardAppear {
@@ -134,7 +210,7 @@
   }
 }
 
-// Délais d'animation progressifs
+// Délais d'animation
 @for $i from 1 through 20 {
   .grid > *:nth-child(#{$i}) {
     animation-delay: #{$i * 0.05}s;

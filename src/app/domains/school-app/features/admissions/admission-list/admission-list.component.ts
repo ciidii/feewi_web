@@ -2,7 +2,8 @@ import { Component, inject, signal, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { LucideAngularModule, Filter, Download, Layers, Clock, ShieldCheck, UserCheck } from 'lucide-angular';
-import {DataListComponent, TabItem, TableRow} from '../../../../../shared/components/data-list/data-list.component';
+import { DataListComponent } from '../../../../../shared/components/data-list/data-list.component';
+import { TabItem, TableRow } from '../../../../../shared/models/data-list.models';
 
 @Component({
   selector: 'app-admissions',
@@ -35,7 +36,7 @@ export class AdmissionsComponent {
       subtitle: 'Niveau : 6ème A • Dossier #ADM-2024-001',
       avatarLabel: 'JD',
       date: `Aujourd'hui`,
-      badges: [{ label: 'Paiement OK', class: 'success' }, { label: 'Action requise', class: 'warning' }]
+      badges: [{ label: 'Paiement OK', type: 'success' }, { label: 'Action requise', type: 'warning' }]
     },
     {
       id: 2,
@@ -43,7 +44,7 @@ export class AdmissionsComponent {
       subtitle: 'Niveau : 3ème B • Dossier #ADM-2024-002',
       avatarLabel: 'MC',
       date: 'Hier',
-      badges: [{ label: 'Vérifié', class: 'info' }]
+      badges: [{ label: 'Vérifié', type: 'info' }]
     },
     {
       id: 3,
@@ -51,7 +52,7 @@ export class AdmissionsComponent {
       subtitle: 'Niveau : Terminale S • Dossier #ADM-2024-003',
       avatarLabel: 'AD',
       date: '24 Fév',
-      badges: [{ label: 'Dossier Incomplet', class: 'danger' }]
+      badges: [{ label: 'Dossier Incomplet', type: 'danger' }]
     },
     {
       id: 4,
@@ -59,7 +60,7 @@ export class AdmissionsComponent {
       subtitle: 'Niveau : CP • Dossier #ADM-2024-004',
       avatarLabel: 'SM',
       date: '20 Fév',
-      badges: [{ label: 'Validé', class: 'success' }]
+      badges: [{ label: 'Validé', type: 'success' }]
     },
     {
       id: 5,
@@ -67,7 +68,7 @@ export class AdmissionsComponent {
       subtitle: 'Niveau : Terminale S • Dossier #ADM-2024-005',
       avatarLabel: 'TA',
       date: '18 Fév',
-      badges: [{ label: 'En attente', class: 'warning' }]
+      badges: [{ label: 'En attente', type: 'warning' }]
     }
   ]);
 

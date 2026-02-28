@@ -1,3 +1,5 @@
+import type { LucideIconData } from 'lucide-angular';
+
 // ===========================================
 // ÉNUMÉRATIONS ET TYPES DE BASE
 // ===========================================
@@ -20,7 +22,7 @@ export interface ViewConfig {
   /** Label affiché */
   label: string;
   /** Icône Lucide */
-  icon: string;
+  icon: string | LucideIconData;
   /** Description pour le tooltip */
   description: string;
   /** Si la vue est disponible (pour activation progressive) */
@@ -78,7 +80,7 @@ export interface TabItem {
   /** Label de l'onglet */
   label: string;
   /** Icône optionnelle */
-  icon?: string;
+  icon?: string | LucideIconData;
   /** Compteur optionnel */
   count?: number;
   /** Si l'onglet est actif (géré par le parent) */

@@ -96,7 +96,7 @@
         <div class="avatar">
           <img *ngIf="row.avatarUrl" [src]="row.avatarUrl" [alt]="row.title" class="avatar-img" />
           <span *ngIf="!row.avatarUrl" class="avatar-fallback">
-                {{ row.avatarLabel || row.title?.charAt(0) || '?' }}
+                {{ row.avatarLabel || row.title.charAt(0) || '?' }}
               </span>
         </div>
         <span class="font-medium text-slate-900">{{ row.title }}</span>
@@ -155,7 +155,7 @@
 <div *ngIf="data().length === 0" class="py-20 text-center">
   <div class="inline-flex flex-col items-center gap-4">
     <div class="w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center">
-      <lucide-icon [name]="'Table'" class="w-10 h-10 text-slate-300"></lucide-icon>
+      <lucide-icon [name]="Table" class="w-10 h-10 text-slate-300"></lucide-icon>
     </div>
     <div class="space-y-1">
       <p class="text-sm font-semibold text-slate-700">Aucune donnée dans le tableau</p>

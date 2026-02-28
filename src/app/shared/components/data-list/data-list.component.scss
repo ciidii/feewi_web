@@ -265,3 +265,249 @@
   font-weight: 500;
   border: 1px solid;
 }
+
+// Amélioration du menu
+.view-menu {
+  .mat-menu-item {
+    .text-primary-600 {
+      color: #2563eb;
+    }
+  }
+}
+
+// Badge nouveau dans le menu
+.bg-green-100 {
+  background-color: #dcfce7;
+}
+.text-green-700 {
+  color: #15803d;
+}
+.rounded-full {
+  border-radius: 9999px;
+}
+
+// Animation pour le bouton du sélecteur
+.view-switcher button {
+  transition: all 0.2s ease;
+
+  lucide-icon {
+    transition: transform 0.2s ease;
+  }
+
+  &:hover lucide-icon:last-child {
+    transform: translateY(2px);
+  }
+}
+
+// ===========================================
+// MENU DES VUES - VERSION OPTIMISÉE
+// ===========================================
+::ng-deep .view-menu {
+  min-width: 280px !important;
+  max-width: 320px !important;
+  background: white !important;
+  border-radius: 16px !important;
+  padding: 8px 0 !important;
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15), 0 10px 10px -5px rgba(0,0,0,0.04) !important;
+  margin-top: 8px !important;
+  border: 1px solid #e2e8f0 !important;
+  overflow: hidden !important;
+
+  // En-tête du menu
+  .menu-header {
+    padding: 12px 16px 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 4px;
+
+    lucide-icon {
+      color: #64748b;
+    }
+
+    span {
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  }
+
+  // Items du menu
+  .mat-menu-item {
+    height: auto !important;
+    line-height: normal !important;
+    padding: 0 !important;
+    background: white !important;
+
+    &:hover {
+      background-color: #f8fafc !important;
+    }
+
+    &.active {
+      background-color: #f8fafc !important;
+    }
+  }
+
+  // Contenu d'un item
+  .menu-item-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 16px;
+    width: 100%;
+  }
+
+  // Partie gauche (icône)
+  .menu-item-left {
+    flex-shrink: 0;
+    width: 24px;
+    display: flex;
+    justify-content: center;
+
+    lucide-icon {
+      color: #64748b;
+      transition: color 0.2s;
+    }
+  }
+
+  // Partie centrale (texte)
+  .menu-item-center {
+    flex: 1;
+    min-width: 0; // Pour permettre le texte tronqué
+  }
+
+  // Titre de l'option
+  .menu-item-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+
+    span:first-child {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1e293b;
+    }
+  }
+
+  // Badge Nouveau
+  .new-badge {
+    background: #dcfce7;
+    color: #166534;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+  }
+
+  // Description
+  .menu-item-description {
+    font-size: 12px;
+    color: #64748b;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    max-width: 180px;
+  }
+
+  // Partie droite (checkmark)
+  .menu-item-right {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+  }
+
+  // Footer du menu
+  .menu-footer {
+    padding: 12px 16px 10px;
+    border-top: 1px solid #f1f5f9;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    lucide-icon {
+      color: #94a3b8;
+      width: 14px;
+      height: 14px;
+    }
+
+    span {
+      font-size: 10px;
+      color: #94a3b8;
+    }
+  }
+}
+
+// Animation du menu
+.view-menu {
+  animation: slideDown 0.2s ease-out;
+  transform-origin: top right;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+// Style du bouton principal
+.view-switcher button {
+  min-width: 140px;
+  background-color: #f1f5f9;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #e2e8f0;
+    border-color: #cbd5e1;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  lucide-icon:first-child {
+    color: #2563eb;
+  }
+
+  span {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1e293b;
+    flex: 1;
+    text-align: left;
+  }
+
+  lucide-icon:last-child {
+    color: #64748b;
+    transition: transform 0.2s;
+  }
+
+  &:hover lucide-icon:last-child {
+    transform: translateY(2px);
+    color: #2563eb;
+  }
+}

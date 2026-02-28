@@ -1,7 +1,8 @@
 import { Component, signal, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule, History, ShieldAlert, GraduationCap, CreditCard, Activity } from 'lucide-angular';
-import {DataListComponent, TabItem, TableRow} from '../../../../../shared/components/data-list/data-list.component';
+import { DataListComponent } from '../../../../../shared/components/data-list/data-list.component';
+import { TabItem, TableRow } from '../../../../../shared/models/data-list.models';
 
 @Component({
   selector: 'app-audit-trail',
@@ -31,7 +32,7 @@ export class AuditTrailComponent {
       subtitle: 'Dossier #ADM-2024-004 validé par Mamadou Diop',
       avatarLabel: 'MD',
       date: 'Il y a 5 min',
-      badges: [{ label: 'SCOLARITÉ', class: 'info' }, { label: 'SUCCESS', class: 'success' }]
+      badges: [{ label: 'SCOLARITÉ', type: 'info' }, { label: 'SUCCESS', type: 'success' }]
     },
     {
       id: 2,
@@ -39,7 +40,7 @@ export class AuditTrailComponent {
       subtitle: 'Rôle "Comptable" mis à jour par Admin Système',
       avatarLabel: 'AD',
       date: 'Il y a 1h',
-      badges: [{ label: 'SÉCURITÉ', class: 'danger' }, { label: 'SUCCESS', class: 'success' }]
+      badges: [{ label: 'SÉCURITÉ', type: 'danger' }, { label: 'SUCCESS', type: 'success' }]
     },
     {
       id: 3,
@@ -47,7 +48,7 @@ export class AuditTrailComponent {
       subtitle: 'Paiement de 75.000 FCFA enregistré pour Marie Curie',
       avatarLabel: 'FN',
       date: 'Hier',
-      badges: [{ label: 'FINANCE', class: 'warning' }, { label: 'SUCCESS', class: 'success' }]
+      badges: [{ label: 'FINANCE', type: 'warning' }, { label: 'SUCCESS', type: 'success' }]
     },
     {
       id: 4,
@@ -55,7 +56,7 @@ export class AuditTrailComponent {
       subtitle: 'Échec d\'authentification pour l\'utilisateur "test@user.com"',
       avatarLabel: '??',
       date: 'Hier',
-      badges: [{ label: 'SÉCURITÉ', class: 'danger' }, { label: 'FAILURE', class: 'danger' }]
+      badges: [{ label: 'SÉCURITÉ', type: 'danger' }, { label: 'FAILURE', type: 'danger' }]
     },
     {
       id: 5,
@@ -63,7 +64,7 @@ export class AuditTrailComponent {
       subtitle: 'Nouvelle classe "6ème C" ajoutée au référentiel',
       avatarLabel: 'MD',
       date: '24 Fév',
-      badges: [{ label: 'SCOLARITÉ', class: 'info' }, { label: 'SUCCESS', class: 'success' }]
+      badges: [{ label: 'SCOLARITÉ', type: 'info' }, { label: 'SUCCESS', type: 'success' }]
     }
   ]);
 

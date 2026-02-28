@@ -3,8 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-
-// Importer les icônes
+import { MatMenuModule } from '@angular/material/menu';
 import {
   LucideAngularModule,
   LayoutGrid,
@@ -13,21 +12,16 @@ import {
   Layers,
   Search,
   X,
-  SlidersHorizontal,
   ChevronLeft,
   ChevronRight,
-  Eye,
   CheckCircle,
-  Printer,
-  MoreHorizontal,
   Trash2,
   Download,
   Archive,
   Inbox,
   ChevronDown,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown
+  Sparkles,
+  Check
 } from 'lucide-angular';
 
 // Importer les modèles
@@ -45,7 +39,7 @@ import { ExpandableViewComponent } from './views/expandable-view/expandable-view
 import { CardsViewComponent } from './views/cards-view/cards-view';
 import {SortState, TableViewComponent} from './views/table-view/table-view';
 import { TimelineViewComponent } from './views/timeline-view/timeline-view';
-import { ViewSelectorComponent } from './components/view-selector/view-selector';
+
 
 // Importer les services
 import { ViewPreferenceService } from '../../services/view-preference.service';
@@ -63,7 +57,7 @@ import { ViewPreferenceService } from '../../services/view-preference.service';
     CardsViewComponent,
     TableViewComponent,
     TimelineViewComponent,
-    ViewSelectorComponent
+    MatMenuModule
   ],
   templateUrl: './data-list.component.html',
   styleUrls: ['./data-list.component.scss']
@@ -152,28 +146,28 @@ export class DataListComponent {
     {
       id: 'expandable',
       label: 'Vue Extensible',
-      icon: 'Layers',
+      icon: Layers,
       description: 'Lignes avec détails dépliables',
       isAvailable: true
     },
     {
       id: 'cards',
       label: 'Vue Cartes',
-      icon: 'LayoutGrid',
+      icon: LayoutGrid,
       description: 'Affichage moderne en cartes',
       isAvailable: true
     },
     {
       id: 'table',
       label: 'Vue Tableau',
-      icon: 'Table',
+      icon: Table,
       description: 'Affichage classique en lignes et colonnes',
       isAvailable: true  // Maintenant disponible
     },
     {
       id: 'timeline',
       label: 'Vue Chronologique',
-      icon: 'Calendar',
+      icon: Calendar,
       description: 'Organisation par date',
       isAvailable: true  // Maintenant disponible
     }
@@ -353,17 +347,6 @@ export class DataListComponent {
     });
   }
 
-  /** Obtenir l'icône de tri pour une colonne */
-  getSortIcon(column: string): any {
-    const { column: currentColumn, direction } = this.sortState();
-
-    if (currentColumn !== column) {
-      return ArrowUpDown;
-    }
-
-    return direction === 'asc' ? ArrowUp : ArrowDown;
-  }
-
   // ===========================================
   // UTILITAIRES
   // ===========================================
@@ -378,30 +361,69 @@ export class DataListComponent {
       default: return 'bg-slate-50 text-slate-600 border-slate-200';
     }
   }
+  // ===========================================
+// MÉTHODES POUR LE SÉLECTEUR DE VUES INTELLIGENT
+// ===========================================
+
+  /** Obtenir l'icône de la vue actuelle */
+  /** Obtenir l'icône de la vue actuelle */
+  /** Obtenir l'icône de la vue actuelle */
+  getCurrentViewIcon(): any {
+    const currentView = this.viewOptions.find(v => v.id === this.viewMode());
+    return currentView?.icon || Layers;
+  }
+
+  /** Obtenir le label de la vue actuelle */
+  getCurrentViewLabel(): string {
+    const currentView = this.viewOptions.find(v => v.id === this.viewMode());
+    return currentView?.label || 'Vue Extensible';
+  }
+
+  /** Vérifier si une vue est nouvelle (pour afficher le badge) */
+  isNewView(viewId: string): boolean {
+    // Les vues récemment ajoutées - à ajuster selon vos besoins
+    const newViews = ['cards', 'timeline'];
+    return newViews.includes(viewId);
+  }
+
+  /** Marquer une vue comme vue (optionnel) */
+  markViewAsSeen(viewId: string): void {
+    try {
+      localStorage.setItem(`view-${viewId}-seen`, 'true');
+    } catch (error) {
+      console.warn('Impossible d\'accéder au localStorage', error);
+    }
+  }
+
+  /** Vérifier si une vue a déjà été vue (optionnel) */
+  hasViewBeenSeen(viewId: string): boolean {
+    try {
+      return localStorage.getItem(`view-${viewId}-seen`) === 'true';
+    } catch (error) {
+      return false;
+    }
+  }
 
   // ===========================================
   // EXPOSITION DES ICÔNES AU TEMPLATE
   // ===========================================
-
   protected readonly LayoutGrid = LayoutGrid;
   protected readonly Table = Table;
   protected readonly Calendar = Calendar;
   protected readonly Layers = Layers;
   protected readonly Search = Search;
   protected readonly X = X;
-  protected readonly SlidersHorizontal = SlidersHorizontal;
   protected readonly ChevronLeft = ChevronLeft;
   protected readonly ChevronRight = ChevronRight;
-  protected readonly Eye = Eye;
   protected readonly CheckCircle = CheckCircle;
-  protected readonly Printer = Printer;
-  protected readonly MoreHorizontal = MoreHorizontal;
   protected readonly Trash2 = Trash2;
   protected readonly Download = Download;
   protected readonly Archive = Archive;
   protected readonly Inbox = Inbox;
   protected readonly ChevronDown = ChevronDown;
-  protected readonly ArrowUpDown = ArrowUpDown;
-  protected readonly ArrowUp = ArrowUp;
-  protected readonly ArrowDown = ArrowDown;
+  protected readonly Sparkles = Sparkles;
+  protected readonly Check = Check;
 }
+
+
+

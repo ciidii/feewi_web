@@ -33,7 +33,7 @@
         <div class="avatar">
           <img *ngIf="row.avatarUrl" [src]="row.avatarUrl" [alt]="row.title" class="avatar-img" />
           <span *ngIf="!row.avatarUrl" class="avatar-fallback">
-              {{ row.avatarLabel || row.title?.charAt(0) || '?' }}
+              {{ row.avatarLabel || row.title.charAt(0) || '?' }}
             </span>
         </div>
         <div class="flex flex-col">
@@ -44,10 +44,10 @@
 
       <!-- Premier badge -->
       <div class="col-span-3">
-          <span *ngIf="row.badges?.[0]"
+          <span *ngIf="row.badges?.[0] as firstBadge"
                 class="badge-mini"
-                [ngClass]="getBadgeClass()(row.badges[0].type)">
-            {{ row.badges[0].label }}
+                [ngClass]="getBadgeClass()(firstBadge.type)">
+            {{ firstBadge.label }}
           </span>
         <span *ngIf="!row.badges?.length" class="text-sm text-slate-400">—</span>
       </div>

@@ -3,10 +3,10 @@
   <div class="hidden md:flex bg-slate-100 rounded-lg p-1">
     <button
       *ngFor="let view of getAvailableViews()"
-      (click)="changeView(view.id)"
-      (mouseenter)="showTooltip(view.id)"
+      (click)="changeView(view.id); markViewAsSeen(view.id)"
+      (mouseenter)="showTooltip(view.id, $event)"
       (mouseleave)="hideTooltip()"
-      class="view-option px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 flex items-center gap-2"
+      class="view-option px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 flex items-center gap-2 relative"
       [class.bg-white]="activeView() === view.id"
       [class.shadow-sm]="activeView() === view.id"
       [class.text-primary-600]="activeView() === view.id"
@@ -19,7 +19,7 @@
       <span>{{ view.label }}</span>
 
       <!-- Badge "Nouveau" pour les vues récemment ajoutées -->
-      <span *ngIf="view.id === 'cards' && !localStorage.getItem('view-cards-seen')"
+      <span *ngIf="isNewView(view.id) && !hasViewBeenSeen(view.id)"
             class="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse">
       </span>
     </button>
@@ -29,7 +29,7 @@
   <div class="md:hidden flex bg-slate-100 rounded-lg p-1">
     <button
       *ngFor="let view of getAvailableViews()"
-      (click)="changeView(view.id)"
+      (click)="changeView(view.id); markViewAsSeen(view.id)"
       class="view-icon-option p-2 rounded-md transition-all duration-200 relative"
       [class.bg-white]="activeView() === view.id"
       [class.shadow-sm]="activeView() === view.id"
@@ -43,21 +43,26 @@
       <span class="view-tooltip-mobile" *ngIf="activeTooltip() === view.id">
         {{ view.label }}
       </span>
+
+      <!-- Badge "Nouveau" mobile -->
+      <span *ngIf="isNewView(view.id) && !hasViewBeenSeen(view.id)"
+            class="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse">
+      </span>
     </button>
   </div>
 
-  <!-- Tooltip flottant (desktop) -->
+  <!-- Tooltip flottant (desktop) - Version simplifiée sans positionnement complexe -->
   <div *ngIf="activeTooltip()"
        class="fixed z-50 px-2 py-1 bg-slate-800 text-white text-xs rounded shadow-lg pointer-events-none transition-opacity"
-       [style.top.px]="tooltipPosition?.top"
-       [style.left.px]="tooltipPosition?.left">
+       style="top: 30px; left: 50%; transform: translateX(-50%);">
     {{ getViewDescription(activeTooltip()!) }}
   </div>
 
-  <!-- Indicateur de persistance -->
-  <div *ngIf="persistPreference()"
+  <!-- Indicateur de persistance (optionnel) -->
+  <div *ngIf="persistPreference() && false"
        class="absolute -bottom-5 left-0 text-[10px] text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">
-    <lucide-icon [name]="'Sparkles'" class="w-3 h-3 inline"></lucide-icon>
+    <lucide-icon [name]="Sparkles" class="w-3 h-3 inline"></lucide-icon>
     Préférence sauvegardée
   </div>
 </div>
+

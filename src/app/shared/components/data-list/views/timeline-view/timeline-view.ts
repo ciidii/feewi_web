@@ -44,7 +44,7 @@ export class TimelineViewComponent {
   selectedIds = input<Set<string | number>>(new Set());
 
   /** Fonction pour obtenir la classe d'un badge */
-  getBadgeClass = input<(type: string) => string>();
+  getBadgeClass = input.required<(type: string) => string>();
 
   // ===========================================
   // OUTPUTS

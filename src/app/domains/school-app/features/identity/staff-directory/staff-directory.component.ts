@@ -34,7 +34,7 @@ export class StaffDirectoryComponent {
       subtitle: 'Principal • mamadou.diop&#64;feewi.io',
       avatarLabel: 'MD',
       date: 'Connecté il y a 5 min',
-      badges: [{ label: 'SCHOOL_ADMIN', class: 'success' }, { label: 'Permanent', class: 'info' }]
+      badges: [{ label: 'SCHOOL_ADMIN', type: 'success' }, { label: 'Permanent', type: 'info' }]
     },
     {
       id: 2,
@@ -42,7 +42,7 @@ export class StaffDirectoryComponent {
       subtitle: 'Enseignante Mathématiques • aissatou.sow&#64;feewi.io',
       avatarLabel: 'AS',
       date: 'Hier',
-      badges: [{ label: 'TEACHER', class: 'info' }]
+      badges: [{ label: 'TEACHER', type: 'info' }]
     },
     {
       id: 3,
@@ -50,7 +50,7 @@ export class StaffDirectoryComponent {
       subtitle: 'Comptable • fatou.ndiaye&#64;feewi.io',
       avatarLabel: 'FN',
       date: '24 Fév',
-      badges: [{ label: 'ACCOUNTANT', class: 'warning' }]
+      badges: [{ label: 'ACCOUNTANT', type: 'warning' }]
     },
     {
       id: 4,
@@ -58,7 +58,7 @@ export class StaffDirectoryComponent {
       subtitle: 'Surveillant Général • ibrahima.fall&#64;feewi.io',
       avatarLabel: 'IF',
       date: '20 Fév',
-      badges: [{ label: 'STAFF', class: 'info' }]
+      badges: [{ label: 'STAFF', type: 'info' }]
     },
     {
       id: 5,
@@ -66,7 +66,7 @@ export class StaffDirectoryComponent {
       subtitle: 'Ancien Enseignant • christian.gomis&#64;feewi.io',
       avatarLabel: 'CG',
       date: '15 Jan',
-      badges: [{ label: 'INACTIF', class: 'danger' }]
+      badges: [{ label: 'INACTIF', type: 'danger' }]
     }
   ]);
 

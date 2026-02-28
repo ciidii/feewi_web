@@ -11,7 +11,8 @@ import {
   MoreHorizontal,
   ArrowUpDown,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  Table
 } from 'lucide-angular';
 import {TableRow} from '../../../../models/data-list.models';
 
@@ -45,7 +46,7 @@ export class TableViewComponent {
   selectedIds = input<Set<string | number>>(new Set());
 
   /** Fonction pour obtenir la classe d'un badge */
-  getBadgeClass = input<(type: string) => string>();
+  getBadgeClass = input.required<(type: string) => string>();
 
   // ===========================================
   // OUTPUTS
@@ -144,4 +145,5 @@ export class TableViewComponent {
   protected readonly ArrowUpDown = ArrowUpDown;
   protected readonly ArrowUp = ArrowUp;
   protected readonly ArrowDown = ArrowDown;
+  protected readonly Table = Table;
 }

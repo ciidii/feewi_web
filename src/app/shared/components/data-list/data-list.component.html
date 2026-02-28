@@ -1,4 +1,5 @@
-<div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col transition-all hover:shadow-md">
+<div
+  class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col transition-all hover:shadow-md">
 
   <!-- ======================================= -->
   <!-- TOOLBAR (Tabs + Sélecteur de vues + Recherche) -->
@@ -78,13 +79,57 @@
       <!-- Zone droite (sélecteur de vues + recherche) -->
       <div class="ml-auto flex items-center gap-3">
 
-        <!-- SÉLECTEUR DE VUES -->
-        <app-view-selector
-          [views]="viewOptions"
-          [activeView]="viewMode()"
-          [persistPreference]="true"
-          (viewChange)="setViewMode($event)"
-        ></app-view-selector>
+        <div class="view-switcher">
+          <button
+            [matMenuTriggerFor]="viewMenu"
+            class="flex items-center gap-2 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm font-medium transition-colors"
+          >
+            <lucide-icon [name]="getCurrentViewIcon()" class="w-4 h-4 text-primary-600"></lucide-icon>
+            <span class="hidden sm:inline">{{ getCurrentViewLabel() }}</span>
+            <lucide-icon [name]="ChevronDown" class="w-3.5 h-3.5 text-slate-500"></lucide-icon>
+          </button>
+          <mat-menu #viewMenu="matMenu" class="view-menu" xPosition="before" yPosition="below">
+            <!-- En-tête -->
+            <div class="menu-header">
+              <lucide-icon [name]="LayoutGrid" class="w-3.5 h-3.5"></lucide-icon>
+              <span>Changer l'affichage</span>
+            </div>
+
+            <!-- Options de vues -->
+            <button
+              *ngFor="let view of availableViews()"
+              mat-menu-item
+              (click)="setViewMode(view.id)"
+              class="view-menu-item"
+              [class.active]="viewMode() === view.id"
+            >
+              <div class="menu-item-content">
+                <div class="menu-item-left">
+                  <lucide-icon [name]="view.icon" class="w-5 h-5" [class.text-primary-600]="viewMode() === view.id"></lucide-icon>
+                </div>
+
+                <div class="menu-item-center">
+                  <div class="menu-item-title">
+                    <span>{{ view.label }}</span>
+                    <span *ngIf="isNewView(view.id)" class="new-badge">Nouveau</span>
+                  </div>
+                  <div class="menu-item-description">{{ view.description }}</div>
+                </div>
+
+                <!-- Checkmark pour la vue active -->
+                <div class="menu-item-right" *ngIf="viewMode() === view.id">
+                  <lucide-icon [name]="Check" class="w-4 h-4 text-primary-600"></lucide-icon>
+                </div>
+              </div>
+            </button>
+
+            <!-- Footer -->
+            <div class="menu-footer">
+              <lucide-icon [name]="Sparkles" class="w-3.5 h-3.5"></lucide-icon>
+              <span>Préférence sauvegardée automatiquement</span>
+            </div>
+          </mat-menu>
+        </div>
 
         <!-- RECHERCHE -->
         <div class="relative" *ngIf="showSearch()">
@@ -115,12 +160,15 @@
   <!-- ======================================= -->
   <!-- ZONE DE CONTENU DYNAMIQUE (selon la vue) -->
   <!-- ======================================= -->
+  <!-- ======================================= -->
+  <!-- ZONE DE CONTENU DYNAMIQUE (selon la vue) -->
+  <!-- ======================================= -->
   <div class="relative min-h-[200px]">
 
-    <!-- VUE EXTENSIBLE (actuelle) -->
+    <!-- VUE EXTENSIBLE -->
     <app-expandable-view
       *ngIf="viewMode() === 'expandable'"
-      [data]="data()"
+      [data]="displayedData()"
       [selectedIds]="selectedIds()"
       [expandedIds]="expandedIds()"
       [getBadgeClass]="getBadgeClass"
@@ -130,25 +178,22 @@
       (onValidate)="onValidate.emit($event)"
       (onPrint)="onPrint.emit($event)"
     ></app-expandable-view>
-  </div>
 
-  <!-- VUE CARTES (à venir) -->
-  <div *ngIf="viewMode() === 'cards'" class="p-6 text-center text-slate-400">
-    <!-- Remplacer la section VUE CARTES -->
-    <!-- VUE CARTES (maintenant active) -->
+    <!-- VUE CARTES -->
     <app-cards-view
       *ngIf="viewMode() === 'cards'"
-      [data]="data()"
+      [data]="displayedData()"
       [selectedIds]="selectedIds()"
       [getBadgeClass]="getBadgeClass"
       (toggleRow)="toggleRow($event)"
       (onView)="onView.emit($event)"
       (onValidate)="onValidate.emit($event)"
     ></app-cards-view>
+
     <!-- VUE TABLEAU -->
     <app-table-view
       *ngIf="viewMode() === 'table'"
-      [data]="data()"
+      [data]="displayedData()"
       [selectedIds]="selectedIds()"
       [getBadgeClass]="getBadgeClass"
       (toggleRow)="toggleRow($event)"
@@ -162,13 +207,26 @@
     <!-- VUE TIMELINE -->
     <app-timeline-view
       *ngIf="viewMode() === 'timeline'"
-      [data]="data()"
+      [data]="displayedData()"
       [selectedIds]="selectedIds()"
       [getBadgeClass]="getBadgeClass"
       (toggleRow)="toggleRow($event)"
       (onView)="onView.emit($event)"
       (onValidate)="onValidate.emit($event)"
     ></app-timeline-view>
+
+    <!-- ÉTAT VIDE -->
+    <div *ngIf="data().length === 0" class="py-16 text-center">
+      <div class="inline-flex flex-col items-center gap-4">
+        <div class="w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center">
+          <lucide-icon [name]="Inbox" class="w-10 h-10 text-slate-300"></lucide-icon>
+        </div>
+        <div class="space-y-1">
+          <p class="text-sm font-semibold text-slate-700">Aucun élément trouvé</p>
+          <p class="text-xs text-slate-500">Essayez de modifier vos filtres</p>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- VUE TABLEAU (à venir) -->
@@ -223,5 +281,4 @@
       </button>
     </div>
   </div>
-</div>
 </div>

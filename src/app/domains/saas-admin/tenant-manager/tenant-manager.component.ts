@@ -1,7 +1,8 @@
 import { Component, inject, signal, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { DataListComponent, TableRow, TabItem } from '../../../shared/components/data-list/data-list.component';
+import { DataListComponent } from '../../../shared/components/data-list/data-list.component';
+import { TabItem, TableRow } from '../../../shared/models/data-list.models';
 import { LucideAngularModule, Building2, Plus, Globe, ShieldCheck, Activity } from 'lucide-angular';
 import { TenantFormComponent } from '../tenant-form/tenant-form.component';
 
@@ -35,7 +36,7 @@ export class TenantManagerComponent {
       subtitle: 'feewi-demo.edu.sn • Dakar, Sénégal',
       avatarLabel: 'EI',
       date: 'Créé le 12 Jan 2024',
-      badges: [{ label: 'PREMIUM', class: 'success' }, { label: 'ACTIVE', class: 'info' }]
+      badges: [{ label: 'PREMIUM', type: 'success' }, { label: 'ACTIVE', type: 'info' }]
     },
     {
       id: 'sacre-coeur',
@@ -43,7 +44,7 @@ export class TenantManagerComponent {
       subtitle: 'sacre-coeur.sn • Dakar, Sénégal',
       avatarLabel: 'SC',
       date: 'Créé le 05 Fév 2024',
-      badges: [{ label: 'ENTERPRISE', class: 'success' }, { label: 'ACTIVE', class: 'info' }]
+      badges: [{ label: 'ENTERPRISE', type: 'success' }, { label: 'ACTIVE', type: 'info' }]
     },
     {
       id: 'mary-test',
@@ -51,7 +52,7 @@ export class TenantManagerComponent {
       subtitle: 'm-curie.test.feewi.io',
       avatarLabel: 'MC',
       date: 'Créé hier',
-      badges: [{ label: 'TRIAL', class: 'warning' }, { label: 'PENDING', class: 'danger' }]
+      badges: [{ label: 'TRIAL', type: 'warning' }, { label: 'PENDING', type: 'danger' }]
     }
   ]);
 

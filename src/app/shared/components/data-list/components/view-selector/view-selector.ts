@@ -1,8 +1,8 @@
 import { Component, input, output, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LucideAngularModule } from 'lucide-angular';
-import { ViewMode, ViewConfig } from '../../models/data-list.models';
-import { ViewPreferenceService } from '../../services/view-preference.service';
+import { LucideAngularModule, Sparkles } from 'lucide-angular';
+import { ViewMode, ViewConfig } from '../../../../models/data-list.models';
+import { ViewPreferenceService } from '../../../../services/view-preference.service';
 
 @Component({
   selector: 'app-view-selector',
@@ -39,6 +39,9 @@ export class ViewSelectorComponent {
   /** Tooltip visible pour une vue */
   activeTooltip = signal<string | null>(null);
 
+  /** Position du tooltip (calculée dynamiquement) */
+  tooltipPosition = signal<{ top: number; left: number } | null>(null);
+
   constructor(private viewPreferenceService: ViewPreferenceService) {
     // Si la persistance est activée, charger la préférence au démarrage
     if (this.persistPreference()) {
@@ -72,8 +75,18 @@ export class ViewSelectorComponent {
   /**
    * Afficher le tooltip
    */
-  showTooltip(viewId: string): void {
+  showTooltip(viewId: string, event?: MouseEvent): void {
     this.activeTooltip.set(viewId);
+
+    // Calculer la position du tooltip si l'événement est disponible
+    if (event) {
+      const target = event.currentTarget as HTMLElement;
+      const rect = target.getBoundingClientRect();
+      this.tooltipPosition.set({
+        top: rect.top - 30, // 30px au-dessus de l'élément
+        left: rect.left + (rect.width / 2) - 50 // Centré approximativement
+      });
+    }
   }
 
   /**
@@ -81,6 +94,7 @@ export class ViewSelectorComponent {
    */
   hideTooltip(): void {
     this.activeTooltip.set(null);
+    this.tooltipPosition.set(null);
   }
 
   /**
@@ -97,5 +111,43 @@ export class ViewSelectorComponent {
     return this.views().filter(v => v.isAvailable);
   }
 
-  protected readonly localStorage = localStorage;
+  /**
+   * Obtenir la description d'une vue par son ID
+   */
+  getViewDescription(viewId: string): string {
+    const view = this.views().find(v => v.id === viewId);
+    return view?.description || '';
+  }
+
+  /**
+   * Vérifier si une vue est "nouvelle" (pour afficher le badge)
+   */
+  isNewView(viewId: string): boolean {
+    // Exemple: les vues cards et timeline sont considérées comme nouvelles
+    return viewId === 'cards' || viewId === 'timeline';
+  }
+
+  /**
+   * Marquer une vue comme vue
+   */
+  markViewAsSeen(viewId: string): void {
+    try {
+      localStorage.setItem(`view-${viewId}-seen`, 'true');
+    } catch (error) {
+      console.warn('Impossible d\'accéder au localStorage', error);
+    }
+  }
+
+  /**
+   * Vérifier si une vue a déjà été vue
+   */
+  hasViewBeenSeen(viewId: string): boolean {
+    try {
+      return localStorage.getItem(`view-${viewId}-seen`) === 'true';
+    } catch (error) {
+      return false;
+    }
+  }
+
+  protected readonly Sparkles = Sparkles;
 }

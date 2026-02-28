@@ -33,18 +33,18 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
       <div class="flex items-center gap-1">
         <button 
           (click)="onBulkValidate.emit([])" 
-          class="bulk-btn hover:bg-green-50 hover:text-green-600" 
+          class="bulk-btn text-slate-medium transition-all active:scale-90 hover:bg-green-50 hover:text-green-600" 
           title="Valider la sélection"
         >
           <lucide-icon [name]="CheckCircle" class="w-5 h-5"></lucide-icon>
         </button>
-        <button class="bulk-btn hover:bg-blue-50 hover:text-blue-600" title="Archiver">
+        <button class="bulk-btn text-slate-medium transition-all active:scale-90 hover:bg-blue-50 hover:text-blue-600" title="Archiver">
           <lucide-icon [name]="Archive" class="w-5 h-5"></lucide-icon>
         </button>
-        <button class="bulk-btn hover:bg-red-50 hover:text-red-600" title="Supprimer">
+        <button class="bulk-btn text-slate-medium transition-all active:scale-90 hover:bg-red-50 hover:text-red-600" title="Supprimer">
           <lucide-icon [name]="Trash2" class="w-5 h-5"></lucide-icon>
         </button>
-        <button class="bulk-btn hover:bg-slate-100 text-slate-medium hover:text-midnight" title="Exporter">
+        <button class="bulk-btn text-slate-medium transition-all active:scale-90 hover:bg-slate-100 hover:text-midnight" title="Exporter">
           <lucide-icon [name]="Download" class="w-5 h-5"></lucide-icon>
         </button>
       </div>
@@ -52,7 +52,12 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
   `,
   styles: [`
     .bulk-btn {
-      @apply w-10 h-10 flex items-center justify-center rounded-xl text-slate-medium transition-all active:scale-90;
+      width: 2.5rem;
+      height: 2.5rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.75rem;
     }
   `]
 })

@@ -63,14 +63,14 @@
                       </span>
                     <span *ngIf="item.metadata?.['location']" class="flex items-center gap-1">
                         <span>📍</span>
-                      {{ item.metadata['location'] }}
+                      {{ item.metadata?.['location'] }}
                       </span>
                   </div>
                 </div>
 
                 <!-- Badges -->
                 <div class="flex gap-1">
-                    <span *ngFor="let badge of item.badges"
+                    <span *ngFor="let badge of item.badges || []"
                           class="timeline-badge"
                           [ngClass]="getBadgeClass()(badge.type)">
                       {{ badge.label }}
