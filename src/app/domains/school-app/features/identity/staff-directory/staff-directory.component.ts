@@ -1,7 +1,8 @@
 import { Component, signal, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule, UserPlus, Shield, Filter, Download, Users, UserCheck, UserX } from 'lucide-angular';
-import {DataListComponent, TabItem, TableRow} from '../../../../../shared/components/data-list/data-list.component';
+import {DataListComponent} from '../../../../../shared/components/data-list/data-list.component';
+import {TabItem, TableRow} from '../../../../../shared/models/data-list.models';
 
 @Component({
   selector: 'app-staff-directory',

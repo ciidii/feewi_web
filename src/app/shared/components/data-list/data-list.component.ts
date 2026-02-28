@@ -1,67 +1,258 @@
 import { Component, input, output, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LucideAngularModule, MoreHorizontal, Eye, CheckCircle, Printer, Search, X, SlidersHorizontal, Trash2, Download, Archive } from 'lucide-angular';
+import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { FormsModule } from '@angular/forms';
 
-export interface TabItem {
-  label: string;
-  icon?: any;
-  count?: number;
-}
+// Importer les icônes
+import {
+  LucideAngularModule,
+  LayoutGrid,
+  Table,
+  Calendar,
+  Layers,
+  Search,
+  X,
+  SlidersHorizontal,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  CheckCircle,
+  Printer,
+  MoreHorizontal,
+  Trash2,
+  Download,
+  Archive,
+  Inbox,
+  ChevronDown,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown
+} from 'lucide-angular';
 
-export interface TableRow {
-  id: string | number;
-  title: string;
-  subtitle?: string;
-  avatarLabel?: string;
-  avatarUrl?: string;
-  date?: string;
-  badges?: { label: string; class: string }[];
-  rawData?: any;
-}
+// Importer les modèles
+import {
+  SearchState,
+  SelectionState,
+  TabItem,
+  TableRow,
+  ViewConfig,
+  ViewMode
+} from '../../models/data-list.models';
+
+// Importer les composants
+import { ExpandableViewComponent } from './views/expandable-view/expandable-view';
+import { CardsViewComponent } from './views/cards-view/cards-view';
+import {SortState, TableViewComponent} from './views/table-view/table-view';
+import { TimelineViewComponent } from './views/timeline-view/timeline-view';
+import { ViewSelectorComponent } from './components/view-selector/view-selector';
+
+// Importer les services
+import { ViewPreferenceService } from '../../services/view-preference.service';
 
 @Component({
   selector: 'app-data-list',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, MatButtonModule, MatCheckboxModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatButtonModule,
+    MatCheckboxModule,
+    LucideAngularModule,
+    ExpandableViewComponent,
+    CardsViewComponent,
+    TableViewComponent,
+    TimelineViewComponent,
+    ViewSelectorComponent
+  ],
   templateUrl: './data-list.component.html',
-  styleUrl: './data-list.component.scss'
+  styleUrls: ['./data-list.component.scss']
 })
 export class DataListComponent {
+  // ===========================================
+  // CONSTRUCTEUR
+  // ===========================================
+
+  constructor(private viewPreferenceService: ViewPreferenceService) {
+    // Charger la préférence de vue au démarrage
+    const savedView = this.viewPreferenceService.getPreferredView()();
+    if (savedView !== this.viewMode()) {
+      this.viewMode.set(savedView);
+    }
+  }
+
+  // ===========================================
+  // INPUTS (données fournies par le parent)
+  // ===========================================
+
+  /** Les données à afficher */
   data = input<TableRow[]>([]);
+
+  /** Les onglets disponibles */
   tabs = input<TabItem[]>([]);
+
+  /** L'onglet actif */
   activeTab = input<string>('Tous');
+
+  /** Nombre total d'éléments (pour la pagination) */
   total = input<number>(0);
+
+  /** Afficher ou non la barre de recherche */
   showSearch = input<boolean>(true);
 
+  // ===========================================
+  // OUTPUTS (événements vers le parent)
+  // ===========================================
+
+  /** Changement d'onglet */
   onTabChange = output<string>();
+
+  /** Recherche */
   onSearch = output<string>();
+
+  /** Actions sur une ligne */
   onView = output<TableRow>();
   onValidate = output<TableRow>();
   onPrint = output<TableRow>();
+
+  /** Actions groupées */
   onBulkValidate = output<(string | number)[]>();
 
+  /** Changement de tri */
+  onSortChange = output<SortState>();
+
+  // ===========================================
+  // ÉTATS INTERNES (signals)
+  // ===========================================
+
+  /** Mode d'affichage actuel */
+  viewMode = signal<ViewMode>('expandable');
+
+  /** Requête de recherche */
   searchQuery = signal('');
+
+  /** IDs sélectionnés */
   selectedIds = signal<Set<string | number>>(new Set());
 
-  // Computed states for selection
-  isAllSelected = computed(() => this.data().length > 0 && this.selectedIds().size === this.data().length);
-  isPartiallySelected = computed(() => this.selectedIds().size > 0 && this.selectedIds().size < this.data().length);
+  /** IDs des lignes dépliées (pour vue expandable) */
+  expandedIds = signal<Set<string | number>>(new Set());
 
-  readonly Eye = Eye;
-  readonly CheckCircle = CheckCircle;
-  readonly Printer = Printer;
-  readonly MoreHorizontal = MoreHorizontal;
-  readonly Search = Search;
-  readonly X = X;
-  readonly SlidersHorizontal = SlidersHorizontal;
-  readonly Trash2 = Trash2;
-  readonly Download = Download;
-  readonly Archive = Archive;
+  /** État du tri */
+  sortState = signal<SortState>({
+    column: '',
+    direction: null
+  });
 
-  toggleRow(id: string | number) {
+  // ===========================================
+  // CONFIGURATION DES VUES DISPONIBLES
+  // ===========================================
+
+  /** Liste des vues disponibles */
+  viewOptions: ViewConfig[] = [
+    {
+      id: 'expandable',
+      label: 'Vue Extensible',
+      icon: 'Layers',
+      description: 'Lignes avec détails dépliables',
+      isAvailable: true
+    },
+    {
+      id: 'cards',
+      label: 'Vue Cartes',
+      icon: 'LayoutGrid',
+      description: 'Affichage moderne en cartes',
+      isAvailable: true
+    },
+    {
+      id: 'table',
+      label: 'Vue Tableau',
+      icon: 'Table',
+      description: 'Affichage classique en lignes et colonnes',
+      isAvailable: true  // Maintenant disponible
+    },
+    {
+      id: 'timeline',
+      label: 'Vue Chronologique',
+      icon: 'Calendar',
+      description: 'Organisation par date',
+      isAvailable: true  // Maintenant disponible
+    }
+  ];
+
+  // ===========================================
+  // COMPUTED STATES (états calculés)
+  // ===========================================
+
+  /** État de la sélection */
+  selectionState = computed<SelectionState>(() => {
+    const ids = this.selectedIds();
+    const data = this.data();
+    const count = ids.size;
+
+    return {
+      selectedIds: ids,
+      count,
+      isAllSelected: data.length > 0 && count === data.length,
+      isPartiallySelected: count > 0 && count < data.length
+    };
+  });
+
+  /** État de la recherche */
+  searchState = computed<SearchState>(() => ({
+    query: this.searchQuery(),
+    isActive: this.searchQuery().length > 0
+  }));
+
+  /** Vues disponibles (filtrées) */
+  availableViews = computed(() =>
+    this.viewOptions.filter(v => v.isAvailable)
+  );
+
+  /** Données triées selon l'état du tri */
+  sortedData = computed(() => {
+    const data = this.data();
+    const { column, direction } = this.sortState();
+
+    if (!direction || !column || data.length === 0) {
+      return data;
+    }
+
+    return [...data].sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+
+      switch (column) {
+        case 'title':
+          aValue = a.title?.toLowerCase() || '';
+          bValue = b.title?.toLowerCase() || '';
+          break;
+        case 'subtitle':
+          aValue = a.subtitle?.toLowerCase() || '';
+          bValue = b.subtitle?.toLowerCase() || '';
+          break;
+        case 'date':
+          aValue = a.date ? new Date(a.date).getTime() : 0;
+          bValue = b.date ? new Date(b.date).getTime() : 0;
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) return direction === 'asc' ? -1 : 1;
+      if (aValue > bValue) return direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  });
+
+  /** Données à afficher (triées) */
+  displayedData = computed(() => this.sortedData());
+
+  // ===========================================
+  // MÉTHODES DE SÉLECTION
+  // ===========================================
+
+  /** Basculer la sélection d'une ligne */
+  toggleRow(id: string | number): void {
     const next = new Set(this.selectedIds());
     if (next.has(id)) {
       next.delete(id);
@@ -71,30 +262,146 @@ export class DataListComponent {
     this.selectedIds.set(next);
   }
 
-  toggleAll() {
-    if (this.isAllSelected()) {
+  /** Basculer la sélection de toutes les lignes */
+  toggleAll(): void {
+    if (this.selectionState().isAllSelected) {
       this.selectedIds.set(new Set());
     } else {
       this.selectedIds.set(new Set(this.data().map(r => r.id)));
     }
   }
 
+  /** Effacer toute la sélection */
+  clearSelection(): void {
+    this.selectedIds.set(new Set());
+  }
+
+  /** Vérifier si une ligne est sélectionnée */
+  isSelected(id: string | number): boolean {
+    return this.selectedIds().has(id);
+  }
+
+  /** Obtenir le tableau des IDs sélectionnés */
   getSelectedIdsArray(): (string | number)[] {
     return Array.from(this.selectedIds());
   }
 
-  clearSearch() {
+  // ===========================================
+  // MÉTHODES D'EXPANSION
+  // ===========================================
+
+  /** Basculer l'expansion d'une ligne */
+  toggleExpand(id: string | number): void {
+    const next = new Set(this.expandedIds());
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+    this.expandedIds.set(next);
+  }
+
+  /** Vérifier si une ligne est dépliée */
+  isExpanded(id: string | number): boolean {
+    return this.expandedIds().has(id);
+  }
+
+  // ===========================================
+  // MÉTHODES DE RECHERCHE
+  // ===========================================
+
+  /** Mettre à jour la recherche */
+  updateSearch(query: string): void {
+    this.searchQuery.set(query);
+    this.onSearch.emit(query);
+  }
+
+  /** Effacer la recherche */
+  clearSearch(): void {
     this.searchQuery.set('');
     this.onSearch.emit('');
   }
 
+  // ===========================================
+  // MÉTHODES DE VUE
+  // ===========================================
+
+  /** Changer le mode d'affichage */
+  setViewMode(mode: ViewMode): void {
+    this.viewMode.set(mode);
+  }
+
+  // ===========================================
+  // MÉTHODES DE TRI
+  // ===========================================
+
+  /** Gérer le changement de tri */
+  handleSort(sortState: SortState): void {
+    this.sortState.set(sortState);
+    this.onSortChange.emit(sortState);
+  }
+
+  /** Réinitialiser le tri */
+  clearSort(): void {
+    this.sortState.set({
+      column: '',
+      direction: null
+    });
+    this.onSortChange.emit({
+      column: '',
+      direction: null
+    });
+  }
+
+  /** Obtenir l'icône de tri pour une colonne */
+  getSortIcon(column: string): any {
+    const { column: currentColumn, direction } = this.sortState();
+
+    if (currentColumn !== column) {
+      return ArrowUpDown;
+    }
+
+    return direction === 'asc' ? ArrowUp : ArrowDown;
+  }
+
+  // ===========================================
+  // UTILITAIRES
+  // ===========================================
+
+  /** Obtenir la classe CSS d'un badge selon son type */
   getBadgeClass(type: string): string {
     switch (type) {
-      case 'success': return 'bg-green-50 text-green-700 border-green-100 shadow-green-100/50';
-      case 'warning': return 'bg-amber-50 text-amber-700 border-amber-100 shadow-amber-100/50';
-      case 'danger': return 'bg-red-50 text-red-700 border-red-100 shadow-red-100/50';
-      case 'info': return 'bg-blue-50 text-blue-700 border-blue-100 shadow-blue-100/50';
-      default: return 'bg-slate-50 text-slate-600 border-slate-100 shadow-slate-100/50';
+      case 'success': return 'bg-green-50 text-green-700 border-green-200';
+      case 'warning': return 'bg-amber-50 text-amber-700 border-amber-200';
+      case 'danger': return 'bg-red-50 text-red-700 border-red-200';
+      case 'info': return 'bg-blue-50 text-blue-700 border-blue-200';
+      default: return 'bg-slate-50 text-slate-600 border-slate-200';
     }
   }
+
+  // ===========================================
+  // EXPOSITION DES ICÔNES AU TEMPLATE
+  // ===========================================
+
+  protected readonly LayoutGrid = LayoutGrid;
+  protected readonly Table = Table;
+  protected readonly Calendar = Calendar;
+  protected readonly Layers = Layers;
+  protected readonly Search = Search;
+  protected readonly X = X;
+  protected readonly SlidersHorizontal = SlidersHorizontal;
+  protected readonly ChevronLeft = ChevronLeft;
+  protected readonly ChevronRight = ChevronRight;
+  protected readonly Eye = Eye;
+  protected readonly CheckCircle = CheckCircle;
+  protected readonly Printer = Printer;
+  protected readonly MoreHorizontal = MoreHorizontal;
+  protected readonly Trash2 = Trash2;
+  protected readonly Download = Download;
+  protected readonly Archive = Archive;
+  protected readonly Inbox = Inbox;
+  protected readonly ChevronDown = ChevronDown;
+  protected readonly ArrowUpDown = ArrowUpDown;
+  protected readonly ArrowUp = ArrowUp;
+  protected readonly ArrowDown = ArrowDown;
 }

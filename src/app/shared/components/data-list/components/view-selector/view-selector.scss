@@ -1,0 +1,87 @@
+.view-selector-container {
+  position: relative;
+  display: inline-flex;
+}
+
+// Option de vue (desktop)
+.view-option {
+  position: relative;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    color: #2563eb;
+    background-color: rgba(255, 255, 255, 0.8);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  // Animation de pulse pour les badges "nouveau"
+  .animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+}
+
+// Option d'icône (mobile)
+.view-icon-option {
+  position: relative;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.8);
+  }
+}
+
+// Tooltip mobile
+.view-tooltip-mobile {
+  position: absolute;
+  bottom: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: white;
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.25rem;
+  white-space: nowrap;
+  z-index: 100;
+  pointer-events: none;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-bottom: 4px solid #1e293b;
+  }
+}
+
+// Animation de pulse
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+// Animation d'entrée
+.view-option, .view-icon-option {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

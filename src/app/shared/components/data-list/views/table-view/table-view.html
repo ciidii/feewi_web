@@ -1,0 +1,165 @@
+<div class="overflow-x-auto">
+  <table class="w-full border-collapse">
+    <!-- EN-TÊTE DU TABLEAU -->
+    <thead class="bg-slate-50/80 border-b border-slate-200">
+    <tr>
+      <!-- Checkbox et expansion (colonne fixe) -->
+      <th class="w-16 px-4 py-3 text-left">
+        <div class="flex items-center gap-2">
+          <mat-checkbox
+            color="primary"
+            [checked]="isAllSelected()"
+            [indeterminate]="isPartiallySelected()"
+            (change)="toggleAll.emit()"
+            class="table-checkbox"
+          ></mat-checkbox>
+        </div>
+      </th>
+
+      <!-- Colonnes de données -->
+      <th class="px-4 py-3 text-left cursor-pointer group"
+          (click)="handleSort('title')"
+          (mouseenter)="hoveredColumn = 'title'"
+          (mouseleave)="hoveredColumn = null">
+        <div class="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+          <span>Élément</span>
+          <lucide-icon
+            [name]="getSortIcon('title')"
+            class="w-3.5 h-3.5 transition-opacity"
+            [class.opacity-100]="sortState.column === 'title' || hoveredColumn === 'title'"
+            [class.opacity-30]="sortState.column !== 'title' && hoveredColumn !== 'title'"
+          ></lucide-icon>
+        </div>
+      </th>
+
+      <th class="px-4 py-3 text-left cursor-pointer group"
+          (click)="handleSort('subtitle')"
+          (mouseenter)="hoveredColumn = 'subtitle'"
+          (mouseleave)="hoveredColumn = null">
+        <div class="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+          <span>Sous-titre</span>
+          <lucide-icon
+            [name]="getSortIcon('subtitle')"
+            class="w-3.5 h-3.5 transition-opacity"
+            [class.opacity-100]="sortState.column === 'subtitle' || hoveredColumn === 'subtitle'"
+            [class.opacity-30]="sortState.column !== 'subtitle' && hoveredColumn !== 'subtitle'"
+          ></lucide-icon>
+        </div>
+      </th>
+
+      <th class="px-4 py-3 text-left">
+        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Statut</span>
+      </th>
+
+      <th class="px-4 py-3 text-left cursor-pointer group"
+          (click)="handleSort('date')"
+          (mouseenter)="hoveredColumn = 'date'"
+          (mouseleave)="hoveredColumn = null">
+        <div class="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+          <span>Date</span>
+          <lucide-icon
+            [name]="getSortIcon('date')"
+            class="w-3.5 h-3.5 transition-opacity"
+            [class.opacity-100]="sortState.column === 'date' || hoveredColumn === 'date'"
+            [class.opacity-30]="sortState.column !== 'date' && hoveredColumn !== 'date'"
+          ></lucide-icon>
+        </div>
+      </th>
+
+      <th class="w-24 px-4 py-3 text-right">
+        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</span>
+      </th>
+    </tr>
+    </thead>
+
+    <!-- CORPS DU TABLEAU -->
+    <tbody class="divide-y divide-slate-100">
+    <tr *ngFor="let row of data()"
+        class="group hover:bg-slate-50/80 transition-colors cursor-pointer"
+        [class.bg-primary-50/20]="isSelected(row.id)"
+    (click)="toggleRow.emit(row.id)">
+
+    <!-- Checkbox -->
+    <td class="w-16 px-4 py-3" (click)="$event.stopPropagation()">
+      <mat-checkbox
+        color="primary"
+        [checked]="isSelected(row.id)"
+        (change)="toggleRow.emit(row.id)"
+        class="table-checkbox"
+        [class.opacity-100]="isSelected(row.id)"
+      ></mat-checkbox>
+    </td>
+
+    <!-- Titre avec avatar -->
+    <td class="px-4 py-3">
+      <div class="flex items-center gap-3">
+        <div class="avatar">
+          <img *ngIf="row.avatarUrl" [src]="row.avatarUrl" [alt]="row.title" class="avatar-img" />
+          <span *ngIf="!row.avatarUrl" class="avatar-fallback">
+                {{ row.avatarLabel || row.title?.charAt(0) || '?' }}
+              </span>
+        </div>
+        <span class="font-medium text-slate-900">{{ row.title }}</span>
+      </div>
+    </td>
+
+    <!-- Sous-titre -->
+    <td class="px-4 py-3 text-slate-600">
+      {{ row.subtitle || '—' }}
+    </td>
+
+    <!-- Badges -->
+    <td class="px-4 py-3">
+      <div class="flex gap-1 flex-wrap">
+            <span *ngFor="let badge of row.badges?.slice(0, 2)"
+                  class="badge-table"
+                  [ngClass]="getBadgeClass()(badge.type)">
+              {{ badge.label }}
+            </span>
+        <span *ngIf="row.badges && row.badges.length > 2"
+              class="badge-table bg-slate-100 text-slate-600 border-slate-200">
+              +{{ row.badges.length - 2 }}
+            </span>
+        <span *ngIf="!row.badges?.length" class="text-sm text-slate-400">—</span>
+      </div>
+    </td>
+
+    <!-- Date -->
+    <td class="px-4 py-3 text-slate-600">
+      {{ formatDate(row.date) }}
+    </td>
+
+    <!-- Actions -->
+    <td class="w-24 px-4 py-3 text-right" (click)="$event.stopPropagation()">
+      <div class="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <button (click)="onView.emit(row)" class="table-action" title="Voir">
+          <lucide-icon [name]="Eye" class="w-4 h-4"></lucide-icon>
+        </button>
+        <button (click)="onValidate.emit(row)" class="table-action validate" title="Valider">
+          <lucide-icon [name]="CheckCircle" class="w-4 h-4"></lucide-icon>
+        </button>
+        <button (click)="onPrint.emit(row)" class="table-action" title="Imprimer">
+          <lucide-icon [name]="Printer" class="w-4 h-4"></lucide-icon>
+        </button>
+        <button class="table-action more" title="Plus d'options">
+          <lucide-icon [name]="MoreHorizontal" class="w-4 h-4"></lucide-icon>
+        </button>
+      </div>
+    </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- État vide -->
+<div *ngIf="data().length === 0" class="py-20 text-center">
+  <div class="inline-flex flex-col items-center gap-4">
+    <div class="w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center">
+      <lucide-icon [name]="'Table'" class="w-10 h-10 text-slate-300"></lucide-icon>
+    </div>
+    <div class="space-y-1">
+      <p class="text-sm font-semibold text-slate-700">Aucune donnée dans le tableau</p>
+      <p class="text-xs text-slate-500">Les éléments apparaîtront sous forme de lignes</p>
+    </div>
+  </div>
+</div>

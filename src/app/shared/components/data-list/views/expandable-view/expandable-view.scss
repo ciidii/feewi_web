@@ -1,0 +1,122 @@
+// Animation pour l'expansion
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slideDown {
+  animation: slideDown 0.2s ease-out;
+}
+
+// Avatar
+.avatar {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.75rem;
+  background-color: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  flex-shrink: 0;
+
+  &-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &-fallback {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+  }
+}
+
+// Badge mini (pour la ligne principale)
+.badge-mini {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid;
+  display: inline-block;
+}
+
+// Badge status (pour la zone expandée)
+.badge-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid;
+  display: inline-block;
+}
+
+// Icon buttons
+.icon-btn {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  transition: all 0.2s;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #f1f5f9;
+    color: #334155;
+  }
+
+  &.validate:hover {
+    background-color: #f0fdf4;
+    color: #16a34a;
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+// Quick actions
+.quick-action {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  font-size: 0.875rem;
+  color: #475569;
+  transition: all 0.2s;
+  cursor: pointer;
+  width: 100%;
+
+  &:hover {
+    background: #f8fafc;
+    border-color: #2563eb;
+    color: #2563eb;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+// Styles pour les couleurs de badges (seront appliqués via getBadgeClass)
+:host {
+  display: block;
+}

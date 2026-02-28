@@ -1,0 +1,63 @@
+<div class="view-selector-container">
+  <!-- Version desktop (avec labels) -->
+  <div class="hidden md:flex bg-slate-100 rounded-lg p-1">
+    <button
+      *ngFor="let view of getAvailableViews()"
+      (click)="changeView(view.id)"
+      (mouseenter)="showTooltip(view.id)"
+      (mouseleave)="hideTooltip()"
+      class="view-option px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 flex items-center gap-2"
+      [class.bg-white]="activeView() === view.id"
+      [class.shadow-sm]="activeView() === view.id"
+      [class.text-primary-600]="activeView() === view.id"
+      [class.text-slate-500]="activeView() !== view.id"
+      [class.opacity-50]="!view.isAvailable"
+      [disabled]="!view.isAvailable"
+      [attr.aria-label]="view.description"
+    >
+      <lucide-icon [name]="view.icon" class="w-4 h-4"></lucide-icon>
+      <span>{{ view.label }}</span>
+
+      <!-- Badge "Nouveau" pour les vues récemment ajoutées -->
+      <span *ngIf="view.id === 'cards' && !localStorage.getItem('view-cards-seen')"
+            class="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse">
+      </span>
+    </button>
+  </div>
+
+  <!-- Version mobile (icônes seulement) -->
+  <div class="md:hidden flex bg-slate-100 rounded-lg p-1">
+    <button
+      *ngFor="let view of getAvailableViews()"
+      (click)="changeView(view.id)"
+      class="view-icon-option p-2 rounded-md transition-all duration-200 relative"
+      [class.bg-white]="activeView() === view.id"
+      [class.shadow-sm]="activeView() === view.id"
+      [class.text-primary-600]="activeView() === view.id"
+      [class.text-slate-500]="activeView() !== view.id"
+      [attr.aria-label]="view.label"
+    >
+      <lucide-icon [name]="view.icon" class="w-5 h-5"></lucide-icon>
+
+      <!-- Tooltip mobile -->
+      <span class="view-tooltip-mobile" *ngIf="activeTooltip() === view.id">
+        {{ view.label }}
+      </span>
+    </button>
+  </div>
+
+  <!-- Tooltip flottant (desktop) -->
+  <div *ngIf="activeTooltip()"
+       class="fixed z-50 px-2 py-1 bg-slate-800 text-white text-xs rounded shadow-lg pointer-events-none transition-opacity"
+       [style.top.px]="tooltipPosition?.top"
+       [style.left.px]="tooltipPosition?.left">
+    {{ getViewDescription(activeTooltip()!) }}
+  </div>
+
+  <!-- Indicateur de persistance -->
+  <div *ngIf="persistPreference()"
+       class="absolute -bottom-5 left-0 text-[10px] text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">
+    <lucide-icon [name]="'Sparkles'" class="w-3 h-3 inline"></lucide-icon>
+    Préférence sauvegardée
+  </div>
+</div>
