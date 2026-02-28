@@ -29,12 +29,13 @@ export class AuthService {
 
   // State
   private _currentUser = signal<UserProfile | null>(null);
+  private _isReady = signal<boolean>(false);
+
   readonly currentUser = this._currentUser.asReadonly();
+  readonly isReady = this._isReady.asReadonly();
   readonly isAuthenticated = computed(() => this._currentUser() !== null);
 
-  constructor() {
-    this.checkSession();
-  }
+  constructor() {}
 
   async login(email: string, password: string): Promise<boolean> {
     try {
@@ -73,10 +74,15 @@ export class AuthService {
     return user ? user.permissions.includes(permission) : false;
   }
 
-  private async checkSession(): Promise<void> {
+  async checkSession(): Promise<void> {
     const token = localStorage.getItem('access_token');
     if (token) {
-      await this.fetchProfile();
+      try {
+        await this.fetchProfile();
+      } catch (e) {
+        console.warn('Session check failed', e);
+      }
     }
+    this._isReady.set(true);
   }
 }
