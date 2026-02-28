@@ -14,6 +14,7 @@ export const routes: Routes = [
     path: 'saas',
     component: ShellComponent,
     canActivate: [authGuard],
+    data: { roles: ['ROLE_SUPER_ADMIN'] },
     loadChildren: () => import('./domains/saas-admin/saas-admin.routes').then(m => m.SAAS_ADMIN_ROUTES)
   },
 
@@ -22,6 +23,7 @@ export const routes: Routes = [
     path: '',
     component: ShellComponent,
     canActivate: [authGuard],
+    data: { roles: ['ROLE_ADMIN', 'ROLE_SECRETARY'] },
     loadChildren: () => import('./domains/school-app/school-app.routes').then(m => m.SCHOOL_APP_ROUTES)
   },
 
