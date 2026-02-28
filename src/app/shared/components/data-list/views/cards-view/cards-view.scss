@@ -67,6 +67,12 @@
 }
 
 ::ng-deep .custom-checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px !important;
+  height: 28px !important;
+
   .mdc-checkbox {
     padding: 0 !important;
     margin: 0 !important;
