@@ -5,7 +5,7 @@
 >
   
   <!-- === MONDE 1 : SAAS SYSTEM ADMIN === -->
-  <ng-container *ngIf="auth.currentUser()?.roles?.includes('ROLE_SUPER_ADMIN')">
+  <ng-container *ngIf="auth.hasRole('ROLE_SUPER_ADMIN')">
     <div class="p-4 overflow-hidden shrink-0">
       <div class="flex items-center gap-3 bg-amber-50 border border-amber-100 rounded-2xl h-14 w-full px-6">
         <lucide-icon [name]="ShieldCheck" class="w-6 h-6 text-amber-600 shrink-0"></lucide-icon>
@@ -28,7 +28,7 @@
   </ng-container>
 
   <!-- === MONDE 2 : SCHOOL APP === -->
-  <ng-container *ngIf="!auth.currentUser()?.roles?.includes('ROLE_SUPER_ADMIN')">
+  <ng-container *ngIf="!auth.hasRole('ROLE_SUPER_ADMIN')">
     <!-- Hero Button École -->
     <div class="p-4 flex justify-center shrink-0">
       <button 

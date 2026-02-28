@@ -74,6 +74,11 @@ export class AuthService {
     return user ? user.permissions.includes(permission) : false;
   }
 
+  hasRole(role: string): boolean {
+    const user = this._currentUser();
+    return user ? user.roles.includes(role) : false;
+  }
+
   async checkSession(): Promise<void> {
     const token = localStorage.getItem('access_token');
     if (token) {
