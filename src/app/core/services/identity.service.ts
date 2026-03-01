@@ -2,8 +2,9 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { User, UserCreateRequest } from '../models/user.model';
-import { Role } from '../models/role.model';
+import { Role, Permission } from '../models/role.model';
 import { Page } from '../models/school.model';
+import { AuditLog } from '../models/audit.model';
 
 @Injectable({
   providedIn: 'root',
@@ -46,6 +47,15 @@ export class IdentityService {
   }
 
   /**
+   * Récupère le profil complet d'un utilisateur (Vue Administrative)
+   */
+  async getUserProfile(id: string): Promise<User> {
+    return await firstValueFrom(
+      this.http.get<User>(`${this.API_URL}/users/${id}/profile`)
+    );
+  }
+
+  /**
    * Crée un nouvel employé
    */
   async createStaff(request: UserCreateRequest): Promise<User> {
@@ -60,7 +70,7 @@ export class IdentityService {
   }
 
   /**
-   * Liste les rôles disponibles (Système + Tenant)
+   * Liste les rôles disponibles (Système + Tenant) avec effectifs
    */
   async getRoles(): Promise<void> {
     this._loading.set(true);
@@ -75,6 +85,28 @@ export class IdentityService {
     } finally {
       this._loading.set(false);
     }
+  }
+
+  /**
+   * Liste toutes les permissions disponibles dans le système
+   */
+  async getAvailablePermissions(): Promise<Permission[]> {
+    return await firstValueFrom(
+      this.http.get<Permission[]>(`${this.API_URL}/permissions`)
+    );
+  }
+
+  /**
+   * Récupère les logs d'audit du tenant actuel
+   */
+  async getTenantAuditLogs(page: number = 0, size: number = 20): Promise<Page<AuditLog>> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    return await firstValueFrom(
+      this.http.get<Page<AuditLog>>(`${this.API_URL}/audit/tenant`, { params })
+    );
   }
 
   /**

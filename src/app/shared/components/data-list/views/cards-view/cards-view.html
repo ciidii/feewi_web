@@ -94,8 +94,23 @@
       <button (click)="onView.emit(row)" class="card-action" title="Voir">
         <lucide-icon [name]="Eye" class="w-3.5 h-3.5"></lucide-icon>
       </button>
-      <button (click)="onValidate.emit(row)" class="card-action validate" title="Valider">
+      
+      <!-- Action de validation/édition désactivée pour soi-même (API V2) -->
+      <button 
+        *ngIf="!row.metadata?.['isSelf']"
+        (click)="onValidate.emit(row)" 
+        class="card-action validate" 
+        title="Valider / Modifier"
+      >
         <lucide-icon [name]="CheckCircle" class="w-3.5 h-3.5"></lucide-icon>
+      </button>
+
+      <button 
+        *ngIf="row.metadata?.['isSelf']"
+        class="card-action opacity-50 cursor-not-allowed" 
+        title="Auto-modification interdite"
+      >
+        <lucide-icon [name]="CheckCircle" class="w-3.5 h-3.5 text-slate-300"></lucide-icon>
       </button>
     </div>
   </div>

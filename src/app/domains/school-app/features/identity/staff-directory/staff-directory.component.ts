@@ -5,6 +5,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { DataListComponent } from '../../../../../shared/components/data-list/data-list.component';
 import { TabItem, TableRow } from '../../../../../shared/models/data-list.models';
 import { IdentityService } from '../../../../../core/services/identity.service';
+import { AuthService } from '../../../../../core/services/auth.service';
 import { User } from '../../../../../core/models/user.model';
 import { StaffFormComponent } from './components/staff-form/staff-form.component';
 
@@ -18,6 +19,7 @@ import { StaffFormComponent } from './components/staff-form/staff-form.component
 })
 export class StaffDirectoryComponent implements OnInit {
   private identityService = inject(IdentityService);
+  private authService = inject(AuthService);
   private dialog = inject(MatDialog);
 
   readonly UserPlus = UserPlus;
@@ -25,12 +27,13 @@ export class StaffDirectoryComponent implements OnInit {
   readonly Download = Download;
 
   activeTab = signal('Tous');
-  
+
   // Signals connectés au service
   staffMembers = computed(() => {
     const page = this.identityService.staffPage();
+    const currentUser = this.authService.currentUser();
     if (!page) return [];
-    return page.content.map(user => this.mapUserToRow(user));
+    return page.content.map(user => this.mapUserToRow(user, currentUser?.id));
   });
 
   totalStaff = computed(() => this.identityService.staffPage()?.totalElements || 0);
@@ -73,7 +76,9 @@ export class StaffDirectoryComponent implements OnInit {
     });
   }
 
-  private mapUserToRow(user: User): TableRow {
+  private mapUserToRow(user: User, currentUserId?: string): TableRow {
+    const isSelf = user.id === currentUserId;
+
     return {
       id: user.id || Math.random().toString(),
       title: `${user.firstName} ${user.lastName}`,
@@ -83,7 +88,12 @@ export class StaffDirectoryComponent implements OnInit {
       badges: user.roles.map(role => ({
         label: role.replace('ROLE_', ''),
         type: this.getBadgeTypeForRole(role)
-      }))
+      })),
+      metadata: {
+        isSelf: isSelf,
+        lastLoginAt: user.lastLoginAt,
+        connectionCount: user.connectionCount
+      }
     };
   }
 

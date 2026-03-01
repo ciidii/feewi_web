@@ -24,7 +24,7 @@ export interface Permission {
   label: string;
   description: string;
   granted: boolean;
-  isSystem?: boolean;
+  isSystemRole?: boolean;
   dependencies?: string[];
 }
 
@@ -69,8 +69,8 @@ export class RoleDesignerComponent implements OnInit {
     return apiRoles.map(role => ({
       id: role.id || role.name,
       name: this.formatRoleName(role.name),
-      icon: role.isSystem ? ShieldCheck : Shield,
-      memberCount: (role as any).memberCount || 0,
+      icon: role.isSystemRole ? ShieldCheck : Shield,
+      memberCount: role.memberCount || 0,
       rawData: role
     }));
   });
@@ -82,85 +82,69 @@ export class RoleDesignerComponent implements OnInit {
     return currentRoles.find(r => r.id === this.selectedRoleId()) || currentRoles[0];
   });
 
-  // Groupes de permissions
-  permissionGroups = signal<PermissionGroup[]>([
-    {
-      category: 'Scolarité & Workflow',
-      permissions: [
-        {
-          id: 'student:read',
-          label: 'Consultation Référentiel',
-          description: 'Voir la liste des élèves et leurs informations de base.',
-          granted: false
-        },
-        {
-          id: 'student:write',
-          label: 'Édition Dossiers',
-          description: 'Modifier les informations d\'état civil et les pièces jointes.',
-          granted: false
-        },
-        {
-          id: 'admission:validate',
-          label: 'Validation Admission',
-          description: 'Approuver les nouveaux inscrits et assigner une classe.',
-          granted: false,
-          isSystem: true
-        },
-        {
-          id: 'attendance:manage',
-          label: 'Gestion Absences',
-          description: 'Saisir et justifier les absences journalières.',
-          granted: false
-        }
-      ]
-    },
-    {
-      category: 'Gestion Financière',
-      permissions: [
-        {
-          id: 'finance:read',
-          label: 'Encaissement Frais',
-          description: 'Enregistrer les paiements et générer des factures.',
-          granted: false
-        },
-        {
-          id: 'finance:report',
-          label: 'Rapports de Caisse',
-          description: 'Consulter les bilans et l\'historique des transactions.',
-          granted: false,
-          dependencies: ['finance:read']
-        }
-      ]
-    },
-    {
-      category: 'Système & Sécurité',
-      permissions: [
-        {
-          id: 'user:manage',
-          label: 'Annuaire Staff',
-          description: 'Gérer les comptes utilisateurs des collaborateurs.',
-          granted: false,
-          isSystem: true
-        },
-        {
-          id: 'school:manage',
-          label: 'Configuration Niveaux',
-          description: 'Définir la structure des classes et des cycles.',
-          granted: false
-        },
-        {
-          id: 'audit:read',
-          label: 'Audit Trail',
-          description: 'Consulter le journal des actions de sécurité.',
-          granted: false,
-          isSystem: true
-        }
-      ]
-    }
-  ]);
+  // Groupes de permissions dynamiques
+  permissionGroups = signal<PermissionGroup[]>([]);
 
   ngOnInit() {
-    this.loadRoles();
+    this.loadInitialData();
+  }
+
+  async loadInitialData() {
+    await Promise.all([
+      this.loadRoles(),
+      this.loadPermissions()
+    ]);
+  }
+
+  async loadPermissions() {
+    try {
+      const permissions = await this.identityService.getAvailablePermissions();
+      const groups = this.groupPermissions(permissions);
+      this.permissionGroups.set(groups);
+    } catch (err) {
+      console.error('Failed to load permissions', err);
+    }
+  }
+
+  private groupPermissions(apiPermissions: any[]): PermissionGroup[] {
+    const groupsMap = new Map<string, Permission[]>();
+
+    apiPermissions.forEach(p => {
+      const category = this.inferCategory(p.name);
+      if (!groupsMap.has(category)) {
+        groupsMap.set(category, []);
+      }
+      groupsMap.get(category)?.push({
+        id: p.name, // L'ID pour le toggle est le nom technique (ex: student:read)
+        label: this.formatPermissionLabel(p.name),
+        description: p.description,
+        granted: false
+      });
+    });
+
+    return Array.from(groupsMap.entries()).map(([category, permissions]) => ({
+      category,
+      permissions
+    }));
+  }
+
+  private inferCategory(name: string): string {
+    const prefix = name.split(':')[0];
+    switch (prefix) {
+      case 'student': return 'Scolarité & Workflow';
+      case 'admission': return 'Inscriptions';
+      case 'finance': return 'Gestion Financière';
+      case 'user':
+      case 'audit':
+      case 'role':
+      case 'permission': return 'Système & Sécurité';
+      default: return 'Autres';
+    }
+  }
+
+  private formatPermissionLabel(name: string): string {
+    const suffix = name.split(':')[1] || name;
+    return suffix.charAt(0).toUpperCase() + suffix.slice(1).replace(/_/g, ' ');
   }
 
   // ===========================================

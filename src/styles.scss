@@ -3,7 +3,7 @@
 
 /* IMPORT DES TOKENS DE DESIGN SYSTEM FEEWI */
 @use "styles/tokens" as *;
-@import 'ngx-toastr/toastr';
+@use 'ngx-toastr/toastr';
 
 /* --- THEMATISATION MATERIAL 3 (FEEWI Midnight Slate) --- */
 $feewi-primary: (

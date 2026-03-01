@@ -10,6 +10,9 @@ export interface User {
   phone?: string;
   password?: string;
   createdAt?: string;
+  lastLoginAt?: string;
+  connectionCount?: number;
+  lastDeviceType?: string;
 }
 
 export interface UserCreateRequest {

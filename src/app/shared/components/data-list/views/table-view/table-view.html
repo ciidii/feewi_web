@@ -135,9 +135,26 @@
         <button (click)="onView.emit(row)" class="table-action" title="Voir">
           <lucide-icon [name]="Eye" class="w-4 h-4"></lucide-icon>
         </button>
-        <button (click)="onValidate.emit(row)" class="table-action validate" title="Valider">
+
+        <!-- Action de validation/édition désactivée pour soi-même (API V2) -->
+        <button
+          *ngIf="!row.metadata?.['isSelf']"
+          (click)="onValidate.emit(row)"
+          class="table-action validate"
+          title="Valider / Modifier"
+        >
           <lucide-icon [name]="CheckCircle" class="w-4 h-4"></lucide-icon>
         </button>
+
+        <button
+          *ngIf="row.metadata?.['isSelf']"
+          class="table-action opacity-50 cursor-not-allowed"
+          title="Auto-modification interdite"
+          (click)="$event.stopPropagation()"
+        >
+          <lucide-icon [name]="CheckCircle" class="w-4 h-4 text-slate-300"></lucide-icon>
+        </button>
+
         <button (click)="onPrint.emit(row)" class="table-action" title="Imprimer">
           <lucide-icon [name]="Printer" class="w-4 h-4"></lucide-icon>
         </button>
@@ -146,7 +163,6 @@
         </button>
       </div>
     </td>
-    </tr>
     </tbody>
   </table>
 </div>

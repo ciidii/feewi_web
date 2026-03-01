@@ -74,6 +74,23 @@ export class AuthService {
     await firstValueFrom(this.http.post<void>(`${this.API_URL}/auth/reset-password`, payload));
   }
 
+  async impersonate(userId: string): Promise<boolean> {
+    console.log('[AuthService] Attempting impersonation for:', userId);
+    try {
+      const response = await firstValueFrom(
+        this.http.post<LoginResponse>(`${this.API_URL}/auth/impersonate/${userId}`, {})
+      );
+
+      localStorage.setItem('access_token', response.access_token);
+      await this.fetchProfile();
+      this.router.navigate(['/school-app/dashboard']);
+      return true;
+    } catch (error) {
+      console.error('[AuthService] Impersonation failed', error);
+      return false;
+    }
+  }
+
   async fetchProfile(): Promise<void> {
     console.log('[AuthService] Fetching profile...');
     try {

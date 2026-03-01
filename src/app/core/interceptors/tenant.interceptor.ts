@@ -33,6 +33,9 @@ export const tenantInterceptor: HttpInterceptorFn = (req, next) => {
         console.warn('[tenantInterceptor] 401 Unauthorized detected. Clearing session.');
         localStorage.removeItem('access_token');
         router.navigate(['/auth/login']);
+      } else if (error.status === 403) {
+        console.error('[tenantInterceptor] 403 Forbidden: Droits insuffisants ou violation de règle métier.', error.error?.message);
+        // On laisse l'erreur remonter pour que le service de notification puisse l'afficher
       }
       return throwError(() => error);
     })

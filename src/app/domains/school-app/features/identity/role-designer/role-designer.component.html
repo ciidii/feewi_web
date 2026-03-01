@@ -98,7 +98,7 @@
                 <lucide-icon [name]="role.icon" class="w-5 h-5"></lucide-icon>
               </div>
               <!-- Badge système si nécessaire -->
-              <div *ngIf="role.rawData?.isSystem"
+              <div *ngIf="role.rawData?.isSystemRole"
                    class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-amber-500 rounded-full border-2 border-white"
                    title="Rôle système"></div>
             </div>
@@ -115,7 +115,7 @@
                       [class.text-primary-500]="selectedRole()?.id === role.id">
                   {{ role.memberCount }} membre(s)
                 </span>
-                <span *ngIf="role.rawData?.isSystem"
+                <span *ngIf="role.rawData?.isSystemRole"
                       class="text-[8px] px-1.5 py-0.5 bg-slate-200 text-slate-600 rounded-full">
                   Système
                 </span>
@@ -208,7 +208,7 @@
                     {{ perm.label }}
                   </p>
                   <!-- Badge de permission système -->
-                  <span *ngIf="perm.isSystem"
+                  <span *ngIf="perm.isSystemRole"
                         class="text-[8px] px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded-full">
                       système
                     </span>
