@@ -24,7 +24,8 @@
     [tabs]="admissionTabs"
     [activeTab]="activeTab()"
     [total]="totalAdmissions()"
+    [actions]="admissionActions"
     (onTabChange)="onTabChange($event)"
-    (onView)="viewDetails($event)"
+    (onAction)="handleAction($event)"
   ></app-data-list>
 </div>

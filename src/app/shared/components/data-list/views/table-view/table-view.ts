@@ -14,7 +14,7 @@ import {
   ArrowDown,
   Table
 } from 'lucide-angular';
-import {TableRow} from '../../../../models/data-list.models';
+import {RowAction, TableRow} from '../../../../models/data-list.models';
 
 
 export type SortDirection = 'asc' | 'desc' | null;
@@ -48,6 +48,9 @@ export class TableViewComponent {
   /** Fonction pour obtenir la classe d'un badge */
   getBadgeClass = input.required<(type: string) => string>();
 
+  /** Actions disponibles */
+  actions = input<RowAction[]>([]);
+
   // ===========================================
   // OUTPUTS
   // ===========================================
@@ -58,14 +61,8 @@ export class TableViewComponent {
   /** Basculer la sélection de toutes les lignes */
   toggleAll = output<void>();
 
-  /** Voir les détails */
-  onView = output<TableRow>();
-
-  /** Valider */
-  onValidate = output<TableRow>();
-
-  /** Imprimer */
-  onPrint = output<TableRow>();
+  /** Émettre une action */
+  onAction = output<{ actionId: string, row: TableRow }>();
 
   /** Trier */
   onSort = output<SortState>();
@@ -132,6 +129,17 @@ export class TableViewComponent {
   formatDate(date?: string): string {
     if (!date) return '—';
     return date;
+  }
+
+  /** Obtenir la classe CSS d'une action */
+  getActionClass(action: RowAction): string {
+    switch (action.type) {
+      case 'primary': return 'text-primary-600 hover:bg-primary-50';
+      case 'danger': return 'text-rose-600 hover:bg-rose-50';
+      case 'success': return 'text-emerald-600 hover:bg-emerald-50';
+      case 'warning': return 'text-amber-600 hover:bg-amber-50';
+      default: return 'text-slate-600 hover:bg-slate-100';
+    }
   }
 
   // ===========================================

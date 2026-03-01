@@ -12,7 +12,7 @@ import {
   ChevronRight,
   Circle
 } from 'lucide-angular';
-import {TableRow} from '../../../../models/data-list.models';
+import {RowAction, TableRow} from '../../../../models/data-list.models';
 
 
 export interface TimelineGroup {
@@ -46,6 +46,9 @@ export class TimelineViewComponent {
   /** Fonction pour obtenir la classe d'un badge */
   getBadgeClass = input.required<(type: string) => string>();
 
+  /** Actions disponibles */
+  actions = input<RowAction[]>([]);
+
   // ===========================================
   // OUTPUTS
   // ===========================================
@@ -53,11 +56,8 @@ export class TimelineViewComponent {
   /** Basculer la sélection d'un élément */
   toggleRow = output<string | number>();
 
-  /** Voir les détails */
-  onView = output<TableRow>();
-
-  /** Valider */
-  onValidate = output<TableRow>();
+  /** Émettre une action */
+  onAction = output<{ actionId: string, row: TableRow }>();
 
   // ===========================================
   // DONNÉES COMPUTÉES
@@ -124,6 +124,17 @@ export class TimelineViewComponent {
       'border-blue-500'
     ];
     return colors[index % colors.length];
+  }
+
+  /** Obtenir la classe CSS d'une action */
+  getActionClass(action: RowAction): string {
+    switch (action.type) {
+      case 'primary': return 'primary';
+      case 'danger': return 'text-rose-600 border-rose-200 hover:bg-rose-50';
+      case 'success': return 'text-emerald-600 border-emerald-200 hover:bg-emerald-50';
+      case 'warning': return 'text-amber-600 border-amber-200 hover:bg-amber-50';
+      default: return '';
+    }
   }
 
   // ===========================================

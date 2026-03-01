@@ -29,9 +29,10 @@
     [total]="totalTenants()"
     [page]="currentPage()"
     [totalPages]="totalPages()"
+    [actions]="tenantActions"
     (onTabChange)="onTabChange($event)"
     (onSearch)="onSearch($event)"
     (onPageChange)="onPageChange($event)"
-    (onView)="openEditModal($event)"
+    (onAction)="handleAction($event)"
   ></app-data-list>
 </div>

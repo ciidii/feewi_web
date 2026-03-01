@@ -20,6 +20,7 @@
     [tabs]="auditTabs"
     [activeTab]="activeTab()"
     [total]="totalLogs()"
+    [actions]="[]"
     (onTabChange)="onTabChange($event)"
-  ></app-data-list>
-</div>
+    (onAction)="handleAction($event)"
+  ></app-data-list></div>

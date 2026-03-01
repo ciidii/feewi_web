@@ -26,6 +26,7 @@ import {
 
 // Importer les modèles
 import {
+  RowAction,
   SearchState,
   SelectionState,
   TabItem,
@@ -100,6 +101,9 @@ export class DataListComponent {
   /** Afficher ou non la barre de recherche */
   showSearch = input<boolean>(true);
 
+  /** Actions disponibles sur chaque ligne */
+  actions = input<RowAction[]>([]);
+
   // ===========================================
   // OUTPUTS (événements vers le parent)
   // ===========================================
@@ -110,10 +114,8 @@ export class DataListComponent {
   /** Recherche */
   onSearch = output<string>();
 
-  /** Actions sur une ligne */
-  onView = output<TableRow>();
-  onValidate = output<TableRow>();
-  onPrint = output<TableRow>();
+  /** Événement d'action dynamique */
+  onAction = output<{ actionId: string, row: TableRow }>();
 
   /** Actions groupées */
   onBulkValidate = output<(string | number)[]>();

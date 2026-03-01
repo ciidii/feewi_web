@@ -78,16 +78,20 @@
                 </div>
               </div>
 
-              <!-- Actions (apparaissent au survol) -->
-              <div class="flex gap-2 mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button (click)="onView.emit(item)" class="timeline-action">
-                  <lucide-icon [name]="Eye" class="w-4 h-4"></lucide-icon>
-                  <span>Voir</span>
-                </button>
-                <button (click)="onValidate.emit(item)" class="timeline-action primary">
-                  <lucide-icon [name]="CheckCircle" class="w-4 h-4"></lucide-icon>
-                  <span>Valider</span>
-                </button>
+              <!-- Actions Dynamiques (apparaissent au survol) -->
+              <div class="flex gap-2 mt-4 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                <ng-container *ngFor="let action of actions()">
+                  <button
+                    *ngIf="!action.hideIf || !action.hideIf(item)"
+                    (click)="onAction.emit({ actionId: action.id, row: item })"
+                    [disabled]="action.disableIf && action.disableIf(item)"
+                    class="timeline-action transition-all active:scale-90"
+                    [ngClass]="getActionClass(action)"
+                  >
+                    <lucide-icon [name]="action.icon" class="w-4 h-4"></lucide-icon>
+                    <span>{{ action.label }}</span>
+                  </button>
+                </ng-container>
               </div>
             </div>
           </div>

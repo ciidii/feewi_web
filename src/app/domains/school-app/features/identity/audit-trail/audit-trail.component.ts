@@ -89,4 +89,8 @@ export class AuditTrailComponent implements OnInit {
     this.activeTab.set(tab);
     // On pourrait filtrer ici si l'API le permettait via paramètre
   }
+
+  handleAction(event: { actionId: string, row: TableRow }) {
+    // Aucune action sur les logs d'audit pour le moment
+  }
 }

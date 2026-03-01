@@ -89,29 +89,20 @@
         {{ isSelected(row.id) ? 'Sélectionné' : 'Cliquer pour sélectionner' }}
       </span>
 
-    <!-- Actions -->
+    <!-- Actions Dynamiques -->
     <div class="flex gap-1" (click)="$event.stopPropagation()">
-      <button (click)="onView.emit(row)" class="card-action" title="Voir">
-        <lucide-icon [name]="Eye" class="w-3.5 h-3.5"></lucide-icon>
-      </button>
-      
-      <!-- Action de validation/édition désactivée pour soi-même (API V2) -->
-      <button 
-        *ngIf="!row.metadata?.['isSelf']"
-        (click)="onValidate.emit(row)" 
-        class="card-action validate" 
-        title="Valider / Modifier"
-      >
-        <lucide-icon [name]="CheckCircle" class="w-3.5 h-3.5"></lucide-icon>
-      </button>
-
-      <button 
-        *ngIf="row.metadata?.['isSelf']"
-        class="card-action opacity-50 cursor-not-allowed" 
-        title="Auto-modification interdite"
-      >
-        <lucide-icon [name]="CheckCircle" class="w-3.5 h-3.5 text-slate-300"></lucide-icon>
-      </button>
+      <ng-container *ngFor="let action of actions()">
+        <button
+          *ngIf="!action.hideIf || !action.hideIf(row)"
+          (click)="onAction.emit({ actionId: action.id, row: row })"
+          [disabled]="action.disableIf && action.disableIf(row)"
+          class="card-action transition-all active:scale-90"
+          [ngClass]="getActionClass(action)"
+          [title]="action.label"
+        >
+          <lucide-icon [name]="action.icon" class="w-3.5 h-3.5"></lucide-icon>
+        </button>
+      </ng-container>
     </div>
   </div>
 </div>

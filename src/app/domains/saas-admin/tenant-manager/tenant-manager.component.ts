@@ -2,13 +2,14 @@ import { Component, computed, inject, OnInit, signal, ViewEncapsulation } from '
 import { CommonModule } from '@angular/common';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { DataListComponent } from '../../../shared/components/data-list/data-list.component';
-import { TabItem, TableRow } from '../../../shared/models/data-list.models';
-import { LucideAngularModule, Building2, Plus, Globe, ShieldCheck, Activity } from 'lucide-angular';
+import { RowAction, TabItem, TableRow } from '../../../shared/models/data-list.models';
+import { LucideAngularModule, Building2, Plus, Globe, ShieldCheck, Activity, Eye, Trash2 } from 'lucide-angular';
 import { TenantFormComponent } from '../tenant-form/tenant-form.component';
 import { TenantEditFormComponent } from '../tenant-edit-form/tenant-edit-form.component';
 import { SchoolService } from '../../../core/services/school.service';
 import { School } from '../../../core/models/school.model';
 import { NotificationService } from '../../../shared/services/notification.service';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-tenant-manager',
@@ -22,6 +23,7 @@ export class TenantManagerComponent implements OnInit {
   private dialog = inject(MatDialog);
   private schoolService = inject(SchoolService);
   private notificationService = inject(NotificationService);
+  private router = inject(Router);
 
   readonly ShieldCheck = ShieldCheck;
   readonly Plus = Plus;
@@ -30,6 +32,12 @@ export class TenantManagerComponent implements OnInit {
   searchQuery = signal('');
   currentPage = signal(0);
   readonly pageSize = 10;
+
+  // Actions dynamiques pour les établissements
+  readonly tenantActions: RowAction[] = [
+    { id: 'edit', label: 'Détails & Edition', icon: Eye, type: 'primary' },
+    { id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger' }
+  ];
 
   readonly schoolsPage = this.schoolService.schoolsPage;
   readonly totalTenants = computed(() => this.schoolsPage()?.totalElements || 0);
@@ -107,7 +115,19 @@ export class TenantManagerComponent implements OnInit {
     this.loadSchools();
   }
 
-  openEditModal(row: TableRow) {
+  handleAction(event: { actionId: string, row: TableRow }) {
+    switch (event.actionId) {
+      case 'edit':
+        // Navigation vers la page de détails au lieu de la modale pour une vue complète
+        this.router.navigate(['/saas/tenants', event.row.id]);
+        break;
+      case 'delete':
+        this.notificationService.info('La suppression sera disponible bientôt.', 'Fonctionnalité SaaS');
+        break;
+    }
+  }
+
+  private openEditModal(row: TableRow) {
     const school = row.rawData as School | undefined;
     if (!school) {
       this.notificationService.error("Impossible d'ouvrir le formulaire de modification.");

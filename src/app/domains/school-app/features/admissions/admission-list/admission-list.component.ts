@@ -1,9 +1,9 @@
 import { Component, inject, signal, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { LucideAngularModule, Filter, Download, Layers, Clock, ShieldCheck, UserCheck } from 'lucide-angular';
+import { LucideAngularModule, Filter, Download, Layers, Clock, ShieldCheck, UserCheck, Eye, CheckCircle, XCircle } from 'lucide-angular';
 import { DataListComponent } from '../../../../../shared/components/data-list/data-list.component';
-import { TabItem, TableRow } from '../../../../../shared/models/data-list.models';
+import { RowAction, TabItem, TableRow } from '../../../../../shared/models/data-list.models';
 
 @Component({
   selector: 'app-admissions',
@@ -21,6 +21,13 @@ export class AdmissionsComponent {
 
   activeTab = signal('Tous');
   totalAdmissions = signal(142);
+
+  // Configuration des actions dynamiques pour les admissions
+  readonly admissionActions: RowAction[] = [
+    { id: 'view', label: 'Voir le dossier', icon: Eye, type: 'primary' },
+    { id: 'validate', label: 'Approuver', icon: CheckCircle, type: 'success' },
+    { id: 'reject', label: 'Rejeter', icon: XCircle, type: 'danger' }
+  ];
 
   admissionTabs: TabItem[] = [
     { label: 'Tous', icon: Layers, count: 142 },
@@ -77,7 +84,17 @@ export class AdmissionsComponent {
     console.log(`Changement d'onglet :`, tab);
   }
 
-  viewDetails(row: TableRow) {
-    this.router.navigate(['/admissions', row.id]);
+  handleAction(event: { actionId: string, row: TableRow }) {
+    switch (event.actionId) {
+      case 'view':
+        this.router.navigate(['/admissions', event.row.id]);
+        break;
+      case 'validate':
+        console.log('Validation du dossier', event.row.id);
+        break;
+      case 'reject':
+        console.log('Rejet du dossier', event.row.id);
+        break;
+    }
   }
 }

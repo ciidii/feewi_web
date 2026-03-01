@@ -13,7 +13,7 @@ import {
   Download,
   Mail
 } from 'lucide-angular';
-import {TableRow} from '../../../../models/data-list.models';
+import {RowAction, TableRow} from '../../../../models/data-list.models';
 
 @Component({
   selector: 'app-expandable-view',
@@ -43,6 +43,9 @@ export class ExpandableViewComponent {
   /** Fonction pour obtenir la classe d'un badge */
   getBadgeClass = input.required<(type: string) => string>();
 
+  /** Actions disponibles */
+  actions = input<RowAction[]>([]);
+
   // ===========================================
   // OUTPUTS
   // ===========================================
@@ -53,14 +56,8 @@ export class ExpandableViewComponent {
   /** Basculer l'expansion d'une ligne */
   toggleExpand = output<string | number>();
 
-  /** Voir les détails */
-  onView = output<TableRow>();
-
-  /** Valider */
-  onValidate = output<TableRow>();
-
-  /** Imprimer */
-  onPrint = output<TableRow>();
+  /** Émettre une action */
+  onAction = output<{ actionId: string, row: TableRow }>();
 
   // ===========================================
   // MÉTHODES UTILITAIRES
@@ -74,6 +71,45 @@ export class ExpandableViewComponent {
   /** Vérifier si une ligne est dépliée */
   isExpanded(id: string | number): boolean {
     return this.expandedIds().has(id);
+  }
+
+  /** Obtenir la liste des métadonnées affichables */
+  getDisplayableMetadata(row: TableRow): { key: string, value: any }[] {
+    const meta = row.metadata || {};
+    const raw = row.rawData || {};
+    
+    // Fusionner les deux sources (priorité aux metadata)
+    const combined = { ...raw, ...meta };
+    
+    // Liste des clés à ignorer (déjà affichées ou techniques)
+    const blackList = ['id', 'title', 'subtitle', 'avatarUrl', 'avatarLabel', 'date', 'badges', 'isSelf', 'rawData', 'permissions'];
+    
+    return Object.entries(combined)
+      .filter(([key]) => !blackList.includes(key) && typeof combined[key as keyof typeof combined] !== 'object')
+      .map(([key, value]) => ({
+        key: this.formatKey(key),
+        value: value
+      }))
+      .slice(0, 8); // Limiter à 8 éléments pour garder un design propre
+  }
+
+  private formatKey(key: string): string {
+    return key
+      .replace(/([A-Z])/g, ' $1') // CamelCase to spaces
+      .replace(/_/g, ' ')        // Underscores to spaces
+      .trim()
+      .toLowerCase();
+  }
+
+  /** Obtenir la classe CSS d'une action */
+  getActionClass(action: RowAction): string {
+    switch (action.type) {
+      case 'primary': return 'text-primary-600 hover:bg-primary-50';
+      case 'danger': return 'text-rose-600 hover:bg-rose-50';
+      case 'success': return 'text-emerald-600 hover:bg-emerald-50';
+      case 'warning': return 'text-amber-600 hover:bg-amber-50';
+      default: return 'text-slate-600 hover:bg-slate-100';
+    }
   }
 
   // ===========================================

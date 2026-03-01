@@ -14,7 +14,7 @@ import {
   Phone,
   LayoutGrid, Globe, Check
 } from 'lucide-angular';
-import {TableRow} from '../../../../models/data-list.models';
+import {RowAction, TableRow} from '../../../../models/data-list.models';
 
 // Importer les modèles
 
@@ -42,6 +42,10 @@ export class CardsViewComponent {
 
   /** Fonction pour obtenir la classe d'un badge */
   getBadgeClass = input.required<(type: string) => string>();
+
+  /** Actions disponibles */
+  actions = input<RowAction[]>([]);
+
 // Ajouter cette méthode
   getInitials(title: string): string {
     if (!title) return '?';
@@ -60,11 +64,8 @@ export class CardsViewComponent {
   /** Basculer la sélection d'une carte */
   toggleRow = output<string | number>();
 
-  /** Voir les détails */
-  onView = output<TableRow>();
-
-  /** Valider */
-  onValidate = output<TableRow>();
+  /** Émettre une action */
+  onAction = output<{ actionId: string, row: TableRow }>();
 
   // ===========================================
   // MÉTHODES UTILITAIRES
@@ -79,6 +80,17 @@ export class CardsViewComponent {
   formatDate(date?: string): string {
     if (!date) return 'Date non définie';
     return date;
+  }
+
+  /** Obtenir la classe CSS d'une action */
+  getActionClass(action: RowAction): string {
+    switch (action.type) {
+      case 'primary': return 'text-primary-600 hover:bg-primary-50';
+      case 'danger': return 'text-rose-600 hover:bg-rose-50';
+      case 'success': return 'text-emerald-600 hover:bg-emerald-50';
+      case 'warning': return 'text-amber-600 hover:bg-amber-50';
+      default: return 'text-slate-600 hover:bg-slate-100';
+    }
   }
 
   // ===========================================

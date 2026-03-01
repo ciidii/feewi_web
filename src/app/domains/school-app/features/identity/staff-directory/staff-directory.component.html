@@ -31,8 +31,10 @@
       [tabs]="staffTabs"
       [activeTab]="activeTab()"
       [total]="totalStaff()"
+      [actions]="staffActions"
       (onTabChange)="onTabChange($event)"
       (onSearch)="onSearch($event)"
+      (onAction)="handleAction($event)"
     ></app-data-list>
   </div>
 </div>

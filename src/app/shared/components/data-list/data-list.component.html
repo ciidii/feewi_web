@@ -172,11 +172,10 @@
       [selectedIds]="selectedIds()"
       [expandedIds]="expandedIds()"
       [getBadgeClass]="getBadgeClass"
+      [actions]="actions()"
       (toggleRow)="toggleRow($event)"
       (toggleExpand)="toggleExpand($event)"
-      (onView)="onView.emit($event)"
-      (onValidate)="onValidate.emit($event)"
-      (onPrint)="onPrint.emit($event)"
+      (onAction)="onAction.emit($event)"
     ></app-expandable-view>
 
     <!-- VUE CARTES -->
@@ -185,9 +184,9 @@
       [data]="displayedData()"
       [selectedIds]="selectedIds()"
       [getBadgeClass]="getBadgeClass"
+      [actions]="actions()"
       (toggleRow)="toggleRow($event)"
-      (onView)="onView.emit($event)"
-      (onValidate)="onValidate.emit($event)"
+      (onAction)="onAction.emit($event)"
     ></app-cards-view>
 
     <!-- VUE TABLEAU -->
@@ -196,11 +195,10 @@
       [data]="displayedData()"
       [selectedIds]="selectedIds()"
       [getBadgeClass]="getBadgeClass"
+      [actions]="actions()"
       (toggleRow)="toggleRow($event)"
       (toggleAll)="toggleAll()"
-      (onView)="onView.emit($event)"
-      (onValidate)="onValidate.emit($event)"
-      (onPrint)="onPrint.emit($event)"
+      (onAction)="onAction.emit($event)"
       (onSort)="handleSort($event)"
     ></app-table-view>
 
@@ -210,9 +208,9 @@
       [data]="displayedData()"
       [selectedIds]="selectedIds()"
       [getBadgeClass]="getBadgeClass"
+      [actions]="actions()"
       (toggleRow)="toggleRow($event)"
-      (onView)="onView.emit($event)"
-      (onValidate)="onValidate.emit($event)"
+      (onAction)="onAction.emit($event)"
     ></app-timeline-view>
 
     <!-- ÉTAT VIDE -->

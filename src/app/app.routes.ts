@@ -27,6 +27,14 @@ export const routes: Routes = [
     loadChildren: () => import('./domains/school-app/school-app.routes').then(m => m.SCHOOL_APP_ROUTES)
   },
 
-  // 4. Fallback
-  { path: '**', redirectTo: 'auth/login' }
+  // 4. Fallback & Erreurs
+  { 
+    path: '403', 
+    loadComponent: () => import('./domains/public/errors/access-denied/access-denied.component').then(m => m.AccessDeniedComponent) 
+  },
+  { 
+    path: '404', 
+    loadComponent: () => import('./domains/public/errors/not-found/not-found.component').then(m => m.NotFoundComponent) 
+  },
+  { path: '**', redirectTo: '404' }
 ];

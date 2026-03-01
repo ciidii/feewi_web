@@ -46,6 +46,26 @@ export interface Badge {
 }
 
 /**
+ * Configuration d'une action sur une ligne
+ */
+export interface RowAction {
+  /** Identifiant unique de l'action (ex: 'edit', 'delete', 'validate') */
+  id: string;
+  /** Label pour le tooltip/bouton */
+  label: string;
+  /** Icône Lucide */
+  icon: any;
+  /** Type visuel (détermine la couleur) */
+  type?: 'primary' | 'danger' | 'success' | 'warning' | 'default';
+  /** Si l'action est critique (demande confirmation par exemple) */
+  isCritical?: boolean;
+  /** Condition de visibilité basée sur les métadonnées de la ligne */
+  hideIf?: (row: TableRow) => boolean;
+  /** Condition de désactivation */
+  disableIf?: (row: TableRow) => boolean;
+}
+
+/**
  * Structure d'une ligne de données
  */
 export interface TableRow {
@@ -67,6 +87,8 @@ export interface TableRow {
   rawData?: any;
   /** Métadonnées supplémentaires (flexible) */
   metadata?: Record<string, any>;
+  /** Actions spécifiques à cette ligne (optionnel, surcharge les actions globales) */
+  actions?: RowAction[];
 }
 
 // ===========================================
