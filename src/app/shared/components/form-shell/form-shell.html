@@ -1,0 +1,53 @@
+<div class="flex flex-col h-full max-h-[90vh] overflow-hidden bg-white rounded-2xl shadow-2xl">
+
+  <!-- Header standardisé -->
+  <header class="px-8 py-6 border-b border-slate-200 flex items-center justify-between bg-white shrink-0">
+    <div class="flex items-center gap-4">
+      <!-- Icon Badge -->
+      <div class="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center text-primary-600">
+        <lucide-icon *ngIf="icon()" [name]="icon()" class="w-6 h-6"></lucide-icon>
+      </div>
+
+      <div>
+        <div class="flex items-center gap-2">
+          <h2 class="text-xl font-bold text-slate-900">{{ title() }}</h2>
+          <span *ngIf="statusLabel()" class="px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-full text-[9px] font-bold uppercase tracking-wider border border-emerald-200">
+            {{ statusLabel() }}
+          </span>
+        </div>
+        <p class="text-xs text-slate-500 mt-1">{{ subtitle() }}</p>
+      </div>
+    </div>
+
+    <button (click)="onCancel()" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-400 transition-colors">
+      <lucide-icon [name]="X" class="w-4 h-4"></lucide-icon>
+    </button>
+  </header>
+
+  <!-- Corps de formulaire (Projection de contenu) -->
+  <div class="flex-1 overflow-y-auto custom-scrollbar bg-slate-50/30 p-8">
+    <ng-content></ng-content>
+  </div>
+
+  <!-- Footer fixe standardisé -->
+  <footer class="px-8 py-5 border-t border-slate-200 bg-white flex items-center justify-end gap-3 shrink-0 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)]">
+    <button
+      *ngIf="cancelLabel()"
+      type="button"
+      (click)="onCancel()"
+      class="h-11 px-6 rounded-xl text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all active:scale-95"
+    >
+      {{ cancelLabel() }}
+    </button>
+    <button
+      type="submit"
+      (click)="onSave()"
+      [disabled]="!canSave() || isLoading()"
+      class="h-11 px-6 rounded-xl text-sm font-medium bg-slate-900 text-white shadow-lg shadow-slate-900/20 hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none transition-all flex items-center gap-2 active:scale-95"
+    >
+      <lucide-icon *ngIf="isLoading()" [name]="Loader2" class="w-4 h-4 animate-spin"></lucide-icon>
+      <lucide-icon *ngIf="!isLoading()" [name]="Save" class="w-4 h-4"></lucide-icon>
+      <span>{{ isLoading() ? 'En cours...' : saveLabel() }}</span>
+    </button>
+  </footer>
+</div>

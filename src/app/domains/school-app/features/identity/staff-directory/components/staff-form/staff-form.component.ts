@@ -26,6 +26,7 @@ import {
 } from 'lucide-angular';
 import { IdentityService } from '../../../../../../../core/services/identity.service';
 import { NotificationService } from '../../../../../../../shared/services/notification.service';
+import { FormShellComponent } from '../../../../../../../shared/components/form-shell/form-shell';
 
 @Component({
   selector: 'app-staff-form',
@@ -36,7 +37,8 @@ import { NotificationService } from '../../../../../../../shared/services/notifi
     MatDialogModule,
     MatSelectModule,
     MatButtonModule,
-    LucideAngularModule
+    LucideAngularModule,
+    FormShellComponent
   ],
   templateUrl: './staff-form.component.html',
   styleUrls: ['./staff-form.component.scss']

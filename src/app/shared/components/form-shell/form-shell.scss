@@ -1,0 +1,39 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+// ===========================================
+// SCROLLBAR ÉLÉGANTE (Standard Feewi)
+// ===========================================
+.custom-scrollbar {
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 20px;
+    &:hover { background: #cbd5e1; }
+  }
+}
+
+// ===========================================
+// ANIMATIONS D'ENTRÉE
+// ===========================================
+.animate-in {
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
