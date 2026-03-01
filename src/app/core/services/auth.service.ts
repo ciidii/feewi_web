@@ -3,6 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { firstValueFrom, tap } from 'rxjs';
 import { TenantContextService } from './tenant-context.service';
+import { SchoolService } from './school.service';
+import { NavigationContextService } from './navigation-context.service';
 
 export interface UserProfile {
   id: string;
@@ -37,6 +39,8 @@ export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
   private tenantService = inject(TenantContextService);
+  private schoolService = inject(SchoolService);
+  private navContext = inject(NavigationContextService);
   private readonly API_URL = 'http://localhost:8080/api/v1';
 
   // State
@@ -100,17 +104,31 @@ export class AuthService {
       console.log('[AuthService] Profile fetched successfully:', profile.email);
       this._currentUser.set(profile);
 
-      // Update Tenant Context
-      if (profile.tenantId) {
+      // Update Tenant Context dynamiquement
+      if (profile.tenantId && !this.navContext.isSaasDomain()) {
+        try {
+          // On tente de récupérer le nom réel de l'école
+          const school = await this.schoolService.getSchoolById(profile.tenantId);
+          this.tenantService.setTenant({
+            id: school.tenantId,
+            name: school.name, 
+          });
+        } catch (e) {
+          console.warn('[AuthService] Could not fetch school details, using fallback');
+          this.tenantService.setTenant({
+            id: profile.tenantId,
+            name: 'Mon Établissement', 
+          });
+        }
+      } else if (this.navContext.isSaasDomain()) {
         this.tenantService.setTenant({
-          id: profile.tenantId,
-          name: 'Mon Établissement', 
+          id: 'SYSTEM',
+          name: 'Administration Feewi',
         });
       }
     } catch (error) {
       console.warn('[AuthService] Failed to fetch profile (User might not be logged in)');
       this._currentUser.set(null);
-      // On ne redirige plus ici, les Guards s'en chargeront
     }
   }
 

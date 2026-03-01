@@ -1,24 +1,24 @@
 <header class="h-16 border-b border-border-subtle bg-white flex items-center justify-between px-4 sticky top-0 z-50">
-  <!-- Gauche : Logo & Tenant -->
-  <div class="flex items-center gap-3 w-72">
-    <div class="w-8 h-8 bg-primary rounded-md flex items-center justify-center text-white font-bold text-sm">
+  <!-- Gauche : Logo & Tenant (Flexible pour noms longs) -->
+  <div class="flex items-center gap-3 min-w-0 max-w-[320px] mr-4">
+    <div class="w-9 h-9 bg-primary rounded-xl flex items-center justify-center text-white font-bold text-base shadow-sm shrink-0">
       F
     </div>
-    <div class="flex flex-col">
+    <div class="flex flex-col min-w-0">
       <div class="flex items-center gap-2">
-        <span class="text-sm font-semibold text-midnight leading-tight truncate">
-          {{ tenantService.activeTenant()?.name }}
+        <span class="text-sm font-bold text-midnight leading-tight truncate" [title]="tenantService.activeTenant()?.name || 'Administration'">
+          {{ contextService.isSaasDomain() ? 'Administration Feewi' : (tenantService.activeTenant()?.name || 'Chargement...') }}
         </span>
         <!-- Badge SaaS Contextuel -->
-        <span *ngIf="contextService.isSaasDomain()" class="text-[9px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-bold uppercase tracking-tighter">SaaS Admin</span>
+        <span *ngIf="contextService.isSaasDomain()" class="text-[9px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-bold uppercase tracking-tighter shrink-0">SaaS Admin</span>
       </div>
-      <span class="text-[10px] text-slate-medium uppercase tracking-wider font-medium">
-        Tenant: {{ auth.currentUser()?.tenantId }}
+      <span class="text-[10px] text-slate-medium uppercase tracking-wider font-medium truncate">
+        {{ contextService.isSaasDomain() ? 'Gestion de la plateforme' : 'Tenant: ' + (auth.currentUser()?.tenantId || '---') }}
       </span>
     </div>
   </div>
 
-  <!-- Centre : Omnisearch -->
+  <!-- Centre : Omnisearch (Prend le reste de l'espace disponible) -->
   <div class="flex-1 max-w-2xl px-4">
     <div class="relative group">
       <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none transition-colors group-focus-within:text-primary">
@@ -26,22 +26,26 @@
       </div>
       <input 
         type="text" 
-        placeholder="Rechercher..." 
+        [placeholder]="contextService.isSaasDomain() ? 'Rechercher un établissement, un administrateur...' : 'Rechercher un élève, un enseignant, un cours...'" 
         class="w-full bg-ice border-none rounded-lg py-2.5 pl-10 pr-4 text-sm font-medium focus:ring-2 focus:ring-primary/10 focus:bg-white focus:shadow-sm transition-all outline-none"
       />
     </div>
   </div>
 
   <!-- Droite : Sélecteur d'Année & Actions -->
-  <div class="flex items-center gap-1 w-auto min-w-[350px] justify-end">
+  <div class="flex items-center gap-1 shrink-0 justify-end">
     
-    <button class="flex items-center gap-2 px-3 py-1.5 hover:bg-ice rounded-full transition-all border border-border-subtle group mr-2">
+    <!-- Sélecteur d'Année : Uniquement hors SaaS Admin -->
+    <button 
+      *ngIf="!contextService.isSaasDomain()"
+      class="flex items-center gap-2 px-3 py-1.5 hover:bg-ice rounded-full transition-all border border-border-subtle group mr-2"
+    >
       <lucide-icon [name]="CalendarDays" class="w-4 h-4 text-primary"></lucide-icon>
       <span class="text-xs font-bold text-midnight tracking-tight">2024 - 2025</span>
       <lucide-icon [name]="ChevronDown" class="w-3.5 h-3.5 text-slate-medium group-hover:translate-y-0.5 transition-transform"></lucide-icon>
     </button>
 
-    <div class="h-6 w-[1px] bg-border-subtle mx-1"></div>
+    <div *ngIf="!contextService.isSaasDomain()" class="h-6 w-[1px] bg-border-subtle mx-1"></div>
 
     <button mat-icon-button class="text-slate-medium hover:text-midnight transition-colors">
       <lucide-icon [name]="Bell" class="w-5 h-5"></lucide-icon>
@@ -54,9 +58,9 @@
       (click)="openProfileDialog()"
       class="flex items-center gap-3 p-1.5 pl-3 hover:bg-ice rounded-full transition-all border border-transparent hover:border-border-subtle group"
     >
-      <div class="flex flex-col items-end">
+      <div class="flex flex-col items-end hidden sm:flex">
         <span class="text-xs font-bold text-midnight leading-none">{{ auth.currentUser()?.firstName }} {{ auth.currentUser()?.lastName }}</span>
-        <span class="text-[9px] font-bold text-primary uppercase tracking-tighter">{{ auth.currentUser()?.roles?.[0] }}</span>
+        <span class="text-[9px] font-bold text-primary uppercase tracking-tighter">{{ auth.currentUser()?.roles?.[0]?.replace('ROLE_', '') }}</span>
       </div>
       <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center group-hover:bg-white transition-colors relative">
         <lucide-icon [name]="User" class="w-4 h-4 text-slate-medium group-hover:text-primary transition-colors"></lucide-icon>

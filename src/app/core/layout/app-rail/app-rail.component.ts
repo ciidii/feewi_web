@@ -3,10 +3,11 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import {
   LucideAngularModule, Home, Settings, Briefcase, GraduationCap, LayoutGrid, ShieldCheck, ArrowLeftRight, BarChart3,
-  Shield, Building2
+  Shield, Building2, School, Users
 } from 'lucide-angular';
 import { AuthService } from '../../services/auth.service';
 import { NavigationContextService } from '../../services/navigation-context.service';
+import { NavigationStateService } from '../../services/navigation-state.service';
 
 @Component({
   selector: 'app-rail',
@@ -18,6 +19,7 @@ import { NavigationContextService } from '../../services/navigation-context.serv
 export class AppRailComponent {
   auth = inject(AuthService);
   contextService = inject(NavigationContextService);
+  navService = inject(NavigationStateService);
 
   readonly Home = Home;
   readonly Settings = Settings;
@@ -29,4 +31,10 @@ export class AppRailComponent {
   readonly BarChart3 = BarChart3;
   protected readonly Shield = Shield;
   protected readonly Building2 = Building2;
+  protected readonly School = School;
+  protected readonly Users = Users;
+
+  onSelectService(serviceName: string) {
+    this.navService.setActiveService(serviceName);
+  }
 }

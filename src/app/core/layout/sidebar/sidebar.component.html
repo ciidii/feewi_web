@@ -27,10 +27,10 @@
     </nav>
   </ng-container>
 
-  <!-- === MONDE 2 : SCHOOL APP === -->
+  <!-- === MONDE 2 : SCHOOL APP (Architecture par Service) === -->
   <ng-container *ngIf="!auth.hasRole('ROLE_SUPER_ADMIN')">
-    <!-- Hero Button École -->
-    <div class="p-4 flex justify-center shrink-0">
+    <!-- Hero Button École (Contextuel : seulement pour Enrollment ou Dashboard) -->
+    <div *ngIf="['dashboard', 'enrollment'].includes(navService.activeService())" class="p-4 flex justify-center shrink-0">
       <button 
         routerLink="/admissions"
         class="flex items-center bg-white border border-border-subtle shadow-sm hover:shadow-md transition-all rounded-2xl h-14 w-full group active:scale-95 overflow-hidden"
@@ -42,34 +42,63 @@
       </button>
     </div>
 
-    <nav class="flex-1 px-3 py-2 space-y-1 overflow-y-auto">
-      <div *ngIf="navService.isSidebarExpanded()" class="px-4 py-2 mt-2">
-        <span class="text-[10px] font-bold text-slate-medium uppercase tracking-widest">Scolarité</span>
-      </div>
-      <a 
-        *ngFor="let item of academicItems" 
-        [routerLink]="item.route"
-        routerLinkActive="bg-ice text-primary font-bold border-r-2 border-primary"
-        class="flex items-center h-11 px-4 rounded-lg text-slate-medium hover:bg-ice hover:text-primary transition-all group"
-        [class.justify-center]="!navService.isSidebarExpanded()"
-      >
-        <lucide-icon [name]="item.icon" class="w-5 h-5 shrink-0 stroke-[1.5px]"></lucide-icon>
-        <span *ngIf="navService.isSidebarExpanded()" class="ml-4 text-sm font-medium">{{ item.label }}</span>
-      </a>
+    <nav class="flex-1 px-3 py-2 space-y-1 overflow-y-auto custom-scrollbar">
+      
+      <!-- CAS 1 : DASHBOARD -->
+      <ng-container *ngIf="navService.activeService() === 'dashboard'">
+        <div *ngIf="navService.isSidebarExpanded()" class="px-4 py-2 mt-2">
+          <span class="text-[10px] font-bold text-slate-medium uppercase tracking-widest">Tableau de bord</span>
+        </div>
+        <a routerLink="/dashboard" routerLinkActive="active-link" class="sidebar-link">
+          <lucide-icon [name]="BarChart3" class="w-5 h-5"></lucide-icon>
+          <span *ngIf="navService.isSidebarExpanded()" class="ml-4 text-sm font-medium">Vue d'ensemble</span>
+        </a>
+      </ng-container>
 
-      <div *ngIf="navService.isSidebarExpanded()" class="px-4 py-2 mt-4">
-        <span class="text-[10px] font-bold text-slate-medium uppercase tracking-widest">Identity</span>
-      </div>
-      <a 
-        *ngFor="let item of identityItems" 
-        [routerLink]="item.route"
-        routerLinkActive="bg-ice text-primary font-bold border-r-2 border-primary"
-        class="flex items-center h-11 px-4 rounded-lg text-slate-medium hover:bg-ice hover:text-primary transition-all group"
-        [class.justify-center]="!navService.isSidebarExpanded()"
-      >
-        <lucide-icon [name]="item.icon" class="w-5 h-5 shrink-0 stroke-[1.5px]"></lucide-icon>
-        <span *ngIf="navService.isSidebarExpanded()" class="ml-4 text-sm font-medium">{{ item.label }}</span>
-      </a>
+      <!-- CAS 2 : ENROLLMENT SERVICE -->
+      <ng-container *ngIf="navService.activeService() === 'enrollment'">
+        <div *ngIf="navService.isSidebarExpanded()" class="px-4 py-2 mt-2">
+          <span class="text-[10px] font-bold text-slate-medium uppercase tracking-widest">Enrollment Service</span>
+        </div>
+        <a *ngFor="let item of enrollmentItems" [routerLink]="item.route" routerLinkActive="active-link" class="sidebar-link">
+          <lucide-icon [name]="item.icon" class="w-5 h-5"></lucide-icon>
+          <span *ngIf="navService.isSidebarExpanded()" class="ml-4 text-sm font-medium">{{ item.label }}</span>
+        </a>
+      </ng-container>
+
+      <!-- CAS 3 : STUDENT REGISTRY -->
+      <ng-container *ngIf="navService.activeService() === 'registry'">
+        <div *ngIf="navService.isSidebarExpanded()" class="px-4 py-2 mt-2">
+          <span class="text-[10px] font-bold text-slate-medium uppercase tracking-widest">Student Registry</span>
+        </div>
+        <a *ngFor="let item of registryItems" [routerLink]="item.route" routerLinkActive="active-link" class="sidebar-link">
+          <lucide-icon [name]="item.icon" class="w-5 h-5"></lucide-icon>
+          <span *ngIf="navService.isSidebarExpanded()" class="ml-4 text-sm font-medium">{{ item.label }}</span>
+        </a>
+      </ng-container>
+
+      <!-- CAS 4 : ACADEMIC STRUCTURE -->
+      <ng-container *ngIf="navService.activeService() === 'academic'">
+        <div *ngIf="navService.isSidebarExpanded()" class="px-4 py-2 mt-2">
+          <span class="text-[10px] font-bold text-slate-medium uppercase tracking-widest">Academic Structure</span>
+        </div>
+        <a *ngFor="let item of academicItems" [routerLink]="item.route" routerLinkActive="active-link" class="sidebar-link">
+          <lucide-icon [name]="item.icon" class="w-5 h-5"></lucide-icon>
+          <span *ngIf="navService.isSidebarExpanded()" class="ml-4 text-sm font-medium">{{ item.label }}</span>
+        </a>
+      </ng-container>
+
+      <!-- CAS 5 : IDENTITY SERVICE -->
+      <ng-container *ngIf="navService.activeService() === 'identity'">
+        <div *ngIf="navService.isSidebarExpanded()" class="px-4 py-2 mt-2">
+          <span class="text-[10px] font-bold text-slate-medium uppercase tracking-widest">Identity Service</span>
+        </div>
+        <a *ngFor="let item of identityItems" [routerLink]="item.route" routerLinkActive="active-link" class="sidebar-link">
+          <lucide-icon [name]="item.icon" class="w-5 h-5"></lucide-icon>
+          <span *ngIf="navService.isSidebarExpanded()" class="ml-4 text-sm font-medium">{{ item.label }}</span>
+        </a>
+      </ng-container>
+
     </nav>
   </ng-container>
 

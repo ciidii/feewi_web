@@ -1,3 +1,40 @@
 :host {
   display: block;
 }
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 8px;
+  color: #64748b;
+  transition: all 0.2s;
+  text-decoration: none;
+  border-right: 2px solid transparent;
+
+  &:hover {
+    background-color: #f8fafc;
+    color: #2563eb;
+  }
+
+  &.active-link {
+    background-color: #eff6ff;
+    color: #2563eb;
+    font-weight: 700;
+    border-right-color: #2563eb;
+  }
+}
+
+.custom-scrollbar {
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 10px;
+  }
+}

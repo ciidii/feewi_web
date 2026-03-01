@@ -4,7 +4,7 @@ import { RouterModule } from '@angular/router';
 import { NavigationStateService } from '../../services/navigation-state.service';
 import { AuthService } from '../../services/auth.service';
 import { MatButtonModule } from '@angular/material/button';
-import { LucideAngularModule, ChevronLeft, ChevronRight, Plus, Users, School, Calendar, BookOpen, FileText, Briefcase, ShieldCheck, Building2, Globe, BarChart3 } from 'lucide-angular';
+import { LucideAngularModule, ChevronLeft, ChevronRight, Plus, Users, School, Calendar, BookOpen, FileText, Briefcase, ShieldCheck, Building2, Globe, BarChart3, History } from 'lucide-angular';
 
 @Component({
   selector: 'app-sidebar',
@@ -21,25 +21,38 @@ export class SidebarComponent {
   readonly ChevronLeft = ChevronLeft;
   readonly ChevronRight = ChevronRight;
   readonly ShieldCheck = ShieldCheck;
+  readonly History = History;
 
-  // --- CONFIGURATION ÉCOLE ---
-  academicItems = [
+  // --- 1. ENROLLMENT SERVICE (Opérationnel) ---
+  enrollmentItems = [
     { label: 'Admissions', icon: Briefcase, route: '/admissions' },
-    { label: 'Classes', icon: School, route: '/classes' },
-    { label: 'Élèves', icon: Users, route: '/students' },
+    { label: 'Portail Public', icon: Globe, route: '/public/enroll' },
   ];
 
+  // --- 2. STUDENT REGISTRY (Référentiel) ---
+  registryItems = [
+    { label: 'Liste des élèves', icon: Users, route: '/students' },
+    { label: 'Dossiers scolaires', icon: FileText, route: '/students/records' },
+  ];
+
+  // --- 3. ACADEMIC STRUCTURE (Référentiel) ---
+  academicItems = [
+    { label: 'Classes & Niveaux', icon: School, route: '/classes' },
+    { label: 'Années Scolaires', icon: Calendar, route: '/academic/years' },
+  ];
+
+  // --- 4. IDENTITY SERVICE (Fondation) ---
   identityItems = [
-    { label: 'Personnel', icon: Users, route: '/identity/staff' },
+    { label: 'Personnel (Staff)', icon: Users, route: '/identity/staff' },
     { label: 'Rôles & Droits', icon: ShieldCheck, route: '/identity/roles' },
-    { label: 'Journal d\'audit', icon: FileText, route: '/identity/audit' },
+    { label: 'Journal d\'audit', icon: History, route: '/identity/audit' },
   ];
 
   // --- CONFIGURATION SAAS ADMIN ---
   saasItems = [
     { label: 'Établissements', icon: Building2, route: '/saas/tenants' },
-    { label: 'Sous-domaines', icon: Globe, route: '/saas/domains' },
     { label: 'Statistiques Globales', icon: BarChart3, route: '/saas/stats' },
     { label: 'Audit Système', icon: FileText, route: '/saas/audit' },
   ];
+  protected readonly BarChart3 = BarChart3;
 }

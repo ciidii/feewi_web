@@ -14,8 +14,16 @@ export class NavigationStateService {
   private _breadcrumb = signal<string[]>(['Accueil']);
   readonly breadcrumb = this._breadcrumb.asReadonly();
 
+  // Signal pour le service actif (Microservice sélectionné)
+  private _activeService = signal<string>('dashboard');
+  readonly activeService = this._activeService.asReadonly();
+
   toggleSidebar(): void {
     this._isSidebarExpanded.update((v) => !v);
+  }
+
+  setActiveService(service: string): void {
+    this._activeService.set(service);
   }
 
   setSidebarExpanded(state: boolean): void {

@@ -2,49 +2,90 @@
   
   <!-- === MONDE 1 : SAAS SYSTEM ADMIN (Uniquement ROLE_SUPER_ADMIN) === -->
   <ng-container *ngIf="auth.currentUser()?.roles?.includes('ROLE_SUPER_ADMIN')">
-    <a routerLink="/saas/tenants" routerLinkActive="active" class="rail-link group saas-link" title="Établissements">
+    <a 
+      (click)="onSelectService('saas')" 
+      routerLink="/saas/tenants"
+      class="rail-link group saas-link" 
+      [class.active]="navService.activeService() === 'saas'"
+      title="Administration SaaS"
+    >
       <div class="active-indicator bg-amber-500"></div>
       <lucide-icon [name]="Building2" class="w-5 h-5 text-amber-600"></lucide-icon>
-      <span class="rail-label text-amber-700">Tenants</span>
-    </a>
-
-    <a routerLink="/saas/stats" routerLinkActive="active" class="rail-link group saas-link" title="Statistiques">
-      <div class="active-indicator bg-amber-500"></div>
-      <lucide-icon [name]="BarChart3" class="w-5 h-5 text-amber-600"></lucide-icon>
-      <span class="rail-label text-amber-700">Stats</span>
-    </a>
-
-    <a routerLink="/saas/audit" routerLinkActive="active" class="rail-link group saas-link" title="Audit Système">
-      <div class="active-indicator bg-amber-500"></div>
-      <lucide-icon [name]="Shield" class="w-5 h-5 text-amber-600"></lucide-icon>
-      <span class="rail-label text-amber-700">Sécurité</span>
+      <span class="rail-label text-amber-700">SaaS</span>
     </a>
   </ng-container>
 
-  <!-- === MONDE 2 : SCHOOL APP (Pour tous les autres rôles, SAUF ROLE_SUPER_ADMIN) === -->
+  <!-- === MONDE 2 : SCHOOL APP (Sélecteur de Service) === -->
   <ng-container *ngIf="!auth.currentUser()?.roles?.includes('ROLE_SUPER_ADMIN')">
-    <a routerLink="/dashboard" routerLinkActive="active" class="rail-link group" title="Tableau de bord">
+    <!-- Dashboard Service -->
+    <a 
+      (click)="onSelectService('dashboard')" 
+      routerLink="/dashboard"
+      class="rail-link group" 
+      [class.active]="navService.activeService() === 'dashboard'"
+      title="Tableau de bord"
+    >
       <div class="active-indicator"></div>
       <lucide-icon [name]="Home" class="w-5 h-5"></lucide-icon>
-      <span class="rail-label">Accueil</span>
+      <span class="rail-label">Home</span>
     </a>
 
-    <a routerLink="/admissions" routerLinkActive="active" class="rail-link group" title="Admissions">
+    <!-- Enrollment Service -->
+    <a 
+      (click)="onSelectService('enrollment')" 
+      routerLink="/admissions"
+      class="rail-link group" 
+      [class.active]="navService.activeService() === 'enrollment'"
+      title="Enrollment Service"
+    >
       <div class="active-indicator"></div>
       <lucide-icon [name]="Briefcase" class="w-5 h-5"></lucide-icon>
-      <span class="rail-label">Inscrits</span>
+      <span class="rail-label">Insc.</span>
     </a>
 
-    <a routerLink="/students" routerLinkActive="active" class="rail-link group" title="Scolarité">
+    <!-- Student Registry Service -->
+    <a 
+      (click)="onSelectService('registry')" 
+      routerLink="/students"
+      class="rail-link group" 
+      [class.active]="navService.activeService() === 'registry'"
+      title="Student Registry"
+    >
       <div class="active-indicator"></div>
-      <lucide-icon [name]="GraduationCap" class="w-5 h-5"></lucide-icon>
-      <span class="rail-label">Scolarité</span>
+      <lucide-icon [name]="Users" class="w-5 h-5"></lucide-icon>
+      <span class="rail-label">Élèves</span>
+    </a>
+
+    <!-- Academic Structure Service -->
+    <a 
+      (click)="onSelectService('academic')" 
+      routerLink="/classes"
+      class="rail-link group" 
+      [class.active]="navService.activeService() === 'academic'"
+      title="Academic Structure"
+    >
+      <div class="active-indicator"></div>
+      <lucide-icon [name]="School" class="w-5 h-5"></lucide-icon>
+      <span class="rail-label">Acad.</span>
+    </a>
+
+    <!-- Identity Service -->
+    <a 
+      (click)="onSelectService('identity')" 
+      routerLink="/identity/staff"
+      class="rail-link group" 
+      [class.active]="navService.activeService() === 'identity'"
+      title="Identity & Security"
+    >
+      <div class="active-indicator"></div>
+      <lucide-icon [name]="ShieldCheck" class="w-5 h-5"></lucide-icon>
+      <span class="rail-label">Secu.</span>
     </a>
   </ng-container>
 
-  <!-- Bottom: Settings (Commun mais contextuel) -->
+  <!-- Bottom: Settings -->
   <div class="mt-auto">
-    <a class="rail-link group" title="Paramètres">
+    <a (click)="onSelectService('settings')" class="rail-link group" [class.active]="navService.activeService() === 'settings'" title="Paramètres">
       <lucide-icon [name]="Settings" class="w-5 h-5"></lucide-icon>
       <span class="rail-label">Réglages</span>
     </a>

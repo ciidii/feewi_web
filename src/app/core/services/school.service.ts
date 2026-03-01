@@ -41,6 +41,13 @@ export class SchoolService {
   }
 
   /**
+   * Récupère les détails d'une école par son ID
+   */
+  async getSchoolById(id: string): Promise<School> {
+    return await firstValueFrom(this.http.get<School>(`${this.API_URL}/${id}`));
+  }
+
+  /**
    * Provisionne une nouvelle école (SaaS Admin)
    */
   async createSchool(school: School): Promise<School> {
