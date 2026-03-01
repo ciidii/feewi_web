@@ -91,6 +91,12 @@ export class DataListComponent {
   /** Nombre total d'éléments (pour la pagination) */
   total = input<number>(0);
 
+  /** Page courante (index base 0) */
+  page = input<number>(0);
+
+  /** Nombre total de pages */
+  totalPages = input<number>(1);
+
   /** Afficher ou non la barre de recherche */
   showSearch = input<boolean>(true);
 
@@ -114,6 +120,9 @@ export class DataListComponent {
 
   /** Changement de tri */
   onSortChange = output<SortState>();
+
+  /** Pagination */
+  onPageChange = output<number>();
 
   // ===========================================
   // ÉTATS INTERNES (signals)
@@ -241,6 +250,20 @@ export class DataListComponent {
   /** Données à afficher (triées) */
   displayedData = computed(() => this.sortedData());
 
+  /** Liste de pages pour le footer */
+  pageNumbers = computed(() => {
+    const totalPages = Math.max(1, this.totalPages());
+    const current = this.page();
+    const start = Math.max(0, current - 1);
+    const end = Math.min(totalPages - 1, start + 2);
+
+    const pages: number[] = [];
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    return pages;
+  });
+
   // ===========================================
   // MÉTHODES DE SÉLECTION
   // ===========================================
@@ -347,6 +370,21 @@ export class DataListComponent {
     });
   }
 
+  previousPage(): void {
+    if (this.page() <= 0) return;
+    this.onPageChange.emit(this.page() - 1);
+  }
+
+  nextPage(): void {
+    if (this.page() >= this.totalPages() - 1) return;
+    this.onPageChange.emit(this.page() + 1);
+  }
+
+  goToPage(page: number): void {
+    if (page < 0 || page >= this.totalPages() || page === this.page()) return;
+    this.onPageChange.emit(page);
+  }
+
   // ===========================================
   // UTILITAIRES
   // ===========================================
@@ -424,6 +462,7 @@ export class DataListComponent {
   protected readonly Sparkles = Sparkles;
   protected readonly Check = Check;
 }
+
 
 
 

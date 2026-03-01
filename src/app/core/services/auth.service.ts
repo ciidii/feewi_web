@@ -20,6 +20,16 @@ interface LoginResponse {
   token_type: string;
 }
 
+interface ForgotPasswordRequest {
+  email: string;
+}
+
+interface ResetPasswordRequest {
+  email: string;
+  code: string;
+  newPassword: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -53,6 +63,15 @@ export class AuthService {
       console.error('[AuthService] Login failed', error);
       return false;
     }
+  }
+
+  async forgotPassword(email: string): Promise<void> {
+    const payload: ForgotPasswordRequest = { email };
+    await firstValueFrom(this.http.post<void>(`${this.API_URL}/auth/forgot-password`, payload));
+  }
+
+  async resetPassword(payload: ResetPasswordRequest): Promise<void> {
+    await firstValueFrom(this.http.post<void>(`${this.API_URL}/auth/reset-password`, payload));
   }
 
   async fetchProfile(): Promise<void> {

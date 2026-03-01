@@ -7,7 +7,18 @@ export const PUBLIC_ROUTES: Routes = [
     canActivate: [publicGuard],
     loadComponent: () => import('./auth/login/login.component').then(m => m.LoginComponent)
   },
-  // On pourra ajouter ici reset-password, tenant-switcher, etc.
+  {
+    path: 'forgot-password',
+    canActivate: [publicGuard],
+    loadComponent: () =>
+      import('./auth/forgot-password/forgot-password.component').then((m) => m.ForgotPasswordComponent)
+  },
+  {
+    path: 'reset-password',
+    canActivate: [publicGuard],
+    loadComponent: () =>
+      import('./auth/reset-password/reset-password.component').then((m) => m.ResetPasswordComponent)
+  },
   {
     path: '',
     redirectTo: 'login',

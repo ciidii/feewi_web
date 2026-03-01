@@ -24,9 +24,14 @@
   <!-- Table Component -->
   <app-data-list
     [data]="tenants()"
-    [tabs]="tenantTabs"
+    [tabs]="tenantTabs()"
     [activeTab]="activeTab()"
     [total]="totalTenants()"
+    [page]="currentPage()"
+    [totalPages]="totalPages()"
     (onTabChange)="onTabChange($event)"
+    (onSearch)="onSearch($event)"
+    (onPageChange)="onPageChange($event)"
+    (onView)="openEditModal($event)"
   ></app-data-list>
 </div>

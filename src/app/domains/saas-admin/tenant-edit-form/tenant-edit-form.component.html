@@ -1,0 +1,85 @@
+<div class="tenant-edit">
+  <header class="modal-header">
+    <div class="title-wrap">
+      <div class="icon-box">
+        <lucide-icon [name]="Building2" class="w-5 h-5"></lucide-icon>
+      </div>
+      <div>
+        <h2>Modifier l'etablissement</h2>
+        <p>Tenant: {{ tenantId }}</p>
+      </div>
+    </div>
+    <button (click)="close()" class="close-btn" type="button">
+      <lucide-icon [name]="X" class="w-4 h-4"></lucide-icon>
+    </button>
+  </header>
+
+  <form [formGroup]="schoolForm" (ngSubmit)="onSubmit()" class="modal-body">
+    <div class="section-head">
+      <div class="step-pill">01</div>
+      <span>Informations principales</span>
+    </div>
+
+    <div class="field-wrap">
+      <label>Nom de l'etablissement</label>
+      <div class="input-wrap" [class.error]="isInvalid('name')">
+        <lucide-icon [name]="Building2" class="field-icon"></lucide-icon>
+        <input type="text" formControlName="name" />
+      </div>
+      <p *ngIf="isInvalid('name')" class="error-text">{{ getErrorMessage('name') }}</p>
+    </div>
+
+    <div class="field-wrap">
+      <label>Slogan</label>
+      <div class="input-wrap" [class.error]="isInvalid('slogan')">
+        <lucide-icon [name]="Quote" class="field-icon"></lucide-icon>
+        <input type="text" formControlName="slogan" />
+      </div>
+    </div>
+
+    <div class="field-wrap">
+      <label>Email</label>
+      <div class="input-wrap" [class.error]="isInvalid('email')">
+        <lucide-icon [name]="Mail" class="field-icon"></lucide-icon>
+        <input type="email" formControlName="email" />
+      </div>
+      <p *ngIf="isInvalid('email')" class="error-text">{{ getErrorMessage('email') }}</p>
+    </div>
+
+    <div class="field-wrap">
+      <label>Telephone</label>
+      <div class="input-wrap" [class.error]="isInvalid('phone')">
+        <lucide-icon [name]="Phone" class="field-icon"></lucide-icon>
+        <input type="text" formControlName="phone" />
+      </div>
+      <p *ngIf="isInvalid('phone')" class="error-text">{{ getErrorMessage('phone') }}</p>
+    </div>
+
+    <div class="field-wrap">
+      <label>Adresse</label>
+      <div class="input-wrap" [class.error]="isInvalid('streetAddress')">
+        <lucide-icon [name]="MapPin" class="field-icon"></lucide-icon>
+        <input type="text" formControlName="streetAddress" />
+      </div>
+      <p *ngIf="isInvalid('streetAddress')" class="error-text">{{ getErrorMessage('streetAddress') }}</p>
+    </div>
+
+    <div class="field-wrap">
+      <label>Ville</label>
+      <div class="input-wrap" [class.error]="isInvalid('city')">
+        <lucide-icon [name]="MapPin" class="field-icon"></lucide-icon>
+        <input type="text" formControlName="city" />
+      </div>
+      <p *ngIf="isInvalid('city')" class="error-text">{{ getErrorMessage('city') }}</p>
+    </div>
+
+    <footer class="modal-footer">
+      <button type="button" class="btn-secondary" (click)="close()">Annuler</button>
+      <button type="submit" class="btn-primary" [disabled]="isLoading()">
+        <lucide-icon *ngIf="isLoading()" [name]="Loader2" class="w-4 h-4 animate-spin"></lucide-icon>
+        <lucide-icon *ngIf="!isLoading()" [name]="Save" class="w-4 h-4"></lucide-icon>
+        <span>{{ isLoading() ? 'Mise a jour...' : 'Enregistrer les modifications' }}</span>
+      </button>
+    </footer>
+  </form>
+</div>

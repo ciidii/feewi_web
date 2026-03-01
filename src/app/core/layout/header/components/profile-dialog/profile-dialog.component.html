@@ -1,0 +1,90 @@
+<div class="profile-dialog">
+  <header class="dialog-header">
+    <div class="title-wrap">
+      <div class="avatar">{{ initials }}</div>
+      <div>
+        <h2>Mon profil</h2>
+        <p>Compte actuellement connecte</p>
+      </div>
+    </div>
+
+    <button (click)="close()" class="close-btn" aria-label="Fermer">
+      <lucide-icon [name]="X" class="w-4 h-4"></lucide-icon>
+    </button>
+  </header>
+
+  <div class="dialog-body" *ngIf="profile() as user; else emptyState">
+    <section class="profile-card">
+      <div class="field-line">
+        <span class="label">
+          <lucide-icon [name]="User" class="w-4 h-4"></lucide-icon>
+          Identite
+        </span>
+        <strong>{{ user.firstName }} {{ user.lastName }}</strong>
+      </div>
+
+      <div class="field-line">
+        <span class="label">
+          <lucide-icon [name]="Mail" class="w-4 h-4"></lucide-icon>
+          Email
+        </span>
+        <strong>{{ user.email }}</strong>
+      </div>
+
+      <div class="field-line">
+        <span class="label">
+          <lucide-icon [name]="Building2" class="w-4 h-4"></lucide-icon>
+          Tenant
+        </span>
+        <strong>{{ user.tenantId || 'Non defini' }}</strong>
+      </div>
+
+      <div class="field-line">
+        <span class="label">
+          <lucide-icon [name]="ShieldCheck" class="w-4 h-4"></lucide-icon>
+          Statut
+        </span>
+        <strong [class.active]="user.active" [class.inactive]="!user.active">
+          {{ user.active ? 'Actif' : 'Inactif' }}
+        </strong>
+      </div>
+    </section>
+
+    <section class="section-block">
+      <div class="section-title">
+        <div class="step-pill">01</div>
+        <span>Roles</span>
+      </div>
+      <div class="chip-wrap">
+        <span class="chip role-chip" *ngFor="let role of user.roles">{{ formatRole(role) }}</span>
+      </div>
+    </section>
+
+    <section class="section-block">
+      <div class="section-title">
+        <div class="step-pill">02</div>
+        <span>Permissions</span>
+      </div>
+      <div class="chip-wrap permissions">
+        <span class="chip permission-chip" *ngFor="let permission of user.permissions">
+          <lucide-icon [name]="KeyRound" class="w-3 h-3"></lucide-icon>
+          {{ permission }}
+        </span>
+      </div>
+    </section>
+  </div>
+
+  <ng-template #emptyState>
+    <div class="empty-state">
+      <p>Aucun profil charge.</p>
+    </div>
+  </ng-template>
+
+  <footer class="dialog-footer">
+    <button type="button" class="secondary-btn" (click)="close()">Fermer</button>
+    <button type="button" class="danger-btn" (click)="logout()">
+      <lucide-icon [name]="Power" class="w-4 h-4"></lucide-icon>
+      <span>Se deconnecter</span>
+    </button>
+  </footer>
+</div>

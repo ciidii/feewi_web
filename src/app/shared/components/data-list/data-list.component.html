@@ -260,23 +260,28 @@
   <!-- Informations -->
   <div class="text-xs text-slate-500">
     <span class="font-medium">{{ data().length }}</span> sur
-    <span class="font-medium">{{ total() }}</span> éléments
+    <span class="font-medium">{{ total() }}</span> elements
   </div>
 
   <!-- Pagination -->
   <div class="flex items-center gap-4">
     <div class="flex items-center gap-2">
-      <button class="pagination-button" disabled>
+      <button class="pagination-button" [disabled]="page() === 0" (click)="previousPage()">
         <lucide-icon [name]="ChevronLeft" class="w-4 h-4"></lucide-icon>
       </button>
 
       <div class="flex items-center gap-1">
-        <button class="pagination-page active">1</button>
-        <button class="pagination-page">2</button>
-        <button class="pagination-page">3</button>
+        <button
+          *ngFor="let p of pageNumbers()"
+          class="pagination-page"
+          [class.active]="p === page()"
+          (click)="goToPage(p)"
+        >
+          {{ p + 1 }}
+        </button>
       </div>
 
-      <button class="pagination-button">
+      <button class="pagination-button" [disabled]="page() >= totalPages() - 1" (click)="nextPage()">
         <lucide-icon [name]="ChevronRight" class="w-4 h-4"></lucide-icon>
       </button>
     </div>
