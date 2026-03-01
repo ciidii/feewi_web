@@ -1,0 +1,36 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+::ng-deep .role-form-dialog {
+  mat-dialog-container {
+    padding: 0 !important;
+    border-radius: 24px !important;
+    overflow: hidden !important;
+    border: none !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  }
+
+  .mat-mdc-dialog-surface {
+    border-radius: 24px !important;
+    background: white !important;
+    box-shadow: none !important;
+  }
+}
+
+.custom-scrollbar {
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 10px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: #cbd5e1;
+  }
+}

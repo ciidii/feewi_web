@@ -3,6 +3,7 @@
 
 /* IMPORT DES TOKENS DE DESIGN SYSTEM FEEWI */
 @use "styles/tokens" as *;
+@import 'ngx-toastr/toastr';
 
 /* --- THEMATISATION MATERIAL 3 (FEEWI Midnight Slate) --- */
 $feewi-primary: (
@@ -59,4 +60,49 @@ html { height: 100%; }
 .feewi-dialog-panel .mat-mdc-dialog-surface {
   border-radius: 28px !important;
   background: white !important;
+}
+
+// Personnalisation des toasts
+.toast-container {
+  .ngx-toastr {
+    border-radius: 12px !important;
+    padding: 16px 20px !important;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05) !important;
+    font-family: inherit !important;
+
+    &.toast-success {
+      background-color: #10b981 !important;
+      border-left: 4px solid #059669 !important;
+    }
+
+    &.toast-error {
+      background-color: #ef4444 !important;
+      border-left: 4px solid #dc2626 !important;
+    }
+
+    &.toast-warning {
+      background-color: #f59e0b !important;
+      border-left: 4px solid #d97706 !important;
+    }
+
+    &.toast-info {
+      background-color: #3b82f6 !important;
+      border-left: 4px solid #2563eb !important;
+    }
+
+    .toast-title {
+      font-weight: 600 !important;
+      font-size: 14px !important;
+    }
+
+    .toast-message {
+      font-size: 13px !important;
+      opacity: 0.9 !important;
+    }
+
+    .toast-progress {
+      height: 3px !important;
+      opacity: 0.3 !important;
+    }
+  }
 }

@@ -1,76 +1,96 @@
-import { Component, signal, ViewEncapsulation } from '@angular/core';
+import { Component, signal, computed, inject, OnInit, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule, UserPlus, Shield, Filter, Download, Users, UserCheck, UserX } from 'lucide-angular';
-import {DataListComponent} from '../../../../../shared/components/data-list/data-list.component';
-import {TabItem, TableRow} from '../../../../../shared/models/data-list.models';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { DataListComponent } from '../../../../../shared/components/data-list/data-list.component';
+import { TabItem, TableRow } from '../../../../../shared/models/data-list.models';
+import { IdentityService } from '../../../../../core/services/identity.service';
+import { User } from '../../../../../core/models/user.model';
+import { StaffFormComponent } from './components/staff-form/staff-form.component';
 
 @Component({
   selector: 'app-staff-directory',
   standalone: true,
-  imports: [CommonModule, DataListComponent, LucideAngularModule],
+  imports: [CommonModule, DataListComponent, LucideAngularModule, MatDialogModule],
   templateUrl: './staff-directory.component.html',
   styleUrl: './staff-directory.component.scss',
   encapsulation: ViewEncapsulation.None
 })
-export class StaffDirectoryComponent {
+export class StaffDirectoryComponent implements OnInit {
+  private identityService = inject(IdentityService);
+  private dialog = inject(MatDialog);
+
   readonly UserPlus = UserPlus;
   readonly Filter = Filter;
   readonly Download = Download;
 
   activeTab = signal('Tous');
-  totalStaff = signal(24);
+  
+  // Signals connectés au service
+  staffMembers = computed(() => {
+    const page = this.identityService.staffPage();
+    if (!page) return [];
+    return page.content.map(user => this.mapUserToRow(user));
+  });
+
+  totalStaff = computed(() => this.identityService.staffPage()?.totalElements || 0);
+  isLoading = this.identityService.loading;
 
   staffTabs: TabItem[] = [
-    { label: 'Tous', icon: Users, count: 24 },
-    { label: 'Administratifs', icon: Shield, count: 6 },
-    { label: 'Enseignants', icon: UserCheck, count: 15 },
-    { label: 'Inactifs', icon: UserX, count: 3 }
+    { label: 'Tous', icon: Users, count: 0 },
+    { label: 'Administrateurs', icon: Shield, count: 0 },
+    { label: 'Enseignants', icon: UserCheck, count: 0 },
+    { label: 'Inactifs', icon: UserX, count: 0 }
   ];
 
-  staffMembers = signal<TableRow[]>([
-    {
-      id: 1,
-      title: 'Mamadou Diop',
-      subtitle: 'Principal • mamadou.diop&#64;feewi.io',
-      avatarLabel: 'MD',
-      date: 'Connecté il y a 5 min',
-      badges: [{ label: 'SCHOOL_ADMIN', type: 'success' }, { label: 'Permanent', type: 'info' }]
-    },
-    {
-      id: 2,
-      title: 'Aïssatou Sow',
-      subtitle: 'Enseignante Mathématiques • aissatou.sow&#64;feewi.io',
-      avatarLabel: 'AS',
-      date: 'Hier',
-      badges: [{ label: 'TEACHER', type: 'info' }]
-    },
-    {
-      id: 3,
-      title: 'Fatou Ndiaye',
-      subtitle: 'Comptable • fatou.ndiaye&#64;feewi.io',
-      avatarLabel: 'FN',
-      date: '24 Fév',
-      badges: [{ label: 'ACCOUNTANT', type: 'warning' }]
-    },
-    {
-      id: 4,
-      title: 'Ibrahima Fall',
-      subtitle: 'Surveillant Général • ibrahima.fall&#64;feewi.io',
-      avatarLabel: 'IF',
-      date: '20 Fév',
-      badges: [{ label: 'STAFF', type: 'info' }]
-    },
-    {
-      id: 5,
-      title: 'Christian Gomis',
-      subtitle: 'Ancien Enseignant • christian.gomis&#64;feewi.io',
-      avatarLabel: 'CG',
-      date: '15 Jan',
-      badges: [{ label: 'INACTIF', type: 'danger' }]
-    }
-  ]);
+  ngOnInit() {
+    this.loadStaff();
+  }
+
+  loadStaff(search: string = '') {
+    this.identityService.getStaff(search);
+  }
 
   onTabChange(tab: string) {
     this.activeTab.set(tab);
+  }
+
+  onSearch(query: string) {
+    this.loadStaff(query);
+  }
+
+  openAddStaffForm() {
+    const dialogRef = this.dialog.open(StaffFormComponent, {
+      width: '640px',
+      maxWidth: '95vw',
+      panelClass: 'staff-form-dialog'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadStaff();
+      }
+    });
+  }
+
+  private mapUserToRow(user: User): TableRow {
+    return {
+      id: user.id || Math.random().toString(),
+      title: `${user.firstName} ${user.lastName}`,
+      subtitle: `${user.roles[0]?.replace('ROLE_', '') || 'EMPLOYÉ'} • ${user.email}`,
+      avatarLabel: `${user.firstName[0]}${user.lastName[0]}`,
+      date: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Date inconnue',
+      badges: user.roles.map(role => ({
+        label: role.replace('ROLE_', ''),
+        type: this.getBadgeTypeForRole(role)
+      }))
+    };
+  }
+
+  private getBadgeTypeForRole(role: string): 'success' | 'info' | 'warning' | 'danger' | 'default' {
+    if (role.includes('ADMIN')) return 'success';
+    if (role.includes('TEACHER')) return 'info';
+    if (role.includes('SECRETARY')) return 'warning';
+    return 'default';
   }
 }

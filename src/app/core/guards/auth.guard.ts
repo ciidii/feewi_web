@@ -6,8 +6,11 @@ export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
+  console.log(`[authGuard] Checking route: ${state.url}`);
+
   // 1. Check Authentication
   if (!authService.isAuthenticated()) {
+    console.warn(`[authGuard] User not authenticated. Redirecting to login.`);
     return router.createUrlTree(['/auth/login'], {
       queryParams: { returnUrl: state.url }
     });
@@ -20,10 +23,20 @@ export const authGuard: CanActivateFn = (route, state) => {
     const hasRole = user?.roles.some(role => requiredRoles.includes(role));
 
     if (!hasRole) {
-      console.warn(`User does not have required roles: ${requiredRoles}`);
-      // If super admin is required but user is not, or vice versa, redirect to a safe place
-      // For now, redirect to root or show error. Let's redirect to root which will handle the user's domain.
-      return router.createUrlTree(['/']);
+      console.warn(`[authGuard] Access denied for ${state.url}. Required roles: ${requiredRoles}`);
+      
+      // Redirect to their specific "home" based on role to avoid loops
+      if (user?.roles.includes('ROLE_SUPER_ADMIN')) {
+        return router.createUrlTree(['/saas']);
+      } else {
+        // If they are a school user but hitting a route they can't access, 
+        // redirect to root only if they aren't already there.
+        if (state.url === '/') {
+          console.error('[authGuard] User has no access even to root. Check role configuration.');
+          return router.createUrlTree(['/auth/login']);
+        }
+        return router.createUrlTree(['/']);
+      }
     }
   }
 

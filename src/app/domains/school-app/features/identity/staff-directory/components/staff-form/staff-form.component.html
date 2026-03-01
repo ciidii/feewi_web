@@ -1,0 +1,289 @@
+<div class="flex flex-col h-full max-h-[90vh] overflow-hidden bg-white rounded-2xl">
+
+  <!-- Header minimaliste mais élégant -->
+  <header class="px-8 py-6 border-b border-slate-200 flex items-center justify-between bg-white">
+    <div class="flex items-center gap-4">
+      <!-- Avatar simple -->
+      <div class="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center text-primary-600">
+        <lucide-icon [name]="UserPlus" class="w-6 h-6"></lucide-icon>
+      </div>
+
+      <div>
+        <!-- Titre avec statut intégré -->
+        <div class="flex items-center gap-2">
+          <h2 class="text-xl font-bold text-slate-900">Nouveau Collaborateur</h2>
+          <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-full text-[9px] font-bold uppercase tracking-wider border border-emerald-200">
+          Nouveau
+        </span>
+        </div>
+        <p class="text-xs text-slate-500 mt-1">Création d'un compte accès école</p>
+      </div>
+    </div>
+
+    <button (click)="onCancel()" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-400">
+      <lucide-icon [name]="X" class="w-4 h-4"></lucide-icon>
+    </button>
+  </header>
+
+  <!-- Corps avec scroll élégant -->
+  <div class="flex-1 overflow-y-auto custom-scrollbar bg-slate-50/30">
+    <form [formGroup]="staffForm" (ngSubmit)="onSave()" class="p-8 space-y-8">
+
+      <!-- SECTION 1 : IDENTITÉ -->
+      <div class="space-y-5">
+        <div class="flex items-center gap-3">
+          <div class="flex items-center justify-center w-8 h-8 rounded-xl bg-primary-50 text-primary-600">
+            <span class="text-xs font-bold">01</span>
+          </div>
+          <span class="text-sm font-semibold text-slate-700">Identité</span>
+          <div class="flex-1 h-px bg-gradient-to-r from-slate-200 to-transparent"></div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-5">
+          <!-- Prénom -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-semibold text-slate-600">
+                Prénom <span class="text-rose-500 ml-0.5">*</span>
+              </label>
+              <span *ngIf="isValid('firstName')" class="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                Valide
+              </span>
+            </div>
+
+            <div class="relative">
+              <!-- Icône avec fond et centrage parfait -->
+              <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center pointer-events-none">
+                <div class="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center group-focus-within:bg-primary-50 transition-colors">
+                  <lucide-icon [name]="User" class="w-4 h-4 text-slate-500 group-focus-within:text-primary-600"></lucide-icon>
+                </div>
+              </div>
+
+              <input
+                type="text"
+                formControlName="firstName"
+                placeholder="Alioune"
+                class="w-full h-12 pl-12 pr-4 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none transition-all"
+                [class.border-rose-200]="isInvalid('firstName')"
+                [class.bg-rose-50]="isInvalid('firstName')"
+                [class.border-emerald-200]="isValid('firstName')"
+                [class.bg-emerald-50]="isValid('firstName')"
+              >
+            </div>
+
+            <div *ngIf="isInvalid('firstName')" class="flex items-center gap-1.5 text-rose-600">
+              <lucide-icon [name]="AlertCircle" class="w-3.5 h-3.5"></lucide-icon>
+              <span class="text-[11px] font-medium">{{ getErrorMessage('firstName') }}</span>
+            </div>
+          </div>
+
+          <!-- Nom -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-semibold text-slate-600">
+                Nom <span class="text-rose-500 ml-0.5">*</span>
+              </label>
+              <span *ngIf="isValid('lastName')" class="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                Valide
+              </span>
+            </div>
+
+            <div class="relative">
+              <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center pointer-events-none">
+                <div class="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center group-focus-within:bg-primary-50 transition-colors">
+                  <lucide-icon [name]="User" class="w-4 h-4 text-slate-500 group-focus-within:text-primary-600"></lucide-icon>
+                </div>
+              </div>
+
+              <input
+                type="text"
+                formControlName="lastName"
+                placeholder="Diop"
+                class="w-full h-12 pl-12 pr-4 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none transition-all"
+                [class.border-rose-200]="isInvalid('lastName')"
+                [class.bg-rose-50]="isInvalid('lastName')"
+                [class.border-emerald-200]="isValid('lastName')"
+                [class.bg-emerald-50]="isValid('lastName')"
+              >
+            </div>
+
+            <div *ngIf="isInvalid('lastName')" class="flex items-center gap-1.5 text-rose-600">
+              <lucide-icon [name]="AlertCircle" class="w-3.5 h-3.5"></lucide-icon>
+              <span class="text-[11px] font-medium">{{ getErrorMessage('lastName') }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2 : CONTACT -->
+      <div class="space-y-5">
+        <div class="flex items-center gap-3">
+          <div class="flex items-center justify-center w-8 h-8 rounded-xl bg-primary-50 text-primary-600">
+            <span class="text-xs font-bold">02</span>
+          </div>
+          <span class="text-sm font-semibold text-slate-700">Contact</span>
+          <div class="flex-1 h-px bg-gradient-to-r from-slate-200 to-transparent"></div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-5">
+          <!-- Email -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-semibold text-slate-600">
+                Email professionnel <span class="text-rose-500 ml-0.5">*</span>
+              </label>
+              <span *ngIf="isValid('email')" class="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                Valide
+              </span>
+            </div>
+
+            <div class="relative">
+              <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center pointer-events-none">
+                <div class="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center group-focus-within:bg-primary-50 transition-colors">
+                  <lucide-icon [name]="Mail" class="w-4 h-4 text-slate-500 group-focus-within:text-primary-600"></lucide-icon>
+                </div>
+              </div>
+
+              <input
+                type="email"
+                formControlName="email"
+                placeholder="alioune.diop@ecole.sn"
+                class="w-full h-12 pl-12 pr-4 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none transition-all"
+                [class.border-rose-200]="isInvalid('email')"
+                [class.bg-rose-50]="isInvalid('email')"
+                [class.border-emerald-200]="isValid('email')"
+                [class.bg-emerald-50]="isValid('email')"
+              >
+            </div>
+
+            <div *ngIf="isInvalid('email')" class="flex items-center gap-1.5 text-rose-600">
+              <lucide-icon [name]="AlertCircle" class="w-3.5 h-3.5"></lucide-icon>
+              <span class="text-[11px] font-medium">{{ getErrorMessage('email') }}</span>
+            </div>
+          </div>
+
+          <!-- Téléphone -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-semibold text-slate-600">Téléphone</label>
+              <span *ngIf="isValid('phone')" class="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                Valide
+              </span>
+            </div>
+
+            <div class="relative">
+              <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center pointer-events-none">
+                <div class="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center group-focus-within:bg-primary-50 transition-colors">
+                  <lucide-icon [name]="Phone" class="w-4 h-4 text-slate-500 group-focus-within:text-primary-600"></lucide-icon>
+                </div>
+              </div>
+
+              <input
+                type="tel"
+                formControlName="phone"
+                placeholder="+221 77 123 45 67"
+                class="w-full h-12 pl-12 pr-4 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 outline-none transition-all"
+                [class.border-emerald-200]="isValid('phone')"
+                [class.bg-emerald-50]="isValid('phone')"
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 3 : DROITS & ACCÈS -->
+      <div class="space-y-5">
+        <div class="flex items-center gap-3">
+          <div class="flex items-center justify-center w-8 h-8 rounded-xl bg-primary-50 text-primary-600">
+            <span class="text-xs font-bold">03</span>
+          </div>
+          <span class="text-sm font-semibold text-slate-700">Droits & Accès</span>
+          <div class="flex-1 h-px bg-gradient-to-r from-slate-200 to-transparent"></div>
+        </div>
+
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-semibold text-slate-600">
+              Rôles assignés <span class="text-rose-500 ml-0.5">*</span>
+            </label>
+            <span *ngIf="isValid('roles')" class="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+              {{ getSelectedRolesCount() }} rôle(s) sélectionné(s)
+            </span>
+          </div>
+
+          <!-- Select personnalisé -->
+          <div class="relative">
+            <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center pointer-events-none z-10">
+              <div class="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center">
+                <lucide-icon [name]="Shield" class="w-4 h-4 text-slate-500"></lucide-icon>
+              </div>
+            </div>
+
+            <mat-select
+              formControlName="roles"
+              multiple
+              placeholder="Choisir des rôles"
+              panelClass="role-select-panel"
+              class="role-select"
+              [class.error]="isInvalid('roles')"
+            >
+              <mat-select-trigger>
+                <div class="flex items-center gap-2">
+                  <span class="text-sm text-slate-900">
+                    {{ getSelectedRolesDisplay() }}
+                  </span>
+                </div>
+              </mat-select-trigger>
+
+              <mat-option *ngFor="let role of roles()" [value]="role.name" class="role-option">
+                <div class="flex items-center gap-3 py-1">
+                  <div class="w-6 h-6 rounded-lg bg-slate-100 flex items-center justify-center">
+                    <lucide-icon [name]="getRoleIcon(role.name)" class="w-3.5 h-3.5 text-slate-600"></lucide-icon>
+                  </div>
+                  <span class="text-sm font-medium text-slate-700">{{ formatRoleName(role.name) }}</span>
+                  <span class="text-[11px] text-slate-400 ml-auto">{{ role.description || '' }}</span>
+                </div>
+              </mat-option>
+            </mat-select>
+          </div>
+
+          <!-- Message d'information stylisé -->
+          <div class="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-200 flex items-start gap-3">
+            <div class="w-6 h-6 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+              <lucide-icon [name]="Info" class="w-3.5 h-3.5 text-blue-600"></lucide-icon>
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              <span class="font-medium text-slate-700">Note :</span> L'utilisateur recevra ses identifiants de connexion par email après la création du compte. Un mot de passe temporaire sera généré automatiquement.
+            </p>
+          </div>
+
+          <div *ngIf="isInvalid('roles')" class="flex items-center gap-1.5 text-rose-600">
+            <lucide-icon [name]="AlertCircle" class="w-3.5 h-3.5"></lucide-icon>
+            <span class="text-[11px] font-medium">{{ getErrorMessage('roles') }}</span>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Footer avec actions -->
+  <footer class="px-8 py-5 border-t border-slate-200 bg-white flex items-center justify-end gap-3 shadow-lg">
+    <button
+      type="button"
+      (click)="onCancel()"
+      class="h-11 px-6 rounded-xl text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all active:scale-95"
+    >
+      Annuler
+    </button>
+    <button
+      type="submit"
+      (click)="onSave()"
+      [disabled]="staffForm.invalid || isLoading()"
+      class="h-11 px-6 rounded-xl text-sm font-medium bg-slate-900 text-white shadow-lg shadow-slate-900/20 hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none transition-all flex items-center gap-2 active:scale-95"
+    >
+      <lucide-icon *ngIf="isLoading()" [name]="Loader2" class="w-4 h-4 animate-spin"></lucide-icon>
+      <lucide-icon *ngIf="!isLoading()" [name]="Save" class="w-4 h-4"></lucide-icon>
+      <span>{{ isLoading() ? 'Création...' : 'Créer le compte' }}</span>
+    </button>
+  </footer>
+</div>

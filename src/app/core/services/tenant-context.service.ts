@@ -21,12 +21,7 @@ export class TenantContextService {
   readonly hasTenant = computed(() => this._activeTenant() !== null);
 
   constructor() {
-    // Initialisation par défaut (Mock pour le développement)
-    this.setTenant({
-      id: 'default-school',
-      name: 'Établissement Feewi',
-      primaryColor: '#2563EB',
-    });
+    // L'état initial est nul, il sera défini par l'AuthService après le login
   }
 
   setTenant(tenant: Tenant): void {

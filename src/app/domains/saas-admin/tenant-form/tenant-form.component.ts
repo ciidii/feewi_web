@@ -1,9 +1,25 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { LucideAngularModule, School as SchoolIcon, Globe, Mail, ShieldCheck, X, Loader2, Phone, MapPin, User, Lock, Quote, CheckCircle2, AlertCircle } from 'lucide-angular';
+import {
+  LucideAngularModule,
+  School as SchoolIcon,
+  Globe,
+  Mail,
+  ShieldCheck,
+  X,
+  Loader2,
+  Phone,
+  MapPin,
+  User,
+  Lock,
+  Quote,
+  CheckCircle2,
+  AlertCircle
+} from 'lucide-angular';
 import { SchoolService } from '../../../core/services/school.service';
+import { NotificationService } from '../../../shared/services/notification.service';
 
 @Component({
   selector: 'app-tenant-form',
@@ -16,11 +32,21 @@ export class TenantFormComponent {
   private fb = inject(FormBuilder);
   private schoolService = inject(SchoolService);
   private dialogRef = inject(MatDialogRef<TenantFormComponent>);
+  private notificationService = inject(NotificationService);
 
-  readonly X = X; readonly SchoolIcon = SchoolIcon; readonly Globe = Globe; 
-  readonly Mail = Mail; readonly ShieldCheck = ShieldCheck; readonly Loader2 = Loader2;
-  readonly Phone = Phone; readonly MapPin = MapPin; readonly User = User; readonly Lock = Lock;
-  readonly Quote = Quote; readonly CheckCircle2 = CheckCircle2; readonly AlertCircle = AlertCircle;
+  readonly X = X;
+  readonly SchoolIcon = SchoolIcon;
+  readonly Globe = Globe;
+  readonly Mail = Mail;
+  readonly ShieldCheck = ShieldCheck;
+  readonly Loader2 = Loader2;
+  readonly Phone = Phone;
+  readonly MapPin = MapPin;
+  readonly User = User;
+  readonly Lock = Lock;
+  readonly Quote = Quote;
+  readonly CheckCircle2 = CheckCircle2;
+  readonly AlertCircle = AlertCircle;
 
   isLoading = signal(false);
   error = signal<string | null>(null);
@@ -39,7 +65,6 @@ export class TenantFormComponent {
     adminPassword: ['', [Validators.required, Validators.minLength(8)]]
   });
 
-  // Helpers pour la validation
   isInvalid(controlName: string): boolean {
     const control = this.tenantForm.get(controlName);
     return !!(control && control.invalid && (control.dirty || control.touched));
@@ -55,26 +80,34 @@ export class TenantFormComponent {
     if (control?.hasError('required')) return 'Ce champ est obligatoire';
     if (control?.hasError('email')) return 'Format email invalide';
     if (control?.hasError('pattern')) return 'Format invalide';
-    if (control?.hasError('minlength')) return `Min. ${control.errors?.['minlength'].requiredLength} caractères`;
+    if (control?.hasError('minlength')) {
+      return `Min. ${control.errors?.['minlength'].requiredLength} caracteres`;
+    }
     return '';
   }
 
-  close() { this.dialogRef.close(); }
+  close() {
+    this.dialogRef.close();
+  }
 
   async onSubmit() {
     if (this.tenantForm.invalid) {
       this.tenantForm.markAllAsTouched();
+      this.notificationService.warning('Verifiez les champs du formulaire.', 'Formulaire incomplet');
       return;
     }
-    
+
     this.isLoading.set(true);
     this.error.set(null);
 
     try {
       const result = await this.schoolService.createSchool(this.tenantForm.value);
+      this.notificationService.success('Tenant cree avec succes.', 'Creation terminee');
       this.dialogRef.close(result);
     } catch (err: any) {
-      this.error.set(err.error?.message || 'Une erreur est survenue lors de la création.');
+      const message = err?.error?.message || err?.message || 'Une erreur est survenue lors de la creation.';
+      this.error.set(message);
+      this.notificationService.error(message, 'Echec de creation');
     } finally {
       this.isLoading.set(false);
     }

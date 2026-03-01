@@ -1,14 +1,31 @@
-import { Component, signal, ViewEncapsulation } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { LucideAngularModule, ShieldCheck, ShieldAlert, Shield, Save, Plus, ChevronRight, Check, X } from 'lucide-angular';
-import { MatButtonModule } from '@angular/material/button';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {
+  ChevronRight,
+  Info,
+  Key,
+  Loader2,
+  LucideAngularModule,
+  Maximize2,
+  Plus,
+  Save,
+  Shield,
+  ShieldCheck,
+  Sparkles,
+  Users
+} from 'lucide-angular';
+import {MatButtonModule} from '@angular/material/button';
+import {MatDialog} from '@angular/material/dialog';
+import {IdentityService} from '../../../../../core/services/identity.service';
+import {RoleFormComponent} from './components/role-form/role-form.component';
 
 export interface Permission {
   id: string;
   label: string;
   description: string;
   granted: boolean;
+  isSystem?: boolean;
+  dependencies?: string[];
 }
 
 export interface PermissionGroup {
@@ -19,52 +36,276 @@ export interface PermissionGroup {
 @Component({
   selector: 'app-role-designer',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, MatButtonModule, MatSlideToggleModule],
+  imports: [CommonModule, LucideAngularModule, MatButtonModule],
   templateUrl: './role-designer.component.html',
-  styleUrl: './role-designer.component.scss',
-  encapsulation: ViewEncapsulation.None
+  styleUrls: ['./role-designer.component.scss']
 })
-export class RoleDesignerComponent {
+export class RoleDesignerComponent implements OnInit {
+  private identityService = inject(IdentityService);
+  private dialog = inject(MatDialog);
+
+  // États
+  isLoading = this.identityService.loading;
+  isSaving = signal(false);
+  selectedRoleId = signal<string | null>(null);
+  unsavedChanges = signal<Set<string>>(new Set());
+
+  // Icônes
+  readonly ShieldCheck = ShieldCheck;
+  readonly Shield = Shield;
   readonly Save = Save;
   readonly Plus = Plus;
   readonly ChevronRight = ChevronRight;
-  readonly Shield = Shield;
-  readonly ShieldCheck = ShieldCheck;
+  readonly Loader2 = Loader2;
+  readonly Users = Users;
+  readonly Key = Key;
+  readonly Info = Info;
+  readonly Sparkles = Sparkles;
+  readonly Maximize2 = Maximize2;
 
-  roles = [
-    { id: '1', name: 'Administrateur École', icon: ShieldCheck, memberCount: 3 },
-    { id: '2', name: 'Comptable', icon: Shield, memberCount: 2 },
-    { id: '3', name: 'Enseignant', icon: Shield, memberCount: 15 },
-    { id: '4', name: 'Surveillant', icon: ShieldAlert, memberCount: 4 }
-  ];
+  // Rôles transformés
+  roles = computed(() => {
+    const apiRoles = this.identityService.roles();
+    return apiRoles.map(role => ({
+      id: role.id || role.name,
+      name: this.formatRoleName(role.name),
+      icon: role.isSystem ? ShieldCheck : Shield,
+      memberCount: (role as any).memberCount || 0,
+      rawData: role
+    }));
+  });
 
-  selectedRole = signal(this.roles[0]);
+  // Rôle sélectionné
+  selectedRole = computed(() => {
+    const currentRoles = this.roles();
+    if (currentRoles.length === 0) return null;
+    return currentRoles.find(r => r.id === this.selectedRoleId()) || currentRoles[0];
+  });
 
-  permissionGroups: PermissionGroup[] = [
+  // Groupes de permissions
+  permissionGroups = signal<PermissionGroup[]>([
     {
       category: 'Scolarité & Workflow',
       permissions: [
-        { id: '1', label: 'Consultation Référentiel', description: `Voir la liste des élèves et leurs informations de base.`, granted: true },
-        { id: '2', label: 'Édition Dossiers', description: `Modifier les informations d'état civil et les pièces jointes.`, granted: true },
-        { id: '3', label: 'Validation Admission', description: `Approuver les nouveaux inscrits et assigner une classe.`, granted: false },
-        { id: '10', label: 'Gestion Absences', description: `Saisir et justifier les absences journalières.`, granted: true }
+        {
+          id: 'student:read',
+          label: 'Consultation Référentiel',
+          description: 'Voir la liste des élèves et leurs informations de base.',
+          granted: false
+        },
+        {
+          id: 'student:write',
+          label: 'Édition Dossiers',
+          description: 'Modifier les informations d\'état civil et les pièces jointes.',
+          granted: false
+        },
+        {
+          id: 'admission:validate',
+          label: 'Validation Admission',
+          description: 'Approuver les nouveaux inscrits et assigner une classe.',
+          granted: false,
+          isSystem: true
+        },
+        {
+          id: 'attendance:manage',
+          label: 'Gestion Absences',
+          description: 'Saisir et justifier les absences journalières.',
+          granted: false
+        }
       ]
     },
     {
       category: 'Gestion Financière',
       permissions: [
-        { id: '4', label: 'Encaissement Frais', description: `Enregistrer les paiements et générer des factures.`, granted: false },
-        { id: '5', label: 'Rapports de Caisse', description: `Consulter les bilans et l'historique des transactions.`, granted: false },
-        { id: '11', label: 'Gestion Bourses', description: `Appliquer des remises ou des exonérations.`, granted: false }
+        {
+          id: 'finance:read',
+          label: 'Encaissement Frais',
+          description: 'Enregistrer les paiements et générer des factures.',
+          granted: false
+        },
+        {
+          id: 'finance:report',
+          label: 'Rapports de Caisse',
+          description: 'Consulter les bilans et l\'historique des transactions.',
+          granted: false,
+          dependencies: ['finance:read']
+        }
       ]
     },
     {
       category: 'Système & Sécurité',
       permissions: [
-        { id: '6', label: 'Annuaire Staff', description: `Gérer les comptes utilisateurs des collaborateurs.`, granted: false },
-        { id: '7', label: 'Configuration Niveaux', description: `Définir la structure des classes et des cycles.`, granted: true },
-        { id: '12', label: 'Audit Trail', description: `Consulter le journal des actions de sécurité.`, granted: false }
+        {
+          id: 'user:manage',
+          label: 'Annuaire Staff',
+          description: 'Gérer les comptes utilisateurs des collaborateurs.',
+          granted: false,
+          isSystem: true
+        },
+        {
+          id: 'school:manage',
+          label: 'Configuration Niveaux',
+          description: 'Définir la structure des classes et des cycles.',
+          granted: false
+        },
+        {
+          id: 'audit:read',
+          label: 'Audit Trail',
+          description: 'Consulter le journal des actions de sécurité.',
+          granted: false,
+          isSystem: true
+        }
       ]
     }
-  ];
+  ]);
+
+  ngOnInit() {
+    this.loadRoles();
+  }
+
+  // ===========================================
+  // MÉTHODES UTILITAIRES
+  // ===========================================
+
+  formatRoleName(roleName: string): string {
+    return roleName.replace('ROLE_', '').replace(/_/g, ' ');
+  }
+
+  getTotalPermissions(): number {
+    return this.permissionGroups().reduce((acc, g) => acc + g.permissions.length, 0);
+  }
+
+  getGrantedPermissionsCount(): number {
+    return this.permissionGroups().reduce(
+      (acc, g) => acc + g.permissions.filter(p => p.granted).length,
+      0
+    );
+  }
+
+  hasUnsavedChanges(): boolean {
+    return this.unsavedChanges().size > 0;
+  }
+
+  // ===========================================
+  // GESTION DES RÔLES
+  // ===========================================
+
+  async loadRoles() {
+    await this.identityService.getRoles();
+    const firstRole = this.roles()[0];
+    if (firstRole && !this.selectedRoleId()) {
+      this.selectRole(firstRole.id);
+    }
+  }
+
+  openAddRoleForm() {
+    const dialogRef = this.dialog.open(RoleFormComponent, {
+      width: '560px',
+      panelClass: 'role-form-dialog'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) this.loadRoles();
+    });
+  }
+
+  selectRole(id: string) {
+    this.selectedRoleId.set(id);
+    this.syncPermissionsWithSelectedRole();
+    this.unsavedChanges.set(new Set());
+  }
+
+  // ===========================================
+  // GESTION DES PERMISSIONS
+  // ===========================================
+
+  private syncPermissionsWithSelectedRole() {
+    const role = this.selectedRole();
+    if (!role?.rawData?.permissions) return;
+
+    const grantedPermissions = role.rawData.permissions;
+
+    const updatedGroups = this.permissionGroups().map(group => ({
+      ...group,
+      permissions: group.permissions.map(p => ({
+        ...p,
+        granted: grantedPermissions.includes(p.id)
+      }))
+    }));
+
+    this.permissionGroups.set(updatedGroups);
+  }
+
+  onPermissionToggle(permissionId: string, granted: boolean) {
+    // Mettre à jour l'état local
+    const updatedGroups = this.permissionGroups().map(group => ({
+      ...group,
+      permissions: group.permissions.map(p =>
+        p.id === permissionId ? {...p, granted} : p
+      )
+    }));
+    this.permissionGroups.set(updatedGroups);
+
+    // Marquer comme modifié
+    const updated = new Set(this.unsavedChanges());
+    updated.add(permissionId);
+    this.unsavedChanges.set(updated);
+
+    // Gérer les dépendances si nécessaire
+    this.handleDependencies(permissionId, granted);
+  }
+
+  private handleDependencies(permissionId: string, granted: boolean) {
+    if (!granted) return;
+
+    const permission = this.findPermission(permissionId);
+    if (permission?.dependencies) {
+      const updatedGroups = this.permissionGroups().map(group => ({
+        ...group,
+        permissions: group.permissions.map(p =>
+          permission.dependencies?.includes(p.id) ? {...p, granted: true} : p
+        )
+      }));
+      this.permissionGroups.set(updatedGroups);
+    }
+  }
+
+  private findPermission(id: string): Permission | undefined {
+    for (const group of this.permissionGroups()) {
+      const found = group.permissions.find(p => p.id === id);
+      if (found) return found;
+    }
+    return undefined;
+  }
+
+  expandAllGroups() {
+    console.log('Expand all groups');
+  }
+
+  // ===========================================
+  // SAUVEGARDE
+  // ===========================================
+
+  async savePermissions() {
+    const role = this.selectedRole();
+    if (!role?.rawData?.id || !this.hasUnsavedChanges()) return;
+
+    this.isSaving.set(true);
+
+    const allPermissions = this.permissionGroups().flatMap(g => g.permissions);
+    const grantedIds = allPermissions.filter(p => p.granted).map(p => p.id);
+
+    try {
+      await this.identityService.updateRole(role.rawData.id, {
+        permissions: grantedIds
+      });
+      await this.loadRoles();
+      this.unsavedChanges.set(new Set());
+      console.log('✅ Permissions sauvegardées');
+    } catch (err) {
+      console.error('❌ Erreur de sauvegarde', err);
+    } finally {
+      this.isSaving.set(false);
+    }
+  }
 }

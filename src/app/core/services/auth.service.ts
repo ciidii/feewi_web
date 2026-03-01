@@ -2,6 +2,7 @@ import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { firstValueFrom, tap } from 'rxjs';
+import { TenantContextService } from './tenant-context.service';
 
 export interface UserProfile {
   id: string;
@@ -25,6 +26,7 @@ interface LoginResponse {
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
+  private tenantService = inject(TenantContextService);
   private readonly API_URL = 'http://localhost:8080/api/v1';
 
   // State
@@ -38,6 +40,7 @@ export class AuthService {
   constructor() {}
 
   async login(email: string, password: string): Promise<boolean> {
+    console.log('[AuthService] Attempting login for:', email);
     try {
       const response = await firstValueFrom(
         this.http.post<LoginResponse>(`${this.API_URL}/auth/login`, { email, password })
@@ -47,23 +50,36 @@ export class AuthService {
       await this.fetchProfile();
       return true;
     } catch (error) {
-      console.error('Login failed', error);
+      console.error('[AuthService] Login failed', error);
       return false;
     }
   }
 
   async fetchProfile(): Promise<void> {
+    console.log('[AuthService] Fetching profile...');
     try {
       const profile = await firstValueFrom(
         this.http.get<UserProfile>(`${this.API_URL}/users/me`)
       );
+      console.log('[AuthService] Profile fetched successfully:', profile.email);
       this._currentUser.set(profile);
+
+      // Update Tenant Context
+      if (profile.tenantId) {
+        this.tenantService.setTenant({
+          id: profile.tenantId,
+          name: 'Mon Établissement', 
+        });
+      }
     } catch (error) {
-      this.logout();
+      console.warn('[AuthService] Failed to fetch profile (User might not be logged in)');
+      this._currentUser.set(null);
+      // On ne redirige plus ici, les Guards s'en chargeront
     }
   }
 
   logout(): void {
+    console.log('[AuthService] Logging out...');
     this._currentUser.set(null);
     localStorage.removeItem('access_token');
     this.router.navigate(['/auth/login']);
@@ -83,11 +99,18 @@ export class AuthService {
     const token = localStorage.getItem('access_token');
     if (token) {
       try {
-        await this.fetchProfile();
+        // On essaie de récupérer le profil, mais on ne bloque pas indéfiniment
+        await Promise.race([
+          this.fetchProfile(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 3000))
+        ]);
       } catch (e) {
-        console.warn('Session check failed', e);
+        console.warn('Session check failed or timed out. User will need to login.', e);
+        localStorage.removeItem('access_token');
+        this._currentUser.set(null);
       }
     }
     this._isReady.set(true);
+    return Promise.resolve(); // On résout explicitement pour Angular
   }
 }
