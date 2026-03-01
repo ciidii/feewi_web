@@ -4,8 +4,8 @@ import { Injectable, signal } from '@angular/core';
   providedIn: 'root'
 })
 export class LoadingService {
-  // Keep the loader visible long enough to test animations.
-  private readonly minVisibleMs = 900;
+  // Back to normal behavior (no artificial delay).
+  private readonly minVisibleMs = 0;
   private loadingCount = signal(0);
   private visibleSince = 0;
   private hideTimeoutId: ReturnType<typeof setTimeout> | null = null;
