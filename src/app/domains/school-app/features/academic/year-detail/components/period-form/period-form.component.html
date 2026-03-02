@@ -1,0 +1,103 @@
+<app-form-shell
+  [title]="isEditMode ? 'Modifier la Période' : 'Ajouter une Période'"
+  [subtitle]="isEditMode ? 'Rectifiez les dates de cours ou d\'examens.' : 'Définissez un trimestre ou semestre pour cette année scolaire.'"
+  [icon]="ListTodo"
+  statusLabel="Pédagogique"
+  [saveLabel]="isEditMode ? 'Enregistrer les modifications' : 'Ajouter la période'"
+  [isLoading]="isLoading()"
+  [canSave]="periodForm.valid"
+  (save)="onSave()"
+  (cancel)="onCancel()"
+>
+  <form [formGroup]="periodForm" class="space-y-8">
+
+    <!-- 1. Identification -->
+    <div class="space-y-5">
+      <div class="flex items-center gap-3">
+        <div class="flex items-center justify-center w-8 h-8 rounded-xl bg-primary-50 text-primary-600 font-bold text-xs">01</div>
+        <span class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Identification</span>
+        <div class="flex-1 h-px bg-slate-100"></div>
+      </div>
+
+      <div class="space-y-2">
+        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Libellé de la période</label>
+        <div class="relative group">
+          <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors">
+            <lucide-icon [name]="Type" class="w-4.5 h-4.5"></lucide-icon>
+          </div>
+          <input
+            type="text"
+            formControlName="label"
+            placeholder="Ex: 1er Trimestre"
+            class="fw-input-field"
+            [class.error]="isInvalid('label')"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Calendrier de Cours -->
+    <div class="space-y-5">
+      <div class="flex items-center gap-3">
+        <div class="flex items-center justify-center w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 font-bold text-xs">02</div>
+        <span class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Dates des Cours</span>
+        <div class="flex-1 h-px bg-slate-100"></div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-6">
+        <div class="space-y-2">
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Début</label>
+          <input type="date" formControlName="startDate" class="fw-input-field" [class.error]="isInvalid('startDate')"/>
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Fin</label>
+          <input type="date" formControlName="endDate" class="fw-input-field" [class.error]="isInvalid('endDate')"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Examens & Notes -->
+    <div class="space-y-5">
+      <div class="flex items-center gap-3">
+        <div class="flex items-center justify-center w-8 h-8 rounded-xl bg-amber-50 text-amber-600 font-bold text-xs">03</div>
+        <span class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Examens & Bilans</span>
+        <div class="flex-1 h-px bg-slate-100"></div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-6 mb-4">
+        <div class="space-y-2">
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Début Examens</label>
+          <input type="date" formControlName="examStartDate" class="fw-input-field"/>
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Fin Examens</label>
+          <input type="date" formControlName="examEndDate" class="fw-input-field"/>
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1 text-rose-600 underline">Date limite de saisie des notes</label>
+        <div class="relative group">
+          <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors">
+            <lucide-icon [name]="Clock" class="w-4.5 h-4.5"></lucide-icon>
+          </div>
+          <input
+            type="date"
+            formControlName="gradingDeadline"
+            class="fw-input-field"
+            [class.error]="isInvalid('gradingDeadline')"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="p-4 bg-amber-50 rounded-xl border border-amber-100 flex items-start gap-3">
+      <lucide-icon [name]="Info" class="w-4 h-4 text-amber-600 mt-0.5"></lucide-icon>
+      <p class="text-[11px] text-amber-800 leading-relaxed font-medium">
+        Les dates doivent être incluses dans l'intervalle de l'année scolaire : <br/>
+        <span class="font-bold underline">{{ formatDate(year()?.lessonsStartDate) }} au {{ formatDate(year()?.lessonsEndDate) }}</span>
+      </p>
+    </div>
+
+  </form>
+</app-form-shell>

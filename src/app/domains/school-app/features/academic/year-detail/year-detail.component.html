@@ -198,10 +198,54 @@
         </div>
       </div>
 
-      <!-- AUTRES ONGLETS (PLACEHOLDERS) -->
-      <div *ngIf="activeTab() !== 'timeline'" class="bg-white rounded-3xl border border-slate-200 p-20 text-center space-y-4">
-        <lucide-icon [name]="activeTab() === 'periods' ? ListTodo : Palmtree" class="w-12 h-12 text-slate-300 mx-auto"></lucide-icon>
-        <p class="text-sm text-slate-500 font-medium italic italic uppercase tracking-widest">Contenu {{ activeTab() }} bientôt disponible</p>
+      <!-- CAS 2 : PÉRIODES (Trimestres/Semestres) -->
+      <div *ngIf="activeTab() === 'periods'" class="space-y-6 animate-in slide-in-from-bottom-2 duration-500">
+        <div class="flex justify-between items-center px-2">
+          <h3 class="text-sm font-bold text-slate-700 uppercase tracking-widest flex items-center gap-2">
+            <lucide-icon [name]="ListTodo" class="w-4 h-4 text-primary-600"></lucide-icon>
+            Découpage des Sessions
+          </h3>
+          <button 
+            (click)="openPeriodForm()"
+            [disabled]="y.status === 'ARCHIVED'"
+            class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-xs font-bold hover:bg-primary-hover transition-all active:scale-95 disabled:opacity-50"
+          >
+            <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
+            Ajouter une période
+          </button>
+        </div>
+
+        <app-data-list
+          [data]="displayPeriods()"
+          [total]="displayPeriods().length"
+          [actions]="periodActions"
+          (onAction)="handlePeriodAction($event)"
+        ></app-data-list>
+      </div>
+
+      <!-- CAS 3 : VACANCES -->
+      <div *ngIf="activeTab() === 'holidays'" class="space-y-6 animate-in slide-in-from-bottom-2 duration-500">
+        <div class="flex justify-between items-center px-2">
+          <h3 class="text-sm font-bold text-slate-700 uppercase tracking-widest flex items-center gap-2">
+            <lucide-icon [name]="Palmtree" class="w-4 h-4 text-emerald-600"></lucide-icon>
+            Calendrier des Congés
+          </h3>
+          <button 
+            (click)="openHolidayForm()"
+            [disabled]="y.status === 'ARCHIVED'"
+            class="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition-all active:scale-95 disabled:opacity-50"
+          >
+            <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
+            Ajouter un congé
+          </button>
+        </div>
+
+        <app-data-list
+          [data]="displayHolidays()"
+          [total]="displayHolidays().length"
+          [actions]="holidayActions"
+          (onAction)="handleHolidayAction($event)"
+        ></app-data-list>
       </div>
 
     </div>

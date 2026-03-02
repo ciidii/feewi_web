@@ -8,10 +8,14 @@ import {
   ListTodo, Palmtree, ChevronRight,
   MoreVertical, Edit, Trash2, Printer, Play, Archive, RotateCcw, XCircle
 } from 'lucide-angular';
-import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import { PeriodFormComponent } from './components/period-form/period-form.component';
+import { HolidayFormComponent } from './components/holiday-form/holiday-form.component';
+import {RowAction, TableRow} from '../../../../../shared/models/data-list.models';
+import {AcademicYear, Holiday, Period} from '../../../../../core/models/academic.model';
 import {AcademicService} from '../../../../../core/services/academic.service';
 import {NotificationService} from '../../../../../shared/services/notification.service';
-import {AcademicYear, Holiday, Period} from '../../../../../core/models/academic.model';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import {DataListComponent} from '../../../../../shared/components/data-list/data-list.component';
 import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 
 export interface TimelineEvent {
@@ -27,7 +31,7 @@ export interface TimelineEvent {
 @Component({
   selector: 'app-year-detail',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, RouterModule, MatDialogModule],
+  imports: [CommonModule, LucideAngularModule, RouterModule, MatDialogModule, DataListComponent],
   templateUrl: './year-detail.component.html',
   styleUrls: ['./year-detail.component.scss']
 })
@@ -44,13 +48,54 @@ export class YearDetailComponent implements OnInit {
   isLoading = signal(true);
   activeTab = signal('timeline');
 
+  // Actions pour les périodes
+  readonly periodActions: RowAction[] = [
+    { id: 'edit', label: 'Modifier', icon: Edit, type: 'primary' },
+    { id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger' }
+  ];
+
+  // Actions pour les vacances
+  readonly holidayActions: RowAction[] = [
+    { id: 'edit', label: 'Modifier', icon: Edit, type: 'primary' },
+    { id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger' }
+  ];
+
+  // Transformation des périodes pour le DataList
+  displayPeriods = computed<TableRow[]>(() => {
+    return this.periods().map(p => ({
+      id: p.id,
+      title: p.label,
+      subtitle: `Examens du ${this.formatDateShort(p.examStartDate)} au ${this.formatDateShort(p.examEndDate)}`,
+      avatarLabel: p.label.substring(0, 2).toUpperCase(),
+      date: `Cours: ${this.formatDateShort(p.startDate)} - ${this.formatDateShort(p.endDate)}`,
+      badges: [
+        { label: 'Session de notes', type: 'info' },
+        { label: `Limite: ${this.formatDateShort(p.gradingDeadline)}`, type: 'warning' }
+      ],
+      rawData: p
+    }));
+  });
+
+  // Transformation des vacances pour le DataList
+  displayHolidays = computed<TableRow[]>(() => {
+    return this.holidays().map(h => ({
+      id: h.id,
+      title: h.label,
+      subtitle: h.schoolClosed ? 'Établissement fermé' : 'Établissement ouvert',
+      avatarLabel: 'VC',
+      date: `${this.formatDateShort(h.startDate)} au ${this.formatDateShort(h.endDate)}`,
+      badges: [
+        { label: 'CONGÉ', type: h.schoolClosed ? 'danger' : 'success' }
+      ],
+      rawData: h
+    }));
+  });
+
   // Construction de la Timeline
   timelineEvents = computed<TimelineEvent[]>(() => {
     const events: TimelineEvent[] = [];
-    const pList = this.periods();
-    const hList = this.holidays();
 
-    pList.forEach(p => {
+    this.periods().forEach(p => {
       events.push({
         id: p.id,
         type: 'PERIOD',
@@ -72,7 +117,7 @@ export class YearDetailComponent implements OnInit {
       }
     });
 
-    hList.forEach(h => {
+    this.holidays().forEach(h => {
       events.push({
         id: h.id,
         type: 'HOLIDAY',
@@ -128,6 +173,100 @@ export class YearDetailComponent implements OnInit {
       this.notificationService.error("Erreur lors du chargement des détails de l'année.");
     } finally {
       this.isLoading.set(false);
+    }
+  }
+
+  // --- ACTIONS VACANCES ---
+
+  handleHolidayAction(event: { actionId: string, row: TableRow }) {
+    if (event.actionId === 'edit') {
+      this.openHolidayForm(event.row.rawData);
+    } else if (event.actionId === 'delete') {
+      this.confirmDeleteHoliday(event.row.id as string, event.row.title);
+    }
+  }
+
+  openHolidayForm(holiday?: Holiday) {
+    const dialogRef = this.dialog.open(HolidayFormComponent, {
+      width: '500px',
+      maxWidth: '95vw',
+      panelClass: 'feewi-dialog-panel',
+      data: {
+        year: this.year(),
+        holiday: holiday
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && this.year()) {
+        this.loadYearDetails(this.year()!.id);
+      }
+    });
+  }
+
+  private async confirmDeleteHoliday(id: string, name: string) {
+    const confirmed = await this.confirmAction(
+      'Supprimer le congé ?',
+      `Voulez-vous supprimer les vacances "${name}" du calendrier ?`,
+      'Oui, supprimer',
+      'danger'
+    );
+
+    if (confirmed && this.year()) {
+      try {
+        await this.academicService.deleteHoliday(this.year()!.id, id);
+        this.notificationService.success('Congé supprimé.');
+        this.loadYearDetails(this.year()!.id);
+      } catch (e) {
+        this.notificationService.error("Échec de la suppression.");
+      }
+    }
+  }
+
+  // --- ACTIONS PÉRIODES ---
+
+  handlePeriodAction(event: { actionId: string, row: TableRow }) {
+    if (event.actionId === 'edit') {
+      this.openPeriodForm(event.row.rawData);
+    } else if (event.actionId === 'delete') {
+      this.confirmDeletePeriod(event.row.id as string, event.row.title);
+    }
+  }
+
+  openPeriodForm(period?: Period) {
+    const dialogRef = this.dialog.open(PeriodFormComponent, {
+      width: '600px',
+      maxWidth: '95vw',
+      panelClass: 'feewi-dialog-panel',
+      data: {
+        year: this.year(),
+        period: period
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && this.year()) {
+        this.loadYearDetails(this.year()!.id);
+      }
+    });
+  }
+
+  private async confirmDeletePeriod(id: string, name: string) {
+    const confirmed = await this.confirmAction(
+      'Supprimer la période ?',
+      `Voulez-vous supprimer le "${name}" ? Les dates d'examens associées seront également perdues.`,
+      'Oui, supprimer',
+      'danger'
+    );
+
+    if (confirmed && this.year()) {
+      try {
+        await this.academicService.deletePeriod(this.year()!.id, id);
+        this.notificationService.success('Période supprimée.');
+        this.loadYearDetails(this.year()!.id);
+      } catch (e) {
+        this.notificationService.error("Impossible de supprimer cette période.");
+      }
     }
   }
 
