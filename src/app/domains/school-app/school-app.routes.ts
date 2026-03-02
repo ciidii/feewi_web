@@ -40,6 +40,15 @@ export const SCHOOL_APP_ROUTES: Routes = [
     loadComponent: () => import('./features/academic/structure-config/structure-config.component').then(m => m.StructureConfigComponent)
   },
   {
+    path: 'academic',
+    children: [
+      {
+        path: 'years',
+        loadComponent: () => import('./features/academic/year-list/year-list.component').then(m => m.YearListComponent)
+      }
+    ]
+  },
+  {
     path: '',
     redirectTo: 'dashboard',
     pathMatch: 'full'
