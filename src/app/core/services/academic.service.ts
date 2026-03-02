@@ -8,7 +8,9 @@ import {
   Holiday, 
   Cycle, 
   Level, 
-  ClassInstance 
+  SchoolClass,
+  Filiere,
+  CreateClassRequest
 } from '../models/academic.model';
 
 @Injectable({
@@ -97,7 +99,23 @@ export class AcademicService {
   }
 
   // ===========================================
-  // RÉFÉRENTIEL STRUCTURE (Cycles & Niveaux)
+  // GESTION DES CLASSES (OPÉRATIONNEL)
+  // ===========================================
+
+  async getClassesByYear(yearId: string): Promise<SchoolClass[]> {
+    return await firstValueFrom(this.http.get<SchoolClass[]>(`${this.API_URL}/classes/by-year/${yearId}`));
+  }
+
+  async createClass(request: CreateClassRequest): Promise<SchoolClass> {
+    return await firstValueFrom(this.http.post<SchoolClass>(`${this.API_URL}/classes`, request));
+  }
+
+  async updateClass(id: string, request: Partial<CreateClassRequest>): Promise<SchoolClass> {
+    return await firstValueFrom(this.http.put<SchoolClass>(`${this.API_URL}/classes/${id}`, request));
+  }
+
+  // ===========================================
+  // RÉFÉRENTIEL STRUCTURE (Cycles, Niveaux, Filières)
   // ===========================================
 
   async getCycles(): Promise<Cycle[]> {
@@ -130,5 +148,13 @@ export class AcademicService {
 
   async deleteLevel(id: string): Promise<void> {
     await firstValueFrom(this.http.delete<void>(`${this.API_URL}/levels/${id}`));
+  }
+
+  async getFilieres(): Promise<Filiere[]> {
+    return await firstValueFrom(this.http.get<Filiere[]>(`${this.API_URL}/filieres`));
+  }
+
+  async createFiliere(filiere: Partial<Filiere>): Promise<Filiere> {
+    return await firstValueFrom(this.http.post<Filiere>(`${this.API_URL}/filieres`, filiere));
   }
 }

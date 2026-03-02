@@ -1,15 +1,17 @@
 import { Component, inject, OnInit, signal, computed, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LucideAngularModule, School, Plus, Layers, ChevronRight, Trash2, Edit } from 'lucide-angular';
+import { LucideAngularModule, School, Plus, Layers, ChevronRight, Trash2, Edit, BookOpen, Tag } from 'lucide-angular';
 import { AcademicService } from '../../../../../core/services/academic.service';
 import { NotificationService } from '../../../../../shared/services/notification.service';
-import { Cycle, Level } from '../../../../../core/models/academic.model';
+import { Cycle, Level, Filiere } from '../../../../../core/models/academic.model';
 import { DataListComponent } from '../../../../../shared/components/data-list/data-list.component';
-import { RowAction, TableRow } from '../../../../../shared/models/data-list.models';
+import { TableRow, RowAction } from '../../../../../shared/models/data-list.models';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { LevelFormComponent } from './components/level-form/level-form.component';
 import { CycleFormComponent } from './components/cycle-form/cycle-form.component';
+import { FiliereFormComponent } from './components/filiere-form/filiere-form.component';
 import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
+
 
 @Component({
   selector: 'app-structure-config',
@@ -31,15 +33,25 @@ export class StructureConfigComponent implements OnInit {
   readonly ChevronRight = ChevronRight;
   readonly Edit = Edit;
   readonly Trash2 = Trash2;
+  readonly BookOpen = BookOpen;
+  readonly Tag = Tag;
 
   // États
+  activeTab = signal<'niveaux' | 'filieres'>('niveaux');
   cycles = signal<Cycle[]>([]);
   levels = signal<Level[]>([]);
+  filieres = signal<Filiere[]>([]);
   selectedCycleId = signal<string | null>(null);
   isLoading = signal(true);
 
   // Actions pour les niveaux
   readonly levelActions: RowAction[] = [
+    { id: 'edit', label: 'Modifier', icon: Edit, type: 'primary' },
+    { id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger' }
+  ];
+
+  // Actions pour les filières
+  readonly filiereActions: RowAction[] = [
     { id: 'edit', label: 'Modifier', icon: Edit, type: 'primary' },
     { id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger' }
   ];
@@ -68,6 +80,18 @@ export class StructureConfigComponent implements OnInit {
       }));
   });
 
+  // Filières transformées pour le DataList
+  displayFilieres = computed<TableRow[]>(() => {
+    return this.filieres().map(f => ({
+      id: f.id,
+      title: f.name,
+      subtitle: `Code série : ${f.code}`,
+      avatarLabel: f.code.substring(0, 2).toUpperCase(),
+      badges: [{ label: 'SÉRIE', type: 'info' }],
+      rawData: f
+    }));
+  });
+
   ngOnInit() {
     this.loadData();
   }
@@ -75,12 +99,14 @@ export class StructureConfigComponent implements OnInit {
   async loadData() {
     this.isLoading.set(true);
     try {
-      const [cyclesData, levelsData] = await Promise.all([
+      const [cyclesData, levelsData, filieresData] = await Promise.all([
         this.academicService.getCycles(),
-        this.academicService.getLevels()
+        this.academicService.getLevels(),
+        this.academicService.getFilieres()
       ]);
       this.cycles.set(cyclesData);
       this.levels.set(levelsData);
+      this.filieres.set(filieresData);
 
       if (cyclesData.length > 0 && !this.selectedCycleId()) {
         this.selectedCycleId.set(cyclesData[0].id);
@@ -92,8 +118,31 @@ export class StructureConfigComponent implements OnInit {
     }
   }
 
+  setTab(tab: 'niveaux' | 'filieres') {
+    this.activeTab.set(tab);
+  }
+
   selectCycle(id: string) {
     this.selectedCycleId.set(id);
+  }
+
+  // --- ACTIONS FILIÈRES ---
+
+  handleFiliereAction(event: { actionId: string, row: TableRow }) {
+    this.notificationService.info("Action sur filière bientôt disponible.");
+  }
+
+  openAddFiliere() {
+    const dialogRef = this.dialog.open(FiliereFormComponent, {
+      width: '480px',
+      panelClass: 'feewi-dialog-panel'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadData();
+      }
+    });
   }
 
   // --- ACTIONS CYCLES ---

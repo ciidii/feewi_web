@@ -4,7 +4,24 @@ import { RouterModule } from '@angular/router';
 import { NavigationStateService } from '../../services/navigation-state.service';
 import { AuthService } from '../../services/auth.service';
 import { MatButtonModule } from '@angular/material/button';
-import { LucideAngularModule, ChevronLeft, ChevronRight, Plus, Users, School, Calendar, BookOpen, FileText, Briefcase, ShieldCheck, Building2, Globe, BarChart3, History } from 'lucide-angular';
+import {
+  LucideAngularModule,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Users,
+  School,
+  Calendar,
+  BookOpen,
+  FileText,
+  Briefcase,
+  ShieldCheck,
+  Building2,
+  Globe,
+  BarChart3,
+  History,
+  Layers
+} from 'lucide-angular';
 
 @Component({
   selector: 'app-sidebar',
@@ -38,6 +55,7 @@ export class SidebarComponent {
   // --- 3. ACADEMIC STRUCTURE (Référentiel) ---
   academicItems = [
     { label: 'Classes & Niveaux', icon: School, route: '/classes' },
+    { label: 'Gestion des Classes', icon: Layers, route: '/academic/classes' },
     { label: 'Années Scolaires', icon: Calendar, route: '/academic/years' },
   ];
 

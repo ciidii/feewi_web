@@ -86,6 +86,45 @@ Le service **Academic Structure** est le garant de l'organisation temporelle et 
 | `PUT` | `/{id}` | ADMIN | Modifier un niveau (Changement de Cycle/Rank). |
 | `DELETE` | `/{id}` | ADMIN | Supprimer un niveau. |
 
+### 5.3 Référentiel des Filières (`/api/v1/academic/filieres`)
+*   **URL :** `GET /filieres` | `POST /filieres`
+*   **Usage :** Séries au Lycée ou spécialisations techniques (ex: S1, L1, G).
+*   **Requête :**
+    ```json
+    {
+      "name": "Série S1 - Sciences Exactes",
+      "code": "S1"
+    }
+    ```
+
+### 5.4 Gestion des Classes (`/api/v1/academic/classes`)
+La Classe est l'union d'une Année, d'un Niveau et d'une Filière (optionnelle).
+*   **URL :** `POST /classes` | `PUT /classes/{id}`
+*   **Lister par année :** `GET /classes/by-year/{yearId}`
+*   **Requête :**
+    ```json
+    {
+      "academicYearId": "uuid",
+      "levelId": "uuid",
+      "filiereId": "uuid", // Optionnel pour le Tronc Commun
+      "name": "A", // Suffixe de la classe
+      "capacity": 35
+    }
+    ```
+*   **Réponse :**
+    ```json
+    {
+      "id": "uuid",
+      "fullName": "CM2 A", // Nom complet reconstruit
+      "name": "A",
+      "levelName": "CM2",
+      "filiereCode": null,
+      "capacity": 35,
+      "academicYearId": "...",
+      "levelId": "...",
+      "filiereId": null
+    }
+    ```
 ---
 
 ## 6. Guide d'Intégration Frontend (Angular)

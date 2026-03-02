@@ -49,13 +49,30 @@ export interface Level {
   cycle?: Cycle;
 }
 
-export interface ClassInstance {
+export interface Filiere {
   id: string;
   name: string;
+  code: string;
+}
+
+export interface SchoolClass {
+  id: string;
+  fullName: string; // Nom reconstruit (ex: "CM2 A")
+  name: string;     // Suffixe (ex: "A")
   capacity: number;
+  academicYearId: string;
   levelId: string;
-  yearId: string;
-  level?: Level;
+  filiereId?: string | null;
+  levelName?: string;
+  filiereCode?: string | null;
+}
+
+export interface CreateClassRequest {
+  academicYearId: string;
+  levelId: string;
+  filiereId?: string | null;
+  name: string;
+  capacity: number;
 }
 
 export interface CreateYearRequest {

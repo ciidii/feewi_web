@@ -49,6 +49,10 @@ export const SCHOOL_APP_ROUTES: Routes = [
       {
         path: 'years/:id',
         loadComponent: () => import('./features/academic/year-detail/year-detail.component').then(m => m.YearDetailComponent)
+      },
+      {
+        path: 'classes',
+        loadComponent: () => import('./features/academic/class-list/class-list.component').then(m => m.ClassListComponent)
       }
     ]
   },
