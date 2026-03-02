@@ -30,8 +30,70 @@ export class AcademicService {
     return await firstValueFrom(this.http.get<AcademicYear[]>(`${this.API_URL}/years`));
   }
 
+  async getYearById(id: string): Promise<AcademicYear> {
+    return await firstValueFrom(this.http.get<AcademicYear>(`${this.API_URL}/years/${id}`));
+  }
+
+  async getCurrentYear(): Promise<AcademicYear> {
+    return await firstValueFrom(this.http.get<AcademicYear>(`${this.API_URL}/years/current`));
+  }
+
   async createYear(request: CreateYearRequest): Promise<AcademicYear> {
     return await firstValueFrom(this.http.post<AcademicYear>(`${this.API_URL}/years`, request));
+  }
+
+  // --- Workflow de l'année ---
+
+  async activateYear(id: string): Promise<void> {
+    await firstValueFrom(this.http.patch<void>(`${this.API_URL}/years/${id}/activate`, {}));
+  }
+
+  async closeYear(id: string): Promise<void> {
+    await firstValueFrom(this.http.patch<void>(`${this.API_URL}/years/${id}/close`, {}));
+  }
+
+  async reopenYear(id: string): Promise<void> {
+    await firstValueFrom(this.http.patch<void>(`${this.API_URL}/years/${id}/reopen`, {}));
+  }
+
+  async archiveYear(id: string): Promise<void> {
+    await firstValueFrom(this.http.patch<void>(`${this.API_URL}/years/${id}/archive`, {}));
+  }
+
+  // ===========================================
+  // PÉRIODES & CONGÉS
+  // ===========================================
+
+  async getPeriods(yearId: string): Promise<Period[]> {
+    return await firstValueFrom(this.http.get<Period[]>(`${this.API_URL}/years/${yearId}/periods`));
+  }
+
+  async createPeriod(yearId: string, period: Partial<Period>): Promise<Period> {
+    return await firstValueFrom(this.http.post<Period>(`${this.API_URL}/years/${yearId}/periods`, period));
+  }
+
+  async updatePeriod(yearId: string, id: string, period: Partial<Period>): Promise<Period> {
+    return await firstValueFrom(this.http.put<Period>(`${this.API_URL}/years/${yearId}/periods/${id}`, period));
+  }
+
+  async deletePeriod(yearId: string, id: string): Promise<void> {
+    await firstValueFrom(this.http.delete<void>(`${this.API_URL}/years/${yearId}/periods/${id}`));
+  }
+
+  async getHolidays(yearId: string): Promise<Holiday[]> {
+    return await firstValueFrom(this.http.get<Holiday[]>(`${this.API_URL}/years/${yearId}/holidays`));
+  }
+
+  async createHoliday(yearId: string, holiday: Partial<Holiday>): Promise<Holiday> {
+    return await firstValueFrom(this.http.post<Holiday>(`${this.API_URL}/years/${yearId}/holidays`, holiday));
+  }
+
+  async updateHoliday(yearId: string, id: string, holiday: Partial<Holiday>): Promise<Holiday> {
+    return await firstValueFrom(this.http.put<Holiday>(`${this.API_URL}/years/${yearId}/holidays/${id}`, holiday));
+  }
+
+  async deleteHoliday(yearId: string, id: string): Promise<void> {
+    await firstValueFrom(this.http.delete<void>(`${this.API_URL}/years/${yearId}/holidays/${id}`));
   }
 
   // ===========================================
