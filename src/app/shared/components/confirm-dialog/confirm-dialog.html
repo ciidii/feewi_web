@@ -1,0 +1,38 @@
+<div class="confirm-dialog animate-in fade-in zoom-in duration-300">
+  
+  <!-- Icon Section -->
+  <div class="dialog-header">
+    <div class="icon-wrap" [ngClass]="data.type || 'danger'">
+      <lucide-icon 
+        [name]="data.type === 'info' ? Info : (data.type === 'warning' ? AlertTriangle : Trash2)" 
+        class="w-8 h-8"
+      ></lucide-icon>
+    </div>
+    <button (click)="onCancel()" class="close-btn">
+      <lucide-icon [name]="X" class="w-4 h-4"></lucide-icon>
+    </button>
+  </div>
+
+  <!-- Content Section -->
+  <div class="dialog-body text-center">
+    <h2 class="text-xl font-bold text-slate-900 mb-2">{{ data.title }}</h2>
+    <p class="text-sm text-slate-500 leading-relaxed">{{ data.message }}</p>
+  </div>
+
+  <!-- Footer Actions -->
+  <footer class="dialog-footer">
+    <button 
+      (click)="onCancel()" 
+      class="secondary-btn"
+    >
+      {{ data.cancelLabel || 'Annuler' }}
+    </button>
+    <button 
+      (click)="onConfirm()" 
+      class="action-btn"
+      [ngClass]="data.type || 'danger'"
+    >
+      {{ data.confirmLabel || 'Confirmer' }}
+    </button>
+  </footer>
+</div>

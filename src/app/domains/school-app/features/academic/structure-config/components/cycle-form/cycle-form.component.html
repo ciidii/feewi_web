@@ -1,0 +1,60 @@
+<app-form-shell
+  [title]="isEditMode ? 'Modifier le Cycle' : 'Nouveau Cycle Éducatif'"
+  [subtitle]="isEditMode ? 'Mise à jour des paramètres du bloc pédagogique.' : 'Définissez un grand bloc d\'organisation pédagogique (ex: Maternelle, Primaire).'"
+  [icon]="Layers"
+  statusLabel="Structure"
+  [saveLabel]="isEditMode ? 'Enregistrer les modifications' : 'Créer le cycle'"
+  [isLoading]="isLoading()"
+  [canSave]="cycleForm.valid"
+  (save)="onSave()"
+  (cancel)="onCancel()"
+>
+  <form [formGroup]="cycleForm" class="space-y-8">
+
+    <div class="space-y-6">
+      <!-- Nom du Cycle -->
+      <div class="space-y-2">
+        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Dénomination du cycle</label>
+        <div class="relative group">
+          <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors">
+            <lucide-icon [name]="Type" class="w-4.5 h-4.5"></lucide-icon>
+          </div>
+          <input
+            type="text"
+            formControlName="name"
+            placeholder="Ex: Enseignement Moyen"
+            class="w-full h-13 bg-white border border-slate-200 rounded-2xl pl-12 pr-4 text-sm font-semibold outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all shadow-sm"
+            [class.border-rose-300]="isInvalid('name')"
+          />
+        </div>
+      </div>
+
+      <!-- Rang d'affichage -->
+      <div class="space-y-2">
+        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Ordre d'affichage (Rang)</label>
+        <div class="relative group">
+          <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors">
+            <lucide-icon [name]="Hash" class="w-4.5 h-4.5"></lucide-icon>
+          </div>
+          <input
+            type="number"
+            formControlName="rank"
+            class="w-full h-13 bg-white border border-slate-200 rounded-2xl pl-12 pr-4 text-sm font-semibold outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all shadow-sm"
+            [class.border-rose-300]="isInvalid('rank')"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Info Box -->
+    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 flex items-start gap-3">
+      <div class="w-8 h-8 bg-white rounded-xl flex items-center justify-center border border-slate-100 shrink-0 shadow-sm">
+        <lucide-icon [name]="Info" class="w-4 h-4 text-slate-400"></lucide-icon>
+      </div>
+      <p class="text-xs text-slate-500 leading-relaxed font-medium">
+        Les <span class="font-bold text-slate-700">cycles</span> permettent de regrouper vos niveaux. Par exemple, le cycle "Lycée" regroupera Seconde, Première et Terminale.
+      </p>
+    </div>
+
+  </form>
+</app-form-shell>

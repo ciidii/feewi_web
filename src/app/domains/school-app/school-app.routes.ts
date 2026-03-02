@@ -36,6 +36,10 @@ export const SCHOOL_APP_ROUTES: Routes = [
     ]
   },
   {
+    path: 'classes',
+    loadComponent: () => import('./features/academic/structure-config/structure-config.component').then(m => m.StructureConfigComponent)
+  },
+  {
     path: '',
     redirectTo: 'dashboard',
     pathMatch: 'full'

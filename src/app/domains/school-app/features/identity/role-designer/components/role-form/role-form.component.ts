@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { LucideAngularModule, Shield, Save, X, Info, AlertCircle, Loader2, Type, FileText } from 'lucide-angular';
 import { IdentityService } from '../../../../../../../core/services/identity.service';
 import { NotificationService } from '../../../../../../../shared/services/notification.service';
+import { FormShellComponent } from '../../../../../../../shared/components/form-shell/form-shell';
 
 @Component({
   selector: 'app-role-form',
@@ -19,7 +20,8 @@ import { NotificationService } from '../../../../../../../shared/services/notifi
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    LucideAngularModule
+    LucideAngularModule,
+    FormShellComponent
   ],
   templateUrl: './role-form.component.html',
   styleUrl: './role-form.component.scss'

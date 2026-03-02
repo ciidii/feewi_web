@@ -46,6 +46,7 @@ export class RoleDesignerComponent implements OnInit {
 
   // États
   isLoading = this.identityService.loading;
+  isInitialLoading = signal(true); // Pour le skeleton screen
   isSaving = signal(false);
   selectedRoleId = signal<string | null>(null);
   unsavedChanges = signal<Set<string>>(new Set());
@@ -90,10 +91,15 @@ export class RoleDesignerComponent implements OnInit {
   }
 
   async loadInitialData() {
-    await Promise.all([
-      this.loadRoles(),
-      this.loadPermissions()
-    ]);
+    this.isInitialLoading.set(true);
+    try {
+      await Promise.all([
+        this.loadRoles(),
+        this.loadPermissions()
+      ]);
+    } finally {
+      this.isInitialLoading.set(false);
+    }
   }
 
   async loadPermissions() {
