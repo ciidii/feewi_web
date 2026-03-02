@@ -1,14 +1,15 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LucideAngularModule, Calendar, Plus, Play, Archive, CheckCircle, Clock } from 'lucide-angular';
-import {DataListComponent} from '../../../../../shared/components/data-list/data-list.component';
-import {MatDialog, MatDialogModule} from '@angular/material/dialog';
-import {AcademicService} from '../../../../../core/services/academic.service';
-import {NotificationService} from '../../../../../shared/services/notification.service';
-import {AcademicYear, YearStatus} from '../../../../../core/models/academic.model';
-import {RowAction, TabItem, TableRow} from '../../../../../shared/models/data-list.models';
+import { LucideAngularModule, Calendar, Plus, Play, Archive, CheckCircle, Clock, Eye, CalendarSearch } from 'lucide-angular';
+import { DataListComponent } from '../../../../../shared/components/data-list/data-list.component';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { AcademicService } from '../../../../../core/services/academic.service';
+import { NotificationService } from '../../../../../shared/services/notification.service';
+import { AcademicYear, YearStatus } from '../../../../../core/models/academic.model';
+import { RowAction, TabItem, TableRow } from '../../../../../shared/models/data-list.models';
 import { YearFormComponent } from './components/year-form/year-form.component';
-import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
+import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-year-list',
@@ -21,11 +22,7 @@ export class YearListComponent implements OnInit {
   private academicService = inject(AcademicService);
   private notificationService = inject(NotificationService);
   private dialog = inject(MatDialog);
-
-  // États
-  years = signal<AcademicYear[]>([]);
-  isLoading = signal(true);
-  activeTab = signal('Tous');
+  private router = inject(Router);
 
   // Icônes
   readonly Calendar = Calendar;
@@ -33,17 +30,23 @@ export class YearListComponent implements OnInit {
 
   // Actions dynamiques basées sur le statut de l'année
   readonly yearActions: RowAction[] = [
-    {
-      id: 'activate',
-      label: 'Activer l\'année',
-      icon: Play,
+    { 
+      id: 'view', 
+      label: 'Calendrier détaillé', 
+      icon: CalendarSearch, 
+      type: 'primary' 
+    },
+    { 
+      id: 'activate', 
+      label: 'Activer l\'année', 
+      icon: Play, 
       type: 'success',
       hideIf: (row) => row.metadata?.['status'] !== 'PLANNING'
     },
-    {
-      id: 'archive',
-      label: 'Archiver',
-      icon: Archive,
+    { 
+      id: 'archive', 
+      label: 'Archiver', 
+      icon: Archive, 
       type: 'warning',
       hideIf: (row) => row.metadata?.['status'] !== 'ACTIVE'
     }
@@ -54,6 +57,11 @@ export class YearListComponent implements OnInit {
     { label: 'Active', icon: CheckCircle, count: 0 },
     { label: 'En préparation', icon: Clock, count: 0 }
   ];
+
+  // États
+  years = signal<AcademicYear[]>([]);
+  isLoading = signal(true);
+  activeTab = signal('Tous');
 
   // Transformation des données pour le DataList
   displayYears = computed<TableRow[]>(() => {
@@ -105,8 +113,13 @@ export class YearListComponent implements OnInit {
   }
 
   handleAction(event: { actionId: string, row: TableRow }) {
-    if (event.actionId === 'activate') {
-      this.confirmActivation(event.row);
+    switch (event.actionId) {
+      case 'view':
+        this.router.navigate(['/academic/years', event.row.id]);
+        break;
+      case 'activate':
+        this.confirmActivation(event.row);
+        break;
     }
   }
 
@@ -124,7 +137,7 @@ export class YearListComponent implements OnInit {
     dialogRef.afterClosed().subscribe(async (confirmed) => {
       if (confirmed) {
         try {
-          // Note: Appeler le service PATCH activate
+          // Note: Appeler le service PATCH activate dans une future étape
           this.notificationService.success(`L'année ${row.title} est maintenant active.`);
           this.loadYears();
         } catch (error) {
