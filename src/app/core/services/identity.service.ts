@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { User, UserCreateRequest } from '../models/user.model';
+import { User, UserCreateRequest, UserType } from '../models/user.model';
 import { Role, Permission } from '../models/role.model';
 import { Page } from '../models/school.model';
 import { AuditLog } from '../models/audit.model';
@@ -25,14 +25,17 @@ export class IdentityService {
 
   /**
    * Liste les membres du personnel (Staff)
+   * Supporte désormais le filtrage technique par type
    */
-  async getStaff(search: string = '', page: number = 0, size: number = 10): Promise<void> {
+  async getStaff(search: string = '', page: number = 0, size: number = 10, type?: string): Promise<void> {
     this._loading.set(true);
     try {
-      const params = new HttpParams()
+      let params = new HttpParams()
         .set('search', search)
         .set('page', page.toString())
         .set('size', size.toString());
+      
+      if (type) params = params.set('type', type);
 
       const response = await firstValueFrom(
         this.http.get<Page<User>>(`${this.API_URL}/users`, { params })
@@ -44,6 +47,15 @@ export class IdentityService {
     } finally {
       this._loading.set(false);
     }
+  }
+
+  /**
+   * Récupère le référentiel des types d'utilisateurs
+   */
+  async getUserTypes(): Promise<UserType[]> {
+    return await firstValueFrom(
+      this.http.get<UserType[]>(`${this.API_URL}/user-types`)
+    );
   }
 
   /**

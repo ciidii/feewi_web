@@ -1,5 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { 
   AcademicYear, 
@@ -10,7 +10,10 @@ import {
   Level, 
   SchoolClass,
   Filiere,
-  CreateClassRequest
+  CreateClassRequest,
+  Subject,
+  CurriculumItem,
+  Teaching
 } from '../models/academic.model';
 
 @Injectable({
@@ -156,5 +159,52 @@ export class AcademicService {
 
   async createFiliere(filiere: Partial<Filiere>): Promise<Filiere> {
     return await firstValueFrom(this.http.post<Filiere>(`${this.API_URL}/filieres`, filiere));
+  }
+
+  // ===========================================
+  // GESTION DES MATIÈRES (RÉFÉRENTIEL)
+  // ===========================================
+
+  async getSubjects(): Promise<Subject[]> {
+    return await firstValueFrom(this.http.get<Subject[]>(`${this.API_URL}/subjects`));
+  }
+
+  async createSubject(subject: Partial<Subject>): Promise<Subject> {
+    return await firstValueFrom(this.http.post<Subject>(`${this.API_URL}/subjects`, subject));
+  }
+
+  async updateSubject(id: string, subject: Partial<Subject>): Promise<Subject> {
+    return await firstValueFrom(this.http.put<Subject>(`${this.API_URL}/subjects/${id}`, subject));
+  }
+
+  // ===========================================
+  // PROGRAMMES (CURRICULUM PER LEVEL)
+  // ===========================================
+
+  async getCurriculum(levelId: string, filiereId?: string): Promise<CurriculumItem[]> {
+    let params = new HttpParams();
+    if (filiereId) params = params.set('filiereId', filiereId);
+    
+    return await firstValueFrom(this.http.get<CurriculumItem[]>(`${this.API_URL}/curriculum/by-level/${levelId}`, { params }));
+  }
+
+  async addSubjectToCurriculum(request: Partial<CurriculumItem>): Promise<CurriculumItem> {
+    return await firstValueFrom(this.http.post<CurriculumItem>(`${this.API_URL}/curriculum`, request));
+  }
+
+  async deleteCurriculumItem(id: string): Promise<void> {
+    await firstValueFrom(this.http.delete<void>(`${this.API_URL}/curriculum/${id}`));
+  }
+
+  // ===========================================
+  // ENSEIGNEMENTS (TEACHINGS PER CLASS)
+  // ===========================================
+
+  async getTeachingsByClass(classId: string): Promise<Teaching[]> {
+    return await firstValueFrom(this.http.get<Teaching[]>(`${this.API_URL}/classes/${classId}/teachings`));
+  }
+
+  async assignTeacher(classId: string, request: Partial<Teaching>): Promise<Teaching> {
+    return await firstValueFrom(this.http.post<Teaching>(`${this.API_URL}/classes/${classId}/teachings`, request));
   }
 }

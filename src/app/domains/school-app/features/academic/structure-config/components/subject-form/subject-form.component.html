@@ -1,0 +1,60 @@
+<app-form-shell
+  [title]="isEditMode ? 'Modifier la Matière' : 'Nouvelle Matière'"
+  [subtitle]="isEditMode ? 'Rectifiez le nom ou le code technique.' : 'Créez un nouvel enseignement dans le catalogue global de l\'école.'"
+  [icon]="Tag"
+  statusLabel="Référentiel"
+  [saveLabel]="isEditMode ? 'Enregistrer les modifications' : 'Ajouter la matière'"
+  [isLoading]="isLoading()"
+  [canSave]="subjectForm.valid"
+  (save)="onSave()"
+  (cancel)="onCancel()"
+>
+  <form [formGroup]="subjectForm" class="space-y-8">
+
+    <div class="space-y-6">
+      <!-- Nom de la Matière -->
+      <div class="space-y-2">
+        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Nom de l'enseignement</label>
+        <div class="relative group">
+          <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors">
+            <lucide-icon [name]="Type" class="w-4.5 h-4.5"></lucide-icon>
+          </div>
+          <input
+            type="text"
+            formControlName="name"
+            placeholder="Ex: Mathématiques"
+            class="fw-input-field"
+            [class.error]="isInvalid('name')"
+          />
+        </div>
+      </div>
+
+      <!-- Code technique -->
+      <div class="space-y-2">
+        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Code court (Matière)</label>
+        <div class="relative group">
+          <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors">
+            <lucide-icon [name]="Tag" class="w-4.5 h-4.5"></lucide-icon>
+          </div>
+          <input
+            type="text"
+            formControlName="code"
+            placeholder="Ex: MATH"
+            class="fw-input-field uppercase"
+            [class.error]="isInvalid('code')"
+          />
+        </div>
+        <p class="text-[10px] text-slate-400 font-medium ml-1 italic">Ce code sera utilisé pour l'affichage des emplois du temps.</p>
+      </div>
+    </div>
+
+    <!-- Info Box -->
+    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 flex items-start gap-3">
+      <lucide-icon [name]="Info" class="w-4 h-4 text-slate-400 mt-0.5"></lucide-icon>
+      <p class="text-[11px] text-slate-500 leading-relaxed font-medium">
+        La bibliothèque des matières est unique par établissement. Vous pourrez ensuite définir des coefficients différents selon les niveaux (CP, 6ème, etc.).
+      </p>
+    </div>
+
+  </form>
+</app-form-shell>

@@ -26,6 +26,15 @@
         <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
         Nouvelle série / filière
       </button>
+
+      <button 
+        *ngIf="activeTab() === 'matieres'"
+        (click)="openAddSubjectForm()"
+        class="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-[13px] font-bold hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-200 active:scale-95"
+      >
+        <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
+        Ajouter une matière
+      </button>
     </div>
   </header>
 
@@ -53,12 +62,25 @@
       <lucide-icon [name]="Tag" class="w-3.5 h-3.5"></lucide-icon>
       Séries & Filières
     </button>
+    <button 
+      (click)="setTab('matieres')"
+      class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all"
+      [class.bg-white]="activeTab() === 'matieres'"
+      [class.shadow-sm]="activeTab() === 'matieres'"
+      [class.text-primary-600]="activeTab() === 'matieres'"
+      [class.text-slate-500]="activeTab() !== 'matieres'"
+    >
+      <lucide-icon [name]="BookOpen" class="w-3.5 h-3.5"></lucide-icon>
+      Matières
+    </button>
   </div>
 
   <!-- GRILLE DE CONFIGURATION -->
   <div class="config-grid">
     
-    <!-- COLONNE GAUCHE : CYCLES (Uniquement si onglet Niveaux) -->
+    <!-- COLONNE GAUCHE (Contextuelle) -->
+    
+    <!-- Cas 1 : Cycles (pour Niveaux) -->
     <aside *ngIf="activeTab() === 'niveaux'" class="animate-in fade-in slide-in-from-left duration-300">
       <div class="flex items-center justify-between px-2 shrink-0">
         <span class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Cycles Éducatifs</span>
@@ -114,30 +136,37 @@
       </div>
     </aside>
 
-    <!-- Aide contextuelle si onglet Filières -->
+    <!-- Cas 2 : Aide Filières -->
     <aside *ngIf="activeTab() === 'filieres'" class="animate-in fade-in slide-in-from-left duration-300">
-      <div class="p-6 bg-midnight rounded-3xl text-white space-y-6 shadow-xl shadow-midnight/20">
+      <div class="p-6 bg-slate-900 rounded-3xl text-white space-y-6 shadow-xl shadow-slate-900/20">
         <div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center">
           <lucide-icon [name]="BookOpen" class="w-6 h-6 text-primary-400"></lucide-icon>
         </div>
         <div class="space-y-2">
           <h3 class="text-lg font-bold leading-tight tracking-tight">À propos des Filières</h3>
           <p class="text-xs text-primary-100/70 leading-relaxed">
-            Les filières (ou séries) permettent de spécialiser vos niveaux, particulièrement au Lycée (S1, L1, etc.). Elles sont optionnelles pour le cycle primaire.
+            Les filières (ou séries) permettent de spécialiser vos niveaux (ex: S1, L1).
           </p>
-        </div>
-        <div class="pt-4 border-t border-white/10">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-primary-500/20 flex items-center justify-center text-primary-400">
-              <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
-            </div>
-            <span class="text-[10px] font-bold uppercase tracking-widest text-primary-200">Création globale</span>
-          </div>
         </div>
       </div>
     </aside>
 
-    <!-- COLONNE DROITE : NIVEAUX ou FILIERES (DataList) -->
+    <!-- Cas 3 : Aide Matières -->
+    <aside *ngIf="activeTab() === 'matieres'" class="animate-in fade-in slide-in-from-left duration-300">
+      <div class="p-6 bg-slate-900 rounded-3xl text-white space-y-6 shadow-xl shadow-slate-900/20">
+        <div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center">
+          <lucide-icon [name]="Tag" class="w-6 h-6 text-emerald-400"></lucide-icon>
+        </div>
+        <div class="space-y-2">
+          <h3 class="text-lg font-bold leading-tight tracking-tight">Bibliothèque des Matières</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Gérez ici le catalogue global des enseignements de votre établissement.
+          </p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- COLONNE DROITE : CONTENU DYNAMIQUE -->
     <main class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col relative"
           [class.lg:col-span-9]="true">
       
@@ -145,11 +174,11 @@
       <div *ngIf="isLoading()" class="absolute inset-0 z-10 bg-white/80 backdrop-blur-sm flex items-center justify-center">
         <div class="flex flex-col items-center gap-3">
           <div class="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-          <span class="text-[10px] font-bold text-primary uppercase tracking-widest animate-pulse">Synchronisation structure...</span>
+          <span class="text-[10px] font-bold text-primary uppercase tracking-widest animate-pulse">Chargement structure...</span>
         </div>
       </div>
 
-      <!-- LISTE DES NIVEAUX (Onglet 1) -->
+      <!-- NIVEAUX -->
       <app-data-list
         *ngIf="activeTab() === 'niveaux'"
         [data]="displayLevels()"
@@ -158,7 +187,7 @@
         (onAction)="handleLevelAction($event)"
       ></app-data-list>
 
-      <!-- LISTE DES FILIÈRES (Onglet 2) -->
+      <!-- FILIERES -->
       <app-data-list
         *ngIf="activeTab() === 'filieres'"
         [data]="displayFilieres()"
@@ -167,14 +196,23 @@
         (onAction)="handleFiliereAction($event)"
       ></app-data-list>
 
-      <!-- Message si pas de cycle sélectionné (Onglet Niveaux uniquement) -->
+      <!-- MATIERES -->
+      <app-data-list
+        *ngIf="activeTab() === 'matieres'"
+        [data]="displaySubjects()"
+        [total]="displaySubjects().length"
+        [actions]="subjectActions"
+        (onAction)="handleSubjectAction($event)"
+      ></app-data-list>
+
+      <!-- Message vide pour Niveaux -->
       <div *ngIf="activeTab() === 'niveaux' && !selectedCycleId() && !isLoading()" class="flex-1 flex flex-col items-center justify-center text-center p-12 space-y-4">
         <div class="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center text-slate-200">
           <lucide-icon [name]="School" class="w-10 h-10"></lucide-icon>
         </div>
         <div>
           <h3 class="text-base font-bold text-slate-900 tracking-tight">Aucun cycle sélectionné</h3>
-          <p class="text-xs text-slate-500 max-w-xs mx-auto mt-1">Veuillez sélectionner un cycle dans la liste de gauche pour gérer ses niveaux d'enseignement.</p>
+          <p class="text-xs text-slate-500 max-w-xs mx-auto mt-1">Sélectionnez un cycle pour gérer ses niveaux.</p>
         </div>
       </div>
     </main>

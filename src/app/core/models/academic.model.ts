@@ -55,6 +55,33 @@ export interface Filiere {
   code: string;
 }
 
+export interface Subject {
+  id: string;
+  name: string;
+  code: string;
+}
+
+export interface CurriculumItem {
+  id: string;
+  levelId: string;
+  filiereId?: string | null;
+  subjectId: string;
+  subjectName?: string; // Reconstruit
+  defaultCoefficient: number;
+  maxScore: number;
+  optional: boolean;
+}
+
+export interface Teaching {
+  id: string;
+  subjectId: string;
+  subjectName?: string;
+  teacherId: string;
+  teacherName?: string;
+  coefficient: number;
+  maxScore: number;
+}
+
 export interface SchoolClass {
   id: string;
   fullName: string; // Nom reconstruit (ex: "CM2 A")

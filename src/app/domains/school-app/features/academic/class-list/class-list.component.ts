@@ -1,9 +1,9 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LucideAngularModule, School, Plus, Users } from 'lucide-angular';
-
+import { LucideAngularModule, School, Plus, Users, BookOpenCheck } from 'lucide-angular';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ClassFormComponent } from './components/class-form/class-form.component';
+import { TeachingManagerComponent } from './components/teaching-manager/teaching-manager';
 import {DataListComponent} from '../../../../../shared/components/data-list/data-list.component';
 import {AcademicService} from '../../../../../core/services/academic.service';
 import {NotificationService} from '../../../../../shared/services/notification.service';
@@ -26,6 +26,7 @@ export class ClassListComponent implements OnInit {
   readonly School = School;
   readonly Plus = Plus;
   readonly Users = Users;
+  readonly BookOpenCheck = BookOpenCheck;
 
   // États
   currentYear = signal<AcademicYear | null>(null);
@@ -35,6 +36,7 @@ export class ClassListComponent implements OnInit {
 
   // Actions pour les classes
   readonly classActions: RowAction[] = [
+    { id: 'teachings', label: 'Gérer les cours', icon: BookOpenCheck, type: 'success' },
     { id: 'edit', label: 'Modifier', icon: School, type: 'primary' },
     { id: 'view-students', label: 'Liste des élèves', icon: Users, type: 'default' }
   ];
@@ -53,7 +55,8 @@ export class ClassListComponent implements OnInit {
       metadata: {
         capacity: c.capacity,
         level: c.levelName
-      }
+      },
+      rawData: c
     }));
   });
 
@@ -64,15 +67,12 @@ export class ClassListComponent implements OnInit {
   async loadInitialData() {
     this.isLoading.set(true);
     try {
-      // 1. Récupérer l'année active
       const year = await this.academicService.getCurrentYear();
       this.currentYear.set(year);
 
-      // 2. Charger les niveaux pour le formulaire
       const levelsData = await this.academicService.getLevels();
       this.levels.set(levelsData);
 
-      // 3. Charger les classes de l'année
       await this.loadClasses(year.id);
     } catch (error) {
       this.notificationService.error("Erreur lors du chargement des classes.");
@@ -108,6 +108,19 @@ export class ClassListComponent implements OnInit {
   }
 
   handleClassAction(event: { actionId: string, row: TableRow }) {
-    this.notificationService.info(`Action ${event.actionId} sur ${event.row.title}`);
+    if (event.actionId === 'teachings') {
+      this.openTeachingManager(event.row.rawData);
+    } else {
+      this.notificationService.info(`Action ${event.actionId} sur ${event.row.title}`);
+    }
+  }
+
+  private openTeachingManager(schoolClass: SchoolClass) {
+    this.dialog.open(TeachingManagerComponent, {
+      width: '1000px',
+      maxWidth: '95vw',
+      panelClass: 'feewi-dialog-panel',
+      data: { schoolClass }
+    });
   }
 }

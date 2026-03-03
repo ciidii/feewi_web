@@ -1,8 +1,15 @@
+export interface UserType {
+  id: string;
+  code: string;
+  name: string;
+}
+
 export interface User {
   id?: string;
   email: string;
   firstName: string;
   lastName: string;
+  userType?: string;
   tenantId?: string;
   active?: boolean;
   roles: string[];
@@ -20,6 +27,7 @@ export interface UserCreateRequest {
   password?: string;
   firstName: string;
   lastName: string;
+  userTypeCode: string; // TEACHER, STAFF, etc.
   phone?: string;
   roles: string[];
 }

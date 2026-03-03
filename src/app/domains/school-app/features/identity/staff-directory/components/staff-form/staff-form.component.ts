@@ -27,6 +27,8 @@ import {
 import { IdentityService } from '../../../../../../../core/services/identity.service';
 import { NotificationService } from '../../../../../../../shared/services/notification.service';
 import { FormShellComponent } from '../../../../../../../shared/components/form-shell/form-shell';
+import { UserType } from '../../../../../../../core/models/user.model';
+import { signal } from '@angular/core';
 
 @Component({
   selector: 'app-staff-form',
@@ -62,22 +64,33 @@ export class StaffFormComponent implements OnInit {
   readonly AlertCircle = AlertCircle;
   readonly ShieldCheck = ShieldCheck;
   readonly Sparkles = Sparkles;
+  readonly UserCog = UserCog;
 
   staffForm: FormGroup = this.fb.group({
     firstName: ['', [Validators.required, Validators.minLength(2)]],
     lastName: ['', [Validators.required, Validators.minLength(2)]],
     email: ['', [Validators.required, Validators.email]],
     phone: ['', [Validators.pattern(/^[+]?[0-9\s-]{8,}$/)]],
+    userTypeCode: ['STAFF', [Validators.required]],
     roles: [[], [Validators.required, Validators.minLength(1)]],
     password: ['password123']
   });
 
   roles = this.identityService.roles;
+  userTypes = signal<UserType[]>([]);
   isLoading = this.identityService.loading;
 
-  ngOnInit() {
+  async ngOnInit() {
     if (this.roles().length === 0) {
       this.identityService.getRoles();
+    }
+    
+    try {
+      const types = await this.identityService.getUserTypes();
+      // Filtrer pour ne garder que le personnel administratif et enseignant pour cet écran
+      this.userTypes.set(types.filter(t => ['ADMIN', 'TEACHER', 'STAFF'].includes(t.code)));
+    } catch (error) {
+      console.error('Failed to load user types', error);
     }
   }
 

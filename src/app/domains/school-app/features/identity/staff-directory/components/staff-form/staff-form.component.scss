@@ -1,158 +1,87 @@
 :host {
   display: block;
-  height: 100%;
-  background: white;
 }
 
 // ===========================================
-// SCROLLBAR ÉLÉGANTE
+// CHAMPS DE SAISIE STANDARDS (FEWII UI)
 // ===========================================
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
 
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #e2e8f0;
-  border-radius: 20px;
-
-  &:hover {
-    background: #cbd5e1;
-  }
-}
-
-// ===========================================
-// STYLE DU SELECT MATERIAL
-// ===========================================
-::ng-deep .role-select {
+.fw-input-field {
   width: 100%;
-  height: 48px !important;
-  background: white !important;
-  border: 1px solid #e2e8f0 !important;
-  border-radius: 12px !important;
-  padding-left: 48px !important;
-  padding-right: 16px !important;
-  transition: all 0.2s !important;
+  height: 3.25rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0 1rem 0 3rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  outline: none;
+  transition: all 0.2s;
 
-  .mat-mdc-select-trigger {
-    height: 46px !important;
-    display: flex;
-    align-items: center;
-  }
-
-  .mat-mdc-select-value {
-    padding: 0 !important;
-  }
-
-  .mat-mdc-select-placeholder {
-    color: #94a3b8;
-    font-size: 14px;
-  }
-
-  .mat-mdc-select-arrow {
-    color: #94a3b8;
-  }
-
-  &.mat-focused {
-    border-color: #2563eb !important;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
-  }
-
-  &.error {
-    border-color: #e11d48 !important;
-    background: #fff1f2 !important;
-  }
-
-  // Quand des valeurs sont sélectionnées
-  &.mat-filled {
-    background: #f8fafc !important;
-  }
-}
-
-// Panneau de sélection des rôles
-::ng-deep .role-select-panel {
-  border-radius: 16px !important;
-  padding: 8px !important;
-  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15), 0 10px 10px -5px rgba(0,0,0,0.04) !important;
-  border: 1px solid #e2e8f0 !important;
-  background: white !important;
-  min-width: 280px !important;
-  margin-top: 8px !important;
-
-  .mat-mdc-option {
-    border-radius: 10px !important;
-    min-height: 48px !important;
-    padding: 0 12px !important;
-    margin: 2px 0;
-
-    &:hover {
-      background: #f8fafc !important;
-    }
-
-    &.mat-selected {
-      background: #eff6ff !important;
-
-      .text-slate-700 {
-        color: #2563eb !important;
-        font-weight: 500;
-      }
-    }
-
-    .mdc-list-item__primary-text {
-      width: 100%;
-    }
-  }
-}
-
-// ===========================================
-// ANIMATIONS
-// ===========================================
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-form > div {
-  animation: slideIn 0.3s ease-out forwards;
-  opacity: 0;
-
-  @for $i from 1 through 5 {
-    &:nth-child(#{$i}) {
-      animation-delay: #{$i * 0.1}s;
-    }
-  }
-}
-
-// ===========================================
-// ÉTATS DE VALIDATION
-// ===========================================
-input {
   &::placeholder {
     color: #94a3b8;
     font-weight: 400;
   }
 
-  &:focus::placeholder {
-    opacity: 0.7;
-    transform: translateX(5px);
-    transition: all 0.2s;
+  &:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.05);
+  }
+
+  &.error {
+    border-color: #fda4af;
+    background: #fff1f2;
   }
 }
 
-// Badge de validation
-.bg-emerald-50 {
-  background-color: #ecfdf5;
+// ===========================================
+// SELECT MATERIAL STANDARDS
+// ===========================================
+
+::ng-deep .fw-select-field {
+  width: 100%;
+  height: 3.25rem !important;
+  background: white !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 12px !important;
+  padding-left: 3rem !important;
+  padding-right: 1rem !important;
+  display: flex !important;
+  align-items: center !important;
+  transition: all 0.2s !important;
+
+  .mat-mdc-select-trigger {
+    width: 100%;
+  }
+
+  .mat-mdc-select-value {
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    color: #1e293b !important;
+  }
+
+  &.mat-mdc-select-focused {
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.05) !important;
+  }
+
+  &.error {
+    border-color: #fda4af !important;
+    background: #fff1f2 !important;
+  }
 }
 
-.text-emerald-600 {
-  color: #059669;
+// Correction pour les inputs sans icônes (si besoin)
+input:not(.fw-input-field) {
+  padding-left: 1rem;
+}
+
+// Espacement des sections
+.space-y-8 > div {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }

@@ -1,15 +1,17 @@
 import { Component, inject, OnInit, signal, computed, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LucideAngularModule, School, Plus, Layers, ChevronRight, Trash2, Edit, BookOpen, Tag } from 'lucide-angular';
+import { LucideAngularModule, School, Plus, Layers, ChevronRight, Trash2, Edit, BookOpen, Tag, ListChecks } from 'lucide-angular';
 import { AcademicService } from '../../../../../core/services/academic.service';
 import { NotificationService } from '../../../../../shared/services/notification.service';
-import { Cycle, Level, Filiere } from '../../../../../core/models/academic.model';
+import { Cycle, Level, Filiere, Subject } from '../../../../../core/models/academic.model';
 import { DataListComponent } from '../../../../../shared/components/data-list/data-list.component';
 import { TableRow, RowAction } from '../../../../../shared/models/data-list.models';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { LevelFormComponent } from './components/level-form/level-form.component';
 import { CycleFormComponent } from './components/cycle-form/cycle-form.component';
 import { FiliereFormComponent } from './components/filiere-form/filiere-form.component';
+import { SubjectFormComponent } from './components/subject-form/subject-form.component';
+import { CurriculumManagerComponent } from './components/curriculum-manager/curriculum-manager';
 import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 
 
@@ -35,17 +37,20 @@ export class StructureConfigComponent implements OnInit {
   readonly Trash2 = Trash2;
   readonly BookOpen = BookOpen;
   readonly Tag = Tag;
+  readonly ListChecks = ListChecks;
 
   // États
-  activeTab = signal<'niveaux' | 'filieres'>('niveaux');
+  activeTab = signal<'niveaux' | 'filieres' | 'matieres'>('niveaux');
   cycles = signal<Cycle[]>([]);
   levels = signal<Level[]>([]);
   filieres = signal<Filiere[]>([]);
+  subjects = signal<Subject[]>([]);
   selectedCycleId = signal<string | null>(null);
   isLoading = signal(true);
 
   // Actions pour les niveaux
   readonly levelActions: RowAction[] = [
+    { id: 'curriculum', label: 'Gérer le programme', icon: ListChecks, type: 'success' },
     { id: 'edit', label: 'Modifier', icon: Edit, type: 'primary' },
     { id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger' }
   ];
@@ -56,18 +61,21 @@ export class StructureConfigComponent implements OnInit {
     { id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger' }
   ];
 
+  // Actions pour les matières
+  readonly subjectActions: RowAction[] = [
+    { id: 'edit', label: 'Modifier', icon: Edit, type: 'primary' },
+    { id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger' }
+  ];
+
   // Niveaux transformés pour le DataList
   displayLevels = computed<TableRow[]>(() => {
     const selectedId = this.selectedCycleId();
     const allLevels = this.levels();
-    
     if (!selectedId) return [];
-
     const filtered = allLevels.filter(level => {
       const levelCycleId = level.cycleId || (level as any).cycle?.id;
       return String(levelCycleId) === String(selectedId);
     });
-
     return filtered
       .sort((a, b) => a.rank - b.rank)
       .map(level => ({
@@ -92,6 +100,18 @@ export class StructureConfigComponent implements OnInit {
     }));
   });
 
+  // Matières transformées pour le DataList
+  displaySubjects = computed<TableRow[]>(() => {
+    return this.subjects().map(s => ({
+      id: s.id,
+      title: s.name,
+      subtitle: `Code technique : ${s.code}`,
+      avatarLabel: s.code.substring(0, 2).toUpperCase(),
+      badges: [{ label: 'MATIÈRE', type: 'info' }],
+      rawData: s
+    }));
+  });
+
   ngOnInit() {
     this.loadData();
   }
@@ -99,14 +119,16 @@ export class StructureConfigComponent implements OnInit {
   async loadData() {
     this.isLoading.set(true);
     try {
-      const [cyclesData, levelsData, filieresData] = await Promise.all([
+      const [cyclesData, levelsData, filieresData, subjectsData] = await Promise.all([
         this.academicService.getCycles(),
         this.academicService.getLevels(),
-        this.academicService.getFilieres()
+        this.academicService.getFilieres(),
+        this.academicService.getSubjects()
       ]);
       this.cycles.set(cyclesData);
       this.levels.set(levelsData);
       this.filieres.set(filieresData);
+      this.subjects.set(subjectsData);
 
       if (cyclesData.length > 0 && !this.selectedCycleId()) {
         this.selectedCycleId.set(cyclesData[0].id);
@@ -118,12 +140,34 @@ export class StructureConfigComponent implements OnInit {
     }
   }
 
-  setTab(tab: 'niveaux' | 'filieres') {
+  setTab(tab: 'niveaux' | 'filieres' | 'matieres') {
     this.activeTab.set(tab);
   }
 
   selectCycle(id: string) {
     this.selectedCycleId.set(id);
+  }
+
+  // --- ACTIONS MATIÈRES ---
+
+  handleSubjectAction(event: { actionId: string, row: TableRow }) {
+    if (event.actionId === 'edit') {
+      this.openAddSubjectForm(event.row.rawData);
+    } else {
+      this.notificationService.info("Suppression bientôt disponible.");
+    }
+  }
+
+  openAddSubjectForm(subject?: Subject) {
+    const dialogRef = this.dialog.open(SubjectFormComponent, {
+      width: '480px',
+      panelClass: 'feewi-dialog-panel',
+      data: { subject }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) this.loadData();
+    });
   }
 
   // --- ACTIONS FILIÈRES ---
@@ -139,9 +183,7 @@ export class StructureConfigComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.loadData();
-      }
+      if (result) this.loadData();
     });
   }
 
@@ -177,7 +219,7 @@ export class StructureConfigComponent implements OnInit {
           this.notificationService.success('Cycle supprimé avec succès.');
           this.loadData();
         } catch (error) {
-          this.notificationService.error('Erreur lors de la suppression (le cycle est peut-être utilisé).');
+          this.notificationService.error('Erreur lors de la suppression.');
         }
       }
     });
@@ -186,11 +228,22 @@ export class StructureConfigComponent implements OnInit {
   // --- ACTIONS NIVEAUX ---
 
   handleLevelAction(event: { actionId: string, row: TableRow }) {
-    if (event.actionId === 'edit') {
+    if (event.actionId === 'curriculum') {
+      this.openCurriculumManager(event.row.rawData);
+    } else if (event.actionId === 'edit') {
       this.openEditLevel(event.row.rawData);
     } else if (event.actionId === 'delete') {
       this.confirmDeleteLevel(event.row.id as string, event.row.title);
     }
+  }
+
+  private openCurriculumManager(level: Level) {
+    this.dialog.open(CurriculumManagerComponent, {
+      width: '900px',
+      maxWidth: '95vw',
+      panelClass: 'feewi-dialog-panel',
+      data: { level }
+    });
   }
 
   private openEditLevel(level: Level) {
@@ -224,7 +277,7 @@ export class StructureConfigComponent implements OnInit {
           this.notificationService.success('Le niveau a été supprimé.');
           this.loadData();
         } catch (error) {
-          this.notificationService.error('Impossible de supprimer ce niveau (dépendances actives).');
+          this.notificationService.error('Impossible de supprimer ce niveau.');
         }
       }
     });

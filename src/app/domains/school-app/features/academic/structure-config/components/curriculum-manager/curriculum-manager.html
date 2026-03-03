@@ -1,0 +1,99 @@
+<div class="curriculum-modal flex flex-col h-full bg-white rounded-3xl overflow-hidden shadow-2xl">
+  
+  <!-- Header contextuel -->
+  <header class="px-8 py-6 border-b border-slate-100 flex items-center justify-between shrink-0">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
+        <lucide-icon [name]="ListChecks" class="w-6 h-6"></lucide-icon>
+      </div>
+      <div>
+        <h2 class="text-xl font-bold text-slate-900 italic uppercase tracking-tight">Programme : {{ data.level.name }}</h2>
+        <p class="text-xs text-slate-500 mt-0.5 font-medium">Définissez les matières et coefficients pour ce niveau.</p>
+      </div>
+    </div>
+    <button (click)="close()" class="w-10 h-10 rounded-xl hover:bg-slate-50 flex items-center justify-center text-slate-400 transition-colors">
+      <lucide-icon [name]="X" class="w-5 h-5"></lucide-icon>
+    </button>
+  </header>
+
+  <!-- Corps : Liste des matières actuelles -->
+  <div class="flex-1 overflow-y-auto p-8 bg-slate-50/30 custom-scrollbar relative">
+    
+    <!-- Loader -->
+    <div *ngIf="isLoading()" class="absolute inset-0 z-10 bg-white/60 backdrop-blur-sm flex items-center justify-center">
+      <div class="w-10 h-10 border-4 border-emerald-100 border-t-emerald-600 rounded-full animate-spin"></div>
+    </div>
+
+    <!-- DataList du Programme -->
+    <div class="space-y-6">
+      <div class="flex items-center justify-between">
+        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Matières enseignées</span>
+        <button 
+          *ngIf="!isAdding()"
+          (click)="isAdding.set(true)"
+          class="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-200"
+        >
+          <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
+          Ajouter une matière
+        </button>
+      </div>
+
+      <app-data-list
+        [data]="displayItems()"
+        [total]="displayItems().length"
+        [actions]="curriculumActions"
+        (onAction)="handleAction($event)"
+      ></app-data-list>
+
+      <!-- État vide -->
+      <div *ngIf="displayItems().length === 0 && !isLoading() && !isAdding()" class="text-center py-16 border-2 border-dashed border-slate-200 rounded-3xl bg-white">
+        <lucide-icon [name]="BookOpen" class="w-12 h-12 text-slate-200 mx-auto mb-4"></lucide-icon>
+        <p class="text-sm font-bold text-slate-400 italic">Le programme est encore vide pour ce niveau.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer : Formulaire d'ajout rapide (Conditionnel) -->
+  <footer *ngIf="isAdding()" class="p-8 border-t border-slate-200 bg-white animate-in slide-in-from-bottom duration-300 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+    <form [formGroup]="addForm" (ngSubmit)="onAddSubject()" class="space-y-6">
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="text-sm font-bold text-slate-900">Nouvel Enseignement</h3>
+        <button (click)="isAdding.set(false)" class="text-xs font-bold text-slate-400 hover:text-slate-600 uppercase tracking-widest">Fermer</button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Sélection Matière -->
+        <div class="space-y-2">
+          <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Matière</label>
+          <select formControlName="subjectId" class="w-full h-12 bg-slate-50 border border-slate-200 rounded-xl px-4 text-sm font-semibold outline-none focus:border-emerald-500 focus:bg-white transition-all">
+            <option value="">Sélectionner une matière...</option>
+            <option *ngFor="let s of availableSubjects()" [value]="s.id">{{ s.name }} ({{ s.code }})</option>
+          </select>
+        </div>
+
+        <!-- Coefficient -->
+        <div class="space-y-2">
+          <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Coefficient</label>
+          <input type="number" step="0.5" formControlName="defaultCoefficient" class="w-full h-12 bg-slate-50 border border-slate-200 rounded-xl px-4 text-sm font-semibold outline-none focus:border-emerald-500 focus:bg-white transition-all" />
+        </div>
+
+        <!-- Note Max -->
+        <div class="space-y-2">
+          <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Note Maximale</label>
+          <input type="number" formControlName="maxScore" class="w-full h-12 bg-slate-50 border border-slate-200 rounded-xl px-4 text-sm font-semibold outline-none focus:border-emerald-500 focus:bg-white transition-all" />
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-2">
+        <button 
+          type="submit" 
+          [disabled]="addForm.invalid"
+          class="flex items-center gap-2 px-6 h-12 bg-slate-900 text-white rounded-xl text-sm font-bold shadow-xl hover:bg-slate-800 disabled:bg-slate-200 transition-all active:scale-95"
+        >
+          <lucide-icon [name]="Save" class="w-4 h-4"></lucide-icon>
+          Inscrire au programme
+        </button>
+      </div>
+    </form>
+  </footer>
+</div>
