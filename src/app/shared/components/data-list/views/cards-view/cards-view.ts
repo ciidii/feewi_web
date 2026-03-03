@@ -12,7 +12,7 @@ import {
   MapPin,
   Mail,
   Phone,
-  LayoutGrid, Globe, Check
+  LayoutGrid, Globe, Check, Hash
 } from 'lucide-angular';
 import {RowAction, TableRow} from '../../../../models/data-list.models';
 
@@ -107,4 +107,5 @@ export class CardsViewComponent {
   protected readonly LayoutGrid = LayoutGrid;
   protected readonly Globe = Globe;
   protected readonly Check = Check;
+  protected readonly Hash = Hash;
 }
