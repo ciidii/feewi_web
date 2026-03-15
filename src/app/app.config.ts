@@ -8,6 +8,8 @@ import { tenantInterceptor } from './core/interceptors/tenant.interceptor';
 import { loadingInterceptor } from './core/interceptors/loading.interceptor';
 import { AuthService } from './core/services/auth.service';
 import {provideToastr} from 'ngx-toastr';
+import { TitleStrategy } from '@angular/router';
+import { PageTitleStrategy } from './core/services/page-title-strategy.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -16,6 +18,10 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideAnimationsAsync(),
     provideHttpClient(withInterceptors([loadingInterceptor, tenantInterceptor])),
+    {
+      provide: TitleStrategy,
+      useClass: PageTitleStrategy
+    },
     {
       provide: APP_INITIALIZER,
       useFactory: (authService: AuthService) => () => authService.checkSession(),

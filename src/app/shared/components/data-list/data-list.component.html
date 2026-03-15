@@ -1,5 +1,4 @@
-<div
-  class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col transition-all hover:shadow-md">
+<div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col transition-all hover:shadow-md">
 
   <!-- ======================================= -->
   <!-- TOOLBAR (Tabs + Sélecteur de vues + Recherche) -->
@@ -162,7 +161,7 @@
   <!-- ======================================= -->
   <!-- ======================================= -->
   <!-- ZONE DE CONTENU DYNAMIQUE (selon la vue) -->
-  <!-- ======================================= -->
+  <!-- ======================================= --<!-- VUE TABLEAU (à venir) -->
   <div class="relative min-h-[200px]">
 
     <!-- VUE EXTENSIBLE -->
@@ -223,29 +222,6 @@
           <p class="text-sm font-semibold text-slate-700">Aucun élément trouvé</p>
           <p class="text-xs text-slate-500">Essayez de modifier vos filtres</p>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- VUE TABLEAU (à venir) -->
-  <div *ngIf="viewMode() === 'table'" class="p-6 text-center text-slate-400">
-    Vue Tableau (en cours de développement)
-  </div>
-
-  <!-- VUE TIMELINE (à venir) -->
-  <div *ngIf="viewMode() === 'timeline'" class="p-6 text-center text-slate-400">
-    Vue Chronologique (en cours de développement)
-  </div>
-
-  <!-- ÉTAT VIDE -->
-  <div *ngIf="data().length === 0" class="py-16 text-center">
-    <div class="inline-flex flex-col items-center gap-4">
-      <div class="w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center">
-        <lucide-icon [name]="Inbox" class="w-10 h-10 text-slate-300"></lucide-icon>
-      </div>
-      <div class="space-y-1">
-        <p class="text-sm font-semibold text-slate-700">Aucun élément trouvé</p>
-        <p class="text-xs text-slate-500">Essayez de modifier vos filtres</p>
       </div>
     </div>
   </div>

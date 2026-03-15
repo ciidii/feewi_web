@@ -1,0 +1,22 @@
+<svg width="200" height="52" viewBox="0 0 200 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Icône F compact -->
+  <rect x="0" y="4" width="44" height="44" rx="11" fill="#001945"/>
+  <rect x="10" y="11" width="4" height="30" rx="2" fill="white"/>
+  <rect x="10" y="11" width="22" height="4" rx="2" fill="url(#goldG_cmp)"/>
+  <rect x="10" y="23" width="16" height="3.5" rx="1.75" fill="url(#blueG_cmp)"/>
+  <circle cx="34" cy="37" r="3.5" fill="url(#goldG_cmp)"/>
+
+  <!-- Texte Feewi compact -->
+  <text x="54" y="36" font-family="Lexend, sans-serif" font-weight="700" font-size="30" letter-spacing="-0.5" fill="#001945">Feewi</text>
+
+  <defs>
+    <linearGradient id="goldG_cmp" x1="0" y1="0" x2="1" y2="0" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#E8C05A"/>
+      <stop offset="100%" stop-color="#C9A227"/>
+    </linearGradient>
+    <linearGradient id="blueG_cmp" x1="0" y1="0" x2="1" y2="0" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#5484ff"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+  </defs>
+</svg>
