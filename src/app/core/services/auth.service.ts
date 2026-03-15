@@ -153,6 +153,11 @@ export class AuthService {
     return user ? user.roles.includes(role) : false;
   }
 
+  isCycleAllowed(cycleCode: string): boolean {
+    const user = this._currentUser();
+    return user ? user.allowedCycles.includes(cycleCode) : false;
+  }
+
   async checkSession(): Promise<void> {
     const token = localStorage.getItem('access_token');
     if (token) {

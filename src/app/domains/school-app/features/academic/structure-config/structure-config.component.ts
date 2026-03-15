@@ -137,13 +137,19 @@ export class StructureConfigComponent implements OnInit {
         this.academicService.getFilieres(),
         this.academicService.getSubjects()
       ]);
-      this.cycles.set(cyclesData);
+
+      // Filtrage par provisioning (Cycles autorisés)
+      const allowedCycles = cyclesData.filter(c => 
+        this.authService.hasRole('ROLE_SUPER_ADMIN') || this.authService.isCycleAllowed(c.code)
+      );
+
+      this.cycles.set(allowedCycles);
       this.levels.set(levelsData);
       this.filieres.set(filieresData);
       this.subjects.set(subjectsData);
 
-      if (cyclesData.length > 0 && !this.selectedCycleId()) {
-        this.selectedCycleId.set(cyclesData[0].id);
+      if (allowedCycles.length > 0 && !this.selectedCycleId()) {
+        this.selectedCycleId.set(allowedCycles[0].id);
       }
     } catch (error) {
       this.notificationService.error("Erreur lors du chargement de la structure.");
