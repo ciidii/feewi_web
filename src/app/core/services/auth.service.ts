@@ -15,6 +15,7 @@ export interface UserProfile {
   active: boolean;
   roles: string[];
   permissions: string[];
+  allowedCycles: string[];
 }
 
 interface LoginResponse {
@@ -111,19 +112,22 @@ export class AuthService {
           const school = await this.schoolService.getSchoolById(profile.tenantId);
           this.tenantService.setTenant({
             id: school.tenantId,
-            name: school.name, 
+            name: school.name,
+            allowedCycles: profile.allowedCycles
           });
         } catch (e) {
           console.warn('[AuthService] Could not fetch school details, using fallback');
           this.tenantService.setTenant({
             id: profile.tenantId,
-            name: 'Mon Établissement', 
+            name: 'Mon Établissement',
+            allowedCycles: profile.allowedCycles
           });
         }
       } else if (this.navContext.isSaasDomain()) {
         this.tenantService.setTenant({
           id: 'SYSTEM',
           name: 'Administration Feewi',
+          allowedCycles: []
         });
       }
     } catch (error) {

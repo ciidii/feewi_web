@@ -37,6 +37,7 @@ export class CurriculumManagerComponent implements OnInit {
   allSubjects = signal<Subject[]>([]);
   isLoading = signal(true);
   isAdding = signal(false);
+  editingItem = signal<CurriculumItem | null>(null);
 
   // Formulaire d'ajout rapide
   addForm: FormGroup = this.fb.group({
@@ -48,6 +49,7 @@ export class CurriculumManagerComponent implements OnInit {
 
   // Actions
   readonly curriculumActions: RowAction[] = [
+    { id: 'edit', label: 'Modifier', icon: Edit, type: 'primary' },
     { id: 'delete', label: 'Retirer du programme', icon: Trash2, type: 'danger' }
   ];
 
@@ -89,29 +91,56 @@ export class CurriculumManagerComponent implements OnInit {
     }
   }
 
-  async onAddSubject() {
+  async onSave() {
     if (this.addForm.invalid) return;
 
-    const request = {
-      ...this.addForm.value,
-      levelId: this.data.level.id
-    };
+    const item = this.editingItem();
+    const payload = this.addForm.value;
 
     try {
-      await this.academicService.addSubjectToCurriculum(request);
-      this.notificationService.success('Matière ajoutée au programme.');
-      this.isAdding.set(false);
-      this.addForm.reset({ defaultCoefficient: 1, maxScore: 20, optional: false });
+      if (item) {
+        // Mode Édition
+        await this.academicService.updateCurriculumItem(item.id, payload);
+        this.notificationService.success('Modification enregistrée.');
+      } else {
+        // Mode Ajout
+        const request = { ...payload, levelId: this.data.level.id };
+        await this.academicService.addSubjectToCurriculum(request);
+        this.notificationService.success('Matière ajoutée au programme.');
+      }
+
+      this.cancelForm();
       this.loadData();
     } catch (error) {
-      this.notificationService.error("Erreur lors de l'ajout.");
+      this.notificationService.error("Erreur lors de l'enregistrement.");
     }
   }
 
+  cancelForm() {
+    this.isAdding.set(false);
+    this.editingItem.set(null);
+    this.addForm.reset({ defaultCoefficient: 1, maxScore: 20, optional: false });
+  }
+
   handleAction(event: { actionId: string, row: TableRow }) {
-    if (event.actionId === 'delete') {
+    if (event.actionId === 'edit') {
+      this.startEdit(event.row.rawData);
+    } else if (event.actionId === 'delete') {
       this.confirmRemoveSubject(event.row.id as string, event.row.title);
     }
+  }
+
+  private startEdit(item: CurriculumItem) {
+    this.editingItem.set(item);
+    this.isAdding.set(true);
+    this.addForm.patchValue({
+      subjectId: item.subjectId,
+      defaultCoefficient: item.defaultCoefficient,
+      maxScore: item.maxScore,
+      optional: item.optional
+    });
+    // On désactive le choix de la matière en édition
+    this.addForm.get('subjectId')?.disable();
   }
 
   private async confirmRemoveSubject(id: string, name: string) {

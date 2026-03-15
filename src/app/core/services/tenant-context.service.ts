@@ -5,6 +5,7 @@ export interface Tenant {
   name: string;
   logoUrl?: string;
   primaryColor?: string;
+  allowedCycles: string[];
 }
 
 @Injectable({

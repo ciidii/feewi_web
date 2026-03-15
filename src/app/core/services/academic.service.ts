@@ -192,6 +192,10 @@ export class AcademicService {
     return await firstValueFrom(this.http.post<CurriculumItem>(`${this.API_URL}/curriculum`, request));
   }
 
+  async updateCurriculumItem(id: string, request: Partial<CurriculumItem>): Promise<CurriculumItem> {
+    return await firstValueFrom(this.http.put<CurriculumItem>(`${this.API_URL}/curriculum/${id}`, request));
+  }
+
   async deleteCurriculumItem(id: string): Promise<void> {
     await firstValueFrom(this.http.delete<void>(`${this.API_URL}/curriculum/${id}`));
   }

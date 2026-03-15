@@ -38,6 +38,7 @@ export interface Holiday {
 export interface Cycle {
   id: string;
   name: string;
+  code: string;
   rank: number;
 }
 

@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal, computed, ViewEncapsulation } from '
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule, School, Plus, Layers, ChevronRight, Trash2, Edit, BookOpen, Tag, ListChecks } from 'lucide-angular';
 import { AcademicService } from '../../../../../core/services/academic.service';
+import { AuthService } from '../../../../../core/services/auth.service';
 import { NotificationService } from '../../../../../shared/services/notification.service';
 import { Cycle, Level, Filiere, Subject } from '../../../../../core/models/academic.model';
 import { DataListComponent } from '../../../../../shared/components/data-list/data-list.component';
@@ -25,6 +26,7 @@ import { ConfirmDialogComponent } from '../../../../../shared/components/confirm
 })
 export class StructureConfigComponent implements OnInit {
   private academicService = inject(AcademicService);
+  private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
   private dialog = inject(MatDialog);
 
@@ -48,12 +50,22 @@ export class StructureConfigComponent implements OnInit {
   selectedCycleId = signal<string | null>(null);
   isLoading = signal(true);
 
+  // Autorisations (Provisioning)
+  readonly canEditStructure = computed(() => this.authService.hasRole('ROLE_SUPER_ADMIN'));
+
   // Actions pour les niveaux
-  readonly levelActions: RowAction[] = [
-    { id: 'curriculum', label: 'Gérer le programme', icon: ListChecks, type: 'success' },
-    { id: 'edit', label: 'Modifier', icon: Edit, type: 'primary' },
-    { id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger' }
-  ];
+  readonly levelActions = computed<RowAction[]>(() => {
+    const actions: RowAction[] = [
+      { id: 'curriculum', label: 'Gérer le programme', icon: ListChecks, type: 'success' }
+    ];
+    
+    if (this.canEditStructure()) {
+      actions.push({ id: 'edit', label: 'Modifier', icon: Edit, type: 'primary' });
+      actions.push({ id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger' });
+    }
+    
+    return actions;
+  });
 
   // Actions pour les filières
   readonly filiereActions: RowAction[] = [
