@@ -13,6 +13,7 @@ import {
   CreateClassRequest,
   Subject,
   CurriculumItem,
+  SyllabusDomain,
   Teaching
 } from '../models/academic.model';
 
@@ -198,6 +199,14 @@ export class AcademicService {
 
   async deleteCurriculumItem(id: string): Promise<void> {
     await firstValueFrom(this.http.delete<void>(`${this.API_URL}/curriculum/${id}`));
+  }
+
+  // ===========================================
+  // SYLLABUS (PROGRESSION PÉDAGOGIQUE)
+  // ===========================================
+
+  async getSyllabus(curriculumItemId: string): Promise<SyllabusDomain[]> {
+    return await firstValueFrom(this.http.get<SyllabusDomain[]>(`${this.API_URL}/curriculum/${curriculumItemId}/syllabus`));
   }
 
   // ===========================================

@@ -38,6 +38,44 @@ Désormais, les écoles ne peuvent plus **créer** de cycles, niveaux ou filièr
 | **Filières** | `GET` | `/api/v1/academic/filieres` | Liste toutes les séries provisionnées. |
 | | `PATCH` | `/api/v1/academic/filieres/{id}/status` | Activer/Désactiver une série (`?active=true/false`). |
 
+#### Exemples de réponses (JSON)
+
+**Cycle :**
+```json
+{
+  "id": "uuid-activation",
+  "cycleCode": "MIDDLE_SCHOOL",
+  "systemName": "Moyen (Collège)",
+  "customName": "Cycle CEM",
+  "active": true,
+  "rank": 3
+}
+```
+
+**Niveau :**
+```json
+{
+  "id": "uuid-niveau",
+  "name": "6ème",
+  "rank": 1,
+  "cycle": {
+    "id": "uuid-cycle-parent",
+    "name": "Cycle CEM",
+    "code": "MIDDLE_SCHOOL"
+  }
+}
+```
+
+**Filière :**
+```json
+{
+  "id": "uuid-filiere",
+  "name": "Scientifique (S1)",
+  "code": "S1",
+  "active": true
+}
+```
+
 ### 3.3 Dynamisme par Pays
 Les noms des cycles et des niveaux ne sont plus fixes. 
 *   Pour `educationTemplate: "SN_FR"` : Vous verrez "Moyen", "6ème".

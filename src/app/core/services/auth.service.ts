@@ -16,6 +16,7 @@ export interface UserProfile {
   roles: string[];
   permissions: string[];
   allowedCycles: string[];
+  educationTemplate: string;
 }
 
 interface LoginResponse {

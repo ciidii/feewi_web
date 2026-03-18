@@ -43,8 +43,18 @@ export const SCHOOL_APP_ROUTES: Routes = [
   },
   {
     path: 'classes',
-    title: 'Configuration de la Structure',
-    loadComponent: () => import('./features/academic/structure-config/structure-config.component').then(m => m.StructureConfigComponent)
+    children: [
+      {
+        path: '',
+        title: 'Structure Éducative',
+        loadComponent: () => import('./features/academic/structure-config/structure-config.component').then(m => m.StructureConfigComponent)
+      },
+      {
+        path: 'cycles/:id',
+        title: 'Détails du Cycle',
+        loadComponent: () => import('./features/academic/structure-config/cycle-detail/cycle-detail.component').then(m => m.CycleDetailComponent)
+      }
+    ]
   },
   {
     path: 'academic',

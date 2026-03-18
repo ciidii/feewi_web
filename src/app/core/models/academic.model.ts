@@ -69,8 +69,30 @@ export interface CurriculumItem {
   subjectId: string;
   subjectName?: string; // Reconstruit
   defaultCoefficient: number;
+  weeklyHours: number; // Nouveau : Volume horaire hebdo
   maxScore: number;
   optional: boolean;
+}
+
+export interface SyllabusDomain {
+  id: string;
+  name: string;
+  rank: number;
+}
+
+export interface SyllabusChapter {
+  id: string;
+  domainId: string;
+  name: string;
+  estimatedDuration: number; // En semaines
+  rank: number;
+}
+
+export interface LearningObjective {
+  id: string;
+  chapterId: string;
+  label: string;
+  rank: number;
 }
 
 export interface Teaching {

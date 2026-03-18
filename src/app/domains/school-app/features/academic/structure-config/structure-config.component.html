@@ -4,18 +4,17 @@
   <header class="flex justify-between items-end">
     <div class="space-y-1">
       <h1 class="text-3xl font-display font-bold text-midnight tracking-tight italic uppercase">Configuration Structure</h1>
-      <p class="text-sm text-slate-medium font-medium">Définissez les cycles et les niveaux d'enseignement de votre établissement.</p>
+      <p class="text-sm text-slate-medium font-medium">Gérez l'architecture pédagogique globale de votre établissement.</p>
     </div>
 
     <div class="flex gap-3">
       <button 
-        *ngIf="activeTab() === 'niveaux' && canEditStructure()"
-        (click)="openAddLevel()"
-        [disabled]="!selectedCycleId()"
-        class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-[13px] font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 active:scale-95 disabled:opacity-50"
+        *ngIf="activeTab() === 'cycles' && canEditStructure()"
+        (click)="openAddCycle()"
+        class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-[13px] font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 active:scale-95"
       >
         <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
-        Ajouter un niveau
+        Ajouter un cycle
       </button>
 
       <button 
@@ -41,15 +40,15 @@
   <!-- BARRE D'ONGLETS -->
   <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl w-fit">
     <button 
-      (click)="setTab('niveaux')"
+      (click)="setTab('cycles')"
       class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all"
-      [class.bg-white]="activeTab() === 'niveaux'"
-      [class.shadow-sm]="activeTab() === 'niveaux'"
-      [class.text-primary-600]="activeTab() === 'niveaux'"
-      [class.text-slate-500]="activeTab() !== 'niveaux'"
+      [class.bg-white]="activeTab() === 'cycles'"
+      [class.shadow-sm]="activeTab() === 'cycles'"
+      [class.text-primary-600]="activeTab() === 'cycles'"
+      [class.text-slate-500]="activeTab() !== 'cycles'"
     >
       <lucide-icon [name]="Layers" class="w-3.5 h-3.5"></lucide-icon>
-      Cycles & Niveaux
+      Cycles Éducatifs
     </button>
     <button 
       (click)="setTab('filieres')"
@@ -75,147 +74,82 @@
     </button>
   </div>
 
-  <!-- GRILLE DE CONFIGURATION -->
-  <div class="config-grid">
+  <!-- CONTENU DYNAMIQUE -->
+  <main class="w-full relative min-h-[400px]">
     
-    <!-- COLONNE GAUCHE (Contextuelle) -->
-    
-    <!-- Cas 1 : Cycles (pour Niveaux) -->
-    <aside *ngIf="activeTab() === 'niveaux'" class="animate-in fade-in slide-in-from-left duration-300">
-      <div class="flex items-center justify-between px-2 shrink-0">
-        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Cycles Éducatifs</span>
-        <button *ngIf="canEditStructure()" (click)="openAddCycle()" class="text-primary hover:text-primary-700 transition-colors">
-          <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
-        </button>
+    <!-- État de chargement Main -->
+    <div *ngIf="isLoading()" class="absolute inset-0 z-10 bg-slate-50/80 backdrop-blur-sm flex items-center justify-center rounded-3xl">
+      <div class="flex flex-col items-center gap-3">
+        <div class="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+        <span class="text-[10px] font-bold text-primary uppercase tracking-widest animate-pulse">Chargement...</span>
       </div>
+    </div>
 
-      <div class="cycles-list custom-scrollbar">
-        <!-- Loader Cycles -->
-        <div *ngIf="isLoading()" class="space-y-3">
-          <div *ngFor="let i of [1,2,3,4,5]" class="h-16 w-full bg-white border-2 border-slate-100 rounded-2xl skeleton-pulse"></div>
-        </div>
-
-        <!-- Liste réelle -->
-        <div *ngIf="!isLoading()" class="space-y-3">
-          <div 
-            *ngFor="let cycle of cycles()" 
-            (click)="selectCycle(cycle.id)"
-            class="cycle-item group"
-            [class.active]="selectedCycleId() === cycle.id"
-          >
-            <div class="flex items-center gap-4">
-              <div class="cycle-icon">
-                <lucide-icon [name]="Layers" class="w-5 h-5"></lucide-icon>
-              </div>
-              <span class="cycle-name">{{ cycle.name }}</span>
-            </div>
-            
-            <!-- Actions au survol -->
-            <div *ngIf="canEditStructure()" class="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
-              <button 
-                (click)="$event.stopPropagation(); onEditCycle(cycle)"
-                class="w-7 h-7 rounded-lg hover:bg-white flex items-center justify-center text-slate-400 hover:text-primary-600 transition-colors"
-                title="Modifier"
-              >
-                <lucide-icon [name]="Edit" class="w-3.5 h-3.5"></lucide-icon>
-              </button>
-              <button 
-                (click)="$event.stopPropagation(); onDeleteCycle(cycle)"
-                class="w-7 h-7 rounded-lg hover:bg-white flex items-center justify-center text-slate-400 hover:text-rose-600 transition-colors"
-                title="Supprimer"
-              >
-                <lucide-icon [name]="Trash2" class="w-3.5 h-3.5"></lucide-icon>
-              </button>
-            </div>
-          </div>
-
-          <div *ngIf="cycles().length === 0" class="text-center py-8 px-4 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400">
-            <p class="text-xs font-medium">Aucun cycle défini</p>
-          </div>
-        </div>
-      </div>
-    </aside>
-
-    <!-- Cas 2 : Aide Filières -->
-    <aside *ngIf="activeTab() === 'filieres'" class="animate-in fade-in slide-in-from-left duration-300">
-      <div class="p-6 bg-slate-900 rounded-3xl text-white space-y-6 shadow-xl shadow-slate-900/20">
-        <div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center">
-          <lucide-icon [name]="BookOpen" class="w-6 h-6 text-primary-400"></lucide-icon>
-        </div>
-        <div class="space-y-2">
-          <h3 class="text-lg font-bold leading-tight tracking-tight">À propos des Filières</h3>
-          <p class="text-xs text-primary-100/70 leading-relaxed">
-            Les filières (ou séries) permettent de spécialiser vos niveaux (ex: S1, L1).
-          </p>
-        </div>
-      </div>
-    </aside>
-
-    <!-- Cas 3 : Aide Matières -->
-    <aside *ngIf="activeTab() === 'matieres'" class="animate-in fade-in slide-in-from-left duration-300">
-      <div class="p-6 bg-slate-900 rounded-3xl text-white space-y-6 shadow-xl shadow-slate-900/20">
-        <div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center">
-          <lucide-icon [name]="Tag" class="w-6 h-6 text-emerald-400"></lucide-icon>
-        </div>
-        <div class="space-y-2">
-          <h3 class="text-lg font-bold leading-tight tracking-tight">Bibliothèque des Matières</h3>
-          <p class="text-xs text-slate-300 leading-relaxed">
-            Gérez ici le catalogue global des enseignements de votre établissement.
-          </p>
-        </div>
-      </div>
-    </aside>
-
-    <!-- COLONNE DROITE : CONTENU DYNAMIQUE -->
-    <main class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col relative"
-          [class.lg:col-span-9]="true">
+    <!-- HUB : GRILLE DES CYCLES -->
+    <div *ngIf="activeTab() === 'cycles'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom duration-500">
       
-      <!-- État de chargement Main -->
-      <div *ngIf="isLoading()" class="absolute inset-0 z-10 bg-white/80 backdrop-blur-sm flex items-center justify-center">
-        <div class="flex flex-col items-center gap-3">
-          <div class="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-          <span class="text-[10px] font-bold text-primary uppercase tracking-widest animate-pulse">Chargement structure...</span>
+      <!-- Cartes Cycle -->
+      <div 
+        *ngFor="let cycle of cycles()"
+        (click)="goToCycle(cycle.id)"
+        class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm hover:shadow-xl hover:border-primary-200 hover:-translate-y-1 transition-all cursor-pointer group relative overflow-hidden flex flex-col h-56"
+      >
+        <!-- Décoration de fond -->
+        <div class="absolute -right-6 -top-6 w-32 h-32 bg-primary-50 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+        <div class="flex items-start justify-between relative z-10">
+          <div class="w-14 h-14 bg-primary-50 rounded-2xl flex items-center justify-center text-primary-600 group-hover:bg-primary group-hover:text-white transition-colors shadow-inner">
+            <lucide-icon [name]="Layers" class="w-7 h-7"></lucide-icon>
+          </div>
+          
+          <!-- Actions Admin Rapides -->
+          <div *ngIf="canEditStructure()" class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button (click)="$event.stopPropagation(); onEditCycle(cycle)" class="w-8 h-8 rounded-xl bg-white hover:bg-slate-100 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary transition-colors shadow-sm">
+              <lucide-icon [name]="Edit" class="w-4 h-4"></lucide-icon>
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-auto relative z-10 space-y-4">
+          <div>
+            <h3 class="text-xl font-bold text-slate-900 tracking-tight">{{ cycle.name }}</h3>
+            <p class="text-xs text-slate-500 font-medium mt-1">Code Système : {{ cycle.code }}</p>
+          </div>
+          
+          <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+            <span class="text-xs font-bold text-primary flex items-center gap-1.5">
+              Gérer ce cycle
+            </span>
+            <lucide-icon [name]="ArrowRight" class="w-4 h-4 text-slate-300 group-hover:text-primary transition-colors group-hover:translate-x-1"></lucide-icon>
+          </div>
         </div>
       </div>
 
-      <!-- NIVEAUX -->
-      <app-data-list
-        *ngIf="activeTab() === 'niveaux'"
-        [data]="displayLevels()"
-        [total]="displayLevels().length"
-        [actions]="levelActions()"
-        (onAction)="handleLevelAction($event)"
-      ></app-data-list>
+      <!-- Vide -->
+      <div *ngIf="cycles().length === 0 && !isLoading()" class="col-span-full py-16 text-center border-2 border-dashed border-slate-200 rounded-3xl">
+        <p class="text-sm font-bold text-slate-400 italic">Aucun cycle n'est actif pour votre établissement.</p>
+      </div>
+    </div>
 
-      <!-- FILIERES -->
+    <!-- FILIERES (DataList Classique) -->
+    <div *ngIf="activeTab() === 'filieres'" class="animate-in fade-in slide-in-from-right duration-300">
       <app-data-list
-        *ngIf="activeTab() === 'filieres'"
         [data]="displayFilieres()"
         [total]="displayFilieres().length"
         [actions]="filiereActions"
         (onAction)="handleFiliereAction($event)"
       ></app-data-list>
+    </div>
 
-      <!-- MATIERES -->
+    <!-- MATIERES (DataList Classique) -->
+    <div *ngIf="activeTab() === 'matieres'" class="animate-in fade-in slide-in-from-right duration-300">
       <app-data-list
-        *ngIf="activeTab() === 'matieres'"
         [data]="displaySubjects()"
         [total]="displaySubjects().length"
         [actions]="subjectActions"
         (onAction)="handleSubjectAction($event)"
       ></app-data-list>
+    </div>
 
-      <!-- Message vide pour Niveaux -->
-      <div *ngIf="activeTab() === 'niveaux' && !selectedCycleId() && !isLoading()" class="flex-1 flex flex-col items-center justify-center text-center p-12 space-y-4">
-        <div class="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center text-slate-200">
-          <lucide-icon [name]="School" class="w-10 h-10"></lucide-icon>
-        </div>
-        <div>
-          <h3 class="text-base font-bold text-slate-900 tracking-tight">Aucun cycle sélectionné</h3>
-          <p class="text-xs text-slate-500 max-w-xs mx-auto mt-1">Sélectionnez un cycle pour gérer ses niveaux.</p>
-        </div>
-      </div>
-    </main>
-
-  </div>
+  </main>
 </div>

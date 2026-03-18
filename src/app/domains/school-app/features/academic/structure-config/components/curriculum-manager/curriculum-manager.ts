@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material/dialog';
-import { LucideAngularModule, ListChecks, Plus, Trash2, Edit, Save, X, BookOpen, Hash } from 'lucide-angular';
+import { LucideAngularModule, ListChecks, Plus, Trash2, Edit, Save, X, BookOpen, Hash, Clock } from 'lucide-angular';
 import { AcademicService } from '../../../../../../../core/services/academic.service';
 import { CurriculumItem, Level, Subject } from '../../../../../../../core/models/academic.model';
 import { NotificationService } from '../../../../../../../shared/services/notification.service';
@@ -9,6 +9,7 @@ import { DataListComponent } from '../../../../../../../shared/components/data-l
 import { TableRow, RowAction } from '../../../../../../../shared/models/data-list.models';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ConfirmDialogComponent } from '../../../../../../../shared/components/confirm-dialog/confirm-dialog';
+import { SyllabusViewerComponent } from '../syllabus-viewer/syllabus-viewer';
 
 @Component({
   selector: 'app-curriculum-manager',
@@ -31,6 +32,7 @@ export class CurriculumManagerComponent implements OnInit {
   readonly X = X;
   readonly Save = Save;
   readonly BookOpen = BookOpen;
+  readonly Clock = Clock;
 
   // États
   curriculumItems = signal<CurriculumItem[]>([]);
@@ -43,12 +45,14 @@ export class CurriculumManagerComponent implements OnInit {
   addForm: FormGroup = this.fb.group({
     subjectId: ['', [Validators.required]],
     defaultCoefficient: [1, [Validators.required, Validators.min(0.5)]],
+    weeklyHours: [2, [Validators.required, Validators.min(0.5)]],
     maxScore: [20, [Validators.required]],
     optional: [false]
   });
 
   // Actions
   readonly curriculumActions: RowAction[] = [
+    { id: 'syllabus', label: 'Voir le Syllabus', icon: BookOpen, type: 'primary' },
     { id: 'edit', label: 'Modifier', icon: Edit, type: 'primary' },
     { id: 'delete', label: 'Retirer du programme', icon: Trash2, type: 'danger' }
   ];
@@ -58,9 +62,12 @@ export class CurriculumManagerComponent implements OnInit {
     return this.curriculumItems().map(item => ({
       id: item.id,
       title: item.subjectName || 'Matière inconnue',
-      subtitle: `Coefficient: ${item.defaultCoefficient} • Note Max: ${item.maxScore}`,
+      subtitle: `Coefficient: ${item.defaultCoefficient} • Volume: ${item.weeklyHours}h/sem • Max: ${item.maxScore}`,
       avatarLabel: (item.subjectName || '??').substring(0, 2).toUpperCase(),
-      badges: [{ label: item.optional ? 'OPTIONNELLE' : 'OBLIGATOIRE', type: item.optional ? 'info' : 'success' }],
+      badges: [
+        { label: `${item.weeklyHours}H`, type: 'info' },
+        { label: item.optional ? 'OPTIONNELLE' : 'OBLIGATOIRE', type: item.optional ? 'info' : 'success' }
+      ],
       rawData: item
     }));
   });
@@ -119,15 +126,26 @@ export class CurriculumManagerComponent implements OnInit {
   cancelForm() {
     this.isAdding.set(false);
     this.editingItem.set(null);
-    this.addForm.reset({ defaultCoefficient: 1, maxScore: 20, optional: false });
+    this.addForm.reset({ defaultCoefficient: 1, weeklyHours: 2, maxScore: 20, optional: false });
   }
 
   handleAction(event: { actionId: string, row: TableRow }) {
-    if (event.actionId === 'edit') {
+    if (event.actionId === 'syllabus') {
+      this.openSyllabusViewer(event.row.rawData);
+    } else if (event.actionId === 'edit') {
       this.startEdit(event.row.rawData);
     } else if (event.actionId === 'delete') {
       this.confirmRemoveSubject(event.row.id as string, event.row.title);
     }
+  }
+
+  private openSyllabusViewer(item: CurriculumItem) {
+    this.dialog.open(SyllabusViewerComponent, {
+      width: '1000px',
+      maxWidth: '95vw',
+      panelClass: 'feewi-dialog-panel',
+      data: { item }
+    });
   }
 
   private startEdit(item: CurriculumItem) {
@@ -136,6 +154,7 @@ export class CurriculumManagerComponent implements OnInit {
     this.addForm.patchValue({
       subjectId: item.subjectId,
       defaultCoefficient: item.defaultCoefficient,
+      weeklyHours: item.weeklyHours,
       maxScore: item.maxScore,
       optional: item.optional
     });
