@@ -37,8 +37,10 @@ export interface Holiday {
 
 export interface Cycle {
   id: string;
-  name: string;
-  code: string;
+  cycleCode: string;   // Code système (ex: PRIMARY)
+  systemName: string;  // Nom par défaut (ex: Élémentaire)
+  customName?: string; // Nom personnalisé par l'école
+  active: boolean;
   rank: number;
 }
 

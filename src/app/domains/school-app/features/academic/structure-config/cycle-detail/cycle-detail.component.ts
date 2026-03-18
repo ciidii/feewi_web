@@ -55,7 +55,7 @@ export class CycleDetailComponent implements OnInit {
 
   // Déterminer si les filières sont pertinentes pour ce cycle (ex: Lycée)
   readonly hasFilieres = computed(() => {
-    const code = this.cycle()?.code;
+    const code = this.cycle()?.cycleCode;
     return code === 'HIGH_SCHOOL' || code === 'TECHNICAL_SCHOOL' || code === 'UNIVERSITY';
   });
 
@@ -128,7 +128,8 @@ export class CycleDetailComponent implements OnInit {
       const currentCycle = allCycles.find(c => c.id === id);
       if (currentCycle) {
         this.cycle.set(currentCycle);
-        this.navState.setBreadcrumb(['Accueil', 'Structure', currentCycle.name]);
+        const cycleName = currentCycle.customName || currentCycle.systemName;
+        this.navState.setBreadcrumb(['Accueil', 'Structure', cycleName]);
       } else {
         this.notificationService.error("Cycle non trouvé.");
       }

@@ -47,13 +47,8 @@ export class StructureConfigComponent implements OnInit {
     this.isLoading.set(true);
     try {
       const cyclesData = await this.academicService.getCycles();
-
-      // Filtrage par provisioning (Cycles autorisés via JWT)
-      const allowedCycles = cyclesData.filter(c =>
-        this.authService.hasRole('ROLE_SUPER_ADMIN') || this.authService.isCycleAllowed(c.code)
-      );
-
-      this.cycles.set(allowedCycles.sort((a, b) => a.rank - b.rank));
+      // On fait confiance à l'API pour les cycles activés (Tenant-scoped)
+      this.cycles.set(cyclesData.sort((a, b) => a.rank - b.rank));
     } catch (error) {
       this.notificationService.error("Erreur lors du chargement de la structure.");
     } finally {
@@ -92,11 +87,12 @@ export class StructureConfigComponent implements OnInit {
   }
 
   onDeleteCycle(cycle: Cycle) {
+    const cycleName = cycle.customName || cycle.systemName;
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
         title: 'Supprimer le cycle ?',
-        message: `Voulez-vous supprimer le cycle "${cycle.name}" ? Tous les niveaux rattachés à ce cycle seront impactés.`,
+        message: `Voulez-vous supprimer le cycle "${cycleName}" ? Tous les niveaux rattachés à ce cycle seront impactés.`,
         confirmLabel: 'Oui, supprimer le cycle',
         type: 'danger'
       }

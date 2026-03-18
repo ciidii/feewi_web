@@ -62,9 +62,9 @@
         <div class="mt-auto relative z-10 space-y-4">
           <div>
             <div class="flex items-center gap-2 mb-1">
-              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ cycle.code }}</span>
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ cycle.cycleCode }}</span>
             </div>
-            <h3 class="text-2xl font-bold text-slate-900 tracking-tight leading-none italic uppercase">{{ cycle.name }}</h3>
+            <h3 class="text-2xl font-bold text-slate-900 tracking-tight leading-none italic uppercase">{{ cycle.customName || cycle.systemName }}</h3>
           </div>
 
           <div class="flex items-center justify-between pt-5 border-t border-slate-100">

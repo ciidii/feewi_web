@@ -46,9 +46,9 @@
           <div class="space-y-1">
             <div class="flex items-center gap-2">
               <span class="px-2 py-0.5 bg-primary-100 text-primary-700 text-[10px] font-bold rounded-md uppercase tracking-wider">Cycle Actif</span>
-              <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">{{ cycle()?.code }}</span>
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">{{ cycle()?.cycleCode }}</span>
             </div>
-            <h2 class="text-4xl font-display font-bold text-slate-900 leading-none italic uppercase">{{ cycle()?.name || '...' }}</h2>
+            <h2 class="text-4xl font-display font-bold text-slate-900 leading-none italic uppercase">{{ cycle()?.customName || cycle()?.systemName || '...' }}</h2>
             <p class="text-sm text-slate-500 font-medium">Gestion contextuelle des niveaux et programmes.</p>
           </div>
         </div>

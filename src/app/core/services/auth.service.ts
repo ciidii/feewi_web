@@ -156,7 +156,8 @@ export class AuthService {
 
   isCycleAllowed(cycleCode: string): boolean {
     const user = this._currentUser();
-    return user ? user.allowedCycles.includes(cycleCode) : false;
+    if (!user || !user.allowedCycles) return false;
+    return user.allowedCycles.some(code => code.toUpperCase() === cycleCode.toUpperCase());
   }
 
   async checkSession(): Promise<void> {

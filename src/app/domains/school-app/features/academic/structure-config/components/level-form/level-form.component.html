@@ -76,7 +76,7 @@
             [class.error]="isInvalid('cycleId')"
           >
             <mat-option *ngFor="let cycle of cycles()" [value]="cycle.id">
-              {{ cycle.name }}
+              {{ cycle.customName || cycle.systemName }}
             </mat-option>
           </mat-select>
         </div>
