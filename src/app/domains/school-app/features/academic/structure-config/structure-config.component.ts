@@ -7,13 +7,15 @@ import { AuthService } from '../../../../../core/services/auth.service';
 import { NotificationService } from '../../../../../shared/services/notification.service';
 import { Cycle } from '../../../../../core/models/academic.model';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { DataListComponent } from '../../../../../shared/components/data-list/data-list.component';
+import { TableRow, RowAction } from '../../../../../shared/models/data-list.models';
 import { CycleFormComponent } from './components/cycle-form/cycle-form.component';
 import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 
 @Component({
   selector: 'app-structure-config',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, MatDialogModule],
+  imports: [CommonModule, LucideAngularModule, MatDialogModule, DataListComponent],
   templateUrl: './structure-config.component.html',
   styleUrls: ['./structure-config.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -39,6 +41,37 @@ export class StructureConfigComponent implements OnInit {
   // Autorisations (Provisioning)
   readonly canEditStructure = computed(() => this.authService.hasRole('ROLE_SUPER_ADMIN'));
 
+  // Actions pour les cycles
+  readonly cycleActions = computed<RowAction[]>(() => {
+    const actions: RowAction[] = [
+      { id: 'open', label: 'Gérer le cycle', icon: ArrowRight, type: 'primary' }
+    ];
+    if (this.canEditStructure()) {
+      actions.push({ id: 'edit', label: 'Personnaliser', icon: Edit, type: 'primary' });
+      actions.push({ id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger' });
+    }
+    return actions;
+  });
+
+  // Transformation des cycles pour le DataList
+  displayCycles = computed<TableRow[]>(() => {
+    return this.cycles().map(c => ({
+      id: c.id,
+      title: c.customName || c.systemName,
+      subtitle: `Code Système : ${c.cycleCode}`,
+      avatarLabel: c.cycleCode.substring(0, 2).toUpperCase(),
+      badges: [
+        { label: 'ACTIF', type: 'success' },
+        { label: `RANG ${c.rank}`, type: 'info' }
+      ],
+      metadata: {
+        domain: 'Éducation',
+        location: 'National'
+      },
+      rawData: c
+    }));
+  });
+
   ngOnInit() {
     this.loadData();
   }
@@ -53,6 +86,17 @@ export class StructureConfigComponent implements OnInit {
       this.notificationService.error("Erreur lors du chargement de la structure.");
     } finally {
       this.isLoading.set(false);
+    }
+  }
+
+  handleCycleAction(event: { actionId: string, row: TableRow }) {
+    const cycle = event.row.rawData as Cycle;
+    if (event.actionId === 'open') {
+      this.goToCycle(cycle.id);
+    } else if (event.actionId === 'edit') {
+      this.onEditCycle(cycle);
+    } else if (event.actionId === 'delete') {
+      this.onDeleteCycle(cycle);
     }
   }
 

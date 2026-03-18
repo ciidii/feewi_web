@@ -69,10 +69,21 @@ export class DataListComponent {
   // ===========================================
 
   constructor(private viewPreferenceService: ViewPreferenceService) {
-    // Charger la préférence de vue au démarrage
+    // La vue sera initialisée dans ngOnInit pour prendre en compte les inputs
+  }
+
+  ngOnInit() {
+    // Charger la préférence de vue au démarrage ou utiliser la vue par défaut
     const savedView = this.viewPreferenceService.getPreferredView()();
-    if (savedView !== this.viewMode()) {
+    
+    // Priorité : 
+    // 1. Vue sauvegardée par l'utilisateur
+    // 2. Vue définie par le développeur (defaultView)
+    // 3. Vue par défaut du système (expandable)
+    if (savedView) {
       this.viewMode.set(savedView);
+    } else if (this.defaultView()) {
+      this.viewMode.set(this.defaultView());
     }
   }
 
@@ -82,6 +93,9 @@ export class DataListComponent {
 
   /** Les données à afficher */
   data = input<TableRow[]>([]);
+
+  /** Vue par défaut (si aucune préférence n'est enregistrée) */
+  defaultView = input<ViewMode>('expandable');
 
   /** Les onglets disponibles */
   tabs = input<TabItem[]>([]);

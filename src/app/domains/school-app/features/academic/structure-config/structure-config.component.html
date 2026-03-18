@@ -1,29 +1,28 @@
 <div class="space-y-8 animate-in fade-in duration-500">
 
-  <!-- HEADER (Premium Look) -->
+  <!-- HEADER -->
   <header class="flex justify-between items-end">
     <div class="space-y-1">
       <div class="flex items-center gap-2 mb-1">
         <span class="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold rounded-md uppercase tracking-wider">Architecture</span>
       </div>
       <h1 class="text-4xl font-display font-bold text-midnight tracking-tight italic uppercase">Structure Scolaire</h1>
-      <p class="text-sm text-slate-medium font-medium">Sélectionnez un cycle pour configurer ses niveaux, séries et programmes.</p>
+      <p class="text-sm text-slate-medium font-medium">Gérez vos cycles éducatifs et accédez aux configurations de programmes.</p>
     </div>
 
     <div class="flex gap-3">
-      <!-- Uniquement pour le Super Admin (Provisioning) -->
       <button
         *ngIf="canEditStructure()"
         (click)="openAddCycle()"
         class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-[13px] font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 active:scale-95"
       >
         <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
-        Nouveau Cycle Éducatif
+        Nouveau Cycle
       </button>
     </div>
   </header>
 
-  <!-- HUB : GRILLE DES CYCLES (Seul contenu du Hub) -->
+  <!-- HUB : UTILISATION DE DATALIST (Mode Cards) -->
   <main class="w-full relative min-h-[400px]">
 
     <!-- État de chargement -->
@@ -34,57 +33,16 @@
       </div>
     </div>
 
-    <!-- GRILLE DYNAMIQUE -->
-    <div *ngIf="!isLoading()" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom duration-500">
+    <!-- DataList en mode Cards -->
+    <app-data-list
+      *ngIf="!isLoading()"
+      [data]="displayCycles()"
+      [total]="displayCycles().length"
+      [actions]="cycleActions()"
+      defaultView="cards"
+      (onAction)="handleCycleAction($event)"
+    ></app-data-list>
 
-      <!-- Carte de Cycle (Premium) -->
-      <div
-        *ngFor="let cycle of cycles()"
-        (click)="goToCycle(cycle.id)"
-        class="group relative bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-sm hover:shadow-2xl hover:border-primary-200 hover:-translate-y-2 transition-all duration-500 cursor-pointer overflow-hidden flex flex-col h-64"
-      >
-        <!-- Décoration Blur de fond -->
-        <div class="absolute -right-6 -top-6 w-32 h-32 bg-primary-50 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-
-        <div class="flex items-start justify-between relative z-10">
-          <div class="w-16 h-16 bg-primary-50 rounded-2xl flex items-center justify-center text-primary-600 group-hover:bg-primary group-hover:text-white transition-all duration-500 shadow-inner">
-            <lucide-icon [name]="Layers" class="w-8 h-8"></lucide-icon>
-          </div>
-
-          <!-- Actions Admin Rapides (Visibles au survol) -->
-          <div *ngIf="canEditStructure()" class="flex gap-2 opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all duration-500">
-            <button (click)="$event.stopPropagation(); onEditCycle(cycle)" class="w-9 h-9 rounded-xl bg-white hover:bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary transition-colors shadow-sm">
-              <lucide-icon [name]="Edit" class="w-4 h-4"></lucide-icon>
-            </button>
-          </div>
-        </div>
-
-        <div class="mt-auto relative z-10 space-y-4">
-          <div>
-            <div class="flex items-center gap-2 mb-1">
-              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ cycle.cycleCode }}</span>
-            </div>
-            <h3 class="text-2xl font-bold text-slate-900 tracking-tight leading-none italic uppercase">{{ cycle.customName || cycle.systemName }}</h3>
-          </div>
-
-          <div class="flex items-center justify-between pt-5 border-t border-slate-100">
-            <span class="text-xs font-bold text-primary flex items-center gap-2 uppercase tracking-wider">
-              Gérer ce cycle
-              <lucide-icon [name]="ArrowRight" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></lucide-icon>
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <!-- État vide -->
-      <div *ngIf="cycles().length === 0 && !isLoading()" class="col-span-full py-24 text-center border-2 border-dashed border-slate-200 rounded-[3rem] bg-slate-50/30">
-        <div class="w-20 h-20 bg-white rounded-3xl flex items-center justify-center text-slate-200 mx-auto mb-6 shadow-sm">
-          <lucide-icon [name]="Layers" class="w-10 h-10"></lucide-icon>
-        </div>
-        <h3 class="text-lg font-bold text-slate-400 italic">Aucun cycle actif.</h3>
-        <p class="text-xs text-slate-400 mt-1 max-w-xs mx-auto">Vérifiez vos abonnements ou contactez le support pour activer votre structure.</p>
-      </div>
-    </div>
-
+    <!-- État vide (géré par DataList, mais on peut personnaliser si besoin) -->
   </main>
 </div>
