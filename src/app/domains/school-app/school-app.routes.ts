@@ -60,6 +60,11 @@ export const SCHOOL_APP_ROUTES: Routes = [
     path: 'academic',
     children: [
       {
+        path: 'library',
+        title: 'Bibliothèque des Matières',
+        loadComponent: () => import('./features/academic/subject-library/subject-library.component').then(m => m.SubjectLibraryComponent)
+      },
+      {
         path: 'years',
         title: 'Années Académiques',
         loadComponent: () => import('./features/academic/year-list/year-list.component').then(m => m.YearListComponent)

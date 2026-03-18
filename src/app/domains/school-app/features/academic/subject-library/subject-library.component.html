@@ -1,0 +1,72 @@
+<div class="space-y-8 animate-in fade-in duration-500">
+  
+  <!-- HEADER -->
+  <header class="flex justify-between items-end">
+    <div class="space-y-1">
+      <div class="flex items-center gap-2 mb-1">
+        <span class="px-2 py-0.5 bg-emerald-50 text-emerald-600 text-[10px] font-bold rounded-md uppercase tracking-wider border border-emerald-100">Référentiel</span>
+      </div>
+      <h1 class="text-4xl font-display font-bold text-midnight tracking-tight italic uppercase">Bibliothèque des Matières</h1>
+      <p class="text-sm text-slate-medium font-medium">Gérez le catalogue global des enseignements de votre établissement.</p>
+    </div>
+
+    <div class="flex gap-3">
+      <button 
+        (click)="openSubjectForm()"
+        class="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-[13px] font-bold hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-200 active:scale-95"
+      >
+        <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
+        Nouvelle Matière
+      </button>
+    </div>
+  </header>
+
+  <!-- RECHERCHE & INFO -->
+  <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
+    <div class="relative w-full md:w-96 group">
+      <lucide-icon [name]="Search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400 group-focus-within:text-emerald-500 transition-colors"></lucide-icon>
+      <input 
+        type="text" 
+        (input)="updateSearch($event)"
+        placeholder="Rechercher une matière ou un code..." 
+        class="w-full h-12 bg-white border border-slate-200 rounded-2xl pl-12 pr-4 text-sm font-semibold outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all shadow-sm"
+      />
+    </div>
+
+    <div class="flex items-center gap-3 px-4 py-2 bg-slate-50 border border-slate-100 rounded-2xl">
+      <lucide-icon [name]="Info" class="w-4 h-4 text-slate-400"></lucide-icon>
+      <span class="text-[11px] text-slate-500 font-medium">
+        {{ subjects().length }} matières enregistrées dans votre catalogue.
+      </span>
+    </div>
+  </div>
+
+  <!-- LISTE DES MATIÈRES -->
+  <main class="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden flex flex-col relative min-h-[500px]">
+    
+    <!-- Loader -->
+    <div *ngIf="isLoading()" class="absolute inset-0 z-10 bg-white/80 backdrop-blur-sm flex items-center justify-center">
+      <div class="w-10 h-10 border-4 border-emerald-100 border-t-emerald-600 rounded-full animate-spin"></div>
+    </div>
+
+    <!-- DataList -->
+    <app-data-list
+      [data]="displaySubjects()"
+      [total]="displaySubjects().length"
+      [actions]="subjectActions"
+      (onAction)="handleAction($event)"
+    ></app-data-list>
+
+    <!-- État vide -->
+    <div *ngIf="displaySubjects().length === 0 && !isLoading()" class="flex-1 flex flex-col items-center justify-center text-center py-24 px-4 space-y-4">
+      <div class="w-24 h-24 bg-slate-50 rounded-[2rem] flex items-center justify-center text-slate-200 mx-auto">
+        <lucide-icon [name]="BookOpen" class="w-12 h-12"></lucide-icon>
+      </div>
+      <div>
+        <h3 class="text-lg font-bold text-slate-900 tracking-tight">Aucune matière trouvée</h3>
+        <p class="text-sm text-slate-500 max-w-xs mx-auto mt-1">Commencez par enrichir votre catalogue global pour pouvoir ensuite construire vos programmes scolaires.</p>
+      </div>
+    </div>
+  </main>
+
+</div>

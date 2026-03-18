@@ -162,6 +162,10 @@ export class AcademicService {
     return await firstValueFrom(this.http.post<Filiere>(`${this.API_URL}/filieres`, filiere));
   }
 
+  async deleteFiliere(id: string): Promise<void> {
+    await firstValueFrom(this.http.delete<void>(`${this.API_URL}/filieres/${id}`));
+  }
+
   // ===========================================
   // GESTION DES MATIÈRES (RÉFÉRENTIEL)
   // ===========================================
@@ -176,6 +180,10 @@ export class AcademicService {
 
   async updateSubject(id: string, subject: Partial<Subject>): Promise<Subject> {
     return await firstValueFrom(this.http.put<Subject>(`${this.API_URL}/subjects/${id}`, subject));
+  }
+
+  async deleteSubject(id: string): Promise<void> {
+    await firstValueFrom(this.http.delete<void>(`${this.API_URL}/subjects/${id}`));
   }
 
   // ===========================================
