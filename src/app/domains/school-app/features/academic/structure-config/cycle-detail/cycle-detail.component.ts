@@ -1,16 +1,17 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
-import { LucideAngularModule, ArrowLeft, Layers, Plus, ListChecks, Edit, Trash2, GraduationCap, Users } from 'lucide-angular';
+import { LucideAngularModule, ArrowLeft, Layers, Plus, ListChecks, Edit, Trash2, GraduationCap, Users, Tag } from 'lucide-angular';
 import { AcademicService } from '../../../../../../core/services/academic.service';
 import { AuthService } from '../../../../../../core/services/auth.service';
 import { NavigationStateService } from '../../../../../../core/services/navigation-state.service';
 import { NotificationService } from '../../../../../../shared/services/notification.service';
-import { Cycle, Level } from '../../../../../../core/models/academic.model';
+import { Cycle, Level, Filiere } from '../../../../../../core/models/academic.model';
 import { DataListComponent } from '../../../../../../shared/components/data-list/data-list.component';
 import { TableRow, RowAction } from '../../../../../../shared/models/data-list.models';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { LevelFormComponent } from '../components/level-form/level-form.component';
+import { FiliereFormComponent } from '../components/filiere-form/filiere-form.component';
 import { CurriculumManagerComponent } from '../components/curriculum-manager/curriculum-manager';
 import { ConfirmDialogComponent } from '../../../../../../shared/components/confirm-dialog/confirm-dialog';
 
@@ -38,14 +39,27 @@ export class CycleDetailComponent implements OnInit {
   readonly Edit = Edit;
   readonly Trash2 = Trash2;
   readonly GraduationCap = GraduationCap;
+  readonly Tag = Tag;
+  readonly Users = Users;
 
+  // États
   cycleId = signal<string | null>(null);
   cycle = signal<Cycle | null>(null);
   levels = signal<Level[]>([]);
+  filieres = signal<Filiere[]>([]);
+  activeTab = signal<'niveaux' | 'filieres'>('niveaux');
   isLoading = signal(true);
 
+  // Permission de modification (Provisioning)
   readonly canEditStructure = computed(() => this.authService.hasRole('ROLE_SUPER_ADMIN'));
 
+  // Déterminer si les filières sont pertinentes pour ce cycle (ex: Lycée)
+  readonly hasFilieres = computed(() => {
+    const code = this.cycle()?.code;
+    return code === 'HIGH_SCHOOL' || code === 'TECHNICAL_SCHOOL' || code === 'UNIVERSITY';
+  });
+
+  // Actions pour les niveaux
   readonly levelActions = computed<RowAction[]>(() => {
     const actions: RowAction[] = [
       { id: 'curriculum', label: 'Gérer le programme', icon: ListChecks, type: 'success' },
@@ -60,6 +74,13 @@ export class CycleDetailComponent implements OnInit {
     return actions;
   });
 
+  // Actions pour les filières
+  readonly filiereActions: RowAction[] = [
+    { id: 'edit', label: 'Modifier', icon: Edit, type: 'primary' },
+    { id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger' }
+  ];
+
+  // Transformation des niveaux pour DataList
   displayLevels = computed<TableRow[]>(() => {
     return this.levels()
       .sort((a, b) => a.rank - b.rank)
@@ -71,6 +92,18 @@ export class CycleDetailComponent implements OnInit {
         badges: [{ label: 'ACTIF', type: 'success' }],
         rawData: level
       }));
+  });
+
+  // Transformation des filières pour DataList
+  displayFilieres = computed<TableRow[]>(() => {
+    return this.filieres().map(f => ({
+      id: f.id,
+      title: f.name,
+      subtitle: `Code série : ${f.code}`,
+      avatarLabel: f.code.substring(0, 2).toUpperCase(),
+      badges: [{ label: 'SÉRIE', type: 'info' }],
+      rawData: f
+    }));
   });
 
   ngOnInit() {
@@ -86,11 +119,10 @@ export class CycleDetailComponent implements OnInit {
   async loadData(id: string) {
     this.isLoading.set(true);
     try {
-      // Pour l'instant on récupère tous les cycles et on filtre.
-      // Idéalement on aurait un endpoint getCycleById et getLevelsByCycle.
-      const [allCycles, allLevels] = await Promise.all([
+      const [allCycles, allLevels, allFilieres] = await Promise.all([
         this.academicService.getCycles(),
-        this.academicService.getLevels()
+        this.academicService.getLevels(),
+        this.academicService.getFilieres()
       ]);
 
       const currentCycle = allCycles.find(c => c.id === id);
@@ -101,8 +133,13 @@ export class CycleDetailComponent implements OnInit {
         this.notificationService.error("Cycle non trouvé.");
       }
 
+      // Filtrage des niveaux appartenant à ce cycle
       const cycleLevels = allLevels.filter(l => String(l.cycleId || (l as any).cycle?.id) === String(id));
       this.levels.set(cycleLevels);
+
+      // Note: Dans une version future de l'API, les filières seront liées au cycle.
+      // Pour l'instant on affiche toutes les filières si le cycle le permet.
+      this.filieres.set(allFilieres);
 
     } catch (error) {
       this.notificationService.error("Erreur lors du chargement du cycle.");
@@ -110,6 +147,12 @@ export class CycleDetailComponent implements OnInit {
       this.isLoading.set(false);
     }
   }
+
+  setTab(tab: 'niveaux' | 'filieres') {
+    this.activeTab.set(tab);
+  }
+
+  // --- GESTION DES NIVEAUX ---
 
   openAddLevel() {
     const dialogRef = this.dialog.open(LevelFormComponent, {
@@ -120,9 +163,7 @@ export class CycleDetailComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result && this.cycleId()) {
-        this.loadData(this.cycleId()!);
-      }
+      if (result && this.cycleId()) this.loadData(this.cycleId()!);
     });
   }
 
@@ -160,9 +201,7 @@ export class CycleDetailComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result && this.cycleId()) {
-        this.loadData(this.cycleId()!);
-      }
+      if (result && this.cycleId()) this.loadData(this.cycleId()!);
     });
   }
 
@@ -188,5 +227,22 @@ export class CycleDetailComponent implements OnInit {
         }
       }
     });
+  }
+
+  // --- GESTION DES FILIÈRES ---
+
+  openAddFiliere() {
+    const dialogRef = this.dialog.open(FiliereFormComponent, {
+      width: '480px',
+      panelClass: 'feewi-dialog-panel'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && this.cycleId()) this.loadData(this.cycleId()!);
+    });
+  }
+
+  handleFiliereAction(event: { actionId: string, row: TableRow }) {
+    this.notificationService.info("Action sur filière bientôt disponible.");
   }
 }
