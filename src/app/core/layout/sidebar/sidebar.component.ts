@@ -52,11 +52,12 @@ export class SidebarComponent {
     { label: 'Dossiers scolaires', icon: FileText, route: '/students/records' },
   ];
 
-  // --- 3. ACADEMIC STRUCTURE (Référentiel) ---
+  // --- 3. ACADEMIC STRUCTURE (Référentiel & Pilotage) ---
   academicItems = [
-    { label: 'Classes & Niveaux', icon: School, route: '/classes' },
-    { label: 'Gestion des Classes', icon: Layers, route: '/academic/classes' },
-    { label: 'Années Scolaires', icon: Calendar, route: '/academic/years' },
+    { label: 'Architecture & Cycles', icon: Layers, route: '/classes' },
+    { label: 'Gestion des Classes', icon: Users, route: '/academic/classes' },
+    { label: 'Bibliothèque Matières', icon: BookOpen, route: '/academic/library' },
+    { label: 'Calendrier Scolaire', icon: Calendar, route: '/academic/years' },
   ];
 
   // --- 4. IDENTITY SERVICE (Fondation) ---
