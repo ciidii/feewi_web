@@ -52,7 +52,12 @@ export class SubjectLibraryComponent implements OnInit {
         title: s.name,
         subtitle: `Code technique : ${s.code}`,
         avatarLabel: s.code.substring(0, 2).toUpperCase(),
-        badges: [{ label: 'MATIÈRE', type: 'info' }],
+        badges: [
+          { 
+            label: s.isProvisioned ? 'NATIONAL' : 'ÉTABLISSEMENT', 
+            type: s.isProvisioned ? 'success' : 'info' 
+          }
+        ],
         rawData: s
       }));
   });

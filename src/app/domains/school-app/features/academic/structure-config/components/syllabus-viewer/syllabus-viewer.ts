@@ -39,9 +39,14 @@ export class SyllabusViewerComponent implements OnInit {
   );
 
   // Chapitres du domaine actif
-  activeChapters = computed(() => {
+  activeChapters = computed<SyllabusChapter[]>(() => {
     const domain = this.activeDomain();
     return domain ? (domain as any).chapters || [] : [];
+  });
+
+  /** Durée totale du domaine en semaines */
+  totalDomainDuration = computed(() => {
+    return this.activeChapters().reduce((sum, ch) => sum + (ch.estimatedDuration || 0), 0);
   });
 
   ngOnInit() {

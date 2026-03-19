@@ -62,6 +62,7 @@ export interface Subject {
   id: string;
   name: string;
   code: string;
+  isProvisioned: boolean; // True si vient du modèle national, False si créé par l'école
 }
 
 export interface CurriculumItem {
