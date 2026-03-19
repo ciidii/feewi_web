@@ -81,6 +81,7 @@ export interface SyllabusDomain {
   id: string;
   name: string;
   rank: number;
+  chapters?: SyllabusChapter[]; // Cascade V3
 }
 
 export interface SyllabusChapter {
@@ -89,6 +90,7 @@ export interface SyllabusChapter {
   name: string;
   estimatedDuration: number; // En semaines
   rank: number;
+  objectives?: LearningObjective[]; // Cascade V3
 }
 
 export interface LearningObjective {

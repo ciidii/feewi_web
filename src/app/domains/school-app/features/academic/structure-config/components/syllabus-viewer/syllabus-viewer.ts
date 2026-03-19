@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { LucideAngularModule, BookOpen, Clock, ChevronRight, X, LayoutGrid, Target, Layers } from 'lucide-angular';
 import { AcademicService } from '../../../../../../../core/services/academic.service';
-import { SyllabusDomain, CurriculumItem } from '../../../../../../../core/models/academic.model';
+import {SyllabusDomain, CurriculumItem, SyllabusChapter} from '../../../../../../../core/models/academic.model';
 import { NotificationService } from '../../../../../../../shared/services/notification.service';
 
 @Component({
@@ -34,14 +34,14 @@ export class SyllabusViewerComponent implements OnInit {
   isLoading = signal(true);
 
   // Domaine sélectionné
-  activeDomain = computed(() => 
+  activeDomain = computed(() =>
     this.domains().find(d => d.id === this.selectedDomainId()) || null
   );
 
   // Chapitres du domaine actif
   activeChapters = computed<SyllabusChapter[]>(() => {
     const domain = this.activeDomain();
-    return domain ? (domain as any).chapters || [] : [];
+    return domain?.chapters || [];
   });
 
   /** Durée totale du domaine en semaines */
@@ -58,7 +58,7 @@ export class SyllabusViewerComponent implements OnInit {
     try {
       const syllabusData = await this.academicService.getSyllabus(this.data.item.id);
       this.domains.set(syllabusData);
-      
+
       if (syllabusData.length > 0) {
         this.selectedDomainId.set(syllabusData[0].id);
       }
