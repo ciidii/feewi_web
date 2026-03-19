@@ -8,7 +8,14 @@
       </div>
       <div>
         <h2 class="text-xl font-bold text-slate-900 italic uppercase tracking-tight">Programme : {{ data.level.name }}</h2>
-        <p class="text-xs text-slate-500 mt-0.5 font-medium">Définissez les matières et coefficients pour ce niveau.</p>
+        <div class="flex items-center gap-3 mt-0.5">
+          <p class="text-xs text-slate-500 font-medium">Définissez les matières et coefficients pour ce niveau.</p>
+          <div class="h-1 w-1 rounded-full bg-slate-300"></div>
+          <p class="text-xs font-bold text-primary flex items-center gap-1.5">
+            <lucide-icon [name]="Clock" class="w-3.5 h-3.5"></lucide-icon>
+            {{ totalWeeklyHours() }}h / semaine
+          </p>
+        </div>
       </div>
     </div>
     <button (click)="close()" class="w-10 h-10 rounded-xl hover:bg-slate-50 flex items-center justify-center text-slate-400 transition-colors">
@@ -42,6 +49,7 @@
         [data]="displayItems()"
         [total]="displayItems().length"
         [actions]="curriculumActions"
+        defaultView="table"
         (onAction)="handleAction($event)"
       ></app-data-list>
 

@@ -41,6 +41,11 @@ export class CurriculumManagerComponent implements OnInit {
   isAdding = signal(false);
   editingItem = signal<CurriculumItem | null>(null);
 
+  /** Volume horaire total hebdo pour ce niveau */
+  totalWeeklyHours = computed(() => {
+    return this.curriculumItems().reduce((sum, item) => sum + (item.weeklyHours || 0), 0);
+  });
+
   // Formulaire d'ajout rapide
   addForm: FormGroup = this.fb.group({
     subjectId: ['', [Validators.required]],
