@@ -108,35 +108,49 @@ export class CycleDetailComponent implements OnInit {
   async loadData(id: string) {
     this.isLoading.set(true);
     try {
-      // 1. Récupérer l'année active
-      const year = await this.academicService.getCurrentYear();
-      this.currentYear.set(year);
-
-      // 2. Récupérer toutes les données en parallèle
-      const [allCycles, allLevels, allFilieres, yearClasses] = await Promise.all([
+      // 1. CHARGEMENT DE LA STRUCTURE (Obligatoire)
+      const [allCycles, allLevels, allFilieres] = await Promise.all([
         this.academicService.getCycles(),
         this.academicService.getLevels(),
-        this.academicService.getFilieres(),
-        this.academicService.getClassesByYear(year.id)
+        this.academicService.getFilieres()
       ]);
 
-      const currentCycle = allCycles.find(c => c.id === id);
+      const currentCycle = allCycles.find(c => String(c.id) === String(id));
+
       if (currentCycle) {
         this.cycle.set(currentCycle);
         const cycleName = currentCycle.customName || currentCycle.systemName;
         this.navState.setBreadcrumb(['Accueil', 'Structure', cycleName]);
+
+        const cycleLevels = allLevels.filter(l => {
+          const levelCycleId = l.cycleId || (l as any).cycle?.id;
+          const levelCycleCode = (l as any).cycle?.code || (l as any).cycle?.cycleCode;
+          return String(levelCycleId) === String(id) || (levelCycleCode && levelCycleCode === currentCycle.cycleCode);
+        });
+        this.levels.set(cycleLevels);
       } else {
         this.notificationService.error("Cycle non trouvé.");
       }
-
-      // Filtrage des niveaux appartenant à ce cycle
-      const cycleLevels = allLevels.filter(l => String(l.cycleId || (l as any).cycle?.id) === String(id));
-      this.levels.set(cycleLevels);
-      this.classes.set(yearClasses);
       this.filieres.set(allFilieres);
 
+      // 2. CHARGEMENT OPÉRATIONNEL (Résilient : ne bloque pas si échec)
+      try {
+        const year = await this.academicService.getCurrentYear();
+        this.currentYear.set(year);
+        
+        if (year) {
+          const yearClasses = await this.academicService.getClassesByYear(year.id);
+          this.classes.set(yearClasses);
+        }
+      } catch (yearError) {
+        console.warn("[CycleDetail] Aucune année académique active trouvée. Mode structure uniquement.");
+        this.currentYear.set(null);
+        this.classes.set([]);
+      }
+
     } catch (error) {
-      this.notificationService.error("Erreur lors du chargement des données opérationnelles.");
+      console.error("[CycleDetail] Erreur fatale lors du chargement de la structure:", error);
+      this.notificationService.error("Impossible de charger la structure du cycle.");
     } finally {
       this.isLoading.set(false);
     }
