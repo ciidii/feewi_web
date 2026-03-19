@@ -120,6 +120,10 @@ export interface SchoolClass {
   filiereId?: string | null;
   levelName?: string;
   filiereCode?: string | null;
+  
+  // Statistiques V4 (Calculées par le backend ou enrichies en front)
+  totalTeachings?: number;    // Nombre total de matières prévues
+  assignedTeachings?: number; // Nombre de matières avec un prof assigné
 }
 
 export interface CreateClassRequest {

@@ -136,9 +136,21 @@
               (click)="goToClassDetails(cls)"
               class="group/cls relative bg-slate-50 border border-slate-100 rounded-2xl p-4 cursor-pointer hover:bg-primary hover:border-primary transition-all duration-300 overflow-hidden"
             >
-              <div class="relative z-10">
-                <span class="block text-sm font-bold text-slate-700 group-hover/cls:text-white transition-colors">{{ cls.name }}</span>
-                <span class="block text-[10px] font-medium text-slate-400 group-hover/cls:text-primary-100 transition-colors">{{ cls.capacity }} places</span>
+              <div class="relative z-10 space-y-2">
+                <div>
+                  <span class="block text-sm font-bold text-slate-700 group-hover/cls:text-white transition-colors">{{ cls.name }}</span>
+                  <span class="block text-[10px] font-medium text-slate-400 group-hover/cls:text-primary-100 transition-colors">{{ cls.capacity }} places</span>
+                </div>
+                
+                <!-- Indicateur d'assignation (V4) -->
+                <div class="flex items-center gap-1.5 pt-1 border-t border-slate-200/50 group-hover/cls:border-white/20">
+                  <div class="w-1.5 h-1.5 rounded-full" 
+                       [ngClass]="cls.assignedTeachings === cls.totalTeachings ? 'bg-emerald-500 group-hover/cls:bg-white' : 'bg-amber-400 group-hover/cls:bg-amber-200'">
+                  </div>
+                  <span class="text-[9px] font-bold text-slate-500 group-hover/cls:text-white transition-colors">
+                    {{ cls.assignedTeachings || 0 }}/{{ cls.totalTeachings || 0 }} PROFS
+                  </span>
+                </div>
               </div>
               <!-- Déco -->
               <lucide-icon [name]="Users" class="absolute -right-2 -bottom-2 w-12 h-12 text-slate-200/50 group-hover/cls:text-white/10 transition-colors"></lucide-icon>
