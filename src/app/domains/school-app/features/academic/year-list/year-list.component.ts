@@ -137,7 +137,7 @@ export class YearListComponent implements OnInit {
     dialogRef.afterClosed().subscribe(async (confirmed) => {
       if (confirmed) {
         try {
-          // Note: Appeler le service PATCH activate dans une future étape
+          await this.academicService.activateYear(row.id as string);
           this.notificationService.success(`L'année ${row.title} est maintenant active.`);
           this.loadYears();
         } catch (error) {

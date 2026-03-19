@@ -37,6 +37,7 @@
       [activeTab]="activeTab()"
       [total]="displayYears().length"
       [actions]="yearActions"
+      defaultView="cards"
       (onTabChange)="onTabChange($event)"
       (onAction)="handleAction($event)"
     ></app-data-list>

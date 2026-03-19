@@ -219,6 +219,7 @@
           [data]="displayPeriods()"
           [total]="displayPeriods().length"
           [actions]="periodActions"
+          defaultView="table"
           (onAction)="handlePeriodAction($event)"
         ></app-data-list>
       </div>
@@ -244,6 +245,7 @@
           [data]="displayHolidays()"
           [total]="displayHolidays().length"
           [actions]="holidayActions"
+          defaultView="table"
           (onAction)="handleHolidayAction($event)"
         ></app-data-list>
       </div>

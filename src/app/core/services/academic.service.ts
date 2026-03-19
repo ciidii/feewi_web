@@ -138,8 +138,10 @@ export class AcademicService {
     await firstValueFrom(this.http.delete<void>(`${this.API_URL}/cycles/${id}`));
   }
 
-  async getLevels(): Promise<Level[]> {
-    return await firstValueFrom(this.http.get<Level[]>(`${this.API_URL}/levels`));
+  async getLevels(cycleId?: string): Promise<Level[]> {
+    let params = new HttpParams();
+    if (cycleId) params = params.set('cycleId', cycleId);
+    return await firstValueFrom(this.http.get<Level[]>(`${this.API_URL}/levels`, { params }));
   }
 
   async createLevel(level: Partial<Level>): Promise<Level> {
