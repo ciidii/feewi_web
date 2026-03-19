@@ -14,6 +14,7 @@ import { LevelFormComponent } from '../components/level-form/level-form.componen
 import { FiliereFormComponent } from '../components/filiere-form/filiere-form.component';
 import { CurriculumManagerComponent } from '../components/curriculum-manager/curriculum-manager';
 import { ConfirmDialogComponent } from '../../../../../../shared/components/confirm-dialog/confirm-dialog';
+import {ClassFormComponent} from '../../class-list/components/class-form/class-form.component';
 
 export interface LevelGroup {
   level: Level;
@@ -137,7 +138,7 @@ export class CycleDetailComponent implements OnInit {
       try {
         const year = await this.academicService.getCurrentYear();
         this.currentYear.set(year);
-        
+
         if (year) {
           const yearClasses = await this.academicService.getClassesByYear(year.id);
           this.classes.set(yearClasses);
@@ -187,7 +188,20 @@ export class CycleDetailComponent implements OnInit {
   // --- GESTION DES CLASSES ---
 
   openAddClass(level: Level) {
-    this.notificationService.info(`Ouverture de classe en ${level.name} bientôt disponible.`);
+    const dialogRef = this.dialog.open(ClassFormComponent, {
+      width: '640px',
+      maxWidth: '95vw',
+      panelClass: 'feewi-dialog-panel',
+      data: {
+        year: this.currentYear(),
+        levels: this.levels(),
+        levelId: level.id
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && this.cycleId()) this.loadData(this.cycleId()!);
+    });
   }
 
   goToClassDetails(cls: SchoolClass) {

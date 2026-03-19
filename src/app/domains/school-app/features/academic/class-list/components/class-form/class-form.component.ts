@@ -54,6 +54,12 @@ export class ClassFormComponent implements OnInit {
     if (this.dialogData.year) {
       this.classForm.patchValue({ academicYearId: this.dialogData.year.id });
     }
+    
+    // Pré-remplissage du niveau si fourni
+    if (this.dialogData.levelId) {
+      this.classForm.patchValue({ levelId: this.dialogData.levelId });
+    }
+
     this.levels.set(this.dialogData.levels || []);
     this.loadFilieres();
   }
