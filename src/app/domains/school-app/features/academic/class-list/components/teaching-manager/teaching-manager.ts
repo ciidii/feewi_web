@@ -1,20 +1,20 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { LucideAngularModule, BookOpenCheck, Plus, X, Save, ArrowRight } from 'lucide-angular';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import {DataListComponent} from '../../../../../../../shared/components/data-list/data-list.component';
+import {Component, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import {ArrowRight, BookOpenCheck, Info, LucideAngularModule, Plus, Save, Trash2, UserPlus, X} from 'lucide-angular';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {MatSelectModule} from '@angular/material/select';
 import {AcademicService} from '../../../../../../../core/services/academic.service';
 import {IdentityService} from '../../../../../../../core/services/identity.service';
 import {NotificationService} from '../../../../../../../shared/services/notification.service';
-import {CurriculumItem, SchoolClass, Teaching} from '../../../../../../../core/models/academic.model';
+import {SchoolClass, Subject, Teaching} from '../../../../../../../core/models/academic.model';
 import {User} from '../../../../../../../core/models/user.model';
-import {RowAction, TableRow} from '../../../../../../../shared/models/data-list.models';
+import {ConfirmDialogComponent} from '../../../../../../../shared/components/confirm-dialog/confirm-dialog';
 
 @Component({
   selector: 'app-teaching-manager',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, MatDialogModule, DataListComponent, ReactiveFormsModule],
+  imports: [CommonModule, LucideAngularModule, MatDialogModule, ReactiveFormsModule, MatSelectModule],
   templateUrl: './teaching-manager.html',
   styleUrls: ['./teaching-manager.scss']
 })
@@ -23,6 +23,7 @@ export class TeachingManagerComponent implements OnInit {
   private identityService = inject(IdentityService);
   private notificationService = inject(NotificationService);
   private dialogRef = inject(MatDialogRef<TeachingManagerComponent>);
+  private dialog = inject(MatDialog);
   private fb = inject(FormBuilder);
   data: { schoolClass: SchoolClass } = inject(MAT_DIALOG_DATA);
 
@@ -32,40 +33,23 @@ export class TeachingManagerComponent implements OnInit {
   readonly X = X;
   readonly Save = Save;
   readonly ArrowRight = ArrowRight;
+  readonly UserPlus = UserPlus;
+  readonly Trash2 = Trash2;
+  readonly Info = Info;
 
   // États
   teachings = signal<Teaching[]>([]);
-  availableCurriculum = signal<CurriculumItem[]>([]);
+  allSubjects = signal<Subject[]>([]);
   staffList = signal<User[]>([]);
   isLoading = signal(true);
-  isAdding = signal(false);
+  isAddingManual = signal(false);
 
-  // Formulaire d'affectation
-  assignForm: FormGroup = this.fb.group({
+  // Formulaire pour ajout manuel (Hybride)
+  manualForm: FormGroup = this.fb.group({
     subjectId: ['', [Validators.required]],
     teacherId: ['', [Validators.required]],
-    coefficient: [1, [Validators.required]],
+    coefficient: [1, [Validators.required, Validators.min(0.5)]],
     maxScore: [20, [Validators.required]]
-  });
-
-  // Actions
-  readonly teachingActions: RowAction[] = [
-    { id: 'delete', label: 'Retirer l\'enseignement', icon: X, type: 'danger' }
-  ];
-
-  // Données transformées pour l'affichage
-  displayTeachings = computed<TableRow[]>(() => {
-    return this.teachings().map(t => ({
-      id: t.id,
-      title: t.subjectName || 'Matière inconnue',
-      subtitle: `Professeur: ${t.teacherName || 'Non assigné'}`,
-      avatarLabel: (t.subjectName || '??').substring(0, 2).toUpperCase(),
-      badges: [
-        { label: `Coeff: ${t.coefficient}`, type: 'info' },
-        { label: `Sur ${t.maxScore}`, type: 'default' }
-      ],
-      rawData: t
-    }));
   });
 
   ngOnInit() {
@@ -75,23 +59,20 @@ export class TeachingManagerComponent implements OnInit {
   async loadData() {
     this.isLoading.set(true);
     try {
-      // 1. Charger les enseignements actuels de la classe
+      // 1. Charger les enseignements actuels (Auto-clonés ou Manuels)
       const teachings = await this.academicService.getTeachingsByClass(this.data.schoolClass.id);
       this.teachings.set(teachings);
 
-      // 2. Charger le programme du niveau pour savoir quoi proposer
-      const curriculum = await this.academicService.getCurriculum(
-        this.data.schoolClass.levelId,
-        this.data.schoolClass.filiereId || undefined
-      );
-      this.availableCurriculum.set(curriculum);
-
-      // 3. Charger la liste du personnel (ENSEIGNANTS uniquement)
+      // 2. Charger le personnel (ENSEIGNANTS)
       await this.identityService.getStaff('', 0, 100, 'TEACHER');
       const staffPage = this.identityService.staffPage();
       if (staffPage) {
         this.staffList.set(staffPage.content);
       }
+
+      // 3. Charger toutes les matières (pour l'ajout manuel)
+      const subjects = await this.academicService.getSubjects();
+      this.allSubjects.set(subjects);
 
     } catch (error) {
       this.notificationService.error("Erreur lors du chargement des données pédagogiques.");
@@ -100,28 +81,55 @@ export class TeachingManagerComponent implements OnInit {
     }
   }
 
-  onSubjectChange(subjectId: string) {
-    const item = this.availableCurriculum().find(c => c.subjectId === subjectId);
-    if (item) {
-      this.assignForm.patchValue({
-        coefficient: item.defaultCoefficient,
-        maxScore: item.maxScore
-      });
+  /** Assigner un professeur à un cours existant (PATCH V4) */
+  async onAssignTeacher(teachingId: string, teacherId: string) {
+    try {
+      await this.academicService.assignTeacher(this.data.schoolClass.id, teachingId, teacherId);
+      this.notificationService.success('Enseignant assigné avec succès.');
+      this.loadData();
+    } catch (error) {
+      this.notificationService.error("Échec de l'assignation.");
     }
   }
 
-  async onAssign() {
-    if (this.assignForm.invalid) return;
+  /** Ajouter un cours spécifique manuellement (POST Hybrid) */
+  async onAddManualTeaching() {
+    if (this.manualForm.invalid) return;
 
     try {
-      await this.academicService.assignTeacher(this.data.schoolClass.id, this.assignForm.value);
-      this.notificationService.success('Enseignement programmé avec succès.');
-      this.isAdding.set(false);
-      this.assignForm.reset({ coefficient: 1, maxScore: 20 });
+      await this.academicService.addTeachingToClass(this.data.schoolClass.id, this.manualForm.value);
+      this.notificationService.success('Cours manuel ajouté à la classe.');
+      this.isAddingManual.set(false);
+      this.manualForm.reset({coefficient: 1, maxScore: 20});
       this.loadData();
     } catch (error) {
-      this.notificationService.error("Échec de l'affectation.");
+      this.notificationService.error("Échec de l'ajout manuel.");
     }
+  }
+
+  /** Retirer un enseignement */
+  async confirmRemove(t: Teaching) {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Retirer cet enseignement ?',
+        message: `Voulez-vous retirer "${t.subjectName}" de cette classe ?`,
+        confirmLabel: 'Oui, retirer',
+        type: 'danger'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(async (confirmed) => {
+      if (confirmed) {
+        try {
+          await this.academicService.removeTeachingFromClass(this.data.schoolClass.id, t.id);
+          this.notificationService.success('Enseignement retiré.');
+          this.loadData();
+        } catch (error) {
+          this.notificationService.error("Impossible de retirer ce cours.");
+        }
+      }
+    });
   }
 
   close() {

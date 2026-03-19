@@ -7,13 +7,23 @@
         <lucide-icon [name]="BookOpenCheck" class="w-6 h-6"></lucide-icon>
       </div>
       <div>
-        <h2 class="text-xl font-bold text-slate-900 italic uppercase tracking-tight">Affectations : {{ data.schoolClass.fullName }}</h2>
-        <p class="text-xs text-slate-500 mt-0.5 font-medium">Assignez les professeurs aux matières pour cette classe.</p>
+        <h2 class="text-xl font-bold text-slate-900 italic uppercase tracking-tight">{{ data.schoolClass.fullName }}</h2>
+        <p class="text-xs text-slate-500 mt-0.5 font-medium italic">Affectation des enseignants aux matières.</p>
       </div>
     </div>
-    <button (click)="close()" class="w-10 h-10 rounded-xl hover:bg-slate-50 flex items-center justify-center text-slate-400 transition-colors">
-      <lucide-icon [name]="X" class="w-5 h-5"></lucide-icon>
-    </button>
+    <div class="flex items-center gap-3">
+      <button 
+        *ngIf="!isAddingManual()"
+        (click)="isAddingManual.set(true)"
+        class="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-200 transition-all"
+      >
+        <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
+        Cours Manuel
+      </button>
+      <button (click)="close()" class="w-10 h-10 rounded-xl hover:bg-slate-50 flex items-center justify-center text-slate-400 transition-colors">
+        <lucide-icon [name]="X" class="w-5 h-5"></lucide-icon>
+      </button>
+    </div>
   </header>
 
   <!-- Corps : Liste des affectations -->
@@ -25,83 +35,126 @@
     </div>
 
     <div class="space-y-6">
-      <div class="flex items-center justify-between">
-        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Enseignements programmés</span>
-        <button 
-          *ngIf="!isAdding()"
-          (click)="isAdding.set(true)"
-          class="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200"
-        >
-          <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
-          Assigner un cours
-        </button>
+      <div class="flex items-center justify-between mb-4">
+        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Tableau d'affectation</span>
+        <div class="flex items-center gap-2 px-3 py-1 bg-white border border-slate-200 rounded-full">
+          <div class="w-2 h-2 rounded-full bg-indigo-500"></div>
+          <span class="text-[10px] font-bold text-slate-600 uppercase">{{ teachings().length }} cours programmés</span>
+        </div>
       </div>
 
-      <app-data-list
-        [data]="displayTeachings()"
-        [total]="displayTeachings().length"
-        [actions]="teachingActions"
-      ></app-data-list>
+      <!-- TABLEAU D'AFFECTATION PREMIUM -->
+      <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+        <table class="w-full border-collapse">
+          <thead>
+            <tr class="bg-slate-50 border-b border-slate-100">
+              <th class="px-6 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Matière</th>
+              <th class="px-6 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Enseignant Responsable</th>
+              <th class="px-6 py-4 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">Coeff / Max</th>
+              <th class="px-6 py-4 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest">Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-50">
+            <tr *ngFor="let t of teachings()" class="group hover:bg-slate-50/50 transition-colors">
+              <!-- Matière -->
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-[10px] font-bold">
+                    {{ (t.subjectName || '??').substring(0, 2).toUpperCase() }}
+                  </div>
+                  <span class="text-sm font-bold text-slate-700">{{ t.subjectName }}</span>
+                </div>
+              </td>
 
-      <!-- État vide -->
-      <div *ngIf="displayTeachings().length === 0 && !isLoading() && !isAdding()" class="text-center py-16 border-2 border-dashed border-slate-200 rounded-3xl bg-white">
-        <lucide-icon [name]="BookOpenCheck" class="w-12 h-12 text-slate-200 mx-auto mb-4"></lucide-icon>
-        <p class="text-sm font-bold text-slate-400 italic">Aucun cours n'a encore été programmé pour cette classe.</p>
+              <!-- Enseignant (Sélecteur Inline) -->
+              <td class="px-6 py-4">
+                <div class="relative min-w-[240px]">
+                  <mat-select 
+                    [value]="t.teacherId" 
+                    (selectionChange)="onAssignTeacher(t.id, $event.value)"
+                    placeholder="Assigner un professeur"
+                    class="tm-inline-select"
+                  >
+                    <mat-option *ngFor="let staff of staffList()" [value]="staff.id">
+                      {{ staff.firstName }} {{ staff.lastName }}
+                    </mat-option>
+                  </mat-select>
+                </div>
+              </td>
+
+              <!-- Coeff / Max -->
+              <td class="px-6 py-4 text-center text-xs font-bold text-slate-500">
+                <span class="px-2 py-1 bg-slate-100 rounded-md">x{{ t.coefficient }}</span>
+                <span class="mx-2 text-slate-300">/</span>
+                <span class="text-slate-400">{{ t.maxScore }}</span>
+              </td>
+
+              <!-- Actions -->
+              <td class="px-6 py-4 text-right">
+                <button (click)="confirmRemove(t)" class="p-2 text-slate-300 hover:text-rose-500 transition-colors">
+                  <lucide-icon [name]="Trash2" class="w-4 h-4"></lucide-icon>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- État vide -->
+        <div *ngIf="teachings().length === 0 && !isLoading()" class="py-20 text-center">
+          <lucide-icon [name]="Info" class="w-12 h-12 text-slate-200 mx-auto mb-4"></lucide-icon>
+          <p class="text-sm font-bold text-slate-400 italic">Aucun enseignement. Utilisez "Smart Create" ou l'ajout manuel.</p>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Footer : Formulaire d'affectation rapide -->
-  <footer *ngIf="isAdding()" class="p-8 border-t border-slate-200 bg-white animate-in slide-in-from-bottom duration-300 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
-    <form [formGroup]="assignForm" (ngSubmit)="onAssign()" class="space-y-6">
+  <!-- Footer : Formulaire d'ajout manuel (Approche Hybride) -->
+  <footer *ngIf="isAddingManual()" class="p-8 border-t border-slate-200 bg-white animate-in slide-in-from-bottom duration-300 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+    <form [formGroup]="manualForm" (ngSubmit)="onAddManualTeaching()" class="space-y-6">
       <div class="flex items-center justify-between mb-2">
         <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
-          Nouvelle Affectation
-          <lucide-icon [name]="ArrowRight" class="w-3.5 h-3.5 text-slate-300"></lucide-icon>
+          <lucide-icon [name]="Plus" class="w-4 h-4 text-indigo-600"></lucide-icon>
+          Cours manuel (Hors programme)
         </h3>
-        <button type="button" (click)="isAdding.set(false)" class="text-xs font-bold text-slate-400 hover:text-slate-600 uppercase tracking-widest">Annuler</button>
+        <button type="button" (click)="isAddingManual.set(false)" class="text-xs font-bold text-slate-400 hover:text-slate-600 uppercase tracking-widest">Annuler</button>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <!-- Sélection Matière (du programme) -->
+        <!-- Sélection Matière -->
         <div class="space-y-2">
           <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Matière</label>
-          <select formControlName="subjectId" (change)="onSubjectChange(subSelect.value)" #subSelect class="w-full h-12 bg-slate-50 border border-slate-200 rounded-xl px-4 text-sm font-semibold outline-none focus:border-indigo-500 focus:bg-white transition-all">
-            <option value="">Choisir une matière...</option>
-            <option *ngFor="let item of availableCurriculum()" [value]="item.subjectId">{{ item.subjectName }}</option>
-          </select>
+          <mat-select formControlName="subjectId" placeholder="Choisir une matière" class="tm-form-select">
+            <mat-option *ngFor="let s of allSubjects()" [value]="s.id">{{ s.name }} ({{ s.code }})</mat-option>
+          </mat-select>
         </div>
 
         <!-- Sélection Professeur -->
         <div class="space-y-2">
           <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Professeur</label>
-          <select formControlName="teacherId" class="w-full h-12 bg-slate-50 border border-slate-200 rounded-xl px-4 text-sm font-semibold outline-none focus:border-indigo-500 focus:bg-white transition-all">
-            <option value="">Choisir un enseignant...</option>
-            <option *ngFor="let staff of staffList()" [value]="staff.id">{{ staff.firstName }} {{ staff.lastName }}</option>
-          </select>
+          <mat-select formControlName="teacherId" placeholder="Choisir un prof" class="tm-form-select">
+            <mat-option *ngFor="let staff of staffList()" [value]="staff.id">{{ staff.firstName }} {{ staff.lastName }}</mat-option>
+          </mat-select>
         </div>
 
-        <!-- Coefficient (Pre-rempli) -->
         <div class="space-y-2">
           <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Coefficient</label>
-          <input type="number" formControlName="coefficient" class="w-full h-12 bg-slate-50 border border-slate-200 rounded-xl px-4 text-sm font-semibold outline-none focus:border-indigo-500 focus:bg-white transition-all" />
+          <input type="number" formControlName="coefficient" class="tm-form-input" />
         </div>
 
-        <!-- Note Max (Pre-rempli) -->
         <div class="space-y-2">
           <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Note Max</label>
-          <input type="number" formControlName="maxScore" class="w-full h-12 bg-slate-50 border border-slate-200 rounded-xl px-4 text-sm font-semibold outline-none focus:border-indigo-500 focus:bg-white transition-all" />
+          <input type="number" formControlName="maxScore" class="tm-form-input" />
         </div>
       </div>
 
       <div class="flex justify-end pt-2">
         <button 
           type="submit" 
-          [disabled]="assignForm.invalid"
+          [disabled]="manualForm.invalid"
           class="flex items-center gap-2 px-8 h-12 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-xl shadow-indigo-200 hover:bg-indigo-700 disabled:bg-slate-200 transition-all active:scale-95"
         >
           <lucide-icon [name]="Save" class="w-4 h-4"></lucide-icon>
-          Valider l'affectation
+          Ajouter le cours
         </button>
       </div>
     </form>

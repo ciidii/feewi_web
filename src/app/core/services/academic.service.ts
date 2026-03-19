@@ -223,11 +223,26 @@ export class AcademicService {
   // ENSEIGNEMENTS (TEACHINGS PER CLASS)
   // ===========================================
 
+  /** Lister tous les cours d'une classe (Auto-générés ou Manuels) */
   async getTeachingsByClass(classId: string): Promise<Teaching[]> {
     return await firstValueFrom(this.http.get<Teaching[]>(`${this.API_URL}/classes/${classId}/teachings`));
   }
 
-  async assignTeacher(classId: string, request: Partial<Teaching>): Promise<Teaching> {
+  /** Approche Hybride : Ajouter un cours manuellement à une classe spécifique */
+  async addTeachingToClass(classId: string, request: Partial<Teaching>): Promise<Teaching> {
     return await firstValueFrom(this.http.post<Teaching>(`${this.API_URL}/classes/${classId}/teachings`, request));
+  }
+
+  /** Approche V4 : Assigner ou changer un professeur (PATCH granulaire) */
+  async assignTeacher(classId: string, teachingId: string, teacherId: string): Promise<Teaching> {
+    const params = new HttpParams().set('teacherId', teacherId);
+    return await firstValueFrom(
+      this.http.patch<Teaching>(`${this.API_URL}/classes/${classId}/teachings/${teachingId}/teacher`, {}, { params })
+    );
+  }
+
+  /** Retirer un enseignement d'une classe */
+  async removeTeachingFromClass(classId: string, teachingId: string): Promise<void> {
+    await firstValueFrom(this.http.delete<void>(`${this.API_URL}/classes/${classId}/teachings/${teachingId}`));
   }
 }
