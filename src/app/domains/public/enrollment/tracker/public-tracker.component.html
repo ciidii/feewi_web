@@ -1,69 +1,85 @@
 <div class="tracker-wrapper">
   
-  <!-- Header : Succès de soumission (Si on vient juste de soumettre) -->
-  <header class="tracker-header card">
-    <div class="success-icon"><lucide-icon [name]="CheckCircle" [size]="48"></lucide-icon></div>
-    <h1>Dossier Soumis avec Succès</h1>
-    <p>Votre numéro de dossier est : <strong>{{ admissionId() }}</strong></p>
-    <div class="header-divider"></div>
-    <p class="status-msg">{{ statusMessage() }}</p>
-  </header>
+  @if (isLoading()) {
+    <div class="loading-state card">
+      <lucide-icon [name]="RefreshCw" [size]="32" class="animate-spin text-primary"></lucide-icon>
+      <p>Chargement de votre dossier...</p>
+    </div>
+  } @else if (error()) {
+    <div class="error-state card">
+      <lucide-icon [name]="Info" [size]="32" class="text-red-500"></lucide-icon>
+      <p>{{ error() }}</p>
+      <button class="btn-outline" routerLink="../../">Retour à l'accueil</button>
+    </div>
+  } @else if (application()) {
+    <!-- Header : Succès de soumission -->
+    <header class="tracker-header card">
+      <div class="success-icon"><lucide-icon [name]="CheckCircle" [size]="48"></lucide-icon></div>
+      <h1>Bonjour, {{ application()?.candidate?.firstName }}</h1>
+      <p>Suivi du dossier : <strong>{{ application()?.reference }}</strong></p>
+      <div class="header-divider"></div>
+      <p class="status-msg">Statut actuel : {{ application()?.status }}</p>
+    </header>
 
-  <!-- Main Content : Timeline "Uber Style" -->
-  <main class="tracker-main">
-    
-    <div class="tracker-section card">
-      <div class="section-title">
-        <lucide-icon [name]="Clock" [size]="20"></lucide-icon>
-        <h2>Avancement de la demande</h2>
-        <button class="btn-refresh"><lucide-icon [name]="RefreshCw" [size]="16"></lucide-icon> Actualiser</button>
-      </div>
+    <!-- Main Content : Timeline -->
+    <main class="tracker-main">
+      <div class="tracker-section card">
+        <div class="section-title">
+          <lucide-icon [name]="Clock" [size]="20"></lucide-icon>
+          <h2>Avancement de la demande</h2>
+          <button class="btn-refresh" (click)="loadApplicationData()"><lucide-icon [name]="RefreshCw" [size]="16"></lucide-icon> Actualiser</button>
+        </div>
 
-      <div class="timeline">
-        @for (event of events(); track event.title; let i = $index) {
-          <div class="timeline-item" [class]="event.status">
-            <div class="timeline-dot">
-              @if (event.status === 'completed') { <lucide-icon [name]="CheckCircle" [size]="14"></lucide-icon> }
-            </div>
+        <div class="timeline">
+          <div class="timeline-item" [class.completed]="application()?.status !== 'DRAFT'">
+            <div class="timeline-dot"><lucide-icon [name]="CheckCircle" [size]="14"></lucide-icon></div>
             <div class="timeline-content">
-              <div class="event-header">
-                <h3>{{ event.title }}</h3>
-                <span class="event-date">{{ event.date }}</span>
-              </div>
-              <p class="event-desc">{{ event.desc }}</p>
+              <h3>Dossier Soumis</h3>
+              <p>Votre demande a été enregistrée le {{ application()?.submittedAt | date:'short' }}.</p>
             </div>
           </div>
-        }
-      </div>
-    </div>
-
-    <!-- Sidebar : Support & Next Steps -->
-    <aside class="tracker-sidebar">
-      <div class="support-card card">
-        <h3>Besoin d'aide ?</h3>
-        <p>Notre secrétariat est à votre disposition pour toute question.</p>
-        <div class="contact-methods">
-          <a href="tel:+221771234567" class="contact-item">
-            <lucide-icon [name]="Phone" [size]="18"></lucide-icon>
-            <span>+221 77 123 45 67</span>
-          </a>
-          <a href="mailto:admin@ecole.com" class="contact-item">
-            <lucide-icon [name]="Mail" [size]="18"></lucide-icon>
-            <span>admin@ecole.com</span>
-          </a>
+          <div class="timeline-item" [class.active]="application()?.status === 'SUBMITTED'" [class.completed]="application()?.status === 'VERIFIED' || application()?.status === 'TESTING' || application()?.status === 'VALIDATED'">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <h3>Vérification Administrative</h3>
+              <p>Le secrétariat vérifie la conformité de vos pièces jointes.</p>
+            </div>
+          </div>
+          <div class="timeline-item" [class.active]="application()?.status === 'VERIFIED'" [class.completed]="application()?.status === 'TESTING' || application()?.status === 'VALIDATED'">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <h3>Évaluation Pédagogique</h3>
+              <p>Test de niveau et entretien avec l'équipe éducative.</p>
+            </div>
+          </div>
+          <div class="timeline-item" [class.active]="application()?.status === 'TESTING'" [class.completed]="application()?.status === 'VALIDATED'">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <h3>Décision Finale</h3>
+              <p>Validation définitive par la Direction de l'établissement.</p>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="info-alert card">
-        <lucide-icon [name]="Info" [size]="24" class="text-blue-600"></lucide-icon>
-        <div class="alert-content">
-          <h4>Prochaine étape</h4>
-          <p>Dès que vos documents seront vérifiés, vous recevrez une notification par email pour choisir la date de votre test de niveau.</p>
+      <!-- Sidebar -->
+      <aside class="tracker-sidebar">
+        <div class="support-card card">
+          <h3>Contact École</h3>
+          <div class="contact-methods">
+            <a href="#" class="contact-item">
+              <lucide-icon [name]="Phone" [size]="18"></lucide-icon>
+              <span>+221 77 123 45 67</span>
+            </a>
+            <a href="#" class="contact-item">
+              <lucide-icon [name]="Mail" [size]="18"></lucide-icon>
+              <span>admin@ecole.com</span>
+            </a>
+          </div>
         </div>
-      </div>
-    </aside>
-
-  </main>
+      </aside>
+    </main>
+  }
 
   <footer class="tracker-footer">
     <button routerLink="../../" class="btn-back">

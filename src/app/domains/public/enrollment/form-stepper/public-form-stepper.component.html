@@ -160,30 +160,72 @@
     <!-- Étape 4 : DOCUMENTS -->
     <div *ngIf="currentStep() === 'DOCS'" class="form-section animate-fade">
       <h2>Pièces justificatives</h2>
-      <p class="section-desc">Téléversement des documents obligatoires.</p>
+      <p class="section-desc">Veuillez téléverser les documents requis par l'établissement.</p>
       
       <div class="upload-grid">
-        <div class="upload-item">
-          <div class="upload-info">
-            <span class="upload-label">Extrait de naissance <span class="required">*</span></span>
+        @for (doc of application()?.documents; track doc.code) {
+          <div class="upload-item" [class.uploaded]="doc.status === 'UPLOADED'">
+            <div class="upload-info">
+              <span class="upload-label">{{ doc.name }} <span class="required" *ngIf="doc.mandatory">*</span></span>
+              <span class="upload-status-tag" [class]="doc.status.toLowerCase()">{{ doc.status }}</span>
+            </div>
+            
+            <div class="upload-actions">
+              <input type="file" #fileInput hidden (change)="onFileSelected(doc.code, $event)">
+              
+              @if (uploadingDocCode() === doc.code) {
+                <div class="upload-spinner"><lucide-icon [name]="RefreshCw" [size]="18" class="animate-spin"></lucide-icon></div>
+              } @else {
+                <button class="btn-upload" (click)="fileInput.click()" [disabled]="doc.status === 'UPLOADED'">
+                  <lucide-icon [name]="doc.status === 'UPLOADED' ? CheckCircle : Upload" [size]="18"></lucide-icon>
+                  {{ doc.status === 'UPLOADED' ? 'Chargé' : 'Choisir' }}
+                </button>
+              }
+            </div>
           </div>
-          <button class="btn-upload"><lucide-icon [name]="Upload" [size]="18"></lucide-icon> Télécharger</button>
-        </div>
+        } @empty {
+          <p class="text-slate-500 italic">Aucun document requis pour ce niveau.</p>
+        }
       </div>
     </div>
 
     <!-- Étape 5 : RÉCAPITULATIF -->
     <div *ngIf="currentStep() === 'REVIEW'" class="form-section animate-fade">
       <h2>Vérification Finale</h2>
-      <div class="review-box">
-        <div class="review-row">
-          <span class="label">Candidat</span>
-          <span class="value">{{ formData().student.firstName }} {{ formData().student.lastName }}</span>
+      <p class="section-desc">Relisez attentivement les informations ci-dessous avant de soumettre votre dossier.</p>
+      
+      <div class="review-grid">
+        <!-- Candidat -->
+        <div class="review-card">
+          <div class="review-card-header"><lucide-icon [name]="User" [size]="16"></lucide-icon> Candidat</div>
+          <div class="review-row"><span class="label">Nom complet</span><span class="value">{{ formData().student.firstName }} {{ formData().student.lastName }}</span></div>
+          <div class="review-row"><span class="label">Niveau</span><span class="value">{{ selectedLevelName() }}</span></div>
         </div>
-        <div class="review-row">
-          <span class="label">Niveau</span>
-          <span class="value">{{ selectedLevelName() }}</span>
+
+        <!-- Tuteur -->
+        <div class="review-card">
+          <div class="review-card-header"><lucide-icon [name]="Users" [size]="16"></lucide-icon> Responsable Principal</div>
+          <div class="review-row"><span class="label">Nom</span><span class="value">{{ formData().parents[0].firstName }} {{ formData().parents[0].lastName }}</span></div>
+          <div class="review-row"><span class="label">Téléphone</span><span class="value">{{ formData().parents[0].phone }}</span></div>
         </div>
+
+        <!-- Documents -->
+        <div class="review-card full">
+          <div class="review-card-header"><lucide-icon [name]="FileText" [size]="16"></lucide-icon> État des documents</div>
+          <div class="review-docs">
+            @for (doc of application()?.documents; track doc.code) {
+              <div class="doc-status-line">
+                <span>{{ doc.name }}</span>
+                <span class="badge" [class]="doc.status.toLowerCase()">{{ doc.status }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="legal-notice">
+        <lucide-icon [name]="GraduationCap" [size]="20"></lucide-icon>
+        <p>En cliquant sur "Soumettre", vous certifiez que toutes les informations fournies sont exactes. Votre dossier sera verrouillé et transmis au secrétariat de l'école pour vérification.</p>
       </div>
     </div>
 
@@ -195,10 +237,18 @@
       <lucide-icon [name]="ArrowLeft" [size]="18"></lucide-icon> Retour
     </button>
     <div class="spacer"></div>
-    <button class="btn-primary" (click)="nextStep()" [disabled]="isSubmitting()">
-      <span *ngIf="!isSubmitting()">Continuer <lucide-icon [name]="ArrowRight" [size]="18"></lucide-icon></span>
-      <span *ngIf="isSubmitting()"><lucide-icon [name]="RefreshCw" [size]="18" class="animate-spin"></lucide-icon> Création...</span>
-    </button>
+    
+    @if (currentStep() === 'REVIEW') {
+      <button class="btn-primary btn-hero" (click)="submitFinal()" [disabled]="isSubmitting()">
+        <span *ngIf="!isSubmitting()">Soumettre mon dossier <lucide-icon [name]="CheckCircle" [size]="20"></lucide-icon></span>
+        <span *ngIf="isSubmitting()"><lucide-icon [name]="RefreshCw" [size]="20" class="animate-spin"></lucide-icon> Soumission...</span>
+      </button>
+    } @else {
+      <button class="btn-primary" (click)="nextStep()" [disabled]="isSubmitting()">
+        <span *ngIf="!isSubmitting()">Continuer <lucide-icon [name]="ArrowRight" [size]="18"></lucide-icon></span>
+        <span *ngIf="isSubmitting()"><lucide-icon [name]="RefreshCw" [size]="18" class="animate-spin"></lucide-icon> Traitement...</span>
+      </button>
+    }
   </footer>
 
 </div>

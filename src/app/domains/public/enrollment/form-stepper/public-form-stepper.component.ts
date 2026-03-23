@@ -8,6 +8,8 @@ import { AdmissionSessionService } from '../../../../core/services/admission-ses
 import { AcademicService } from '../../../../core/services/academic.service';
 import { TenantContextService } from '../../../../core/services/tenant-context.service';
 import { Level, AcademicYear, Filiere } from '../../../../core/models/academic.model';
+import { AdmissionApplication as Application } from '../../../../core/models/enrollment.model';
+import { Router } from '@angular/router';
 
 export type StepperStep = 'PRE_ENROLL' | 'STUDENT' | 'PARENTS' | 'DOCS' | 'REVIEW';
 
@@ -23,11 +25,14 @@ export class PublicFormStepperComponent {
   private sessionService = inject(AdmissionSessionService);
   private academicService = inject(AcademicService);
   private tenantContext = inject(TenantContextService);
+  private router = inject(Router);
 
   // --- ÉTATS DU STEPPER ---
   currentStep = signal<StepperStep>('PRE_ENROLL');
   currentApplicationId = signal<string | null>(null);
+  application = signal<Application | null>(null);
   isSubmitting = signal(false);
+  uploadingDocCode = signal<string | null>(null);
 
   // --- DONNÉES RÉFÉRENTIELLES (API) ---
   availableLevels = signal<Level[]>([]);
@@ -109,14 +114,11 @@ export class PublicFormStepperComponent {
     const steps: StepperStep[] = ['PRE_ENROLL', 'STUDENT', 'PARENTS', 'DOCS', 'REVIEW'];
     const currentIndex = steps.indexOf(this.currentStep());
 
-    // Validation
-    if (this.currentStep() === 'PRE_ENROLL' && !this.formData().preEnroll.requestedLevelId) {
-      alert('Veuillez sélectionner un niveau.');
-      return;
-    }
-
-    // Persistance API (Auto-save)
     if (this.currentStep() === 'PRE_ENROLL' && !this.currentApplicationId()) {
+      if (!this.formData().preEnroll.requestedLevelId) {
+        alert('Veuillez sélectionner un niveau.');
+        return;
+      }
       await this.initializeApplication();
     } else if (this.currentStep() === 'STUDENT') {
       await this.saveCandidateInfo();
@@ -124,7 +126,6 @@ export class PublicFormStepperComponent {
       await this.saveGuardiansInfo();
     }
 
-    // Passage à l'étape suivante
     if (currentIndex < steps.length - 1) {
       this.currentStep.set(steps[currentIndex + 1]);
       window.scrollTo(0, 0);
@@ -154,6 +155,7 @@ export class PublicFormStepperComponent {
       }).toPromise();
 
       if (res) {
+        this.application.set(res);
         this.currentApplicationId.set(res.id);
         this.sessionService.saveSession(res.reference, res.accessCode);
       }
@@ -192,11 +194,67 @@ export class PublicFormStepperComponent {
         phone: primaryGuardian.phone,
         profession: primaryGuardian.profession,
         relation: primaryGuardian.relation,
-        address: primaryGuardian.address
+        address: primaryGuardian.address,
+        isPrimary: true
       };
       
-      await this.enrollmentService.updateGuardians(id, payload).toPromise();
+      const updatedApp = await this.enrollmentService.updateGuardians(id, payload as any).toPromise();
+      if (updatedApp) this.application.set(updatedApp);
     } catch (e) { console.error('Save guardians failed:', e); }
+  }
+
+  /**
+   * Gérer la sélection et l'upload d'un document
+   */
+  async onFileSelected(docCode: string, event: any) {
+    const file = event.target.files[0];
+    if (!file || !this.currentApplicationId()) return;
+
+    this.uploadingDocCode.set(docCode);
+    try {
+      // 1. Simulation d'upload (URL fictive pour le test backend)
+      const mockFileUrl = `https://cdn.feewi.com/mock/docs/${this.currentApplicationId()}/${docCode}_${file.name}`;
+      
+      // 2. Envoi de l'URL au backend
+      const updatedApp = await this.enrollmentService.uploadDocument(
+        this.currentApplicationId()!, 
+        docCode, 
+        mockFileUrl
+      ).toPromise();
+
+      if (updatedApp) {
+        this.application.set(updatedApp);
+      }
+    } catch (e) {
+      console.error(`Erreur upload document ${docCode}:`, e);
+    } finally {
+      this.uploadingDocCode.set(null);
+    }
+  }
+
+  /**
+   * Soumission finale du dossier au serveur
+   */
+  async submitFinal() {
+    const id = this.currentApplicationId();
+    if (!id) return;
+
+    this.isSubmitting.set(true);
+    try {
+      const finalApp = await this.enrollmentService.submitApplication(id).toPromise();
+      if (finalApp) {
+        // Succès : On nettoie la session de saisie
+        const reference = finalApp.reference;
+        this.sessionService.clearSession();
+        // Redirection vers le tracker pour voir le succès
+        this.router.navigate(['/enrollment/tracker', reference]);
+      }
+    } catch (e) {
+      console.error('Erreur lors de la soumission finale', e);
+      alert('Une erreur est survenue lors de la soumission. Veuillez vérifier que tous les documents obligatoires sont présents.');
+    } finally {
+      this.isSubmitting.set(false);
+    }
   }
 
   // --- ICÔNES ---

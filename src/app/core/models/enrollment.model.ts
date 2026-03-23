@@ -49,9 +49,9 @@ export interface Assessment {
  * État d'un document requis
  */
 export interface RequiredDocument {
-  code: string; // EXT, BUL, PHOTO, etc.
-  label: string;
-  isMandatory: boolean;
+  code: string; // ex: 'EXT'
+  name: string; // ex: 'Extrait de Naissance'
+  mandatory: boolean;
   status: 'MISSING' | 'PHYSICAL_RECEIVED' | 'UPLOADED';
   fileUrl?: string;
 }
@@ -61,23 +61,23 @@ export interface RequiredDocument {
  */
 export interface AdmissionApplication {
   id: string;
-  reference: string; // ex: ADM-2026-XXXX
-  accessCode: string; // Pour le tracking public
+  reference: string;
+  accessCode: string;
   type: AdmissionType;
   status: AdmissionStatus;
   academicYearId: string;
   tenantId: string;
 
   candidate: Candidate;
-  guardians: Guardian[];
+  primaryGuardian: Guardian;
   documents: RequiredDocument[];
   assessment?: Assessment;
 
+  trackerMessage: string;
   createdAt: string;
   updatedAt: string;
   submittedAt?: string;
 }
-
 /**
  * REQUÊTES API (Payloads)
  */

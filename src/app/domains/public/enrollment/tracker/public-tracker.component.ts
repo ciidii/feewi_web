@@ -1,10 +1,15 @@
-import { Component, signal, computed } from '@angular/core';
+import {Component, signal, computed, inject} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { LucideAngularModule, Clock, CheckCircle, MessageSquare, Phone, Mail, FileText, Info, ArrowLeft, RefreshCw } from 'lucide-angular';
 import {
   AdmissionState
 } from '../../../school-app/features/admissions/components/admission-workflow/admission-workflow.component';
+import { ActivatedRoute } from '@angular/router';
+import { EnrollmentPublicService } from '../../../../core/services/enrollment-public.service';
+import { AdmissionSessionService } from '../../../../core/services/admission-session.service';
+import { AdmissionApplication } from '../../../../core/models/enrollment.model';
+
 @Component({
   selector: 'app-public-tracker',
   standalone: true,
@@ -13,28 +18,45 @@ import {
   styleUrls: ['./public-tracker.component.scss']
 })
 export class PublicTrackerComponent {
-  // État simulé du dossier
-  admissionId = signal('ADM-2026-8842');
-  currentStatus = signal<AdmissionState>('SUBMITTED');
-  studentName = signal('Jean Dupont');
+  private route = inject(ActivatedRoute);
+  private enrollmentService = inject(EnrollmentPublicService);
+  private sessionService = inject(AdmissionSessionService);
 
-  // Timeline des événements
-  events = signal([
-    { title: 'Dossier Soumis', date: 'Aujourd\'hui, 14:20', desc: 'Votre demande a bien été enregistrée par notre système.', status: 'completed' },
-    { title: 'Vérification Administrative', date: 'En cours', desc: 'Le secrétariat vérifie la conformité de vos pièces jointes.', status: 'active' },
-    { title: 'Convocation au Test', date: 'À venir', desc: 'Une date vous sera proposée dès que le dossier sera validé.', status: 'future' },
-    { title: 'Décision Finale', date: 'À venir', desc: 'La Direction rendra son arbitrage pédagogique.', status: 'future' }
-  ]);
+  // État du dossier chargé depuis l'API
+  application = signal<AdmissionApplication | null>(null);
+  isLoading = signal(true);
+  error = signal<string | null>(null);
 
-  // Messages contextuels selon l'état
-  statusMessage = computed(() => {
-    switch(this.currentStatus()) {
-      case 'SUBMITTED': return 'Votre dossier est entre de bonnes mains. Nous effectuons actuellement les vérifications administratives.';
-      case 'VERIFIED': return 'Bonne nouvelle ! Vos documents sont conformes. Préparez-vous pour le test de niveau.';
-      case 'TESTING': return 'L\'évaluation est terminée. Les résultats sont en cours de traitement par le jury.';
-      default: return 'Suivez l\'avancement de votre demande en temps réel.';
+  constructor() {
+    this.loadApplicationData();
+  }
+
+  /**
+   * Charger les données de suivi via l'API
+   */
+  async loadApplicationData() {
+    const reference = this.route.snapshot.paramMap.get('id');
+    const session = this.sessionService.getSession();
+
+    // Pour tracker, on a besoin du accessCode (sécurité)
+    if (!reference || !session || session.reference !== reference) {
+      this.error.set('Session introuvable ou invalide. Veuillez vous reconnecter.');
+      this.isLoading.set(false);
+      return;
     }
-  });
+
+    this.isLoading.set(true);
+    try {
+      const res = await this.enrollmentService.trackApplication(reference, session.accessCode).toPromise();
+      if (res) {
+        this.application.set(res);
+      }
+    } catch (e) {
+      this.error.set('Impossible de récupérer les informations de votre dossier.');
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
 
   // Icônes
   readonly Clock = Clock;

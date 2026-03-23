@@ -65,9 +65,14 @@ export class EnrollmentPublicService {
 
   /**
    * Uploader un document justificatif
+   * @param fileUrl URL publique du fichier stocké
    */
   uploadDocument(applicationId: string, docCode: string, fileUrl: string): Observable<AdmissionApplication> {
-    return this.http.post<AdmissionApplication>(`${this.baseUrl}/${applicationId}/documents/${docCode}`, { fileUrl });
+    return this.http.post<AdmissionApplication>(
+      `${this.baseUrl}/${applicationId}/documents/${docCode}`, 
+      `"${fileUrl}"`, // Envoi de l'URL en tant que JSON String brute
+      { headers: new HttpHeaders().set('Content-Type', 'application/json') }
+    );
   }
 
   /**
