@@ -1,0 +1,31 @@
+<div class="workflow-container">
+  <div class="workflow-steps">
+    @for (step of steps; track step.state; let i = $index) {
+      <!-- Ligne de liaison -->
+      @if (i > 0) {
+        <div class="workflow-line" 
+             [class.completed]="getStepStatus(i) !== 'future'"
+             [class.active]="getStepStatus(i) === 'active'">
+        </div>
+      }
+
+      <div class="workflow-step" [class]="getStepStatus(i)">
+        <div class="step-icon-wrapper">
+          <div class="step-icon">
+            <lucide-icon [name]="step.icon" [size]="18"></lucide-icon>
+          </div>
+          @if (getStepStatus(i) === 'completed') {
+            <div class="step-check">
+              <lucide-icon [name]="CheckCircle" [size]="12"></lucide-icon>
+            </div>
+          }
+        </div>
+        
+        <div class="step-info">
+          <span class="step-label">{{ step.label }}</span>
+          <!-- <span class="step-desc">{{ step.description }}</span> -->
+        </div>
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,106 @@
+<div class="re-enrollment-container">
+  
+  <header class="page-header">
+    <div class="header-info">
+      <h1>Réinscription Administrative</h1>
+      <p>Initiez ou complétez une réinscription pour un élève déjà présent dans l'établissement.</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-cancel" routerLink="/admissions"><lucide-icon [name]="X" [size]="18"></lucide-icon> Annuler</button>
+      <button class="btn-primary" [disabled]="!selectedStudent()" (click)="onSave()"><lucide-icon [name]="Save" [size]="18"></lucide-icon> Enregistrer la réinscription</button>
+    </div>
+  </header>
+
+  <main class="page-content">
+    
+    <!-- Zone de recherche (Visible si aucun élève sélectionné) -->
+    <section class="search-section card" *ngIf="!selectedStudent()">
+      <div class="search-box">
+        <lucide-icon [name]="Search" [size]="20"></lucide-icon>
+        <input type="text" [(ngModel)]="searchQuery" placeholder="Rechercher un élève (Nom, Prénom ou Matricule)..." class="search-input">
+      </div>
+
+      <div class="results-list" *ngIf="filteredResults().length > 0">
+        @for (stu of filteredResults(); track stu.id) {
+          <div class="result-item" (click)="selectStudent(stu)">
+            <div class="stu-avatar"><lucide-icon [name]="User" [size]="18"></lucide-icon></div>
+            <div class="stu-info">
+              <span class="stu-name">{{ stu.name }}</span>
+              <span class="stu-meta">{{ stu.id }} • {{ stu.level }}</span>
+            </div>
+            <div class="stu-parent">Parent : {{ stu.parent }}</div>
+            <lucide-icon [name]="ArrowRight" [size]="18" class="text-slate-400"></lucide-icon>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- Formulaire de Réinscription (Visible si élève sélectionné) -->
+    <div class="form-layout" *ngIf="selectedStudent()">
+      
+      <!-- Colonne Gauche : Info Élève & Passage -->
+      <section class="form-column">
+        <div class="card student-card">
+          <div class="card-title">Élève Sélectionné</div>
+          <div class="student-summary">
+            <div class="stu-name">{{ selectedStudent().name }}</div>
+            <div class="stu-id">Matricule : {{ selectedStudent().id }}</div>
+            <button class="btn-change" (click)="selectedStudent.set(null)">Changer d'élève</button>
+          </div>
+
+          <div class="promotion-flow">
+            <div class="level-box">
+              <span class="label">Niveau {{ 2025 }}</span>
+              <span class="val">{{ selectedStudent().level }}</span>
+            </div>
+            <lucide-icon [name]="ArrowRight" [size]="24" class="text-primary"></lucide-icon>
+            <div class="level-box highlight">
+              <span class="label">Niveau {{ 2026 }}</span>
+              <span class="val">{{ selectedStudent().nextLevel }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Services Périscolaires</div>
+          <div class="services-list">
+            <label class="check-group">
+              <input type="checkbox" checked>
+              <span>Cantine / Restauration</span>
+            </label>
+            <label class="check-group">
+              <input type="checkbox">
+              <span>Transport Scolaire</span>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- Colonne Droite : Contacts & Administrative -->
+      <section class="form-column">
+        <div class="card">
+          <div class="card-title">Contacts & Urgence</div>
+          <div class="grid-inputs">
+            <div class="field">
+              <label>Téléphone Parent</label>
+              <input type="text" [(ngModel)]="selectedStudent().phone" class="fw-input">
+            </div>
+            <div class="field">
+              <label>Adresse de résidence</label>
+              <textarea [(ngModel)]="selectedStudent().address" class="fw-input"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="card alert-card">
+          <div class="alert-icon"><lucide-icon [name]="Info" [size]="20"></lucide-icon></div>
+          <div class="alert-text">
+            <strong>Validation Directe :</strong> En tant que secrétaire, votre validation bypass le workflow public. Le dossier passera directement en état <code>VERIFIED</code>.
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+</div>

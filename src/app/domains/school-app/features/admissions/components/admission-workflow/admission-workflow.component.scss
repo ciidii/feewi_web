@@ -1,0 +1,111 @@
+@use '../../../../../../../styles/tokens' as *;
+
+.workflow-container {
+  padding: 1rem 0;
+  width: 100%;
+}
+
+.workflow-steps {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.workflow-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  flex: 1;
+  z-index: 1;
+
+  .step-icon-wrapper {
+    position: relative;
+    margin-bottom: 0.5rem;
+  }
+
+  .step-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--fw-ice);
+    border: 1.5px solid var(--fw-border);
+    color: var(--fw-slate-medium);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .step-check {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: var(--fw-white);
+    border-radius: 50%;
+    color: #10b981; /* Green success */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .step-info {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .step-label {
+    font-family: var(--fw-font-display);
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--fw-slate-medium);
+  }
+
+  // État ACTIF
+  &.active {
+    .step-icon {
+      background: var(--fw-primary);
+      border-color: var(--fw-primary);
+      color: var(--fw-white);
+      box-shadow: 0 0 0 4px var(--fw-primary-alpha);
+    }
+    .step-label {
+      color: var(--fw-midnight);
+      font-weight: 600;
+    }
+  }
+
+  // État COMPLÉTÉ
+  &.completed {
+    .step-icon {
+      background: var(--fw-ice);
+      border-color: #10b981;
+      color: #10b981;
+    }
+    .step-label {
+      color: var(--fw-midnight);
+    }
+  }
+}
+
+.workflow-line {
+  height: 2px;
+  background: var(--fw-border);
+  flex: 1;
+  margin: 0 -10px;
+  position: relative;
+  top: -12px; // Align with icons
+  transition: all 0.3s ease;
+
+  &.completed {
+    background: #10b981;
+  }
+
+  &.active {
+    background: linear-gradient(to right, #10b981, var(--fw-primary));
+  }
+}

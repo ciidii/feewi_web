@@ -18,6 +18,7 @@ export class AdmissionsComponent {
 
   readonly Filter = Filter;
   readonly Download = Download;
+  readonly Layers = Layers;
 
   activeTab = signal('Tous');
   totalAdmissions = signal(142);
@@ -31,9 +32,9 @@ export class AdmissionsComponent {
 
   admissionTabs: TabItem[] = [
     { label: 'Tous', icon: Layers, count: 142 },
-    { label: 'En attente', icon: Clock, count: 24 },
-    { label: 'Vérifiés', icon: ShieldCheck, count: 86 },
-    { label: 'Validés', icon: UserCheck, count: 32 }
+    { label: 'À Vérifier', icon: Clock, count: 24 }, // SUBMITTED
+    { label: 'À Évaluer', icon: ShieldCheck, count: 86 }, // VERIFIED
+    { label: 'En Décision', icon: UserCheck, count: 32 } // TESTING / WAITLIST
   ];
 
   admissions = signal<TableRow[]>([
@@ -43,7 +44,10 @@ export class AdmissionsComponent {
       subtitle: 'Niveau : 6ème A • Dossier #ADM-2024-001',
       avatarLabel: 'JD',
       date: `Aujourd'hui`,
-      badges: [{ label: 'Paiement OK', type: 'success' }, { label: 'Action requise', type: 'warning' }]
+      badges: [
+        { label: 'Paiement OK', type: 'success' }, 
+        { label: 'Scan Check : 100%', type: 'info' }
+      ]
     },
     {
       id: 2,
@@ -51,7 +55,10 @@ export class AdmissionsComponent {
       subtitle: 'Niveau : 3ème B • Dossier #ADM-2024-002',
       avatarLabel: 'MC',
       date: 'Hier',
-      badges: [{ label: 'Vérifié', type: 'info' }]
+      badges: [
+        { label: 'À Numériser', type: 'warning' },
+        { label: 'Paiement OK', type: 'success' }
+      ]
     },
     {
       id: 3,
@@ -59,7 +66,10 @@ export class AdmissionsComponent {
       subtitle: 'Niveau : Terminale S • Dossier #ADM-2024-003',
       avatarLabel: 'AD',
       date: '24 Fév',
-      badges: [{ label: 'Dossier Incomplet', type: 'danger' }]
+      badges: [
+        { label: 'Dossier Incomplet', type: 'danger' },
+        { label: 'Test requis', type: 'warning' }
+      ]
     },
     {
       id: 4,
@@ -67,7 +77,10 @@ export class AdmissionsComponent {
       subtitle: 'Niveau : CP • Dossier #ADM-2024-004',
       avatarLabel: 'SM',
       date: '20 Fév',
-      badges: [{ label: 'Validé', type: 'success' }]
+      badges: [
+        { label: 'Validé', type: 'success' },
+        { label: 'Réinscription', type: 'info' }
+      ]
     },
     {
       id: 5,
@@ -75,7 +88,9 @@ export class AdmissionsComponent {
       subtitle: 'Niveau : Terminale S • Dossier #ADM-2024-005',
       avatarLabel: 'TA',
       date: '18 Fév',
-      badges: [{ label: 'En attente', type: 'warning' }]
+      badges: [
+        { label: 'Waitlist', type: 'warning' }
+      ]
     }
   ]);
 

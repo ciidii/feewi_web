@@ -18,6 +18,11 @@ export const SCHOOL_APP_ROUTES: Routes = [
         path: ':id',
         title: 'Dossier d’Admission',
         loadComponent: () => import('./features/admissions/admission-detail/admission-detail.component').then(m => m.AdmissionDetailComponent)
+      },
+      {
+        path: 're-enrollment',
+        title: 'Réinscription Administrative',
+        loadComponent: () => import('./features/admissions/re-enrollment/re-enrollment.component').then(m => m.SecretaryReEnrollmentComponent)
       }
     ]
   },

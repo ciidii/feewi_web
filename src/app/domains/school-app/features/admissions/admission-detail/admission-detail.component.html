@@ -1,324 +1,192 @@
-<div class="flex flex-col h-full animate-in fade-in duration-300 bg-slate-50/50">
-
-  <!-- ======================================= -->
-  <!-- HEADER PROFESSIONNEL AVEC PROGRESSION -->
-  <!-- ======================================= -->
-  <header class="sticky top-0 z-30 bg-white border-b border-slate-200 shadow-sm">
-    <!-- Barre de progression contextuelle -->
-    <div class="h-1 bg-gradient-to-r from-amber-500 via-primary-500 to-green-500" style="width: 75%"></div>
-
-    <div class="flex items-center justify-between h-20 px-6">
-      <!-- Partie gauche : Retour et identité -->
-      <div class="flex items-center gap-4">
-        <button routerLink="/admissions"
-                class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-500 transition-all active:scale-95"
-                title="Retour à la liste">
-          <lucide-icon [name]="ArrowLeft" class="w-5 h-5"></lucide-icon>
-        </button>
-        <div class="h-8 w-px bg-slate-200"></div>
-        <div class="flex flex-col">
-          <div class="flex items-center gap-3">
-            <h1 class="text-lg font-semibold text-slate-900">{{ student().name }}</h1>
-            <span class="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[10px] font-bold">
-              En vérification
-            </span>
-          </div>
-          <div class="flex items-center gap-2 text-xs text-slate-500">
-            <span class="font-mono">#{{ student().id }}</span>
-            <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
-            <span>Dossier créé le 20 Fév 2024</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Partie droite : Actions et navigation -->
-      <div class="flex items-center gap-3">
-        <!-- Actions rapides -->
-        <div class="flex items-center bg-white rounded-xl border border-slate-200 p-1 shadow-sm">
-          <button class="px-4 py-2 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors">
-            Commenter
-          </button>
-          <button class="px-4 py-2 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors">
-            Partager
-          </button>
-          <button class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500">
-            <lucide-icon [name]="MoreVertical" class="w-4 h-4"></lucide-icon>
-          </button>
-        </div>
-
-        <div class="h-8 w-px bg-slate-200"></div>
-
-        <!-- Actions principales -->
-        <div class="flex items-center gap-2">
-          <button class="flex items-center gap-2 px-5 py-2.5 bg-red-50 text-red-700 rounded-xl text-xs font-semibold hover:bg-red-100 transition-all border border-red-200 shadow-sm active:scale-95">
-            <lucide-icon [name]="XCircle" class="w-4 h-4"></lucide-icon>
-            Rejeter
-          </button>
-          <button class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-xl text-xs font-semibold hover:from-primary-700 hover:to-primary-800 transition-all shadow-md shadow-primary-200 active:scale-95">
-            <lucide-icon [name]="CheckCircle" class="w-4 h-4"></lucide-icon>
-            Valider le dossier
-          </button>
-        </div>
-
-        <div class="h-8 w-px bg-slate-200"></div>
-
-        <!-- Navigation séquentielle améliorée -->
-        <div class="flex items-center bg-slate-100 rounded-xl p-1">
-          <button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white text-slate-600 transition-all disabled:opacity-30" title="Précédent">
-            <lucide-icon [name]="ChevronLeft" class="w-4 h-4"></lucide-icon>
-          </button>
-          <div class="px-3 text-xs font-medium text-slate-600">
-            <span class="font-bold text-primary-600">5</span> / 42
-          </div>
-          <button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white text-slate-600 transition-all" title="Suivant">
-            <lucide-icon [name]="ChevronRight" class="w-4 h-4"></lucide-icon>
-          </button>
-        </div>
-
-        <!-- Bouton d'impression -->
-        <button class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 transition-all">
-          <lucide-icon [name]="Printer" class="w-4 h-4"></lucide-icon>
-        </button>
+<div class="admission-detail-container">
+  <!-- Header de Pilotage -->
+  <header class="detail-header">
+    <div class="header-left">
+      <button mat-icon-button routerLink="/school-app/features/admissions/admission-list" class="back-btn">
+        <lucide-icon [name]="ArrowLeft" [size]="20"></lucide-icon>
+      </button>
+      <div class="title-group">
+        <h1>{{ student().name }}</h1>
+        <span class="admission-id">Dossier {{ student().id }}</span>
       </div>
     </div>
 
-    <!-- Micro-navigation (sous-onglets) -->
-    <div class="flex items-center gap-2 px-6 pb-1">
-      <button class="px-4 py-2 text-sm font-medium text-primary-600 border-b-2 border-primary-600">Informations</button>
-      <button class="px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700">Documents</button>
-      <button class="px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700">Paiements</button>
-      <button class="px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700">Historique</button>
+    <div class="header-center">
+      <app-admission-workflow [state]="admissionState()"></app-admission-workflow>
+    </div>
+
+    <div class="header-right">
+      <div class="nav-actions">
+        <button class="nav-btn"><lucide-icon [name]="ChevronLeft" [size]="18"></lucide-icon></button>
+        <span class="nav-count">Dossier 5 / 42</span>
+        <button class="nav-btn"><lucide-icon [name]="ChevronRight" [size]="18"></lucide-icon></button>
+      </div>
+      <div class="action-group">
+        <button class="btn btn-outline"><lucide-icon [name]="Printer" [size]="18"></lucide-icon> Récépissé</button>
+        <button class="btn btn-danger"><lucide-icon [name]="XCircle" [size]="18"></lucide-icon> Rejeter</button>
+        <button class="btn btn-primary"><lucide-icon [name]="CheckCircle" [size]="18"></lucide-icon> Approuver les pièces</button>
+      </div>
     </div>
   </header>
 
-  <!-- ======================================= -->
-  <!-- CONTENU PRINCIPAL AVEC GRILLE AMÉLIORÉE -->
-  <!-- ======================================= -->
-  <div class="flex-1 overflow-y-auto p-8">
-    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-      <!-- Colonne Gauche (2/3) : Informations principales -->
-      <div class="lg:col-span-2 space-y-6">
-
-        <!-- Carte État Civil -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-          <div class="px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white flex justify-between items-center">
-            <h3 class="text-xs font-semibold text-slate-700 uppercase tracking-wider flex items-center gap-2">
-              <div class="w-6 h-6 bg-primary-50 rounded-lg flex items-center justify-center">
-                <lucide-icon [name]="User" class="w-3.5 h-3.5 text-primary-600"></lucide-icon>
-              </div>
-              État Civil & Coordonnées
-            </h3>
-            <button class="text-xs font-medium text-primary-600 hover:text-primary-700 flex items-center gap-1">
-              <lucide-icon [name]="Pencil" class="w-3.5 h-3.5"></lucide-icon>
-              Modifier
-            </button>
-          </div>
-
-          <div class="p-6">
-            <div class="grid grid-cols-2 gap-6">
-              <!-- Ligne 1 -->
-              <div class="space-y-1">
-                <p class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Nom complet</p>
-                <p class="text-base font-semibold text-slate-900">{{ student().name }}</p>
-              </div>
-              <div class="space-y-1">
-                <p class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Date de naissance</p>
-                <p class="text-base font-semibold text-slate-900">12 Mai 2012 <span class="text-sm font-normal text-slate-500 ml-2">(12 ans)</span></p>
-              </div>
-
-              <!-- Ligne 2 -->
-              <div class="space-y-1">
-                <p class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Email des parents</p>
-                <div class="flex items-center gap-2">
-                  <div class="w-6 h-6 bg-slate-100 rounded-lg flex items-center justify-center">
-                    <lucide-icon [name]="Mail" class="w-3.5 h-3.5 text-slate-500"></lucide-icon>
-                  </div>
-                  <p class="text-sm font-medium text-slate-900">parents.dupont&#64;email.com</p>
-                </div>
-              </div>
-              <div class="space-y-1">
-                <p class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Téléphone</p>
-                <div class="flex items-center gap-2">
-                  <div class="w-6 h-6 bg-slate-100 rounded-lg flex items-center justify-center">
-                    <lucide-icon [name]="Phone" class="w-3.5 h-3.5 text-slate-500"></lucide-icon>
-                  </div>
-                  <p class="text-sm font-medium text-slate-900">+221 77 123 45 67</p>
-                </div>
-              </div>
-
-              <!-- Adresse (full width) -->
-              <div class="col-span-2 space-y-1">
-                <p class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Adresse</p>
-                <div class="flex items-start gap-2">
-                  <div class="w-6 h-6 bg-slate-100 rounded-lg flex items-center justify-center mt-0.5">
-                    <lucide-icon [name]="MapPin" class="w-3.5 h-3.5 text-slate-500"></lucide-icon>
-                  </div>
-                  <p class="text-sm font-medium text-slate-900">Villa 123, Sacré-Cœur 3, Dakar</p>
-                </div>
-              </div>
-            </div>
-          </div>
+  <!-- Main Content Layout -->
+  <main class="detail-main" [class.with-viewer]="showDocumentViewer()">
+    
+    <!-- Zone Formulaire (Scrollable) -->
+    <section class="form-section">
+      <!-- Section : État Civil -->
+      <div class="card">
+        <div class="card-header">
+          <lucide-icon [name]="User" [size]="18"></lucide-icon>
+          <h2>Informations Candidat</h2>
         </div>
-
-        <!-- Carte Documents (version améliorée) -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-          <div class="px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
-            <h3 class="text-xs font-semibold text-slate-700 uppercase tracking-wider flex items-center gap-2">
-              <div class="w-6 h-6 bg-primary-50 rounded-lg flex items-center justify-center">
-                <lucide-icon [name]="FileText" class="w-3.5 h-3.5 text-primary-600"></lucide-icon>
-              </div>
-              Pièces Jointes
-              <span class="ml-2 px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full text-[10px] font-medium">4 documents</span>
-            </h3>
+        <div class="grid-form">
+          <div class="form-group">
+            <label>Nom Complet</label>
+            <div class="value">{{ student().name }}</div>
           </div>
-
-          <div class="p-4">
-            <div class="grid grid-cols-2 gap-3">
-              <div *ngFor="let doc of documents"
-                   class="group flex items-center justify-between p-3 border border-slate-200 rounded-xl hover:border-primary-200 hover:bg-primary-50/30 transition-all cursor-pointer">
-                <div class="flex items-center gap-3">
-                  <!-- Icône de fichier dynamique selon le type -->
-                  <div class="w-10 h-10 bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl flex items-center justify-center">
-                    <lucide-icon [name]="getFileIcon(doc.name)" class="w-5 h-5 text-primary-600"></lucide-icon>
-                  </div>
-                  <div class="flex flex-col">
-                    <span class="text-xs font-semibold text-slate-900">{{ doc.name }}</span>
-                    <span class="text-[10px] text-slate-500">{{ doc.size }} • PDF</span>
-                  </div>
-                </div>
-
-                <!-- Actions au survol -->
-                <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button class="w-8 h-8 rounded-lg hover:bg-white text-slate-500 hover:text-primary-600 flex items-center justify-center">
-                    <lucide-icon [name]="Eye" class="w-4 h-4"></lucide-icon>
-                  </button>
-                  <button class="w-8 h-8 rounded-lg hover:bg-white text-slate-500 hover:text-primary-600 flex items-center justify-center">
-                    <lucide-icon [name]="Download" class="w-4 h-4"></lucide-icon>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Bouton d'ajout -->
-            <button class="mt-4 w-full py-3 border-2 border-dashed border-slate-200 rounded-xl text-xs font-medium text-slate-500 hover:border-primary-200 hover:text-primary-600 hover:bg-primary-50/30 transition-all flex items-center justify-center gap-2">
-              <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
-              Ajouter un document
-            </button>
+          <div class="form-group">
+            <label>Niveau Demandé</label>
+            <div class="value badge-value">{{ student().requestedLevel }}</div>
           </div>
-        </div>
-
-        <!-- Section Notes/Commentaires -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div class="px-6 py-4 border-b border-slate-100">
-            <h3 class="text-xs font-semibold text-slate-700 uppercase tracking-wider flex items-center gap-2">
-              <lucide-icon [name]="MessageSquare" class="w-4 h-4 text-slate-400"></lucide-icon>
-              Notes internes
-            </h3>
+          <div class="form-group">
+            <label>Date de Naissance</label>
+            <div class="value">{{ student().birthDate }}</div>
           </div>
-          <div class="p-4">
-            <textarea placeholder="Ajouter une note..."
-                      class="w-full p-3 border border-slate-200 rounded-xl text-sm resize-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400 outline-none transition-all"
-                      rows="2"></textarea>
-            <div class="flex justify-end mt-2">
-              <button class="px-4 py-2 bg-primary-600 text-white rounded-lg text-xs font-medium hover:bg-primary-700 transition-colors">
-                Enregistrer
-              </button>
-            </div>
+          <div class="form-group">
+            <label>Sexe</label>
+            <div class="value">{{ student().gender }}</div>
+          </div>
+          <div class="form-group">
+            <label>Nationalité</label>
+            <div class="value">{{ student().nationality }}</div>
+          </div>
+          <div class="form-group">
+            <label>École de provenance</label>
+            <div class="value">{{ student().previousSchool }}</div>
           </div>
         </div>
       </div>
 
-      <!-- Colonne Droite (1/3) : Statut et paiements -->
-      <div class="space-y-6">
-
-        <!-- Carte Statut -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden sticky top-24">
-          <!-- En-tête avec statut -->
-          <div class="h-2 bg-gradient-to-r from-amber-400 to-amber-500"></div>
-
-          <div class="p-6">
-            <div class="flex items-center justify-between mb-6">
-              <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Statut du dossier</span>
-              <span class="px-3 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[10px] font-bold">
-                En vérification
-              </span>
-            </div>
-
-            <!-- Badge de classe -->
-            <div class="text-center p-4 bg-gradient-to-br from-primary-50 to-primary-100/50 rounded-xl mb-6">
-              <p class="text-xs text-primary-700 font-medium mb-1">Classe demandée</p>
-              <p class="text-3xl font-bold text-primary-800">6ème A</p>
-            </div>
-
-            <!-- Section paiement -->
-            <div class="space-y-4">
-              <div class="flex justify-between items-center">
-                <span class="text-xs font-medium text-slate-500">Frais d'inscription</span>
-                <span class="text-lg font-bold text-slate-900">75.000 FCFA</span>
+      <!-- Section : Responsables -->
+      <div class="card">
+        <div class="card-header">
+          <lucide-icon [name]="User" [size]="18"></lucide-icon>
+          <h2>Parents / Tuteurs</h2>
+        </div>
+        <div class="parents-list">
+          @for (parent of parents(); track parent.name) {
+            <div class="parent-item">
+              <div class="parent-info">
+                <span class="parent-role">{{ parent.role }}</span>
+                <span class="parent-name">{{ parent.name }}</span>
               </div>
-
-              <div class="bg-green-50 rounded-xl p-4 border border-green-100">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-                    <lucide-icon [name]="CreditCard" class="w-5 h-5 text-green-600"></lucide-icon>
-                  </div>
-                  <div>
-                    <p class="text-sm font-semibold text-green-700">Paiement reçu</p>
-                    <p class="text-xs text-green-600">Orange Money • 24/02/2024</p>
-                  </div>
-                  <lucide-icon [name]="CheckCircle" class="w-5 h-5 text-green-600 ml-auto"></lucide-icon>
-                </div>
+              <div class="parent-contact">
+                <span><lucide-icon [name]="Phone" [size]="14"></lucide-icon> {{ parent.phone }}</span>
+                <span class="parent-job"><lucide-icon [name]="User" [size]="14"></lucide-icon> {{ parent.job }}</span>
               </div>
             </div>
-          </div>
+          }
+        </div>
+      </div>
 
-          <!-- Actions rapides -->
-          <div class="border-t border-slate-100 p-4 bg-slate-50/50 grid grid-cols-2 gap-2">
-            <button class="py-2 px-3 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors">
-              Contacter
-            </button>
-            <button class="py-2 px-3 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors">
-              Planifier
-            </button>
-          </div>
+      <!-- Section : Documents Checklist -->
+      <div class="card">
+        <div class="card-header">
+          <lucide-icon [name]="FileText" [size]="18"></lucide-icon>
+          <h2>Checklist Documentaire</h2>
+        </div>
+        <div class="docs-list">
+          @for (doc of documents; track doc.name) {
+            <div class="doc-item" (click)="selectedDocument.set(doc)" [class.active]="selectedDocument()?.name === doc.name">
+              <div class="doc-icon">
+                <lucide-icon [name]="getFileIcon(doc.name)" [size]="20"></lucide-icon>
+              </div>
+              <div class="doc-info">
+                <span class="doc-name">{{ doc.name }}</span>
+                <span class="doc-meta">{{ doc.size }} • PDF</span>
+              </div>
+              <div class="doc-status">
+                <lucide-icon [name]="CheckCircle" [size]="18" class="status-ok"></lucide-icon>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Section : Évaluation Pédagogique (Module de Test) -->
+      <div class="card" *ngIf="admissionState() === 'VERIFIED' || admissionState() === 'TESTING' || admissionState() === 'VALIDATED'">
+        <div class="card-header">
+          <lucide-icon [name]="History" [size]="18"></lucide-icon>
+          <h2>Évaluation Pédagogique</h2>
+          <div class="average-badge">Moyenne : {{ averageScore() }} / 20</div>
         </div>
 
-        <!-- Timeline améliorée -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div class="px-6 py-4 border-b border-slate-100">
-            <h4 class="text-xs font-semibold text-slate-700 uppercase tracking-wider flex items-center gap-2">
-              <lucide-icon [name]="History" class="w-4 h-4 text-slate-400"></lucide-icon>
-              Historique
-            </h4>
-          </div>
+        <div class="evaluation-grid">
+          <table class="eval-table">
+            <thead>
+              <tr>
+                <th>Matière</th>
+                <th>Note / 20</th>
+                <th>Observation</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of evaluation(); track item.subject) {
+                <tr>
+                  <td class="subject-cell">{{ item.subject }}</td>
+                  <td class="score-cell">
+                    <input type="number" [(ngModel)]="item.score" min="0" max="20" class="score-input">
+                  </td>
+                  <td class="obs-cell">
+                    <input type="text" placeholder="Commentaire libre..." class="obs-input">
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
 
-          <div class="p-4">
-            <div class="space-y-4">
-              <div *ngFor="let step of timeline; let last = last" class="relative pl-6">
-                <!-- Timeline line -->
-                <div *ngIf="!last" class="absolute left-2 top-5 bottom-0 w-px bg-slate-200"></div>
-                <!-- Timeline dot -->
-                <div class="absolute left-0 top-1.5 w-3 h-3 rounded-full bg-white border-2 border-primary-400"></div>
-
-                <div>
-                  <p class="text-sm font-medium text-slate-900">{{ step.action }}</p>
-                  <div class="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
-                    <span>{{ step.date }}</span>
-                    <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
-                    <span>par {{ step.user }}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <button class="mt-4 text-xs text-primary-600 font-medium hover:text-primary-700 flex items-center gap-1">
-              Voir tout l'historique
-              <lucide-icon [name]="ChevronRight" class="w-3.5 h-3.5"></lucide-icon>
-            </button>
+        <div class="decision-box">
+          <label>Décision Pédagogique :</label>
+          <div class="decision-selector">
+            <button class="choice-btn" [class.active]="pedagogicalDecision() === 'REFUSE'" (click)="pedagogicalDecision.set('REFUSE')">Refusé</button>
+            <button class="choice-btn" [class.active]="pedagogicalDecision() === 'WAITLIST'" (click)="pedagogicalDecision.set('WAITLIST')">Liste d'attente</button>
+            <button class="choice-btn primary" [class.active]="pedagogicalDecision() === 'ADMIS'" (click)="pedagogicalDecision.set('ADMIS')">Admis</button>
           </div>
         </div>
       </div>
-    </div>
-  </div>
+    </section>
+
+    <!-- Zone Viewer (Fixe/Sticky) -->
+    <aside class="viewer-section" *ngIf="showDocumentViewer()">
+      <div class="viewer-card">
+        <div class="viewer-header">
+          <h3>Aperçu : {{ selectedDocument()?.name || 'Veuillez sélectionner un document' }}</h3>
+          <button class="viewer-close" (click)="showDocumentViewer.set(false)">
+            <lucide-icon [name]="XCircle" [size]="18"></lucide-icon>
+          </button>
+        </div>
+        <div class="viewer-content">
+          @if (selectedDocument()) {
+            <div class="document-mock">
+              <div class="mock-content">
+                <lucide-icon [name]="FileText" [size]="48"></lucide-icon>
+                <p>Visualisation de : {{ selectedDocument()?.name }}</p>
+                <button class="btn btn-outline btn-sm">
+                  <lucide-icon [name]="Download" [size]="16"></lucide-icon> Télécharger
+                </button>
+              </div>
+            </div>
+          } @else {
+            <div class="empty-viewer">
+              <lucide-icon [name]="Eye" [size]="32"></lucide-icon>
+              <p>Sélectionnez une pièce jointe pour la visualiser ici.</p>
+            </div>
+          }
+        </div>
+      </div>
+    </aside>
+
+  </main>
 </div>

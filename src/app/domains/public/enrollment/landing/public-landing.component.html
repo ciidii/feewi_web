@@ -1,0 +1,97 @@
+<div class="landing-hero">
+  
+  <!-- ÉTAT : OUVERT (L'Action) -->
+  @if (status() === 'OPEN') {
+    <div class="hero-content open-state">
+      <div class="badge-accent">Inscriptions Ouvertes 2026-2027</div>
+      <h1>Assurez l'avenir de votre enfant dès aujourd'hui.</h1>
+      <p class="hero-desc">Rejoignez une communauté éducative d'excellence. Notre processus d'admission est simple, transparent et 100% en ligne.</p>
+      
+      <div class="action-group">
+        <button class="btn-primary-lg" routerLink="../form-stepper">
+          Commencer mon inscription <lucide-icon [name]="ArrowRight" [size]="20"></lucide-icon>
+        </button>
+        <button class="btn-outline-lg">Consulter nos tarifs</button>
+      </div>
+
+      <div class="hero-stats">
+        <div class="stat-item">
+          <lucide-icon [name]="Clock" [size]="18"></lucide-icon>
+          <span>Clôture dans {{ daysLeft() }} jours</span>
+        </div>
+        <div class="stat-item">
+          <lucide-icon [name]="CheckCircle" [size]="18"></lucide-icon>
+          <span>Dossier complet en 10 min</span>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ÉTAT : TEASING (L'Attente) -->
+  @else if (status() === 'TEASING') {
+    <div class="hero-content teasing-state">
+      <div class="badge-accent warning">Prochainement</div>
+      <h1>Les admissions ouvrent bientôt.</h1>
+      <p class="hero-desc">Soyez les premiers informés de l'ouverture de la campagne de recrutement pour l'année 2026-2027.</p>
+      
+      <div class="countdown-grid">
+        <div class="countdown-item">
+          <span class="count">{{ daysLeft() }}</span>
+          <span class="unit">Jours</span>
+        </div>
+        <div class="countdown-dots">:</div>
+        <div class="countdown-item">
+          <span class="count">08</span>
+          <span class="unit">Heures</span>
+        </div>
+      </div>
+
+      <div class="notify-box">
+        <input type="email" placeholder="Votre adresse email..." class="notify-input">
+        <button class="btn-primary">Me prévenir <lucide-icon [name]="Mail" [size]="18"></lucide-icon></button>
+      </div>
+    </div>
+  }
+
+  <!-- ÉTAT : FERMÉ -->
+  @else {
+    <div class="hero-content closed-state">
+      <div class="badge-accent danger">Campagne terminée</div>
+      <h1>Les inscriptions sont closes.</h1>
+      <p class="hero-desc">La période d'admission officielle est terminée. Vous pouvez toutefois vous inscrire sur notre liste d'attente globale.</p>
+      
+      <div class="info-card">
+        <lucide-icon [name]="Info" [size]="20"></lucide-icon>
+        <p>Les dossiers tardifs peuvent être examinés sur dérogation administrative spéciale.</p>
+      </div>
+
+      <button class="btn-outline-lg">Rejoindre la liste d'attente</button>
+    </div>
+  }
+
+  <!-- Illustration / Background -->
+  <div class="hero-bg">
+    <div class="blob-1"></div>
+    <div class="blob-2"></div>
+  </div>
+
+</div>
+
+<!-- Section : Pourquoi nous rejoindre ? -->
+<section class="features-grid">
+  <div class="feature-card">
+    <div class="feature-icon"><lucide-icon [name]="CheckCircle" [size]="24"></lucide-icon></div>
+    <h3>Simplicité</h3>
+    <p>Un formulaire guidé étape par étape, accessible sur mobile et ordinateur.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon"><lucide-icon [name]="Clock" [size]="24"></lucide-icon></div>
+    <h3>Suivi en direct</h3>
+    <p>Recevez des notifications en temps réel sur l'avancement de votre dossier.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon"><lucide-icon [name]="ShieldCheck" [size]="24"></lucide-icon></div>
+    <h3>Sécurité</h3>
+    <p>Vos données personnelles et documents sont protégés par nos standards de sécurité.</p>
+  </div>
+</section>

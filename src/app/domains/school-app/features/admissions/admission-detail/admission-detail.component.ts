@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import {
@@ -11,22 +11,52 @@ import {
   FileImage, FileSpreadsheet
 } from 'lucide-angular';
 
+import { FormsModule } from '@angular/forms';
+import { AdmissionWorkflowComponent, AdmissionState } from '../components/admission-workflow/admission-workflow.component';
+
 @Component({
   selector: 'app-admission-detail',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, RouterModule],
+  imports: [CommonModule, LucideAngularModule, RouterModule, AdmissionWorkflowComponent, FormsModule],
   templateUrl: './admission-detail.component.html',
   styleUrls: ['./admission-detail.component.scss']
 })
 export class AdmissionDetailComponent {
+  admissionState = signal<AdmissionState>('VERIFIED');
+  showDocumentViewer = signal(true);
+  selectedDocument = signal<any>(null);
+
+  evaluation = signal([
+    { subject: 'Français', score: 14, max: 20 },
+    { subject: 'Mathématiques', score: 12, max: 20 },
+    { subject: 'Éveil', score: 15, max: 20 }
+  ]);
+
+  averageScore = computed(() => {
+    const evals = this.evaluation();
+    const sum = evals.reduce((acc, curr) => acc + curr.score, 0);
+    return (sum / evals.length).toFixed(2);
+  });
+
+  pedagogicalDecision = signal('ADMIS');
+
   student = signal({
     id: 'ADM-2024-001',
     name: 'Jean Dupont',
     email: 'parents.dupont@email.com',
     phone: '+221 77 123 45 67',
     birthDate: '12 Mai 2012',
-    address: 'Villa 123, Sacré-Cœur 3, Dakar'
+    address: 'Villa 123, Sacré-Cœur 3, Dakar',
+    gender: 'Masculin',
+    nationality: 'Sénégalaise',
+    requestedLevel: '6ème A',
+    previousSchool: 'École des Maristes'
   });
+
+  parents = signal([
+    { role: 'Père', name: 'Robert Dupont', phone: '+221 77 111 22 33', job: 'Ingénieur' },
+    { role: 'Mère', name: 'Marie Dupont', phone: '+221 77 444 55 66', job: 'Médecin' }
+  ]);
 
   documents = [
     { name: 'Extrait de naissance', size: '1.2 MB', type: 'pdf' },

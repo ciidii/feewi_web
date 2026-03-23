@@ -1,0 +1,139 @@
+/* VARIABLES LOCALES POUR DÉBOGAGE DESIGN */
+$primary: #2563eb;
+$midnight: #0f172a;
+$slate: #64748b;
+$ice: #f8fafc;
+$border: #e2e8f0;
+$radius-xl: 24px;
+$radius-lg: 16px;
+$radius-md: 8px;
+$radius-sm: 4px;
+$radius-full: 9999px;
+$font-display: "Lexend", sans-serif;
+$font-sans: "Inter", sans-serif;
+$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+
+.tracker-wrapper {
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.card {
+  background: #fff;
+  border-radius: $radius-lg;
+  border: 1px solid $border;
+  padding: 1.5rem;
+  box-shadow: $shadow-sm;
+}
+
+// --- HEADER ---
+.tracker-header {
+  text-align: center;
+  padding: 3rem;
+  background: linear-gradient(to bottom, #fff, $ice);
+
+  .success-icon { color: #10b981; margin-bottom: 1.5rem; }
+  h1 { font-family: $font-display; font-size: 2rem; color: $midnight; font-weight: 800; margin-bottom: 0.5rem; }
+  p { color: $slate; font-size: 1.1rem; }
+  
+  .header-divider { height: 1px; background: $border; width: 64px; margin: 2rem auto; }
+  .status-msg { font-weight: 600; color: $primary; max-width: 600px; margin: 0 auto; line-height: 1.5; }
+}
+
+// --- MAIN CONTENT ---
+.tracker-main {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 2rem;
+}
+
+.tracker-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+
+  .section-title {
+    display: flex; align-items: center; gap: 0.75rem; color: $midnight;
+    h2 { font-family: $font-display; font-size: 1.2rem; font-weight: 700; margin: 0; flex: 1; }
+    .btn-refresh { background: none; border: none; color: $slate; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.8rem; font-weight: 600; &:hover { color: $primary; } }
+  }
+}
+
+// --- TIMELINE ---
+.timeline {
+  display: flex; flex-direction: column;
+  padding-left: 2rem;
+  position: relative;
+  
+  &::before { content: ""; position: absolute; left: 8px; top: 1rem; bottom: 1rem; width: 2px; background: $border; }
+}
+
+.timeline-item {
+  position: relative;
+  padding-bottom: 2.5rem;
+  
+  .timeline-dot {
+    position: absolute; left: -1.45rem; top: 0; width: 24px; height: 24px;
+    background: #fff; border: 2px solid $slate; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; color: $slate; z-index: 1;
+    transition: all 0.3s;
+  }
+
+  &.completed {
+    .timeline-dot { background: #10b981; border-color: #10b981; color: #fff; }
+    h3 { color: $midnight; }
+    &::after { content: ""; position: absolute; left: -1.4rem; top: 1.5rem; width: 2px; height: 100%; background: #10b981; z-index: 0; }
+  }
+
+  &.active {
+    .timeline-dot { background: #fff; border-color: $primary; color: $primary; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
+    h3 { color: $primary; font-weight: 700; }
+  }
+
+  &.future { opacity: 0.5; }
+
+  .event-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem; }
+  h3 { font-size: 1rem; font-weight: 600; margin: 0; }
+  .event-date { font-size: 0.75rem; color: $slate; font-weight: 500; }
+  .event-desc { font-size: 0.9rem; color: $slate; line-height: 1.4; margin: 0; }
+}
+
+// --- SIDEBAR ---
+.tracker-sidebar {
+  display: flex; flex-direction: column; gap: 1.5rem;
+  
+  h3 { font-family: $font-display; font-size: 1.1rem; font-weight: 700; color: $midnight; margin-bottom: 1rem; }
+  p { font-size: 0.9rem; color: $slate; line-height: 1.5; margin-bottom: 1.5rem; }
+}
+
+.contact-methods {
+  display: flex; flex-direction: column; gap: 0.75rem;
+  .contact-item {
+    display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: $midnight; font-size: 0.9rem; font-weight: 500;
+    lucide-icon { color: $primary; }
+    &:hover { color: $primary; }
+  }
+}
+
+.info-alert {
+  background: #f0f9ff; border-color: #bae6fd;
+  display: flex; gap: 1rem;
+  .alert-content {
+    h4 { font-size: 0.9rem; font-weight: 700; color: #0369a1; margin-bottom: 0.4rem; }
+    p { font-size: 0.85rem; color: #075985; margin: 0; }
+  }
+}
+
+.tracker-footer {
+  padding: 1.5rem 0; border-top: 1px solid $border; margin-top: 2rem;
+  .btn-back { background: none; border: none; color: $slate; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: 600; &:hover { color: $primary; } }
+}
+
+@media (max-width: 768px) {
+  .tracker-main { grid-template-columns: 1fr; }
+  .tracker-header { padding: 2rem 1.5rem; }
+}
