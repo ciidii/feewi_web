@@ -17,7 +17,7 @@ export class EnrollmentPublicService {
   private http = inject(HttpClient);
   private tenantContext = inject(TenantContextService);
   
-  private readonly baseUrl = '/enrollment/api/v1/public/applications';
+  private readonly baseUrl = 'http://localhost:8080/enrollment/api/v1/public/applications';
 
   /**
    * Helper pour construire les headers avec le X-Tenant-Id
@@ -57,10 +57,10 @@ export class EnrollmentPublicService {
   }
 
   /**
-   * Mettre à jour les responsables (Uniquement en DRAFT)
+   * Mettre à jour les informations du tuteur principal (Uniquement en DRAFT)
    */
-  updateGuardians(applicationId: string, guardians: Guardian[]): Observable<AdmissionApplication> {
-    return this.http.patch<AdmissionApplication>(`${this.baseUrl}/${applicationId}/guardians`, guardians);
+  updateGuardians(applicationId: string, guardian: Guardian): Observable<AdmissionApplication> {
+    return this.http.patch<AdmissionApplication>(`${this.baseUrl}/${applicationId}/guardians`, guardian);
   }
 
   /**

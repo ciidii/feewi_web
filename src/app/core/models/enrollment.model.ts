@@ -14,25 +14,24 @@ export type AdmissionType = 'NEW' | 'RE_ENROLL';
 export interface Candidate {
   firstName: string;
   lastName: string;
+  gender: 'MALE' | 'FEMALE';
   birthDate: string;
-  gender: 'M' | 'F';
+  birthPlace: string;
   nationality?: string;
   previousSchool?: string;
-  requestedLevelId: string;
-  requestedClassId?: string;
 }
 
 /**
  * Informations sur les responsables (parents/tuteurs)
  */
 export interface Guardian {
-  role: string; // Père, Mère, Tuteur, etc.
-  fullName: string;
-  phone: string;
+  firstName: string;
+  lastName: string;
   email?: string;
+  phone: string;
   profession?: string;
-  address: string;
-  isPrimary: boolean;
+  relation: 'FATHER' | 'MOTHER' | 'GUARDIAN' | 'OTHER';
+  address: string
 }
 
 /**
@@ -68,12 +67,12 @@ export interface AdmissionApplication {
   status: AdmissionStatus;
   academicYearId: string;
   tenantId: string;
-  
+
   candidate: Candidate;
   guardians: Guardian[];
   documents: RequiredDocument[];
   assessment?: Assessment;
-  
+
   createdAt: string;
   updatedAt: string;
   submittedAt?: string;
@@ -84,10 +83,11 @@ export interface AdmissionApplication {
  */
 
 export interface ApplicationCreateRequest {
+  tenantId: string;
   type: 'NEW';
   academicYearId: string;
   levelId: string;
-  filiereId?: string;
+  filiereId?: string | null;
 }
 
 export interface ReEnrollRequest {

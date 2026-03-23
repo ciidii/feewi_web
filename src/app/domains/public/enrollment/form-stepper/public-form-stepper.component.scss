@@ -122,6 +122,13 @@ $shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   &.highlight { border-color: $primary; background: rgba(37, 99, 235, 0.02); }
 }
 
+.input-hint {
+  font-size: 0.75rem;
+  color: $slate;
+  margin-top: 0.4rem;
+  font-style: italic;
+}
+
 // --- UPLOAD ---
 .upload-grid {
   display: flex;
