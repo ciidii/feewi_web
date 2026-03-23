@@ -8,10 +8,17 @@
       <p class="hero-desc">Rejoignez une communauté éducative d'excellence. Notre processus d'admission est simple, transparent et 100% en ligne.</p>
       
       <div class="action-group">
-        <button class="btn-primary-lg" routerLink="../form-stepper">
-          Commencer mon inscription <lucide-icon [name]="ArrowRight" [size]="20"></lucide-icon>
-        </button>
-        <button class="btn-outline-lg">Consulter nos tarifs</button>
+        @if (hasActiveSession()) {
+          <button class="btn-primary-lg" [routerLink]="['../tracker', activeSession()?.reference]">
+            Reprendre mon dossier <lucide-icon [name]="ArrowRight" [size]="20"></lucide-icon>
+          </button>
+          <button class="btn-outline-lg" routerLink="../form-stepper">Nouvelle inscription</button>
+        } @else {
+          <button class="btn-primary-lg" routerLink="../form-stepper">
+            Commencer mon inscription <lucide-icon [name]="ArrowRight" [size]="20"></lucide-icon>
+          </button>
+          <button class="btn-outline-lg">Consulter nos tarifs</button>
+        }
       </div>
 
       <div class="hero-stats">

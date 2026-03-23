@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { LucideAngularModule, Calendar, Clock, ArrowRight, CheckCircle, Info, Mail, ShieldCheck } from 'lucide-angular';
 import { TenantContextService } from '../../../../core/services/tenant-context.service';
+import { AdmissionSessionService } from '../../../../core/services/admission-session.service';
 
 export type WindowStatus = 'TEASING' | 'OPEN' | 'CLOSED';
 
@@ -15,7 +16,11 @@ export type WindowStatus = 'TEASING' | 'OPEN' | 'CLOSED';
 })
 export class PublicLandingComponent implements OnInit, OnDestroy {
   private tenantContext = inject(TenantContextService);
+  private sessionService = inject(AdmissionSessionService);
+  
   tenant = this.tenantContext.activeTenant;
+  activeSession = this.sessionService.currentSession;
+  hasActiveSession = this.sessionService.hasActiveSession;
 
   // État de la période d'admission (Mocké pour la démo)
   status = signal<WindowStatus>('OPEN');
