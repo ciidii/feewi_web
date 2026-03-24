@@ -32,7 +32,8 @@
           </div>
 
           <!-- Carte de contenu -->
-          <div class="flex-1 bg-white rounded-xl border border-slate-200 p-5 mb-2 shadow-sm hover:shadow-md transition-all"
+          <div class="flex-1 bg-white rounded-xl border border-slate-200 p-5 mb-2 shadow-sm hover:shadow-md transition-all cursor-pointer"
+               (click)="onRowClick.emit(item)"
                [class.bg-primary-50/20]="isSelected(item.id)"
           [class.ring-1]="isSelected(item.id)"
           [class.ring-primary-500]="isSelected(item.id)">

@@ -101,8 +101,8 @@ export class StructureConfigComponent implements OnInit {
   }
 
   // Navigation vers le Cockpit du Cycle (Drill-down)
-  goToCycle(id: string) {
-    this.router.navigate(['/classes/cycles', id]);
+  goToCycle(id: string | number) {
+    this.router.navigate(['/classes/cycles', id.toString()]);
   }
 
   // --- ACTIONS CYCLES (Super Admin uniquement) ---

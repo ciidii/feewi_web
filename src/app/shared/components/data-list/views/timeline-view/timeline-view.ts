@@ -56,6 +56,9 @@ export class TimelineViewComponent {
   /** Basculer la sélection d'un élément */
   toggleRow = output<string | number>();
 
+  /** Émettre un clic sur l'élément (Action primaire) */
+  onRowClick = output<TableRow>();
+
   /** Émettre une action */
   onAction = output<{ actionId: string, row: TableRow }>();
 

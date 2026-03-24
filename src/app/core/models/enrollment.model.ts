@@ -9,7 +9,24 @@ export type AdmissionStatus = 'DRAFT' | 'SUBMITTED' | 'VERIFIED' | 'TESTING' | '
 export type AdmissionType = 'NEW' | 'RE_ENROLL';
 
 /**
- * Informations d'identité du candidat
+ * Payload pour la mise à jour du candidat (PATCH /candidate)
+ */
+export interface CandidateUpdateRequest {
+  info: {
+    firstName: string;
+    lastName: string;
+    gender: 'MALE' | 'FEMALE';
+    birthDate: string;
+    birthPlace: string;
+    nationality?: string;
+    previousSchool?: string;
+  };
+  levelId: string;
+  filiereId?: string | null;
+}
+
+/**
+ * Informations d'identité du candidat (pour l'affichage)
  */
 export interface Candidate {
   firstName: string;
@@ -86,8 +103,15 @@ export interface ApplicationCreateRequest {
   tenantId: string;
   type: 'NEW';
   academicYearId: string;
-  levelId: string;
+  levelId?: string | null;
   filiereId?: string | null;
+  primaryGuardian: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    relation: 'FATHER' | 'MOTHER' | 'GUARDIAN' | 'OTHER';
+  }
 }
 
 export interface ReEnrollRequest {

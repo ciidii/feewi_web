@@ -3,15 +3,15 @@
     *ngFor="let row of data()"
     class="feewi-card group"
     [class.selected]="isSelected(row.id)"
-    (click)="toggleRow.emit(row.id)"
+    (click)="onRowClick.emit(row)"
   >
     <!-- Zone de sélection (Top Right) -->
-    <div class="selection-zone">
-      <div *ngIf="isSelected(row.id)" class="check-badge">
+    <div class="selection-zone" (click)="$event.stopPropagation(); toggleRow.emit(row.id)">
+      <div *ngIf="isSelected(row.id)" class="check-badge animate-in zoom-in duration-200">
         <lucide-icon [name]="Check" class="w-4 h-4"></lucide-icon>
       </div>
-      <div *ngIf="!isSelected(row.id)" class="opacity-0 group-hover:opacity-100 transition-opacity">
-        <div class="w-6 h-6 rounded-lg border-2 border-slate-300 bg-white/50 backdrop-blur-sm"></div>
+      <div *ngIf="!isSelected(row.id)" class="opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-110">
+        <div class="w-6 h-6 rounded-lg border-2 border-slate-300 bg-white/80 backdrop-blur-sm hover:border-primary transition-colors shadow-sm"></div>
       </div>
     </div>
 

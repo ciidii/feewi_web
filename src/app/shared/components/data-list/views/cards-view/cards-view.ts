@@ -64,6 +64,9 @@ export class CardsViewComponent {
   /** Basculer la sélection d'une carte */
   toggleRow = output<string | number>();
 
+  /** Émettre un clic sur la ligne (Action primaire) */
+  onRowClick = output<TableRow>();
+
   /** Émettre une action */
   onAction = output<{ actionId: string, row: TableRow }>();
 

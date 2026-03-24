@@ -41,6 +41,7 @@
       [actions]="cycleActions()"
       defaultView="cards"
       (onAction)="handleCycleAction($event)"
+      (onRowClick)="goToCycle($event.id)"
     ></app-data-list>
 
     <!-- État vide (géré par DataList, mais on peut personnaliser si besoin) -->

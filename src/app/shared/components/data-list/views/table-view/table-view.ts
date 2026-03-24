@@ -58,6 +58,9 @@ export class TableViewComponent {
   /** Basculer la sélection d'une ligne */
   toggleRow = output<string | number>();
 
+  /** Émettre un clic sur la ligne (Action primaire) */
+  onRowClick = output<TableRow>();
+
   /** Basculer la sélection de toutes les lignes */
   toggleAll = output<void>();
 

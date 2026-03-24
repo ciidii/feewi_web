@@ -4,6 +4,7 @@ export interface AdmissionSession {
   reference: string;
   accessCode: string;
   studentName?: string;
+  currentStep?: string;
   lastUpdated: number;
 }
 
@@ -13,10 +14,8 @@ export interface AdmissionSession {
 export class AdmissionSessionService {
   private readonly STORAGE_KEY = 'feewi_admission_session';
 
-  // Signal pour l'état de la session (réactivité immédiate dans l'UI)
   private _currentSession = signal<AdmissionSession | null>(null);
   
-  // Exposition en lecture seule
   readonly currentSession = this._currentSession.asReadonly();
   readonly hasActiveSession = computed(() => this._currentSession() !== null);
 
@@ -24,49 +23,57 @@ export class AdmissionSessionService {
     this.loadSessionFromStorage();
   }
 
-  /**
-   * Sauvegarder les identifiants de session dans le LocalStorage
-   */
-  saveSession(reference: string, accessCode: string, studentName?: string): void {
+  saveSession(reference: string, accessCode: string, studentName?: string, currentStep?: string): void {
+    console.log('💾 Tentative de sauvegarde session:', { reference, currentStep });
     const session: AdmissionSession = {
       reference,
       accessCode,
       studentName,
+      currentStep,
       lastUpdated: Date.now()
     };
     
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(session));
-    this._currentSession.set(session);
+    try {
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(session));
+      this._currentSession.set(session);
+      console.log('✅ Session sauvegardée avec succès dans LocalStorage');
+    } catch (e) {
+      console.error('❌ Échec de l\'écriture dans LocalStorage:', e);
+    }
   }
 
-  /**
-   * Récupérer la session actuelle
-   */
+  updateStep(step: string): void {
+    const session = this._currentSession();
+    if (session) {
+      this.saveSession(session.reference, session.accessCode, session.studentName, step);
+    }
+  }
+
   getSession(): AdmissionSession | null {
-    return this._currentSession();
+    const session = this._currentSession();
+    console.log('🔍 Récupération session actuelle:', session);
+    return session;
   }
 
-  /**
-   * Nettoyer la session (à appeler après une soumission finale réussie ou abandon)
-   */
   clearSession(): void {
+    console.warn('🗑️ Nettoyage de la session d\'admission');
     localStorage.removeItem(this.STORAGE_KEY);
     this._currentSession.set(null);
   }
 
-  /**
-   * Charger la session au démarrage du service
-   */
   private loadSessionFromStorage(): void {
     try {
       const stored = localStorage.getItem(this.STORAGE_KEY);
       if (stored) {
+        console.log('📦 Données brutes trouvées dans LocalStorage:', stored);
         const session = JSON.parse(stored) as AdmissionSession;
-        // Optionnel : On pourrait vérifier ici si la session n'est pas trop ancienne (ex: > 30 jours)
         this._currentSession.set(session);
+        console.log('✅ Session chargée et synchronisée avec le Signal');
+      } else {
+        console.log('ℹ️ Aucune session existante dans LocalStorage');
       }
     } catch (e) {
-      console.error('Erreur lors de la lecture de la session d\'admission', e);
+      console.error('❌ Erreur lors du parsing de la session stockée:', e);
       this.clearSession();
     }
   }

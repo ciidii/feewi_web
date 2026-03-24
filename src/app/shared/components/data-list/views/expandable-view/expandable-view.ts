@@ -56,6 +56,9 @@ export class ExpandableViewComponent {
   /** Basculer l'expansion d'une ligne */
   toggleExpand = output<string | number>();
 
+  /** Émettre un clic sur la ligne (Action primaire) */
+  onRowClick = output<TableRow>();
+
   /** Émettre une action */
   onAction = output<{ actionId: string, row: TableRow }>();
 

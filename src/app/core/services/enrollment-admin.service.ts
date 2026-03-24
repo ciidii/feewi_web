@@ -13,7 +13,7 @@ import {
 export class EnrollmentAdminService {
   private http = inject(HttpClient);
   
-  private readonly baseUrl = '/enrollment/api/v1/admin';
+  private readonly baseUrl = 'http://localhost:8080/enrollment/api/v1/admin';
 
   /**
    * Lister tous les dossiers d'admission du tenant actuel

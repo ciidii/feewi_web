@@ -175,6 +175,7 @@
       (toggleRow)="toggleRow($event)"
       (toggleExpand)="toggleExpand($event)"
       (onAction)="onAction.emit($event)"
+      (onRowClick)="handleRowClick($event)"
     ></app-expandable-view>
 
     <!-- VUE CARTES -->
@@ -186,6 +187,7 @@
       [actions]="actions()"
       (toggleRow)="toggleRow($event)"
       (onAction)="onAction.emit($event)"
+      (onRowClick)="handleRowClick($event)"
     ></app-cards-view>
 
     <!-- VUE TABLEAU -->
@@ -199,6 +201,7 @@
       (toggleAll)="toggleAll()"
       (onAction)="onAction.emit($event)"
       (onSort)="handleSort($event)"
+      (onRowClick)="handleRowClick($event)"
     ></app-table-view>
 
     <!-- VUE TIMELINE -->
@@ -210,6 +213,7 @@
       [actions]="actions()"
       (toggleRow)="toggleRow($event)"
       (onAction)="onAction.emit($event)"
+      (onRowClick)="handleRowClick($event)"
     ></app-timeline-view>
 
     <!-- ÉTAT VIDE -->

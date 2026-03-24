@@ -1,133 +1,147 @@
 # Référence API : Enrollment Service (Admissions)
 
-Ce document détaille les endpoints et le workflow nécessaires pour l'intégration du microservice **Enrollment**.
+Ce document est le contrat d'interface entre le Backend et le Frontend (Angular/Mobile).
 
 ---
 
-## 1. Principes d'Authentification & Multi-tenancy
+## 1. Principes d'Authentification
 
-Le service opère selon deux modes distincts :
-
-### A. Mode Public (Portail Parent)
-*   **Authentification** : Aucune (Anonyme).
-*   **Header Obligatoire** : `X-Tenant-Id` (requis uniquement pour la création initiale du dossier).
-*   **Tracking** : Sécurisé par le couple `Référence` + `AccessCode` (générés à la création).
-
-### B. Mode Admin (Secrétariat / Direction)
-*   **Authentification** : `Authorization: Bearer <JWT>`.
-*   **Tenant Isolation** : Le `tenant_id` est extrait automatiquement du JWT par le backend. Le header `X-Tenant-Id` est ignoré en mode authentifié.
+| Espace | Authentification | Header |
+| :--- | :--- | :--- |
+| **Portail Parent** | Anonyme | `X-Tenant-Id: <ID_ECOLE>` |
+| **Portail Admin** | Bearer Token (JWT) | `Authorization: Bearer <TOKEN>` |
 
 ---
 
-## 2. Workflow du Dossier (Statuts)
+## 2. Cycle de Vie et Endpoints (Step-by-Step)
 
-Le passage d'un état à l'autre est protégé par des règles métier strictes :
+### ÉTAPE 1 : Initialisation (Lead Capture)
+**Le parent crée son dossier en fournissant ses propres coordonnées.**
 
-1.  **`DRAFT`** : Saisie en cours (modifiable).
-2.  **`SUBMITTED`** : Soumis par le parent (verrouillé pour le parent).
-3.  **`VERIFIED`** : Conformité administrative validée par le secrétariat.
-4.  **`TESTING`** : Évaluation pédagogique en cours (notes saisies).
-5.  **`VALIDATED`** : Admission définitive (**Verrou Numérique** : requiert 100% des pièces obligatoires numérisées).
-6.  **`REJECTED`** : Dossier refusé.
-
----
-
-## 3. Endpoints : Portail Parent (Public)
-
-### Créer un nouveau dossier
-`POST /enrollment/api/v1/public/applications`
-*   **Headers** : `X-Tenant-Id: <ID_ECOLE>`
+*   **URL** : `POST /enrollment/api/v1/public/applications`
 *   **Payload** :
     ```json
     {
+      "tenantId": "ecole-excellence",
       "type": "NEW",
       "academicYearId": "uuid",
+      "primaryGuardian": {
+        "firstName": "Ibrahima",
+        "lastName": "Diallo",
+        "email": "ibra.diallo@test.com",
+        "phone": "+221771234567",
+        "relation": "FATHER"
+      }
+    }
+    ```
+
+### ÉTAPE 2 : Informations du Candidat & Niveau
+**Le parent ajoute les informations de l'enfant et choisit le niveau scolaire.**
+
+*   **URL** : `PATCH /enrollment/api/v1/public/applications/{id}/candidate`
+*   **Payload** :
+    ```json
+    {
+      "info": {
+        "firstName": "Samba",
+        "lastName": "Diop",
+        "gender": "MALE",
+        "birthDate": "2016-08-20",
+        "birthPlace": "Saint-Louis",
+        "nationality": "Sénégalaise"
+      },
       "levelId": "uuid",
       "filiereId": "uuid (optionnel)"
     }
     ```
-*   **Réponse** : Retourne l'objet complet avec `reference` et `accessCode`. **Le frontend doit stocker ces deux valeurs pour permettre au parent de revenir sur son dossier.**
 
-### Réinscription (Soft-Enrollment)
-`POST /enrollment/api/v1/public/applications/re-enroll`
-*   **Payload** : `{ "studentId": "uuid", "academicYearId": "uuid", "nextLevelId": "uuid" }`
-*   **Action** : Crée un dossier pré-rempli avec les données existantes.
+### ÉTAPE 3 : Pièces Jointes (Upload)
+**Le parent ou le secrétaire uploade les scans des documents requis.**
 
-### Mettre à jour le Candidat / Tuteur
-`PATCH /enrollment/api/v1/public/applications/{id}/candidate`
-`PATCH /enrollment/api/v1/public/applications/{id}/guardians`
-*   **Note** : Uniquement possible en état `DRAFT`.
+*   **URL** : `POST /enrollment/api/v1/public/applications/{id}/documents/{docCode}`
+*   **Path Variable `{docCode}`** : `EXT` (Extrait), `BUL` (Bulletin), `PHOTO` (Photo).
+*   **Body** : `String` (URL brute du fichier après upload sur le Document Engine).
+*   **Exemple** : `"https://storage.feewi.com/docs/extrait_samba.pdf"`
 
-### Uploader un document
-`POST /enrollment/api/v1/public/applications/{id}/documents/{docCode}`
-*   **Body** : URL du fichier (String brute ou JSON selon stockage).
-*   **docCode** : `EXT`, `BUL`, `PHOTO`, etc.
+### ÉTAPE 4 : Suivi (Tracking)
+**Le parent revient sur son dossier plus tard via son code secret.**
 
-### Suivre l'avancement (Tracker)
-`GET /enrollment/api/v1/public/applications/{reference}/track?accessCode={code}`
-*   **Réponse** : Contient le `status` et un `trackerMessage` localisé pour l'affichage (ex: "Dossier en cours de vérification...").
+*   **URL** : `GET /enrollment/api/v1/public/applications/{reference}/track?accessCode={code}`
+*   **Response Body (TS)** : `ApplicationResponse`
 
-### Soumission finale
-`POST /enrollment/api/v1/public/applications/{id}/submit`
-*   **Action** : Passe le dossier de `DRAFT` à `SUBMITTED`.
+### ÉTAPE 5 : Soumission Finale
+**Le parent valide l'envoi définitif du dossier.**
+
+*   **URL** : `POST /enrollment/api/v1/public/applications/{id}/submit`
+*   **Action** : Le dossier passe de `DRAFT` à `SUBMITTED`.
 
 ---
 
-## 4. Endpoints : Back-office (Admin)
+## 3. Endpoints Administration (Secrétariat & Direction)
 
-### Lister les dossiers
-`GET /enrollment/api/v1/admin/applications`
-*   **Scope** : Retourne tous les dossiers du tenant actuel.
+### Liste des dossiers à traiter
+*   **URL** : `GET /enrollment/api/v1/admin/applications`
+*   **Response Body** : `List<AdminApplicationResponse>`
 
-### Réception physique de documents
-`PATCH /enrollment/api/v1/admin/applications/{id}/documents/{docCode}/receive`
-*   **Action** : Marque une pièce comme reçue en main propre au guichet.
+### Réception physique (Guichet)
+*   **URL** : `PATCH /enrollment/api/v1/admin/applications/{id}/documents/{docCode}/receive`
+*   **Action** : Marque le document comme `PHYSICAL_RECEIVED`.
 
-### Valider la conformité (Compliance)
-`PATCH /enrollment/api/v1/admin/applications/{id}/verify`
-*   **Action** : Passe à `VERIFIED`. Échoue si des pièces obligatoires manquent (physiquement ou numériquement).
-
-### Saisir l'évaluation pédagogique
-`PATCH /enrollment/api/v1/admin/applications/{id}/assessment`
-*   **Payload** :
+### Évaluation Pédagogique
+*   **URL** : `PATCH /enrollment/api/v1/admin/applications/{id}/assessment`
+*   **Request Body (TS)** : `Assessment`
+*   **Exemple JSON** :
     ```json
     {
-      "grades": { "Maths": 15, "Français": 12 },
-      "comments": "Très bon niveau",
+      "grades": { "Français": 14, "Maths": 16 },
+      "comments": "Excellent profil",
       "decision": "ADMITTED",
       "recommendedLevelId": "uuid"
     }
     ```
 
----
-
-## 5. Endpoints : Direction (Décision)
-
-### Validation Finale
-`PATCH /enrollment/api/v1/admin/direction/applications/{id}/validate`
-*   **Vérification** : Déclenche le **Verrou Numérique**. Si un document obligatoire n'est pas uploadé (même s'il est reçu physiquement), l'admission est bloquée.
+### Validation Finale (Direction)
+*   **URL** : `PATCH /enrollment/api/v1/admin/direction/applications/{id}/validate`
+*   **Vérification** : Échoue si des documents obligatoires ne sont pas `UPLOADED`.
 
 ---
 
-## 6. Gestion de la Configuration
+## 4. Interfaces TypeScript (Modèles Angular)
 
-`GET /enrollment/api/v1/admin/config` : Récupère les réglages de l'école.
-`PUT /enrollment/api/v1/admin/config` : Définit la checklist des documents et le schéma du formulaire.
+```typescript
+export interface ApplicationResponse {
+  id: string;
+  reference: string;
+  accessCode?: string;
+  status: 'DRAFT' | 'SUBMITTED' | 'VERIFIED' | 'TESTING' | 'VALIDATED' | 'REJECTED';
+  candidate: CandidateInfo;
+  primaryGuardian: GuardianInfo;
+  documents: RequiredDocument[];
+  trackerMessage: string;
+}
 
----
+export interface GuardianInfo {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  relation: 'FATHER' | 'MOTHER' | 'GUARDIAN';
+  address?: string;
+}
 
-## 7. Gestion des Erreurs (Format Standard)
+export interface CandidateInfo {
+  firstName: string;
+  lastName: string;
+  gender: 'MALE' | 'FEMALE';
+  birthDate: string; // YYYY-MM-DD
+  birthPlace?: string;
+}
 
-Toutes les erreurs renvoient un objet JSON :
-```json
-{
-  "message": "Libellé de l'erreur exploitable par le frontend",
-  "status": 400,
-  "timestamp": "2026-03-23T08:00:00Z",
-  "path": "/api/v1/..."
+export interface RequiredDocument {
+  code: string;
+  name: string;
+  mandatory: boolean;
+  status: 'MISSING' | 'PHYSICAL_RECEIVED' | 'UPLOADED';
+  fileUrl?: string;
 }
 ```
-*   **400 Bad Request** : Données invalides ou document inconnu.
-*   **403 Forbidden** : Token invalide ou droits insuffisants.
-*   **409 Conflict** : Tentative de modification d'un dossier verrouillé.
-*   **404 Not Found** : Référence ou dossier introuvable.

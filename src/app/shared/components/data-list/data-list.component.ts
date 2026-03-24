@@ -131,6 +131,9 @@ export class DataListComponent {
   /** Événement d'action dynamique */
   onAction = output<{ actionId: string, row: TableRow }>();
 
+  /** Clic sur une ligne (Action primaire de navigation) */
+  onRowClick = output<TableRow>();
+
   /** Actions groupées */
   onBulkValidate = output<(string | number)[]>();
 
@@ -279,6 +282,11 @@ export class DataListComponent {
     }
     return pages;
   });
+
+  /** Gérer le clic sur une ligne (Relais typé) */
+  handleRowClick(row: TableRow): void {
+    this.onRowClick.emit(row);
+  }
 
   // ===========================================
   // MÉTHODES DE SÉLECTION

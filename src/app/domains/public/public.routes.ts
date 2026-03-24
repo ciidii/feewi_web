@@ -1,10 +1,12 @@
 import { Routes } from '@angular/router';
 import { PublicEnrollmentLayoutComponent } from './enrollment/layout/public-enrollment-layout.component';
+import { AuthLayoutComponent } from './auth/layout/auth-layout.component';
 
 export const PUBLIC_ROUTES: Routes = [
-  // 1. Flux Authentification (Login, etc.)
+  // 1. Flux Authentification (Enveloppé dans AuthLayout)
   {
     path: 'auth',
+    component: AuthLayoutComponent,
     children: [
       {
         path: 'login',
@@ -13,6 +15,17 @@ export const PUBLIC_ROUTES: Routes = [
       {
         path: 'forgot-password',
         loadComponent: () => import('./auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent)
+      },
+      // Redirection par défaut : /auth -> /auth/login
+      {
+        path: '',
+        redirectTo: 'login',
+        pathMatch: 'full'
+      },
+      // Catch-all pour le module auth : /auth/inconnu -> /auth/login
+      {
+        path: '**',
+        redirectTo: 'login'
       }
     ]
   },
@@ -39,5 +52,12 @@ export const PUBLIC_ROUTES: Routes = [
         loadComponent: () => import('./enrollment/soft-enrollment/public-soft-enrollment.component').then(m => m.SoftEnrollmentComponent)
       }
     ]
+  },
+
+  // 3. Redirection globale racine du module public
+  {
+    path: '',
+    redirectTo: 'enrollment',
+    pathMatch: 'full'
   }
 ];
