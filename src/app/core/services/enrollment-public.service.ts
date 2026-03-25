@@ -48,10 +48,10 @@ export class EnrollmentPublicService {
     return this.http.patch<AdmissionApplication>(`${this.baseUrl}/${applicationId}/guardians`, guardian);
   }
 
-  uploadDocument(applicationId: string, docCode: string, fileUrl: string): Observable<AdmissionApplication> {
+  uploadDocument(applicationId: string, docCode: string, fileId: string): Observable<AdmissionApplication> {
     return this.http.post<AdmissionApplication>(
       `${this.baseUrl}/${applicationId}/documents/${docCode}`, 
-      `"${fileUrl}"`, 
+      JSON.stringify(fileId), 
       { headers: new HttpHeaders().set('Content-Type', 'application/json') }
     );
   }

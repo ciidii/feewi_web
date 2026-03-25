@@ -1,10 +1,11 @@
 import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { LucideAngularModule, User, Users, FileText, Sparkles, CheckCircle, ArrowLeft, ArrowRight, Upload, X, GraduationCap, RefreshCw } from 'lucide-angular';
+import { LucideAngularModule, User, Users, FileText, Sparkles, CheckCircle, ArrowLeft, ArrowRight, Upload, X, GraduationCap, RefreshCw, Eye } from 'lucide-angular';
 import { firstValueFrom } from 'rxjs';
 
 import { EnrollmentPublicService } from '../../../../core/services/enrollment-public.service';
+import { DocumentEngineService } from '../../../../core/services/document-engine.service';
 import { AdmissionSessionService } from '../../../../core/services/admission-session.service';
 import { AcademicService } from '../../../../core/services/academic.service';
 import { TenantContextService } from '../../../../core/services/tenant-context.service';
@@ -23,6 +24,7 @@ export type StepperStep = 'GUARDIAN' | 'STUDENT' | 'DOCS' | 'REVIEW';
 })
 export class PublicFormStepperComponent implements OnInit {
   private enrollmentService = inject(EnrollmentPublicService);
+  private documentService = inject(DocumentEngineService);
   private sessionService = inject(AdmissionSessionService);
   private academicService = inject(AcademicService);
   private tenantContext = inject(TenantContextService);
@@ -245,13 +247,48 @@ export class PublicFormStepperComponent implements OnInit {
   async onFileSelected(docCode: string, event: any) {
     const file = event.target.files[0];
     if (!file || !this.currentApplicationId()) return;
+
     this.uploadingDocCode.set(docCode);
     try {
-      const mockFileUrl = `https://cdn.feewi.com/mock/${this.currentApplicationId()}/${docCode}_${file.name}`;
-      const updatedApp = await firstValueFrom(this.enrollmentService.uploadDocument(this.currentApplicationId()!, docCode, mockFileUrl));
-      if (updatedApp) this.application.set(updatedApp);
+      // 1. Demander le ticket d'upload
+      const ticket = await firstValueFrom(this.documentService.getUploadTicket({
+        fileName: file.name,
+        contentType: file.type,
+        serviceOrigin: 'enrollment'
+      }));
+
+      // 2. Upload direct vers le stockage (S3/MinIO)
+      await this.documentService.uploadFileDirectly(ticket.uploadUrl, file);
+
+      // 3. Liaison avec le dossier d'admission métier (via le fileId)
+      await firstValueFrom(
+        this.enrollmentService.uploadDocument(this.currentApplicationId()!, docCode, ticket.fileId)
+      );
+
+      // 4. Rafraîchissement SYSTÉMATIQUE via trackApplication pour garantir la synchronisation UI
+      const session = this.sessionService.getSession();
+      if (session) {
+        const freshApp = await firstValueFrom(
+          this.enrollmentService.trackApplication(session.reference, session.accessCode)
+        );
+        this.application.set(freshApp);
+      }
+    } catch (e) {
+      console.error(`Échec de l'upload pour ${docCode}:`, e);
+      alert('Erreur lors de l\'envoi du fichier. Veuillez réessayer.');
     } finally {
       this.uploadingDocCode.set(null);
+    }
+  }
+
+  async viewDocument(fileId: string | undefined) {
+    if (!fileId) return;
+    try {
+      const viewUrl = await firstValueFrom(this.documentService.getViewUrl(fileId));
+      window.open(viewUrl, '_blank');
+    } catch (e) {
+      console.error('Impossible de générer l\'url de vue:', e);
+      alert('Erreur lors de l\'ouverture du document.');
     }
   }
 
@@ -262,8 +299,16 @@ export class PublicFormStepperComponent implements OnInit {
     try {
       const finalApp = await firstValueFrom(this.enrollmentService.submitApplication(id));
       if (finalApp) {
+        const reference = finalApp.reference;
+        const accessCode = finalApp.accessCode;
+        
+        // On efface la session de saisie
         this.sessionService.clearSession();
-        this.router.navigate(['/enrollment/tracker', finalApp.reference]);
+        
+        // On redirige vers le tracker en passant le code d'accès dans l'URL pour que la page puisse s'afficher
+        this.router.navigate(['/enrollment/tracker', reference], { 
+          queryParams: { accessCode: accessCode } 
+        });
       }
     } finally {
       this.isSubmitting.set(false);
@@ -293,4 +338,5 @@ export class PublicFormStepperComponent implements OnInit {
   readonly Upload = Upload;
   readonly X = X;
   readonly RefreshCw = RefreshCw;
+  readonly Eye = Eye;
 }

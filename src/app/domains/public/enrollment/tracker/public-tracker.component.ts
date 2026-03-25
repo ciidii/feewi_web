@@ -9,6 +9,7 @@ import { ActivatedRoute } from '@angular/router';
 import { EnrollmentPublicService } from '../../../../core/services/enrollment-public.service';
 import { AdmissionSessionService } from '../../../../core/services/admission-session.service';
 import { AdmissionApplication } from '../../../../core/models/enrollment.model';
+import {firstValueFrom} from 'rxjs';
 
 @Component({
   selector: 'app-public-tracker',
@@ -36,10 +37,13 @@ export class PublicTrackerComponent {
    */
   async loadApplicationData() {
     const reference = this.route.snapshot.paramMap.get('id');
+    const queryAccessCode = this.route.snapshot.queryParamMap.get('accessCode');
     const session = this.sessionService.getSession();
 
+    const accessCode = queryAccessCode || (session?.reference === reference ? session?.accessCode : null);
+
     // Pour tracker, on a besoin du accessCode (sécurité)
-    if (!reference || !session || session.reference !== reference) {
+    if (!reference || !accessCode) {
       this.error.set('Session introuvable ou invalide. Veuillez vous reconnecter.');
       this.isLoading.set(false);
       return;
@@ -47,7 +51,8 @@ export class PublicTrackerComponent {
 
     this.isLoading.set(true);
     try {
-      const res = await this.enrollmentService.trackApplication(reference, session.accessCode).toPromise();
+      // Utilisation de firstValueFrom pour être cohérent avec le reste du projet
+      const res = await firstValueFrom(this.enrollmentService.trackApplication(reference, accessCode));
       if (res) {
         this.application.set(res);
       }
