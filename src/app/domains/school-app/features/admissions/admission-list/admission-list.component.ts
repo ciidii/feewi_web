@@ -1,9 +1,13 @@
-import { Component, inject, signal, ViewEncapsulation } from '@angular/core';
+import { Component, inject, signal, ViewEncapsulation, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { LucideAngularModule, Filter, Download, Layers, Clock, ShieldCheck, UserCheck, Eye, CheckCircle, XCircle } from 'lucide-angular';
+import { LucideAngularModule, Filter, Download, Layers, Clock, ShieldCheck, UserCheck, Eye, CheckCircle, XCircle, RefreshCw } from 'lucide-angular';
+import { firstValueFrom } from 'rxjs';
+
 import { DataListComponent } from '../../../../../shared/components/data-list/data-list.component';
 import { RowAction, TabItem, TableRow } from '../../../../../shared/models/data-list.models';
+import { EnrollmentAdminService } from '../../../../../core/services/enrollment-admin.service';
+import { AdmissionApplication, AdmissionStatus } from '../../../../../core/models/enrollment.model';
 
 @Component({
   selector: 'app-admissions',
@@ -13,103 +17,118 @@ import { RowAction, TabItem, TableRow } from '../../../../../shared/models/data-
   styleUrl: './admission-list.component.scss',
   encapsulation: ViewEncapsulation.None
 })
-export class AdmissionsComponent {
+export class AdmissionsComponent implements OnInit {
   private router = inject(Router);
+  private enrollmentAdminService = inject(EnrollmentAdminService);
 
   readonly Filter = Filter;
   readonly Download = Download;
   readonly Layers = Layers;
+  readonly RefreshCw = RefreshCw;
 
+  // --- ÉTATS ---
   activeTab = signal('Tous');
-  totalAdmissions = signal(142);
+  rawApplications = signal<AdmissionApplication[]>([]);
+  isLoading = signal(false);
 
-  // Configuration des actions dynamiques pour les admissions
+  // --- LOGIQUE DE FILTRAGE ---
+  filteredAdmissions = computed(() => {
+    const apps = this.rawApplications();
+    const tab = this.activeTab();
+
+    let filtered = apps;
+    if (tab === 'À Vérifier') filtered = apps.filter(a => a.status === 'SUBMITTED');
+    if (tab === 'À Évaluer') filtered = apps.filter(a => a.status === 'VERIFIED');
+    if (tab === 'En Décision') filtered = apps.filter(a => ['TESTING', 'WAITLIST'].includes(a.status));
+
+    return filtered.map(app => this.mapToTableRow(app));
+  });
+
+  // --- CONFIGURATION UI ---
   readonly admissionActions: RowAction[] = [
     { id: 'view', label: 'Voir le dossier', icon: Eye, type: 'primary' },
     { id: 'validate', label: 'Approuver', icon: CheckCircle, type: 'success' },
     { id: 'reject', label: 'Rejeter', icon: XCircle, type: 'danger' }
   ];
 
-  admissionTabs: TabItem[] = [
-    { label: 'Tous', icon: Layers, count: 142 },
-    { label: 'À Vérifier', icon: Clock, count: 24 }, // SUBMITTED
-    { label: 'À Évaluer', icon: ShieldCheck, count: 86 }, // VERIFIED
-    { label: 'En Décision', icon: UserCheck, count: 32 } // TESTING / WAITLIST
-  ];
+  admissionTabs = computed<TabItem[]>(() => {
+    const apps = this.rawApplications();
+    return [
+      { label: 'Tous', icon: Layers, count: apps.length },
+      { label: 'À Vérifier', icon: Clock, count: apps.filter(a => a.status === 'SUBMITTED').length },
+      { label: 'À Évaluer', icon: ShieldCheck, count: apps.filter(a => a.status === 'VERIFIED').length },
+      { label: 'En Décision', icon: UserCheck, count: apps.filter(a => ['TESTING', 'WAITLIST'].includes(a.status)).length }
+    ];
+  });
 
-  admissions = signal<TableRow[]>([
-    {
-      id: 1,
-      title: 'Jean Dupont',
-      subtitle: 'Niveau : 6ème A • Dossier #ADM-2024-001',
-      avatarLabel: 'JD',
-      date: `Aujourd'hui`,
-      badges: [
-        { label: 'Paiement OK', type: 'success' }, 
-        { label: 'Scan Check : 100%', type: 'info' }
-      ]
-    },
-    {
-      id: 2,
-      title: 'Marie Curie',
-      subtitle: 'Niveau : 3ème B • Dossier #ADM-2024-002',
-      avatarLabel: 'MC',
-      date: 'Hier',
-      badges: [
-        { label: 'À Numériser', type: 'warning' },
-        { label: 'Paiement OK', type: 'success' }
-      ]
-    },
-    {
-      id: 3,
-      title: 'Abdoulaye Diallo',
-      subtitle: 'Niveau : Terminale S • Dossier #ADM-2024-003',
-      avatarLabel: 'AD',
-      date: '24 Fév',
-      badges: [
-        { label: 'Dossier Incomplet', type: 'danger' },
-        { label: 'Test requis', type: 'warning' }
-      ]
-    },
-    {
-      id: 4,
-      title: 'Sophie Martin',
-      subtitle: 'Niveau : CP • Dossier #ADM-2024-004',
-      avatarLabel: 'SM',
-      date: '20 Fév',
-      badges: [
-        { label: 'Validé', type: 'success' },
-        { label: 'Réinscription', type: 'info' }
-      ]
-    },
-    {
-      id: 5,
-      title: 'Thomas Anderson',
-      subtitle: 'Niveau : Terminale S • Dossier #ADM-2024-005',
-      avatarLabel: 'TA',
-      date: '18 Fév',
-      badges: [
-        { label: 'Waitlist', type: 'warning' }
-      ]
+  async ngOnInit() {
+    await this.loadAdmissions();
+  }
+
+  async loadAdmissions() {
+    this.isLoading.set(true);
+    try {
+      const data = await firstValueFrom(this.enrollmentAdminService.getApplications());
+      this.rawApplications.set(data || []);
+    } catch (e) {
+      console.error('Erreur lors du chargement des admissions:', e);
+    } finally {
+      this.isLoading.set(false);
     }
-  ]);
+  }
+
+  private mapToTableRow(app: AdmissionApplication): TableRow {
+    const candidateName = `${app.candidate?.firstName || ''} ${app.candidate?.lastName || ''}`.trim() || 'Candidat inconnu';
+    const initials = (app.candidate?.firstName?.[0] || '') + (app.candidate?.lastName?.[0] || '');
+
+    return {
+      id: app.id,
+      title: candidateName,
+      subtitle: `Dossier #${app.reference} • ${app.type === 'RE_ENROLL' ? 'Réinscription' : 'Nouvelle Admission'}`,
+      avatarLabel: initials || '??',
+      date: new Date(app.createdAt).toLocaleDateString(),
+      badges: [
+        { label: this.getStatusLabel(app.status), type: this.getStatusType(app.status) },
+        { label: `${app.documents.filter(d => d.status === 'UPLOADED').length}/${app.documents.length} docs`, type: 'info' }
+      ]
+    };
+  }
+
+  private getStatusLabel(status: AdmissionStatus): string {
+    const labels: Record<AdmissionStatus, string> = {
+      'DRAFT': 'Brouillon',
+      'SUBMITTED': 'Soumis',
+      'VERIFIED': 'Vérifié',
+      'TESTING': 'Évaluation',
+      'WAITLIST': 'Attente',
+      'VALIDATED': 'Admis',
+      'REJECTED': 'Refusé',
+      'CANCELLED': 'Annulé'
+    };
+    return labels[status] || status;
+  }
+
+  private getStatusType(status: AdmissionStatus): 'success' | 'warning' | 'danger' | 'info' | 'primary' {
+    switch (status) {
+      case 'VALIDATED': return 'success';
+      case 'SUBMITTED': return 'primary';
+      case 'VERIFIED': return 'info';
+      case 'TESTING': case 'WAITLIST': return 'warning';
+      case 'REJECTED': case 'CANCELLED': return 'danger';
+      default: return 'primary';
+    }
+  }
 
   onTabChange(tab: string) {
     this.activeTab.set(tab);
-    console.log(`Changement d'onglet :`, tab);
   }
 
   handleAction(event: { actionId: string, row: TableRow }) {
-    switch (event.actionId) {
-      case 'view':
-        this.router.navigate(['/admissions', event.row.id]);
-        break;
-      case 'validate':
-        console.log('Validation du dossier', event.row.id);
-        break;
-      case 'reject':
-        console.log('Rejet du dossier', event.row.id);
-        break;
+    if (event.actionId === 'view') {
+      this.router.navigate(['/admissions', event.row.id]);
+    } else {
+      console.log(`Action ${event.actionId} sur le dossier ${event.row.id}`);
+      // Les actions comme valider/rejeter seront implémentées dans le détail ou ici plus tard
     }
   }
 }

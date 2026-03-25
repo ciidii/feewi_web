@@ -1,6 +1,8 @@
 <div class="public-container" [style.--fw-primary]="tenant()?.primaryColor || '#2563EB'">
   <header class="public-header">
     <div class="header-content">
+      
+      <!-- Branding cliquable -->
       <div class="school-brand" routerLink="/enrollment" style="cursor: pointer;">
         <img [src]="schoolLogo()" [alt]="schoolName()" class="school-logo">
         <div class="school-info">
@@ -9,15 +11,28 @@
         </div>
       </div>
 
+      <!-- Navigation unifiée -->
       <nav class="header-nav">
         <a routerLink="/enrollment" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link">
           <lucide-icon [name]="LayoutDashboard" [size]="18"></lucide-icon>
           <span>Accueil</span>
         </a>
+        
+        <a routerLink="/enrollment/tracker" routerLinkActive="active" class="nav-link">
+          <lucide-icon [name]="Search" [size]="18"></lucide-icon>
+          <span>Suivre mon dossier</span>
+        </a>
+
+        <div class="header-separator"></div>
+
         <div class="header-badge">
           <lucide-icon [name]="ShieldCheck" [size]="18" class="text-green-600"></lucide-icon>
-          <span>Connexion sécurisée</span>
+          <span class="hidden md:inline">Connexion sécurisée</span>
         </div>
+
+        <button class="btn-help" title="Besoin d'aide ?">
+          <lucide-icon [name]="HelpCircle" [size]="20"></lucide-icon>
+        </button>
       </nav>
     </div>
   </header>
@@ -32,9 +47,11 @@
         <p>© 2026 {{ schoolName() }} • Propulsé par Feewi</p>
       </div>
       <div class="footer-right">
-        <a href="#" class="footer-link">
-          <lucide-icon [name]="HelpCircle" [size]="14"></lucide-icon> Besoin d'aide ?
-        </a>
+        <div class="footer-links">
+          <a href="#" class="footer-link">Mentions légales</a>
+          <span class="dot">·</span>
+          <a href="#" class="footer-link">Confidentialité</a>
+        </div>
       </div>
     </div>
   </footer>

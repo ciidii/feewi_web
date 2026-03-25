@@ -40,7 +40,7 @@ export interface Badge {
   /** Texte affiché */
   label: string;
   /** Type de badge (détermine la couleur) */
-  type: 'success' | 'warning' | 'danger' | 'info' | 'default';
+  type: 'success' | 'warning' | 'danger' | 'info' | 'default' | 'primary';
   /** Info-bulle au survol */
   tooltip?: string;
 }

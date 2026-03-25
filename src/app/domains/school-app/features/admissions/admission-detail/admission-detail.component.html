@@ -1,30 +1,50 @@
-<div class="admission-detail-container">
+<div class="admission-detail-container" *ngIf="application(); let app">
+  
   <!-- Header de Pilotage -->
   <header class="detail-header">
     <div class="header-left">
-      <button mat-icon-button routerLink="/school-app/features/admissions/admission-list" class="back-btn">
+      <button class="back-btn" routerLink="/admissions">
         <lucide-icon [name]="ArrowLeft" [size]="20"></lucide-icon>
       </button>
       <div class="title-group">
-        <h1>{{ student().name }}</h1>
-        <span class="admission-id">Dossier {{ student().id }}</span>
+        <h1>{{ app.candidate?.firstName }} {{ app.candidate?.lastName }}</h1>
+        <span class="admission-id">Dossier #{{ app.reference }} • {{ app.type === 'RE_ENROLL' ? 'Réinscription' : 'Nouvelle' }}</span>
       </div>
     </div>
 
     <div class="header-center">
-      <app-admission-workflow [state]="admissionState()"></app-admission-workflow>
+      <app-admission-workflow [state]="app.status"></app-admission-workflow>
     </div>
 
     <div class="header-right">
-      <div class="nav-actions">
-        <button class="nav-btn"><lucide-icon [name]="ChevronLeft" [size]="18"></lucide-icon></button>
-        <span class="nav-count">Dossier 5 / 42</span>
-        <button class="nav-btn"><lucide-icon [name]="ChevronRight" [size]="18"></lucide-icon></button>
-      </div>
       <div class="action-group">
-        <button class="btn btn-outline"><lucide-icon [name]="Printer" [size]="18"></lucide-icon> Récépissé</button>
-        <button class="btn btn-danger"><lucide-icon [name]="XCircle" [size]="18"></lucide-icon> Rejeter</button>
-        <button class="btn btn-primary"><lucide-icon [name]="CheckCircle" [size]="18"></lucide-icon> Approuver les pièces</button>
+        <!-- ACTIONS DYNAMIQUES SELON LE STATUT -->
+        
+        <!-- Étape 1 : Vérification Administrative -->
+        @if (app.status === 'SUBMITTED') {
+          <button class="btn btn-primary" (click)="verifyApplication()" [disabled]="isActionLoading()">
+            <lucide-icon [name]="isActionLoading() ? RefreshCw : CheckCircle" [size]="18" [class.animate-spin]="isActionLoading()"></lucide-icon>
+            Valider la conformité
+          </button>
+        }
+
+        <!-- Étape 2 : Évaluation Pédagogique (si déjà vérifié) -->
+        @if (app.status === 'VERIFIED') {
+          <button class="btn btn-primary" (click)="submitAssessment()" [disabled]="isActionLoading()">
+            <lucide-icon [name]="isActionLoading() ? RefreshCw : ClipboardCheck" [size]="18" [class.animate-spin]="isActionLoading()"></lucide-icon>
+            Enregistrer l'évaluation
+          </button>
+        }
+
+        <!-- Étape 3 : Admission Finale -->
+        @if (app.status === 'TESTING') {
+          <button class="btn btn-success" (click)="validateFinal()" [disabled]="isActionLoading()">
+            <lucide-icon [name]="isActionLoading() ? RefreshCw : GraduationCap" [size]="18" [class.animate-spin]="isActionLoading()"></lucide-icon>
+            Valider l'Admission
+          </button>
+        }
+
+        <button class="btn btn-outline"><lucide-icon [name]="Printer" [size]="18"></lucide-icon> Imprimer</button>
       </div>
     </div>
   </header>
@@ -34,159 +54,192 @@
     
     <!-- Zone Formulaire (Scrollable) -->
     <section class="form-section">
+      
       <!-- Section : État Civil -->
-      <div class="card">
+      <div class="card card-elevated">
         <div class="card-header">
-          <lucide-icon [name]="User" [size]="18"></lucide-icon>
+          <lucide-icon [name]="User" [size]="18" class="text-primary"></lucide-icon>
           <h2>Informations Candidat</h2>
         </div>
         <div class="grid-form">
           <div class="form-group">
-            <label>Nom Complet</label>
-            <div class="value">{{ student().name }}</div>
+            <label>Prénom(s)</label>
+            <div class="value">{{ app.candidate?.firstName }}</div>
+          </div>
+          <div class="form-group">
+            <label>Nom</label>
+            <div class="value">{{ app.candidate?.lastName }}</div>
           </div>
           <div class="form-group">
             <label>Niveau Demandé</label>
-            <div class="value badge-value">{{ student().requestedLevel }}</div>
+            <div class="value badge-value">{{ app.academicYearId }}</div> <!-- TODO: Mapper le nom du niveau -->
           </div>
           <div class="form-group">
             <label>Date de Naissance</label>
-            <div class="value">{{ student().birthDate }}</div>
+            <div class="value">{{ app.candidate?.birthDate | date:'longDate' }}</div>
           </div>
           <div class="form-group">
             <label>Sexe</label>
-            <div class="value">{{ student().gender }}</div>
+            <div class="value">{{ app.candidate?.gender === 'MALE' ? 'Masculin' : 'Féminin' }}</div>
           </div>
           <div class="form-group">
-            <label>Nationalité</label>
-            <div class="value">{{ student().nationality }}</div>
-          </div>
-          <div class="form-group">
-            <label>École de provenance</label>
-            <div class="value">{{ student().previousSchool }}</div>
+            <label>Lieu de Naissance</label>
+            <div class="value">{{ app.candidate?.birthPlace }}</div>
           </div>
         </div>
       </div>
 
-      <!-- Section : Responsables -->
-      <div class="card">
+      <!-- Section : Responsable Principal -->
+      <div class="card card-elevated">
         <div class="card-header">
-          <lucide-icon [name]="User" [size]="18"></lucide-icon>
-          <h2>Parents / Tuteurs</h2>
+          <lucide-icon [name]="Phone" [size]="18" class="text-primary"></lucide-icon>
+          <h2>Parent / Responsable</h2>
         </div>
-        <div class="parents-list">
-          @for (parent of parents(); track parent.name) {
-            <div class="parent-item">
-              <div class="parent-info">
-                <span class="parent-role">{{ parent.role }}</span>
-                <span class="parent-name">{{ parent.name }}</span>
-              </div>
-              <div class="parent-contact">
-                <span><lucide-icon [name]="Phone" [size]="14"></lucide-icon> {{ parent.phone }}</span>
-                <span class="parent-job"><lucide-icon [name]="User" [size]="14"></lucide-icon> {{ parent.job }}</span>
-              </div>
-            </div>
-          }
+        <div class="parent-info-grid">
+          <div class="info-block">
+            <span class="role-tag">{{ app.primaryGuardian?.relation }}</span>
+            <h3>{{ app.primaryGuardian?.firstName }} {{ app.primaryGuardian?.lastName }}</h3>
+          </div>
+          <div class="contact-details">
+            <div class="detail-item"><lucide-icon [name]="Mail" [size]="14"></lucide-icon> {{ app.primaryGuardian?.email }}</div>
+            <div class="detail-item"><lucide-icon [name]="Phone" [size]="14"></lucide-icon> {{ app.primaryGuardian?.phone }}</div>
+            <div class="detail-item"><lucide-icon [name]="MapPin" [size]="14"></lucide-icon> {{ app.primaryGuardian?.address || 'Non renseignée' }}</div>
+          </div>
         </div>
       </div>
 
       <!-- Section : Documents Checklist -->
-      <div class="card">
+      <div class="card card-elevated">
         <div class="card-header">
-          <lucide-icon [name]="FileText" [size]="18"></lucide-icon>
+          <lucide-icon [name]="FileText" [size]="18" class="text-primary"></lucide-icon>
           <h2>Checklist Documentaire</h2>
         </div>
         <div class="docs-list">
-          @for (doc of documents; track doc.name) {
-            <div class="doc-item" (click)="selectedDocument.set(doc)" [class.active]="selectedDocument()?.name === doc.name">
-              <div class="doc-icon">
-                <lucide-icon [name]="getFileIcon(doc.name)" [size]="20"></lucide-icon>
+          @for (doc of app.documents; track doc.code) {
+            <div class="doc-item" 
+                 [class.active]="selectedDoc()?.code === doc.code"
+                 [class.missing]="doc.status === 'MISSING'">
+              
+              <div class="doc-main-info" (click)="previewDocument(doc)">
+                <div class="doc-icon">
+                  <lucide-icon [name]="getFileIcon(doc.name)" [size]="20"></lucide-icon>
+                </div>
+                <div class="doc-info">
+                  <span class="doc-name">{{ doc.name }}</span>
+                  <span class="doc-status-label" [class]="doc.status.toLowerCase()">{{ doc.status }}</span>
+                </div>
               </div>
-              <div class="doc-info">
-                <span class="doc-name">{{ doc.name }}</span>
-                <span class="doc-meta">{{ doc.size }} • PDF</span>
-              </div>
-              <div class="doc-status">
-                <lucide-icon [name]="CheckCircle" [size]="18" class="status-ok"></lucide-icon>
+
+              <div class="doc-actions">
+                @if (doc.status === 'UPLOADED') {
+                  <button class="btn-icon-sm" (click)="previewDocument(doc)" title="Visualiser"><lucide-icon [name]="Eye" [size]="16"></lucide-icon></button>
+                }
+                @if (doc.status === 'MISSING') {
+                  <button class="btn-action-text" (click)="receiveDocument(doc.code)" [disabled]="isActionLoading()">
+                    <lucide-icon [name]="CheckCircle" [size]="14"></lucide-icon> Réceptionner papier
+                  </button>
+                }
               </div>
             </div>
           }
         </div>
       </div>
 
-      <!-- Section : Évaluation Pédagogique (Module de Test) -->
-      <div class="card" *ngIf="admissionState() === 'VERIFIED' || admissionState() === 'TESTING' || admissionState() === 'VALIDATED'">
-        <div class="card-header">
-          <lucide-icon [name]="History" [size]="18"></lucide-icon>
-          <h2>Évaluation Pédagogique</h2>
-          <div class="average-badge">Moyenne : {{ averageScore() }} / 20</div>
-        </div>
+      <!-- Section : Évaluation Pédagogique -->
+      @if (['VERIFIED', 'TESTING', 'VALIDATED'].includes(app.status)) {
+        <div class="card card-elevated highlight-border">
+          <div class="card-header">
+            <lucide-icon [name]="History" [size]="18" class="text-primary"></lucide-icon>
+            <h2>Évaluation Pédagogique</h2>
+            <div class="average-badge">Moyenne : {{ averageScore() }} / 20</div>
+          </div>
 
-        <div class="evaluation-grid">
-          <table class="eval-table">
-            <thead>
-              <tr>
-                <th>Matière</th>
-                <th>Note / 20</th>
-                <th>Observation</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (item of evaluation(); track item.subject) {
+          <div class="evaluation-grid">
+            <table class="eval-table">
+              <thead>
                 <tr>
-                  <td class="subject-cell">{{ item.subject }}</td>
-                  <td class="score-cell">
-                    <input type="number" [(ngModel)]="item.score" min="0" max="20" class="score-input">
-                  </td>
-                  <td class="obs-cell">
-                    <input type="text" placeholder="Commentaire libre..." class="obs-input">
-                  </td>
+                  <th>Matière</th>
+                  <th>Note / 20</th>
                 </tr>
-              }
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                @for (subject of ['Français', 'Mathématiques', 'Éveil']; track subject) {
+                  <tr>
+                    <td class="subject-cell">{{ subject }}</td>
+                    <td class="score-cell">
+                      <input type="number" 
+                             [ngModel]="evaluationGrades()[subject]" 
+                             (ngModelChange)="updateGrade(subject, $event)"
+                             min="0" max="20" class="score-input"
+                             [disabled]="app.status === 'VALIDATED'">
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
 
-        <div class="decision-box">
-          <label>Décision Pédagogique :</label>
-          <div class="decision-selector">
-            <button class="choice-btn" [class.active]="pedagogicalDecision() === 'REFUSE'" (click)="pedagogicalDecision.set('REFUSE')">Refusé</button>
-            <button class="choice-btn" [class.active]="pedagogicalDecision() === 'WAITLIST'" (click)="pedagogicalDecision.set('WAITLIST')">Liste d'attente</button>
-            <button class="choice-btn primary" [class.active]="pedagogicalDecision() === 'ADMIS'" (click)="pedagogicalDecision.set('ADMIS')">Admis</button>
+          <div class="decision-box">
+            <div class="comment-area">
+              <label>Observations :</label>
+              <textarea [(ngModel)]="evaluationComment" placeholder="Commentaire libre sur le profil..." class="fw-textarea" [disabled]="app.status === 'VALIDATED'"></textarea>
+            </div>
+            
+            <div class="decision-selector-group">
+              <label>Décision finale :</label>
+              <div class="decision-selector">
+                <button class="choice-btn" [class.active]="pedagogicalDecision() === 'REJECTED'" (click)="pedagogicalDecision.set('REJECTED')" [disabled]="app.status === 'VALIDATED'">Refusé</button>
+                <button class="choice-btn" [class.active]="pedagogicalDecision() === 'WAITLIST'" (click)="pedagogicalDecision.set('WAITLIST')" [disabled]="app.status === 'VALIDATED'">Attente</button>
+                <button class="choice-btn primary" [class.active]="pedagogicalDecision() === 'ADMITTED'" (click)="pedagogicalDecision.set('ADMITTED')" [disabled]="app.status === 'VALIDATED'">Admis</button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      }
     </section>
 
     <!-- Zone Viewer (Fixe/Sticky) -->
     <aside class="viewer-section" *ngIf="showDocumentViewer()">
       <div class="viewer-card">
         <div class="viewer-header">
-          <h3>Aperçu : {{ selectedDocument()?.name || 'Veuillez sélectionner un document' }}</h3>
+          <div class="viewer-title">
+            <lucide-icon [name]="FileText" [size]="18"></lucide-icon>
+            <h3>Aperçu : {{ selectedDoc()?.name }}</h3>
+          </div>
           <button class="viewer-close" (click)="showDocumentViewer.set(false)">
             <lucide-icon [name]="XCircle" [size]="18"></lucide-icon>
           </button>
         </div>
+        
         <div class="viewer-content">
-          @if (selectedDocument()) {
-            <div class="document-mock">
-              <div class="mock-content">
-                <lucide-icon [name]="FileText" [size]="48"></lucide-icon>
-                <p>Visualisation de : {{ selectedDocument()?.name }}</p>
-                <button class="btn btn-outline btn-sm">
-                  <lucide-icon [name]="Download" [size]="16"></lucide-icon> Télécharger
-                </button>
-              </div>
+          @if (selectedDocUrl()) {
+            <iframe [src]="selectedDocUrl()" class="document-iframe"></iframe>
+          } @else if (selectedDoc()?.status === 'UPLOADED') {
+            <div class="viewer-loading">
+              <lucide-icon [name]="RefreshCw" [size]="32" class="animate-spin"></lucide-icon>
+              <p>Chargement du document...</p>
             </div>
           } @else {
             <div class="empty-viewer">
               <lucide-icon [name]="Eye" [size]="32"></lucide-icon>
-              <p>Sélectionnez une pièce jointe pour la visualiser ici.</p>
+              <p>Ce document n'est pas encore disponible en version numérique.</p>
             </div>
           }
+        </div>
+
+        <div class="viewer-footer" *ngIf="selectedDocUrl()">
+          <a [href]="selectedDocUrl()" target="_blank" class="btn btn-outline btn-sm">
+            <lucide-icon [name]="Download" [size]="16"></lucide-icon> Télécharger le document
+          </a>
         </div>
       </div>
     </aside>
 
   </main>
+</div>
+
+<!-- Loader global si pas d'application -->
+<div class="loading-overlay" *ngIf="isLoading()">
+  <lucide-icon [name]="RefreshCw" [size]="48" class="animate-spin text-primary"></lucide-icon>
+  <p>Chargement du dossier d'admission...</p>
 </div>

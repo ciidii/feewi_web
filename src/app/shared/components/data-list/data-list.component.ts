@@ -118,6 +118,9 @@ export class DataListComponent {
   /** Actions disponibles sur chaque ligne */
   actions = input<RowAction[]>([]);
 
+  /** État de chargement */
+  isLoading = input<boolean>(false);
+
   // ===========================================
   // OUTPUTS (événements vers le parent)
   // ===========================================
