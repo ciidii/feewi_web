@@ -1,102 +1,113 @@
-<div class="soft-enrollment-wrapper">
-  
-  <!-- Header de Bienvenue -->
-  <header class="soft-header animate-fade">
-    <div class="welcome-text">
-      <span class="badge-re">Réinscription {{ student().academicYear }}</span>
-      <h1>Heureux de vous revoir, famille Diallo !</h1>
-      <p>Confirmons le dossier de <strong>{{ student().name }}</strong> pour la rentrée prochaine.</p>
-    </div>
+<div class="soft-container animate-fade">
+
+  <!-- Hub Header (Mini) -->
+  <header class="soft-header">
+    <button class="btn-back" routerLink="/enrollment">
+      <lucide-icon [name]="ArrowRight" [size]="18" class="rotate-180"></lucide-icon> Retour au Hub
+    </button>
+    <h1>Réinscription Annuelle</h1>
+    <p>Année Académique {{ activeYear()?.label }}</p>
   </header>
 
-  <main class="soft-main">
+  <div class="soft-card">
     
-    <!-- 1. Le Passage (Highlight) -->
-    <section class="promotion-card card animate-slide-up">
-      <div class="promo-content">
-        <div class="promo-level current">
-          <span class="label">Niveau Actuel</span>
-          <span class="level">{{ student().currentLevel }}</span>
-        </div>
-        <div class="promo-arrow"><lucide-icon [name]="ArrowRight" [size]="32"></lucide-icon></div>
-        <div class="promo-level next">
-          <span class="label">Année Prochaine</span>
-          <span class="level">{{ student().nextLevel }}</span>
-        </div>
-      </div>
-      <div class="promo-info">
-        <lucide-icon [name]="Sparkles" [size]="20"></lucide-icon>
-        <p>Le passage en classe supérieure a été validé par le conseil pédagogique.</p>
-      </div>
-    </section>
-
-    <!-- 2. Vérification des données (Pre-filled) -->
-    <section class="info-section">
-      <div class="section-header">
-        <h2>Vos informations actuelles</h2>
-        <p>Veuillez signaler tout changement éventuel.</p>
+    <!-- PHASE 1 : RECHERCHE -->
+    <div *ngIf="currentStep() === 'SEARCH'" class="step-content">
+      <div class="step-header">
+        <div class="icon-circle"><lucide-icon [name]="Search" [size]="24"></lucide-icon></div>
+        <h2>Identifiez l'élève</h2>
+        <p>Saisissez le matricule de votre enfant et sa date de naissance pour retrouver son profil.</p>
       </div>
 
-      <div class="info-cards">
-        <div class="card data-card" [class.editing]="isEditingContacts()">
-          <div class="card-header">
-            <div class="title"><lucide-icon [name]="Phone" [size]="18"></lucide-icon> Contacts & Adresse</div>
-            <button class="btn-edit" (click)="isEditingContacts.set(!isEditingContacts())">
-              {{ isEditingContacts() ? 'Sauvegarder' : 'Modifier' }}
-            </button>
-          </div>
-          
-          <div class="card-body">
-            <div class="data-group">
-              <span class="label">Responsable Principal</span>
-              <span class="value" *ngIf="!isEditingContacts()">Robert Diallo (+221 77 123 45 67)</span>
-              <input type="text" value="Robert Diallo (+221 77 123 45 67)" class="fw-input" *ngIf="isEditingContacts()">
-            </div>
-            <div class="data-group">
-              <span class="label">Adresse de résidence</span>
-              <span class="value" *ngIf="!isEditingContacts()">Villa 45, Plateau, Dakar</span>
-              <input type="text" value="Villa 45, Plateau, Dakar" class="fw-input" *ngIf="isEditingContacts()">
-            </div>
-          </div>
-        </div>
+      <div class="form-group">
+        <label>Matricule de l'élève</label>
+        <input type="text" [(ngModel)]="searchForm.matricule" placeholder="Ex: STU-2024-XXXX" class="fw-input">
       </div>
-    </section>
-
-    <!-- 3. Choix des services -->
-    <section class="services-section">
-      <div class="section-header">
-        <h2>Services pour l'année prochaine</h2>
+      <div class="form-group">
+        <label>Date de naissance</label>
+        <input type="date" [(ngModel)]="searchForm.birthDate" class="fw-input">
       </div>
 
-      <div class="services-grid">
-        <label class="service-item" [class.active]="services().canteen">
-          <input type="checkbox" [(ngModel)]="services().canteen">
-          <span class="service-icon">🍱</span>
-          <span class="service-name">Cantine</span>
-        </label>
-        <label class="service-item" [class.active]="services().transport">
-          <input type="checkbox" [(ngModel)]="services().transport">
-          <span class="service-icon">🚌</span>
-          <span class="service-name">Transport</span>
-        </label>
-      </div>
-    </section>
-
-    <!-- 4. Validation finale -->
-    <section class="confirm-section card">
-      <div class="confirm-content">
-        <lucide-icon [name]="CheckCircle" [size]="32" class="text-green-600"></lucide-icon>
-        <div class="confirm-text">
-          <h3>Tout est correct ?</h3>
-          <p>En validant, vous confirmez la réinscription de votre enfant pour l'année {{ student().academicYear }}.</p>
-        </div>
-      </div>
-      <button class="btn-confirm" (click)="isConfirmed.set(true)" [class.success]="isConfirmed()">
-        <lucide-icon [name]="isConfirmed() ? Check : CheckCircle" [size]="20"></lucide-icon>
-        {{ isConfirmed() ? 'Réinscription Validée' : 'Confirmer la réinscription' }}
+      <button class="btn-primary full" (click)="findStudent()" [disabled]="isLoading() || !searchForm.matricule">
+        <span *ngIf="!isLoading()">Rechercher le profil <lucide-icon [name]="ArrowRight" [size]="18"></lucide-icon></span>
+        <span *ngIf="isLoading()"><lucide-icon [name]="RefreshCw" [size]="18" class="animate-spin"></lucide-icon> Recherche...</span>
       </button>
-    </section>
 
-  </main>
+      <div class="info-note">
+        <lucide-icon [name]="Info" [size]="16"></lucide-icon>
+        <span>Le matricule se trouve sur les bulletins de notes ou la carte d'élève.</span>
+      </div>
+    </div>
+
+    <!-- PHASE 2 : CONFIRMATION -->
+    <div *ngIf="currentStep() === 'CONFIRM'" class="step-content">
+      <div class="student-profile-header">
+        <div class="avatar">{{ student()?.firstName[0] }}{{ student()?.lastName[0] }}</div>
+        <div class="name-info">
+          <h3>{{ student()?.firstName }} {{ student()?.lastName }}</h3>
+          <span class="matricule">{{ student()?.id }}</span>
+        </div>
+      </div>
+
+      <div class="enrollment-summary">
+        <div class="summary-item">
+          <lucide-icon [name]="GraduationCap" [size]="18"></lucide-icon>
+          <div class="item-text">
+            <span class="label">Niveau actuel</span>
+            <span class="value">{{ student()?.currentLevel }}</span>
+          </div>
+        </div>
+        <div class="summary-item highlight">
+          <lucide-icon [name]="Sparkles" [size]="18"></lucide-icon>
+          <div class="item-text">
+            <span class="label">Réinscription en</span>
+            <span class="value">{{ student()?.nextLevel }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="guardian-verify">
+        <h4>Responsable : {{ student()?.guardianName }}</h4>
+        <div class="verify-row">
+          <lucide-icon [name]="Phone" [size]="16"></lucide-icon>
+          <span>{{ student()?.guardianPhone }}</span>
+        </div>
+        <p class="verify-note">Un SMS de confirmation sera envoyé à ce numéro après validation.</p>
+      </div>
+
+      <div class="actions-stack">
+        <button class="btn-primary full" (click)="confirmReEnrollment()" [disabled]="isLoading()">
+          <span *ngIf="!isLoading()">Confirmer la réinscription <lucide-icon [name]="CheckCircle" [size]="18"></lucide-icon></span>
+          <span *ngIf="isLoading()"><lucide-icon [name]="RefreshCw" [size]="18" class="animate-spin"></lucide-icon> Traitement...</span>
+        </button>
+        <button class="btn-text" (click)="reset()">Ce n'est pas le bon élève ?</button>
+      </div>
+    </div>
+
+    <!-- PHASE 3 : SUCCÈS -->
+    <div *ngIf="currentStep() === 'SUCCESS'" class="step-content success-view">
+      <div class="success-icon">
+        <lucide-icon [name]="CheckCircle" [size]="64"></lucide-icon>
+      </div>
+      <h2>Réinscription Enregistrée !</h2>
+      <p>La demande de réinscription pour <strong>{{ student()?.firstName }}</strong> a été transmise avec succès au secrétariat.</p>
+      
+      <div class="ref-badge">
+        <span>Référence du dossier</span>
+        <strong>{{ application()?.reference }}</strong>
+      </div>
+
+      <div class="next-steps">
+        <h4>Prochaines étapes :</h4>
+        <ul>
+          <li>Le secrétariat vérifiera l'éligibilité (passage de classe).</li>
+          <li>Vous recevrez les modalités de paiement par SMS.</li>
+        </ul>
+      </div>
+
+      <button class="btn-outline full" routerLink="/enrollment">Retour au Hub</button>
+    </div>
+
+  </div>
 
 </div>

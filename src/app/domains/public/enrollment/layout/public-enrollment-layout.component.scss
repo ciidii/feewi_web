@@ -71,6 +71,28 @@ $font-sans: "Inter", sans-serif;
     }
   }
 
+  .header-nav {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: $slate;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: $radius-md;
+    transition: all 0.2s;
+
+    &:hover { background: $ice; color: $primary; }
+    &.active { background: rgba(37, 99, 235, 0.08); color: $primary; }
+  }
+
   .header-badge {
     display: flex;
     align-items: center;

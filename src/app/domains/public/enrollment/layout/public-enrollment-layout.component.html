@@ -1,7 +1,7 @@
 <div class="public-container" [style.--fw-primary]="tenant()?.primaryColor || '#2563EB'">
   <header class="public-header">
     <div class="header-content">
-      <div class="school-brand">
+      <div class="school-brand" routerLink="/enrollment" style="cursor: pointer;">
         <img [src]="schoolLogo()" [alt]="schoolName()" class="school-logo">
         <div class="school-info">
           <span class="school-label">Portail Admissions</span>
@@ -9,10 +9,16 @@
         </div>
       </div>
 
-      <div class="header-badge">
-        <lucide-icon [name]="ShieldCheck" [size]="18" class="text-green-600"></lucide-icon>
-        <span>Connexion sécurisée</span>
-      </div>
+      <nav class="header-nav">
+        <a routerLink="/enrollment" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link">
+          <lucide-icon [name]="LayoutDashboard" [size]="18"></lucide-icon>
+          <span>Accueil</span>
+        </a>
+        <div class="header-badge">
+          <lucide-icon [name]="ShieldCheck" [size]="18" class="text-green-600"></lucide-icon>
+          <span>Connexion sécurisée</span>
+        </div>
+      </nav>
     </div>
   </header>
 

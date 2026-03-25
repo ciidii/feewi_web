@@ -44,6 +44,10 @@ export const PUBLIC_ROUTES: Routes = [
         loadComponent: () => import('./enrollment/form-stepper/public-form-stepper.component').then(m => m.PublicFormStepperComponent)
       },
       {
+        path: 'tracker',
+        loadComponent: () => import('./enrollment/tracker/public-tracker.component').then(m => m.PublicTrackerComponent)
+      },
+      {
         path: 'tracker/:id',
         loadComponent: () => import('./enrollment/tracker/public-tracker.component').then(m => m.PublicTrackerComponent)
       },

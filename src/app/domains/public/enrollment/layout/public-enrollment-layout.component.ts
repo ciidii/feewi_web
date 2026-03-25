@@ -1,7 +1,7 @@
 import { Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { LucideAngularModule, ShieldCheck, HelpCircle } from 'lucide-angular';
+import { LucideAngularModule, ShieldCheck, HelpCircle, LayoutDashboard, ArrowLeft } from 'lucide-angular';
 import { TenantContextService } from '../../../../core/services/tenant-context.service';
 
 @Component({
@@ -24,4 +24,6 @@ export class PublicEnrollmentLayoutComponent {
   // Icônes pour le template
   readonly ShieldCheck = ShieldCheck;
   readonly HelpCircle = HelpCircle;
+  readonly LayoutDashboard = LayoutDashboard;
+  readonly ArrowLeft = ArrowLeft;
 }

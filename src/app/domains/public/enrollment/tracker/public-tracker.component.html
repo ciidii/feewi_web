@@ -1,24 +1,53 @@
-<div class="tracker-wrapper">
+<div class="tracker-wrapper animate-fade">
   
+  <!-- PHASE 1 : RECHERCHE MANUELLE -->
+  @if (!application() && !isLoading()) {
+    <div class="search-container card animate-in">
+      <div class="search-icon"><lucide-icon [name]="Search" [size]="48"></lucide-icon></div>
+      <h1>Suivre mon dossier</h1>
+      <p>Saisissez les identifiants de votre demande pour consulter son avancement.</p>
+
+      <div class="search-form">
+        <div class="form-group">
+          <label>Référence du dossier</label>
+          <input type="text" [(ngModel)]="searchData.reference" placeholder="Ex: ADM-2026-XXXX" class="fw-input">
+        </div>
+        <div class="form-group">
+          <label>Code d'accès secret</label>
+          <input type="password" [(ngModel)]="searchData.accessCode" placeholder="••••" class="fw-input">
+        </div>
+        
+        <button class="btn-primary full" (click)="onSearch()" [disabled]="!searchData.reference || !searchData.accessCode">
+          Rechercher mon dossier <lucide-icon [name]="ArrowRight" [size]="18"></lucide-icon>
+        </button>
+      </div>
+
+      @if (error()) {
+        <div class="error-box">
+          <lucide-icon [name]="Info" [size]="16"></lucide-icon>
+          <span>{{ error() }}</span>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- PHASE 2 : CHARGEMENT -->
   @if (isLoading()) {
     <div class="loading-state card">
       <lucide-icon [name]="RefreshCw" [size]="32" class="animate-spin text-primary"></lucide-icon>
       <p>Chargement de votre dossier...</p>
     </div>
-  } @else if (error()) {
-    <div class="error-state card">
-      <lucide-icon [name]="Info" [size]="32" class="text-red-500"></lucide-icon>
-      <p>{{ error() }}</p>
-      <button class="btn-outline" routerLink="../../">Retour à l'accueil</button>
-    </div>
-  } @else if (application()) {
-    <!-- Header : Succès de soumission -->
+  } 
+
+  <!-- PHASE 3 : AFFICHAGE DU DOSSIER -->
+  @if (application(); as app) {
+    <!-- Header : État actuel -->
     <header class="tracker-header card">
       <div class="success-icon"><lucide-icon [name]="CheckCircle" [size]="48"></lucide-icon></div>
-      <h1>Bonjour, {{ application()?.candidate?.firstName }}</h1>
-      <p>Suivi du dossier : <strong>{{ application()?.reference }}</strong></p>
+      <h1>Bonjour, {{ app.candidate?.firstName }}</h1>
+      <p>Dossier : <strong>{{ app.reference }}</strong></p>
       <div class="header-divider"></div>
-      <p class="status-msg">Statut actuel : {{ application()?.status }}</p>
+      <div class="status-badge" [class]="app.status.toLowerCase()">{{ app.status }}</div>
     </header>
 
     <!-- Main Content : Timeline -->
@@ -27,32 +56,32 @@
         <div class="section-title">
           <lucide-icon [name]="Clock" [size]="20"></lucide-icon>
           <h2>Avancement de la demande</h2>
-          <button class="btn-refresh" (click)="loadApplicationData()"><lucide-icon [name]="RefreshCw" [size]="16"></lucide-icon> Actualiser</button>
+          <button class="btn-refresh" (click)="loadApplicationData(app.reference)"><lucide-icon [name]="RefreshCw" [size]="16"></lucide-icon> Actualiser</button>
         </div>
 
         <div class="timeline">
-          <div class="timeline-item" [class.completed]="application()?.status !== 'DRAFT'">
+          <div class="timeline-item" [class.completed]="app.status !== 'DRAFT'">
             <div class="timeline-dot"><lucide-icon [name]="CheckCircle" [size]="14"></lucide-icon></div>
             <div class="timeline-content">
               <h3>Dossier Soumis</h3>
-              <p>Votre demande a été enregistrée le {{ application()?.submittedAt | date:'short' }}.</p>
+              <p>Votre demande a été enregistrée le {{ app.submittedAt | date:'short' }}.</p>
             </div>
           </div>
-          <div class="timeline-item" [class.active]="application()?.status === 'SUBMITTED'" [class.completed]="application()?.status === 'VERIFIED' || application()?.status === 'TESTING' || application()?.status === 'VALIDATED'">
+          <div class="timeline-item" [class.active]="app.status === 'SUBMITTED'" [class.completed]="['VERIFIED', 'TESTING', 'VALIDATED'].includes(app.status)">
             <div class="timeline-dot"></div>
             <div class="timeline-content">
               <h3>Vérification Administrative</h3>
               <p>Le secrétariat vérifie la conformité de vos pièces jointes.</p>
             </div>
           </div>
-          <div class="timeline-item" [class.active]="application()?.status === 'VERIFIED'" [class.completed]="application()?.status === 'TESTING' || application()?.status === 'VALIDATED'">
+          <div class="timeline-item" [class.active]="app.status === 'VERIFIED'" [class.completed]="['TESTING', 'VALIDATED'].includes(app.status)">
             <div class="timeline-dot"></div>
             <div class="timeline-content">
               <h3>Évaluation Pédagogique</h3>
               <p>Test de niveau et entretien avec l'équipe éducative.</p>
             </div>
           </div>
-          <div class="timeline-item" [class.active]="application()?.status === 'TESTING'" [class.completed]="application()?.status === 'VALIDATED'">
+          <div class="timeline-item" [class.active]="app.status === 'TESTING'" [class.completed]="app.status === 'VALIDATED'">
             <div class="timeline-dot"></div>
             <div class="timeline-content">
               <h3>Décision Finale</h3>
@@ -62,19 +91,20 @@
         </div>
       </div>
 
-      <!-- Sidebar -->
+      <!-- Sidebar Support -->
       <aside class="tracker-sidebar">
         <div class="support-card card">
-          <h3>Contact École</h3>
+          <h3>Besoin d'aide ?</h3>
+          <p>Contactez le secrétariat pour toute question sur votre dossier.</p>
           <div class="contact-methods">
-            <a href="#" class="contact-item">
+            <div class="contact-item">
               <lucide-icon [name]="Phone" [size]="18"></lucide-icon>
-              <span>+221 77 123 45 67</span>
-            </a>
-            <a href="#" class="contact-item">
+              <span>+221 33 800 00 00</span>
+            </div>
+            <div class="contact-item">
               <lucide-icon [name]="Mail" [size]="18"></lucide-icon>
-              <span>admin@ecole.com</span>
-            </a>
+              <span>admissions@ecole.com</span>
+            </div>
           </div>
         </div>
       </aside>
@@ -82,8 +112,8 @@
   }
 
   <footer class="tracker-footer">
-    <button routerLink="../../" class="btn-back">
-      <lucide-icon [name]="ArrowLeft" [size]="18"></lucide-icon> Retour à l'accueil
+    <button routerLink="/enrollment" class="btn-back">
+      <lucide-icon [name]="ArrowLeft" [size]="18"></lucide-icon> Retour au Hub
     </button>
   </footer>
 
