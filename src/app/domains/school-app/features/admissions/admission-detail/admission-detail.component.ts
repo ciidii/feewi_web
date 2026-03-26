@@ -13,15 +13,20 @@ import {
 import { firstValueFrom } from 'rxjs';
 
 import { FormsModule } from '@angular/forms';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
+import { NotificationService } from '../../../../../shared/services/notification.service';
 import { AdmissionWorkflowComponent, AdmissionState } from '../components/admission-workflow/admission-workflow.component';
 import { EnrollmentAdminService } from '../../../../../core/services/enrollment-admin.service';
 import { DocumentEngineService } from '../../../../../core/services/document-engine.service';
+import { AcademicService } from '../../../../../core/services/academic.service';
 import { AdmissionApplication, RequiredDocument } from '../../../../../core/models/enrollment.model';
+import { Level, Filiere } from '../../../../../core/models/academic.model';
 
 @Component({
   selector: 'app-admission-detail',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, RouterModule, AdmissionWorkflowComponent, FormsModule],
+  imports: [CommonModule, LucideAngularModule, RouterModule, AdmissionWorkflowComponent, FormsModule, MatDialogModule],
   templateUrl: './admission-detail.component.html',
   styleUrls: ['./admission-detail.component.scss']
 })
@@ -29,15 +34,34 @@ export class AdmissionDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private enrollmentAdminService = inject(EnrollmentAdminService);
   private documentService = inject(DocumentEngineService);
+  private academicService = inject(AcademicService);
+  private dialog = inject(MatDialog);
+  private notificationService = inject(NotificationService);
 
   // --- ÉTATS ---
   application = signal<AdmissionApplication | null>(null);
   isLoading = signal(true);
   isActionLoading = signal(false);
   
+  levels = signal<Level[]>([]);
+  filieres = signal<Filiere[]>([]);
+
   showDocumentViewer = signal(false);
   selectedDoc = signal<RequiredDocument | null>(null);
   selectedDocUrl = signal<string | null>(null);
+
+  // --- CALCULS RÉACTIFS ---
+  levelName = computed(() => {
+    const app = this.application();
+    if (!app) return '...';
+    return this.levels().find(l => l.id === app.levelId)?.name || 'Niveau inconnu';
+  });
+
+  filiereName = computed(() => {
+    const app = this.application();
+    if (!app || !app.filiereId) return null;
+    return this.filieres().find(f => f.id === app.filiereId)?.name || 'Filière inconnue';
+  });
 
   // --- ÉVALUATION (Local state avant soumission) ---
   evaluationGrades = signal<Record<string, number>>({
@@ -71,8 +95,15 @@ export class AdmissionDetailComponent implements OnInit {
   async loadApplication(id: string) {
     this.isLoading.set(true);
     try {
-      const data = await firstValueFrom(this.enrollmentAdminService.getApplicationById(id));
+      const [data, levels, filieres] = await Promise.all([
+        firstValueFrom(this.enrollmentAdminService.getApplicationById(id)),
+        this.academicService.getLevels(),
+        this.academicService.getFilieres()
+      ]);
+
       this.application.set(data);
+      this.levels.set(levels);
+      this.filieres.set(filieres);
       
       // Pré-remplir l'évaluation si elle existe déjà
       if (data.assessment) {
@@ -82,6 +113,7 @@ export class AdmissionDetailComponent implements OnInit {
       }
     } catch (e) {
       console.error('Erreur chargement dossier:', e);
+      this.notificationService.error('Impossible de charger les données du dossier.');
     } finally {
       this.isLoading.set(false);
     }
@@ -96,8 +128,9 @@ export class AdmissionDetailComponent implements OnInit {
     try {
       const updated = await firstValueFrom(this.enrollmentAdminService.receivePhysicalDocument(this.application()!.id, docCode));
       this.application.set(updated);
+      this.notificationService.success('Document marqué comme reçu.');
     } catch (e) {
-      alert('Erreur lors de la réception du document.');
+      this.notificationService.error('Erreur lors de la réception du document.');
     } finally {
       this.isActionLoading.set(false);
     }
@@ -112,8 +145,9 @@ export class AdmissionDetailComponent implements OnInit {
     try {
       const updated = await firstValueFrom(this.enrollmentAdminService.verifyApplication(this.application()!.id));
       this.application.set(updated);
+      this.notificationService.success('Dossier validé administrativement.');
     } catch (e) {
-      alert('Erreur lors de la vérification administrative.');
+      this.notificationService.error('Erreur lors de la vérification administrative.');
     } finally {
       this.isActionLoading.set(false);
     }
@@ -133,8 +167,9 @@ export class AdmissionDetailComponent implements OnInit {
       };
       const updated = await firstValueFrom(this.enrollmentAdminService.submitAssessment(this.application()!.id, payload));
       this.application.set(updated);
+      this.notificationService.success('Évaluation enregistrée avec succès.');
     } catch (e) {
-      alert('Erreur lors de l\'enregistrement de l\'évaluation.');
+      this.notificationService.error('Erreur lors de l\'enregistrement de l\'évaluation.');
     } finally {
       this.isActionLoading.set(false);
     }
@@ -145,14 +180,27 @@ export class AdmissionDetailComponent implements OnInit {
    */
   async validateFinal() {
     if (!this.application()) return;
-    if (!confirm('Confirmez-vous l\'admission définitive de cet élève ?')) return;
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Confirmer l\'admission',
+        message: 'Confirmez-vous l\'admission définitive de cet élève ? Cette action est irréversible.',
+        confirmLabel: 'Confirmer l\'Admission',
+        type: 'warning'
+      }
+    });
+
+    const confirmed = await firstValueFrom(dialogRef.afterClosed());
+    if (!confirmed) return;
 
     this.isActionLoading.set(true);
     try {
       const updated = await firstValueFrom(this.enrollmentAdminService.validateAdmission(this.application()!.id));
       this.application.set(updated);
+      this.notificationService.success('Admission validée avec succès !');
     } catch (e) {
-      alert('Erreur lors de la validation finale. Vérifiez que tous les documents sont présents.');
+      this.notificationService.error('Erreur lors de la validation finale. Vérifiez que tous les documents sont présents.');
     } finally {
       this.isActionLoading.set(false);
     }

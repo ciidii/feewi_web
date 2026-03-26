@@ -83,6 +83,8 @@ export interface AdmissionApplication {
   type: AdmissionType;
   status: AdmissionStatus;
   academicYearId: string;
+  levelId: string;
+  filiereId?: string | null;
   tenantId: string;
 
   candidate: Candidate;

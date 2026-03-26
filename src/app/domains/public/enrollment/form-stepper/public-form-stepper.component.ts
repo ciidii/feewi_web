@@ -13,6 +13,8 @@ import { Level, AcademicYear, Filiere } from '../../../../core/models/academic.m
 import { AdmissionApplication as Application } from '../../../../core/models/enrollment.model';
 import { Router } from '@angular/router';
 
+import { NotificationService } from '../../../../shared/services/notification.service';
+
 export type StepperStep = 'GUARDIAN' | 'STUDENT' | 'DOCS' | 'REVIEW';
 
 @Component({
@@ -28,6 +30,7 @@ export class PublicFormStepperComponent implements OnInit {
   private sessionService = inject(AdmissionSessionService);
   private academicService = inject(AcademicService);
   private tenantContext = inject(TenantContextService);
+  private notificationService = inject(NotificationService);
   private router = inject(Router);
 
   // --- ÉTATS DU STEPPER ---
@@ -149,8 +152,8 @@ export class PublicFormStepperComponent implements OnInit {
         birthPlace: app.candidate?.birthPlace || '',
         nationality: app.candidate?.nationality || 'Sénégalaise',
         previousSchool: app.candidate?.previousSchool || '',
-        requestedLevelId: app.academicYearId || '', // Simplification
-        filiereId: null 
+        requestedLevelId: app.levelId || '',
+        filiereId: app.filiereId || null 
       }
     }));
   }
@@ -173,7 +176,7 @@ export class PublicFormStepperComponent implements OnInit {
       }
     } catch (e) {
       console.error('NextStep API Error:', e);
-      alert('Erreur lors de la sauvegarde. Veuillez vérifier vos informations.');
+      this.notificationService.error('Erreur lors de la sauvegarde. Veuillez vérifier vos informations.');
       stepSuccess = false;
     } finally {
       this.isSubmitting.set(false);
@@ -207,6 +210,7 @@ export class PublicFormStepperComponent implements OnInit {
 
     const res = await firstValueFrom(this.enrollmentService.createApplication(payload));
     if (res) {
+      this.notificationService.success('Dossier d\'admission initialisé avec succès.');
       this.application.set(res);
       this.currentApplicationId.set(res.id);
       const studentFirstName = res.candidate?.firstName || this.formData().student.firstName || '';
@@ -218,7 +222,10 @@ export class PublicFormStepperComponent implements OnInit {
     const id = this.currentApplicationId();
     if (!id) return;
     const updatedApp = await firstValueFrom(this.enrollmentService.updateGuardians(id, this.formData().primaryGuardian));
-    if (updatedApp) this.application.set(updatedApp);
+    if (updatedApp) {
+      this.notificationService.info('Informations du responsable enregistrées.');
+      this.application.set(updatedApp);
+    }
   }
 
   private async saveCandidateInfo() {
@@ -241,7 +248,10 @@ export class PublicFormStepperComponent implements OnInit {
     };
 
     const updatedApp = await firstValueFrom(this.enrollmentService.updateCandidate(id, payload));
-    if (updatedApp) this.application.set(updatedApp);
+    if (updatedApp) {
+      this.notificationService.info('Informations du candidat enregistrées.');
+      this.application.set(updatedApp);
+    }
   }
 
   async onFileSelected(docCode: string, event: any) {
@@ -265,6 +275,8 @@ export class PublicFormStepperComponent implements OnInit {
         this.enrollmentService.uploadDocument(this.currentApplicationId()!, docCode, ticket.fileId)
       );
 
+      this.notificationService.success('Document envoyé avec succès.');
+
       // 4. Rafraîchissement SYSTÉMATIQUE via trackApplication pour garantir la synchronisation UI
       const session = this.sessionService.getSession();
       if (session) {
@@ -275,7 +287,7 @@ export class PublicFormStepperComponent implements OnInit {
       }
     } catch (e) {
       console.error(`Échec de l'upload pour ${docCode}:`, e);
-      alert('Erreur lors de l\'envoi du fichier. Veuillez réessayer.');
+      this.notificationService.error('Erreur lors de l\'envoi du fichier. Veuillez réessayer.');
     } finally {
       this.uploadingDocCode.set(null);
     }
@@ -288,7 +300,7 @@ export class PublicFormStepperComponent implements OnInit {
       window.open(viewUrl, '_blank');
     } catch (e) {
       console.error('Impossible de générer l\'url de vue:', e);
-      alert('Erreur lors de l\'ouverture du document.');
+      this.notificationService.error('Erreur lors de l\'ouverture du document.');
     }
   }
 
@@ -299,6 +311,7 @@ export class PublicFormStepperComponent implements OnInit {
     try {
       const finalApp = await firstValueFrom(this.enrollmentService.submitApplication(id));
       if (finalApp) {
+        this.notificationService.success('Votre dossier a été soumis avec succès.');
         const reference = finalApp.reference;
         const accessCode = finalApp.accessCode;
         

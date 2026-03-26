@@ -7,7 +7,7 @@
         <lucide-icon [name]="ArrowLeft" [size]="20"></lucide-icon>
       </button>
       <div class="title-group">
-        <h1>{{ app.candidate?.firstName }} {{ app.candidate?.lastName }}</h1>
+        <h1>{{ app.candidate.firstName }} {{ app.candidate.lastName }}</h1>
         <span class="admission-id">Dossier #{{ app.reference }} • {{ app.type === 'RE_ENROLL' ? 'Réinscription' : 'Nouvelle' }}</span>
       </div>
     </div>
@@ -64,27 +64,33 @@
         <div class="grid-form">
           <div class="form-group">
             <label>Prénom(s)</label>
-            <div class="value">{{ app.candidate?.firstName }}</div>
+            <div class="value">{{ app.candidate.firstName }}</div>
           </div>
           <div class="form-group">
             <label>Nom</label>
-            <div class="value">{{ app.candidate?.lastName }}</div>
+            <div class="value">{{ app.candidate.lastName }}</div>
           </div>
           <div class="form-group">
             <label>Niveau Demandé</label>
-            <div class="value badge-value">{{ app.academicYearId }}</div> <!-- TODO: Mapper le nom du niveau -->
+            <div class="value badge-value">{{ levelName() }}</div>
           </div>
+          @if (filiereName()) {
+            <div class="form-group">
+              <label>Filière</label>
+              <div class="value badge-value">{{ filiereName() }}</div>
+            </div>
+          }
           <div class="form-group">
             <label>Date de Naissance</label>
-            <div class="value">{{ app.candidate?.birthDate | date:'longDate' }}</div>
+            <div class="value">{{ app.candidate.birthDate | date:'longDate' }}</div>
           </div>
           <div class="form-group">
             <label>Sexe</label>
-            <div class="value">{{ app.candidate?.gender === 'MALE' ? 'Masculin' : 'Féminin' }}</div>
+            <div class="value">{{ app.candidate.gender === 'MALE' ? 'Masculin' : 'Féminin' }}</div>
           </div>
           <div class="form-group">
             <label>Lieu de Naissance</label>
-            <div class="value">{{ app.candidate?.birthPlace }}</div>
+            <div class="value">{{ app.candidate.birthPlace }}</div>
           </div>
         </div>
       </div>
@@ -97,13 +103,13 @@
         </div>
         <div class="parent-info-grid">
           <div class="info-block">
-            <span class="role-tag">{{ app.primaryGuardian?.relation }}</span>
-            <h3>{{ app.primaryGuardian?.firstName }} {{ app.primaryGuardian?.lastName }}</h3>
+            <span class="role-tag">{{ app.primaryGuardian.relation }}</span>
+            <h3>{{ app.primaryGuardian.firstName }} {{ app.primaryGuardian.lastName }}</h3>
           </div>
           <div class="contact-details">
-            <div class="detail-item"><lucide-icon [name]="Mail" [size]="14"></lucide-icon> {{ app.primaryGuardian?.email }}</div>
-            <div class="detail-item"><lucide-icon [name]="Phone" [size]="14"></lucide-icon> {{ app.primaryGuardian?.phone }}</div>
-            <div class="detail-item"><lucide-icon [name]="MapPin" [size]="14"></lucide-icon> {{ app.primaryGuardian?.address || 'Non renseignée' }}</div>
+            <div class="detail-item"><lucide-icon [name]="Mail" [size]="14"></lucide-icon> {{ app.primaryGuardian.email }}</div>
+            <div class="detail-item"><lucide-icon [name]="Phone" [size]="14"></lucide-icon> {{ app.primaryGuardian.phone }}</div>
+            <div class="detail-item"><lucide-icon [name]="MapPin" [size]="14"></lucide-icon> {{ app.primaryGuardian.address || 'Non renseignée' }}</div>
           </div>
         </div>
       </div>
