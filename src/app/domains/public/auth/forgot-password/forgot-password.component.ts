@@ -45,7 +45,7 @@ export class ForgotPasswordComponent {
     return 'Champ invalide';
   }
 
-  async onSubmit() {
+  onSubmit() {
     if (this.forgotPasswordForm.invalid) {
       this.forgotPasswordForm.markAllAsTouched();
       this.notificationService.warning('Verifiez le formulaire.', 'Formulaire incomplet');
@@ -55,15 +55,19 @@ export class ForgotPasswordComponent {
     const email = this.forgotPasswordForm.value.email!;
     this.isLoading.set(true);
 
-    try {
-      await this.authService.forgotPassword(email);
-      this.notificationService.success('Code OTP envoye par email.', 'Verification');
-      await this.router.navigate(['/auth/reset-password'], { queryParams: { email } });
-    } catch (err: any) {
-      const message = err?.error?.message || err?.message || "Impossible d'envoyer le code OTP.";
-      this.notificationService.error(message, 'Echec de la demande');
-    } finally {
-      this.isLoading.set(false);
-    }
+    this.authService.forgotPassword(email).subscribe({
+      next: () => {
+        this.notificationService.success('Code OTP envoye par email.', 'Verification');
+        this.router.navigate(['/auth/reset-password'], { queryParams: { email } });
+      },
+      error: (err: any) => {
+        const message = err?.error?.message || err?.message || "Impossible d'envoyer le code OTP.";
+        this.notificationService.error(message, 'Echec de la demande');
+        this.isLoading.set(false);
+      },
+      complete: () => {
+        this.isLoading.set(false);
+      }
+    });
   }
 }

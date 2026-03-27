@@ -1,10 +1,11 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { firstValueFrom, tap } from 'rxjs';
+import { Observable, catchError, map, of, tap, throwError } from 'rxjs';
 import { TenantContextService } from './tenant-context.service';
 import { SchoolService } from './school.service';
 import { NavigationContextService } from './navigation-context.service';
+import { EnvironmentService } from './environment.service';
 
 export interface UserProfile {
   id: string;
@@ -43,7 +44,8 @@ export class AuthService {
   private tenantService = inject(TenantContextService);
   private schoolService = inject(SchoolService);
   private navContext = inject(NavigationContextService);
-  private readonly API_URL = 'http://localhost:8080/api/v1';
+  private envService = inject(EnvironmentService);
+  private readonly API_URL = this.envService.getServiceUrl('identity');
 
   // State
   private _currentUser = signal<UserProfile | null>(null);
@@ -55,85 +57,86 @@ export class AuthService {
 
   constructor() {}
 
-  async login(email: string, password: string): Promise<boolean> {
+  login(email: string, password: string): Observable<boolean> {
     console.log('[AuthService] Attempting login for:', email);
-    try {
-      const response = await firstValueFrom(
-        this.http.post<LoginResponse>(`${this.API_URL}/auth/login`, { email, password })
-      );
-
-      localStorage.setItem('access_token', response.access_token);
-      await this.fetchProfile();
-      return true;
-    } catch (error) {
-      console.error('[AuthService] Login failed', error);
-      return false;
-    }
+    return this.http.post<LoginResponse>(`${this.API_URL}/auth/login`, { email, password }).pipe(
+      tap(response => localStorage.setItem('access_token', response.access_token)),
+      map(() => {
+        // Déclenche la récupération du profil en arrière-plan (réactif)
+        this.fetchProfile().subscribe();
+        return true;
+      }),
+      catchError(error => {
+        console.error('[AuthService] Login failed', error);
+        return of(false);
+      })
+    );
   }
 
-  async forgotPassword(email: string): Promise<void> {
+  forgotPassword(email: string): Observable<void> {
     const payload: ForgotPasswordRequest = { email };
-    await firstValueFrom(this.http.post<void>(`${this.API_URL}/auth/forgot-password`, payload));
+    return this.http.post<void>(`${this.API_URL}/auth/forgot-password`, payload);
   }
 
-  async resetPassword(payload: ResetPasswordRequest): Promise<void> {
-    await firstValueFrom(this.http.post<void>(`${this.API_URL}/auth/reset-password`, payload));
+  resetPassword(payload: ResetPasswordRequest): Observable<void> {
+    return this.http.post<void>(`${this.API_URL}/auth/reset-password`, payload);
   }
 
-  async impersonate(userId: string): Promise<boolean> {
+  impersonate(userId: string): Observable<boolean> {
     console.log('[AuthService] Attempting impersonation for:', userId);
-    try {
-      const response = await firstValueFrom(
-        this.http.post<LoginResponse>(`${this.API_URL}/auth/impersonate/${userId}`, {})
-      );
-
-      localStorage.setItem('access_token', response.access_token);
-      await this.fetchProfile();
-      this.router.navigate(['/school-app/dashboard']);
-      return true;
-    } catch (error) {
-      console.error('[AuthService] Impersonation failed', error);
-      return false;
-    }
+    return this.http.post<LoginResponse>(`${this.API_URL}/auth/impersonate/${userId}`, {}).pipe(
+      tap(response => localStorage.setItem('access_token', response.access_token)),
+      map(() => {
+        this.fetchProfile().subscribe();
+        this.router.navigate(['/school-app/dashboard']);
+        return true;
+      }),
+      catchError(error => {
+        console.error('[AuthService] Impersonation failed', error);
+        return of(false);
+      })
+    );
   }
 
-  async fetchProfile(): Promise<void> {
+  fetchProfile(): Observable<UserProfile | null> {
     console.log('[AuthService] Fetching profile...');
-    try {
-      const profile = await firstValueFrom(
-        this.http.get<UserProfile>(`${this.API_URL}/users/me`)
-      );
-      console.log('[AuthService] Profile fetched successfully:', profile.email);
-      this._currentUser.set(profile);
+    return this.http.get<UserProfile>(`${this.API_URL}/users/me`).pipe(
+      tap(profile => {
+        console.log('[AuthService] Profile fetched successfully:', profile.email);
+        this._currentUser.set(profile);
+        this.updateTenantContext(profile);
+      }),
+      catchError(error => {
+        console.warn('[AuthService] Failed to fetch profile (User might not be logged in)');
+        this._currentUser.set(null);
+        return of(null);
+      })
+    );
+  }
 
-      // Update Tenant Context dynamiquement
-      if (profile.tenantId && !this.navContext.isSaasDomain()) {
-        try {
-          // On tente de récupérer le nom réel de l'école
-          const school = await this.schoolService.getSchoolById(profile.tenantId);
-          this.tenantService.setTenant({
-            id: school.tenantId,
-            name: school.name,
-            allowedCycles: profile.allowedCycles
-          });
-        } catch (e) {
-          console.warn('[AuthService] Could not fetch school details, using fallback');
-          this.tenantService.setTenant({
-            id: profile.tenantId,
-            name: 'Mon Établissement',
-            allowedCycles: profile.allowedCycles
-          });
-        }
-      } else if (this.navContext.isSaasDomain()) {
+  private updateTenantContext(profile: UserProfile): void {
+    if (profile.tenantId && !this.navContext.isSaasDomain()) {
+      // Version Promise-to-Observable élégante
+      this.schoolService.getSchoolById(profile.tenantId).then(school => {
         this.tenantService.setTenant({
-          id: 'SYSTEM',
-          name: 'Administration Feewi',
-          allowedCycles: []
+          id: school.tenantId,
+          name: school.name,
+          allowedCycles: profile.allowedCycles
         });
-      }
-    } catch (error) {
-      console.warn('[AuthService] Failed to fetch profile (User might not be logged in)');
-      this._currentUser.set(null);
+      }).catch(() => {
+        console.warn('[AuthService] Could not fetch school details, using fallback');
+        this.tenantService.setTenant({
+          id: profile.tenantId,
+          name: 'Mon Établissement',
+          allowedCycles: profile.allowedCycles
+        });
+      });
+    } else if (this.navContext.isSaasDomain()) {
+      this.tenantService.setTenant({
+        id: 'SYSTEM',
+        name: 'Administration Feewi',
+        allowedCycles: []
+      });
     }
   }
 
@@ -160,22 +163,24 @@ export class AuthService {
     return user.allowedCycles.some(code => code.toUpperCase() === cycleCode.toUpperCase());
   }
 
-  async checkSession(): Promise<void> {
+  checkSession(): Observable<boolean> {
     const token = localStorage.getItem('access_token');
-    if (token) {
-      try {
-        // On essaie de récupérer le profil, mais on ne bloque pas indéfiniment
-        await Promise.race([
-          this.fetchProfile(),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 3000))
-        ]);
-      } catch (e) {
-        console.warn('Session check failed or timed out. User will need to login.', e);
+    if (!token) {
+      this._isReady.set(true);
+      return of(false);
+    }
+
+    return this.fetchProfile().pipe(
+      map(profile => {
+        this._isReady.set(true);
+        return profile !== null;
+      }),
+      catchError(() => {
         localStorage.removeItem('access_token');
         this._currentUser.set(null);
-      }
-    }
-    this._isReady.set(true);
-    return Promise.resolve(); // On résout explicitement pour Angular
+        this._isReady.set(true);
+        return of(false);
+      })
+    );
   }
 }

@@ -49,20 +49,27 @@ export class LoginComponent {
     this.showPassword.update(v => !v);
   }
 
-  async onSubmit() {
+  onSubmit() {
     if (this.loginForm.invalid) return;
 
     this.isLoading.set(true);
     this.loginError.set(false);
 
     const { email, password } = this.loginForm.value;
-    const success = await this.authService.login(email!, password!);
-
-    if (success) {
-      this.router.navigate(['/dashboard']);
-    } else {
-      this.loginError.set(true);
-      this.isLoading.set(false);
-    }
+    
+    this.authService.login(email!, password!).subscribe({
+      next: (success) => {
+        if (success) {
+          this.router.navigate(['/dashboard']);
+        } else {
+          this.loginError.set(true);
+          this.isLoading.set(false);
+        }
+      },
+      error: () => {
+        this.loginError.set(true);
+        this.isLoading.set(false);
+      }
+    });
   }
 }

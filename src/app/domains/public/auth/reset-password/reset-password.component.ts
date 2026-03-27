@@ -84,7 +84,7 @@ export class ResetPasswordComponent {
     return !!(form.hasError('passwordMismatch') && (form.get('confirmPassword')?.touched || form.touched));
   }
 
-  async onSubmit() {
+  onSubmit() {
     if (this.resetForm.invalid) {
       this.resetForm.markAllAsTouched();
       this.notificationService.warning('Verifiez les champs du formulaire.', 'Formulaire incomplet');
@@ -94,19 +94,23 @@ export class ResetPasswordComponent {
     const { email, code, newPassword } = this.resetForm.value;
     this.isLoading.set(true);
 
-    try {
-      await this.authService.resetPassword({
-        email: email!,
-        code: code!,
-        newPassword: newPassword!
-      });
-      this.notificationService.success('Mot de passe reinitialise avec succes.', 'Operation terminee');
-      await this.router.navigate(['/auth/login']);
-    } catch (err: any) {
-      const message = err?.error?.message || err?.message || 'Impossible de reinitialiser le mot de passe.';
-      this.notificationService.error(message, 'Echec de reinitialisation');
-    } finally {
-      this.isLoading.set(false);
-    }
+    this.authService.resetPassword({
+      email: email!,
+      code: code!,
+      newPassword: newPassword!
+    }).subscribe({
+      next: () => {
+        this.notificationService.success('Mot de passe reinitialise avec succes.', 'Operation terminee');
+        this.router.navigate(['/auth/login']);
+      },
+      error: (err: any) => {
+        const message = err?.error?.message || err?.message || 'Impossible de reinitialiser le mot de passe.';
+        this.notificationService.error(message, 'Echec de reinitialisation');
+        this.isLoading.set(false);
+      },
+      complete: () => {
+        this.isLoading.set(false);
+      }
+    });
   }
 }
