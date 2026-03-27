@@ -1,14 +1,14 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { firstValueFrom } from 'rxjs';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatSelectModule } from '@angular/material/select';
-import { LucideAngularModule, GraduationCap, Type, Hash, Layers, Info, AlertCircle } from 'lucide-angular';
-import { AcademicService } from '../../../../../../../core/services/academic.service';
-import { NotificationService } from '../../../../../../../shared/services/notification.service';
-import { FormShellComponent } from '../../../../../../../shared/components/form-shell/form-shell';
+import {Component, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import {MatSelectModule} from '@angular/material/select';
+import {AlertCircle, GraduationCap, Hash, Info, Layers, LucideAngularModule, Type} from 'lucide-angular';
+import {AcademicService} from '../../../../../../../core/services/academic.service';
+import {NotificationService} from '../../../../../../../shared/services/notification.service';
+import {FormShellComponent} from '../../../../../../../shared/components/form-shell/form-shell';
 import {Cycle, Level} from '../../../../../../../core/models/academic.model';
+import {finalize} from 'rxjs';
 
 @Component({
   selector: 'app-level-form',
@@ -29,7 +29,7 @@ export class LevelFormComponent implements OnInit {
   private dialogRef = inject(MatDialogRef<LevelFormComponent>);
   private academicService = inject(AcademicService);
   private notificationService = inject(NotificationService);
-  private dialogData = inject(MAT_DIALOG_DATA, { optional: true });
+  private dialogData = inject(MAT_DIALOG_DATA, {optional: true});
 
   // Icônes
   readonly GraduationCap = GraduationCap;
@@ -59,40 +59,39 @@ export class LevelFormComponent implements OnInit {
         cycleId: level.cycleId || (level as any).cycle?.id
       });
     } else if (this.dialogData?.cycleId) {
-      this.levelForm.patchValue({ cycleId: this.dialogData.cycleId });
+      this.levelForm.patchValue({cycleId: this.dialogData.cycleId});
     }
   }
 
-  async loadCycles() {
-    try {
-      const data = await firstValueFrom(this.academicService.getCycles());
-      this.cycles.set(data);
-    } catch (error) {
-      this.notificationService.error("Impossible de charger les cycles.");
-    }
+  loadCycles() {
+    this.academicService.getCycles().subscribe({
+      next: (data) => this.cycles.set(data),
+      error: () => this.notificationService.error("Impossible de charger les cycles.")
+    });
   }
 
-  async onSave() {
+  onSave() {
     if (this.levelForm.invalid) {
       this.levelForm.markAllAsTouched();
       return;
     }
 
     this.isLoading.set(true);
-    try {
-      if (this.isEditMode) {
-        await firstValueFrom(this.academicService.updateLevel(this.dialogData.level.id, this.levelForm.value));
-        this.notificationService.success('Le niveau a été mis à jour.');
-      } else {
-        await firstValueFrom(this.academicService.createLevel(this.levelForm.value));
-        this.notificationService.success('Le niveau a été créé avec succès.');
+    const operation$ = this.isEditMode
+      ? this.academicService.updateLevel(this.dialogData.level.id, this.levelForm.value)
+      : this.academicService.createLevel(this.levelForm.value);
+
+    operation$.pipe(
+      finalize(() => this.isLoading.set(false))
+    ).subscribe({
+      next: () => {
+        this.notificationService.success(this.isEditMode ? 'Le niveau a été mis à jour.' : 'Le niveau a été créé avec succès.');
+        this.dialogRef.close(true);
+      },
+      error: () => {
+        this.notificationService.error("Erreur lors de l'enregistrement du niveau.");
       }
-      this.dialogRef.close(true);
-    } catch (error) {
-      this.notificationService.error("Erreur lors de l'enregistrement du niveau.");
-    } finally {
-      this.isLoading.set(false);
-    }
+    });
   }
 
   onCancel() {
