@@ -10,6 +10,8 @@ import { AuthService } from './core/services/auth.service';
 import {provideToastr} from 'ngx-toastr';
 import { TitleStrategy } from '@angular/router';
 import { PageTitleStrategy } from './core/services/page-title-strategy.service';
+import { ENVIRONMENT_CONFIG } from '../environments/environment.interface';
+import { environment } from '../environments/environment';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -18,6 +20,10 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideAnimationsAsync(),
     provideHttpClient(withInterceptors([loadingInterceptor, tenantInterceptor])),
+    {
+      provide: ENVIRONMENT_CONFIG,
+      useValue: environment
+    },
     {
       provide: TitleStrategy,
       useClass: PageTitleStrategy

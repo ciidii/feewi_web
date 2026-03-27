@@ -1,3 +1,7 @@
+import { InjectionToken } from '@angular/core';
+
+export const ENVIRONMENT_CONFIG = new InjectionToken<Environment>('ENVIRONMENT_CONFIG');
+
 export interface Environment {
   production: boolean;
   apiUrl: string;
