@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { NavigationStateService } from '../../services/navigation-state.service';
 import { AuthService } from '../../services/auth.service';
 import { MatButtonModule } from '@angular/material/button';
+import { MatMenuModule } from '@angular/material/menu';
 import {
   LucideAngularModule,
   ChevronLeft,
@@ -20,13 +21,16 @@ import {
   Globe,
   BarChart3,
   History,
-  Layers
+  Layers,
+  UserPlus,
+  UserCheck,
+  ChevronDown
 } from 'lucide-angular';
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, LucideAngularModule, RouterModule],
+  imports: [CommonModule, MatButtonModule, MatMenuModule, LucideAngularModule, RouterModule],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss'
 })
@@ -35,6 +39,9 @@ export class SidebarComponent {
   auth = inject(AuthService);
 
   readonly Plus = Plus;
+  readonly UserPlus = UserPlus;
+  readonly UserCheck = UserCheck;
+  readonly ChevronDown = ChevronDown;
   readonly ChevronLeft = ChevronLeft;
   readonly ChevronRight = ChevronRight;
   readonly ShieldCheck = ShieldCheck;
@@ -43,7 +50,7 @@ export class SidebarComponent {
   // --- 1. ENROLLMENT SERVICE (Opérationnel) ---
   enrollmentItems = [
     { label: 'Admissions', icon: Briefcase, route: '/admissions' },
-    { label: 'Portail Public', icon: Globe, route: '/public/enroll' },
+    { label: 'Paramètres Portail', icon: Globe, route: '/admissions/settings' },
   ];
 
   // --- 2. STUDENT REGISTRY (Référentiel) ---

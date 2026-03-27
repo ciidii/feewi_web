@@ -8,7 +8,7 @@ import {
   User, Mail, Phone, MapPin, FileText,
   CreditCard, Pencil, MoreVertical, Eye,
   Plus, MessageSquare, History, File,
-  FileImage, FileSpreadsheet, RefreshCw, ClipboardCheck, GraduationCap
+  FileImage, FileSpreadsheet, RefreshCw, ClipboardCheck, GraduationCap, Info
 } from 'lucide-angular';
 import { firstValueFrom } from 'rxjs';
 
@@ -42,7 +42,7 @@ export class AdmissionDetailComponent implements OnInit {
   application = signal<AdmissionApplication | null>(null);
   isLoading = signal(true);
   isActionLoading = signal(false);
-  
+
   levels = signal<Level[]>([]);
   filieres = signal<Filiere[]>([]);
 
@@ -61,6 +61,31 @@ export class AdmissionDetailComponent implements OnInit {
     const app = this.application();
     if (!app || !app.filiereId) return null;
     return this.filieres().find(f => f.id === app.filiereId)?.name || 'Filière inconnue';
+  });
+
+  // Checklist de validation pour la direction
+  isReadyForFinalValidation = computed(() => {
+    const app = this.application();
+    if (!app || app.status !== 'TESTING') return false;
+
+    // 1. Tous les documents obligatoires doivent être reçus
+    const mandatoryDocs = app.documents.filter(d => d.mandatory);
+    const allDocsOk = mandatoryDocs.every(d => d.status === 'UPLOADED' || d.status === 'PHYSICAL_RECEIVED');
+
+    // 2. L'évaluation doit avoir été saisie
+    const assessmentOk = !!app.assessment && !!app.assessment.decision;
+
+    return allDocsOk && assessmentOk;
+  });
+
+  mandatoryDocsSummary = computed(() => {
+    const app = this.application();
+    if (!app) return { total: 0, received: 0 };
+    const mandatory = app.documents.filter(d => d.mandatory);
+    return {
+      total: mandatory.length,
+      received: mandatory.filter(d => d.status === 'UPLOADED' || d.status === 'PHYSICAL_RECEIVED').length
+    };
   });
 
   // --- ÉVALUATION (Local state avant soumission) ---
@@ -104,7 +129,7 @@ export class AdmissionDetailComponent implements OnInit {
       this.application.set(data);
       this.levels.set(levels);
       this.filieres.set(filieres);
-      
+
       // Pré-remplir l'évaluation si elle existe déjà
       if (data.assessment) {
         this.evaluationGrades.set(data.assessment.grades);
@@ -211,7 +236,7 @@ export class AdmissionDetailComponent implements OnInit {
    */
   async previewDocument(doc: RequiredDocument) {
     if (doc.status === 'MISSING') return;
-    
+
     this.selectedDoc.set(doc);
     this.showDocumentViewer.set(true);
     this.selectedDocUrl.set(null);
@@ -260,4 +285,5 @@ export class AdmissionDetailComponent implements OnInit {
   readonly FileImage = FileImage;
   readonly FileSpreadsheet = FileSpreadsheet;
   readonly RefreshCw = RefreshCw;
+  protected readonly Info = Info;
 }

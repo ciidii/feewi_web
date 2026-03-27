@@ -1,8 +1,9 @@
-import { Component, inject, signal, ViewEncapsulation, OnInit, computed } from '@angular/core';
+import { Component, inject, signal, ViewEncapsulation, OnInit, computed, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { LucideAngularModule, Filter, Download, Layers, Clock, ShieldCheck, UserCheck, Eye, CheckCircle, XCircle, RefreshCw } from 'lucide-angular';
-import { firstValueFrom } from 'rxjs';
+import { LucideAngularModule, Filter, Download, Layers, Clock, ShieldCheck, UserCheck, Eye, CheckCircle, XCircle, RefreshCw, Search, UserPlus, ChevronDown } from 'lucide-angular';
+import { firstValueFrom, Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
+import { MatMenuModule } from '@angular/material/menu';
 
 import { DataListComponent } from '../../../../../shared/components/data-list/data-list.component';
 import { RowAction, TabItem, TableRow } from '../../../../../shared/models/data-list.models';
@@ -12,12 +13,12 @@ import { AdmissionApplication, AdmissionStatus } from '../../../../../core/model
 @Component({
   selector: 'app-admissions',
   standalone: true,
-  imports: [CommonModule, DataListComponent, LucideAngularModule],
+  imports: [CommonModule, DataListComponent, LucideAngularModule, MatMenuModule],
   templateUrl: './admission-list.component.html',
   styleUrl: './admission-list.component.scss',
   encapsulation: ViewEncapsulation.None
 })
-export class AdmissionsComponent implements OnInit {
+export class AdmissionsComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private enrollmentAdminService = inject(EnrollmentAdminService);
 
@@ -25,11 +26,19 @@ export class AdmissionsComponent implements OnInit {
   readonly Download = Download;
   readonly Layers = Layers;
   readonly RefreshCw = RefreshCw;
+  readonly Search = Search;
+  readonly ChevronDown = ChevronDown;
+  readonly UserPlus = UserPlus;
+  readonly UserCheck = UserCheck;
 
   // --- ÉTATS ---
   activeTab = signal('Tous');
   rawApplications = signal<AdmissionApplication[]>([]);
+  searchQuery = signal('');
   isLoading = signal(false);
+
+  private searchSubject = new Subject<string>();
+  private destroy$ = new Subject<void>();
 
   // --- LOGIQUE DE FILTRAGE ---
   filteredAdmissions = computed(() => {
@@ -63,12 +72,36 @@ export class AdmissionsComponent implements OnInit {
 
   async ngOnInit() {
     await this.loadAdmissions();
+
+    // Setup search debounce
+    this.searchSubject.pipe(
+      debounceTime(400),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$)
+    ).subscribe(query => {
+      this.loadAdmissions(query);
+    });
   }
 
-  async loadAdmissions() {
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  onSearchChange(event: Event) {
+    const query = (event.target as HTMLInputElement).value;
+    this.searchQuery.set(query);
+    this.searchSubject.next(query);
+  }
+
+  async loadAdmissions(query?: string) {
     this.isLoading.set(true);
     try {
-      const data = await firstValueFrom(this.enrollmentAdminService.getApplications());
+      const request = query
+        ? this.enrollmentAdminService.searchApplications(query)
+        : this.enrollmentAdminService.getApplications();
+
+      const data = await firstValueFrom(request);
       this.rawApplications.set(data || []);
     } catch (e) {
       console.error('Erreur lors du chargement des admissions:', e);
@@ -131,4 +164,5 @@ export class AdmissionsComponent implements OnInit {
       // Les actions comme valider/rejeter seront implémentées dans le détail ou ici plus tard
     }
   }
+
 }

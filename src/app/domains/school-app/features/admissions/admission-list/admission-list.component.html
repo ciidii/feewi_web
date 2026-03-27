@@ -7,13 +7,22 @@
       <p class="page-subtitle">Suivez et validez les dossiers d'inscription des nouveaux élèves.</p>
     </div>
     <div class="header-actions">
-      <button class="btn-refresh-sync" (click)="loadAdmissions()" [disabled]="isLoading()">
+      <div class="search-field">
+        <lucide-icon [name]="Search" [size]="18"></lucide-icon>
+        <input 
+          type="text" 
+          placeholder="Référence, Nom du candidat..." 
+          (input)="onSearchChange($event)"
+          [value]="searchQuery()">
+      </div>
+      
+      <button class="btn-action" (click)="loadAdmissions(searchQuery())" [disabled]="isLoading()">
         <lucide-icon [name]="RefreshCw" [size]="18" [class.animate-spin]="isLoading()"></lucide-icon>
-        Actualiser
+        <span>Actualiser</span>
       </button>
-      <button class="btn-secondary">
+
+      <button class="btn-action" title="Exporter les données">
         <lucide-icon [name]="Download" [size]="18"></lucide-icon>
-        Exporter CSV
       </button>
     </div>
   </header>

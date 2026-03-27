@@ -90,6 +90,28 @@ html { height: 100%; }
   background: white !important;
 }
 
+/* GLOBAL MATERIAL MENU FIX (REMOVES TRANSPARENCY) */
+.mat-mdc-menu-panel {
+  background-color: var(--fw-white) !important;
+  border: 1px solid var(--fw-border) !important;
+  box-shadow: var(--fw-shadow-md) !important;
+  border-radius: var(--fw-radius-md) !important;
+  min-width: 200px !important;
+}
+
+.mat-mdc-menu-item {
+  .mdc-list-item__primary-text {
+    font-family: var(--fw-font-sans) !important;
+    font-size: 0.875rem !important;
+    color: var(--fw-midnight) !important;
+    font-weight: 500 !important;
+  }
+
+  &:hover:not([disabled]) {
+    background-color: var(--fw-ice) !important;
+  }
+}
+
 // Personnalisation des toasts
 .toast-container {
   .ngx-toastr {

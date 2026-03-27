@@ -32,14 +32,26 @@
     <!-- Hero Button École (Contextuel : seulement pour Enrollment ou Dashboard) -->
     <div *ngIf="['dashboard', 'enrollment'].includes(navService.activeService())" class="p-4 flex justify-center shrink-0">
       <button 
-        routerLink="/admissions"
+        [matMenuTriggerFor]="sidebarEnrollMenu"
         class="flex items-center bg-white border border-border-subtle shadow-sm hover:shadow-md transition-all rounded-2xl h-14 w-full group active:scale-95 overflow-hidden"
         [class.justify-center]="!navService.isSidebarExpanded()"
         [class.px-6]="navService.isSidebarExpanded()"
       >
         <lucide-icon [name]="Plus" class="w-6 h-6 text-primary stroke-[3px] shrink-0"></lucide-icon>
         <span *ngIf="navService.isSidebarExpanded()" class="ml-3 text-sm font-bold text-midnight whitespace-nowrap">Nouvelle Inscription</span>
+        <lucide-icon *ngIf="navService.isSidebarExpanded()" [name]="ChevronDown" class="ml-auto w-4 h-4 text-slate-medium opacity-50"></lucide-icon>
       </button>
+
+      <mat-menu #sidebarEnrollMenu="matMenu" class="feewi-mat-menu">
+        <button mat-menu-item routerLink="/public/enroll">
+          <lucide-icon [name]="UserPlus" [size]="18" class="mr-3"></lucide-icon>
+          <span>Nouveau candidat</span>
+        </button>
+        <button mat-menu-item routerLink="/admissions/re-enroll">
+          <lucide-icon [name]="UserCheck" [size]="18" class="mr-3"></lucide-icon>
+          <span>Réinscription (Ancien élève)</span>
+        </button>
+      </mat-menu>
     </div>
 
     <nav class="flex-1 px-3 py-2 space-y-1 overflow-y-auto custom-scrollbar">

@@ -1,3 +1,183 @@
 :host {
   display: block;
 }
+
+.feewi-page-container {
+  padding: 2rem;
+  background-color: var(--fw-ice);
+  min-height: 100vh;
+}
+
+.feewi-page-header {
+  margin-bottom: 2.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  border-bottom: 1px solid var(--fw-border);
+  padding-bottom: 1.5rem;
+
+  .header-left {
+    .page-title {
+      font-family: var(--fw-font-display);
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--fw-midnight);
+      margin: 0;
+      letter-spacing: -0.02em;
+    }
+
+    .page-subtitle {
+      font-size: 0.95rem;
+      color: var(--fw-slate-medium);
+      margin: 0.5rem 0 0;
+      font-weight: 450;
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    .search-field {
+      position: relative;
+      display: flex;
+      align-items: center;
+      background: var(--fw-white);
+      border: 1px solid var(--fw-border);
+      height: 40px;
+      border-radius: var(--fw-radius-md);
+      padding: 0 0.875rem;
+      width: 280px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--fw-shadow-sm);
+
+      lucide-icon {
+        color: var(--fw-slate-medium);
+        margin-right: 0.625rem;
+        transition: color 0.2s;
+      }
+
+      input {
+        border: none;
+        background: transparent;
+        font-size: 0.875rem;
+        width: 100%;
+        color: var(--fw-midnight);
+        font-weight: 500;
+
+        &::placeholder {
+          color: var(--fw-slate-medium);
+          opacity: 0.6;
+        }
+
+        &:focus {
+          outline: none;
+        }
+      }
+
+      &:focus-within {
+        border-color: var(--fw-primary);
+        box-shadow: 0 0 0 3px var(--fw-primary-alpha);
+        
+        lucide-icon {
+          color: var(--fw-primary);
+        }
+      }
+    }
+
+    .btn-action {
+      height: 40px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0 1rem;
+      border-radius: var(--fw-radius-md);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid var(--fw-border);
+      background: var(--fw-white);
+      color: var(--fw-slate-medium);
+      box-shadow: var(--fw-shadow-sm);
+
+      &:hover:not(:disabled) {
+        background: var(--fw-ice);
+        border-color: var(--fw-slate-medium);
+        color: var(--fw-midnight);
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      &.primary {
+        background: var(--fw-primary);
+        border-color: var(--fw-primary);
+        color: var(--fw-white);
+        box-shadow: 0 2px 4px var(--fw-primary-alpha);
+
+        &:hover {
+          background: var(--fw-primary-hover);
+          transform: translateY(-1px);
+          box-shadow: 0 4px 8px var(--fw-primary-alpha);
+        }
+      }
+
+      lucide-icon {
+        transition: transform 0.3s;
+      }
+    }
+
+    .action-divider {
+      width: 1px;
+      height: 24px;
+      background: var(--fw-border);
+      margin: 0 0.25rem;
+    }
+  }
+}
+
+// Utility classes for header/menu
+.ml-1 { margin-left: 0.25rem; }
+.mr-3 { margin-right: 0.75rem; }
+.opacity-70 { opacity: 0.7; }
+
+::ng-deep .feewi-mat-menu {
+  margin-top: 8px;
+  border-radius: var(--fw-radius-md) !important;
+  border: 1px solid var(--fw-border) !important;
+  box-shadow: var(--fw-shadow-md) !important;
+  
+  .mat-mdc-menu-content {
+    padding: 4px 0 !important;
+  }
+
+  button {
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    color: var(--fw-midnight) !important;
+    display: flex !important;
+    align-items: center !important;
+    height: 44px !important;
+
+    &:hover {
+      background-color: var(--fw-ice) !important;
+      color: var(--fw-primary) !important;
+    }
+
+    lucide-icon {
+      color: var(--fw-slate-medium);
+    }
+  }
+}
+
+.page-content {
+  background: var(--fw-white);
+  border-radius: var(--fw-radius-lg);
+  border: 1px solid var(--fw-border);
+  box-shadow: var(--fw-shadow-sm);
+  overflow: hidden;
+}

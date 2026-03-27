@@ -17,7 +17,7 @@ export class EnrollmentPublicService {
   private http = inject(HttpClient);
   private tenantContext = inject(TenantContextService);
   
-  private readonly baseUrl = 'http://localhost:8080/enrollment/api/v1/public/applications';
+  private readonly baseUrl = '/enrollment/api/v1/public/applications';
 
   private getHeaders(): HttpHeaders {
     const tenantId = this.tenantContext.activeTenant()?.id;
@@ -29,7 +29,7 @@ export class EnrollmentPublicService {
   }
 
   createApplication(request: ApplicationCreateRequest): Observable<AdmissionApplication> {
-    return this.http.post<AdmissionApplication>(this.baseUrl, request, {
+    return this.http.post<AdmissionApplication>(`${this.baseUrl}/`, request, {
       headers: this.getHeaders()
     });
   }
@@ -48,10 +48,14 @@ export class EnrollmentPublicService {
     return this.http.patch<AdmissionApplication>(`${this.baseUrl}/${applicationId}/guardians`, guardian);
   }
 
-  uploadDocument(applicationId: string, docCode: string, fileId: string): Observable<AdmissionApplication> {
+  updateSubscriptions(applicationId: string, subscriptions: any[]): Observable<AdmissionApplication> {
+    return this.http.patch<AdmissionApplication>(`${this.baseUrl}/${applicationId}/subscriptions`, subscriptions);
+  }
+
+  uploadDocument(applicationId: string, docCode: string, fileUrl: string): Observable<AdmissionApplication> {
     return this.http.post<AdmissionApplication>(
       `${this.baseUrl}/${applicationId}/documents/${docCode}`, 
-      JSON.stringify(fileId), 
+      JSON.stringify(fileUrl), 
       { headers: new HttpHeaders().set('Content-Type', 'application/json') }
     );
   }
@@ -61,7 +65,19 @@ export class EnrollmentPublicService {
     return this.http.get<AdmissionApplication>(`${this.baseUrl}/${reference}/track`, { params });
   }
 
+  getMyApplications(email: string): Observable<AdmissionApplication[]> {
+    const params = new HttpParams().set('email', email);
+    return this.http.get<AdmissionApplication[]>(`${this.baseUrl}/mine`, { 
+      headers: this.getHeaders(),
+      params 
+    });
+  }
+
   submitApplication(applicationId: string): Observable<AdmissionApplication> {
     return this.http.post<AdmissionApplication>(`${this.baseUrl}/${applicationId}/submit`, {});
+  }
+
+  cancelApplication(applicationId: string): Observable<AdmissionApplication> {
+    return this.http.post<AdmissionApplication>(`${this.baseUrl}/${applicationId}/cancel`, {});
   }
 }

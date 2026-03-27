@@ -1,124 +1,178 @@
 # Référence API : Enrollment Service (Admissions)
 
-Ce document est le contrat d'interface entre le Backend et le Frontend (Angular/Mobile).
+Ce document est le contrat d'interface technique exhaustif entre le Backend et les Frontends (Portail Parent, Administration, Mobile).
 
 ---
 
-## 1. Principes d'Authentification
+## 1. Principes d'Authentification & Headers
 
-| Espace | Authentification | Header |
+| Espace | Authentification | Headers Requis |
 | :--- | :--- | :--- |
-| **Portail Parent** | Anonyme | `X-Tenant-Id: <ID_ECOLE>` |
+| **Portail Parent** | Publique (Anonyme) | `X-Tenant-Id: <ID_ECOLE>` |
 | **Portail Admin** | Bearer Token (JWT) | `Authorization: Bearer <TOKEN>` |
+| **Général** | Multi-tenancy | `X-Tenant-Id` (injecté par la Gateway pour l'Admin) |
 
 ---
 
-## 2. Cycle de Vie et Endpoints (Step-by-Step)
+## 2. API Publique (Portail Parent)
+Base URL : `/enrollment/api/v1/public/applications`
 
-### ÉTAPE 1 : Initialisation (Lead Capture)
-**Le parent crée son dossier en fournissant ses propres coordonnées.**
-
-*   **URL** : `POST /enrollment/api/v1/public/applications`
-*   **Payload** :
+### 2.1 Création d'un dossier (Initialisation)
+*   **URL** : `POST /`
+*   **Description** : Crée un nouveau dossier au statut `DRAFT`.
+*   **Payload (`CreateApplicationRequest`)** :
     ```json
     {
-      "tenantId": "ecole-excellence",
-      "type": "NEW",
+      "tenantId": "string",
+      "type": "NEW | RE_ENROLLMENT",
       "academicYearId": "uuid",
+      "levelId": "uuid (optionnel)",
+      "filiereId": "uuid (optionnel)",
       "primaryGuardian": {
-        "firstName": "Ibrahima",
-        "lastName": "Diallo",
-        "email": "ibra.diallo@test.com",
-        "phone": "+221771234567",
-        "relation": "FATHER"
+        "firstName": "string",
+        "lastName": "string",
+        "email": "string",
+        "phone": "string",
+        "relation": "FATHER | MOTHER | GUARDIAN"
       }
     }
     ```
+*   **Réponse** : `ApplicationResponse` (201 Created)
 
-### ÉTAPE 2 : Informations du Candidat & Niveau
-**Le parent ajoute les informations de l'enfant et choisit le niveau scolaire.**
+### 2.2 Réinscription simplifiée
+*   **URL** : `POST /re-enroll`
+*   **Description** : Initialise un dossier pré-rempli pour un élève déjà inscrit.
+*   **Payload (`ReEnrollRequest`)** :
+    ```json
+    {
+      "tenantId": "string",
+      "studentId": "uuid",
+      "academicYearId": "uuid",
+      "nextLevelId": "uuid"
+    }
+    ```
 
-*   **URL** : `PATCH /enrollment/api/v1/public/applications/{id}/candidate`
-*   **Payload** :
+### 2.3 Mise à jour du Candidat
+*   **URL** : `PATCH /{id}/candidate`
+*   **Payload (`CandidateRequest`)** :
     ```json
     {
       "info": {
-        "firstName": "Samba",
-        "lastName": "Diop",
-        "gender": "MALE",
-        "birthDate": "2016-08-20",
-        "birthPlace": "Saint-Louis",
-        "nationality": "Sénégalaise"
+        "firstName": "string",
+        "lastName": "string",
+        "gender": "MALE | FEMALE",
+        "birthDate": "YYYY-MM-DD",
+        "birthPlace": "string",
+        "nationality": "string"
       },
       "levelId": "uuid",
       "filiereId": "uuid (optionnel)"
     }
     ```
 
-### ÉTAPE 3 : Pièces Jointes (Upload)
-**Le parent ou le secrétaire uploade les scans des documents requis.**
+### 2.4 Mise à jour du Responsable
+*   **URL** : `PATCH /{id}/guardians`
+*   **Payload** : `GuardianInfo` (voir section 5)
 
-*   **URL** : `POST /enrollment/api/v1/public/applications/{id}/documents/{docCode}`
-*   **Path Variable `{docCode}`** : `EXT` (Extrait), `BUL` (Bulletin), `PHOTO` (Photo).
-*   **Body** : `String` (URL brute du fichier après upload sur le Document Engine).
-*   **Exemple** : `"https://storage.feewi.com/docs/extrait_samba.pdf"`
+### 2.5 Gestion des Services (Cantine, Transport)
+*   **URL** : `PATCH /{id}/subscriptions`
+*   **Payload** : `List<ServiceSubscription>`
+    ```json
+    [
+      { "serviceCode": "CANTEEN", "optionCode": "DEMI_PENSION" },
+      { "serviceCode": "TRANSPORT", "optionCode": "ZONE_1" }
+    ]
+    ```
 
-### ÉTAPE 4 : Suivi (Tracking)
-**Le parent revient sur son dossier plus tard via son code secret.**
+### 2.6 Téléchargement de Document
+*   **URL** : `POST /{id}/documents/{docCode}`
+*   **Body** : `String` (URL brute du fichier stocké)
 
-*   **URL** : `GET /enrollment/api/v1/public/applications/{reference}/track?accessCode={code}`
-*   **Response Body (TS)** : `ApplicationResponse`
+### 2.7 Soumission & Annulation
+*   **Soumettre** : `POST /{id}/submit` (Passe à `SUBMITTED`)
+*   **Annuler** : `POST /{id}/cancel` (Passe à `CANCELLED`)
 
-### ÉTAPE 5 : Soumission Finale
-**Le parent valide l'envoi définitif du dossier.**
-
-*   **URL** : `POST /enrollment/api/v1/public/applications/{id}/submit`
-*   **Action** : Le dossier passe de `DRAFT` à `SUBMITTED`.
+### 2.8 Suivi & Récupération
+*   **Suivi Direct** : `GET /{reference}/track?accessCode={code}`
+*   **Mes Dossiers** : `GET /mine?email={email}` (Nécessite Header `X-Tenant-Id`)
 
 ---
 
-## 3. Endpoints Administration (Secrétariat & Direction)
+## 3. API Administration (Secrétariat & Admissions)
+Base URL : `/enrollment/api/v1/admin/applications`
 
-### Liste des dossiers à traiter
-*   **URL** : `GET /enrollment/api/v1/admin/applications`
-*   **Response Body** : `List<AdminApplicationResponse>`
+### 3.1 Consultation & Recherche
+*   **Liste tous** : `GET /`
+*   **Recherche** : `GET /search?q={query}` (Nom, Prénom, Réf)
+*   **Détail/Récépissé** : `GET /{id}/receipt`
 
-### Réception physique (Guichet)
-*   **URL** : `PATCH /enrollment/api/v1/admin/applications/{id}/documents/{docCode}/receive`
-*   **Action** : Marque le document comme `PHYSICAL_RECEIVED`.
+### 3.2 Saisie Directe (Guichet)
+*   **URL** : `POST /direct`
+*   **Payload (`FastEntryRequest`)** : Fusion de `CreateApplicationRequest` + `CandidateInfo`. Crée un dossier directement en statut `SUBMITTED`.
 
-### Évaluation Pédagogique
-*   **URL** : `PATCH /enrollment/api/v1/admin/applications/{id}/assessment`
-*   **Request Body (TS)** : `Assessment`
-*   **Exemple JSON** :
+### 3.3 Traitement Opérationnel
+*   **Évaluation** : `PATCH /{id}/assessment`
     ```json
     {
-      "grades": { "Français": 14, "Maths": 16 },
-      "comments": "Excellent profil",
-      "decision": "ADMITTED",
+      "grades": { "Maths": 15.5, "Français": 14.0 },
+      "comments": "Texte libre",
+      "decision": "ADMITTED | REFUSED | WAITLISTED",
       "recommendedLevelId": "uuid"
     }
     ```
-
-### Validation Finale (Direction)
-*   **URL** : `PATCH /enrollment/api/v1/admin/direction/applications/{id}/validate`
-*   **Vérification** : Échoue si des documents obligatoires ne sont pas `UPLOADED`.
+*   **Réception Physique** : `PATCH /{id}/documents/{docCode}/receive`
+*   **Vérification Admin** : `PATCH /{id}/verify` (Passe à `VERIFIED`)
+*   **Annulation Admin** : `POST /{id}/cancel`
 
 ---
 
-## 4. Interfaces TypeScript (Modèles Angular)
+## 4. API Direction (Validation Stratégique)
+Base URL : `/enrollment/api/v1/admin/direction/applications`
 
+| Méthode | Endpoint | Description |
+| :--- | :--- | :--- |
+| `PATCH` | `/{id}/validate` | Validation finale (Admission confirmée). |
+| `PATCH` | `/{id}/reject` | Refus définitif (Body: `String` raison). |
+| `PATCH` | `/{id}/waitlist` | Mise en liste d'attente. |
+| `POST` | `/bulk-validate` | Validation par lot (Body: `List<UUID>`). |
+
+---
+
+## 5. Modèles de Données (TypeScript / DTOs)
+
+### 5.1 ApplicationResponse (Vue Parent)
 ```typescript
 export interface ApplicationResponse {
   id: string;
   reference: string;
-  accessCode?: string;
-  status: 'DRAFT' | 'SUBMITTED' | 'VERIFIED' | 'TESTING' | 'VALIDATED' | 'REJECTED';
+  accessCode?: string; // Uniquement à la création
+  type: 'NEW' | 'RE_ENROLLMENT';
+  status: ApplicationStatus;
   candidate: CandidateInfo;
-  primaryGuardian: GuardianInfo;
   documents: RequiredDocument[];
   trackerMessage: string;
+  createdAt: string;
+  updatedAt: string;
 }
+```
+
+### 5.2 AdminApplicationResponse (Vue Complète)
+```typescript
+export interface AdminApplicationResponse extends ApplicationResponse {
+  channel: 'DIGITAL' | 'DIRECT';
+  primaryGuardian: GuardianInfo;
+  wish: SchoolingWish;
+  assessment?: Assessment;
+  subscriptions: ServiceSubscription[];
+  customFields: Record<string, any>;
+}
+```
+
+### 5.3 Types de Base
+```typescript
+export type ApplicationStatus = 
+  | 'DRAFT' | 'SUBMITTED' | 'VERIFIED' | 'TESTING' 
+  | 'WAITLIST' | 'VALIDATED' | 'REJECTED' | 'CANCELLED';
 
 export interface GuardianInfo {
   firstName: string;
@@ -127,14 +181,16 @@ export interface GuardianInfo {
   phone: string;
   relation: 'FATHER' | 'MOTHER' | 'GUARDIAN';
   address?: string;
+  profession?: string;
 }
 
 export interface CandidateInfo {
   firstName: string;
   lastName: string;
   gender: 'MALE' | 'FEMALE';
-  birthDate: string; // YYYY-MM-DD
-  birthPlace?: string;
+  birthDate: string;
+  birthPlace: string;
+  nationality: string;
 }
 
 export interface RequiredDocument {
@@ -145,3 +201,19 @@ export interface RequiredDocument {
   fileUrl?: string;
 }
 ```
+
+---
+
+## 6. Gestion des Erreurs
+Le service retourne des objets `ErrorResponse` (4xx, 5xx) :
+```json
+{
+  "message": "Message d'erreur explicite",
+  "status": 400,
+  "timestamp": "2026-03-25T10:00:00Z",
+  "path": "/api/v1/..."
+}
+```
+
+---
+*Documentation Technique - Version 1.1 (Mars 2026)*

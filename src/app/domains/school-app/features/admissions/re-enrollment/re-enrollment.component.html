@@ -7,7 +7,10 @@
     </div>
     <div class="header-actions">
       <button class="btn-cancel" routerLink="/admissions"><lucide-icon [name]="X" [size]="18"></lucide-icon> Annuler</button>
-      <button class="btn-primary" [disabled]="!selectedStudent()" (click)="onSave()"><lucide-icon [name]="Save" [size]="18"></lucide-icon> Enregistrer la réinscription</button>
+      <button class="btn-primary" [disabled]="!selectedStudent() || isSaving()" (click)="onSave()">
+        <lucide-icon [name]="isSaving() ? RefreshCw : Save" [size]="18" [class.animate-spin]="isSaving()"></lucide-icon>
+        {{ isSaving() ? 'Enregistrement...' : 'Enregistrer la réinscription' }}
+      </button>
     </div>
   </header>
 
@@ -16,22 +19,30 @@
     <!-- Zone de recherche (Visible si aucun élève sélectionné) -->
     <section class="search-section card" *ngIf="!selectedStudent()">
       <div class="search-box">
-        <lucide-icon [name]="Search" [size]="20"></lucide-icon>
-        <input type="text" [(ngModel)]="searchQuery" placeholder="Rechercher un élève (Nom, Prénom ou Matricule)..." class="search-input">
+        <lucide-icon [name]="isLoading() ? RefreshCw : Search" [size]="20" [class.animate-spin]="isLoading()"></lucide-icon>
+        <input type="text" 
+               [ngModel]="searchQuery()" 
+               (ngModelChange)="onSearchChange($event)"
+               placeholder="Rechercher un élève (Nom, Prénom ou Email)..." 
+               class="search-input">
       </div>
 
-      <div class="results-list" *ngIf="filteredResults().length > 0">
-        @for (stu of filteredResults(); track stu.id) {
+      <div class="results-list" *ngIf="searchResults().length > 0">
+        @for (stu of searchResults(); track stu.id) {
           <div class="result-item" (click)="selectStudent(stu)">
             <div class="stu-avatar"><lucide-icon [name]="User" [size]="18"></lucide-icon></div>
             <div class="stu-info">
-              <span class="stu-name">{{ stu.name }}</span>
-              <span class="stu-meta">{{ stu.id }} • {{ stu.level }}</span>
+              <span class="stu-name">{{ stu.firstName }} {{ stu.lastName }}</span>
+              <span class="stu-meta">{{ stu.email }}</span>
             </div>
-            <div class="stu-parent">Parent : {{ stu.parent }}</div>
+            <div class="stu-parent">Tél : {{ stu.phone || 'Non renseigné' }}</div>
             <lucide-icon [name]="ArrowRight" [size]="18" class="text-slate-400"></lucide-icon>
           </div>
         }
+      </div>
+      
+      <div class="empty-results" *ngIf="searchQuery().length >= 2 && searchResults().length === 0 && !isLoading()">
+        Aucun élève trouvé pour cette recherche.
       </div>
     </section>
 
@@ -44,18 +55,18 @@
           <div class="card-title">Élève Sélectionné</div>
           <div class="student-summary">
             <div class="stu-name">{{ selectedStudent().name }}</div>
-            <div class="stu-id">Matricule : {{ selectedStudent().id }}</div>
+            <div class="stu-id">Email : {{ selectedStudent().email }}</div>
             <button class="btn-change" (click)="selectedStudent.set(null)">Changer d'élève</button>
           </div>
 
           <div class="promotion-flow">
             <div class="level-box">
-              <span class="label">Niveau {{ 2025 }}</span>
+              <span class="label">Niveau Actuel</span>
               <span class="val">{{ selectedStudent().level }}</span>
             </div>
             <lucide-icon [name]="ArrowRight" [size]="24" class="text-primary"></lucide-icon>
             <div class="level-box highlight">
-              <span class="label">Niveau {{ 2026 }}</span>
+              <span class="label">Réinscription {{ selectedStudent().academicYearLabel }}</span>
               <span class="val">{{ selectedStudent().nextLevel }}</span>
             </div>
           </div>

@@ -153,6 +153,29 @@
 
       <!-- Section : Évaluation Pédagogique -->
       @if (['VERIFIED', 'TESTING', 'VALIDATED'].includes(app.status)) {
+        <!-- Bandeau de synthèse pour la Direction (visible uniquement si prêt ou en cours de décision) -->
+        @if (app.status === 'TESTING') {
+          <div class="validation-summary-card" [class.ready]="isReadyForFinalValidation()">
+            <div class="summary-header">
+              <lucide-icon [name]="isReadyForFinalValidation() ? CheckCircle : Info" [size]="24"></lucide-icon>
+              <div class="summary-title">
+                <h3>Vérification avant Admission</h3>
+                <p>{{ isReadyForFinalValidation() ? 'Tous les critères sont remplis pour valider l\'admission.' : 'Certains critères sont encore en attente.' }}</p>
+              </div>
+            </div>
+            <div class="checklist">
+              <div class="check-item" [class.ok]="mandatoryDocsSummary().received === mandatoryDocsSummary().total">
+                <lucide-icon [name]="CheckCircle" [size]="16"></lucide-icon>
+                <span>Documents obligatoires : {{ mandatoryDocsSummary().received }} / {{ mandatoryDocsSummary().total }} reçus</span>
+              </div>
+              <div class="check-item" [class.ok]="!!app.assessment">
+                <lucide-icon [name]="CheckCircle" [size]="16"></lucide-icon>
+                <span>Évaluation pédagogique saisie</span>
+              </div>
+            </div>
+          </div>
+        }
+
         <div class="card card-elevated highlight-border">
           <div class="card-header">
             <lucide-icon [name]="History" [size]="18" class="text-primary"></lucide-icon>

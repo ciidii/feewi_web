@@ -23,6 +23,11 @@ export const SCHOOL_APP_ROUTES: Routes = [
         path: 're-enrollment',
         title: 'Réinscription Administrative',
         loadComponent: () => import('./features/admissions/re-enrollment/re-enrollment.component').then(m => m.SecretaryReEnrollmentComponent)
+      },
+      {
+        path: 'settings',
+        title: 'Configuration Portail',
+        loadComponent: () => import('./features/admissions/admission-config/admission-config.component').then(m => m.AdmissionConfigComponent)
       }
     ]
   },
