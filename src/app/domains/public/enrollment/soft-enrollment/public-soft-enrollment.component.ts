@@ -20,7 +20,7 @@ import {
   Calendar,
   Info
 } from 'lucide-angular';
-import { firstValueFrom } from 'rxjs';
+import { delay, finalize, firstValueFrom, of } from 'rxjs';
 
 import { EnrollmentPublicService } from '../../../../core/services/enrollment-public.service';
 import { AcademicService } from '../../../../core/services/academic.service';
@@ -58,25 +58,23 @@ export class SoftEnrollmentComponent implements OnInit {
   // Simulation d'une application de réinscription créée
   application = signal<AdmissionApplication | null>(null);
 
-  async ngOnInit() {
-    try {
-      const year = await this.academicService.getCurrentYear();
-      this.activeYear.set(year);
-    } catch (e) {
-      console.warn('Erreur chargement année académique');
-    }
+  ngOnInit() {
+    this.academicService.getCurrentYear().subscribe({
+      next: (year) => this.activeYear.set(year),
+      error: () => console.warn('Erreur chargement année académique')
+    });
   }
 
   /**
    * ÉTAPE 1 : Rechercher l'élève dans la base
    */
-  async findStudent() {
+  findStudent() {
     this.isLoading.set(true);
-    try {
-      // Simuler un délai réseau
-      await new Promise(resolve => setTimeout(resolve, 800));
-
-      // On simule une réponse positive pour la démo
+    // Simulation d'un délai réseau réactif
+    of(null).pipe(
+      delay(800),
+      finalize(() => this.isLoading.set(false))
+    ).subscribe(() => {
       this.student.set({
         id: 'STU-2024-089',
         firstName: 'Moussa',
@@ -86,43 +84,36 @@ export class SoftEnrollmentComponent implements OnInit {
         guardianName: 'Awa Faye',
         guardianPhone: '+221 77 123 45 67'
       });
-
       this.currentStep.set('CONFIRM');
-    } catch (e) {
-      alert('Élève introuvable avec ces informations.');
-    } finally {
-      this.isLoading.set(false);
-    }
+    });
   }
 
   /**
    * ÉTAPE 2 : Confirmer la réinscription (Appel API métier)
    */
-  async confirmReEnrollment() {
+  confirmReEnrollment() {
     const studentData = this.student();
     const yearId = this.activeYear()?.id;
 
     if (!studentData || !yearId) return;
 
     this.isLoading.set(true);
-    try {
-      const payload = {
-        studentId: studentData.id,
-        academicYearId: yearId,
-        nextLevelId: 'level-uuid-mocked' // En prod, l'API le déduira ou on le passera
-      };
-
-      const res = await firstValueFrom(this.enrollmentService.reEnroll(payload));
-      if (res) {
+    this.enrollmentService.reEnroll({
+      studentId: studentData.id,
+      academicYearId: yearId,
+      nextLevelId: 'level-uuid-mocked'
+    }).pipe(
+      finalize(() => this.isLoading.set(false))
+    ).subscribe({
+      next: (res) => {
         this.application.set(res);
         this.currentStep.set('SUCCESS');
+      },
+      error: (e) => {
+        console.error('Erreur lors de la réinscription:', e);
+        alert('Impossible de valider la réinscription pour le moment.');
       }
-    } catch (e) {
-      console.error('Erreur lors de la réinscription:', e);
-      alert('Impossible de valider la réinscription pour le moment.');
-    } finally {
-      this.isLoading.set(false);
-    }
+    });
   }
 
   reset() {

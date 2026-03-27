@@ -17,6 +17,7 @@ import {NotificationService} from '../../../../../shared/services/notification.s
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {DataListComponent} from '../../../../../shared/components/data-list/data-list.component';
 import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
+import { firstValueFrom } from 'rxjs';
 
 export interface TimelineEvent {
   id: string;
@@ -161,9 +162,9 @@ export class YearDetailComponent implements OnInit {
     this.isLoading.set(true);
     try {
       const [yearData, periodsData, holidaysData] = await Promise.all([
-        this.academicService.getYearById(id),
-        this.academicService.getPeriods(id),
-        this.academicService.getHolidays(id)
+        firstValueFrom(this.academicService.getYearById(id)),
+        firstValueFrom(this.academicService.getPeriods(id)),
+        firstValueFrom(this.academicService.getHolidays(id))
       ]);
 
       this.year.set(yearData);

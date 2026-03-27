@@ -2,7 +2,7 @@ import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { LucideAngularModule, User, Users, FileText, Sparkles, CheckCircle, ArrowLeft, ArrowRight, Upload, X, GraduationCap, RefreshCw, Eye } from 'lucide-angular';
-import { firstValueFrom } from 'rxjs';
+import { catchError, finalize, forkJoin, map, of, switchMap, tap } from 'rxjs';
 
 import { EnrollmentPublicService } from '../../../../core/services/enrollment-public.service';
 import { DocumentEngineService } from '../../../../core/services/document-engine.service';
@@ -14,6 +14,7 @@ import { AdmissionApplication as Application } from '../../../../core/models/enr
 import { Router } from '@angular/router';
 
 import { NotificationService } from '../../../../shared/services/notification.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 export type StepperStep = 'GUARDIAN' | 'STUDENT' | 'DOCS' | 'REVIEW';
 
@@ -85,50 +86,55 @@ export class PublicFormStepperComponent implements OnInit {
     return this.availableLevels().find(l => l.id === levelId)?.name || 'Non sélectionné';
   });
 
-  async ngOnInit() {
-    await this.loadInitialData();
-    await this.checkExistingSession();
+  ngOnInit() {
+    this.loadInitialData();
+    this.checkExistingSession();
   }
 
-  async loadInitialData() {
-    try {
-      const [levels, filieres, year] = await Promise.all([
-        this.academicService.getLevels(),
-        this.academicService.getFilieres(),
-        this.academicService.getCurrentYear()
-      ]);
-      this.availableLevels.set(levels);
-      this.availableFilieres.set(filieres);
-      this.activeYear.set(year);
-    } catch (e) {
-      console.error('Erreur chargement Academic data:', e);
-    }
+  private loadInitialData() {
+    forkJoin({
+      levels: this.academicService.getLevels(),
+      filieres: this.academicService.getFilieres(),
+      year: this.academicService.getCurrentYear()
+    }).pipe(
+      tap(({ levels, filieres, year }) => {
+        this.availableLevels.set(levels);
+        this.availableFilieres.set(filieres);
+        this.activeYear.set(year);
+      }),
+      catchError(err => {
+        console.error('Erreur chargement Academic data:', err);
+        return of(null);
+      })
+    ).subscribe();
   }
 
-  async checkExistingSession() {
+  private checkExistingSession() {
     const session = this.sessionService.getSession();
     if (session) {
       this.isSubmitting.set(true);
-      try {
-        const app = await firstValueFrom(this.enrollmentService.trackApplication(session.reference, session.accessCode));
-        if (app && app.status === 'DRAFT') {
-          this.application.set(app);
-          this.currentApplicationId.set(app.id);
-          this.resumeFormData(app);
-          
-          const savedStep = session.currentStep as StepperStep;
-          if (savedStep && savedStep !== 'GUARDIAN') {
-            this.currentStep.set(savedStep);
-          } else {
-            this.currentStep.set('STUDENT');
+      this.enrollmentService.trackApplication(session.reference, session.accessCode).pipe(
+        tap(app => {
+          if (app && app.status === 'DRAFT') {
+            this.application.set(app);
+            this.currentApplicationId.set(app.id);
+            this.resumeFormData(app);
+            
+            const savedStep = session.currentStep as StepperStep;
+            if (savedStep && savedStep !== 'GUARDIAN') {
+              this.currentStep.set(savedStep);
+            } else {
+              this.currentStep.set('STUDENT');
+            }
           }
-        }
-      } catch (e) {
-        console.warn('Session expirée ou invalide.');
-        this.sessionService.clearSession();
-      } finally {
-        this.isSubmitting.set(false);
-      }
+        }),
+        catchError(e => {
+          console.warn('Session expirée ou invalide.');
+          this.sessionService.clearSession();
+          return of(null);
+        }),
+        finalize(() => this.isSubmitting.set(false))
+      ).subscribe();
     }
   }
 
@@ -158,42 +164,41 @@ export class PublicFormStepperComponent implements OnInit {
     }));
   }
 
-  async nextStep() {
+  nextStep() {
     const steps: StepperStep[] = ['GUARDIAN', 'STUDENT', 'DOCS', 'REVIEW'];
     const currentIndex = steps.indexOf(this.currentStep());
-    let stepSuccess = true;
-
+    
     this.isSubmitting.set(true);
-    try {
-      if (this.currentStep() === 'GUARDIAN' && !this.currentApplicationId()) {
-        await this.initializeApplication();
-      } 
-      else if (this.currentStep() === 'GUARDIAN') {
-        await this.saveGuardianInfo();
-      }
-      else if (this.currentStep() === 'STUDENT') {
-        await this.saveCandidateInfo();
-      }
-    } catch (e) {
-      console.error('NextStep API Error:', e);
-      this.notificationService.error('Erreur lors de la sauvegarde. Veuillez vérifier vos informations.');
-      stepSuccess = false;
-    } finally {
-      this.isSubmitting.set(false);
+    let operation$;
+
+    if (this.currentStep() === 'GUARDIAN' && !this.currentApplicationId()) {
+      operation$ = this.initializeApplication();
+    } 
+    else if (this.currentStep() === 'GUARDIAN') {
+      operation$ = this.saveGuardianInfo();
+    }
+    else if (this.currentStep() === 'STUDENT') {
+      operation$ = this.saveCandidateInfo();
+    } else {
+      operation$ = of(true);
     }
 
-    if (stepSuccess && currentIndex < steps.length - 1) {
-      const nextStep = steps[currentIndex + 1];
-      this.currentStep.set(nextStep);
-      this.sessionService.updateStep(nextStep);
-      window.scrollTo(0, 0);
-    }
+    operation$.pipe(
+      finalize(() => this.isSubmitting.set(false))
+    ).subscribe(success => {
+      if (success && currentIndex < steps.length - 1) {
+        const nextStep = steps[currentIndex + 1];
+        this.currentStep.set(nextStep);
+        this.sessionService.updateStep(nextStep);
+        window.scrollTo(0, 0);
+      }
+    });
   }
 
-  private async initializeApplication() {
+  private initializeApplication() {
     const tenantId = this.tenantContext.activeTenant()?.id || 'bruno-test-full';
     const yearId = this.activeYear()?.id;
-    if (!yearId) throw new Error('Pas d’année académique active.');
+    if (!yearId) return of(false);
 
     const payload = {
       tenantId,
@@ -208,31 +213,36 @@ export class PublicFormStepperComponent implements OnInit {
       }
     };
 
-    const res = await firstValueFrom(this.enrollmentService.createApplication(payload));
-    if (res) {
-      this.notificationService.success('Dossier d\'admission initialisé avec succès.');
-      this.application.set(res);
-      this.currentApplicationId.set(res.id);
-      const studentFirstName = res.candidate?.firstName || this.formData().student.firstName || '';
-      this.sessionService.saveSession(res.reference, res.accessCode, studentFirstName, 'STUDENT');
-    }
+    return this.enrollmentService.createApplication(payload).pipe(
+      tap(res => {
+        this.notificationService.success('Dossier d\'admission initialisé avec succès.');
+        this.application.set(res);
+        this.currentApplicationId.set(res.id);
+        const studentFirstName = res.candidate?.firstName || this.formData().student.firstName || '';
+        this.sessionService.saveSession(res.reference, res.accessCode, studentFirstName, 'STUDENT');
+      }),
+      map(() => true),
+      catchError(() => of(false))
+    );
   }
 
-  private async saveGuardianInfo() {
+  private saveGuardianInfo() {
     const id = this.currentApplicationId();
-    if (!id) return;
-    const updatedApp = await firstValueFrom(this.enrollmentService.updateGuardians(id, this.formData().primaryGuardian));
-    if (updatedApp) {
-      this.notificationService.info('Informations du responsable enregistrées.');
-      this.application.set(updatedApp);
-    }
+    if (!id) return of(false);
+    return this.enrollmentService.updateGuardians(id, this.formData().primaryGuardian).pipe(
+      tap(updatedApp => {
+        this.notificationService.info('Informations du responsable enregistrées.');
+        this.application.set(updatedApp);
+      }),
+      map(() => true),
+      catchError(() => of(false))
+    );
   }
 
-  private async saveCandidateInfo() {
+  private saveCandidateInfo() {
     const id = this.currentApplicationId();
-    if (!id) return;
+    if (!id) return of(false);
     
-    // Payload imbriqué selon l'exemple Bruno
     const payload = {
       info: {
         firstName: this.formData().student.firstName,
@@ -247,85 +257,76 @@ export class PublicFormStepperComponent implements OnInit {
       filiereId: this.formData().student.filiereId
     };
 
-    const updatedApp = await firstValueFrom(this.enrollmentService.updateCandidate(id, payload));
-    if (updatedApp) {
-      this.notificationService.info('Informations du candidat enregistrées.');
-      this.application.set(updatedApp);
-    }
+    return this.enrollmentService.updateCandidate(id, payload).pipe(
+      tap(updatedApp => {
+        this.notificationService.info('Informations du candidat enregistrées.');
+        this.application.set(updatedApp);
+      }),
+      map(() => true),
+      catchError(() => of(false))
+    );
   }
 
-  async onFileSelected(docCode: string, event: any) {
+  onFileSelected(docCode: string, event: any) {
     const file = event.target.files[0];
     if (!file || !this.currentApplicationId()) return;
 
     this.uploadingDocCode.set(docCode);
-    try {
-      // 1. Demander le ticket d'upload
-      const ticket = await firstValueFrom(this.documentService.getUploadTicket({
-        fileName: file.name,
-        contentType: file.type,
-        serviceOrigin: 'enrollment'
-      }));
 
-      // 2. Upload direct vers le stockage (S3/MinIO)
-      await this.documentService.uploadFileDirectly(ticket.uploadUrl, file);
-
-      // 3. Liaison avec le dossier d'admission métier (via le fileId)
-      await firstValueFrom(
-        this.enrollmentService.uploadDocument(this.currentApplicationId()!, docCode, ticket.fileId)
-      );
-
-      this.notificationService.success('Document envoyé avec succès.');
-
-      // 4. Rafraîchissement SYSTÉMATIQUE via trackApplication pour garantir la synchronisation UI
-      const session = this.sessionService.getSession();
-      if (session) {
-        const freshApp = await firstValueFrom(
-          this.enrollmentService.trackApplication(session.reference, session.accessCode)
-        );
-        this.application.set(freshApp);
-      }
-    } catch (e) {
-      console.error(`Échec de l'upload pour ${docCode}:`, e);
-      this.notificationService.error('Erreur lors de l\'envoi du fichier. Veuillez réessayer.');
-    } finally {
-      this.uploadingDocCode.set(null);
-    }
+    this.documentService.getUploadTicket({
+      fileName: file.name,
+      contentType: file.type,
+      serviceOrigin: 'enrollment'
+    }).pipe(
+      switchMap(ticket => 
+        this.documentService.uploadFileDirectly(ticket.uploadUrl, file).pipe(
+          switchMap(() => this.enrollmentService.uploadDocument(this.currentApplicationId()!, docCode, ticket.fileId)),
+          map(() => ticket)
+        )
+      ),
+      switchMap(() => {
+        this.notificationService.success('Document envoyé avec succès.');
+        const session = this.sessionService.getSession();
+        if (session) {
+          return this.enrollmentService.trackApplication(session.reference, session.accessCode);
+        }
+        return of(null);
+      }),
+      tap(freshApp => {
+        if (freshApp) this.application.set(freshApp);
+      }),
+      finalize(() => this.uploadingDocCode.set(null)),
+      catchError(err => {
+        console.error(`Échec de l'upload pour ${docCode}:`, err);
+        return of(null);
+      })
+    ).subscribe();
   }
 
-  async viewDocument(fileId: string | undefined) {
+  viewDocument(fileId: string | undefined) {
     if (!fileId) return;
-    try {
-      const viewUrl = await firstValueFrom(this.documentService.getViewUrl(fileId));
-      window.open(viewUrl, '_blank');
-    } catch (e) {
-      console.error('Impossible de générer l\'url de vue:', e);
-      this.notificationService.error('Erreur lors de l\'ouverture du document.');
-    }
+    this.documentService.getViewUrl(fileId).subscribe({
+      next: (viewUrl) => window.open(viewUrl, '_blank'),
+      error: (e) => console.error('Impossible de générer l\'url de vue:', e)
+    });
   }
 
-  async submitFinal() {
+  submitFinal() {
     const id = this.currentApplicationId();
     if (!id) return;
     this.isSubmitting.set(true);
-    try {
-      const finalApp = await firstValueFrom(this.enrollmentService.submitApplication(id));
+    
+    this.enrollmentService.submitApplication(id).pipe(
+      finalize(() => this.isSubmitting.set(false))
+    ).subscribe(finalApp => {
       if (finalApp) {
         this.notificationService.success('Votre dossier a été soumis avec succès.');
-        const reference = finalApp.reference;
-        const accessCode = finalApp.accessCode;
-        
-        // On efface la session de saisie
         this.sessionService.clearSession();
-        
-        // On redirige vers le tracker en passant le code d'accès dans l'URL pour que la page puisse s'afficher
-        this.router.navigate(['/enrollment/tracker', reference], { 
-          queryParams: { accessCode: accessCode } 
+        this.router.navigate(['/enrollment/tracker', finalApp.reference], { 
+          queryParams: { accessCode: finalApp.accessCode } 
         });
       }
-    } finally {
-      this.isSubmitting.set(false);
-    }
+    });
   }
 
   prevStep() {

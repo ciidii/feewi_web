@@ -1,6 +1,8 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
+import { Observable, catchError, throwError } from 'rxjs';
+import { EnvironmentService } from './environment.service';
+import { NotificationService } from '../../shared/services/notification.service';
 import { 
   AcademicYear, 
   CreateYearRequest, 
@@ -22,227 +24,318 @@ import {
 })
 export class AcademicService {
   private http = inject(HttpClient);
-  private readonly API_URL = 'http://localhost:8080/api/v1/academic';
+  private envService = inject(EnvironmentService);
+  private notificationService = inject(NotificationService);
 
-  // State
-  private _loading = signal<boolean>(false);
-  readonly loading = this._loading.asReadonly();
+  private readonly API_URL = this.envService.getServiceUrl('academic');
+
+  // ===========================================
+  // GESTION DES ERREURS
+  // ===========================================
+
+  private handleError(message: string) {
+    return (error: any) => {
+      console.error(error);
+      this.notificationService.error(message);
+      return throwError(() => error);
+    };
+  }
 
   // ===========================================
   // GESTION DES ANNÉES (TEMPORALITÉ)
   // ===========================================
 
-  async getYears(): Promise<AcademicYear[]> {
-    return await firstValueFrom(this.http.get<AcademicYear[]>(`${this.API_URL}/years`));
+  getYears(): Observable<AcademicYear[]> {
+    return this.http.get<AcademicYear[]>(`${this.API_URL}/years`).pipe(
+      catchError(this.handleError('Erreur lors du chargement des années académiques'))
+    );
   }
 
-  async getYearById(id: string): Promise<AcademicYear> {
-    return await firstValueFrom(this.http.get<AcademicYear>(`${this.API_URL}/years/${id}`));
+  getYearById(id: string): Observable<AcademicYear> {
+    return this.http.get<AcademicYear>(`${this.API_URL}/years/${id}`).pipe(
+      catchError(this.handleError('Erreur lors du chargement de l\'année'))
+    );
   }
 
-  async getCurrentYear(): Promise<AcademicYear> {
-    return await firstValueFrom(this.http.get<AcademicYear>(`${this.API_URL}/years/current`));
+  getCurrentYear(): Observable<AcademicYear> {
+    return this.http.get<AcademicYear>(`${this.API_URL}/years/current`).pipe(
+      catchError(this.handleError('Erreur lors du chargement de l\'année en cours'))
+    );
   }
 
-  async createYear(request: CreateYearRequest): Promise<AcademicYear> {
-    return await firstValueFrom(this.http.post<AcademicYear>(`${this.API_URL}/years`, request));
+  createYear(request: CreateYearRequest): Observable<AcademicYear> {
+    return this.http.post<AcademicYear>(`${this.API_URL}/years`, request).pipe(
+      catchError(this.handleError('Erreur lors de la création de l\'année'))
+    );
   }
 
   // --- Workflow de l'année ---
 
-  async activateYear(id: string): Promise<void> {
-    await firstValueFrom(this.http.patch<void>(`${this.API_URL}/years/${id}/activate`, {}));
+  activateYear(id: string): Observable<void> {
+    return this.http.patch<void>(`${this.API_URL}/years/${id}/activate`, {}).pipe(
+      catchError(this.handleError('Erreur lors de l\'activation de l\'année'))
+    );
   }
 
-  async closeYear(id: string): Promise<void> {
-    await firstValueFrom(this.http.patch<void>(`${this.API_URL}/years/${id}/close`, {}));
+  closeYear(id: string): Observable<void> {
+    return this.http.patch<void>(`${this.API_URL}/years/${id}/close`, {}).pipe(
+      catchError(this.handleError('Erreur lors de la clôture de l\'année'))
+    );
   }
 
-  async reopenYear(id: string): Promise<void> {
-    await firstValueFrom(this.http.patch<void>(`${this.API_URL}/years/${id}/reopen`, {}));
+  reopenYear(id: string): Observable<void> {
+    return this.http.patch<void>(`${this.API_URL}/years/${id}/reopen`, {}).pipe(
+      catchError(this.handleError('Erreur lors de la réouverture de l\'année'))
+    );
   }
 
-  async archiveYear(id: string): Promise<void> {
-    await firstValueFrom(this.http.patch<void>(`${this.API_URL}/years/${id}/archive`, {}));
+  archiveYear(id: string): Observable<void> {
+    return this.http.patch<void>(`${this.API_URL}/years/${id}/archive`, {}).pipe(
+      catchError(this.handleError('Erreur lors de l\'archivage de l\'année'))
+    );
   }
 
   // ===========================================
   // PÉRIODES & CONGÉS
   // ===========================================
 
-  async getPeriods(yearId: string): Promise<Period[]> {
-    return await firstValueFrom(this.http.get<Period[]>(`${this.API_URL}/years/${yearId}/periods`));
+  getPeriods(yearId: string): Observable<Period[]> {
+    return this.http.get<Period[]>(`${this.API_URL}/years/${yearId}/periods`).pipe(
+      catchError(this.handleError('Erreur lors du chargement des périodes'))
+    );
   }
 
-  async createPeriod(yearId: string, period: Partial<Period>): Promise<Period> {
-    return await firstValueFrom(this.http.post<Period>(`${this.API_URL}/years/${yearId}/periods`, period));
+  createPeriod(yearId: string, period: Partial<Period>): Observable<Period> {
+    return this.http.post<Period>(`${this.API_URL}/years/${yearId}/periods`, period).pipe(
+      catchError(this.handleError('Erreur lors de la création de la période'))
+    );
   }
 
-  async updatePeriod(yearId: string, id: string, period: Partial<Period>): Promise<Period> {
-    return await firstValueFrom(this.http.put<Period>(`${this.API_URL}/years/${yearId}/periods/${id}`, period));
+  updatePeriod(yearId: string, id: string, period: Partial<Period>): Observable<Period> {
+    return this.http.put<Period>(`${this.API_URL}/years/${yearId}/periods/${id}`, period).pipe(
+      catchError(this.handleError('Erreur lors de la mise à jour de la période'))
+    );
   }
 
-  async deletePeriod(yearId: string, id: string): Promise<void> {
-    await firstValueFrom(this.http.delete<void>(`${this.API_URL}/years/${yearId}/periods/${id}`));
+  deletePeriod(yearId: string, id: string): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/years/${yearId}/periods/${id}`).pipe(
+      catchError(this.handleError('Erreur lors de la suppression de la période'))
+    );
   }
 
-  async getHolidays(yearId: string): Promise<Holiday[]> {
-    return await firstValueFrom(this.http.get<Holiday[]>(`${this.API_URL}/years/${yearId}/holidays`));
+  getHolidays(yearId: string): Observable<Holiday[]> {
+    return this.http.get<Holiday[]>(`${this.API_URL}/years/${yearId}/holidays`).pipe(
+      catchError(this.handleError('Erreur lors du chargement des congés'))
+    );
   }
 
-  async createHoliday(yearId: string, holiday: Partial<Holiday>): Promise<Holiday> {
-    return await firstValueFrom(this.http.post<Holiday>(`${this.API_URL}/years/${yearId}/holidays`, holiday));
+  createHoliday(yearId: string, holiday: Partial<Holiday>): Observable<Holiday> {
+    return this.http.post<Holiday>(`${this.API_URL}/years/${yearId}/holidays`, holiday).pipe(
+      catchError(this.handleError('Erreur lors de la création du congé'))
+    );
   }
 
-  async updateHoliday(yearId: string, id: string, holiday: Partial<Holiday>): Promise<Holiday> {
-    return await firstValueFrom(this.http.put<Holiday>(`${this.API_URL}/years/${yearId}/holidays/${id}`, holiday));
+  updateHoliday(yearId: string, id: string, holiday: Partial<Holiday>): Observable<Holiday> {
+    return this.http.put<Holiday>(`${this.API_URL}/years/${yearId}/holidays/${id}`, holiday).pipe(
+      catchError(this.handleError('Erreur lors de la mise à jour du congé'))
+    );
   }
 
-  async deleteHoliday(yearId: string, id: string): Promise<void> {
-    await firstValueFrom(this.http.delete<void>(`${this.API_URL}/years/${yearId}/holidays/${id}`));
+  deleteHoliday(yearId: string, id: string): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/years/${yearId}/holidays/${id}`).pipe(
+      catchError(this.handleError('Erreur lors de la suppression du congé'))
+    );
   }
 
   // ===========================================
   // GESTION DES CLASSES (OPÉRATIONNEL)
   // ===========================================
 
-  async getClassesByYear(yearId: string): Promise<SchoolClass[]> {
-    return await firstValueFrom(this.http.get<SchoolClass[]>(`${this.API_URL}/classes/by-year/${yearId}`));
+  getClassesByYear(yearId: string): Observable<SchoolClass[]> {
+    return this.http.get<SchoolClass[]>(`${this.API_URL}/classes/by-year/${yearId}`).pipe(
+      catchError(this.handleError('Erreur lors du chargement des classes'))
+    );
   }
 
-  async createClass(request: CreateClassRequest): Promise<SchoolClass> {
-    return await firstValueFrom(this.http.post<SchoolClass>(`${this.API_URL}/classes`, request));
+  createClass(request: CreateClassRequest): Observable<SchoolClass> {
+    return this.http.post<SchoolClass>(`${this.API_URL}/classes`, request).pipe(
+      catchError(this.handleError('Erreur lors de la création de la classe'))
+    );
   }
 
-  async updateClass(id: string, request: Partial<CreateClassRequest>): Promise<SchoolClass> {
-    return await firstValueFrom(this.http.put<SchoolClass>(`${this.API_URL}/classes/${id}`, request));
+  updateClass(id: string, request: Partial<CreateClassRequest>): Observable<SchoolClass> {
+    return this.http.put<SchoolClass>(`${this.API_URL}/classes/${id}`, request).pipe(
+      catchError(this.handleError('Erreur lors de la mise à jour de la classe'))
+    );
   }
 
   // ===========================================
   // RÉFÉRENTIEL STRUCTURE (Cycles, Niveaux, Filières)
   // ===========================================
 
-  async getCycles(): Promise<Cycle[]> {
-    return await firstValueFrom(this.http.get<Cycle[]>(`${this.API_URL}/cycles`));
+  getCycles(): Observable<Cycle[]> {
+    return this.http.get<Cycle[]>(`${this.API_URL}/cycles`).pipe(
+      catchError(this.handleError('Erreur lors du chargement des cycles'))
+    );
   }
 
-  async createCycle(cycle: Partial<Cycle>): Promise<Cycle> {
-    return await firstValueFrom(this.http.post<Cycle>(`${this.API_URL}/cycles`, cycle));
+  createCycle(cycle: Partial<Cycle>): Observable<Cycle> {
+    return this.http.post<Cycle>(`${this.API_URL}/cycles`, cycle).pipe(
+      catchError(this.handleError('Erreur lors de la création du cycle'))
+    );
   }
 
-  async updateCycle(id: string, cycle: Partial<Cycle>): Promise<Cycle> {
-    return await firstValueFrom(this.http.put<Cycle>(`${this.API_URL}/cycles/${id}`, cycle));
+  updateCycle(id: string, cycle: Partial<Cycle>): Observable<Cycle> {
+    return this.http.put<Cycle>(`${this.API_URL}/cycles/${id}`, cycle).pipe(
+      catchError(this.handleError('Erreur lors de la mise à jour du cycle'))
+    );
   }
 
-  async deleteCycle(id: string): Promise<void> {
-    await firstValueFrom(this.http.delete<void>(`${this.API_URL}/cycles/${id}`));
+  deleteCycle(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/cycles/${id}`).pipe(
+      catchError(this.handleError('Erreur lors de la suppression du cycle'))
+    );
   }
 
-  async getLevels(cycleId?: string): Promise<Level[]> {
+  getLevels(cycleId?: string): Observable<Level[]> {
     let params = new HttpParams();
     if (cycleId) params = params.set('cycleId', cycleId);
-    return await firstValueFrom(this.http.get<Level[]>(`${this.API_URL}/levels`, { params }));
+    return this.http.get<Level[]>(`${this.API_URL}/levels`, { params }).pipe(
+      catchError(this.handleError('Erreur lors du chargement des niveaux'))
+    );
   }
 
-  async createLevel(level: Partial<Level>): Promise<Level> {
-    return await firstValueFrom(this.http.post<Level>(`${this.API_URL}/levels`, level));
+  createLevel(level: Partial<Level>): Observable<Level> {
+    return this.http.post<Level>(`${this.API_URL}/levels`, level).pipe(
+      catchError(this.handleError('Erreur lors de la création du niveau'))
+    );
   }
 
-  async updateLevel(id: string, level: Partial<Level>): Promise<Level> {
-    return await firstValueFrom(this.http.put<Level>(`${this.API_URL}/levels/${id}`, level));
+  updateLevel(id: string, level: Partial<Level>): Observable<Level> {
+    return this.http.put<Level>(`${this.API_URL}/levels/${id}`, level).pipe(
+      catchError(this.handleError('Erreur lors de la mise à jour du niveau'))
+    );
   }
 
-  async deleteLevel(id: string): Promise<void> {
-    await firstValueFrom(this.http.delete<void>(`${this.API_URL}/levels/${id}`));
+  deleteLevel(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/levels/${id}`).pipe(
+      catchError(this.handleError('Erreur lors de la suppression du niveau'))
+    );
   }
 
-  async getFilieres(): Promise<Filiere[]> {
-    return await firstValueFrom(this.http.get<Filiere[]>(`${this.API_URL}/filieres`));
+  getFilieres(): Observable<Filiere[]> {
+    return this.http.get<Filiere[]>(`${this.API_URL}/filieres`).pipe(
+      catchError(this.handleError('Erreur lors du chargement des filières'))
+    );
   }
 
-  async createFiliere(filiere: Partial<Filiere>): Promise<Filiere> {
-    return await firstValueFrom(this.http.post<Filiere>(`${this.API_URL}/filieres`, filiere));
+  createFiliere(filiere: Partial<Filiere>): Observable<Filiere> {
+    return this.http.post<Filiere>(`${this.API_URL}/filieres`, filiere).pipe(
+      catchError(this.handleError('Erreur lors de la création de la filière'))
+    );
   }
 
-  async deleteFiliere(id: string): Promise<void> {
-    await firstValueFrom(this.http.delete<void>(`${this.API_URL}/filieres/${id}`));
+  deleteFiliere(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/filieres/${id}`).pipe(
+      catchError(this.handleError('Erreur lors de la suppression de la filière'))
+    );
   }
 
   // ===========================================
   // GESTION DES MATIÈRES (RÉFÉRENTIEL)
   // ===========================================
 
-  async getSubjects(): Promise<Subject[]> {
-    return await firstValueFrom(this.http.get<Subject[]>(`${this.API_URL}/subjects`));
+  getSubjects(): Observable<Subject[]> {
+    return this.http.get<Subject[]>(`${this.API_URL}/subjects`).pipe(
+      catchError(this.handleError('Erreur lors du chargement des matières'))
+    );
   }
 
-  async createSubject(subject: Partial<Subject>): Promise<Subject> {
-    return await firstValueFrom(this.http.post<Subject>(`${this.API_URL}/subjects`, subject));
+  createSubject(subject: Partial<Subject>): Observable<Subject> {
+    return this.http.post<Subject>(`${this.API_URL}/subjects`, subject).pipe(
+      catchError(this.handleError('Erreur lors de la création de la matière'))
+    );
   }
 
-  async updateSubject(id: string, subject: Partial<Subject>): Promise<Subject> {
-    return await firstValueFrom(this.http.put<Subject>(`${this.API_URL}/subjects/${id}`, subject));
+  updateSubject(id: string, subject: Partial<Subject>): Observable<Subject> {
+    return this.http.put<Subject>(`${this.API_URL}/subjects/${id}`, subject).pipe(
+      catchError(this.handleError('Erreur lors de la mise à jour de la matière'))
+    );
   }
 
-  async deleteSubject(id: string): Promise<void> {
-    await firstValueFrom(this.http.delete<void>(`${this.API_URL}/subjects/${id}`));
+  deleteSubject(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/subjects/${id}`).pipe(
+      catchError(this.handleError('Erreur lors de la suppression de la matière'))
+    );
   }
 
   // ===========================================
   // PROGRAMMES (CURRICULUM PER LEVEL)
   // ===========================================
 
-  async getCurriculum(levelId: string, filiereId?: string): Promise<CurriculumItem[]> {
+  getCurriculum(levelId: string, filiereId?: string): Observable<CurriculumItem[]> {
     let params = new HttpParams();
     if (filiereId) params = params.set('filiereId', filiereId);
     
-    return await firstValueFrom(this.http.get<CurriculumItem[]>(`${this.API_URL}/curriculum/by-level/${levelId}`, { params }));
+    return this.http.get<CurriculumItem[]>(`${this.API_URL}/curriculum/by-level/${levelId}`, { params }).pipe(
+      catchError(this.handleError('Erreur lors du chargement du programme'))
+    );
   }
 
-  async addSubjectToCurriculum(request: Partial<CurriculumItem>): Promise<CurriculumItem> {
-    return await firstValueFrom(this.http.post<CurriculumItem>(`${this.API_URL}/curriculum`, request));
+  addSubjectToCurriculum(request: Partial<CurriculumItem>): Observable<CurriculumItem> {
+    return this.http.post<CurriculumItem>(`${this.API_URL}/curriculum`, request).pipe(
+      catchError(this.handleError('Erreur lors de l\'ajout de la matière au programme'))
+    );
   }
 
-  async updateCurriculumItem(id: string, request: Partial<CurriculumItem>): Promise<CurriculumItem> {
-    return await firstValueFrom(this.http.put<CurriculumItem>(`${this.API_URL}/curriculum/${id}`, request));
+  updateCurriculumItem(id: string, request: Partial<CurriculumItem>): Observable<CurriculumItem> {
+    return this.http.put<CurriculumItem>(`${this.API_URL}/curriculum/${id}`, request).pipe(
+      catchError(this.handleError('Erreur lors de la mise à jour du programme'))
+    );
   }
 
-  async deleteCurriculumItem(id: string): Promise<void> {
-    await firstValueFrom(this.http.delete<void>(`${this.API_URL}/curriculum/${id}`));
+  deleteCurriculumItem(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/curriculum/${id}`).pipe(
+      catchError(this.handleError('Erreur lors de la suppression de l\'élément du programme'))
+    );
   }
 
   // ===========================================
   // SYLLABUS (PROGRESSION PÉDAGOGIQUE)
   // ===========================================
 
-  async getSyllabus(curriculumItemId: string): Promise<SyllabusDomain[]> {
-    return await firstValueFrom(this.http.get<SyllabusDomain[]>(`${this.API_URL}/curriculum/${curriculumItemId}/syllabus`));
+  getSyllabus(curriculumItemId: string): Observable<SyllabusDomain[]> {
+    return this.http.get<SyllabusDomain[]>(`${this.API_URL}/curriculum/${curriculumItemId}/syllabus`).pipe(
+      catchError(this.handleError('Erreur lors du chargement du syllabus'))
+    );
   }
 
   // ===========================================
   // ENSEIGNEMENTS (TEACHINGS PER CLASS)
   // ===========================================
 
-  /** Lister tous les cours d'une classe (Auto-générés ou Manuels) */
-  async getTeachingsByClass(classId: string): Promise<Teaching[]> {
-    return await firstValueFrom(this.http.get<Teaching[]>(`${this.API_URL}/classes/${classId}/teachings`));
-  }
-
-  /** Approche Hybride : Ajouter un cours manuellement à une classe spécifique */
-  async addTeachingToClass(classId: string, request: Partial<Teaching>): Promise<Teaching> {
-    return await firstValueFrom(this.http.post<Teaching>(`${this.API_URL}/classes/${classId}/teachings`, request));
-  }
-
-  /** Approche V4 : Assigner ou changer un professeur (PATCH granulaire) */
-  async assignTeacher(classId: string, teachingId: string, teacherId: string): Promise<Teaching> {
-    const params = new HttpParams().set('teacherId', teacherId);
-    return await firstValueFrom(
-      this.http.patch<Teaching>(`${this.API_URL}/classes/${classId}/teachings/${teachingId}/teacher`, {}, { params })
+  getTeachingsByClass(classId: string): Observable<Teaching[]> {
+    return this.http.get<Teaching[]>(`${this.API_URL}/classes/${classId}/teachings`).pipe(
+      catchError(this.handleError('Erreur lors du chargement des enseignements'))
     );
   }
 
-  /** Retirer un enseignement d'une classe */
-  async removeTeachingFromClass(classId: string, teachingId: string): Promise<void> {
-    await firstValueFrom(this.http.delete<void>(`${this.API_URL}/classes/${classId}/teachings/${teachingId}`));
+  addTeachingToClass(classId: string, request: Partial<Teaching>): Observable<Teaching> {
+    return this.http.post<Teaching>(`${this.API_URL}/classes/${classId}/teachings`, request).pipe(
+      catchError(this.handleError('Erreur lors de l\'ajout de l\'enseignement'))
+    );
+  }
+
+  assignTeacher(classId: string, teachingId: string, teacherId: string): Observable<Teaching> {
+    const params = new HttpParams().set('teacherId', teacherId);
+    return this.http.patch<Teaching>(`${this.API_URL}/classes/${classId}/teachings/${teachingId}/teacher`, {}, { params }).pipe(
+      catchError(this.handleError('Erreur lors de l\'assignation du professeur'))
+    );
+  }
+
+  removeTeachingFromClass(classId: string, teachingId: string): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/classes/${classId}/teachings/${teachingId}`).pipe(
+      catchError(this.handleError('Erreur lors de la suppression de l\'enseignement'))
+    );
   }
 }

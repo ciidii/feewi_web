@@ -1,5 +1,6 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { firstValueFrom } from 'rxjs';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material/dialog';
 import { LucideAngularModule, ListChecks, Plus, Trash2, Edit, Save, X, BookOpen, Hash, Clock } from 'lucide-angular';
 import { AcademicService } from '../../../../../../../core/services/academic.service';
@@ -91,8 +92,8 @@ export class CurriculumManagerComponent implements OnInit {
     this.isLoading.set(true);
     try {
       const [curriculum, subjects] = await Promise.all([
-        this.academicService.getCurriculum(this.data.level.id),
-        this.academicService.getSubjects()
+        firstValueFrom(this.academicService.getCurriculum(this.data.level.id)),
+        firstValueFrom(this.academicService.getSubjects())
       ]);
       this.curriculumItems.set(curriculum);
       this.allSubjects.set(subjects);
@@ -112,12 +113,12 @@ export class CurriculumManagerComponent implements OnInit {
     try {
       if (item) {
         // Mode Édition
-        await this.academicService.updateCurriculumItem(item.id, payload);
+        await firstValueFrom(this.academicService.updateCurriculumItem(item.id, payload));
         this.notificationService.success('Modification enregistrée.');
       } else {
         // Mode Ajout
         const request = { ...payload, levelId: this.data.level.id };
-        await this.academicService.addSubjectToCurriculum(request);
+        await firstValueFrom(this.academicService.addSubjectToCurriculum(request));
         this.notificationService.success('Matière ajoutée au programme.');
       }
 
@@ -181,7 +182,7 @@ export class CurriculumManagerComponent implements OnInit {
     dialogRef.afterClosed().subscribe(async (confirmed) => {
       if (confirmed) {
         try {
-          await this.academicService.deleteCurriculumItem(id);
+          await firstValueFrom(this.academicService.deleteCurriculumItem(id));
           this.notificationService.success('Matière retirée du programme.');
           this.loadData();
         } catch (error) {

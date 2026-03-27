@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { LucideAngularModule, BookOpen, Type, Hash, Info, Tag } from 'lucide-angular';
+import { firstValueFrom } from 'rxjs';
 import { AcademicService } from '../../../../../../../core/services/academic.service';
 import { NotificationService } from '../../../../../../../shared/services/notification.service';
 import { FormShellComponent } from '../../../../../../../shared/components/form-shell/form-shell';
@@ -57,10 +58,10 @@ export class SubjectFormComponent implements OnInit {
     this.isLoading.set(true);
     try {
       if (this.isEditMode) {
-        await this.academicService.updateSubject(this.dialogData.subject.id, this.subjectForm.value);
+        await firstValueFrom(this.academicService.updateSubject(this.dialogData.subject.id, this.subjectForm.value));
         this.notificationService.success('La matière a été mise à jour.');
       } else {
-        await this.academicService.createSubject(this.subjectForm.value);
+        await firstValueFrom(this.academicService.createSubject(this.subjectForm.value));
         this.notificationService.success('La matière a été ajoutée à la bibliothèque.');
       }
       this.dialogRef.close(true);

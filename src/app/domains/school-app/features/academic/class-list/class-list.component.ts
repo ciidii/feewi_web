@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule, School, Plus, Users, BookOpenCheck } from 'lucide-angular';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { firstValueFrom } from 'rxjs';
 import { ClassFormComponent } from './components/class-form/class-form.component';
 import { TeachingManagerComponent } from './components/teaching-manager/teaching-manager';
 import {DataListComponent} from '../../../../../shared/components/data-list/data-list.component';
@@ -67,10 +68,10 @@ export class ClassListComponent implements OnInit {
   async loadInitialData() {
     this.isLoading.set(true);
     try {
-      const year = await this.academicService.getCurrentYear();
+      const year = await firstValueFrom(this.academicService.getCurrentYear());
       this.currentYear.set(year);
 
-      const levelsData = await this.academicService.getLevels();
+      const levelsData = await firstValueFrom(this.academicService.getLevels());
       this.levels.set(levelsData);
 
       await this.loadClasses(year.id);
@@ -83,7 +84,7 @@ export class ClassListComponent implements OnInit {
 
   async loadClasses(yearId: string) {
     try {
-      const data = await this.academicService.getClassesByYear(yearId);
+      const data = await firstValueFrom(this.academicService.getClassesByYear(yearId));
       this.classes.set(data);
     } catch (error) {
       console.error('Failed to load classes', error);

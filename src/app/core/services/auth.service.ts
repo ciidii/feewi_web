@@ -1,11 +1,11 @@
-import { Injectable, signal, computed, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
-import { Observable, catchError, map, of, tap, throwError } from 'rxjs';
-import { TenantContextService } from './tenant-context.service';
-import { SchoolService } from './school.service';
-import { NavigationContextService } from './navigation-context.service';
-import { EnvironmentService } from './environment.service';
+import {computed, inject, Injectable, signal} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {Router} from '@angular/router';
+import {catchError, map, Observable, of, tap} from 'rxjs';
+import {TenantContextService} from './tenant-context.service';
+import {SchoolService} from './school.service';
+import {NavigationContextService} from './navigation-context.service';
+import {EnvironmentService} from './environment.service';
 
 export interface UserProfile {
   id: string;
@@ -52,14 +52,11 @@ export class AuthService {
   private _isReady = signal<boolean>(false);
 
   readonly currentUser = this._currentUser.asReadonly();
-  readonly isReady = this._isReady.asReadonly();
   readonly isAuthenticated = computed(() => this._currentUser() !== null);
-
-  constructor() {}
 
   login(email: string, password: string): Observable<boolean> {
     console.log('[AuthService] Attempting login for:', email);
-    return this.http.post<LoginResponse>(`${this.API_URL}/auth/login`, { email, password }).pipe(
+    return this.http.post<LoginResponse>(`${this.API_URL}/auth/login`, {email, password}).pipe(
       tap(response => localStorage.setItem('access_token', response.access_token)),
       map(() => {
         // Déclenche la récupération du profil en arrière-plan (réactif)
@@ -74,7 +71,7 @@ export class AuthService {
   }
 
   forgotPassword(email: string): Observable<void> {
-    const payload: ForgotPasswordRequest = { email };
+    const payload: ForgotPasswordRequest = {email};
     return this.http.post<void>(`${this.API_URL}/auth/forgot-password`, payload);
   }
 

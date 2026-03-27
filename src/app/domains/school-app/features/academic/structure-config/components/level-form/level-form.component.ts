@@ -1,5 +1,6 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { firstValueFrom } from 'rxjs';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
@@ -64,7 +65,7 @@ export class LevelFormComponent implements OnInit {
 
   async loadCycles() {
     try {
-      const data = await this.academicService.getCycles();
+      const data = await firstValueFrom(this.academicService.getCycles());
       this.cycles.set(data);
     } catch (error) {
       this.notificationService.error("Impossible de charger les cycles.");
@@ -80,10 +81,10 @@ export class LevelFormComponent implements OnInit {
     this.isLoading.set(true);
     try {
       if (this.isEditMode) {
-        await this.academicService.updateLevel(this.dialogData.level.id, this.levelForm.value);
+        await firstValueFrom(this.academicService.updateLevel(this.dialogData.level.id, this.levelForm.value));
         this.notificationService.success('Le niveau a été mis à jour.');
       } else {
-        await this.academicService.createLevel(this.levelForm.value);
+        await firstValueFrom(this.academicService.createLevel(this.levelForm.value));
         this.notificationService.success('Le niveau a été créé avec succès.');
       }
       this.dialogRef.close(true);

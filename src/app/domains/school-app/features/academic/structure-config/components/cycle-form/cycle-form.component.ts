@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { LucideAngularModule, Layers, Type, Hash, Info } from 'lucide-angular';
+import { firstValueFrom } from 'rxjs';
 import { AcademicService } from '../../../../../../../core/services/academic.service';
 import { NotificationService } from '../../../../../../../shared/services/notification.service';
 import { FormShellComponent } from '../../../../../../../shared/components/form-shell/form-shell';
@@ -57,10 +58,10 @@ export class CycleFormComponent implements OnInit {
     this.isLoading.set(true);
     try {
       if (this.isEditMode) {
-        await this.academicService.updateCycle(this.dialogData.cycle.id, this.cycleForm.value);
+        await firstValueFrom(this.academicService.updateCycle(this.dialogData.cycle.id, this.cycleForm.value));
         this.notificationService.success('Le cycle a été mis à jour.');
       } else {
-        await this.academicService.createCycle(this.cycleForm.value);
+        await firstValueFrom(this.academicService.createCycle(this.cycleForm.value));
         this.notificationService.success('Le cycle éducatif a été créé avec succès.');
       }
       this.dialogRef.close(true);

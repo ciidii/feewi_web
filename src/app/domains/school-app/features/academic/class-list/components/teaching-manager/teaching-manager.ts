@@ -1,5 +1,6 @@
 import {Component, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
+import {firstValueFrom} from 'rxjs';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {ArrowRight, BookOpenCheck, Info, LucideAngularModule, Plus, Save, Trash2, UserPlus, X} from 'lucide-angular';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
@@ -60,7 +61,7 @@ export class TeachingManagerComponent implements OnInit {
     this.isLoading.set(true);
     try {
       // 1. Charger les enseignements actuels (Auto-clonés ou Manuels)
-      const teachings = await this.academicService.getTeachingsByClass(this.data.schoolClass.id);
+      const teachings = await firstValueFrom(this.academicService.getTeachingsByClass(this.data.schoolClass.id));
       this.teachings.set(teachings);
 
       // 2. Charger le personnel (ENSEIGNANTS)
@@ -71,7 +72,7 @@ export class TeachingManagerComponent implements OnInit {
       }
 
       // 3. Charger toutes les matières (pour l'ajout manuel)
-      const subjects = await this.academicService.getSubjects();
+      const subjects = await firstValueFrom(this.academicService.getSubjects());
       this.allSubjects.set(subjects);
 
     } catch (error) {
@@ -84,7 +85,7 @@ export class TeachingManagerComponent implements OnInit {
   /** Assigner un professeur à un cours existant (PATCH V4) */
   async onAssignTeacher(teachingId: string, teacherId: string) {
     try {
-      await this.academicService.assignTeacher(this.data.schoolClass.id, teachingId, teacherId);
+      await firstValueFrom(this.academicService.assignTeacher(this.data.schoolClass.id, teachingId, teacherId));
       this.notificationService.success('Enseignant assigné avec succès.');
       this.loadData();
     } catch (error) {
@@ -97,7 +98,7 @@ export class TeachingManagerComponent implements OnInit {
     if (this.manualForm.invalid) return;
 
     try {
-      await this.academicService.addTeachingToClass(this.data.schoolClass.id, this.manualForm.value);
+      await firstValueFrom(this.academicService.addTeachingToClass(this.data.schoolClass.id, this.manualForm.value));
       this.notificationService.success('Cours manuel ajouté à la classe.');
       this.isAddingManual.set(false);
       this.manualForm.reset({coefficient: 1, maxScore: 20});
@@ -122,7 +123,7 @@ export class TeachingManagerComponent implements OnInit {
     dialogRef.afterClosed().subscribe(async (confirmed) => {
       if (confirmed) {
         try {
-          await this.academicService.removeTeachingFromClass(this.data.schoolClass.id, t.id);
+          await firstValueFrom(this.academicService.removeTeachingFromClass(this.data.schoolClass.id, t.id));
           this.notificationService.success('Enseignement retiré.');
           this.loadData();
         } catch (error) {

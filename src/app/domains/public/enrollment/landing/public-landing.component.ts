@@ -41,16 +41,14 @@ export class PublicLandingComponent implements OnInit, OnDestroy {
 
   private timer: any;
 
-  async ngOnInit() {
+  ngOnInit() {
     this.updateStatus();
     this.timer = setInterval(() => this.updateStatus(), 60000);
     
-    try {
-      const year = await this.academicService.getCurrentYear();
-      this.activeYear.set(year);
-    } catch (e) {
-      console.warn('Impossible de charger l\'année active sur le hub');
-    }
+    this.academicService.getCurrentYear().subscribe({
+      next: (year) => this.activeYear.set(year),
+      error: () => console.warn('Impossible de charger l\'année active sur le hub')
+    });
   }
 
   ngOnDestroy() {

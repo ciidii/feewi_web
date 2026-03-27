@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { LucideAngularModule, BookOpen, Clock, ChevronRight, X, LayoutGrid, Target, Layers } from 'lucide-angular';
+import { firstValueFrom } from 'rxjs';
 import { AcademicService } from '../../../../../../../core/services/academic.service';
 import {SyllabusDomain, CurriculumItem, SyllabusChapter} from '../../../../../../../core/models/academic.model';
 import { NotificationService } from '../../../../../../../shared/services/notification.service';
@@ -56,7 +57,7 @@ export class SyllabusViewerComponent implements OnInit {
   async loadSyllabus() {
     this.isLoading.set(true);
     try {
-      const syllabusData = await this.academicService.getSyllabus(this.data.item.id);
+      const syllabusData = await firstValueFrom(this.academicService.getSyllabus(this.data.item.id));
       this.domains.set(syllabusData);
 
       if (syllabusData.length > 0) {

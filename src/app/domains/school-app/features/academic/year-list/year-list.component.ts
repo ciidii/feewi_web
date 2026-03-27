@@ -10,6 +10,7 @@ import { RowAction, TabItem, TableRow } from '../../../../../shared/models/data-
 import { YearFormComponent } from './components/year-form/year-form.component';
 import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-year-list',
@@ -86,7 +87,7 @@ export class YearListComponent implements OnInit {
   async loadYears() {
     this.isLoading.set(true);
     try {
-      const data = await this.academicService.getYears();
+      const data = await firstValueFrom(this.academicService.getYears());
       this.years.set(data);
       this.updateTabsCount(data);
     } catch (error) {
@@ -137,7 +138,7 @@ export class YearListComponent implements OnInit {
     dialogRef.afterClosed().subscribe(async (confirmed) => {
       if (confirmed) {
         try {
-          await this.academicService.activateYear(row.id as string);
+          await firstValueFrom(this.academicService.activateYear(row.id as string));
           this.notificationService.success(`L'année ${row.title} est maintenant active.`);
           this.loadYears();
         } catch (error) {

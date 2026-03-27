@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule, BookOpen, Plus, Tag, Edit, Trash2, Search, Info } from 'lucide-angular';
+import { firstValueFrom } from 'rxjs';
 import { AcademicService } from '../../../../../core/services/academic.service';
 import { NotificationService } from '../../../../../shared/services/notification.service';
 import { Subject } from '../../../../../core/models/academic.model';
@@ -69,7 +70,7 @@ export class SubjectLibraryComponent implements OnInit {
   async loadData() {
     this.isLoading.set(true);
     try {
-      const data = await this.academicService.getSubjects();
+      const data = await firstValueFrom(this.academicService.getSubjects());
       this.subjects.set(data);
     } catch (error) {
       this.notificationService.error("Erreur lors du chargement de la bibliothèque.");
@@ -112,7 +113,7 @@ export class SubjectLibraryComponent implements OnInit {
     dialogRef.afterClosed().subscribe(async (confirmed) => {
       if (confirmed) {
         try {
-          await this.academicService.deleteSubject(subject.id);
+          await firstValueFrom(this.academicService.deleteSubject(subject.id));
           this.notificationService.success('Matière retirée du catalogue.');
           this.loadData();
         } catch (error) {

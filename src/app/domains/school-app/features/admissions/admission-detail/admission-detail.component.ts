@@ -122,8 +122,8 @@ export class AdmissionDetailComponent implements OnInit {
     try {
       const [data, levels, filieres] = await Promise.all([
         firstValueFrom(this.enrollmentAdminService.getApplicationById(id)),
-        this.academicService.getLevels(),
-        this.academicService.getFilieres()
+        firstValueFrom(this.academicService.getLevels()),
+        firstValueFrom(this.academicService.getFilieres())
       ]);
 
       this.application.set(data);

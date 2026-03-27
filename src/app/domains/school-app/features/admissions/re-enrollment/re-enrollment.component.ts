@@ -90,7 +90,7 @@ export class SecretaryReEnrollmentComponent implements OnInit, OnDestroy {
   async selectStudent(student: StudentUser) {
     this.isLoading.set(true);
     try {
-      const year = await this.academicService.getCurrentYear();
+      const year = await firstValueFrom(this.academicService.getCurrentYear());
       
       this.selectedStudent.set({
         id: student.id,

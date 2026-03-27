@@ -1,5 +1,6 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { firstValueFrom } from 'rxjs';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
@@ -66,7 +67,7 @@ export class ClassFormComponent implements OnInit {
 
   async loadFilieres() {
     try {
-      const data = await this.academicService.getFilieres();
+      const data = await firstValueFrom(this.academicService.getFilieres());
       this.filieres.set(data);
     } catch (error) {
       console.error('Failed to load filieres', error);
@@ -81,7 +82,7 @@ export class ClassFormComponent implements OnInit {
 
     this.isLoading.set(true);
     try {
-      await this.academicService.createClass(this.classForm.value);
+      await firstValueFrom(this.academicService.createClass(this.classForm.value));
       this.notificationService.success('La classe a été ouverte avec succès.');
       this.dialogRef.close(true);
     } catch (error) {

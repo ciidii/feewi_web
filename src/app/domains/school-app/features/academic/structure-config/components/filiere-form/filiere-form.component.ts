@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { LucideAngularModule, BookOpen, Type, Hash, Info, Tag } from 'lucide-angular';
+import { firstValueFrom } from 'rxjs';
 import { AcademicService } from '../../../../../../../core/services/academic.service';
 import { NotificationService } from '../../../../../../../shared/services/notification.service';
 import { FormShellComponent } from '../../../../../../../shared/components/form-shell/form-shell';
@@ -60,7 +61,7 @@ export class FiliereFormComponent implements OnInit {
         // Note: updateFiliere n'est pas encore dans le service mais sera ajouté si besoin
         this.notificationService.info("Mise à jour en cours d'implémentation.");
       } else {
-        await this.academicService.createFiliere(this.filiereForm.value);
+        await firstValueFrom(this.academicService.createFiliere(this.filiereForm.value));
         this.notificationService.success('La série a été ajoutée au référentiel.');
       }
       this.dialogRef.close(true);

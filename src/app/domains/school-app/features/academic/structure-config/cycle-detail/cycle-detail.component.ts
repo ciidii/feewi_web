@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { LucideAngularModule, ArrowLeft, Layers, Plus, ListChecks, Edit, Trash2, GraduationCap, Users, Tag } from 'lucide-angular';
+import { firstValueFrom } from 'rxjs';
 import { AcademicService } from '../../../../../../core/services/academic.service';
 import { AuthService } from '../../../../../../core/services/auth.service';
 import { NavigationStateService } from '../../../../../../core/services/navigation-state.service';
@@ -111,9 +112,9 @@ export class CycleDetailComponent implements OnInit {
     try {
       // 1. CHARGEMENT DE LA STRUCTURE (Obligatoire)
       const [allCycles, allLevels, allFilieres] = await Promise.all([
-        this.academicService.getCycles(),
-        this.academicService.getLevels(),
-        this.academicService.getFilieres()
+        firstValueFrom(this.academicService.getCycles()),
+        firstValueFrom(this.academicService.getLevels()),
+        firstValueFrom(this.academicService.getFilieres())
       ]);
 
       const currentCycle = allCycles.find(c => String(c.id) === String(id));
@@ -136,11 +137,11 @@ export class CycleDetailComponent implements OnInit {
 
       // 2. CHARGEMENT OPÉRATIONNEL (Résilient : ne bloque pas si échec)
       try {
-        const year = await this.academicService.getCurrentYear();
+        const year = await firstValueFrom(this.academicService.getCurrentYear());
         this.currentYear.set(year);
 
         if (year) {
-          const yearClasses = await this.academicService.getClassesByYear(year.id);
+          const yearClasses = await firstValueFrom(this.academicService.getClassesByYear(year.id));
           this.classes.set(yearClasses);
         }
       } catch (yearError) {

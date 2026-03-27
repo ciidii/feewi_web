@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal, computed, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { LucideAngularModule, Plus, Layers, Edit, Trash2, ArrowRight } from 'lucide-angular';
 import { AcademicService } from '../../../../../core/services/academic.service';
 import { AuthService } from '../../../../../core/services/auth.service';
@@ -79,7 +80,7 @@ export class StructureConfigComponent implements OnInit {
   async loadData() {
     this.isLoading.set(true);
     try {
-      const cyclesData = await this.academicService.getCycles();
+      const cyclesData = await firstValueFrom(this.academicService.getCycles());
       // On fait confiance à l'API pour les cycles activés (Tenant-scoped)
       this.cycles.set(cyclesData.sort((a, b) => a.rank - b.rank));
     } catch (error) {
@@ -145,7 +146,7 @@ export class StructureConfigComponent implements OnInit {
     dialogRef.afterClosed().subscribe(async (confirmed) => {
       if (confirmed) {
         try {
-          await this.academicService.deleteCycle(cycle.id);
+          await firstValueFrom(this.academicService.deleteCycle(cycle.id));
           this.notificationService.success('Cycle supprimé avec succès.');
           this.loadData();
         } catch (error) {
