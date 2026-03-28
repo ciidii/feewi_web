@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, catchError, finalize, tap, throwError } from 'rxjs';
-import { School, Page } from '../models/school.model';
+import { catchError, finalize, map, Observable, tap, throwError } from 'rxjs';
+import { School, Page, PublicSchoolResponse } from '../models/school.model';
 import { EnvironmentService } from './environment.service';
 import { NotificationService } from '../../shared/services/notification.service';
 
@@ -48,11 +48,21 @@ export class SchoolService {
   }
 
   /**
-   * Récupère les détails d'une école par son ID
+   * Récupère les détails d'une école par son ID (UUID)
    */
   getSchoolById(id: string): Observable<School> {
     return this.http.get<School>(`${this.API_URL}/${id}`).pipe(
       catchError(this.handleError('Impossible de récupérer les détails de l\'établissement'))
+    );
+  }
+
+  /**
+   * Récupère les informations publiques d'un établissement par son tenantId (Slug)
+   * Utilisé pour le branding (logo, nom) au login ou sur le portail public
+   */
+  getPublicSchoolInfo(tenantId: string): Observable<PublicSchoolResponse> {
+    return this.http.get<PublicSchoolResponse>(`${this.API_URL}/public/${tenantId}`).pipe(
+      catchError(this.handleError(`Impossible de charger les infos de l'établissement "${tenantId}"`))
     );
   }
 

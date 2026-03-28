@@ -3,6 +3,7 @@ export interface School {
   tenantId: string;
   name: string;
   slogan?: string;
+  logoUrl?: string;
   phone: string;
   email: string;
   streetAddress: string;
@@ -13,6 +14,18 @@ export interface School {
   adminPassword?: string;
   active?: boolean;
   createdAt?: string;
+}
+
+export interface PublicSchoolResponse {
+  tenantId: string;
+  name: string;
+  slogan?: string;
+  logoUrl?: string;
+  phone?: string;
+  email?: string;
+  streetAddress?: string;
+  city?: string;
+  country?: string;
 }
 
 export interface Page<T> {

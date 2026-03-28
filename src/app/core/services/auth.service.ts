@@ -113,11 +113,12 @@ export class AuthService {
 
   private updateTenantContext(profile: UserProfile): void {
     if (profile.tenantId && !this.navContext.isSaasDomain()) {
-      this.schoolService.getSchoolById(profile.tenantId).subscribe({
+      this.schoolService.getPublicSchoolInfo(profile.tenantId).subscribe({
         next: (school) => {
           this.tenantService.setTenant({
             id: school.tenantId,
             name: school.name,
+            logoUrl: school.logoUrl,
             allowedCycles: profile.allowedCycles
           });
         },
