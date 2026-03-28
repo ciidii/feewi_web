@@ -18,8 +18,6 @@ export class EnrollmentAdminService {
   private notificationService = inject(NotificationService);
 
   private readonly baseUrl = this.envService.getServiceUrl('enrollment');
-  private readonly adminUrl = `${this.baseUrl}/admin/applications`;
-  private readonly directionUrl = `${this.baseUrl}/admin/direction/applications`;
 
   private handleError(message: string) {
     return (error: any) => {
@@ -30,149 +28,88 @@ export class EnrollmentAdminService {
     };
   }
 
-  /**
-   * Lister tous les dossiers d'admission
-   */
+  // --- GESTION DES DOSSIERS ---
+
   getApplications(): Observable<AdmissionApplication[]> {
-    return this.http.get<AdmissionApplication[]>(this.adminUrl).pipe(
+    return this.http.get<AdmissionApplication[]>(`${this.baseUrl}/admin/applications`).pipe(
       catchError(this.handleError('Erreur lors du chargement des dossiers'))
     );
   }
 
-  /**
-   * Recherche globale de dossiers
-   */
   searchApplications(query: string): Observable<AdmissionApplication[]> {
     const params = new HttpParams().set('q', query);
-    return this.http.get<AdmissionApplication[]>(`${this.adminUrl}/search`, { params }).pipe(
+    return this.http.get<AdmissionApplication[]>(`${this.baseUrl}/admin/applications/search`, { params }).pipe(
       catchError(this.handleError('Erreur lors de la recherche'))
     );
   }
 
-  /**
-   * Récupérer un dossier spécifique
-   */
   getApplicationById(id: string): Observable<AdmissionApplication> {
-    return this.http.get<AdmissionApplication>(`${this.adminUrl}/${id}`).pipe(
+    return this.http.get<AdmissionApplication>(`${this.baseUrl}/admin/applications/${id}`).pipe(
       catchError(this.handleError('Impossible de récupérer le dossier'))
     );
   }
 
+  // --- CONFIGURATION DU PORTAIL ---
+
   /**
-   * Récupérer le récépissé d'un dossier
+   * Récupérer la configuration (Endpoint: /enrollment/api/v1/admin/config)
    */
-  getApplicationReceipt(id: string): Observable<any> {
-    return this.http.get(`${this.adminUrl}/${id}/receipt`).pipe(
-      catchError(this.handleError('Impossible de générer le récépissé'))
+  getConfig(): Observable<EnrollmentConfig> {
+    return this.http.get<EnrollmentConfig>(`${this.baseUrl}/admin/config`).pipe(
+      catchError(this.handleError('Impossible de charger la configuration du portail'))
     );
   }
 
   /**
-   * Saisie directe (Guichet)
+   * Mettre à jour la configuration (Endpoint: /enrollment/api/v1/admin/config)
    */
-  directEntry(request: any): Observable<AdmissionApplication> {
-    return this.http.post<AdmissionApplication>(`${this.adminUrl}/direct`, request).pipe(
-      catchError(this.handleError('Erreur lors de la saisie directe'))
+  updateConfig(config: EnrollmentConfig): Observable<EnrollmentConfig> {
+    return this.http.put<EnrollmentConfig>(`${this.baseUrl}/admin/config`, config).pipe(
+      catchError(this.handleError('Erreur lors de la mise à jour de la configuration'))
     );
   }
 
-  /**
-   * Marquer un document comme reçu physiquement
-   */
+  // --- ACTIONS MÉTIER ---
+
   receivePhysicalDocument(applicationId: string, docCode: string): Observable<AdmissionApplication> {
     return this.http.patch<AdmissionApplication>(
-      `${this.adminUrl}/${applicationId}/documents/${docCode}/receive`,
+      `${this.baseUrl}/admin/applications/${applicationId}/documents/${docCode}/receive`,
       {}
     ).pipe(
       catchError(this.handleError('Erreur lors de la validation du document'))
     );
   }
 
-  /**
-   * Valider la conformité administrative
-   */
   verifyApplication(applicationId: string): Observable<AdmissionApplication> {
-    return this.http.patch<AdmissionApplication>(`${this.adminUrl}/${applicationId}/verify`, {}).pipe(
+    return this.http.patch<AdmissionApplication>(`${this.baseUrl}/admin/applications/${applicationId}/verify`, {}).pipe(
       catchError(this.handleError('Erreur lors de la vérification administrative'))
     );
   }
 
-  /**
-   * Saisir les résultats de l'évaluation pédagogique
-   */
   submitAssessment(applicationId: string, assessment: AssessmentRequest): Observable<AdmissionApplication> {
     return this.http.patch<AdmissionApplication>(
-      `${this.adminUrl}/${applicationId}/assessment`,
+      `${this.baseUrl}/admin/applications/${applicationId}/assessment`,
       assessment
     ).pipe(
       catchError(this.handleError('Erreur lors de l\'enregistrement de l\'évaluation'))
     );
   }
 
-  /**
-   * Annulation administrative d'un dossier
-   */
-  cancelApplicationAdmin(applicationId: string): Observable<AdmissionApplication> {
-    return this.http.post<AdmissionApplication>(`${this.adminUrl}/${applicationId}/cancel`, {}).pipe(
-      catchError(this.handleError('Erreur lors de l\'annulation du dossier'))
-    );
-  }
-
   // --- API DIRECTION ---
 
-  /**
-   * Validation finale par la Direction
-   */
   validateAdmission(applicationId: string): Observable<AdmissionApplication> {
-    return this.http.patch<AdmissionApplication>(`${this.directionUrl}/${applicationId}/validate`, {}).pipe(
+    return this.http.patch<AdmissionApplication>(`${this.baseUrl}/admin/direction/applications/${applicationId}/validate`, {}).pipe(
       catchError(this.handleError('Erreur lors de la validation finale'))
     );
   }
 
-  /**
-   * Refus définitif d'un dossier
-   */
   rejectAdmission(applicationId: string, reason: string): Observable<AdmissionApplication> {
-    return this.http.patch<AdmissionApplication>(`${this.directionUrl}/${applicationId}/reject`, JSON.stringify(reason), {
-      headers: { 'Content-Type': 'application/json' }
-    }).pipe(
+    return this.http.patch<AdmissionApplication>(
+      `${this.baseUrl}/admin/direction/applications/${applicationId}/reject`,
+      JSON.stringify(reason),
+      { headers: { 'Content-Type': 'application/json' } }
+    ).pipe(
       catchError(this.handleError('Erreur lors du rejet du dossier'))
-    );
-  }
-
-  /**
-   * Mise en liste d'attente
-   */
-  waitlistAdmission(applicationId: string): Observable<AdmissionApplication> {
-    return this.http.patch<AdmissionApplication>(`${this.directionUrl}/${applicationId}/waitlist`, {}).pipe(
-      catchError(this.handleError('Erreur lors de la mise en liste d\'attente'))
-    );
-  }
-
-  /**
-   * Validation par lot
-   */
-  bulkValidateAdmissions(ids: string[]): Observable<void> {
-    return this.http.post<void>(`${this.directionUrl}/bulk-validate`, ids).pipe(
-      catchError(this.handleError('Erreur lors de la validation groupée'))
-    );
-  }
-
-  /**
-   * Récupérer la configuration du service Enrollment
-   */
-  getConfig(): Observable<EnrollmentConfig> {
-    return this.http.get<EnrollmentConfig>(`${this.baseUrl}/admin/config`).pipe(
-      catchError(this.handleError('Impossible de charger la configuration'))
-    );
-  }
-
-  /**
-   * Mettre à jour la configuration
-   */
-  updateConfig(config: EnrollmentConfig): Observable<EnrollmentConfig> {
-    return this.http.put<EnrollmentConfig>(`${this.baseUrl}/admin/config`, config).pipe(
-      catchError(this.handleError('Erreur lors de la mise à jour de la configuration'))
     );
   }
 }

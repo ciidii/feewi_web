@@ -133,15 +133,23 @@ export interface AssessmentRequest {
  * CONFIGURATION DU SERVICE (Paramètres École)
  */
 export interface EnrollmentConfig {
-  isPublicPortalOpen: boolean;
-  admissionWindow: {
+  tenantId: string;
+  isPublicPortalOpen?: boolean; // Maintenu pour la logique UI actuelle
+  admissionWindow?: {           // Maintenu pour la logique UI actuelle
     startDate: string;
     endDate: string;
   };
-  requiredDocuments: {
+  documentChecklist: {
     code: string;
-    label: string;
-    isMandatory: boolean;
+    name: string;
+    mandatory: boolean;
   }[];
-  formSchema?: any; // Format JSONB dynamique
+  formSchema: {
+    customFields: {
+      name: string;
+      label: string;
+      type: string;
+    }[];
+  };
+  enabledServices: string[];
 }

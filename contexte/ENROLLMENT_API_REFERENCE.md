@@ -74,7 +74,19 @@ Base URL : `/enrollment/api/v1/public/applications`
 *   **URL** : `PATCH /{id}/guardians`
 *   **Payload** : `GuardianInfo` (voir section 5)
 
-### 2.5 Gestion des Services (Cantine, Transport)
+### 2.5 Champs Personnalisés (Formulaire spécifique à l'école)
+*   **URL** : `PATCH /{id}/custom-fields`
+*   **Description** : Permet de répondre aux questions spécifiques définies par l'établissement.
+*   **Payload** : Objet JSON clé/valeur libre.
+    ```json
+    {
+      "is_allergic": true,
+      "allergy_details": "Arachides",
+      "previous_school_city": "Thiès"
+    }
+    ```
+
+### 2.6 Gestion des Services (Cantine, Transport)
 *   **URL** : `PATCH /{id}/subscriptions`
 *   **Payload** : `List<ServiceSubscription>`
     ```json
@@ -90,6 +102,8 @@ Base URL : `/enrollment/api/v1/public/applications`
 
 ### 2.7 Soumission & Annulation
 *   **Soumettre** : `POST /{id}/submit` (Passe à `SUBMITTED`)
+    *   **Contrôle Temps-Réel** : Le service interroge le *Academic Structure Service* pour vérifier que la fenêtre d'inscription est bien ouverte pour l'année scolaire concernée.
+    *   **Contrôle de Capacité** : Vérification des quotas disponibles (si configuré).
 *   **Annuler** : `POST /{id}/cancel` (Passe à `CANCELLED`)
 
 ### 2.8 Suivi & Récupération
@@ -138,7 +152,37 @@ Base URL : `/enrollment/api/v1/admin/direction/applications`
 
 ---
 
-## 5. Modèles de Données (TypeScript / DTOs)
+## 5. Configuration de l'Admission (`/api/v1/admin/config`)
+Ces points d'accès permettent à l'école de personnaliser son portail public.
+
+### 5.1 Récupérer la configuration actuelle
+*   **URL** : `GET /`
+*   **Description** : Retourne la checklist des documents, le schéma des champs personnalisés et les services activés.
+*   **Réponse (`EnrollmentConfig`)** :
+    ```json
+    {
+      "tenantId": "ecole-test",
+      "documentChecklist": [
+        { "code": "EXT", "name": "Extrait de Naissance", "mandatory": true },
+        { "code": "BUL", "name": "Bulletins de notes", "mandatory": true }
+      ],
+      "formSchema": {
+        "customFields": [
+          { "name": "allergies", "label": "Allergies connues", "type": "text" }
+        ]
+      },
+      "enabledServices": ["CANTEEN", "TRANSPORT"]
+    }
+    ```
+
+### 5.2 Mettre à jour la configuration
+*   **URL** : `PUT /`
+*   **Description** : Écrase la configuration existante.
+*   **Payload** : Objet `EnrollmentConfig` complet.
+
+---
+
+## 6. Modèles de Données (TypeScript / DTOs)
 
 ### 5.1 ApplicationResponse (Vue Parent)
 ```typescript

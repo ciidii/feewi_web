@@ -3,7 +3,10 @@
   <header class="config-header">
     <div class="header-left">
       <h1 class="page-title">Paramètres du Portail d'Admission</h1>
-      <p class="page-subtitle">Pilotez l'ouverture du portail public et configurez les exigences du dossier.</p>
+      <p class="page-subtitle">
+        Pilotez l'ouverture du portail public et configurez les exigences du dossier 
+        <strong *ngIf="activeYear()">pour l'année {{ activeYear()?.label }}</strong>.
+      </p>
     </div>
     <div class="header-actions">
       <button class="btn btn-outline" (click)="previewPortal()">
@@ -19,79 +22,119 @@
 
   <main class="config-content" *ngIf="config(); let cfg">
     
-    <!-- SECTION 1 : STATUT DU PORTAIL -->
-    <section class="config-card">
-      <div class="card-header">
-        <lucide-icon [name]="Globe" [size]="20" class="text-primary"></lucide-icon>
-        <h2>Disponibilité du Service</h2>
-      </div>
-      
-      <div class="status-control">
-        <div class="status-info">
-          <span class="status-label">État du portail public :</span>
-          <span class="status-badge" [class.open]="cfg.isPublicPortalOpen">
-            {{ cfg.isPublicPortalOpen ? 'OUVERT' : 'FERMÉ' }}
-          </span>
-        </div>
-        <button class="btn-toggle" [class.active]="cfg.isPublicPortalOpen" (click)="togglePortal()">
-          <div class="toggle-track">
-            <div class="toggle-thumb"></div>
-          </div>
-          <span>{{ cfg.isPublicPortalOpen ? 'Désactiver le portail' : 'Activer le portail' }}</span>
-        </button>
-      </div>
-      <p class="helper-text">Lorsque le portail est fermé, les parents ne peuvent plus soumettre de nouvelles demandes.</p>
-    </section>
-
+    <!-- SECTION 1 : DISPONIBILITÉ & SERVICES -->
     <div class="config-grid">
-      <!-- SECTION 2 : PÉRIODE D'ADMISSION -->
       <section class="config-card">
         <div class="card-header">
-          <lucide-icon [name]="Calendar" [size]="20" class="text-primary"></lucide-icon>
-          <h2>Période d'Ouverture</h2>
+          <lucide-icon [name]="Globe" [size]="20" class="text-primary"></lucide-icon>
+          <h2>Statut du Portail Public</h2>
         </div>
-        
-        <div class="date-inputs">
-          <div class="form-group">
-            <label>Date de début</label>
-            <input type="date" [(ngModel)]="cfg.admissionWindow.startDate" class="fw-input">
+        <div class="status-control">
+          <div class="status-info">
+            <span class="status-badge" [class.open]="cfg.isPublicPortalOpen">
+              {{ cfg.isPublicPortalOpen ? 'OUVERT AUX INSCRIPTIONS' : 'FERMÉ' }}
+            </span>
           </div>
-          <div class="form-group">
-            <label>Date de fin (clôture)</label>
-            <input type="date" [(ngModel)]="cfg.admissionWindow.endDate" class="fw-input">
-          </div>
+          <button class="btn-toggle" [class.active]="cfg.isPublicPortalOpen" (click)="togglePortal()">
+            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+            <span>{{ cfg.isPublicPortalOpen ? 'Désactiver' : 'Activer' }}</span>
+          </button>
         </div>
-        <p class="helper-text">Le portail s'ouvrira et se fermera automatiquement aux dates indiquées.</p>
+        <p class="helper-text">Impacte la possibilité pour les parents de soumettre de nouveaux dossiers.</p>
       </section>
 
-      <!-- SECTION 3 : CHECKLIST DOCUMENTAIRE -->
       <section class="config-card">
         <div class="card-header">
-          <lucide-icon [name]="FileText" [size]="20" class="text-primary"></lucide-icon>
-          <h2>Documents Requis</h2>
+          <lucide-icon [name]="ChefHat" [size]="20" class="text-primary"></lucide-icon>
+          <h2>Services Optionnels</h2>
         </div>
-        
-        <div class="docs-checklist">
-          <div *ngFor="let doc of cfg.requiredDocuments" class="doc-config-item">
-            <div class="doc-info">
-              <span class="doc-label">{{ doc.label }}</span>
-              <span class="doc-code">{{ doc.code }}</span>
+        <div class="services-toggle-list">
+          <div class="service-item">
+            <div class="service-info">
+              <lucide-icon [name]="ChefHat" [size]="16"></lucide-icon>
+              <span>Restauration scolaire (Cantine)</span>
             </div>
-            <label class="mandatory-toggle">
-              <input type="checkbox" [checked]="doc.isMandatory" (change)="updateDocumentMandatory(doc.code, !doc.isMandatory)">
-              <span class="check-text">Obligatoire</span>
-            </label>
+            <mat-checkbox color="primary" [checked]="isServiceEnabled('CANTEEN')" (change)="toggleService('CANTEEN')"></mat-checkbox>
+          </div>
+          <div class="service-item">
+            <div class="service-info">
+              <lucide-icon [name]="Bus" [size]="16"></lucide-icon>
+              <span>Transport scolaire</span>
+            </div>
+            <mat-checkbox color="primary" [checked]="isServiceEnabled('TRANSPORT')" (change)="toggleService('TRANSPORT')"></mat-checkbox>
           </div>
         </div>
       </section>
     </div>
+
+    <!-- SECTION 2 : PÉRIODE & CHAMPS PERSONNALISÉS -->
+    <div class="config-grid">
+      <section class="config-card" *ngIf="cfg.admissionWindow">
+        <div class="card-header">
+          <lucide-icon [name]="Calendar" [size]="20" class="text-primary"></lucide-icon>
+          <h2>Fenêtre d'Admission</h2>
+        </div>
+        <div class="date-inputs">
+          <div class="form-group">
+            <label>Ouverture</label>
+            <input type="date" [(ngModel)]="cfg.admissionWindow.startDate" class="fw-input">
+          </div>
+          <div class="form-group">
+            <label>Fermeture</label>
+            <input type="date" [(ngModel)]="cfg.admissionWindow.endDate" class="fw-input">
+          </div>
+        </div>
+        <p class="helper-text">Le portail se régule automatiquement selon ces dates.</p>
+      </section>
+
+      <section class="config-card">
+        <div class="card-header">
+          <lucide-icon [name]="MessageSquare" [size]="20" class="text-primary"></lucide-icon>
+          <h2>Champs Spécifiques (École)</h2>
+        </div>
+        <div class="custom-fields-list">
+          <div *ngFor="let field of cfg.formSchema.customFields" class="field-item">
+            <span class="field-label">{{ field.label }}</span>
+            <span class="field-type-badge">{{ field.type }}</span>
+          </div>
+          <div *ngIf="cfg.formSchema.customFields.length === 0" class="empty-hint">
+            Aucun champ personnalisé défini.
+          </div>
+        </div>
+        <button class="btn-text-action"><lucide-icon [name]="Plus" [size]="14"></lucide-icon> Ajouter une question</button>
+      </section>
+    </div>
+
+    <!-- SECTION 3 : CHECKLIST DOCUMENTAIRE -->
+    <section class="config-card full-width">
+      <div class="card-header">
+        <lucide-icon [name]="FileText" [size]="20" class="text-primary"></lucide-icon>
+        <h2>Checklist des Documents Requis</h2>
+      </div>
+      <div class="docs-grid-config">
+        <div *ngFor="let doc of cfg.documentChecklist" class="doc-config-row">
+          <div class="doc-main-info">
+            <span class="doc-name">{{ doc.name }}</span>
+            <span class="doc-code-tag">{{ doc.code }}</span>
+          </div>
+          <div class="doc-actions-config">
+            <label class="toggle-label">
+              <input type="checkbox" [checked]="doc.mandatory" (change)="updateDocumentMandatory(doc.code, !doc.mandatory)">
+              <span>Obligatoire</span>
+            </label>
+            <button class="btn-icon-danger" title="Supprimer"><lucide-icon [name]="Trash2" [size]="16"></lucide-icon></button>
+          </div>
+        </div>
+      </div>
+      <button class="btn-outline mt-4"><lucide-icon [name]="Plus" [size]="18"></lucide-icon> Ajouter un type de document</button>
+    </section>
 
   </main>
 
   <!-- LOADER -->
   <div class="loading-overlay" *ngIf="isLoading()">
     <lucide-icon [name]="RefreshCw" [size]="48" class="animate-spin text-primary"></lucide-icon>
-    <p>Chargement de la configuration...</p>
+    <p>Synchronisation avec le serveur...</p>
   </div>
 
 </div>

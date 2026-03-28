@@ -1,25 +1,35 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, Globe, Save, RefreshCw, Eye, Calendar, FileText, ShieldCheck, ToggleLeft as ToggleIcon } from 'lucide-angular';
-import { firstValueFrom } from 'rxjs';
+import { 
+  LucideAngularModule, Globe, Save, RefreshCw, Eye, 
+  Calendar, FileText, ShieldCheck, ToggleLeft as ToggleIcon,
+  ChefHat, Bus, MessageSquare, Plus, Trash2
+} from 'lucide-angular';
+import { finalize, forkJoin } from 'rxjs';
 import { EnrollmentAdminService } from '../../../../../core/services/enrollment-admin.service';
 import { EnrollmentConfig } from '../../../../../core/models/enrollment.model';
 import { NotificationService } from '../../../../../shared/services/notification.service';
+import { AcademicService } from '../../../../../core/services/academic.service';
+import { AcademicYear } from '../../../../../core/models/academic.model';
+
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 @Component({
   selector: 'app-admission-config',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [CommonModule, FormsModule, LucideAngularModule, MatCheckboxModule],
   templateUrl: './admission-config.component.html',
   styleUrls: ['./admission-config.component.scss']
 })
 export class AdmissionConfigComponent implements OnInit {
   private enrollmentService = inject(EnrollmentAdminService);
+  private academicService = inject(AcademicService);
   private notificationService = inject(NotificationService);
 
   // --- ÉTATS ---
   config = signal<EnrollmentConfig | null>(null);
+  activeYear = signal<AcademicYear | null>(null);
   isLoading = signal(true);
   isSaving = signal(false);
 
@@ -32,38 +42,59 @@ export class AdmissionConfigComponent implements OnInit {
   readonly FileText = FileText;
   readonly ShieldCheck = ShieldCheck;
   readonly ToggleIcon = ToggleIcon;
+  readonly ChefHat = ChefHat;
+  readonly Bus = Bus;
+  readonly MessageSquare = MessageSquare;
+  readonly Plus = Plus;
+  readonly Trash2 = Trash2;
 
-  async ngOnInit() {
-    await this.loadConfig();
+  ngOnInit() {
+    this.loadInitialData();
   }
 
-  async loadConfig() {
+  loadInitialData() {
     this.isLoading.set(true);
-    try {
-      const data = await firstValueFrom(this.enrollmentService.getConfig());
-      this.config.set(data);
-    } catch (e) {
-      console.error('Erreur chargement config:', e);
-      this.notificationService.error('Impossible de charger la configuration du portail.');
-    } finally {
-      this.isLoading.set(false);
-    }
+    forkJoin({
+      config: this.enrollmentService.getConfig(),
+      year: this.academicService.getCurrentYear()
+    }).pipe(
+      finalize(() => this.isLoading.set(false))
+    ).subscribe({
+      next: ({ config, year }) => {
+        // Aligner les données reçues avec la nouvelle interface
+        const securedConfig: EnrollmentConfig = {
+          ...config,
+          admissionWindow: config.admissionWindow || { startDate: '', endDate: '' },
+          documentChecklist: config.documentChecklist || [],
+          formSchema: config.formSchema || { customFields: [] },
+          enabledServices: config.enabledServices || []
+        };
+        this.config.set(securedConfig);
+        this.activeYear.set(year);
+      },
+      error: (err) => console.error('[AdmissionConfig] Erreur initialisation:', err)
+    });
   }
 
-  async onSave() {
+  onSave() {
     const currentConfig = this.config();
     if (!currentConfig) return;
 
-    this.isSaving.set(true);
-    try {
-      await firstValueFrom(this.enrollmentService.updateConfig(currentConfig));
-      this.notificationService.success('Configuration enregistrée avec succès.');
-    } catch (e) {
-      console.error('Erreur sauvegarde config:', e);
-      this.notificationService.error('Erreur lors de la mise à jour de la configuration.');
-    } finally {
-      this.isSaving.set(false);
+    // Validation des dates
+    if (currentConfig.admissionWindow?.startDate && currentConfig.admissionWindow?.endDate) {
+      if (new Date(currentConfig.admissionWindow.startDate) > new Date(currentConfig.admissionWindow.endDate)) {
+        this.notificationService.error('La date de début ne peut pas être après la date de fin.');
+        return;
+      }
     }
+
+    this.isSaving.set(true);
+    this.enrollmentService.updateConfig(currentConfig).pipe(
+      finalize(() => this.isSaving.set(false))
+    ).subscribe({
+      next: () => this.notificationService.success('Configuration enregistrée avec succès.'),
+      error: (err) => console.error('[AdmissionConfig] Erreur sauvegarde:', err)
+    });
   }
 
   togglePortal() {
@@ -76,17 +107,40 @@ export class AdmissionConfigComponent implements OnInit {
     }
   }
 
-  updateDocumentMandatory(code: string, isMandatory: boolean) {
+  // --- GESTION DES SERVICES ---
+
+  isServiceEnabled(code: string): boolean {
+    return this.config()?.enabledServices.includes(code) || false;
+  }
+
+  toggleService(code: string) {
+    const current = this.config();
+    if (!current) return;
+
+    const services = [...current.enabledServices];
+    const index = services.indexOf(code);
+    
+    if (index > -1) services.splice(index, 1);
+    else services.push(code);
+
+    this.config.set({ ...current, enabledServices: services });
+  }
+
+  // --- GESTION DES DOCUMENTS ---
+
+  updateDocumentMandatory(code: string, mandatory: boolean) {
     const current = this.config();
     if (current) {
-      const updatedDocs = current.requiredDocuments.map(doc => 
-        doc.code === code ? { ...doc, isMandatory } : doc
+      const updatedDocs = current.documentChecklist.map(doc => 
+        doc.code === code ? { ...doc, mandatory } : doc
       );
-      this.config.set({ ...current, requiredDocuments: updatedDocs });
+      this.config.set({ ...current, documentChecklist: updatedDocs });
     }
   }
 
+  // --- PREVIEW ---
+
   previewPortal() {
-    window.open('/public/enroll', '_blank');
+    window.open('/enrollment', '_blank');
   }
 }
