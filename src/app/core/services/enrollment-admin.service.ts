@@ -44,7 +44,7 @@ export class EnrollmentAdminService {
   }
 
   getApplicationById(id: string): Observable<AdmissionApplication> {
-    return this.http.get<AdmissionApplication>(`${this.baseUrl}/admin/applications/${id}`).pipe(
+    return this.http.get<AdmissionApplication>(`${this.baseUrl}/admin/applications/${id}/details`).pipe(
       catchError(this.handleError('Impossible de récupérer le dossier'))
     );
   }

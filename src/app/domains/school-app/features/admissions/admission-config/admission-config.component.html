@@ -10,14 +10,16 @@
   (save)="onSave()"
   (cancel)="previewPortal()"
 >
-  <main class="config-content" *ngIf="config(); let cfg">
+  <div class="config-split-layout" *ngIf="config(); let cfg">
     
-    <!-- SECTION 1 : DISPONIBILITÉ & SERVICES -->
-    <div class="config-grid">
+    <!-- COLONNE GAUCHE : RÉGLAGES -->
+    <div class="settings-column">
+      
+      <!-- DISPONIBILITÉ -->
       <section class="config-card">
         <div class="card-header">
           <lucide-icon [name]="Globe" [size]="20" class="text-primary"></lucide-icon>
-          <h2>Statut du Portail Public</h2>
+          <h2>Disponibilité du Service</h2>
         </div>
         <div class="status-control">
           <div class="status-info">
@@ -30,9 +32,9 @@
             <span>{{ cfg.isPublicPortalOpen ? 'Désactiver' : 'Activer' }}</span>
           </button>
         </div>
-        <p class="helper-text">Impacte la possibilité pour les parents de soumettre de nouveaux dossiers.</p>
       </section>
 
+      <!-- SERVICES -->
       <section class="config-card">
         <div class="card-header">
           <lucide-icon [name]="ChefHat" [size]="20" class="text-primary"></lucide-icon>
@@ -42,7 +44,7 @@
           <div class="service-item">
             <div class="service-info">
               <lucide-icon [name]="ChefHat" [size]="16"></lucide-icon>
-              <span>Restauration scolaire (Cantine)</span>
+              <span>Cantine scolaire</span>
             </div>
             <mat-checkbox color="primary" [checked]="isServiceEnabled('CANTEEN')" (change)="toggleService('CANTEEN')"></mat-checkbox>
           </div>
@@ -55,14 +57,12 @@
           </div>
         </div>
       </section>
-    </div>
 
-    <!-- SECTION 2 : PÉRIODE & CHAMPS PERSONNALISÉS -->
-    <div class="config-grid">
+      <!-- PÉRIODE -->
       <section class="config-card" *ngIf="cfg.admissionWindow">
         <div class="card-header">
           <lucide-icon [name]="Calendar" [size]="20" class="text-primary"></lucide-icon>
-          <h2>Fenêtre d'Admission</h2>
+          <h2>Fenêtre Temporelle</h2>
         </div>
         <div class="date-inputs">
           <div class="form-group">
@@ -74,52 +74,40 @@
             <input type="date" [(ngModel)]="cfg.admissionWindow.endDate" class="fw-input">
           </div>
         </div>
-        <p class="helper-text">Le portail se régule automatiquement selon ces dates.</p>
       </section>
 
+      <!-- CHECKLIST -->
       <section class="config-card">
         <div class="card-header">
-          <lucide-icon [name]="MessageSquare" [size]="20" class="text-primary"></lucide-icon>
-          <h2>Champs Spécifiques (École)</h2>
+          <lucide-icon [name]="FileText" [size]="20" class="text-primary"></lucide-icon>
+          <h2>Checklist Documents</h2>
         </div>
-        <div class="custom-fields-list">
-          <div *ngFor="let field of cfg.formSchema.customFields" class="field-item">
-            <span class="field-label">{{ field.label }}</span>
-            <span class="field-type-badge">{{ field.type }}</span>
-          </div>
-          <div *ngIf="cfg.formSchema.customFields.length === 0" class="empty-hint">
-            Aucun champ personnalisé défini.
+        <div class="docs-grid-config">
+          <div *ngFor="let doc of cfg.documentChecklist" class="doc-config-row">
+            <div class="doc-main-info">
+              <span class="doc-name text-xs">{{ doc.name }}</span>
+              <span class="doc-code-tag">{{ doc.code }}</span>
+            </div>
+            <div class="doc-actions-config">
+              <mat-checkbox color="primary" [checked]="doc.mandatory" (change)="updateDocumentMandatory(doc.code, !doc.mandatory)"></mat-checkbox>
+              <button class="btn-icon-danger-sm" (click)="removeDocumentType(doc.code)"><lucide-icon [name]="Trash2" [size]="14"></lucide-icon></button>
+            </div>
           </div>
         </div>
-        <button class="btn-text-action"><lucide-icon [name]="Plus" [size]="14"></lucide-icon> Ajouter une question</button>
+        <button class="btn-text-action mt-4" (click)="addDocumentType()"><lucide-icon [name]="Plus" [size]="14"></lucide-icon> Ajouter un document</button>
       </section>
+
     </div>
 
-    <!-- SECTION 3 : CHECKLIST DOCUMENTAIRE -->
-    <section class="config-card full-width">
-      <div class="card-header">
-        <lucide-icon [name]="FileText" [size]="20" class="text-primary"></lucide-icon>
-        <h2>Checklist des Documents Requis</h2>
+    <!-- COLONNE DROITE : LIVE PREVIEW (Simulateur) -->
+    <div class="preview-column">
+      <div class="sticky-top">
+        <div class="preview-header-label">Aperçu en temps réel</div>
+        <app-portal-preview [config]="cfg" [activeYear]="activeYear()"></app-portal-preview>
       </div>
-      <div class="docs-grid-config">
-        <div *ngFor="let doc of cfg.documentChecklist" class="doc-config-row">
-          <div class="doc-main-info">
-            <span class="doc-name">{{ doc.name }}</span>
-            <span class="doc-code-tag">{{ doc.code }}</span>
-          </div>
-          <div class="doc-actions-config">
-            <label class="toggle-label">
-              <input type="checkbox" [checked]="doc.mandatory" (change)="updateDocumentMandatory(doc.code, !doc.mandatory)">
-              <span>Obligatoire</span>
-            </label>
-            <button class="btn-icon-danger" (click)="removeDocumentType(doc.code)" title="Supprimer"><lucide-icon [name]="Trash2" [size]="16"></lucide-icon></button>
-          </div>
-        </div>
-      </div>
-      <button class="btn-outline mt-4" (click)="addDocumentType()"><lucide-icon [name]="Plus" [size]="18"></lucide-icon> Ajouter un type de document</button>
-    </section>
+    </div>
 
-  </main>
+  </div>
 
   <!-- LOADER INITIAL -->
   <div class="loading-overlay" *ngIf="isLoading()">

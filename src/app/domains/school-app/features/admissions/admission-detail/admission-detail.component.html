@@ -7,7 +7,7 @@
         <lucide-icon [name]="ArrowLeft" [size]="20"></lucide-icon>
       </button>
       <div class="title-group">
-        <h1>{{ app.candidate.firstName }} {{ app.candidate.lastName }}</h1>
+        <h1>{{ app.candidate?.firstName || 'Candidat' }} {{ app.candidate?.lastName || 'Inconnu' }}</h1>
         <span class="admission-id">Dossier #{{ app.reference }} • {{ app.type === 'RE_ENROLL' ? 'Réinscription' : 'Nouvelle' }}</span>
       </div>
     </div>
@@ -61,7 +61,7 @@
           <lucide-icon [name]="User" [size]="18" class="text-primary"></lucide-icon>
           <h2>Informations Candidat</h2>
         </div>
-        <div class="grid-form">
+        <div class="grid-form" *ngIf="app.candidate">
           <div class="form-group">
             <label>Prénom(s)</label>
             <div class="value">{{ app.candidate.firstName }}</div>
@@ -93,6 +93,9 @@
             <div class="value">{{ app.candidate.birthPlace }}</div>
           </div>
         </div>
+        <div *ngIf="!app.candidate" class="p-4 text-slate-400 italic text-sm">
+          Données d'identité manquantes pour ce dossier.
+        </div>
       </div>
 
       <!-- Section : Responsable Principal -->
@@ -101,7 +104,7 @@
           <lucide-icon [name]="Phone" [size]="18" class="text-primary"></lucide-icon>
           <h2>Parent / Responsable</h2>
         </div>
-        <div class="parent-info-grid">
+        <div class="parent-info-grid" *ngIf="app.primaryGuardian">
           <div class="info-block">
             <span class="role-tag">{{ app.primaryGuardian.relation }}</span>
             <h3>{{ app.primaryGuardian.firstName }} {{ app.primaryGuardian.lastName }}</h3>
@@ -111,6 +114,9 @@
             <div class="detail-item"><lucide-icon [name]="Phone" [size]="14"></lucide-icon> {{ app.primaryGuardian.phone }}</div>
             <div class="detail-item"><lucide-icon [name]="MapPin" [size]="14"></lucide-icon> {{ app.primaryGuardian.address || 'Non renseignée' }}</div>
           </div>
+        </div>
+        <div *ngIf="!app.primaryGuardian" class="p-4 text-slate-400 italic text-sm">
+          Données du responsable manquantes.
         </div>
       </div>
 

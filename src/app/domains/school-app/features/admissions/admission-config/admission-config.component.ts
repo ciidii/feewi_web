@@ -17,11 +17,20 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { FormShellComponent } from '../../../../../shared/components/form-shell/form-shell';
 import { DocumentTypeFormComponent } from './components/document-type-form/document-type-form.component';
+import { PortalPreviewComponent } from './components/portal-preview/portal-preview.component';
 
 @Component({
   selector: 'app-admission-config',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, MatCheckboxModule, MatDialogModule, FormShellComponent],
+  imports: [
+    CommonModule, 
+    FormsModule, 
+    LucideAngularModule, 
+    MatCheckboxModule, 
+    MatDialogModule, 
+    FormShellComponent,
+    PortalPreviewComponent
+  ],
   templateUrl: './admission-config.component.html',
   styleUrls: ['./admission-config.component.scss']
 })
