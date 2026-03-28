@@ -1,0 +1,62 @@
+<app-form-shell
+  title="Ajouter un Document"
+  subtitle="Définissez un nouveau type de pièce jointe exigé pour le dossier."
+  [icon]="FileText"
+  saveLabel="Ajouter à la liste"
+  cancelLabel="Annuler"
+  [canSave]="docForm.valid"
+  (save)="onSave()"
+  (cancel)="onCancel()"
+>
+  <form [formGroup]="docForm" class="space-y-6">
+    
+    <!-- Nom du Document -->
+    <div class="space-y-2">
+      <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Nom complet</label>
+      <div class="relative group">
+        <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors">
+          <lucide-icon [name]="Type" class="w-4.5 h-4.5"></lucide-icon>
+        </div>
+        <input 
+          type="text" 
+          formControlName="name" 
+          placeholder="Ex: Certificat de scolarité" 
+          class="fw-input-field"
+          [class.error]="isInvalid('name')"
+        />
+      </div>
+    </div>
+
+    <!-- Code Technique -->
+    <div class="space-y-2">
+      <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Code (3 caractères)</label>
+      <div class="relative group">
+        <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors">
+          <lucide-icon [name]="Hash" class="w-4.5 h-4.5"></lucide-icon>
+        </div>
+        <input 
+          type="text" 
+          formControlName="code" 
+          placeholder="Ex: CER" 
+          maxlength="3"
+          class="fw-input-field uppercase"
+          [class.error]="isInvalid('code')"
+        />
+      </div>
+      <p class="text-[10px] text-slate-400 font-medium ml-1 italic">Ce code court sert d'identifiant technique.</p>
+    </div>
+
+    <!-- Option Obligatoire -->
+    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <lucide-icon [name]="Info" class="w-4 h-4 text-slate-400"></lucide-icon>
+        <span class="text-sm font-semibold text-slate-700">Rendre ce document obligatoire</span>
+      </div>
+      <label class="relative inline-flex items-center cursor-pointer">
+        <input type="checkbox" formControlName="mandatory" class="sr-only peer">
+        <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+      </label>
+    </div>
+
+  </form>
+</app-form-shell>

@@ -6,11 +6,12 @@ import { LucideAngularModule, Building2, Mail, Phone, MapPin, Quote, Loader2, X,
 import { SchoolService } from '../../../core/services/school.service';
 import { School } from '../../../core/models/school.model';
 import { NotificationService } from '../../../shared/services/notification.service';
+import { FormShellComponent } from '../../../shared/components/form-shell/form-shell';
 
 @Component({
   selector: 'app-tenant-edit-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, LucideAngularModule],
+  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, LucideAngularModule, FormShellComponent],
   templateUrl: './tenant-edit-form.component.html',
   styleUrl: './tenant-edit-form.component.scss'
 })

@@ -14,11 +14,14 @@ import { AcademicService } from '../../../../../core/services/academic.service';
 import { AcademicYear } from '../../../../../core/models/academic.model';
 
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { FormShellComponent } from '../../../../../shared/components/form-shell/form-shell';
+import { DocumentTypeFormComponent } from './components/document-type-form/document-type-form.component';
 
 @Component({
   selector: 'app-admission-config',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, MatCheckboxModule],
+  imports: [CommonModule, FormsModule, LucideAngularModule, MatCheckboxModule, MatDialogModule, FormShellComponent],
   templateUrl: './admission-config.component.html',
   styleUrls: ['./admission-config.component.scss']
 })
@@ -26,6 +29,7 @@ export class AdmissionConfigComponent implements OnInit {
   private enrollmentService = inject(EnrollmentAdminService);
   private academicService = inject(AcademicService);
   private notificationService = inject(NotificationService);
+  private dialog = inject(MatDialog);
 
   // --- ÉTATS ---
   config = signal<EnrollmentConfig | null>(null);
@@ -33,7 +37,7 @@ export class AdmissionConfigComponent implements OnInit {
   isLoading = signal(true);
   isSaving = signal(false);
 
-  // Icônes
+  // Icônes pour le template
   readonly Globe = Globe;
   readonly Save = Save;
   readonly RefreshCw = RefreshCw;
@@ -61,7 +65,6 @@ export class AdmissionConfigComponent implements OnInit {
       finalize(() => this.isLoading.set(false))
     ).subscribe({
       next: ({ config, year }) => {
-        // Aligner les données reçues avec la nouvelle interface
         const securedConfig: EnrollmentConfig = {
           ...config,
           admissionWindow: config.admissionWindow || { startDate: '', endDate: '' },
@@ -80,7 +83,6 @@ export class AdmissionConfigComponent implements OnInit {
     const currentConfig = this.config();
     if (!currentConfig) return;
 
-    // Validation des dates
     if (currentConfig.admissionWindow?.startDate && currentConfig.admissionWindow?.endDate) {
       if (new Date(currentConfig.admissionWindow.startDate) > new Date(currentConfig.admissionWindow.endDate)) {
         this.notificationService.error('La date de début ne peut pas être après la date de fin.');
@@ -107,8 +109,6 @@ export class AdmissionConfigComponent implements OnInit {
     }
   }
 
-  // --- GESTION DES SERVICES ---
-
   isServiceEnabled(code: string): boolean {
     return this.config()?.enabledServices.includes(code) || false;
   }
@@ -126,19 +126,41 @@ export class AdmissionConfigComponent implements OnInit {
     this.config.set({ ...current, enabledServices: services });
   }
 
-  // --- GESTION DES DOCUMENTS ---
+  addDocumentType() {
+    const dialogRef = this.dialog.open(DocumentTypeFormComponent, {
+      width: '450px',
+      panelClass: 'feewi-dialog-panel'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        const current = this.config();
+        if (current) {
+          const updatedDocs = [...current.documentChecklist, result];
+          this.config.set({ ...current, documentChecklist: updatedDocs });
+          this.notificationService.success(`Document "${result.name}" ajouté.`);
+        }
+      }
+    });
+  }
+
+  removeDocumentType(code: string) {
+    const current = this.config();
+    if (current) {
+      const updatedDocs = current.documentChecklist.filter((d: {code: string}) => d.code !== code);
+      this.config.set({ ...current, documentChecklist: updatedDocs });
+    }
+  }
 
   updateDocumentMandatory(code: string, mandatory: boolean) {
     const current = this.config();
     if (current) {
-      const updatedDocs = current.documentChecklist.map(doc => 
+      const updatedDocs = current.documentChecklist.map((doc: {code: string, name: string, mandatory: boolean}) => 
         doc.code === code ? { ...doc, mandatory } : doc
       );
       this.config.set({ ...current, documentChecklist: updatedDocs });
     }
   }
-
-  // --- PREVIEW ---
 
   previewPortal() {
     window.open('/enrollment', '_blank');

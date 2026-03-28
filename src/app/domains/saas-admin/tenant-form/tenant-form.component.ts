@@ -20,11 +20,12 @@ import {
 } from 'lucide-angular';
 import { SchoolService } from '../../../core/services/school.service';
 import { NotificationService } from '../../../shared/services/notification.service';
+import { FormShellComponent } from '../../../shared/components/form-shell/form-shell';
 
 @Component({
   selector: 'app-tenant-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, LucideAngularModule],
+  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, LucideAngularModule, FormShellComponent],
   templateUrl: './tenant-form.component.html',
   styleUrl: './tenant-form.component.scss'
 })

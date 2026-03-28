@@ -1,25 +1,15 @@
-<div class="admission-config-container">
-  
-  <header class="config-header">
-    <div class="header-left">
-      <h1 class="page-title">Paramètres du Portail d'Admission</h1>
-      <p class="page-subtitle">
-        Pilotez l'ouverture du portail public et configurez les exigences du dossier 
-        <strong *ngIf="activeYear()">pour l'année {{ activeYear()?.label }}</strong>.
-      </p>
-    </div>
-    <div class="header-actions">
-      <button class="btn btn-outline" (click)="previewPortal()">
-        <lucide-icon [name]="Eye" [size]="18"></lucide-icon>
-        Voir le Portail
-      </button>
-      <button class="btn btn-primary" (click)="onSave()" [disabled]="isSaving() || isLoading()">
-        <lucide-icon [name]="isSaving() ? RefreshCw : Save" [size]="18" [class.animate-spin]="isSaving()"></lucide-icon>
-        Enregistrer les modifications
-      </button>
-    </div>
-  </header>
-
+<app-form-shell
+  title="Paramètres du Portail d'Admission"
+  [subtitle]="'Pilotez l\'ouverture du portail public et configurez les exigences du dossier' + (activeYear() ? ' pour l\'année ' + activeYear()?.label : '')"
+  [icon]="Globe"
+  statusLabel="Pilotage"
+  saveLabel="Enregistrer les modifications"
+  cancelLabel="Aperçu"
+  [isLoading]="isSaving()"
+  [canSave]="config() !== null"
+  (save)="onSave()"
+  (cancel)="previewPortal()"
+>
   <main class="config-content" *ngIf="config(); let cfg">
     
     <!-- SECTION 1 : DISPONIBILITÉ & SERVICES -->
@@ -122,19 +112,18 @@
               <input type="checkbox" [checked]="doc.mandatory" (change)="updateDocumentMandatory(doc.code, !doc.mandatory)">
               <span>Obligatoire</span>
             </label>
-            <button class="btn-icon-danger" title="Supprimer"><lucide-icon [name]="Trash2" [size]="16"></lucide-icon></button>
+            <button class="btn-icon-danger" (click)="removeDocumentType(doc.code)" title="Supprimer"><lucide-icon [name]="Trash2" [size]="16"></lucide-icon></button>
           </div>
         </div>
       </div>
-      <button class="btn-outline mt-4"><lucide-icon [name]="Plus" [size]="18"></lucide-icon> Ajouter un type de document</button>
+      <button class="btn-outline mt-4" (click)="addDocumentType()"><lucide-icon [name]="Plus" [size]="18"></lucide-icon> Ajouter un type de document</button>
     </section>
 
   </main>
 
-  <!-- LOADER -->
+  <!-- LOADER INITIAL -->
   <div class="loading-overlay" *ngIf="isLoading()">
     <lucide-icon [name]="RefreshCw" [size]="48" class="animate-spin text-primary"></lucide-icon>
     <p>Synchronisation avec le serveur...</p>
   </div>
-
-</div>
+</app-form-shell>
