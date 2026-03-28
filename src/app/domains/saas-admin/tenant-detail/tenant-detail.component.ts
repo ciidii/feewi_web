@@ -64,17 +64,19 @@ export class TenantDetailComponent implements OnInit {
     }
   }
 
-  async loadSchool(id: string) {
+  loadSchool(id: string): void {
     this.isLoading.set(true);
-    try {
-      const data = await this.schoolService.getSchoolById(id);
-      this.school.set(data);
-    } catch (err) {
-      this.notificationService.error("Impossible de charger les détails de l'établissement.");
-      this.router.navigate(['/saas/tenants']);
-    } finally {
-      this.isLoading.set(false);
-    }
+    this.schoolService.getSchoolById(id).subscribe({
+      next: (data) => {
+        this.school.set(data);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        this.notificationService.error("Impossible de charger les détails de l'établissement.");
+        this.router.navigate(['/saas/tenants']);
+        this.isLoading.set(false);
+      }
+    });
   }
 
   async onImpersonate() {

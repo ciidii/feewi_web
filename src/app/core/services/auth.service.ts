@@ -113,20 +113,22 @@ export class AuthService {
 
   private updateTenantContext(profile: UserProfile): void {
     if (profile.tenantId && !this.navContext.isSaasDomain()) {
-      // Version Promise-to-Observable élégante
-      this.schoolService.getSchoolById(profile.tenantId).then(school => {
-        this.tenantService.setTenant({
-          id: school.tenantId,
-          name: school.name,
-          allowedCycles: profile.allowedCycles
-        });
-      }).catch(() => {
-        console.warn('[AuthService] Could not fetch school details, using fallback');
-        this.tenantService.setTenant({
-          id: profile.tenantId,
-          name: 'Mon Établissement',
-          allowedCycles: profile.allowedCycles
-        });
+      this.schoolService.getSchoolById(profile.tenantId).subscribe({
+        next: (school) => {
+          this.tenantService.setTenant({
+            id: school.tenantId,
+            name: school.name,
+            allowedCycles: profile.allowedCycles
+          });
+        },
+        error: () => {
+          console.warn('[AuthService] Could not fetch school details, using fallback');
+          this.tenantService.setTenant({
+            id: profile.tenantId,
+            name: 'Mon Établissement',
+            allowedCycles: profile.allowedCycles
+          });
+        }
       });
     } else if (this.navContext.isSaasDomain()) {
       this.tenantService.setTenant({

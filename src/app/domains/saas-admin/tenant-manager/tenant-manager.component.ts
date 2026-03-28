@@ -77,14 +77,9 @@ export class TenantManagerComponent implements OnInit {
     this.loadSchools();
   }
 
-  async loadSchools(search: string = this.searchQuery()): Promise<void> {
+  loadSchools(search: string = this.searchQuery()): void {
     this.searchQuery.set(search);
-    try {
-      await this.schoolService.getSchools(search, this.currentPage(), this.pageSize);
-    } catch (err: any) {
-      const message = err?.error?.message || err?.message || "Impossible de charger la liste des etablissements.";
-      this.notificationService.error(message, 'Chargement echoue');
-    }
+    this.schoolService.getSchools(search, this.currentPage(), this.pageSize).subscribe();
   }
 
   openCreateModal() {

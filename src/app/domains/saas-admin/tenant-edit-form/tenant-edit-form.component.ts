@@ -65,7 +65,7 @@ export class TenantEditFormComponent {
     this.dialogRef.close(false);
   }
 
-  async onSubmit() {
+  onSubmit() {
     if (this.schoolForm.invalid) {
       this.schoolForm.markAllAsTouched();
       this.notificationService.warning('Verifiez les champs du formulaire.', 'Formulaire incomplet');
@@ -79,15 +79,17 @@ export class TenantEditFormComponent {
 
     this.isLoading.set(true);
 
-    try {
-      await this.schoolService.updateSchool(this.data.id, this.schoolForm.value);
-      this.notificationService.success('Etablissement mis a jour avec succes.', 'Modification terminee');
-      this.dialogRef.close(true);
-    } catch (err: any) {
-      const message = err?.error?.message || err?.message || "Impossible de modifier l'etablissement.";
-      this.notificationService.error(message, 'Echec de modification');
-    } finally {
-      this.isLoading.set(false);
-    }
+    this.schoolService.updateSchool(this.data.id, this.schoolForm.value).subscribe({
+      next: () => {
+        this.notificationService.success('Etablissement mis a jour avec succes.', 'Modification terminee');
+        this.dialogRef.close(true);
+        this.isLoading.set(false);
+      },
+      error: (err: any) => {
+        const message = err?.error?.message || err?.message || "Impossible de modifier l'etablissement.";
+        this.notificationService.error(message, 'Echec de modification');
+        this.isLoading.set(false);
+      }
+    });
   }
 }

@@ -90,7 +90,7 @@ export class TenantFormComponent {
     this.dialogRef.close();
   }
 
-  async onSubmit() {
+  onSubmit() {
     if (this.tenantForm.invalid) {
       this.tenantForm.markAllAsTouched();
       this.notificationService.warning('Verifiez les champs du formulaire.', 'Formulaire incomplet');
@@ -100,16 +100,18 @@ export class TenantFormComponent {
     this.isLoading.set(true);
     this.error.set(null);
 
-    try {
-      const result = await this.schoolService.createSchool(this.tenantForm.value);
-      this.notificationService.success('Tenant cree avec succes.', 'Creation terminee');
-      this.dialogRef.close(result);
-    } catch (err: any) {
-      const message = err?.error?.message || err?.message || 'Une erreur est survenue lors de la creation.';
-      this.error.set(message);
-      this.notificationService.error(message, 'Echec de creation');
-    } finally {
-      this.isLoading.set(false);
-    }
+    this.schoolService.createSchool(this.tenantForm.value).subscribe({
+      next: (result) => {
+        this.notificationService.success('Tenant cree avec succes.', 'Creation terminee');
+        this.dialogRef.close(result);
+        this.isLoading.set(false);
+      },
+      error: (err: any) => {
+        const message = err?.error?.message || err?.message || 'Une erreur est survenue lors de la creation.';
+        this.error.set(message);
+        this.notificationService.error(message, 'Echec de creation');
+        this.isLoading.set(false);
+      }
+    });
   }
 }
