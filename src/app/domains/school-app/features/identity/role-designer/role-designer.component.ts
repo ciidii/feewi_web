@@ -1,5 +1,6 @@
 import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
+import { firstValueFrom } from 'rxjs';
 import {
   ChevronRight,
   Info,
@@ -104,7 +105,7 @@ export class RoleDesignerComponent implements OnInit {
 
   async loadPermissions() {
     try {
-      const permissions = await this.identityService.getAvailablePermissions();
+      const permissions = await firstValueFrom(this.identityService.getAvailablePermissions());
       const groups = this.groupPermissions(permissions);
       this.permissionGroups.set(groups);
     } catch (err) {
@@ -181,7 +182,7 @@ export class RoleDesignerComponent implements OnInit {
   // ===========================================
 
   async loadRoles() {
-    await this.identityService.getRoles();
+    await firstValueFrom(this.identityService.getRoles());
     const firstRole = this.roles()[0];
     if (firstRole && !this.selectedRoleId()) {
       this.selectRole(firstRole.id);
@@ -286,9 +287,9 @@ export class RoleDesignerComponent implements OnInit {
     const grantedIds = allPermissions.filter(p => p.granted).map(p => p.id);
 
     try {
-      await this.identityService.updateRole(role.rawData.id, {
+      await firstValueFrom(this.identityService.updateRole(role.rawData.id, {
         permissions: grantedIds
-      });
+      }));
       await this.loadRoles();
       this.unsavedChanges.set(new Set());
       console.log('✅ Permissions sauvegardées');

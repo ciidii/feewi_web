@@ -29,6 +29,7 @@ import { NotificationService } from '../../../../../../../shared/services/notifi
 import { FormShellComponent } from '../../../../../../../shared/components/form-shell/form-shell';
 import { UserType } from '../../../../../../../core/models/user.model';
 import { signal } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-staff-form',
@@ -82,11 +83,11 @@ export class StaffFormComponent implements OnInit {
 
   async ngOnInit() {
     if (this.roles().length === 0) {
-      this.identityService.getRoles();
+      firstValueFrom(this.identityService.getRoles());
     }
     
     try {
-      const types = await this.identityService.getUserTypes();
+      const types = await firstValueFrom(this.identityService.getUserTypes());
       // Filtrer pour ne garder que le personnel administratif et enseignant pour cet écran
       this.userTypes.set(types.filter(t => ['ADMIN', 'TEACHER', 'STAFF'].includes(t.code)));
     } catch (error) {
@@ -148,7 +149,7 @@ export class StaffFormComponent implements OnInit {
     }
 
     try {
-      await this.identityService.createStaff(this.staffForm.value);
+      await firstValueFrom(this.identityService.createStaff(this.staffForm.value));
       this.notificationService.success('Personnel cree avec succes.', 'Creation terminee');
       this.dialogRef.close(true);
     } catch (err: any) {

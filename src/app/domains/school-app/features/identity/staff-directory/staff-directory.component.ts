@@ -72,7 +72,7 @@ export class StaffDirectoryComponent implements OnInit {
   }
 
   loadStaff(search: string = '') {
-    this.identityService.getStaff(search);
+    this.identityService.getStaff(search).subscribe();
   }
 
   onTabChange(tab: string) {

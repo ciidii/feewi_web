@@ -1,6 +1,7 @@
 import { Component, signal, inject, OnInit, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule, History, ShieldAlert, GraduationCap, CreditCard, Activity } from 'lucide-angular';
+import { firstValueFrom } from 'rxjs';
 import { DataListComponent } from '../../../../../shared/components/data-list/data-list.component';
 import { TabItem, TableRow } from '../../../../../shared/models/data-list.models';
 import { IdentityService } from '../../../../../core/services/identity.service';
@@ -39,7 +40,7 @@ export class AuditTrailComponent implements OnInit {
   async loadLogs(page: number = 0) {
     this.isLoading.set(true);
     try {
-      const response = await this.identityService.getTenantAuditLogs(page);
+      const response = await firstValueFrom(this.identityService.getTenantAuditLogs(page));
       this.totalLogs.set(response.totalElements);
       this.auditLogs.set(response.content.map((log, index) => this.mapLogToRow(log, index)));
       

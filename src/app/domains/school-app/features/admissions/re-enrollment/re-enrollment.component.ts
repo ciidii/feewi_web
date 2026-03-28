@@ -76,7 +76,7 @@ export class SecretaryReEnrollmentComponent implements OnInit, OnDestroy {
     this.isLoading.set(true);
     try {
       // On utilise IdentityService pour chercher les utilisateurs de type STUDENT
-      await this.identityService.getStaff(query, 0, 10, 'STUDENT');
+      await firstValueFrom(this.identityService.getStaff(query, 0, 10, 'STUDENT'));
       const page = this.identityService.staffPage();
       this.searchResults.set(page?.content || []);
     } catch (e) {

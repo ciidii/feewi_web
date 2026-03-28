@@ -5,6 +5,7 @@ import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { firstValueFrom } from 'rxjs';
 import { LucideAngularModule, Shield, Save, X, Info, AlertCircle, Loader2, Type, FileText } from 'lucide-angular';
 import { IdentityService } from '../../../../../../../core/services/identity.service';
 import { NotificationService } from '../../../../../../../shared/services/notification.service';
@@ -60,7 +61,7 @@ export class RoleFormComponent implements OnInit {
 
     try {
       const roleData = this.roleForm.value;
-      await this.identityService.createRole(roleData);
+      await firstValueFrom(this.identityService.createRole(roleData));
       this.notificationService.success('Role cree avec succes.', 'Creation terminee');
       this.dialogRef.close(true);
     } catch (err: any) {
