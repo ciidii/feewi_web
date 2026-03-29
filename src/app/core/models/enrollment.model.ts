@@ -1,5 +1,4 @@
 
-
 /**
  * États possibles d'un dossier d'admission
  */
@@ -119,17 +118,19 @@ export interface EnrollmentConfig {
   // Configuration par défaut
   defaultChecklist: RequiredDocumentConfig[];
   defaultCoreOverrides: Record<string, CoreFieldControl>;
-  defaultFormSchema: Record<string, any>;
+  defaultFormSchema: {
+    customFields: CustomFieldConfig[];
+  };
 
   // Overrides par niveau
   levelOverrides: Record<string, LevelOverrideConfig>;
 
   // Branding & Expérience
-  instructions: Record<string, string>; // Map<String, String> en Java
+  instructions: Record<string, string>;
   legalText: string;
   enabledServices: string[];
 
-  // Helpers UI (Non envoyés au Backend ou gérés à part)
+  // Helpers UI
   admissionWindow?: {
     startDate: string;
     endDate: string;
@@ -148,8 +149,19 @@ export interface CoreFieldControl {
   mandatory: boolean;
 }
 
+export interface CustomFieldConfig {
+  name: string;
+  label: string;
+  type: string;
+  required: boolean;
+  placeholder?: string;
+  options?: string[];
+}
+
 export interface LevelOverrideConfig {
   documentChecklist: RequiredDocumentConfig[];
   coreFieldOverrides: Record<string, CoreFieldControl>;
-  formSchema: Record<string, any>;
+  formSchema: {
+    customFields: CustomFieldConfig[];
+  };
 }

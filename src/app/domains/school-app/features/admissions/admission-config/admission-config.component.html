@@ -208,9 +208,11 @@
                   <span class="field-label">{{ field.label }}</span>
                   <span class="field-type">{{ field.type }} • {{ field.required ? 'Obligatoire' : 'Optionnel' }}</span>
                 </div>
-                <button class="btn-delete-icon ml-auto"><lucide-icon [name]="Trash2" [size]="14"></lucide-icon></button>
+                <button class="btn-delete-icon ml-auto" (click)="removeCustomField(field.name)">
+                  <lucide-icon [name]="Trash2" [size]="14"></lucide-icon>
+                </button>
               </div>
-              <button class="btn-add-dashed mt-4">
+              <button class="btn-add-dashed mt-4" (click)="addCustomField()">
                 <lucide-icon [name]="Plus" [size]="16"></lucide-icon>
                 <span>Ajouter une question personnalisée</span>
               </button>
