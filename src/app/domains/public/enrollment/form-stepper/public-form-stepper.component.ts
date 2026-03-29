@@ -1,32 +1,34 @@
 import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { LucideAngularModule, User, Users, FileText, Sparkles, CheckCircle, ArrowLeft, ArrowRight, Upload, X, GraduationCap, RefreshCw, Eye } from 'lucide-angular';
+import { LucideAngularModule, User, Users, FileText, Sparkles, CheckCircle, ArrowLeft, ArrowRight, Upload, X, GraduationCap, RefreshCw, Eye, Info, ShieldCheck } from 'lucide-angular';
 import { catchError, finalize, forkJoin, map, of, switchMap, tap } from 'rxjs';
 
 import { EnrollmentPublicService } from '../../../../core/services/enrollment-public.service';
+import { EnrollmentAdminService } from '../../../../core/services/enrollment-admin.service';
 import { DocumentEngineService } from '../../../../core/services/document-engine.service';
 import { AdmissionSessionService } from '../../../../core/services/admission-session.service';
 import { AcademicService } from '../../../../core/services/academic.service';
 import { TenantContextService } from '../../../../core/services/tenant-context.service';
 import { Level, AcademicYear, Filiere } from '../../../../core/models/academic.model';
-import { AdmissionApplication as Application } from '../../../../core/models/enrollment.model';
+import { AdmissionApplication as Application, EnrollmentConfig } from '../../../../core/models/enrollment.model';
 import { Router } from '@angular/router';
 
 import { NotificationService } from '../../../../shared/services/notification.service';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {MatCheckbox} from '@angular/material/checkbox';
 
 export type StepperStep = 'GUARDIAN' | 'STUDENT' | 'DOCS' | 'REVIEW';
 
 @Component({
   selector: 'app-public-form-stepper',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule, MatCheckbox],
   templateUrl: './public-form-stepper.component.html',
   styleUrls: ['./public-form-stepper.component.scss']
 })
 export class PublicFormStepperComponent implements OnInit {
   private enrollmentService = inject(EnrollmentPublicService);
+  private enrollmentAdminService = inject(EnrollmentAdminService);
   private documentService = inject(DocumentEngineService);
   private sessionService = inject(AdmissionSessionService);
   private academicService = inject(AcademicService);
@@ -35,6 +37,7 @@ export class PublicFormStepperComponent implements OnInit {
   private router = inject(Router);
 
   // --- ÉTATS DU STEPPER ---
+  config = signal<EnrollmentConfig | null>(null);
   currentStep = signal<StepperStep>('GUARDIAN');
   currentApplicationId = signal<string | null>(null);
   application = signal<Application | null>(null);
@@ -57,10 +60,10 @@ export class PublicFormStepperComponent implements OnInit {
       profession: '',
       address: ''
     },
-    student: { 
-      firstName: '', 
-      lastName: '', 
-      birthDate: '', 
+    student: {
+      firstName: '',
+      lastName: '',
+      birthDate: '',
       birthPlace: '',
       gender: '' as 'MALE' | 'FEMALE',
       nationality: 'Sénégalaise',
@@ -71,7 +74,7 @@ export class PublicFormStepperComponent implements OnInit {
   });
 
   // --- CALCULS RÉACTIFS ---
-  
+
   progress = computed(() => {
     const steps: StepperStep[] = ['GUARDIAN', 'STUDENT', 'DOCS', 'REVIEW'];
     return ((steps.indexOf(this.currentStep()) + 1) / steps.length) * 100;
@@ -92,22 +95,28 @@ export class PublicFormStepperComponent implements OnInit {
   }
 
   private loadInitialData() {
+    this.isLoading.set(true);
     forkJoin({
       levels: this.academicService.getLevels(),
       filieres: this.academicService.getFilieres(),
-      year: this.academicService.getCurrentYear()
+      year: this.academicService.getCurrentYear(),
+      config: this.enrollmentAdminService.getConfig()
     }).pipe(
-      tap(({ levels, filieres, year }) => {
+      finalize(() => this.isLoading.set(false))
+    ).subscribe({
+      next: ({ levels, filieres, year, config }) => {
         this.availableLevels.set(levels);
         this.availableFilieres.set(filieres);
         this.activeYear.set(year);
-      }),
-      catchError(err => {
-        console.error('Erreur chargement Academic data:', err);
-        return of(null);
-      })
-    ).subscribe();
+        this.config.set(config);
+      },
+      error: (err) => {
+        console.error('Erreur chargement données initiales:', err);
+      }
+    });
   }
+
+  isLoading = signal(false);
 
   private checkExistingSession() {
     const session = this.sessionService.getSession();
@@ -119,7 +128,7 @@ export class PublicFormStepperComponent implements OnInit {
             this.application.set(app);
             this.currentApplicationId.set(app.id);
             this.resumeFormData(app);
-            
+
             const savedStep = session.currentStep as StepperStep;
             if (savedStep && savedStep !== 'GUARDIAN') {
               this.currentStep.set(savedStep);
@@ -141,7 +150,7 @@ export class PublicFormStepperComponent implements OnInit {
   private resumeFormData(app: Application) {
     this.formData.update(f => ({
       ...f,
-      primaryGuardian: { 
+      primaryGuardian: {
         firstName: app.primaryGuardian?.firstName || '',
         lastName: app.primaryGuardian?.lastName || '',
         email: app.primaryGuardian?.email || '',
@@ -150,7 +159,7 @@ export class PublicFormStepperComponent implements OnInit {
         profession: app.primaryGuardian?.profession || '',
         address: app.primaryGuardian?.address || ''
       },
-      student: { 
+      student: {
         firstName: app.candidate?.firstName || '',
         lastName: app.candidate?.lastName || '',
         gender: app.candidate?.gender || '' as any,
@@ -159,7 +168,7 @@ export class PublicFormStepperComponent implements OnInit {
         nationality: app.candidate?.nationality || 'Sénégalaise',
         previousSchool: app.candidate?.previousSchool || '',
         requestedLevelId: app.levelId || '',
-        filiereId: app.filiereId || null 
+        filiereId: app.filiereId || null
       }
     }));
   }
@@ -167,13 +176,13 @@ export class PublicFormStepperComponent implements OnInit {
   nextStep() {
     const steps: StepperStep[] = ['GUARDIAN', 'STUDENT', 'DOCS', 'REVIEW'];
     const currentIndex = steps.indexOf(this.currentStep());
-    
+
     this.isSubmitting.set(true);
     let operation$;
 
     if (this.currentStep() === 'GUARDIAN' && !this.currentApplicationId()) {
       operation$ = this.initializeApplication();
-    } 
+    }
     else if (this.currentStep() === 'GUARDIAN') {
       operation$ = this.saveGuardianInfo();
     }
@@ -242,7 +251,7 @@ export class PublicFormStepperComponent implements OnInit {
   private saveCandidateInfo() {
     const id = this.currentApplicationId();
     if (!id) return of(false);
-    
+
     const payload = {
       info: {
         firstName: this.formData().student.firstName,
@@ -278,7 +287,7 @@ export class PublicFormStepperComponent implements OnInit {
       contentType: file.type,
       serviceOrigin: 'enrollment'
     }).pipe(
-      switchMap(ticket => 
+      switchMap(ticket =>
         this.documentService.uploadFileDirectly(ticket.uploadUrl, file).pipe(
           switchMap(() => this.enrollmentService.uploadDocument(this.currentApplicationId()!, docCode, ticket.fileId)),
           map(() => ticket)
@@ -315,16 +324,22 @@ export class PublicFormStepperComponent implements OnInit {
     const id = this.currentApplicationId();
     if (!id) return;
     this.isSubmitting.set(true);
-    
+
     this.enrollmentService.submitApplication(id).pipe(
       finalize(() => this.isSubmitting.set(false))
-    ).subscribe(finalApp => {
-      if (finalApp) {
-        this.notificationService.success('Votre dossier a été soumis avec succès.');
-        this.sessionService.clearSession();
-        this.router.navigate(['/enrollment/tracker', finalApp.reference], { 
-          queryParams: { accessCode: finalApp.accessCode } 
-        });
+    ).subscribe({
+      next: (finalApp) => {
+        if (finalApp) {
+          this.notificationService.success('Votre dossier a été soumis avec succès.');
+          this.sessionService.clearSession();
+          this.router.navigate(['/enrollment/tracker', finalApp.reference], {
+            queryParams: { accessCode: finalApp.accessCode }
+          });
+        }
+      },
+      error: (err) => {
+        console.error('Erreur soumission finale:', err);
+        this.notificationService.error('Une erreur est survenue lors de la soumission. Veuillez réessayer.');
       }
     });
   }
@@ -353,4 +368,6 @@ export class PublicFormStepperComponent implements OnInit {
   readonly X = X;
   readonly RefreshCw = RefreshCw;
   readonly Eye = Eye;
+  readonly Info = Info;
+  readonly ShieldCheck = ShieldCheck;
 }

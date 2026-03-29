@@ -26,6 +26,15 @@
     </div>
   </div>
 
+  <!-- Instructions Globales (Si définies par l'école) -->
+  <div class="instructions-alert animate-fade" *ngIf="config()?.instructions && currentStep() === 'GUARDIAN'">
+    <lucide-icon [name]="Info" [size]="20"></lucide-icon>
+    <div class="content">
+      <span class="title">Note de l'établissement</span>
+      <p>{{ config()?.instructions }}</p>
+    </div>
+  </div>
+
   <!-- Form Content Area -->
   <div class="stepper-content card">
     
@@ -70,7 +79,7 @@
       </div>
     </div>
 
-    <!-- Étape 2 : L'ENFANT & PARCOURS (Fusionné) -->
+    <!-- Étape 2 : L'ENFANT & PARCOURS -->
     <div *ngIf="currentStep() === 'STUDENT'" class="form-section animate-fade">
       <h2>Identité du Candidat & Parcours</h2>
       <p class="section-desc">Informations sur l'enfant et le niveau souhaité pour l'année {{ activeYear()?.label }}.</p>
@@ -125,17 +134,51 @@
           <input type="text" [(ngModel)]="formData().student.nationality" class="fw-input">
         </div>
       </div>
+
+      <!-- CHAMPS PERSONNALISÉS DYNAMIQUE (Si configurés) -->
+      <div class="custom-fields-section mt-8 pt-8 border-t border-slate-100" *ngIf="config()?.formSchema?.customFields?.length">
+        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-6">Informations Complémentaires</h3>
+        <div class="grid-form">
+          <div class="form-group" *ngFor="let field of config()?.formSchema?.customFields" [class.full]="field.type === 'text'">
+            <label>{{ field.label }} <span *ngIf="field.required" class="text-red-500">*</span></label>
+            
+            <input *ngIf="field.type === 'text' || field.type === 'number'" 
+                   [type]="field.type" 
+                   [placeholder]="field.placeholder || ''" 
+                   class="fw-input">
+            
+            <input *ngIf="field.type === 'date'" 
+                   type="date" 
+                   class="fw-input">
+
+            <select *ngIf="field.type === 'select'" class="fw-input">
+              <option value="">Sélectionner...</option>
+              <option *ngFor="let opt of field.options" [value]="opt">{{ opt }}</option>
+            </select>
+
+            <div *ngIf="field.type === 'boolean'" class="flex items-center gap-3 py-2">
+              <mat-checkbox color="primary"></mat-checkbox>
+              <span class="text-sm font-medium text-slate-600">{{ field.placeholder || 'Oui' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Étape 3 : DOCUMENTS -->
     <div *ngIf="currentStep() === 'DOCS'" class="form-section animate-fade">
       <h2>Documents</h2>
+      <p class="section-desc">Veuillez charger les pièces jointes nécessaires pour l'étude de votre dossier.</p>
+      
       <div class="upload-grid">
         @for (doc of application()?.documents; track doc.code) {
           <div class="upload-item" [class.uploaded]="doc.status === 'UPLOADED'">
             <div class="upload-info">
               <span class="upload-label">{{ doc.name }}</span>
-              <span class="upload-status-tag" [class]="doc.status.toLowerCase()">{{ doc.status }}</span>
+              <div class="flex items-center gap-2">
+                <span class="upload-status-tag" [class]="doc.status.toLowerCase()">{{ doc.status }}</span>
+                <span *ngIf="doc.mandatory" class="text-[10px] font-bold text-red-500 uppercase tracking-tighter">(Obligatoire)</span>
+              </div>
             </div>
             <div class="upload-actions">
               <input type="file" #fileInput hidden (change)="onFileSelected(doc.code, $event)">
@@ -196,7 +239,20 @@
         </div>
       </div>
 
-      <div class="legal-notice">
+      <!-- TEXTE LÉGAL DYNAMIQUE -->
+      <div class="legal-notice-box animate-in" *ngIf="config()?.legalText">
+        <div class="notice-header">
+          <lucide-icon [name]="ShieldCheck" [size]="20" class="text-emerald-600"></lucide-icon>
+          <span>Engagement & Consentement</span>
+        </div>
+        <p class="notice-content">{{ config()?.legalText }}</p>
+        <label class="consent-checkbox mt-4">
+          <input type="checkbox" required>
+          <span>Je certifie l'exactitude de ces informations.</span>
+        </label>
+      </div>
+
+      <div class="legal-notice" *ngIf="!config()?.legalText">
         <lucide-icon [name]="GraduationCap" [size]="20"></lucide-icon>
         <p>En cliquant sur "Soumettre", vous certifiez l'exactitude des informations fournies. Votre dossier sera transmis au secrétariat.</p>
       </div>
@@ -217,7 +273,7 @@
         <span *ngIf="isSubmitting()"><lucide-icon [name]="RefreshCw" [size]="20" class="animate-spin"></lucide-icon> Soumission...</span>
       </button>
     } @else {
-      <button class="btn-primary" (click)="nextStep()" [disabled]="isSubmitting()">
+      <button class="btn-primary" (click)="nextStep()" [disabled]="isSubmitting() || isLoading()">
         <span *ngIf="!isSubmitting()">Continuer <lucide-icon [name]="ArrowRight" [size]="18"></lucide-icon></span>
         <span *ngIf="isSubmitting()"><lucide-icon [name]="RefreshCw" [size]="18" class="animate-spin"></lucide-icon> Traitement...</span>
       </button>
