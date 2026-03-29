@@ -69,6 +69,27 @@ export class EnrollmentAdminService {
     );
   }
 
+  /**
+   * Gérer l'état du portail (Master Switch)
+   * Endpoint: PATCH /admin/config/portal-status?active=true|false
+   */
+  updatePortalStatus(active: boolean): Observable<void> {
+    const params = new HttpParams().set('active', active.toString());
+    return this.http.patch<void>(`${this.baseUrl}/admin/config/portal-status`, {}, { params }).pipe(
+      catchError(this.handleError('Erreur lors du changement de statut du portail'))
+    );
+  }
+
+  /**
+   * Personnaliser un niveau spécifique (Surcharge)
+   * Endpoint: PATCH /admin/config/level-overrides/{levelId}
+   */
+  updateLevelOverride(levelId: string, override: any): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/admin/config/level-overrides/${levelId}`, override).pipe(
+      catchError(this.handleError('Erreur lors de la personnalisation du niveau'))
+    );
+  }
+
   // --- ACTIONS MÉTIER ---
 
   receivePhysicalDocument(applicationId: string, docCode: string): Observable<AdmissionApplication> {

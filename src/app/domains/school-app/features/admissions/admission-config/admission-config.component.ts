@@ -7,7 +7,7 @@ import {
   ChefHat, Bus, MessageSquare, Plus, Trash2, Settings2,
   GraduationCap, Info, AlertTriangle
 } from 'lucide-angular';
-import { finalize, forkJoin } from 'rxjs';
+import { finalize, forkJoin, Observable } from 'rxjs';
 import { EnrollmentAdminService } from '../../../../../core/services/enrollment-admin.service';
 import { EnrollmentConfig, CustomFieldConfig, RequiredDocumentConfig } from '../../../../../core/models/enrollment.model';
 import { NotificationService } from '../../../../../shared/services/notification.service';
@@ -146,7 +146,17 @@ export class AdmissionConfigComponent implements OnInit {
     if (!currentConfig) return;
 
     this.isSaving.set(true);
-    this.enrollmentService.updateConfig(currentConfig).pipe(
+
+    let operation$: Observable<any>;
+    if (this.currentScope() === 'GLOBAL') {
+      operation$ = this.enrollmentService.updateConfig(currentConfig);
+    } else {
+      const levelId = this.selectedLevelId()!;
+      const override = currentConfig.levelOverrides?.[levelId];
+      operation$ = this.enrollmentService.updateLevelOverride(levelId, override);
+    }
+
+    operation$.pipe(
       finalize(() => this.isSaving.set(false))
     ).subscribe({
       next: () => this.notificationService.success('Configuration enregistrée avec succès.'),
@@ -177,12 +187,12 @@ export class AdmissionConfigComponent implements OnInit {
   }
 
   removeDocumentType(code: string) {
-    const updated = this.activeChecklist().filter(d => d.code !== code);
+    const updated = this.activeChecklist().filter((d: any) => d.code !== code);
     this.updateActiveChecklist(updated);
   }
 
   updateDocumentMandatory(code: string, mandatory: boolean) {
-    const updated = this.activeChecklist().map(doc => 
+    const updated = this.activeChecklist().map((doc: any) => 
       doc.code === code ? { ...doc, mandatory } : doc
     );
     this.updateActiveChecklist(updated);
@@ -206,9 +216,19 @@ export class AdmissionConfigComponent implements OnInit {
 
   togglePortal() {
     const current = this.config();
-    if (current) {
-      this.config.set({ ...current, isPublicPortalOpen: !current.isPublicPortalOpen });
-    }
+    if (!current) return;
+
+    const newStatus = !current.isPublicPortalOpen;
+    this.isSaving.set(true);
+
+    this.enrollmentService.updatePortalStatus(newStatus).pipe(
+      finalize(() => this.isSaving.set(false))
+    ).subscribe({
+      next: () => {
+        this.config.set({ ...current, isPublicPortalOpen: newStatus });
+        this.notificationService.info(newStatus ? 'Portail public ouvert.' : 'Portail public fermé.');
+      }
+    });
   }
 
   isServiceEnabled(code: string): boolean {

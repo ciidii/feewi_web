@@ -118,7 +118,7 @@ Base URL : `/enrollment/api/v1/admin/applications`
 ### 3.1 Consultation & Recherche
 *   **Liste tous** : `GET /`
 *   **Recherche** : `GET /search?q={query}` (Nom, Prénom, Réf)
-*   **Détail/Récépissé** : `GET /{id}/receipt`
+*   **Détail complet** : `GET /{id}/details`
 
 ### 3.2 Saisie Directe (Guichet)
 *   **URL** : `POST /direct`
@@ -175,10 +175,30 @@ Ces points d'accès permettent à l'école de personnaliser son portail public.
     }
     ```
 
-### 5.2 Mettre à jour la configuration
+### 5.2 Mettre à jour la configuration globale
 *   **URL** : `PUT /`
-*   **Description** : Écrase la configuration existante.
+*   **Description** : Écrase l'intégralité de la configuration.
 *   **Payload** : Objet `EnrollmentConfig` complet.
+
+### 5.3 Gérer l'état du portail (Master Switch)
+*   **URL** : `PATCH /portal-status?active={true|false}`
+*   **Description** : Fermeture ou ouverture instantanée du portail public.
+
+### 5.4 Personnaliser un niveau spécifique
+*   **URL** : `PATCH /level-overrides/{levelId}`
+*   **Description** : Définit des règles propres à un niveau (ex: documents différents pour la Terminale).
+*   **Payload (`LevelOverride`)** :
+    ```json
+    {
+      "documentChecklist": [
+        { "code": "BUL", "name": "Relevé de notes 1ère", "mandatory": true }
+      ],
+      "coreFieldOverrides": {
+        "previousSchool": { "mandatory": true, "label": "Lycée d'origine" }
+      },
+      "formSchema": { "specialty": "S1 | S2" }
+    }
+    ```
 
 ---
 
