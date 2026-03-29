@@ -68,6 +68,7 @@
 
       <div class="sections-container space-y-8">
         
+        <!-- 01. DISPONIBILITÉ (GLOBAL ONLY) -->
         <section class="numbered-section" *ngIf="currentScope() === 'GLOBAL'">
           <div class="section-head">
             <div class="step-pill">01</div>
@@ -104,6 +105,7 @@
           </div>
         </section>
 
+        <!-- 02. SERVICES (GLOBAL ONLY) -->
         <section class="numbered-section" *ngIf="currentScope() === 'GLOBAL'">
           <div class="section-head">
             <div class="step-pill">02</div>
@@ -116,19 +118,51 @@
             <div class="service-toggle-card" [class.active]="isServiceEnabled('CANTEEN')" (click)="toggleService('CANTEEN')">
               <lucide-icon [name]="ChefHat" [size]="20"></lucide-icon>
               <span>Restauration scolaire</span>
-              <mat-checkbox [checked]="isServiceEnabled('CANTEEN')" color="primary" class="ml-auto"></mat-checkbox>
+              <mat-checkbox [checked]="isServiceEnabled('CANTEEN')" color="primary" class="ml-auto" (click)="$event.stopPropagation()"></mat-checkbox>
             </div>
             <div class="service-toggle-card" [class.active]="isServiceEnabled('TRANSPORT')" (click)="toggleService('TRANSPORT')">
               <lucide-icon [name]="Bus" [size]="20"></lucide-icon>
               <span>Transport & Ramassage</span>
-              <mat-checkbox [checked]="isServiceEnabled('TRANSPORT')" color="primary" class="ml-auto"></mat-checkbox>
+              <mat-checkbox [checked]="isServiceEnabled('TRANSPORT')" color="primary" class="ml-auto" (click)="$event.stopPropagation()"></mat-checkbox>
             </div>
           </div>
         </section>
 
+        <!-- 03. CHAMPS STANDARDS (CERCLE 2) -->
         <section class="numbered-section">
           <div class="section-head">
             <div class="step-pill">{{ currentScope() === 'GLOBAL' ? '03' : '01' }}</div>
+            <div class="section-title">
+              <h4>Personnalisation des champs standards</h4>
+              <p>Pilotez la visibilité et l'exigence des champs du noyau dur.</p>
+            </div>
+          </div>
+          <div class="section-content card-inner">
+            <div class="core-fields-grid">
+              <div *ngFor="let field of coreFieldsList" class="core-field-row">
+                <div class="field-desc">
+                  <span class="field-cat">{{ field.category }}</span>
+                  <span class="field-label">{{ field.label }}</span>
+                </div>
+                <div class="field-controls">
+                  <label class="control-toggle">
+                    <input type="checkbox" [checked]="!getCoreFieldControl(field.key).hidden" (change)="updateCoreField(field.key, { hidden: !$any($event.target).checked })">
+                    <span>Affiché</span>
+                  </label>
+                  <label class="control-toggle">
+                    <input type="checkbox" [checked]="getCoreFieldControl(field.key).mandatory" (change)="updateCoreField(field.key, { mandatory: $any($event.target).checked })">
+                    <span>Obligatoire</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 04. DOCUMENTS (CHECKLIST) -->
+        <section class="numbered-section">
+          <div class="section-head">
+            <div class="step-pill">{{ currentScope() === 'GLOBAL' ? '04' : '02' }}</div>
             <div class="section-title">
               <h4>Exigences Documentaires</h4>
               <p>Pièces justificatives à charger par les parents.</p>
@@ -157,9 +191,37 @@
           </div>
         </section>
 
+        <!-- 05. QUESTIONS LIBRES (CERCLE 3) -->
         <section class="numbered-section">
           <div class="section-head">
-            <div class="step-pill">{{ currentScope() === 'GLOBAL' ? '04' : '02' }}</div>
+            <div class="step-pill">{{ currentScope() === 'GLOBAL' ? '05' : '03' }}</div>
+            <div class="section-title">
+              <h4>Questions Spécifiques (École)</h4>
+              <p>Champs totalement libres à ajouter au formulaire.</p>
+            </div>
+          </div>
+          <div class="section-content">
+            <div class="fields-modern-list">
+              <div *ngFor="let field of activeCustomFields()" class="field-row-modern">
+                <lucide-icon [name]="MessageSquare" [size]="16" class="text-slate-400"></lucide-icon>
+                <div class="field-info">
+                  <span class="field-label">{{ field.label }}</span>
+                  <span class="field-type">{{ field.type }} • {{ field.required ? 'Obligatoire' : 'Optionnel' }}</span>
+                </div>
+                <button class="btn-delete-icon ml-auto"><lucide-icon [name]="Trash2" [size]="14"></lucide-icon></button>
+              </div>
+              <button class="btn-add-dashed mt-4">
+                <lucide-icon [name]="Plus" [size]="16"></lucide-icon>
+                <span>Ajouter une question personnalisée</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 06. TEXTES & GOUVERNANCE -->
+        <section class="numbered-section">
+          <div class="section-head">
+            <div class="step-pill">{{ currentScope() === 'GLOBAL' ? '06' : '04' }}</div>
             <div class="section-title">
               <h4>Instructions & Légal</h4>
               <p>Messages d'aide et mentions obligatoires.</p>

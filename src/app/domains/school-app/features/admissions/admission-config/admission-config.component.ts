@@ -1,25 +1,40 @@
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { 
-  LucideAngularModule, Globe, Save, RefreshCw, Eye, 
-  Calendar, FileText, ShieldCheck, ToggleLeft as ToggleIcon,
-  ChefHat, Bus, MessageSquare, Plus, Trash2, Settings2,
-  GraduationCap, Info, AlertTriangle
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {
+  Bus,
+  Calendar,
+  ChefHat,
+  Eye,
+  FileText,
+  Globe,
+  GraduationCap,
+  Info,
+  LayoutGrid,
+  LucideAngularModule,
+  MessageSquare,
+  Plus,
+  RefreshCw,
+  Save,
+  Settings2,
+  ShieldCheck,
+  ToggleLeft as ToggleIcon,
+  Trash2,
+  UserCog
 } from 'lucide-angular';
-import { finalize, forkJoin, Observable, of } from 'rxjs';
-import { EnrollmentAdminService } from '../../../../../core/services/enrollment-admin.service';
-import { EnrollmentConfig, RequiredDocumentConfig } from '../../../../../core/models/enrollment.model';
-import { NotificationService } from '../../../../../shared/services/notification.service';
-import { AcademicService } from '../../../../../core/services/academic.service';
-import { AcademicYear, Level } from '../../../../../core/models/academic.model';
+import {finalize, forkJoin, Observable, of} from 'rxjs';
+import {EnrollmentAdminService} from '../../../../../core/services/enrollment-admin.service';
+import {CoreFieldControl, EnrollmentConfig, RequiredDocumentConfig} from '../../../../../core/models/enrollment.model';
+import {NotificationService} from '../../../../../shared/services/notification.service';
+import {AcademicService} from '../../../../../core/services/academic.service';
+import {AcademicYear, Level} from '../../../../../core/models/academic.model';
 
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatSelectModule } from '@angular/material/select';
-import { DocumentTypeFormComponent } from './components/document-type-form/document-type-form.component';
-import { PortalPreviewDialogComponent } from './components/portal-preview-dialog/portal-preview-dialog.component';
-import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import {MatSelectModule} from '@angular/material/select';
+import {DocumentTypeFormComponent} from './components/document-type-form/document-type-form.component';
+import {PortalPreviewDialogComponent} from './components/portal-preview-dialog/portal-preview-dialog.component';
+import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 
 export type ConfigScope = 'GLOBAL' | 'LEVEL';
 
@@ -27,11 +42,11 @@ export type ConfigScope = 'GLOBAL' | 'LEVEL';
   selector: 'app-admission-config',
   standalone: true,
   imports: [
-    CommonModule, 
-    FormsModule, 
-    LucideAngularModule, 
-    MatCheckboxModule, 
-    MatDialogModule, 
+    CommonModule,
+    FormsModule,
+    LucideAngularModule,
+    MatCheckboxModule,
+    MatDialogModule,
     MatSelectModule
   ],
   templateUrl: './admission-config.component.html',
@@ -47,12 +62,22 @@ export class AdmissionConfigComponent implements OnInit {
   config = signal<EnrollmentConfig | null>(null);
   activeYear = signal<AcademicYear | null>(null);
   levels = signal<Level[]>([]);
-  
+
   isLoading = signal(true);
   isSaving = signal(false);
 
   currentScope = signal<ConfigScope>('GLOBAL');
   selectedLevelId = signal<string | null>(null);
+
+  // Liste des champs standards pilotables (Cercle 2)
+  readonly coreFieldsList = [
+    {key: 'gender', label: 'Sexe / Genre', category: 'Candidat'},
+    {key: 'birthPlace', label: 'Lieu de naissance', category: 'Candidat'},
+    {key: 'nationality', label: 'Nationalité', category: 'Candidat'},
+    {key: 'previousSchool', label: 'École d\'origine', category: 'Candidat'},
+    {key: 'address', label: 'Adresse physique', category: 'Tuteur'},
+    {key: 'profession', label: 'Profession du tuteur', category: 'Tuteur'}
+  ];
 
   // --- CALCULS RÉACTIFS ---
 
@@ -64,6 +89,16 @@ export class AdmissionConfigComponent implements OnInit {
       if (override?.documentChecklist) return override.documentChecklist;
     }
     return cfg.defaultChecklist;
+  });
+
+  activeCoreOverrides = computed(() => {
+    const cfg = this.config();
+    if (!cfg) return {};
+    if (this.currentScope() === 'LEVEL' && this.selectedLevelId()) {
+      const override = cfg.levelOverrides?.[this.selectedLevelId()!];
+      if (override?.coreFieldOverrides) return override.coreFieldOverrides;
+    }
+    return cfg.defaultCoreOverrides;
   });
 
   activeCustomFields = computed(() => {
@@ -93,7 +128,8 @@ export class AdmissionConfigComponent implements OnInit {
   readonly Settings2 = Settings2;
   readonly GraduationCap = GraduationCap;
   readonly Info = Info;
-  readonly AlertTriangle = AlertTriangle;
+  readonly LayoutGrid = LayoutGrid;
+  readonly UserCog = UserCog;
 
   ngOnInit() {
     this.loadInitialData();
@@ -108,7 +144,7 @@ export class AdmissionConfigComponent implements OnInit {
     }).pipe(
       finalize(() => this.isLoading.set(false))
     ).subscribe({
-      next: ({ config, year, levels }) => {
+      next: ({config, year, levels}) => {
         const securedConfig = this.secureConfig(config);
         if (year) {
           securedConfig.admissionWindow = {
@@ -128,13 +164,13 @@ export class AdmissionConfigComponent implements OnInit {
     return {
       ...config,
       defaultChecklist: config.defaultChecklist || [],
-      defaultFormSchema: config.defaultFormSchema || {},
+      defaultFormSchema: config.defaultFormSchema || {customFields: []},
       defaultCoreOverrides: config.defaultCoreOverrides || {},
       enabledServices: config.enabledServices || [],
       levelOverrides: config.levelOverrides || {},
-      instructions: config.instructions || { 'general': '' },
+      instructions: config.instructions || {'general': ''},
       legalText: config.legalText || '',
-      admissionWindow: { startDate: '', endDate: '' }
+      admissionWindow: {startDate: '', endDate: ''}
     };
   }
 
@@ -144,8 +180,7 @@ export class AdmissionConfigComponent implements OnInit {
     if (!currentConfig || !year) return;
 
     this.isSaving.set(true);
-
-    const { admissionWindow, portalActive, ...payload } = currentConfig;
+    const {admissionWindow, portalActive, ...payload} = currentConfig;
 
     let configOp$: Observable<any>;
     if (this.currentScope() === 'GLOBAL') {
@@ -166,7 +201,7 @@ export class AdmissionConfigComponent implements OnInit {
       academicOp$ = this.academicService.updateYear(year.id, updatedYear);
     }
 
-    forkJoin({ config: configOp$, academic: academicOp$ }).pipe(
+    forkJoin({config: configOp$, academic: academicOp$}).pipe(
       finalize(() => this.isSaving.set(false))
     ).subscribe({
       next: () => this.notificationService.success('Configuration et calendrier publiés avec succès.'),
@@ -181,6 +216,38 @@ export class AdmissionConfigComponent implements OnInit {
     this.currentScope.set(scope);
     this.selectedLevelId.set(levelId);
   }
+
+  // --- GESTION DES CHAMPS STANDARDS (Core Overrides) ---
+
+  getCoreFieldControl(key: string): CoreFieldControl {
+    return this.activeCoreOverrides()[key] || {label: '', hidden: false, mandatory: false};
+  }
+
+  updateCoreField(key: string, patch: Partial<CoreFieldControl>) {
+    const current = this.config();
+    if (!current) return;
+
+    const currentControl = this.getCoreFieldControl(key);
+    const updatedControl = {...currentControl, ...patch};
+
+    if (this.currentScope() === 'GLOBAL') {
+      const overrides = {...current.defaultCoreOverrides, [key]: updatedControl};
+      this.config.set({...current, defaultCoreOverrides: overrides});
+    } else {
+      const levelId = this.selectedLevelId()!;
+      const levelOverrides = {...current.levelOverrides};
+      const levelOverride = levelOverrides[levelId] || {
+        documentChecklist: [],
+        coreFieldOverrides: {},
+        formSchema: {customFields: []}
+      };
+      levelOverride.coreFieldOverrides = {...levelOverride.coreFieldOverrides, [key]: updatedControl};
+      levelOverrides[levelId] = levelOverride;
+      this.config.set({...current, levelOverrides});
+    }
+  }
+
+  // --- GESTION DES DOCUMENTS ---
 
   addDocumentType() {
     const dialogRef = this.dialog.open(DocumentTypeFormComponent, {
@@ -211,8 +278,8 @@ export class AdmissionConfigComponent implements OnInit {
   }
 
   updateDocumentMandatory(code: string, mandatory: boolean) {
-    const updated = this.activeChecklist().map((doc: RequiredDocumentConfig) => 
-      doc.code === code ? { ...doc, mandatory } : doc
+    const updated = this.activeChecklist().map((doc: RequiredDocumentConfig) =>
+      doc.code === code ? {...doc, mandatory} : doc
     );
     this.updateActiveChecklist(updated);
   }
@@ -221,14 +288,22 @@ export class AdmissionConfigComponent implements OnInit {
     const current = this.config();
     if (!current) return;
     if (this.currentScope() === 'GLOBAL') {
-      this.config.set({ ...current, defaultChecklist: list });
+      this.config.set({...current, defaultChecklist: list});
     } else {
       const levelId = this.selectedLevelId()!;
-      const overrides = { ...current.levelOverrides };
-      overrides[levelId] = { ...overrides[levelId], documentChecklist: list };
-      this.config.set({ ...current, levelOverrides: overrides });
+      const overrides = {...current.levelOverrides};
+      const levelOverride = overrides[levelId] || {
+        documentChecklist: [],
+        coreFieldOverrides: {},
+        formSchema: {customFields: []}
+      };
+      levelOverride.documentChecklist = list;
+      overrides[levelId] = levelOverride;
+      this.config.set({...current, levelOverrides: overrides});
     }
   }
+
+  // --- ACTIONS DIVERSES ---
 
   togglePortal() {
     const current = this.config();
@@ -237,7 +312,7 @@ export class AdmissionConfigComponent implements OnInit {
     this.isSaving.set(true);
     this.enrollmentService.updatePortalStatus(newStatus).pipe(finalize(() => this.isSaving.set(false))).subscribe({
       next: () => {
-        this.config.set({ ...current, portalActive: newStatus });
+        this.config.set({...current, portalActive: newStatus});
         this.notificationService.info(newStatus ? 'Portail public ouvert.' : 'Portail public fermé.');
       }
     });
@@ -254,14 +329,14 @@ export class AdmissionConfigComponent implements OnInit {
     const index = services.indexOf(code);
     if (index > -1) services.splice(index, 1);
     else services.push(code);
-    this.config.set({ ...current, enabledServices: services });
+    this.config.set({...current, enabledServices: services});
   }
 
   previewPortal() {
     this.dialog.open(PortalPreviewDialogComponent, {
       width: '100vw', height: '100vh', maxWidth: '100vw', maxHeight: '100vh',
       panelClass: 'full-screen-dialog',
-      data: { config: this.config(), activeYear: this.activeYear() }
+      data: {config: this.config(), activeYear: this.activeYear()}
     });
   }
 }

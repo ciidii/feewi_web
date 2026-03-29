@@ -12,9 +12,6 @@
   height: 100%;
 }
 
-// ===========================================
-// PAGE HEADER (Style Administratif Moderne)
-// ===========================================
 .page-header {
   background: white;
   border-bottom: 1px solid #e2e8f0;
@@ -36,31 +33,18 @@
     display: flex;
     align-items: center;
     gap: 1.25rem;
-
     .icon-badge {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 48px; height: 48px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
     }
-
     .title-meta {
       h1 { margin: 0; line-height: 1.2; }
       p { margin: 4px 0 0; }
     }
   }
-
-  .header-actions {
-    display: flex;
-    gap: 1rem;
-  }
+  .header-actions { display: flex; gap: 1rem; }
 }
 
-// ===========================================
-// MAIN LAYOUT (Scope Nav + Editor)
-// ===========================================
 .portal-admin-layout {
   display: grid;
   grid-template-columns: 280px 1fr;
@@ -79,91 +63,53 @@
   overflow-y: auto;
 
   .nav-section-title {
-    font-size: 10px;
-    font-weight: 800;
-    text-transform: uppercase;
-    color: #94a3b8;
-    letter-spacing: 0.1em;
-    margin: 1.5rem 0.5rem 0.75rem;
+    font-size: 10px; font-weight: 800; text-transform: uppercase;
+    color: #94a3b8; letter-spacing: 0.1em; margin: 1.5rem 0.5rem 0.75rem;
   }
-
   .nav-divider { height: 1px; background: #f1f5f9; margin: 1.5rem 0; }
 
   .scope-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.875rem 1rem;
-    border-radius: 12px;
-    border: none;
-    background: transparent;
-    color: #64748b;
-    font-size: 0.875rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    width: 100%;
-    text-align: left;
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.875rem 1rem; border-radius: 12px; border: none;
+    background: transparent; color: #64748b; font-size: 0.875rem;
+    font-weight: 600; cursor: pointer; transition: all 0.2s;
+    width: 100%; text-align: left;
 
     &:hover { background: #f8fafc; color: #1e293b; }
     &.active {
-      background: #eff6ff;
-      color: #2563eb;
+      background: #eff6ff; color: #2563eb;
       box-shadow: 0 4px 12px -2px rgba(37, 99, 235, 0.1);
     }
-
     .override-dot { width: 6px; height: 6px; background: #10b981; border-radius: 50%; margin-left: auto; }
   }
 }
 
 .editor-main {
-  padding: 3rem;
-  background: #f8fafc;
-  display: flex;
-  flex-direction: column;
-  gap: 2.5rem;
+  padding: 3rem; background: #f8fafc;
+  display: flex; flex-direction: column; gap: 2.5rem;
 }
 
-// ===========================================
-// COMPONENTS STYLES
-// ===========================================
 .scope-banner {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  padding: 1.25rem 1.5rem;
-  background: white;
-  border-radius: 16px;
-  border: 1px solid #e2e8f0;
+  display: flex; align-items: center; gap: 1.25rem;
+  padding: 1.25rem 1.5rem; background: white;
+  border-radius: 16px; border: 1px solid #e2e8f0;
   border-left: 4px solid #2563eb;
-
   lucide-icon { color: #2563eb; }
   .content {
     .title { font-size: 0.9rem; font-weight: 800; color: #0f172a; text-transform: uppercase; }
     p { font-size: 0.85rem; color: #64748b; margin: 2px 0 0; }
   }
-
-  &.is-level {
-    border-left-color: #10b981;
-    lucide-icon { color: #10b981; }
-  }
+  &.is-level { border-left-color: #10b981; lucide-icon { color: #10b981; } }
 }
 
 .numbered-section {
   .section-head {
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
-    margin-bottom: 1.5rem;
-
+    display: flex; align-items: center; gap: 1.25rem; margin-bottom: 1.5rem;
     .step-pill {
-      width: 36px; height: 36px;
-      background: #0f172a; color: white;
-      border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; background: #0f172a; color: white;
+      border-radius: 12px; display: flex; align-items: center; justify-content: center;
       font-size: 0.85rem; font-weight: 800;
     }
-
     .section-title {
       h4 { font-size: 1.1rem; font-weight: 700; color: #0f172a; margin: 0; }
       p { font-size: 0.85rem; color: #64748b; margin: 0; }
@@ -172,19 +118,14 @@
 }
 
 .card-inner {
-  background: white;
-  border-radius: 20px;
-  border: 1px solid #e2e8f0;
-  padding: 2rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  background: white; border-radius: 20px; border: 1px solid #e2e8f0;
+  padding: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 // --- Status Control ---
 .status-control-row {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 1.25rem; background: #f8fafc; border-radius: 16px;
-  border: 1px solid #f1f5f9;
-  
+  padding: 1.25rem; background: #f8fafc; border-radius: 16px; border: 1px solid #f1f5f9;
   .label { font-size: 0.85rem; font-weight: 700; color: #475569; }
   .status-badge {
     margin-left: 1rem; padding: 4px 12px; border-radius: 8px;
@@ -193,39 +134,42 @@
   }
 }
 
+// --- Core Fields Grid ---
+.core-fields-grid {
+  display: flex; flex-direction: column; gap: 1rem;
+}
+.core-field-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 1.25rem; background: #f8fafc; border-radius: 12px; border: 1px solid #f1f5f9;
+  
+  .field-desc {
+    display: flex; flex-direction: column;
+    .field-cat { font-size: 9px; font-weight: 800; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; }
+    .field-label { font-size: 0.9rem; font-weight: 600; color: #1e293b; }
+  }
+
+  .field-controls {
+    display: flex; gap: 2rem;
+    .control-toggle {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-size: 0.75rem; font-weight: 700; color: #64748b; cursor: pointer;
+      input { accent-color: #2563eb; width: 16px; height: 16px; }
+    }
+  }
+}
+
 // --- Toggle Switch ---
 .btn-toggle {
   display: flex; align-items: center; gap: 1rem;
   background: none; border: none; cursor: pointer; padding: 0;
-  
   span { font-size: 0.85rem; font-weight: 700; color: #64748b; transition: color 0.3s; }
-
   .toggle-track {
-    width: 48px; height: 24px;
-    background: #cbd5e1;
-    border-radius: 999px;
-    position: relative;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-    .toggle-thumb {
-      width: 18px; height: 18px;
-      background: white;
-      border-radius: 50%;
-      position: absolute;
-      top: 3px; left: 3px;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
+    width: 48px; height: 24px; background: #cbd5e1; border-radius: 999px; position: relative; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    .toggle-thumb { width: 18px; height: 18px; background: white; border-radius: 50%; position: absolute; top: 3px; left: 3px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
   }
-
   &.active {
     span { color: #2563eb; }
-    .toggle-track {
-      background: #2563eb;
-      .toggle-thumb {
-        transform: translateX(24px); // Plus fiable que 'left'
-      }
-    }
+    .toggle-track { background: #2563eb; .toggle-thumb { transform: translateX(24px); } }
   }
 }
 
@@ -239,14 +183,13 @@
 }
 
 // --- Lists ---
-.docs-modern-list {
-  display: flex; flex-direction: column; gap: 0.75rem;
-}
-.doc-row-modern {
+.docs-modern-list, .fields-modern-list { display: flex; flex-direction: column; gap: 0.75rem; }
+.doc-row-modern, .field-row-modern {
   display: flex; align-items: center; justify-content: space-between;
   padding: 1.25rem; background: white; border: 1px solid #e2e8f0; border-radius: 16px;
-  .doc-name { font-weight: 600; color: #1e293b; }
+  .doc-name, .field-label { font-weight: 600; color: #1e293b; }
   .doc-code { font-family: monospace; font-size: 0.75rem; color: #2563eb; background: #eff6ff; padding: 2px 8px; border-radius: 6px; margin-left: 1rem; }
+  .field-type { font-size: 0.7rem; color: #64748b; margin-left: 0.5rem; }
   .doc-actions { display: flex; align-items: center; gap: 2rem; }
 }
 
