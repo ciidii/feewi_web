@@ -2,27 +2,80 @@
 
 :host {
   display: block;
-  height: 100%;
+  min-height: 100vh;
+  background-color: #f8fafc;
 }
 
-.portal-admin-layout {
-  display: grid;
-  grid-template-columns: 240px 1fr 320px;
-  gap: 0;
-  height: 100%;
-  margin: -2rem; // On annule le padding du shell pour coller aux bords
-}
-
-// ===========================================
-// NAVIGATION DE SCOPE
-// ===========================================
-.scope-navigation {
-  background: white;
-  border-right: 1px solid #e2e8f0;
-  padding: 1.5rem 1rem;
+.admission-config-page {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  height: 100%;
+}
+
+// ===========================================
+// PAGE HEADER (Style Administratif Moderne)
+// ===========================================
+.page-header {
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 1.5rem 2.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1600px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+
+    .icon-badge {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .title-meta {
+      h1 { margin: 0; line-height: 1.2; }
+      p { margin: 4px 0 0; }
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+  }
+}
+
+// ===========================================
+// MAIN LAYOUT (Scope Nav + Editor)
+// ===========================================
+.portal-admin-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  flex: 1;
+  max-width: 1600px;
+  margin: 0 auto;
+  width: 100%;
+  background: white;
+  min-height: calc(100vh - 100px);
+}
+
+.scope-navigation {
+  border-right: 1px solid #f1f5f9;
+  padding: 2rem 1.5rem;
+  background: #fff;
   overflow-y: auto;
 
   .nav-section-title {
@@ -31,20 +84,16 @@
     text-transform: uppercase;
     color: #94a3b8;
     letter-spacing: 0.1em;
-    margin: 1rem 0.5rem 0.5rem;
+    margin: 1.5rem 0.5rem 0.75rem;
   }
 
-  .nav-divider {
-    height: 1px;
-    background: #f1f5f9;
-    margin: 1rem 0;
-  }
+  .nav-divider { height: 1px; background: #f1f5f9; margin: 1.5rem 0; }
 
   .scope-item {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.75rem 1rem;
+    padding: 0.875rem 1rem;
     border-radius: 12px;
     border: none;
     background: transparent;
@@ -53,60 +102,49 @@
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
+    width: 100%;
     text-align: left;
-    position: relative;
 
     &:hover { background: #f8fafc; color: #1e293b; }
     &.active {
       background: #eff6ff;
       color: #2563eb;
-      &::after {
-        content: '';
-        position: absolute;
-        right: 0; top: 20%; bottom: 20%;
-        width: 3px; background: #2563eb;
-        border-radius: 4px 0 0 4px;
-      }
+      box-shadow: 0 4px 12px -2px rgba(37, 99, 235, 0.1);
     }
 
-    .override-dot {
-      width: 6px; height: 6px;
-      background: #10b981;
-      border-radius: 50%;
-      margin-left: auto;
-    }
+    .override-dot { width: 6px; height: 6px; background: #10b981; border-radius: 50%; margin-left: auto; }
   }
 }
 
-// ===========================================
-// ZONE D'ÉDITION
-// ===========================================
 .editor-main {
+  padding: 3rem;
   background: #f8fafc;
-  padding: 2rem;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 2.5rem;
 }
 
-.scope-header {
-  padding: 1.5rem;
+// ===========================================
+// COMPONENTS STYLES
+// ===========================================
+.scope-banner {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.25rem 1.5rem;
   background: white;
-  border-radius: 20px;
+  border-radius: 16px;
   border: 1px solid #e2e8f0;
-  
-  .scope-info {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    lucide-icon { color: #2563eb; }
-    h3 { font-size: 1rem; font-weight: 700; color: #0f172a; margin: 0; }
-    p { font-size: 0.8rem; color: #64748b; margin: 2px 0 0; }
+  border-left: 4px solid #2563eb;
+
+  lucide-icon { color: #2563eb; }
+  .content {
+    .title { font-size: 0.9rem; font-weight: 800; color: #0f172a; text-transform: uppercase; }
+    p { font-size: 0.85rem; color: #64748b; margin: 2px 0 0; }
   }
 
   &.is-level {
-    border-left: 4px solid #10b981;
+    border-left-color: #10b981;
     lucide-icon { color: #10b981; }
   }
 }
@@ -115,153 +153,112 @@
   .section-head {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 1.25rem;
     margin-bottom: 1.5rem;
 
     .step-pill {
-      width: 32px; height: 32px;
-      background: white; border: 1px solid #e2e8f0;
-      border-radius: 10px;
+      width: 36px; height: 36px;
+      background: #0f172a; color: white;
+      border-radius: 12px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 0.75rem; font-weight: 800; color: #2563eb;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      font-size: 0.85rem; font-weight: 800;
     }
 
     .section-title {
-      h4 { font-size: 0.95rem; font-weight: 700; color: #0f172a; margin: 0; }
-      p { font-size: 0.75rem; color: #64748b; margin: 0; }
+      h4 { font-size: 1.1rem; font-weight: 700; color: #0f172a; margin: 0; }
+      p { font-size: 0.85rem; color: #64748b; margin: 0; }
     }
   }
 }
 
 .card-inner {
   background: white;
-  border-radius: 16px;
+  border-radius: 20px;
   border: 1px solid #e2e8f0;
-  padding: 1.5rem;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 // --- Status Control ---
 .status-control-row {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 1rem; background: #f8fafc; border-radius: 12px;
-  .label { font-size: 0.8rem; font-weight: 700; color: #475569; }
+  padding: 1.25rem; background: #f8fafc; border-radius: 16px;
+  border: 1px solid #f1f5f9;
+  
+  .label { font-size: 0.85rem; font-weight: 700; color: #475569; }
   .status-badge {
-    margin-left: 1rem; padding: 4px 10px; border-radius: 6px;
-    font-size: 0.65rem; font-weight: 800; background: #fee2e2; color: #ef4444;
+    margin-left: 1rem; padding: 4px 12px; border-radius: 8px;
+    font-size: 0.7rem; font-weight: 800; background: #fee2e2; color: #ef4444;
     &.open { background: #dcfce7; color: #16a34a; }
   }
 }
 
-// --- Services Toggle Card ---
-.service-toggle-card {
-  background: white; padding: 1rem; border-radius: 12px;
-  border: 1.5px solid #e2e8f0; cursor: pointer;
-  display: flex; align-items: center; gap: 0.75rem;
-  transition: all 0.2s;
-  
-  lucide-icon { color: #94a3b8; }
-  span { font-size: 0.85rem; font-weight: 600; color: #475569; }
-
-  &:hover { border-color: #cbd5e1; background: #f8fafc; }
-  &.active {
-    border-color: #2563eb; background: #eff6ff;
-    lucide-icon { color: #2563eb; }
-    span { color: #1e40af; }
-  }
-}
-
-// --- Lists (Docs & Fields) ---
-.docs-modern-list, .fields-modern-list {
-  display: flex; flex-direction: column; gap: 0.5rem;
-}
-
-.doc-row-modern, .field-row-modern {
+// --- Toggle Switch ---
+.btn-toggle {
   display: flex; align-items: center; gap: 1rem;
-  padding: 0.75rem 1rem; background: white;
-  border: 1px solid #e2e8f0; border-radius: 12px;
-  
-  .doc-name, .field-label { font-size: 0.85rem; font-weight: 600; color: #1e293b; }
-  .doc-code { font-family: monospace; font-size: 0.7rem; color: #2563eb; background: #eff6ff; padding: 2px 6px; border-radius: 4px; }
-  .field-type { font-size: 0.7rem; color: #64748b; }
-
-  .doc-actions {
-    margin-left: auto; display: flex; align-items: center; gap: 1.5rem;
-    .mandatory-switch {
-      display: flex; align-items: center; gap: 0.5rem;
-      font-size: 0.75rem; font-weight: 700; color: #94a3b8; cursor: pointer;
-      input { accent-color: #2563eb; }
-    }
+  background: none; border: none; cursor: pointer;
+  span { font-size: 0.85rem; font-weight: 700; color: #64748b; }
+  .toggle-track {
+    width: 48px; height: 24px; background: #cbd5e1; border-radius: 12px; position: relative; transition: all 0.3s ease;
+    .toggle-thumb { width: 18px; height: 18px; background: white; border-radius: 50%; position: absolute; top: 3px; left: 3px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+  }
+  &.active {
+    .toggle-track { background: #2563eb; }
+    .toggle-thumb { left: 27px; }
+    span { color: #2563eb; }
   }
 }
 
-// ===========================================
-// SIMULATEUR COLUMN
-// ===========================================
-.simulator-column {
-  background: white;
-  border-left: 1px solid #e2e8f0;
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-
-  .sticky-container {
-    position: sticky;
-    top: 0;
-  }
-
-  .preview-label {
-    font-size: 10px; font-weight: 800; text-transform: uppercase;
-    color: #64748b; letter-spacing: 0.1em;
-    display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-    margin-bottom: 1rem;
-
-    .pulse-dot {
-      width: 6px; height: 6px; background: #ef4444; border-radius: 50%;
-      animation: pulse 2s infinite;
-    }
-  }
-
-  .device-frame {
-    height: 600px;
-    border: 8px solid #1e293b;
-    border-radius: 24px;
-    overflow: hidden;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  }
+// --- Services ---
+.service-toggle-card {
+  background: white; padding: 1.25rem; border-radius: 16px; border: 1.5px solid #e2e8f0;
+  cursor: pointer; display: flex; align-items: center; gap: 1rem; transition: all 0.2s;
+  span { font-size: 0.9rem; font-weight: 600; color: #475569; }
+  &:hover { border-color: #cbd5e1; }
+  &.active { border-color: #2563eb; background: #eff6ff; span { color: #1e40af; } }
 }
 
-// --- UTILS ---
+// --- Lists ---
+.docs-modern-list {
+  display: flex; flex-direction: column; gap: 0.75rem;
+}
+.doc-row-modern {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.25rem; background: white; border: 1px solid #e2e8f0; border-radius: 16px;
+  .doc-name { font-weight: 600; color: #1e293b; }
+  .doc-code { font-family: monospace; font-size: 0.75rem; color: #2563eb; background: #eff6ff; padding: 2px 8px; border-radius: 6px; margin-left: 1rem; }
+  .doc-actions { display: flex; align-items: center; gap: 2rem; }
+}
+
+// --- Buttons Modern ---
+.btn-primary-modern {
+  height: 44px; padding: 0 1.5rem; background: #0f172a; color: white; border: none; border-radius: 12px;
+  font-weight: 700; display: flex; align-items: center; gap: 0.75rem; cursor: pointer; transition: all 0.2s;
+  &:hover:not(:disabled) { background: #1e293b; transform: translateY(-1px); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+.btn-outline-modern {
+  height: 44px; padding: 0 1.5rem; background: white; border: 1.5px solid #e2e8f0; color: #475569;
+  border-radius: 12px; font-weight: 700; display: flex; align-items: center; gap: 0.75rem; cursor: pointer;
+  &:hover { background: #f8fafc; border-color: #cbd5e1; }
+}
+
 .btn-add-dashed {
-  width: 100%; padding: 0.75rem; border: 1.5px dashed #cbd5e1;
-  border-radius: 12px; background: transparent; color: #64748b;
-  font-size: 0.8rem; font-weight: 600; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-  transition: all 0.2s;
+  width: 100%; padding: 1.25rem; border: 2px dashed #e2e8f0; border-radius: 16px; background: transparent;
+  color: #64748b; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.75rem;
   &:hover { border-color: #2563eb; color: #2563eb; background: #eff6ff; }
 }
 
-.btn-delete-icon {
-  width: 28px; height: 28px; border-radius: 6px; border: none; background: transparent; color: #94a3b8;
-  cursor: pointer; display: grid; place-items: center;
-  &:hover { background: #fee2e2; color: #ef4444; }
-}
+.btn-delete-icon { width: 36px; height: 36px; border-radius: 10px; border: none; background: #fee2e2; color: #ef4444; cursor: pointer; display: grid; place-items: center; }
 
-.fw-textarea-modern {
-  width: 100%; padding: 1rem; border: 1.5px solid #e2e8f0; border-radius: 12px;
-  font-size: 0.85rem; font-family: inherit;
-  &:focus { outline: none; border-color: #2563eb; }
-}
-
-@keyframes pulse {
-  0% { transform: scale(0.95); opacity: 0.5; }
-  50% { transform: scale(1.05); opacity: 1; }
-  100% { transform: scale(0.95); opacity: 0.5; }
+.fw-input-modern, .fw-textarea-modern {
+  width: 100%; padding: 1rem; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 0.9rem; font-family: inherit;
+  &:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 4px rgba(37,99,235,0.05); }
 }
 
 .loading-overlay {
-  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(255,255,255,0.9); z-index: 100;
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255,255,255,0.9); z-index: 9999;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 1rem; p { font-weight: 700; color: #2563eb; }
 }

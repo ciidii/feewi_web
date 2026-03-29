@@ -1,15 +1,35 @@
-<app-form-shell
-  title="Gouvernance du Portail d'Admission"
-  [subtitle]="'Pilotez l\'expérience parent ' + (activeYear() ? 'pour l\'année ' + activeYear()?.label : '')"
-  [icon]="Settings2"
-  statusLabel="Architecture"
-  saveLabel="Publier la configuration"
-  cancelLabel="Aperçu"
-  [isLoading]="isSaving()"
-  [canSave]="config() !== null"
-  (save)="onSave()"
-  (cancel)="previewPortal()"
->
+<div class="admission-config-page">
+  
+  <!-- EN-TÊTE DE PAGE PROFESSIONNEL -->
+  <header class="page-header">
+    <div class="header-content">
+      <div class="header-left">
+        <div class="icon-badge bg-primary-50 text-primary-600">
+          <lucide-icon [name]="Settings2" [size]="24"></lucide-icon>
+        </div>
+        <div class="title-meta">
+          <h1 class="text-2xl font-bold text-slate-900">Gouvernance du Portail</h1>
+          <p class="text-sm text-slate-500">
+            Pilotage de l'expérience parent 
+            <span class="text-primary font-semibold" *ngIf="activeYear()">— Année {{ activeYear()?.label }}</span>
+          </p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button class="btn-outline-modern" (click)="previewPortal()">
+          <lucide-icon [name]="Eye" [size]="18"></lucide-icon>
+          <span>Aperçu Simulateur</span>
+        </button>
+        <button class="btn-primary-modern" (click)="onSave()" [disabled]="isSaving() || isLoading()">
+          <lucide-icon *ngIf="isSaving()" [name]="RefreshCw" [size]="18" class="animate-spin"></lucide-icon>
+          <lucide-icon *ngIf="!isSaving()" [name]="Save" [size]="18"></lucide-icon>
+          <span>{{ isSaving() ? 'Publication...' : 'Publier les changements' }}</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
   <div class="portal-admin-layout" *ngIf="config(); let cfg">
     
     <!-- NAVIGATION DE SCOPE -->
@@ -41,18 +61,15 @@
     <!-- ZONE D'ÉDITION -->
     <main class="editor-main">
       
-      <!-- ENTÊTE DE SCOPE -->
-      <header class="scope-header" [class.is-level]="currentScope() === 'LEVEL'">
-        <div class="scope-info">
-          <lucide-icon [name]="currentScope() === 'GLOBAL' ? Globe : GraduationCap" [size]="24"></lucide-icon>
-          <div>
-            <h3>{{ currentScope() === 'GLOBAL' ? 'Règles par défaut de l\'école' : 'Surcharge pour le niveau sélectionné' }}</h3>
-            <p>{{ currentScope() === 'GLOBAL' ? 'Ces paramètres s\'appliquent à tous les niveaux sauf exception.' : 'Ces règles écrasent la configuration globale pour ce niveau spécifique.' }}</p>
-          </div>
+      <!-- ÉTAT DU SCOPE -->
+      <div class="scope-banner" [class.is-level]="currentScope() === 'LEVEL'">
+        <lucide-icon [name]="currentScope() === 'GLOBAL' ? Globe : GraduationCap" [size]="20"></lucide-icon>
+        <div class="content">
+          <span class="title">{{ currentScope() === 'GLOBAL' ? 'Mode : Configuration par défaut' : 'Mode : Surcharge par niveau' }}</span>
+          <p>{{ currentScope() === 'GLOBAL' ? 'Modifiez les règles s\'appliquant à l\'ensemble de l\'établissement.' : 'Ces paramètres écrasent les règles globales pour ce niveau uniquement.' }}</p>
         </div>
-      </header>
+      </div>
 
-      <!-- SECTIONS DE CONFIGURATION -->
       <div class="sections-container space-y-8">
         
         <!-- SECTION 01 : DISPONIBILITÉ (Seulement en Global) -->
@@ -147,43 +164,16 @@
           </div>
         </section>
 
-        <!-- SECTION 04 : FORMULAIRE DYNAMIQUE -->
+        <!-- SECTION 04 : TEXTES & GOUVERNANCE -->
         <section class="numbered-section">
           <div class="section-head">
             <div class="step-pill">{{ currentScope() === 'GLOBAL' ? '04' : '02' }}</div>
-            <div class="section-title">
-              <h4>Questions Personnalisées</h4>
-              <p>Champs spécifiques à votre établissement.</p>
-            </div>
-          </div>
-          <div class="section-content">
-            <div class="fields-modern-list">
-              <div *ngFor="let field of activeCustomFields()" class="field-row-modern">
-                <lucide-icon [name]="MessageSquare" [size]="16" class="text-slate-400"></lucide-icon>
-                <div class="field-info">
-                  <span class="field-label">{{ field.label }}</span>
-                  <span class="field-type">{{ field.type }} • {{ field.required ? 'Obligatoire' : 'Optionnel' }}</span>
-                </div>
-                <button class="btn-delete-icon ml-auto"><lucide-icon [name]="Trash2" [size]="14"></lucide-icon></button>
-              </div>
-              <button class="btn-add-dashed mt-4">
-                <lucide-icon [name]="Plus" [size]="16"></lucide-icon>
-                <span>Ajouter une question personnalisée</span>
-              </button>
-            </div>
-          </div>
-        </section>
-
-        <!-- SECTION 05 : TEXTES & GOUVERNANCE -->
-        <section class="numbered-section">
-          <div class="section-head">
-            <div class="step-pill">{{ currentScope() === 'GLOBAL' ? '05' : '03' }}</div>
             <div class="section-title">
               <h4>Instructions & Légal</h4>
               <p>Messages d'aide et mentions obligatoires.</p>
             </div>
           </div>
-          <div class="section-content space-y-4">
+          <div class="section-content space-y-4 card-inner">
             <div class="form-group">
               <label>Instructions aux parents</label>
               <textarea [(ngModel)]="cfg.instructions" rows="3" class="fw-textarea-modern" placeholder="Ex: Veuillez préparer vos documents scannés..."></textarea>
@@ -198,19 +188,6 @@
       </div>
     </main>
 
-    <!-- COLONNE DROITE : SIMULATEUR LIVE -->
-    <aside class="simulator-column">
-      <div class="sticky-container">
-        <div class="preview-label">
-          <span class="pulse-dot"></span>
-          Simulateur en temps réel
-        </div>
-        <div class="device-frame">
-          <app-portal-preview [config]="cfg" [activeYear]="activeYear()"></app-portal-preview>
-        </div>
-      </div>
-    </aside>
-
   </div>
 
   <!-- LOADER INITIAL -->
@@ -218,4 +195,4 @@
     <lucide-icon [name]="RefreshCw" [size]="48" class="animate-spin text-primary"></lucide-icon>
     <p>Architecture en cours de synchronisation...</p>
   </div>
-</app-form-shell>
+</div>

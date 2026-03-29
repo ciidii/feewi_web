@@ -17,9 +17,9 @@ import { AcademicYear, Level } from '../../../../../core/models/academic.model';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
-import { FormShellComponent } from '../../../../../shared/components/form-shell/form-shell';
 import { DocumentTypeFormComponent } from './components/document-type-form/document-type-form.component';
 import { PortalPreviewComponent } from './components/portal-preview/portal-preview.component';
+import { PortalPreviewDialogComponent } from './components/portal-preview-dialog/portal-preview-dialog.component';
 
 export type ConfigScope = 'GLOBAL' | 'LEVEL';
 
@@ -33,7 +33,6 @@ export type ConfigScope = 'GLOBAL' | 'LEVEL';
     MatCheckboxModule, 
     MatDialogModule, 
     MatSelectModule,
-    FormShellComponent,
     PortalPreviewComponent
   ],
   templateUrl: './admission-config.component.html',
@@ -59,33 +58,23 @@ export class AdmissionConfigComponent implements OnInit {
 
   // --- CALCULS RÉACTIFS ---
 
-  /**
-   * Retourne la checklist des documents en fonction du scope actif
-   */
   activeChecklist = computed(() => {
     const cfg = this.config();
     if (!cfg) return [];
-    
     if (this.currentScope() === 'LEVEL' && this.selectedLevelId()) {
       const override = cfg.levelOverrides?.[this.selectedLevelId()!];
       if (override?.documentChecklist) return override.documentChecklist;
     }
-    
     return cfg.documentChecklist;
   });
 
-  /**
-   * Retourne les champs personnalisés en fonction du scope actif
-   */
   activeCustomFields = computed(() => {
     const cfg = this.config();
     if (!cfg) return [];
-    
     if (this.currentScope() === 'LEVEL' && this.selectedLevelId()) {
       const override = cfg.levelOverrides?.[this.selectedLevelId()!];
       if (override?.formSchema?.customFields) return override.formSchema.customFields;
     }
-    
     return cfg.formSchema.customFields;
   });
 
@@ -144,9 +133,7 @@ export class AdmissionConfigComponent implements OnInit {
   onSave() {
     const currentConfig = this.config();
     if (!currentConfig) return;
-
     this.isSaving.set(true);
-
     let operation$: Observable<any>;
     if (this.currentScope() === 'GLOBAL') {
       operation$ = this.enrollmentService.updateConfig(currentConfig);
@@ -155,34 +142,24 @@ export class AdmissionConfigComponent implements OnInit {
       const override = currentConfig.levelOverrides?.[levelId];
       operation$ = this.enrollmentService.updateLevelOverride(levelId, override);
     }
-
-    operation$.pipe(
-      finalize(() => this.isSaving.set(false))
-    ).subscribe({
+    operation$.pipe(finalize(() => this.isSaving.set(false))).subscribe({
       next: () => this.notificationService.success('Configuration enregistrée avec succès.'),
       error: (err) => console.error('[AdmissionConfig] Erreur sauvegarde:', err)
     });
   }
-
-  // --- GESTION DU SCOPE ---
 
   setScope(scope: ConfigScope, levelId: string | null = null) {
     this.currentScope.set(scope);
     this.selectedLevelId.set(levelId);
   }
 
-  // --- ACTIONS DOCUMENTS ---
-
   addDocumentType() {
     const dialogRef = this.dialog.open(DocumentTypeFormComponent, {
       width: '450px',
       panelClass: 'feewi-dialog-panel'
     });
-
     dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.updateActiveChecklist([...this.activeChecklist(), result]);
-      }
+      if (result) this.updateActiveChecklist([...this.activeChecklist(), result]);
     });
   }
 
@@ -201,7 +178,6 @@ export class AdmissionConfigComponent implements OnInit {
   private updateActiveChecklist(list: RequiredDocumentConfig[]) {
     const current = this.config();
     if (!current) return;
-
     if (this.currentScope() === 'GLOBAL') {
       this.config.set({ ...current, documentChecklist: list });
     } else {
@@ -212,18 +188,12 @@ export class AdmissionConfigComponent implements OnInit {
     }
   }
 
-  // --- ACTIONS DIVERSES ---
-
   togglePortal() {
     const current = this.config();
     if (!current) return;
-
     const newStatus = !current.isPublicPortalOpen;
     this.isSaving.set(true);
-
-    this.enrollmentService.updatePortalStatus(newStatus).pipe(
-      finalize(() => this.isSaving.set(false))
-    ).subscribe({
+    this.enrollmentService.updatePortalStatus(newStatus).pipe(finalize(() => this.isSaving.set(false))).subscribe({
       next: () => {
         this.config.set({ ...current, isPublicPortalOpen: newStatus });
         this.notificationService.info(newStatus ? 'Portail public ouvert.' : 'Portail public fermé.');
@@ -246,6 +216,16 @@ export class AdmissionConfigComponent implements OnInit {
   }
 
   previewPortal() {
-    window.open('/enrollment', '_blank');
+    this.dialog.open(PortalPreviewDialogComponent, {
+      width: '100vw',
+      height: '100vh',
+      maxWidth: '100vw',
+      maxHeight: '100vh',
+      panelClass: 'full-screen-dialog',
+      data: {
+        config: this.config(),
+        activeYear: this.activeYear()
+      }
+    });
   }
 }
