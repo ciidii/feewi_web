@@ -49,29 +49,29 @@ export class SidebarComponent {
 
   // --- 1. ENROLLMENT SERVICE (Opérationnel) ---
   enrollmentItems = [
-    { label: 'Admissions', icon: Briefcase, route: '/admissions' },
-    { label: 'Paramètres Portail', icon: Globe, route: '/admissions/settings' },
+    { label: 'Admissions', icon: Briefcase, route: '/admin/admissions' },
+    { label: 'Paramètres Portail', icon: Globe, route: '/admin/admissions/settings' },
   ];
 
   // --- 2. STUDENT REGISTRY (Référentiel) ---
   registryItems = [
-    { label: 'Liste des élèves', icon: Users, route: '/students' },
-    { label: 'Dossiers scolaires', icon: FileText, route: '/students/records' },
+    { label: 'Liste des élèves', icon: Users, route: '/admin/students' },
+    { label: 'Dossiers scolaires', icon: FileText, route: '/admin/students/records' },
   ];
 
   // --- 3. ACADEMIC STRUCTURE (Référentiel & Pilotage) ---
   academicItems = [
-    { label: 'Architecture & Cycles', icon: Layers, route: '/classes' },
-    { label: 'Gestion des Classes', icon: Users, route: '/academic/classes' },
-    { label: 'Bibliothèque Matières', icon: BookOpen, route: '/academic/library' },
-    { label: 'Calendrier Scolaire', icon: Calendar, route: '/academic/years' },
+    { label: 'Architecture & Cycles', icon: Layers, route: '/admin/classes' },
+    { label: 'Gestion des Classes', icon: Users, route: '/admin/academic/classes' },
+    { label: 'Bibliothèque Matières', icon: BookOpen, route: '/admin/academic/library' },
+    { label: 'Calendrier Scolaire', icon: Calendar, route: '/admin/academic/years' },
   ];
 
   // --- 4. IDENTITY SERVICE (Fondation) ---
   identityItems = [
-    { label: 'Personnel (Staff)', icon: Users, route: '/identity/staff' },
-    { label: 'Rôles & Droits', icon: ShieldCheck, route: '/identity/roles' },
-    { label: 'Journal d\'audit', icon: History, route: '/identity/audit' },
+    { label: 'Personnel (Staff)', icon: Users, route: '/admin/identity/staff' },
+    { label: 'Rôles & Droits', icon: ShieldCheck, route: '/admin/identity/roles' },
+    { label: 'Journal d\'audit', icon: History, route: '/admin/identity/audit' },
   ];
 
   // --- CONFIGURATION SAAS ADMIN ---

@@ -3,13 +3,14 @@ import {ShellComponent} from './core/layout/shell/shell.component';
 import {authGuard} from './core/guards/auth.guard';
 
 export const routes: Routes = [
-  // 1. TOUT CE QUI EST PUBLIC (Auth, Enrollment, Errors)
+  // 1. DOMAINE PUBLIC (Authentification & Portail Parent)
+  // Ces routes sont accessibles sans connexion.
   {
     path: '',
     loadChildren: () => import('./domains/public/public.routes').then(m => m.PUBLIC_ROUTES)
   },
 
-  // 2. MONDE SAAS ADMIN (Dans le Shell, uniquement pour ROLE_SUPER_ADMIN)
+  // 2. ADMINISTRATION SAAS (Super Admin uniquement)
   {
     path: 'saas',
     component: ShellComponent,
@@ -18,23 +19,17 @@ export const routes: Routes = [
     loadChildren: () => import('./domains/saas-admin/saas-admin.routes').then(m => m.SAAS_ADMIN_ROUTES)
   },
 
-  // 3. MONDE ÉCOLE (Dans le Shell, métier quotidien)
+  // 3. ADMINISTRATION ÉCOLE (Secrétariat, Direction, etc.)
+  // On utilise un préfixe 'admin' pour isoler totalement ces routes du monde public.
   {
-    path: 'app',
+    path: 'admin',
     component: ShellComponent,
     canActivate: [authGuard],
     data: {roles: ['ROLE_ADMIN', 'ROLE_SECRETARY']},
     loadChildren: () => import('./domains/school-app/school-app.routes').then(m => m.SCHOOL_APP_ROUTES)
   },
 
-  // 4. Redirection par défaut : Racine -> Enrollment
-  {
-    path: '',
-    pathMatch: 'full',
-    redirectTo: 'enrollment'
-  },
-
-  // 5. Fallback & Erreurs
+  // 4. GESTION DES ERREURS
   {
     path: '403',
     loadComponent: () => import('./domains/public/errors/access-denied/access-denied.component').then(m => m.AccessDeniedComponent)

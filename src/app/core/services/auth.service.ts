@@ -85,7 +85,7 @@ export class AuthService {
       tap(response => localStorage.setItem('access_token', response.access_token)),
       map(() => {
         this.fetchProfile().subscribe();
-        this.router.navigate(['/school-app/dashboard']);
+        this.router.navigate(['/admin/dashboard']);
         return true;
       }),
       catchError(error => {

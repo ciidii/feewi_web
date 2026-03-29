@@ -60,7 +60,7 @@ export class LoginComponent {
     this.authService.login(email!, password!).subscribe({
       next: (success) => {
         if (success) {
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/admin/dashboard']);
         } else {
           this.loginError.set(true);
           this.isLoading.set(false);

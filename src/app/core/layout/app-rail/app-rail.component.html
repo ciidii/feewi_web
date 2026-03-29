@@ -20,7 +20,7 @@
     <!-- Dashboard Service -->
     <a 
       (click)="onSelectService('dashboard')" 
-      routerLink="/dashboard"
+      routerLink="/admin/dashboard"
       class="rail-link group" 
       [class.active]="navService.activeService() === 'dashboard'"
       title="Tableau de bord"
@@ -33,7 +33,7 @@
     <!-- Enrollment Service -->
     <a 
       (click)="onSelectService('enrollment')" 
-      routerLink="/admissions"
+      routerLink="/admin/admissions"
       class="rail-link group" 
       [class.active]="navService.activeService() === 'enrollment'"
       title="Enrollment Service"
@@ -46,7 +46,7 @@
     <!-- Student Registry Service -->
     <a 
       (click)="onSelectService('registry')" 
-      routerLink="/students"
+      routerLink="/admin/students"
       class="rail-link group" 
       [class.active]="navService.activeService() === 'registry'"
       title="Student Registry"
@@ -59,7 +59,7 @@
     <!-- Academic Structure Service -->
     <a 
       (click)="onSelectService('academic')" 
-      routerLink="/classes"
+      routerLink="/admin/classes"
       class="rail-link group" 
       [class.active]="navService.activeService() === 'academic'"
       title="Academic Structure"
@@ -72,7 +72,7 @@
     <!-- Identity Service -->
     <a 
       (click)="onSelectService('identity')" 
-      routerLink="/identity/staff"
+      routerLink="/admin/identity/staff"
       class="rail-link group" 
       [class.active]="navService.activeService() === 'identity'"
       title="Identity & Security"
