@@ -1,64 +1,65 @@
 <div class="simulator-frame">
   <div class="preview-banner">
-    <lucide-icon [name]="Globe" class="w-4 h-4"></lucide-icon>
-    <span>APERCU DU PORTAIL PARENT</span>
+    <lucide-icon [name]="Globe" class="w-3 h-3"></lucide-icon>
+    <span>MODE SIMULATION</span>
   </div>
 
-  <div class="hub-container">
+  <div class="hub-container custom-scrollbar">
+    
     <!-- Header simulé -->
     <header class="hub-hero">
       <div class="badge-status" [class.open]="portalStatus === 'OPEN'" [class.closed]="portalStatus === 'CLOSED'">
-        <lucide-icon [name]="portalStatus === 'OPEN' ? CheckCircle : Clock" [size]="16"></lucide-icon>
-        <span>Les admissions sont actuellement <strong>{{ portalStatus === 'OPEN' ? 'OUVERTES' : 'FERMÉES' }}</strong></span>
+        <lucide-icon [name]="portalStatus === 'OPEN' ? CheckCircle : Clock" [size]="14"></lucide-icon>
+        <span>{{ portalStatus === 'OPEN' ? 'Inscriptions Ouvertes' : 'Inscriptions Fermées' }}</span>
       </div>
-      <h1>Bienvenue sur votre espace Admission</h1>
+      <h1>{{ config().tenantId }}</h1>
       <p>Année Académique {{ activeYear()?.label || '2026-2027' }}</p>
     </header>
+
+    <!-- Bloc Instructions -->
+    <div class="instructions-box" *ngIf="config().instructions">
+      <lucide-icon [name]="Info" [size]="16"></lucide-icon>
+      <p>{{ config().instructions }}</p>
+    </div>
 
     <!-- Grille d'Aiguillage simulée -->
     <div class="hub-grid">
       <div class="hub-card primary" [class.disabled]="portalStatus === 'CLOSED'">
-        <div class="card-icon"><lucide-icon [name]="Sparkles" [size]="32"></lucide-icon></div>
+        <div class="card-icon"><lucide-icon [name]="Sparkles" [size]="24"></lucide-icon></div>
         <div class="card-body">
           <h3>Nouvelle Inscription</h3>
-          <p>Créez le dossier de votre enfant en quelques minutes.</p>
-          <button class="btn-hub-main" [disabled]="portalStatus === 'CLOSED'">
-            Commencer <lucide-icon [name]="ArrowRight" [size]="18"></lucide-icon>
-          </button>
+          <button class="btn-hub-main" [disabled]="portalStatus === 'CLOSED'">Commencer</button>
         </div>
       </div>
-
       <div class="hub-card">
-        <div class="card-icon"><lucide-icon [name]="Search" [size]="28"></lucide-icon></div>
+        <div class="card-icon"><lucide-icon [name]="Search" [size]="24"></lucide-icon></div>
         <div class="card-body">
-          <h3>Suivre un dossier</h3>
-          <p>Consultez l'avancement d'une demande déjà soumise.</p>
-          <div class="search-form-mock">
-            <div class="hub-input-mock">Référence...</div>
-            <div class="btn-hub-icon-mock"><lucide-icon [name]="ArrowRight" [size]="20"></lucide-icon></div>
-          </div>
+          <h3>Suivi</h3>
+          <button class="btn-hub-secondary">Accéder</button>
         </div>
       </div>
     </div>
 
-    <!-- Section Documents requis (Visualisation directe) -->
+    <!-- Preview des Documents -->
     <section class="preview-section">
-      <h3>Pièces à fournir (Checklist)</h3>
-      <div class="docs-preview-list">
-        <div *ngFor="let doc of config().documentChecklist" class="doc-pill">
+      <div class="section-title-preview">Checklist Documents</div>
+      <div class="docs-preview-stack">
+        <div *ngFor="let doc of config().documentChecklist" class="doc-pill-mock">
           <span class="dot" [class.mandatory]="doc.mandatory"></span>
           {{ doc.name }}
         </div>
-        <div *ngIf="config().documentChecklist.length === 0" class="empty-text">Aucune pièce jointe configurée.</div>
       </div>
     </section>
 
+    <!-- Mentions Légales -->
+    <div class="legal-box" *ngIf="config().legalText">
+      <div class="checkbox-mock"></div>
+      <p>{{ config().legalText }}</p>
+    </div>
+
     <!-- Footer simulé -->
     <footer class="hub-footer">
-      <div class="info-item">
-        <lucide-icon [name]="Info" [size]="18"></lucide-icon>
-        <span>Besoin d'aide ? Contactez le secrétariat.</span>
-      </div>
+      <p>© 2026 Feewi Education</p>
     </footer>
   </div>
 </div>

@@ -2,7 +2,7 @@ import { Environment } from './environment.interface';
 
 export const environment: Environment = {
   production: false,
-  apiUrl: '',
+  apiUrl: 'http://localhost:8080',
   apiVersion: 'v1',
   appName: 'Feewi Education - LOCAL',
   logLevel: 'debug',

@@ -87,8 +87,8 @@ export interface AdmissionApplication {
   filiereId?: string | null;
   tenantId: string;
 
-  candidate: Candidate;
-  primaryGuardian: Guardian;
+  candidate?: Candidate;
+  primaryGuardian?: Guardian;
   documents: RequiredDocument[];
   assessment?: Assessment;
 
@@ -131,25 +131,53 @@ export interface AssessmentRequest {
 
 /**
  * CONFIGURATION DU SERVICE (Paramètres École)
+ * Basé sur le plan d'implémentation "Configuration-Driven"
  */
 export interface EnrollmentConfig {
   tenantId: string;
-  isPublicPortalOpen?: boolean; // Maintenu pour la logique UI actuelle
-  admissionWindow?: {           // Maintenu pour la logique UI actuelle
+  isPublicPortalOpen: boolean;
+
+  // Gouvernance & Textes
+  instructions?: string;
+  legalText?: string;
+
+  // Fenêtre temporelle
+  admissionWindow: {
     startDate: string;
     endDate: string;
   };
-  documentChecklist: {
-    code: string;
-    name: string;
-    mandatory: boolean;
-  }[];
+
+  // Configuration par défaut
+  documentChecklist: RequiredDocumentConfig[];
   formSchema: {
-    customFields: {
-      name: string;
-      label: string;
-      type: string;
-    }[];
+    customFields: CustomFieldConfig[];
   };
+
+  // Overrides par niveau (Key: levelId)
+  levelOverrides?: Record<string, LevelOverrideConfig>;
+
   enabledServices: string[];
+}
+
+export interface RequiredDocumentConfig {
+  code: string;
+  name: string;
+  mandatory: boolean;
+}
+
+export interface CustomFieldConfig {
+  name: string;
+  label: string;
+  type: 'text' | 'number' | 'boolean' | 'date' | 'select';
+  required: boolean;
+  placeholder?: string;
+  options?: string[]; // Pour le type select
+}
+
+export interface LevelOverrideConfig {
+  documentChecklist?: RequiredDocumentConfig[];
+  formSchema?: {
+    customFields: CustomFieldConfig[];
+  };
+  instructions?: string;
 }

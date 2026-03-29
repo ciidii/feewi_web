@@ -13,6 +13,8 @@ import { PageTitleStrategy } from './core/services/page-title-strategy.service';
 import { ENVIRONMENT_CONFIG } from '../environments/environment.interface';
 import { environment } from '../environments/environment';
 
+import { catchError, of } from 'rxjs';
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
@@ -30,7 +32,9 @@ export const appConfig: ApplicationConfig = {
     },
     {
       provide: APP_INITIALIZER,
-      useFactory: (authService: AuthService) => () => authService.checkSession(),
+      useFactory: (authService: AuthService) => () => authService.checkSession().pipe(
+        catchError(() => of(false)) // On ne bloque jamais le boot
+      ),
       deps: [AuthService],
       multi: true
     },

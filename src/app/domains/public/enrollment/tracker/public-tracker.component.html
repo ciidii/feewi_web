@@ -44,7 +44,7 @@
     <!-- Header : État actuel -->
     <header class="tracker-header card">
       <div class="success-icon"><lucide-icon [name]="CheckCircle" [size]="48"></lucide-icon></div>
-      <h1>Bonjour, {{ app.candidate.firstName }}</h1>
+      <h1>Bonjour, {{ app.candidate?.firstName || 'Candidat' }}</h1>
       <p>Dossier : <strong>{{ app.reference }}</strong></p>
       <div class="header-divider"></div>
       <div class="status-badge" [class]="app.status.toLowerCase()">{{ app.status }}</div>

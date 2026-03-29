@@ -20,14 +20,21 @@ export const routes: Routes = [
 
   // 3. MONDE ÉCOLE (Dans le Shell, métier quotidien)
   {
-    path: '',
+    path: 'app',
     component: ShellComponent,
     canActivate: [authGuard],
     data: {roles: ['ROLE_ADMIN', 'ROLE_SECRETARY']},
     loadChildren: () => import('./domains/school-app/school-app.routes').then(m => m.SCHOOL_APP_ROUTES)
   },
 
-  // 4. Fallback & Erreurs
+  // 4. Redirection par défaut : Racine -> Enrollment
+  {
+    path: '',
+    pathMatch: 'full',
+    redirectTo: 'enrollment'
+  },
+
+  // 5. Fallback & Erreurs
   {
     path: '403',
     loadComponent: () => import('./domains/public/errors/access-denied/access-denied.component').then(m => m.AccessDeniedComponent)

@@ -1,117 +1,221 @@
 <app-form-shell
-  title="Paramètres du Portail d'Admission"
-  [subtitle]="'Pilotez l\'ouverture du portail public et configurez les exigences du dossier' + (activeYear() ? ' pour l\'année ' + activeYear()?.label : '')"
-  [icon]="Globe"
-  statusLabel="Pilotage"
-  saveLabel="Enregistrer les modifications"
+  title="Gouvernance du Portail d'Admission"
+  [subtitle]="'Pilotez l\'expérience parent ' + (activeYear() ? 'pour l\'année ' + activeYear()?.label : '')"
+  [icon]="Settings2"
+  statusLabel="Architecture"
+  saveLabel="Publier la configuration"
   cancelLabel="Aperçu"
   [isLoading]="isSaving()"
   [canSave]="config() !== null"
   (save)="onSave()"
   (cancel)="previewPortal()"
 >
-  <div class="config-split-layout" *ngIf="config(); let cfg">
+  <div class="portal-admin-layout" *ngIf="config(); let cfg">
     
-    <!-- COLONNE GAUCHE : RÉGLAGES -->
-    <div class="settings-column">
+    <!-- NAVIGATION DE SCOPE -->
+    <aside class="scope-navigation">
+      <div class="nav-section-title">Étendue du pilotage</div>
       
-      <!-- DISPONIBILITÉ -->
-      <section class="config-card">
-        <div class="card-header">
-          <lucide-icon [name]="Globe" [size]="20" class="text-primary"></lucide-icon>
-          <h2>Disponibilité du Service</h2>
-        </div>
-        <div class="status-control">
-          <div class="status-info">
-            <span class="status-badge" [class.open]="cfg.isPublicPortalOpen">
-              {{ cfg.isPublicPortalOpen ? 'OUVERT AUX INSCRIPTIONS' : 'FERMÉ' }}
-            </span>
-          </div>
-          <button class="btn-toggle" [class.active]="cfg.isPublicPortalOpen" (click)="togglePortal()">
-            <div class="toggle-track"><div class="toggle-thumb"></div></div>
-            <span>{{ cfg.isPublicPortalOpen ? 'Désactiver' : 'Activer' }}</span>
-          </button>
-        </div>
-      </section>
+      <button class="scope-item" [class.active]="currentScope() === 'GLOBAL'" (click)="setScope('GLOBAL')">
+        <lucide-icon [name]="Globe" [size]="18"></lucide-icon>
+        <span>Configuration Globale</span>
+      </button>
 
-      <!-- SERVICES -->
-      <section class="config-card">
-        <div class="card-header">
-          <lucide-icon [name]="ChefHat" [size]="20" class="text-primary"></lucide-icon>
-          <h2>Services Optionnels</h2>
-        </div>
-        <div class="services-toggle-list">
-          <div class="service-item">
-            <div class="service-info">
-              <lucide-icon [name]="ChefHat" [size]="16"></lucide-icon>
-              <span>Cantine scolaire</span>
-            </div>
-            <mat-checkbox color="primary" [checked]="isServiceEnabled('CANTEEN')" (change)="toggleService('CANTEEN')"></mat-checkbox>
-          </div>
-          <div class="service-item">
-            <div class="service-info">
-              <lucide-icon [name]="Bus" [size]="16"></lucide-icon>
-              <span>Transport scolaire</span>
-            </div>
-            <mat-checkbox color="primary" [checked]="isServiceEnabled('TRANSPORT')" (change)="toggleService('TRANSPORT')"></mat-checkbox>
-          </div>
-        </div>
-      </section>
-
-      <!-- PÉRIODE -->
-      <section class="config-card" *ngIf="cfg.admissionWindow">
-        <div class="card-header">
-          <lucide-icon [name]="Calendar" [size]="20" class="text-primary"></lucide-icon>
-          <h2>Fenêtre Temporelle</h2>
-        </div>
-        <div class="date-inputs">
-          <div class="form-group">
-            <label>Ouverture</label>
-            <input type="date" [(ngModel)]="cfg.admissionWindow.startDate" class="fw-input">
-          </div>
-          <div class="form-group">
-            <label>Fermeture</label>
-            <input type="date" [(ngModel)]="cfg.admissionWindow.endDate" class="fw-input">
-          </div>
-        </div>
-      </section>
-
-      <!-- CHECKLIST -->
-      <section class="config-card">
-        <div class="card-header">
-          <lucide-icon [name]="FileText" [size]="20" class="text-primary"></lucide-icon>
-          <h2>Checklist Documents</h2>
-        </div>
-        <div class="docs-grid-config">
-          <div *ngFor="let doc of cfg.documentChecklist" class="doc-config-row">
-            <div class="doc-main-info">
-              <span class="doc-name text-xs">{{ doc.name }}</span>
-              <span class="doc-code-tag">{{ doc.code }}</span>
-            </div>
-            <div class="doc-actions-config">
-              <mat-checkbox color="primary" [checked]="doc.mandatory" (change)="updateDocumentMandatory(doc.code, !doc.mandatory)"></mat-checkbox>
-              <button class="btn-icon-danger-sm" (click)="removeDocumentType(doc.code)"><lucide-icon [name]="Trash2" [size]="14"></lucide-icon></button>
-            </div>
-          </div>
-        </div>
-        <button class="btn-text-action mt-4" (click)="addDocumentType()"><lucide-icon [name]="Plus" [size]="14"></lucide-icon> Ajouter un document</button>
-      </section>
-
-    </div>
-
-    <!-- COLONNE DROITE : LIVE PREVIEW (Simulateur) -->
-    <div class="preview-column">
-      <div class="sticky-top">
-        <div class="preview-header-label">Aperçu en temps réel</div>
-        <app-portal-preview [config]="cfg" [activeYear]="activeYear()"></app-portal-preview>
+      <div class="nav-divider"></div>
+      <div class="nav-section-title">Surcharges par niveau</div>
+      
+      <div class="levels-scroll-area">
+        <button 
+          *ngFor="let level of levels()" 
+          class="scope-item level" 
+          [class.active]="selectedLevelId() === level.id"
+          (click)="setScope('LEVEL', level.id)"
+        >
+          <lucide-icon [name]="GraduationCap" [size]="16"></lucide-icon>
+          <span>{{ level.name }}</span>
+          <span *ngIf="cfg.levelOverrides?.[level.id]" class="override-dot" title="Surcharge active"></span>
+        </button>
       </div>
-    </div>
+    </aside>
+
+    <!-- ZONE D'ÉDITION -->
+    <main class="editor-main">
+      
+      <!-- ENTÊTE DE SCOPE -->
+      <header class="scope-header" [class.is-level]="currentScope() === 'LEVEL'">
+        <div class="scope-info">
+          <lucide-icon [name]="currentScope() === 'GLOBAL' ? Globe : GraduationCap" [size]="24"></lucide-icon>
+          <div>
+            <h3>{{ currentScope() === 'GLOBAL' ? 'Règles par défaut de l\'école' : 'Surcharge pour le niveau sélectionné' }}</h3>
+            <p>{{ currentScope() === 'GLOBAL' ? 'Ces paramètres s\'appliquent à tous les niveaux sauf exception.' : 'Ces règles écrasent la configuration globale pour ce niveau spécifique.' }}</p>
+          </div>
+        </div>
+      </header>
+
+      <!-- SECTIONS DE CONFIGURATION -->
+      <div class="sections-container space-y-8">
+        
+        <!-- SECTION 01 : DISPONIBILITÉ (Seulement en Global) -->
+        <section class="numbered-section" *ngIf="currentScope() === 'GLOBAL'">
+          <div class="section-head">
+            <div class="step-pill">01</div>
+            <div class="section-title">
+              <h4>Disponibilité du Service</h4>
+              <p>Contrôle manuel et automatique de l'ouverture.</p>
+            </div>
+          </div>
+          
+          <div class="section-content card-inner">
+            <div class="status-control-row">
+              <div class="status-info">
+                <span class="label">Statut du Master Switch :</span>
+                <span class="status-badge" [class.open]="cfg.isPublicPortalOpen">
+                  {{ cfg.isPublicPortalOpen ? 'PORTAIL ACTIF' : 'PORTAIL FERMÉ' }}
+                </span>
+              </div>
+              <button class="btn-toggle" [class.active]="cfg.isPublicPortalOpen" (click)="togglePortal()">
+                <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                <span>{{ cfg.isPublicPortalOpen ? 'Désactiver le portail' : 'Activer le portail' }}</span>
+              </button>
+            </div>
+
+            <div class="date-inputs grid grid-cols-2 gap-6 mt-6">
+              <div class="form-group">
+                <label>Date d'ouverture automatique</label>
+                <input type="date" [(ngModel)]="cfg.admissionWindow.startDate" class="fw-input-modern">
+              </div>
+              <div class="form-group">
+                <label>Date de clôture automatique</label>
+                <input type="date" [(ngModel)]="cfg.admissionWindow.endDate" class="fw-input-modern">
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 02 : SERVICES (Seulement en Global) -->
+        <section class="numbered-section" *ngIf="currentScope() === 'GLOBAL'">
+          <div class="section-head">
+            <div class="step-pill">02</div>
+            <div class="section-title">
+              <h4>Services Optionnels</h4>
+              <p>Activez les prestations complémentaires.</p>
+            </div>
+          </div>
+          <div class="section-content grid grid-cols-2 gap-4">
+            <div class="service-toggle-card" [class.active]="isServiceEnabled('CANTEEN')" (click)="toggleService('CANTEEN')">
+              <lucide-icon [name]="ChefHat" [size]="20"></lucide-icon>
+              <span>Restauration scolaire</span>
+              <mat-checkbox [checked]="isServiceEnabled('CANTEEN')" color="primary" class="ml-auto"></mat-checkbox>
+            </div>
+            <div class="service-toggle-card" [class.active]="isServiceEnabled('TRANSPORT')" (click)="toggleService('TRANSPORT')">
+              <lucide-icon [name]="Bus" [size]="20"></lucide-icon>
+              <span>Transport & Ramassage</span>
+              <mat-checkbox [checked]="isServiceEnabled('TRANSPORT')" color="primary" class="ml-auto"></mat-checkbox>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 03 : DOCUMENTS -->
+        <section class="numbered-section">
+          <div class="section-head">
+            <div class="step-pill">{{ currentScope() === 'GLOBAL' ? '03' : '01' }}</div>
+            <div class="section-title">
+              <h4>Exigences Documentaires</h4>
+              <p>Pièces justificatives à charger par les parents.</p>
+            </div>
+          </div>
+          <div class="section-content">
+            <div class="docs-modern-list">
+              <div *ngFor="let doc of activeChecklist()" class="doc-row-modern">
+                <div class="doc-info">
+                  <span class="doc-name">{{ doc.name }}</span>
+                  <code class="doc-code">{{ doc.code }}</code>
+                </div>
+                <div class="doc-actions">
+                  <label class="mandatory-switch">
+                    <input type="checkbox" [checked]="doc.mandatory" (change)="updateDocumentMandatory(doc.code, !doc.mandatory)">
+                    <span>Obligatoire</span>
+                  </label>
+                  <button class="btn-delete-icon" (click)="removeDocumentType(doc.code)"><lucide-icon [name]="Trash2" [size]="14"></lucide-icon></button>
+                </div>
+              </div>
+              <button class="btn-add-dashed mt-4" (click)="addDocumentType()">
+                <lucide-icon [name]="Plus" [size]="16"></lucide-icon>
+                <span>Ajouter un type de document</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 04 : FORMULAIRE DYNAMIQUE -->
+        <section class="numbered-section">
+          <div class="section-head">
+            <div class="step-pill">{{ currentScope() === 'GLOBAL' ? '04' : '02' }}</div>
+            <div class="section-title">
+              <h4>Questions Personnalisées</h4>
+              <p>Champs spécifiques à votre établissement.</p>
+            </div>
+          </div>
+          <div class="section-content">
+            <div class="fields-modern-list">
+              <div *ngFor="let field of activeCustomFields()" class="field-row-modern">
+                <lucide-icon [name]="MessageSquare" [size]="16" class="text-slate-400"></lucide-icon>
+                <div class="field-info">
+                  <span class="field-label">{{ field.label }}</span>
+                  <span class="field-type">{{ field.type }} • {{ field.required ? 'Obligatoire' : 'Optionnel' }}</span>
+                </div>
+                <button class="btn-delete-icon ml-auto"><lucide-icon [name]="Trash2" [size]="14"></lucide-icon></button>
+              </div>
+              <button class="btn-add-dashed mt-4">
+                <lucide-icon [name]="Plus" [size]="16"></lucide-icon>
+                <span>Ajouter une question personnalisée</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 05 : TEXTES & GOUVERNANCE -->
+        <section class="numbered-section">
+          <div class="section-head">
+            <div class="step-pill">{{ currentScope() === 'GLOBAL' ? '05' : '03' }}</div>
+            <div class="section-title">
+              <h4>Instructions & Légal</h4>
+              <p>Messages d'aide et mentions obligatoires.</p>
+            </div>
+          </div>
+          <div class="section-content space-y-4">
+            <div class="form-group">
+              <label>Instructions aux parents</label>
+              <textarea [(ngModel)]="cfg.instructions" rows="3" class="fw-textarea-modern" placeholder="Ex: Veuillez préparer vos documents scannés..."></textarea>
+            </div>
+            <div class="form-group">
+              <label>Texte légal / Consentement (RGPD)</label>
+              <textarea [(ngModel)]="cfg.legalText" rows="3" class="fw-textarea-modern" placeholder="Ex: En soumettant ce formulaire, j'accepte que..."></textarea>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+    <!-- COLONNE DROITE : SIMULATEUR LIVE -->
+    <aside class="simulator-column">
+      <div class="sticky-container">
+        <div class="preview-label">
+          <span class="pulse-dot"></span>
+          Simulateur en temps réel
+        </div>
+        <div class="device-frame">
+          <app-portal-preview [config]="cfg" [activeYear]="activeYear()"></app-portal-preview>
+        </div>
+      </div>
+    </aside>
 
   </div>
 
   <!-- LOADER INITIAL -->
   <div class="loading-overlay" *ngIf="isLoading()">
     <lucide-icon [name]="RefreshCw" [size]="48" class="animate-spin text-primary"></lucide-icon>
-    <p>Synchronisation avec le serveur...</p>
+    <p>Architecture en cours de synchronisation...</p>
   </div>
 </app-form-shell>

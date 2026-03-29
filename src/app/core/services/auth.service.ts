@@ -176,6 +176,7 @@ export class AuthService {
         return profile !== null;
       }),
       catchError(() => {
+        // En cas d'erreur (ex: 401), on nettoie juste le token sans faire de bruit
         localStorage.removeItem('access_token');
         this._currentUser.set(null);
         this._isReady.set(true);
