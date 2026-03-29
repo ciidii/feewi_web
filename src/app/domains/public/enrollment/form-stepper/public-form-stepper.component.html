@@ -26,12 +26,12 @@
     </div>
   </div>
 
-  <!-- Instructions Globales (Si définies par l'école) -->
-  <div class="instructions-alert animate-fade" *ngIf="config()?.instructions && currentStep() === 'GUARDIAN'">
+  <!-- Instructions Globales (Accès via la clé 'general' de la Map) -->
+  <div class="instructions-alert animate-fade" *ngIf="config()?.instructions?.['general'] && currentStep() === 'GUARDIAN'">
     <lucide-icon [name]="Info" [size]="20"></lucide-icon>
     <div class="content">
       <span class="title">Note de l'établissement</span>
-      <p>{{ config()?.instructions }}</p>
+      <p>{{ config()?.instructions?.['general'] }}</p>
     </div>
   </div>
 
@@ -135,11 +135,11 @@
         </div>
       </div>
 
-      <!-- CHAMPS PERSONNALISÉS DYNAMIQUE (Si configurés) -->
-      <div class="custom-fields-section mt-8 pt-8 border-t border-slate-100" *ngIf="config()?.formSchema?.customFields?.length">
+      <!-- CHAMPS PERSONNALISÉS DYNAMIQUE (Utilisation de defaultFormSchema) -->
+      <div class="custom-fields-section mt-8 pt-8 border-t border-slate-100" *ngIf="config()?.defaultFormSchema?.['customFields']?.length">
         <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-6">Informations Complémentaires</h3>
         <div class="grid-form">
-          <div class="form-group" *ngFor="let field of config()?.formSchema?.customFields" [class.full]="field.type === 'text'">
+          <div class="form-group" *ngFor="let field of config()?.defaultFormSchema?.['customFields']" [class.full]="field.type === 'text'">
             <label>{{ field.label }} <span *ngIf="field.required" class="text-red-500">*</span></label>
             
             <input *ngIf="field.type === 'text' || field.type === 'number'" 

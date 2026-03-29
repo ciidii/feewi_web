@@ -1,13 +1,10 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, catchError, throwError } from 'rxjs';
-import {
-  AdmissionApplication,
-  AssessmentRequest,
-  EnrollmentConfig
-} from '../models/enrollment.model';
-import { EnvironmentService } from './environment.service';
-import { NotificationService } from '../../shared/services/notification.service';
+import {HttpClient, HttpParams} from "@angular/common/http";
+import {inject, Injectable } from "@angular/core";
+import { EnvironmentService } from "./environment.service";
+import { NotificationService } from "../../shared/services/notification.service";
+import {catchError, Observable, throwError} from "rxjs";
+import {AdmissionApplication, AssessmentRequest, EnrollmentConfig} from '../models/enrollment.model';
+
 
 @Injectable({
   providedIn: 'root'

@@ -1,32 +1,17 @@
+
+
 /**
  * États possibles d'un dossier d'admission
  */
 export type AdmissionStatus = 'DRAFT' | 'SUBMITTED' | 'VERIFIED' | 'TESTING' | 'WAITLIST' | 'VALIDATED' | 'REJECTED' | 'CANCELLED';
 
 /**
- * Type d'admission (Nouvelle inscription ou Réinscription)
+ * Type d'admission
  */
 export type AdmissionType = 'NEW' | 'RE_ENROLL';
 
 /**
- * Payload pour la mise à jour du candidat (PATCH /candidate)
- */
-export interface CandidateUpdateRequest {
-  info: {
-    firstName: string;
-    lastName: string;
-    gender: 'MALE' | 'FEMALE';
-    birthDate: string;
-    birthPlace: string;
-    nationality?: string;
-    previousSchool?: string;
-  };
-  levelId: string;
-  filiereId?: string | null;
-}
-
-/**
- * Informations d'identité du candidat (pour l'affichage)
+ * Informations d'identité du candidat
  */
 export interface Candidate {
   firstName: string;
@@ -39,7 +24,7 @@ export interface Candidate {
 }
 
 /**
- * Informations sur les responsables (parents/tuteurs)
+ * Informations sur les responsables
  */
 export interface Guardian {
   firstName: string;
@@ -48,33 +33,32 @@ export interface Guardian {
   phone: string;
   profession?: string;
   relation: 'FATHER' | 'MOTHER' | 'GUARDIAN' | 'OTHER';
-  address: string
+  address: string;
 }
 
 /**
- * Résultat de l'évaluation pédagogique (Test)
+ * Résultat de l'évaluation pédagogique
  */
 export interface Assessment {
-  grades: Record<string, number>; // ex: { "Maths": 15, "Français": 12 }
+  grades: Record<string, number>;
   comments?: string;
-  decision: 'ADMITTED' | 'ADMITTED_WITH_RESERVATION' | 'REJECTED' | 'WAITLIST';
+  decision: string;
   recommendedLevelId?: string;
-  assessedAt?: string;
 }
 
 /**
  * État d'un document requis
  */
 export interface RequiredDocument {
-  code: string; // ex: 'EXT'
-  name: string; // ex: 'Extrait de Naissance'
+  code: string;
+  name: string;
   mandatory: boolean;
   status: 'MISSING' | 'PHYSICAL_RECEIVED' | 'UPLOADED';
   fileUrl?: string;
 }
 
 /**
- * Entité principale : Demande d'Admission (Application)
+ * Entité principale : Dossier d'admission (Application)
  */
 export interface AdmissionApplication {
   id: string;
@@ -86,20 +70,17 @@ export interface AdmissionApplication {
   levelId: string;
   filiereId?: string | null;
   tenantId: string;
-
   candidate?: Candidate;
   primaryGuardian?: Guardian;
   documents: RequiredDocument[];
   assessment?: Assessment;
-
   trackerMessage: string;
   createdAt: string;
   updatedAt: string;
   submittedAt?: string;
 }
-/**
- * REQUÊTES API (Payloads)
- */
+
+// --- PAYLOADS REQUÊTES ---
 
 export interface ApplicationCreateRequest {
   tenantId: string;
@@ -107,13 +88,7 @@ export interface ApplicationCreateRequest {
   academicYearId: string;
   levelId?: string | null;
   filiereId?: string | null;
-  primaryGuardian: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone: string;
-    relation: 'FATHER' | 'MOTHER' | 'GUARDIAN' | 'OTHER';
-  }
+  primaryGuardian: Partial<Guardian>;
 }
 
 export interface ReEnrollRequest {
@@ -129,33 +104,36 @@ export interface AssessmentRequest {
   recommendedLevelId?: string;
 }
 
-/**
- * CONFIGURATION DU SERVICE (Paramètres École)
- * Basé sur le plan d'implémentation "Configuration-Driven"
- */
+export interface CandidateUpdateRequest {
+  info: Partial<Candidate>;
+  levelId: string;
+  filiereId?: string | null;
+}
+
+// --- CONFIGURATION (ALIGNEMENT JAVA) ---
+
 export interface EnrollmentConfig {
   tenantId: string;
   portalActive: boolean;
 
-  // Gouvernance & Textes
-  instructions?: string;
-  legalText?: string;
-  // Fenêtre temporelle
-  admissionWindow: {
+  // Configuration par défaut
+  defaultChecklist: RequiredDocumentConfig[];
+  defaultCoreOverrides: Record<string, CoreFieldControl>;
+  defaultFormSchema: Record<string, any>;
+
+  // Overrides par niveau
+  levelOverrides: Record<string, LevelOverrideConfig>;
+
+  // Branding & Expérience
+  instructions: Record<string, string>; // Map<String, String> en Java
+  legalText: string;
+  enabledServices: string[];
+
+  // Helpers UI (Non envoyés au Backend ou gérés à part)
+  admissionWindow?: {
     startDate: string;
     endDate: string;
   };
-
-  // Configuration par défaut
-  documentChecklist: RequiredDocumentConfig[];
-  formSchema: {
-    customFields: CustomFieldConfig[];
-  };
-
-  // Overrides par niveau (Key: levelId)
-  levelOverrides?: Record<string, LevelOverrideConfig>;
-
-  enabledServices: string[];
 }
 
 export interface RequiredDocumentConfig {
@@ -164,19 +142,14 @@ export interface RequiredDocumentConfig {
   mandatory: boolean;
 }
 
-export interface CustomFieldConfig {
-  name: string;
+export interface CoreFieldControl {
   label: string;
-  type: 'text' | 'number' | 'boolean' | 'date' | 'select';
-  required: boolean;
-  placeholder?: string;
-  options?: string[]; // Pour le type select
+  hidden: boolean;
+  mandatory: boolean;
 }
 
 export interface LevelOverrideConfig {
-  documentChecklist?: RequiredDocumentConfig[];
-  formSchema?: {
-    customFields: CustomFieldConfig[];
-  };
-  instructions?: string;
+  documentChecklist: RequiredDocumentConfig[];
+  coreFieldOverrides: Record<string, CoreFieldControl>;
+  formSchema: Record<string, any>;
 }

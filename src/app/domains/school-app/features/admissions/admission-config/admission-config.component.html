@@ -1,6 +1,5 @@
 <div class="admission-config-page">
   
-  <!-- EN-TÊTE DE PAGE PROFESSIONNEL -->
   <header class="page-header">
     <div class="header-content">
       <div class="header-left">
@@ -32,7 +31,6 @@
 
   <div class="portal-admin-layout" *ngIf="config(); let cfg">
     
-    <!-- NAVIGATION DE SCOPE -->
     <aside class="scope-navigation">
       <div class="nav-section-title">Étendue du pilotage</div>
       
@@ -58,10 +56,8 @@
       </div>
     </aside>
 
-    <!-- ZONE D'ÉDITION -->
     <main class="editor-main">
       
-      <!-- ÉTAT DU SCOPE -->
       <div class="scope-banner" [class.is-level]="currentScope() === 'LEVEL'">
         <lucide-icon [name]="currentScope() === 'GLOBAL' ? Globe : GraduationCap" [size]="20"></lucide-icon>
         <div class="content">
@@ -72,7 +68,6 @@
 
       <div class="sections-container space-y-8">
         
-        <!-- SECTION 01 : DISPONIBILITÉ (Seulement en Global) -->
         <section class="numbered-section" *ngIf="currentScope() === 'GLOBAL'">
           <div class="section-head">
             <div class="step-pill">01</div>
@@ -89,13 +84,14 @@
                 <span class="status-badge" [class.open]="cfg.portalActive">
                   {{ cfg.portalActive ? 'PORTAIL ACTIF' : 'PORTAIL FERMÉ' }}
                 </span>
-                </div>
-                <button class="btn-toggle" [class.active]="cfg.portalActive" (click)="togglePortal()">
+              </div>
+              <button class="btn-toggle" [class.active]="cfg.portalActive" (click)="togglePortal()">
                 <div class="toggle-track"><div class="toggle-thumb"></div></div>
                 <span>{{ cfg.portalActive ? 'Désactiver le portail' : 'Activer le portail' }}</span>
-                </button>            </div>
+              </button>
+            </div>
 
-            <div class="date-inputs grid grid-cols-2 gap-6 mt-6">
+            <div class="date-inputs grid grid-cols-2 gap-6 mt-6" *ngIf="cfg.admissionWindow">
               <div class="form-group">
                 <label>Date d'ouverture automatique</label>
                 <input type="date" [(ngModel)]="cfg.admissionWindow.startDate" class="fw-input-modern">
@@ -108,7 +104,6 @@
           </div>
         </section>
 
-        <!-- SECTION 02 : SERVICES (Seulement en Global) -->
         <section class="numbered-section" *ngIf="currentScope() === 'GLOBAL'">
           <div class="section-head">
             <div class="step-pill">02</div>
@@ -131,7 +126,6 @@
           </div>
         </section>
 
-        <!-- SECTION 03 : DOCUMENTS -->
         <section class="numbered-section">
           <div class="section-head">
             <div class="step-pill">{{ currentScope() === 'GLOBAL' ? '03' : '01' }}</div>
@@ -163,7 +157,6 @@
           </div>
         </section>
 
-        <!-- SECTION 04 : TEXTES & GOUVERNANCE -->
         <section class="numbered-section">
           <div class="section-head">
             <div class="step-pill">{{ currentScope() === 'GLOBAL' ? '04' : '02' }}</div>
@@ -174,8 +167,8 @@
           </div>
           <div class="section-content space-y-4 card-inner">
             <div class="form-group">
-              <label>Instructions aux parents</label>
-              <textarea [(ngModel)]="cfg.instructions" rows="3" class="fw-textarea-modern" placeholder="Ex: Veuillez préparer vos documents scannés..."></textarea>
+              <label>Instructions aux parents (Accueil)</label>
+              <textarea [(ngModel)]="cfg.instructions['general']" rows="3" class="fw-textarea-modern" placeholder="Ex: Veuillez préparer vos documents scannés..."></textarea>
             </div>
             <div class="form-group">
               <label>Texte légal / Consentement (RGPD)</label>
@@ -189,7 +182,6 @@
 
   </div>
 
-  <!-- LOADER INITIAL -->
   <div class="loading-overlay" *ngIf="isLoading()">
     <lucide-icon [name]="RefreshCw" [size]="48" class="animate-spin text-primary"></lucide-icon>
     <p>Architecture en cours de synchronisation...</p>

@@ -1,27 +1,30 @@
-import { Component, signal, computed, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule, ActivatedRoute } from '@angular/router';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {firstValueFrom} from 'rxjs';
+import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
+import {AdmissionApplication, RequiredDocument} from '../../../../../core/models/enrollment.model';
 import {
-  LucideAngularModule,
-  ArrowLeft, ChevronLeft, ChevronRight,
-  CheckCircle, XCircle, Printer, Download,
-  User, Mail, Phone, MapPin, FileText,
-  CreditCard, Pencil, MoreVertical, Eye,
-  Plus, MessageSquare, History, File,
-  FileImage, FileSpreadsheet, RefreshCw, ClipboardCheck, GraduationCap, Info
+  ArrowLeft,
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+  ClipboardCheck, CreditCard, Download, Eye,
+  FileImage,
+  FileSpreadsheet,
+  FileText, GraduationCap, History as HistoryIcon, Info,
+  LucideAngularModule, Mail, MapPin, MessageSquare, MoreVertical, Pencil, Phone, Plus, Printer,
+  RefreshCw, User, XCircle
 } from 'lucide-angular';
-import { firstValueFrom } from 'rxjs';
+import {ActivatedRoute, RouterModule} from '@angular/router';
+import {EnrollmentAdminService} from '../../../../../core/services/enrollment-admin.service';
+import {DocumentEngineService} from '../../../../../core/services/document-engine.service';
+import {AcademicService} from '../../../../../core/services/academic.service';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import {NotificationService} from '../../../../../shared/services/notification.service';
+import {Filiere, Level} from '../../../../../core/models/academic.model';
+import {AdmissionWorkflowComponent} from '../components/admission-workflow/admission-workflow.component';
+import {FormsModule} from '@angular/forms';
 
-import { FormsModule } from '@angular/forms';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
-import { NotificationService } from '../../../../../shared/services/notification.service';
-import { AdmissionWorkflowComponent, AdmissionState } from '../components/admission-workflow/admission-workflow.component';
-import { EnrollmentAdminService } from '../../../../../core/services/enrollment-admin.service';
-import { DocumentEngineService } from '../../../../../core/services/document-engine.service';
-import { AcademicService } from '../../../../../core/services/academic.service';
-import { AdmissionApplication, RequiredDocument } from '../../../../../core/models/enrollment.model';
-import { Level, Filiere } from '../../../../../core/models/academic.model';
 
 @Component({
   selector: 'app-admission-detail',
@@ -80,7 +83,7 @@ export class AdmissionDetailComponent implements OnInit {
 
   mandatoryDocsSummary = computed(() => {
     const app = this.application();
-    if (!app) return { total: 0, received: 0 };
+    if (!app) return {total: 0, received: 0};
     const mandatory = app.documents.filter(d => d.mandatory);
     return {
       total: mandatory.length,
@@ -274,16 +277,9 @@ export class AdmissionDetailComponent implements OnInit {
   readonly Phone = Phone;
   readonly MapPin = MapPin;
   readonly FileText = FileText;
-  readonly CreditCard = CreditCard;
-  readonly Pencil = Pencil;
-  readonly MoreVertical = MoreVertical;
   readonly Eye = Eye;
   readonly Plus = Plus;
-  readonly MessageSquare = MessageSquare;
-  readonly History = History;
-  readonly File = File;
-  readonly FileImage = FileImage;
-  readonly FileSpreadsheet = FileSpreadsheet;
+  readonly HistoryIcon = HistoryIcon;
   readonly RefreshCw = RefreshCw;
   protected readonly Info = Info;
 }

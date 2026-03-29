@@ -17,9 +17,9 @@
     </header>
 
     <!-- Bloc Instructions -->
-    <div class="instructions-box" *ngIf="config().instructions">
+    <div class="instructions-box" *ngIf="config().instructions?.['general']">
       <lucide-icon [name]="Info" [size]="16"></lucide-icon>
-      <p>{{ config().instructions }}</p>
+      <p>{{ config().instructions['general'] }}</p>
     </div>
 
     <!-- Grille d'Aiguillage simulée -->
@@ -40,11 +40,11 @@
       </div>
     </div>
 
-    <!-- Preview des Documents -->
+    <!-- Preview des Documents (Utilisation de defaultChecklist) -->
     <section class="preview-section">
       <div class="section-title-preview">Checklist Documents</div>
       <div class="docs-preview-stack">
-        <div *ngFor="let doc of config().documentChecklist" class="doc-pill-mock">
+        <div *ngFor="let doc of config().defaultChecklist" class="doc-pill-mock">
           <span class="dot" [class.mandatory]="doc.mandatory"></span>
           {{ doc.name }}
         </div>
