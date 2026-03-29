@@ -1,8 +1,20 @@
-import { Component, input } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { LucideAngularModule, Globe, Sparkles, Search, RefreshCw, ArrowRight, CheckCircle, Clock, Info, UserCheck, Calendar } from 'lucide-angular';
-import { EnrollmentConfig } from '../../../../../../../core/models/enrollment.model';
-import { AcademicYear } from '../../../../../../../core/models/academic.model';
+import {Component, input} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {
+  ArrowRight,
+  Calendar,
+  CheckCircle,
+  Clock,
+  Globe,
+  Info,
+  LucideAngularModule,
+  RefreshCw,
+  Search,
+  Sparkles,
+  UserCheck
+} from 'lucide-angular';
+import {EnrollmentConfig} from '../../../../../../../core/models/enrollment.model';
+import {AcademicYear} from '../../../../../../../core/models/academic.model';
 
 @Component({
   selector: 'app-portal-preview',
@@ -28,6 +40,6 @@ export class PortalPreviewComponent {
   readonly Calendar = Calendar;
 
   get portalStatus(): 'OPEN' | 'CLOSED' {
-    return this.config().isPublicPortalOpen ? 'OPEN' : 'CLOSED';
+    return this.config().portalActive ? 'OPEN' : 'CLOSED';
   }
 }

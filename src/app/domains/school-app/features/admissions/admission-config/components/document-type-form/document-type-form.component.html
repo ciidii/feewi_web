@@ -12,7 +12,7 @@
     
     <!-- Nom du Document -->
     <div class="space-y-2">
-      <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Nom complet</label>
+      <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Nom complet du document</label>
       <div class="relative group">
         <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors">
           <lucide-icon [name]="Type" class="w-4.5 h-4.5"></lucide-icon>
@@ -25,25 +25,7 @@
           [class.error]="isInvalid('name')"
         />
       </div>
-    </div>
-
-    <!-- Code Technique -->
-    <div class="space-y-2">
-      <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Code (3 caractères)</label>
-      <div class="relative group">
-        <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors">
-          <lucide-icon [name]="Hash" class="w-4.5 h-4.5"></lucide-icon>
-        </div>
-        <input 
-          type="text" 
-          formControlName="code" 
-          placeholder="Ex: CER" 
-          maxlength="3"
-          class="fw-input-field uppercase"
-          [class.error]="isInvalid('code')"
-        />
-      </div>
-      <p class="text-[10px] text-slate-400 font-medium ml-1 italic">Ce code court sert d'identifiant technique.</p>
+      <p class="text-[10px] text-slate-400 font-medium ml-1 italic">Le système générera automatiquement un identifiant technique.</p>
     </div>
 
     <!-- Option Obligatoire -->

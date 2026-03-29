@@ -69,6 +69,12 @@ export class AcademicService {
     );
   }
 
+  updateYear(id: string, year: Partial<AcademicYear>): Observable<AcademicYear> {
+    return this.http.put<AcademicYear>(`${this.API_URL}/years/${id}`, year).pipe(
+      catchError(this.handleError('Erreur lors de la mise à jour de l\'année académique'))
+    );
+  }
+
   // --- Workflow de l'année ---
 
   activateYear(id: string): Observable<void> {

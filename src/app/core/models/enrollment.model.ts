@@ -135,12 +135,11 @@ export interface AssessmentRequest {
  */
 export interface EnrollmentConfig {
   tenantId: string;
-  isPublicPortalOpen: boolean;
+  portalActive: boolean;
 
   // Gouvernance & Textes
   instructions?: string;
   legalText?: string;
-
   // Fenêtre temporelle
   admissionWindow: {
     startDate: string;

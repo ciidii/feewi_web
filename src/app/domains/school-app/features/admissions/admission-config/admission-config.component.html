@@ -86,15 +86,14 @@
             <div class="status-control-row">
               <div class="status-info">
                 <span class="label">Statut du Master Switch :</span>
-                <span class="status-badge" [class.open]="cfg.isPublicPortalOpen">
-                  {{ cfg.isPublicPortalOpen ? 'PORTAIL ACTIF' : 'PORTAIL FERMÉ' }}
+                <span class="status-badge" [class.open]="cfg.portalActive">
+                  {{ cfg.portalActive ? 'PORTAIL ACTIF' : 'PORTAIL FERMÉ' }}
                 </span>
-              </div>
-              <button class="btn-toggle" [class.active]="cfg.isPublicPortalOpen" (click)="togglePortal()">
+                </div>
+                <button class="btn-toggle" [class.active]="cfg.portalActive" (click)="togglePortal()">
                 <div class="toggle-track"><div class="toggle-thumb"></div></div>
-                <span>{{ cfg.isPublicPortalOpen ? 'Désactiver le portail' : 'Activer le portail' }}</span>
-              </button>
-            </div>
+                <span>{{ cfg.portalActive ? 'Désactiver le portail' : 'Activer le portail' }}</span>
+                </button>            </div>
 
             <div class="date-inputs grid grid-cols-2 gap-6 mt-6">
               <div class="form-group">
