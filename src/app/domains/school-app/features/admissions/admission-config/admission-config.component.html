@@ -248,11 +248,11 @@
             <div class="subjects-selector-box pt-4 border-t border-slate-100">
               <label class="text-xs font-bold text-slate-500 uppercase mb-3 block">Matières à évaluer</label>
               <div class="flex flex-wrap gap-2 mb-4">
-                <div *ngFor="let sub of activeAssessmentConfig().subjects" class="subject-tag">
+                <div *ngFor="let sub of activeAssessmentConfig()?.subjects" class="subject-tag">
                   <span>{{ sub }}</span>
                   <button (click)="removeSubject(sub)"><lucide-icon [name]="Trash2" [size]="12"></lucide-icon></button>
                 </div>
-                <div *ngIf="activeAssessmentConfig().subjects.length === 0" class="text-sm text-slate-400 italic">Aucune matière configurée.</div>
+                <div *ngIf="!activeAssessmentConfig()?.subjects?.length" class="text-sm text-slate-400 italic">Aucune matière configurée.</div>
               </div>
               
               <div class="flex gap-2">

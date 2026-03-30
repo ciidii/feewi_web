@@ -1,43 +1,23 @@
-import {Component, computed, inject, OnInit, signal} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {firstValueFrom} from 'rxjs';
-import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
-import {AdmissionApplication, RequiredDocument, AssessmentRequest} from '../../../../../core/models/enrollment.model';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { finalize, switchMap, forkJoin, of } from 'rxjs';
+import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
+import { AdmissionApplication, RequiredDocument, AssessmentRequest } from '../../../../../core/models/enrollment.model';
 import {
-  ArrowLeft,
-  CheckCircle,
-  ChevronLeft,
-  ChevronRight,
-  ClipboardCheck,
-  Download,
-  Eye,
-  FileImage,
-  FileSpreadsheet,
-  FileText,
-  GraduationCap,
-  History as HistoryIcon,
-  Info,
-  LucideAngularModule,
-  Mail,
-  MapPin,
-  Phone,
-  Plus,
-  Printer,
-  RefreshCw,
-  User,
-  XCircle,
-  Save
+  ArrowLeft, CheckCircle, ChevronLeft, ChevronRight, ClipboardCheck,
+  Download, Eye, FileImage, FileSpreadsheet, FileText, GraduationCap,
+  History as HistoryIcon, Info, LucideAngularModule, Mail, MapPin,
+  Phone, Plus, Printer, RefreshCw, User, XCircle, Save, ShieldCheck
 } from 'lucide-angular';
-import {ActivatedRoute, RouterModule} from '@angular/router';
-import {EnrollmentAdminService} from '../../../../../core/services/enrollment-admin.service';
-import {DocumentEngineService} from '../../../../../core/services/document-engine.service';
-import {AcademicService} from '../../../../../core/services/academic.service';
-import {MatDialog, MatDialogModule} from '@angular/material/dialog';
-import {NotificationService} from '../../../../../shared/services/notification.service';
-import {Filiere, Level} from '../../../../../core/models/academic.model';
-import {AdmissionWorkflowComponent} from '../components/admission-workflow/admission-workflow.component';
-import {FormsModule} from '@angular/forms';
-
+import { ActivatedRoute, RouterModule } from '@angular/router';
+import { EnrollmentAdminService } from '../../../../../core/services/enrollment-admin.service';
+import { DocumentEngineService } from '../../../../../core/services/document-engine.service';
+import { AcademicService } from '../../../../../core/services/academic.service';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { NotificationService } from '../../../../../shared/services/notification.service';
+import { Filiere, Level, AcademicYear } from '../../../../../core/models/academic.model';
+import { AdmissionWorkflowComponent } from '../components/admission-workflow/admission-workflow.component';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-admission-detail',
@@ -61,6 +41,7 @@ export class AdmissionDetailComponent implements OnInit {
 
   levels = signal<Level[]>([]);
   filieres = signal<Filiere[]>([]);
+  activeYear = signal<AcademicYear | null>(null); // AJOUTÉ
 
   showDocumentViewer = signal(false);
   selectedDoc = signal<RequiredDocument | null>(null);
@@ -83,21 +64,18 @@ export class AdmissionDetailComponent implements OnInit {
     return this.filieres().find(f => f.id === app.filiereId)?.name || 'Filière inconnue';
   });
 
-  // Checklist de validation pour la direction
   isReadyForFinalValidation = computed(() => {
     const app = this.application();
     if (!app || app.status !== 'TESTING') return false;
-
     const mandatoryDocs = app.documents.filter(d => d.mandatory);
     const allDocsOk = mandatoryDocs.every(d => d.status === 'UPLOADED' || d.status === 'PHYSICAL_RECEIVED');
     const assessmentOk = !!app.assessment && !!app.assessment.decision;
-
     return allDocsOk && assessmentOk;
   });
 
   mandatoryDocsSummary = computed(() => {
     const app = this.application();
-    if (!app) return {total: 0, received: 0};
+    if (!app) return { total: 0, received: 0 };
     const mandatory = app.documents.filter(d => d.mandatory);
     return {
       total: mandatory.length,
@@ -105,7 +83,7 @@ export class AdmissionDetailComponent implements OnInit {
     };
   });
 
-  // --- ÉVALUATION (Local state avant soumission) ---
+  // --- ÉVALUATION ---
   evaluationGrades = signal<Record<string, number>>({});
   evaluationComment = '';
   pedagogicalDecision = signal<'ADMITTED' | 'REJECTED' | 'WAITLIST'>('ADMITTED');
@@ -118,110 +96,119 @@ export class AdmissionDetailComponent implements OnInit {
   });
 
   updateGrade(subject: string, value: number) {
-    this.evaluationGrades.update(prev => ({
-      ...prev,
-      [subject]: value
-    }));
+    this.evaluationGrades.update(prev => ({ ...prev, [subject]: value }));
   }
 
-  async ngOnInit() {
+  ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      await this.loadApplication(id);
-    }
+    if (id) this.loadApplication(id);
   }
 
-  async loadApplication(id: string) {
+  /**
+   * Chargement réactif des données (RxJS pur)
+   */
+  loadApplication(id: string) {
     this.isLoading.set(true);
-    try {
-      const [data, levels, filieres] = await Promise.all([
-        firstValueFrom(this.enrollmentAdminService.getApplicationById(id)),
-        firstValueFrom(this.academicService.getLevels()),
-        firstValueFrom(this.academicService.getFilieres())
-      ]);
-
-      this.application.set(data);
-      this.levels.set(levels);
-      this.filieres.set(filieres);
-
-      // 2. Charger la configuration effective du niveau pour les matières
-      const effectiveConfig = await firstValueFrom(this.enrollmentAdminService.getEffectiveConfig(data.levelId));
-      const aConfig = effectiveConfig.assessmentConfig || effectiveConfig.defaultAssessmentConfig;
-      
-      if (aConfig) {
-        this.assessmentSubjects.set(aConfig.subjects || []);
-        this.minPassingGrade.set(aConfig.minPassingGrade || 10);
+    
+    forkJoin({
+      app: this.enrollmentAdminService.getApplicationById(id),
+      levels: this.academicService.getLevels(),
+      filieres: this.academicService.getFilieres(),
+      year: this.academicService.getCurrentYear() // AJOUTÉ
+    }).pipe(
+      switchMap(({ app, levels, filieres, year }) => {
+        this.application.set(app);
+        this.levels.set(levels);
+        this.filieres.set(filieres);
+        this.activeYear.set(year); // AJOUTÉ
         
-        // Initialiser evaluationGrades avec les sujets de la config
-        const initialGrades: Record<string, number> = {};
-        aConfig.subjects.forEach((sub: string) => {
-          initialGrades[sub] = data.assessment?.grades?.[sub] || 0;
-        });
-        this.evaluationGrades.set(initialGrades);
+        return this.enrollmentAdminService.getEffectiveConfig(app.levelId);
+      }),
+      finalize(() => this.isLoading.set(false))
+    ).subscribe({
+      next: (effectiveConfig) => {
+        const aConfig = effectiveConfig.assessmentConfig || effectiveConfig.defaultAssessmentConfig;
+        if (aConfig) {
+          this.assessmentSubjects.set(aConfig.subjects || []);
+          this.minPassingGrade.set(aConfig.minPassingGrade || 10);
+          
+          const app = this.application();
+          const initialGrades: Record<string, number> = {};
+          
+          // SÉCURISATION DU FOREACH
+          if (aConfig.subjects && Array.isArray(aConfig.subjects)) {
+            aConfig.subjects.forEach((sub: string) => {
+              initialGrades[sub] = app?.assessment?.grades?.[sub] || 0;
+            });
+          }
+          this.evaluationGrades.set(initialGrades);
+        }
+
+        const data = this.application();
+        if (data?.assessment) {
+          this.evaluationComment = data.assessment.comments || '';
+          this.pedagogicalDecision.set(data.assessment.decision as any);
+        }
+      },
+      error: (err) => {
+        console.error('Erreur chargement dossier:', err);
+        this.notificationService.error('Impossible de charger les données du dossier.');
       }
+    });
+  }
 
-      // Pré-remplir le reste de l'évaluation si elle existe
-      if (data.assessment) {
-        this.evaluationComment = data.assessment.comments || '';
-        this.pedagogicalDecision.set(data.assessment.decision as any);
+  receiveDocument(docCode: string) {
+    const app = this.application();
+    if (!app) return;
+    this.isActionLoading.set(true);
+    this.enrollmentAdminService.receivePhysicalDocument(app.id, docCode).pipe(
+      finalize(() => this.isActionLoading.set(false))
+    ).subscribe({
+      next: (updated) => {
+        this.application.set(updated);
+        this.notificationService.success('Document marqué comme reçu.');
       }
-    } catch (e) {
-      console.error('Erreur chargement dossier:', e);
-      this.notificationService.error('Impossible de charger les données du dossier.');
-    } finally {
-      this.isLoading.set(false);
-    }
+    });
   }
 
-  async receiveDocument(docCode: string) {
-    if (!this.application()) return;
+  verifyApplication() {
+    const app = this.application();
+    if (!app) return;
     this.isActionLoading.set(true);
-    try {
-      const updated = await firstValueFrom(this.enrollmentAdminService.receivePhysicalDocument(this.application()!.id, docCode));
-      this.application.set(updated);
-      this.notificationService.success('Document marqué comme reçu.');
-    } catch (e) {
-      this.notificationService.error('Erreur lors de la réception du document.');
-    } finally {
-      this.isActionLoading.set(false);
-    }
+    this.enrollmentAdminService.verifyApplication(app.id).pipe(
+      finalize(() => this.isActionLoading.set(false))
+    ).subscribe({
+      next: (updated) => {
+        this.application.set(updated);
+        this.notificationService.success('Dossier validé administrativement.');
+      }
+    });
   }
 
-  async verifyApplication() {
-    if (!this.application()) return;
+  submitAssessment() {
+    const app = this.application();
+    if (!app) return;
     this.isActionLoading.set(true);
-    try {
-      const updated = await firstValueFrom(this.enrollmentAdminService.verifyApplication(this.application()!.id));
-      this.application.set(updated);
-      this.notificationService.success('Dossier validé administrativement.');
-    } catch (e) {
-      this.notificationService.error('Erreur lors de la vérification administrative.');
-    } finally {
-      this.isActionLoading.set(false);
-    }
+    
+    const payload: AssessmentRequest = {
+      grades: this.evaluationGrades(),
+      comments: this.evaluationComment,
+      decision: this.pedagogicalDecision()
+    };
+
+    this.enrollmentAdminService.submitAssessment(app.id, payload).pipe(
+      finalize(() => this.isActionLoading.set(false))
+    ).subscribe({
+      next: (updated) => {
+        this.application.set(updated);
+        this.notificationService.success('Évaluation enregistrée avec succès.');
+      }
+    });
   }
 
-  async submitAssessment() {
-    if (!this.application()) return;
-    this.isActionLoading.set(true);
-    try {
-      const payload: AssessmentRequest = {
-        grades: this.evaluationGrades(),
-        comments: this.evaluationComment,
-        decision: this.pedagogicalDecision()
-      };
-      const updated = await firstValueFrom(this.enrollmentAdminService.submitAssessment(this.application()!.id, payload));
-      this.application.set(updated);
-      this.notificationService.success('Évaluation enregistrée avec succès.');
-    } catch (e) {
-      this.notificationService.error('Erreur lors de l\'enregistrement de l\'évaluation.');
-    } finally {
-      this.isActionLoading.set(false);
-    }
-  }
-
-  async validateFinal() {
-    if (!this.application()) return;
+  validateFinal() {
+    const app = this.application();
+    if (!app) return;
 
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
@@ -233,33 +220,36 @@ export class AdmissionDetailComponent implements OnInit {
       }
     });
 
-    const confirmed = await firstValueFrom(dialogRef.afterClosed());
-    if (!confirmed) return;
-
-    this.isActionLoading.set(true);
-    try {
-      const updated = await firstValueFrom(this.enrollmentAdminService.validateAdmission(this.application()!.id));
-      this.application.set(updated);
-      this.notificationService.success('Admission validée avec succès !');
-    } catch (e) {
-      this.notificationService.error('Erreur lors de la validation finale. Vérifiez que tous les documents sont présents.');
-    } finally {
-      this.isActionLoading.set(false);
-    }
+    dialogRef.afterClosed().pipe(
+      switchMap(confirmed => {
+        if (confirmed) {
+          this.isActionLoading.set(true);
+          return this.enrollmentAdminService.validateAdmission(app.id);
+        }
+        return of(null);
+      }),
+      finalize(() => this.isActionLoading.set(false))
+    ).subscribe({
+      next: (updated) => {
+        if (updated) {
+          this.application.set(updated);
+          this.notificationService.success('Admission validée avec succès !');
+        }
+      }
+    });
   }
 
-  async previewDocument(doc: RequiredDocument) {
+  previewDocument(doc: RequiredDocument) {
     if (doc.status === 'MISSING') return;
     this.selectedDoc.set(doc);
     this.showDocumentViewer.set(true);
     this.selectedDocUrl.set(null);
-    try {
-      if (doc.fileUrl) {
-        const viewUrl = await firstValueFrom(this.documentService.getViewUrl(doc.fileUrl));
-        this.selectedDocUrl.set(viewUrl);
-      }
-    } catch (e) {
-      console.error('Erreur génération URL de vue:', e);
+
+    if (doc.fileUrl) {
+      this.documentService.getViewUrl(doc.fileUrl).subscribe({
+        next: (viewUrl) => this.selectedDocUrl.set(viewUrl),
+        error: (err) => console.error('Erreur génération URL de vue:', err)
+      });
     }
   }
 
@@ -269,6 +259,7 @@ export class AdmissionDetailComponent implements OnInit {
     return FileText;
   }
 
+  // --- READONLY ICONS ---
   readonly ArrowLeft = ArrowLeft;
   readonly ChevronLeft = ChevronLeft;
   readonly ChevronRight = ChevronRight;
@@ -288,5 +279,6 @@ export class AdmissionDetailComponent implements OnInit {
   readonly HistoryIcon = HistoryIcon;
   readonly RefreshCw = RefreshCw;
   readonly Save = Save;
+  readonly ShieldCheck = ShieldCheck; // AJOUTÉ
   protected readonly Info = Info;
 }

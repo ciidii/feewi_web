@@ -158,7 +158,7 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
 
   handleAction(event: { actionId: string, row: TableRow }) {
     if (event.actionId === 'view') {
-      this.router.navigate(['/admissions', event.row.id]);
+      this.router.navigate(['/admin/admissions', event.row.id]);
     } else {
       console.log(`Action ${event.actionId} sur le dossier ${event.row.id}`);
       // Les actions comme valider/rejeter seront implémentées dans le détail ou ici plus tard

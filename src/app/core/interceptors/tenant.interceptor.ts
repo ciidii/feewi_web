@@ -7,8 +7,9 @@ export const tenantInterceptor: HttpInterceptorFn = (req, next) => {
   const tenantService = inject(TenantContextService);
   
   // 1. Déterminer si c'est une requête vers une API Feewi
-  // (On évite d'envoyer nos headers à des APIs tierces comme Google Maps)
   const isApiRequest = req.url.includes('/api/v1');
+  const isLoginRequest = req.url.includes('/auth/login');
+  
   if (!isApiRequest) return next(req);
 
   const token = localStorage.getItem('access_token');
@@ -17,8 +18,8 @@ export const tenantInterceptor: HttpInterceptorFn = (req, next) => {
   // 2. Préparer les headers
   const headers: { [name: string]: string } = {};
 
-  // N'ajouter le token que s'il existe (évite d'envoyer "Bearer null")
-  if (token) {
+  // N'ajouter le token que s'il existe ET que ce n'est pas une requête de login
+  if (token && !isLoginRequest) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
