@@ -5,11 +5,11 @@ import {
   LucideAngularModule, Globe, Save, RefreshCw, Eye, 
   Calendar, FileText, ShieldCheck, ToggleLeft as ToggleIcon,
   ChefHat, Bus, MessageSquare, Plus, Trash2, Settings2,
-  GraduationCap, Info, AlertTriangle, LayoutGrid, UserCog
+  GraduationCap, Info, AlertTriangle, LayoutGrid, UserCog, ClipboardCheck
 } from 'lucide-angular';
 import { finalize, forkJoin, Observable, of } from 'rxjs';
 import { EnrollmentAdminService } from '../../../../../core/services/enrollment-admin.service';
-import { EnrollmentConfig, RequiredDocumentConfig, CoreFieldControl, CustomFieldConfig, LevelOverrideConfig } from '../../../../../core/models/enrollment.model';
+import { EnrollmentConfig, RequiredDocumentConfig, CoreFieldControl, CustomFieldConfig, LevelOverrideConfig, AssessmentConfig } from '../../../../../core/models/enrollment.model';
 import { NotificationService } from '../../../../../shared/services/notification.service';
 import { AcademicService } from '../../../../../core/services/academic.service';
 import { AcademicYear, Level } from '../../../../../core/models/academic.model';
@@ -97,6 +97,16 @@ export class AdmissionConfigComponent implements OnInit {
     return cfg.defaultFormSchema?.customFields || [];
   });
 
+  activeAssessmentConfig = computed(() => {
+    const cfg = this.config();
+    if (!cfg) return { assessmentType: 'DOSSIER', subjects: [], minPassingGrade: 10 } as AssessmentConfig;
+    if (this.currentScope() === 'LEVEL' && this.selectedLevelId()) {
+      const override = cfg.levelOverrides?.[this.selectedLevelId()!];
+      if (override?.assessmentConfig) return override.assessmentConfig;
+    }
+    return cfg.defaultAssessmentConfig;
+  });
+
   // Icônes
   readonly Globe = Globe;
   readonly Save = Save;
@@ -116,6 +126,7 @@ export class AdmissionConfigComponent implements OnInit {
   readonly Info = Info;
   readonly LayoutGrid = LayoutGrid;
   readonly UserCog = UserCog;
+  readonly ClipboardCheck = ClipboardCheck;
 
   ngOnInit() {
     this.loadInitialData();
@@ -152,6 +163,7 @@ export class AdmissionConfigComponent implements OnInit {
       defaultChecklist: config.defaultChecklist || [],
       defaultFormSchema: config.defaultFormSchema || { customFields: [] },
       defaultCoreOverrides: config.defaultCoreOverrides || {},
+      defaultAssessmentConfig: config.defaultAssessmentConfig || { assessmentType: 'DOSSIER', subjects: [], minPassingGrade: 10 },
       enabledServices: config.enabledServices || [],
       levelOverrides: config.levelOverrides || {},
       instructions: config.instructions || { 'general': '' },
@@ -190,7 +202,9 @@ export class AdmissionConfigComponent implements OnInit {
     forkJoin({ config: configOp$, academic: academicOp$ }).pipe(
       finalize(() => this.isSaving.set(false))
     ).subscribe({
-      next: () => this.notificationService.success('Configuration et calendrier publiés avec succès.'),
+      next: () => {
+        this.notificationService.success('Configuration et calendrier publiés avec succès.');
+      },
       error: (err) => {
         console.error('[AdmissionConfig] Erreur sauvegarde:', err);
         this.notificationService.error('Erreur lors de la synchronisation.');
@@ -222,10 +236,52 @@ export class AdmissionConfigComponent implements OnInit {
     } else {
       const levelId = this.selectedLevelId()!;
       const levelOverrides = { ...current.levelOverrides };
-      const levelOverride = levelOverrides[levelId] || { documentChecklist: [], coreFieldOverrides: {}, formSchema: { customFields: [] } };
+      const levelOverride = levelOverrides[levelId] || this.createEmptyLevelOverride();
       levelOverride.coreFieldOverrides = { ...levelOverride.coreFieldOverrides, [key]: updatedControl };
       levelOverrides[levelId] = levelOverride;
       this.config.set({ ...current, levelOverrides });
+    }
+  }
+
+  // --- GESTION DE L'ÉVALUATION ---
+
+  updateAssessmentType(type: 'EXAM' | 'DOSSIER' | 'INTERVIEW') {
+    this.updateActiveAssessment({ assessmentType: type });
+  }
+
+  updateMinGrade(grade: number) {
+    this.updateActiveAssessment({ minPassingGrade: grade });
+  }
+
+  addSubject(subjectInput: HTMLInputElement) {
+    const subject = subjectInput.value.trim();
+    if (!subject) return;
+    const currentSubjects = this.activeAssessmentConfig().subjects;
+    if (!currentSubjects.includes(subject)) {
+      this.updateActiveAssessment({ subjects: [...currentSubjects, subject] });
+      subjectInput.value = '';
+    }
+  }
+
+  removeSubject(subject: string) {
+    const updated = this.activeAssessmentConfig().subjects.filter(s => s !== subject);
+    this.updateActiveAssessment({ subjects: updated });
+  }
+
+  private updateActiveAssessment(patch: Partial<AssessmentConfig>) {
+    const current = this.config();
+    if (!current) return;
+    const updated = { ...this.activeAssessmentConfig(), ...patch };
+
+    if (this.currentScope() === 'GLOBAL') {
+      this.config.set({ ...current, defaultAssessmentConfig: updated });
+    } else {
+      const levelId = this.selectedLevelId()!;
+      const overrides = { ...current.levelOverrides };
+      const levelOverride = overrides[levelId] || this.createEmptyLevelOverride();
+      levelOverride.assessmentConfig = updated;
+      overrides[levelId] = levelOverride;
+      this.config.set({ ...current, levelOverrides: overrides });
     }
   }
 
@@ -238,6 +294,20 @@ export class AdmissionConfigComponent implements OnInit {
     });
     dialogRef.afterClosed().subscribe(result => {
       if (result) this.updateActiveChecklist([...this.activeChecklist(), result]);
+    });
+  }
+
+  editDocumentType(doc: RequiredDocumentConfig) {
+    const dialogRef = this.dialog.open(DocumentTypeFormComponent, {
+      width: '450px',
+      panelClass: 'feewi-dialog-panel',
+      data: doc
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        const updated = this.activeChecklist().map(d => d.code === doc.code ? result : d);
+        this.updateActiveChecklist(updated);
+      }
     });
   }
 
@@ -274,7 +344,7 @@ export class AdmissionConfigComponent implements OnInit {
     } else {
       const levelId = this.selectedLevelId()!;
       const overrides = { ...current.levelOverrides };
-      const levelOverride = overrides[levelId] || { documentChecklist: [], coreFieldOverrides: {}, formSchema: { customFields: [] } };
+      const levelOverride = overrides[levelId] || this.createEmptyLevelOverride();
       levelOverride.documentChecklist = list;
       overrides[levelId] = levelOverride;
       this.config.set({ ...current, levelOverrides: overrides });
@@ -293,9 +363,38 @@ export class AdmissionConfigComponent implements OnInit {
     });
   }
 
+  editCustomField(field: CustomFieldConfig) {
+    const dialogRef = this.dialog.open(CustomFieldFormComponent, {
+      width: '500px',
+      panelClass: 'feewi-dialog-panel',
+      data: field
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        const updated = this.activeCustomFields().map(f => f.name === field.name ? result : f);
+        this.updateActiveCustomFields(updated);
+      }
+    });
+  }
+
   removeCustomField(name: string) {
-    const updated = this.activeCustomFields().filter((f: CustomFieldConfig) => f.name !== name);
-    this.updateActiveCustomFields(updated);
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Supprimer la question',
+        message: 'Êtes-vous sûr de vouloir retirer cette question du formulaire d\'admission ?',
+        confirmLabel: 'Supprimer',
+        type: 'danger'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        const updated = this.activeCustomFields().filter((f: CustomFieldConfig) => f.name !== name);
+        this.updateActiveCustomFields(updated);
+        this.notificationService.info('Question retirée de la liste.');
+      }
+    });
   }
 
   private updateActiveCustomFields(list: CustomFieldConfig[]) {
@@ -306,7 +405,7 @@ export class AdmissionConfigComponent implements OnInit {
     } else {
       const levelId = this.selectedLevelId()!;
       const overrides = { ...current.levelOverrides };
-      const levelOverride = overrides[levelId] || { documentChecklist: [], coreFieldOverrides: {}, formSchema: { customFields: [] } };
+      const levelOverride = overrides[levelId] || this.createEmptyLevelOverride();
       levelOverride.formSchema = { ...levelOverride.formSchema, customFields: list };
       overrides[levelId] = levelOverride;
       this.config.set({ ...current, levelOverrides: overrides });
@@ -314,6 +413,14 @@ export class AdmissionConfigComponent implements OnInit {
   }
 
   // --- ACTIONS DIVERSES ---
+
+  private createEmptyLevelOverride(): LevelOverrideConfig {
+    return {
+      documentChecklist: [],
+      coreFieldOverrides: {},
+      formSchema: { customFields: [] }
+    };
+  }
 
   togglePortal() {
     const current = this.config();

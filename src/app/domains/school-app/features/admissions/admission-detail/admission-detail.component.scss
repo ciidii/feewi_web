@@ -376,6 +376,10 @@
   border-radius: var(--fw-radius-full);
   font-size: 0.875rem;
   font-weight: 600;
+  transition: all 0.3s ease;
+
+  &.success { background: #10b981; }
+  &.danger { background: #ef4444; }
 }
 
 .eval-table {

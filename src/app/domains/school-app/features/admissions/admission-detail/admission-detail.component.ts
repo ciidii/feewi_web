@@ -2,18 +2,31 @@ import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {firstValueFrom} from 'rxjs';
 import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
-import {AdmissionApplication, RequiredDocument} from '../../../../../core/models/enrollment.model';
+import {AdmissionApplication, RequiredDocument, AssessmentRequest} from '../../../../../core/models/enrollment.model';
 import {
   ArrowLeft,
   CheckCircle,
   ChevronLeft,
   ChevronRight,
-  ClipboardCheck, CreditCard, Download, Eye,
+  ClipboardCheck,
+  Download,
+  Eye,
   FileImage,
   FileSpreadsheet,
-  FileText, GraduationCap, History as HistoryIcon, Info,
-  LucideAngularModule, Mail, MapPin, MessageSquare, MoreVertical, Pencil, Phone, Plus, Printer,
-  RefreshCw, User, XCircle
+  FileText,
+  GraduationCap,
+  History as HistoryIcon,
+  Info,
+  LucideAngularModule,
+  Mail,
+  MapPin,
+  Phone,
+  Plus,
+  Printer,
+  RefreshCw,
+  User,
+  XCircle,
+  Save
 } from 'lucide-angular';
 import {ActivatedRoute, RouterModule} from '@angular/router';
 import {EnrollmentAdminService} from '../../../../../core/services/enrollment-admin.service';
@@ -53,6 +66,10 @@ export class AdmissionDetailComponent implements OnInit {
   selectedDoc = signal<RequiredDocument | null>(null);
   selectedDocUrl = signal<string | null>(null);
 
+  // --- CONFIGURATION DYNAMIQUE ---
+  assessmentSubjects = signal<string[]>([]);
+  minPassingGrade = signal<number>(10);
+
   // --- CALCULS RÉACTIFS ---
   levelName = computed(() => {
     const app = this.application();
@@ -71,11 +88,8 @@ export class AdmissionDetailComponent implements OnInit {
     const app = this.application();
     if (!app || app.status !== 'TESTING') return false;
 
-    // 1. Tous les documents obligatoires doivent être reçus
     const mandatoryDocs = app.documents.filter(d => d.mandatory);
     const allDocsOk = mandatoryDocs.every(d => d.status === 'UPLOADED' || d.status === 'PHYSICAL_RECEIVED');
-
-    // 2. L'évaluation doit avoir été saisie
     const assessmentOk = !!app.assessment && !!app.assessment.decision;
 
     return allDocsOk && assessmentOk;
@@ -92,16 +106,13 @@ export class AdmissionDetailComponent implements OnInit {
   });
 
   // --- ÉVALUATION (Local state avant soumission) ---
-  evaluationGrades = signal<Record<string, number>>({
-    'Français': 0,
-    'Mathématiques': 0,
-    'Éveil': 0
-  });
+  evaluationGrades = signal<Record<string, number>>({});
   evaluationComment = '';
   pedagogicalDecision = signal<'ADMITTED' | 'REJECTED' | 'WAITLIST'>('ADMITTED');
 
   averageScore = computed(() => {
     const grades = Object.values(this.evaluationGrades());
+    if (grades.length === 0) return '0.00';
     const sum = grades.reduce((acc, curr) => acc + curr, 0);
     return (sum / grades.length).toFixed(2);
   });
@@ -133,9 +144,24 @@ export class AdmissionDetailComponent implements OnInit {
       this.levels.set(levels);
       this.filieres.set(filieres);
 
-      // Pré-remplir l'évaluation si elle existe déjà
+      // 2. Charger la configuration effective du niveau pour les matières
+      const effectiveConfig = await firstValueFrom(this.enrollmentAdminService.getEffectiveConfig(data.levelId));
+      const aConfig = effectiveConfig.assessmentConfig || effectiveConfig.defaultAssessmentConfig;
+      
+      if (aConfig) {
+        this.assessmentSubjects.set(aConfig.subjects || []);
+        this.minPassingGrade.set(aConfig.minPassingGrade || 10);
+        
+        // Initialiser evaluationGrades avec les sujets de la config
+        const initialGrades: Record<string, number> = {};
+        aConfig.subjects.forEach((sub: string) => {
+          initialGrades[sub] = data.assessment?.grades?.[sub] || 0;
+        });
+        this.evaluationGrades.set(initialGrades);
+      }
+
+      // Pré-remplir le reste de l'évaluation si elle existe
       if (data.assessment) {
-        this.evaluationGrades.set(data.assessment.grades);
         this.evaluationComment = data.assessment.comments || '';
         this.pedagogicalDecision.set(data.assessment.decision as any);
       }
@@ -147,9 +173,6 @@ export class AdmissionDetailComponent implements OnInit {
     }
   }
 
-  /**
-   * Action 1 : Marquer un document comme reçu physiquement
-   */
   async receiveDocument(docCode: string) {
     if (!this.application()) return;
     this.isActionLoading.set(true);
@@ -164,9 +187,6 @@ export class AdmissionDetailComponent implements OnInit {
     }
   }
 
-  /**
-   * Action 2 : Valider la conformité administrative (Passage en VERIFIED)
-   */
   async verifyApplication() {
     if (!this.application()) return;
     this.isActionLoading.set(true);
@@ -181,14 +201,11 @@ export class AdmissionDetailComponent implements OnInit {
     }
   }
 
-  /**
-   * Action 3 : Enregistrer l'évaluation pédagogique (Passage en TESTING)
-   */
   async submitAssessment() {
     if (!this.application()) return;
     this.isActionLoading.set(true);
     try {
-      const payload = {
+      const payload: AssessmentRequest = {
         grades: this.evaluationGrades(),
         comments: this.evaluationComment,
         decision: this.pedagogicalDecision()
@@ -203,9 +220,6 @@ export class AdmissionDetailComponent implements OnInit {
     }
   }
 
-  /**
-   * Action 4 : Validation finale par la direction (Passage en VALIDATED)
-   */
   async validateFinal() {
     if (!this.application()) return;
 
@@ -234,18 +248,12 @@ export class AdmissionDetailComponent implements OnInit {
     }
   }
 
-  /**
-   * Visualiser un document
-   */
   async previewDocument(doc: RequiredDocument) {
     if (doc.status === 'MISSING') return;
-
     this.selectedDoc.set(doc);
     this.showDocumentViewer.set(true);
     this.selectedDocUrl.set(null);
-
     try {
-      // Si le document a un fileUrl (UUID), on demande une URL pré-signée
       if (doc.fileUrl) {
         const viewUrl = await firstValueFrom(this.documentService.getViewUrl(doc.fileUrl));
         this.selectedDocUrl.set(viewUrl);
@@ -255,14 +263,12 @@ export class AdmissionDetailComponent implements OnInit {
     }
   }
 
-  // Méthode pour l'icône dynamique selon le type de fichier
   getFileIcon(fileName: string): any {
     if (fileName.includes('Photo')) return FileImage;
     if (fileName.includes('Bulletin')) return FileSpreadsheet;
     return FileText;
   }
 
-  // Exposition des icônes
   readonly ArrowLeft = ArrowLeft;
   readonly ChevronLeft = ChevronLeft;
   readonly ChevronRight = ChevronRight;
@@ -281,5 +287,6 @@ export class AdmissionDetailComponent implements OnInit {
   readonly Plus = Plus;
   readonly HistoryIcon = HistoryIcon;
   readonly RefreshCw = RefreshCw;
+  readonly Save = Save;
   protected readonly Info = Info;
 }

@@ -128,7 +128,7 @@
           </div>
         </section>
 
-        <!-- 03. CHAMPS STANDARDS (CERCLE 2) -->
+        <!-- 03. CHAMPS STANDARDS -->
         <section class="numbered-section">
           <div class="section-head">
             <div class="step-pill">{{ currentScope() === 'GLOBAL' ? '03' : '01' }}</div>
@@ -140,9 +140,9 @@
           <div class="section-content card-inner">
             <div class="core-fields-grid">
               <div *ngFor="let field of coreFieldsList" class="core-field-row">
-                <div class="field-desc">
+                <div class="field-desc flex-1">
                   <span class="field-cat">{{ field.category }}</span>
-                  <span class="field-label">{{ field.label }}</span>
+                  <input type="text" [placeholder]="field.label" [ngModel]="getCoreFieldControl(field.key).label || field.label" (ngModelChange)="updateCoreField(field.key, { label: $event })" class="field-label-input">
                 </div>
                 <div class="field-controls">
                   <label class="control-toggle">
@@ -159,7 +159,7 @@
           </div>
         </section>
 
-        <!-- 04. DOCUMENTS (CHECKLIST) -->
+        <!-- 04. DOCUMENTS -->
         <section class="numbered-section">
           <div class="section-head">
             <div class="step-pill">{{ currentScope() === 'GLOBAL' ? '04' : '02' }}</div>
@@ -170,17 +170,17 @@
           </div>
           <div class="section-content">
             <div class="docs-modern-list">
-              <div *ngFor="let doc of activeChecklist()" class="doc-row-modern">
+              <div *ngFor="let doc of activeChecklist()" class="doc-row-modern group cursor-pointer" (click)="editDocumentType(doc)">
                 <div class="doc-info">
                   <span class="doc-name">{{ doc.name }}</span>
                   <code class="doc-code">{{ doc.code }}</code>
                 </div>
                 <div class="doc-actions">
-                  <label class="mandatory-switch">
+                  <label class="mandatory-switch" (click)="$event.stopPropagation()">
                     <input type="checkbox" [checked]="doc.mandatory" (change)="updateDocumentMandatory(doc.code, !doc.mandatory)">
                     <span>Obligatoire</span>
                   </label>
-                  <button class="btn-delete-icon" (click)="removeDocumentType(doc.code)"><lucide-icon [name]="Trash2" [size]="14"></lucide-icon></button>
+                  <button class="btn-delete-icon" (click)="removeDocumentType(doc.code); $event.stopPropagation()"><lucide-icon [name]="Trash2" [size]="14"></lucide-icon></button>
                 </div>
               </div>
               <button class="btn-add-dashed mt-4" (click)="addDocumentType()">
@@ -191,7 +191,7 @@
           </div>
         </section>
 
-        <!-- 05. QUESTIONS LIBRES (CERCLE 3) -->
+        <!-- 05. QUESTIONS LIBRES -->
         <section class="numbered-section">
           <div class="section-head">
             <div class="step-pill">{{ currentScope() === 'GLOBAL' ? '05' : '03' }}</div>
@@ -202,13 +202,13 @@
           </div>
           <div class="section-content">
             <div class="fields-modern-list">
-              <div *ngFor="let field of activeCustomFields()" class="field-row-modern">
-                <lucide-icon [name]="MessageSquare" [size]="16" class="text-slate-400"></lucide-icon>
+              <div *ngFor="let field of activeCustomFields()" class="field-row-modern group cursor-pointer" (click)="editCustomField(field)">
+                <lucide-icon [name]="MessageSquare" [size]="16" class="text-slate-400 group-hover:text-primary transition-colors"></lucide-icon>
                 <div class="field-info">
                   <span class="field-label">{{ field.label }}</span>
                   <span class="field-type">{{ field.type }} • {{ field.required ? 'Obligatoire' : 'Optionnel' }}</span>
                 </div>
-                <button class="btn-delete-icon ml-auto" (click)="removeCustomField(field.name)">
+                <button class="btn-delete-icon ml-auto" (click)="removeCustomField(field.name); $event.stopPropagation()">
                   <lucide-icon [name]="Trash2" [size]="14"></lucide-icon>
                 </button>
               </div>
@@ -220,10 +220,55 @@
           </div>
         </section>
 
-        <!-- 06. TEXTES & GOUVERNANCE -->
+        <!-- 06. POLITIQUE D'ÉVALUATION -->
         <section class="numbered-section">
           <div class="section-head">
             <div class="step-pill">{{ currentScope() === 'GLOBAL' ? '06' : '04' }}</div>
+            <div class="section-title">
+              <h4>Politique d'Évaluation</h4>
+              <p>Définissez les modalités de sélection des candidats.</p>
+            </div>
+          </div>
+          <div class="section-content card-inner space-y-6">
+            <div class="grid grid-cols-2 gap-6">
+              <div class="form-group">
+                <label>Mode de sélection</label>
+                <select [ngModel]="activeAssessmentConfig().assessmentType" (ngModelChange)="updateAssessmentType($event)" class="fw-input-modern">
+                  <option value="DOSSIER">Étude de dossier uniquement</option>
+                  <option value="EXAM">Concours / Examen d'entrée</option>
+                  <option value="INTERVIEW">Entretien oral</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Note minimale d'admission (/20)</label>
+                <input type="number" [ngModel]="activeAssessmentConfig().minPassingGrade" (ngModelChange)="updateMinGrade($event)" class="fw-input-modern" min="0" max="20" step="0.5">
+              </div>
+            </div>
+
+            <div class="subjects-selector-box pt-4 border-t border-slate-100">
+              <label class="text-xs font-bold text-slate-500 uppercase mb-3 block">Matières à évaluer</label>
+              <div class="flex flex-wrap gap-2 mb-4">
+                <div *ngFor="let sub of activeAssessmentConfig().subjects" class="subject-tag">
+                  <span>{{ sub }}</span>
+                  <button (click)="removeSubject(sub)"><lucide-icon [name]="Trash2" [size]="12"></lucide-icon></button>
+                </div>
+                <div *ngIf="activeAssessmentConfig().subjects.length === 0" class="text-sm text-slate-400 italic">Aucune matière configurée.</div>
+              </div>
+              
+              <div class="flex gap-2">
+                <input type="text" #subInput placeholder="Ex: Anglais, Français, Logique..." class="fw-input-modern flex-1 h-10" (keyup.enter)="addSubject(subInput)">
+                <button class="btn-primary-modern h-10 px-4" (click)="addSubject(subInput)">
+                  <lucide-icon [name]="Plus" [size]="16"></lucide-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 07. TEXTES & GOUVERNANCE -->
+        <section class="numbered-section">
+          <div class="section-head">
+            <div class="step-pill">{{ currentScope() === 'GLOBAL' ? '07' : '05' }}</div>
             <div class="section-title">
               <h4>Instructions & Légal</h4>
               <p>Messages d'aide et mentions obligatoires.</p>

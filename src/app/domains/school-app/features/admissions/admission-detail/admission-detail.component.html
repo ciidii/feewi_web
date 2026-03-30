@@ -186,7 +186,11 @@
           <div class="card-header">
             <lucide-icon [name]="HistoryIcon" [size]="18" class="text-primary"></lucide-icon>
             <h2>Évaluation Pédagogique</h2>
-            <div class="average-badge">Moyenne : {{ averageScore() }} / 20</div>
+            <div class="average-badge" 
+                 [class.success]="+averageScore() >= minPassingGrade()" 
+                 [class.danger]="+averageScore() < minPassingGrade() && +averageScore() > 0">
+              Moyenne : {{ averageScore() }} / 20
+            </div>
           </div>
 
           <div class="evaluation-grid">
@@ -198,7 +202,7 @@
                 </tr>
               </thead>
               <tbody>
-                @for (subject of ['Français', 'Mathématiques', 'Éveil']; track subject) {
+                @for (subject of assessmentSubjects(); track subject) {
                   <tr>
                     <td class="subject-cell">{{ subject }}</td>
                     <td class="score-cell">
@@ -207,6 +211,13 @@
                              (ngModelChange)="updateGrade(subject, $event)"
                              min="0" max="20" class="score-input"
                              [disabled]="app.status === 'VALIDATED'">
+                    </td>
+                  </tr>
+                }
+                @if (assessmentSubjects().length === 0) {
+                  <tr>
+                    <td colspan="2" class="text-center py-4 text-slate-400 italic text-sm">
+                      Aucune matière d'évaluation n'est configurée pour ce niveau.
                     </td>
                   </tr>
                 }

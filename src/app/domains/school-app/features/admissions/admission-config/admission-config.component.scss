@@ -193,6 +193,19 @@
   .doc-actions { display: flex; align-items: center; gap: 2rem; }
 }
 
+// --- Assessment Subjects ---
+.subject-tag {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 6px 12px; background: #eff6ff; border: 1px solid #bfdbfe;
+  border-radius: 8px; color: #1e40af; font-size: 0.8rem; font-weight: 600;
+  
+  button {
+    border: none; background: transparent; color: #60a5fa; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    &:hover { color: #ef4444; }
+  }
+}
+
 // --- Buttons Modern ---
 .btn-primary-modern {
   height: 44px; padding: 0 1.5rem; background: #0f172a; color: white; border: none; border-radius: 12px;

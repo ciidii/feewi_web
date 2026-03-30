@@ -1,11 +1,10 @@
-
 /**
  * États possibles d'un dossier d'admission
  */
 export type AdmissionStatus = 'DRAFT' | 'SUBMITTED' | 'VERIFIED' | 'TESTING' | 'WAITLIST' | 'VALIDATED' | 'REJECTED' | 'CANCELLED';
 
 /**
- * Type d'admission
+ * Type d'admission (Nouvelle inscription ou Réinscription)
  */
 export type AdmissionType = 'NEW' | 'RE_ENROLL';
 
@@ -36,13 +35,14 @@ export interface Guardian {
 }
 
 /**
- * Résultat de l'évaluation pédagogique
+ * Résultat de l'évaluation pédagogique (Section 3.3)
  */
 export interface Assessment {
-  grades: Record<string, number>;
+  grades: Record<string, number>; // Map<Matière, Note>
   comments?: string;
-  decision: string;
+  decision: string; // ADMITTED | REFUSED | WAITLISTED
   recommendedLevelId?: string;
+  assessedAt?: string;
 }
 
 /**
@@ -57,7 +57,7 @@ export interface RequiredDocument {
 }
 
 /**
- * Entité principale : Dossier d'admission (Application)
+ * Entité principale : Demande d'Admission (Section 6.1)
  */
 export interface AdmissionApplication {
   id: string;
@@ -79,7 +79,7 @@ export interface AdmissionApplication {
   submittedAt?: string;
 }
 
-// --- PAYLOADS REQUÊTES ---
+// --- PAYLOADS REQUÊTES (Alignement API Parent & Admin) ---
 
 export interface ApplicationCreateRequest {
   tenantId: string;
@@ -90,10 +90,18 @@ export interface ApplicationCreateRequest {
   primaryGuardian: Partial<Guardian>;
 }
 
+/** Missing Interface 1: Re-Enrollment Request */
 export interface ReEnrollRequest {
   studentId: string;
   academicYearId: string;
   nextLevelId: string;
+}
+
+/** Missing Interface 2: Candidate Update (PATCH) */
+export interface CandidateUpdateRequest {
+  info: Partial<Candidate>;
+  levelId: string;
+  filiereId?: string | null;
 }
 
 export interface AssessmentRequest {
@@ -103,24 +111,25 @@ export interface AssessmentRequest {
   recommendedLevelId?: string;
 }
 
-export interface CandidateUpdateRequest {
-  info: Partial<Candidate>;
-  levelId: string;
-  filiereId?: string | null;
-}
+// --- CONFIGURATION (ALIGNEMENT SECTION 4 & 5) ---
 
-// --- CONFIGURATION (ALIGNEMENT JAVA) ---
+export interface AssessmentConfig {
+  assessmentType: 'EXAM' | 'DOSSIER' | 'INTERVIEW';
+  subjects: string[];
+  minPassingGrade: number;
+}
 
 export interface EnrollmentConfig {
   tenantId: string;
   portalActive: boolean;
 
-  // Configuration par défaut
+  // Configuration par défaut (Fallback)
   defaultChecklist: RequiredDocumentConfig[];
   defaultCoreOverrides: Record<string, CoreFieldControl>;
   defaultFormSchema: {
     customFields: CustomFieldConfig[];
   };
+  defaultAssessmentConfig: AssessmentConfig;
 
   // Overrides par niveau
   levelOverrides: Record<string, LevelOverrideConfig>;
@@ -130,7 +139,7 @@ export interface EnrollmentConfig {
   legalText: string;
   enabledServices: string[];
 
-  // Helpers UI
+  // Helpers UI (Optionnels)
   admissionWindow?: {
     startDate: string;
     endDate: string;
@@ -164,4 +173,5 @@ export interface LevelOverrideConfig {
   formSchema: {
     customFields: CustomFieldConfig[];
   };
+  assessmentConfig?: AssessmentConfig;
 }

@@ -3,7 +3,7 @@ import {inject, Injectable } from "@angular/core";
 import { EnvironmentService } from "./environment.service";
 import { NotificationService } from "../../shared/services/notification.service";
 import {catchError, Observable, throwError} from "rxjs";
-import {AdmissionApplication, AssessmentRequest, EnrollmentConfig} from '../models/enrollment.model';
+import {AdmissionApplication, AssessmentRequest, EnrollmentConfig, LevelOverrideConfig} from '../models/enrollment.model';
 
 
 @Injectable({
@@ -81,9 +81,19 @@ export class EnrollmentAdminService {
    * Personnaliser un niveau spécifique (Surcharge)
    * Endpoint: PATCH /admin/config/level-overrides/{levelId}
    */
-  updateLevelOverride(levelId: string, override: any): Observable<void> {
+  updateLevelOverride(levelId: string, override: LevelOverrideConfig): Observable<void> {
     return this.http.patch<void>(`${this.baseUrl}/admin/config/level-overrides/${levelId}`, override).pipe(
       catchError(this.handleError('Erreur lors de la personnalisation du niveau'))
+    );
+  }
+
+  /**
+   * Récupère la configuration effective pour un niveau (Fusion Global + Surcharges)
+   * On utilise le endpoint public car c'est lui qui gère la fusion.
+   */
+  getEffectiveConfig(levelId: string): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/public/config/${levelId}`).pipe(
+      catchError(this.handleError('Impossible de charger la configuration effective du niveau'))
     );
   }
 
