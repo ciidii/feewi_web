@@ -1,260 +1,313 @@
-<div class="stepper-wrapper">
+<div class="stepper-wrapper" *ngIf="summary() && !isPortalClosed(); else initialLoading">
   
-  <!-- Stepper Visual Indicator -->
+  <!-- ENTÊTE INSTITUTIONNEL -->
+  <header class="school-brand-header animate-fade">
+    <div class="school-logo" *ngIf="tenantContext.activeTenant()?.logoUrl; else defaultLogo">
+      <img [src]="tenantContext.activeTenant()?.logoUrl" [alt]="tenantContext.activeTenant()?.name">
+    </div>
+    <ng-template #defaultLogo>
+      <div class="school-logo-placeholder">
+        <lucide-icon [name]="GraduationCap" [size]="32"></lucide-icon>
+      </div>
+    </ng-template>
+    <div class="school-info">
+      <span class="portal-label">Portail d'Admission Officiel</span>
+      <h2 class="school-name">{{ tenantContext.activeTenant()?.name || 'Établissement Partenaire' }}</h2>
+    </div>
+  </header>
+
+  <!-- Stepper Nav (6 étapes) -->
   <div class="stepper-nav">
     <div class="progress-bar">
       <div class="progress-fill" [style.width.%]="progress()"></div>
     </div>
-    
     <div class="steps-indicators">
-      <div class="step-indicator" [class.active]="currentStep() === 'GUARDIAN'" [class.completed]="progress() > 25">
-        <div class="step-circle"><lucide-icon [name]="Users" [size]="16"></lucide-icon></div>
+      <div class="step-indicator" [class.active]="currentStep() === 'GUARDIAN'" [class.completed]="progress() > 16">
+        <div class="step-circle"><lucide-icon [name]="Users" [size]="14"></lucide-icon></div>
         <span class="step-label">Tuteur</span>
       </div>
-      <div class="step-indicator" [class.active]="currentStep() === 'STUDENT'" [class.completed]="progress() > 50">
-        <div class="step-circle"><lucide-icon [name]="GraduationCap" [size]="16"></lucide-icon></div>
-        <span class="step-label">L'Enfant</span>
+      <div class="step-indicator" [class.active]="currentStep() === 'STUDENT'" [class.completed]="progress() > 33">
+        <div class="step-circle"><lucide-icon [name]="User" [size]="14"></lucide-icon></div>
+        <span class="step-label">Enfant</span>
       </div>
-      <div class="step-indicator" [class.active]="currentStep() === 'DOCS'" [class.completed]="progress() > 75">
-        <div class="step-circle"><lucide-icon [name]="FileText" [size]="16"></lucide-icon></div>
-        <span class="step-label">Documents</span>
+      <div class="step-indicator" [class.active]="currentStep() === 'SPECIFIC'" [class.completed]="progress() > 50">
+        <div class="step-circle"><lucide-icon [name]="MessageSquare" [size]="14"></lucide-icon></div>
+        <span class="step-label">Questions</span>
+      </div>
+      <div class="step-indicator" [class.active]="currentStep() === 'SERVICES'" [class.completed]="progress() > 66">
+        <div class="step-circle"><lucide-icon [name]="ChefHat" [size]="14"></lucide-icon></div>
+        <span class="step-label">Services</span>
+      </div>
+      <div class="step-indicator" [class.active]="currentStep() === 'DOCS'" [class.completed]="progress() > 83">
+        <div class="step-circle"><lucide-icon [name]="FileText" [size]="14"></lucide-icon></div>
+        <span class="step-label">Pièces</span>
       </div>
       <div class="step-indicator" [class.active]="currentStep() === 'REVIEW'">
-        <div class="step-circle"><lucide-icon [name]="CheckCircle" [size]="16"></lucide-icon></div>
+        <div class="step-circle"><lucide-icon [name]="CheckCircle" [size]="14"></lucide-icon></div>
         <span class="step-label">Récap</span>
       </div>
     </div>
   </div>
 
-  <!-- Instructions Globales (Accès via la clé 'general' de la Map) -->
-  <div class="instructions-alert animate-fade" *ngIf="config()?.instructions?.['general'] && currentStep() === 'GUARDIAN'">
+  <!-- INSTRUCTIONS CONTEXTUELLES (Section 2.2) -->
+  <div class="instructions-alert animate-fade" *ngIf="currentInstruction()">
     <lucide-icon [name]="Info" [size]="20"></lucide-icon>
     <div class="content">
       <span class="title">Note de l'établissement</span>
-      <p>{{ config()?.instructions?.['general'] }}</p>
+      <p>{{ currentInstruction() }}</p>
     </div>
   </div>
 
-  <!-- Form Content Area -->
   <div class="stepper-content card">
     
     <!-- Étape 1 : LE TUTEUR -->
     <div *ngIf="currentStep() === 'GUARDIAN'" class="form-section animate-fade">
-      <h2>Qui êtes-vous ?</h2>
-      <p class="section-desc">Commençons par vos coordonnées pour sécuriser votre dossier.</p>
+      <div class="section-header-modern">
+        <lucide-icon [name]="Users" class="text-primary"></lucide-icon>
+        <div>
+          <h2>Qui êtes-vous ?</h2>
+          <p>Identifiez-vous pour sécuriser le dossier de votre enfant.</p>
+        </div>
+      </div>
       
       <div class="grid-form">
-        <div class="form-group">
+        <div class="form-group full">
           <label>Lien avec l'enfant</label>
           <select [(ngModel)]="formData().primaryGuardian.relation" class="fw-input" [disabled]="currentApplicationId() !== null">
             <option value="FATHER">Père</option>
             <option value="MOTHER">Mère</option>
             <option value="GUARDIAN">Tuteur / Tutrice</option>
-            <option value="OTHER">Autre</option>
           </select>
         </div>
-        <div class="form-group"></div>
 
         <div class="form-group">
           <label>Votre Nom</label>
-          <input type="text" [(ngModel)]="formData().primaryGuardian.lastName" placeholder="Ex: Diop" class="fw-input" [disabled]="currentApplicationId() !== null">
+          <input type="text" [(ngModel)]="formData().primaryGuardian.lastName" class="fw-input" [disabled]="currentApplicationId() !== null">
         </div>
         <div class="form-group">
           <label>Votre Prénom</label>
-          <input type="text" [(ngModel)]="formData().primaryGuardian.firstName" placeholder="Ex: Ibrahima" class="fw-input" [disabled]="currentApplicationId() !== null">
+          <input type="text" [(ngModel)]="formData().primaryGuardian.firstName" class="fw-input" [disabled]="currentApplicationId() !== null">
         </div>
         <div class="form-group">
-          <label>Votre Email</label>
-          <input type="email" [(ngModel)]="formData().primaryGuardian.email" placeholder="email@test.com" class="fw-input" [disabled]="currentApplicationId() !== null">
+          <label>Email</label>
+          <input type="email" [(ngModel)]="formData().primaryGuardian.email" class="fw-input" [disabled]="currentApplicationId() !== null">
         </div>
         <div class="form-group">
-          <label>Votre Téléphone</label>
-          <input type="tel" [(ngModel)]="formData().primaryGuardian.phone" placeholder="+221 ..." class="fw-input" [disabled]="currentApplicationId() !== null">
+          <label>Téléphone</label>
+          <input type="tel" [(ngModel)]="formData().primaryGuardian.phone" class="fw-input" [disabled]="currentApplicationId() !== null">
         </div>
-      </div>
 
-      <div class="info-alert success" *ngIf="currentApplicationId()">
-        <lucide-icon [name]="CheckCircle" [size]="18"></lucide-icon>
-        <span>Dossier reconnu ! Référence : <strong>{{ application()?.reference }}</strong></span>
+        <div class="form-group full" *ngIf="!getCoreControl('profession').hidden">
+          <label>{{ getCoreControl('profession').label || 'Profession' }} <span *ngIf="getCoreControl('profession').mandatory">*</span></label>
+          <input type="text" [(ngModel)]="formData().primaryGuardian.profession" class="fw-input">
+        </div>
+
+        <div class="form-group full" *ngIf="!getCoreControl('address').hidden">
+          <label>{{ getCoreControl('address').label || 'Adresse' }} <span *ngIf="getCoreControl('address').mandatory">*</span></label>
+          <input type="text" [(ngModel)]="formData().primaryGuardian.address" class="fw-input">
+        </div>
       </div>
     </div>
 
-    <!-- Étape 2 : L'ENFANT & PARCOURS -->
+    <!-- Étape 2 : L'ENFANT & NIVEAU -->
     <div *ngIf="currentStep() === 'STUDENT'" class="form-section animate-fade">
-      <h2>Identité du Candidat & Parcours</h2>
-      <p class="section-desc">Informations sur l'enfant et le niveau souhaité pour l'année {{ activeYear()?.label }}.</p>
+      <div class="section-header-modern">
+        <lucide-icon [name]="GraduationCap" class="text-primary"></lucide-icon>
+        <div>
+          <h2>Identité du Candidat</h2>
+          <p>Informations sur l'enfant pour l'année {{ summary()?.academicYearLabel }}.</p>
+        </div>
+      </div>
       
       <div class="grid-form">
         <div class="form-group full">
           <label>Niveau demandé</label>
           <select [(ngModel)]="formData().student.requestedLevelId" class="fw-input highlight">
             <option value="">Choisir un niveau...</option>
-            @for (level of availableLevels(); track level.id) {
-              <option [value]="level.id">{{ level.name }}</option>
-            }
+            <option *ngFor="let level of availableLevels()" [value]="level.id">{{ level.name }}</option>
           </select>
         </div>
 
-        <div class="form-group full animate-fade" *ngIf="showFiliereSelector()">
-          <label>Série / Filière (Lycée)</label>
+        <div class="form-group full" *ngIf="showFiliereSelector()">
+          <label>Série / Filière</label>
           <select [(ngModel)]="formData().student.filiereId" class="fw-input highlight">
             <option value="">Sélectionner une filière...</option>
-            @for (filiere of availableFilieres(); track filiere.id) {
-              <option [value]="filiere.id">{{ filiere.name }} ({{ filiere.code }})</option>
-            }
+            <option *ngFor="let filiere of availableFilieres()" [value]="filiere.id">{{ filiere.name }}</option>
           </select>
         </div>
 
         <div class="form-group">
-          <label>Nom de l'enfant</label>
-          <input type="text" [(ngModel)]="formData().student.lastName" class="fw-input">
-        </div>
-        <div class="form-group">
-          <label>Prénoms de l'enfant</label>
+          <label>Prénoms</label>
           <input type="text" [(ngModel)]="formData().student.firstName" class="fw-input">
         </div>
         <div class="form-group">
-          <label>Date de naissance</label>
-          <input type="date" [(ngModel)]="formData().student.birthDate" class="fw-input">
+          <label>Nom</label>
+          <input type="text" [(ngModel)]="formData().student.lastName" class="fw-input">
         </div>
-        <div class="form-group">
-          <label>Lieu de naissance</label>
-          <input type="text" [(ngModel)]="formData().student.birthPlace" class="fw-input">
-        </div>
-        <div class="form-group">
-          <label>Sexe</label>
+
+        <div class="form-group" *ngIf="!getCoreControl('gender').hidden">
+          <label>{{ getCoreControl('gender').label || 'Sexe' }} <span *ngIf="getCoreControl('gender').mandatory">*</span></label>
           <select [(ngModel)]="formData().student.gender" class="fw-input">
             <option value="">Sélectionner...</option>
             <option value="MALE">Masculin</option>
             <option value="FEMALE">Féminin</option>
           </select>
         </div>
+
         <div class="form-group">
-          <label>Nationalité</label>
+          <label>Date de naissance</label>
+          <input type="date" [(ngModel)]="formData().student.birthDate" class="fw-input">
+        </div>
+
+        <div class="form-group" *ngIf="!getCoreControl('birthPlace').hidden">
+          <label>{{ getCoreControl('birthPlace').label || 'Lieu de naissance' }} <span *ngIf="getCoreControl('birthPlace').mandatory">*</span></label>
+          <input type="text" [(ngModel)]="formData().student.birthPlace" class="fw-input">
+        </div>
+
+        <div class="form-group" *ngIf="!getCoreControl('nationality').hidden">
+          <label>{{ getCoreControl('nationality').label || 'Nationalité' }} <span *ngIf="getCoreControl('nationality').mandatory">*</span></label>
           <input type="text" [(ngModel)]="formData().student.nationality" class="fw-input">
         </div>
-      </div>
 
-      <!-- CHAMPS PERSONNALISÉS DYNAMIQUE (Utilisation de defaultFormSchema) -->
-      <div class="custom-fields-section mt-8 pt-8 border-t border-slate-100" *ngIf="config()?.defaultFormSchema?.['customFields']?.length">
-        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-6">Informations Complémentaires</h3>
-        <div class="grid-form">
-          <div class="form-group" *ngFor="let field of config()?.defaultFormSchema?.['customFields']" [class.full]="field.type === 'text'">
-            <label>{{ field.label }} <span *ngIf="field.required" class="text-red-500">*</span></label>
-            
-            <input *ngIf="field.type === 'text' || field.type === 'number'" 
-                   [type]="field.type" 
-                   [placeholder]="field.placeholder || ''" 
-                   class="fw-input">
-            
-            <input *ngIf="field.type === 'date'" 
-                   type="date" 
-                   class="fw-input">
-
-            <select *ngIf="field.type === 'select'" class="fw-input">
-              <option value="">Sélectionner...</option>
-              <option *ngFor="let opt of field.options" [value]="opt">{{ opt }}</option>
-            </select>
-
-            <div *ngIf="field.type === 'boolean'" class="flex items-center gap-3 py-2">
-              <mat-checkbox color="primary"></mat-checkbox>
-              <span class="text-sm font-medium text-slate-600">{{ field.placeholder || 'Oui' }}</span>
-            </div>
-          </div>
+        <div class="form-group full" *ngIf="!getCoreControl('previousSchool').hidden">
+          <label>{{ getCoreControl('previousSchool').label || 'Dernier établissement' }} <span *ngIf="getCoreControl('previousSchool').mandatory">*</span></label>
+          <input type="text" [(ngModel)]="formData().student.previousSchool" class="fw-input">
         </div>
       </div>
     </div>
 
-    <!-- Étape 3 : DOCUMENTS -->
+    <!-- Étape 3 : QUESTIONS SPÉCIFIQUES (CERCLE 3) -->
+    <div *ngIf="currentStep() === 'SPECIFIC'" class="form-section animate-fade">
+      <div class="section-header-modern">
+        <lucide-icon [name]="MessageSquare" class="text-primary"></lucide-icon>
+        <div>
+          <h2>Questions Spécifiques</h2>
+          <p>Informations complémentaires requises par l'école.</p>
+        </div>
+      </div>
+
+      <div class="grid-form">
+        @if (effectiveCustomFields().length) {
+          @for (field of effectiveCustomFields(); track field.name) {
+            <div class="form-group" [class.full]="field.type === 'text'">
+              <label>{{ field.label }} <span *ngIf="field.required" class="text-red-500">*</span></label>
+              
+              <input *ngIf="field.type === 'text' || field.type === 'number'" 
+                     [type]="field.type" [(ngModel)]="formData().specificResponses[field.name]" class="fw-input">
+              
+              <input *ngIf="field.type === 'date'" type="date" [(ngModel)]="formData().specificResponses[field.name]" class="fw-input">
+
+              <select *ngIf="field.type === 'select'" [(ngModel)]="formData().specificResponses[field.name]" class="fw-input">
+                <option value="">Sélectionner...</option>
+                <option *ngFor="let opt of field.options" [value]="opt">{{ opt }}</option>
+              </select>
+
+              <div *ngIf="field.type === 'boolean'" class="flex items-center gap-3 py-2">
+                <mat-checkbox color="primary" [(ngModel)]="formData().specificResponses[field.name]"></mat-checkbox>
+                <span class="text-sm font-medium">{{ field.placeholder || 'Cocher si concerné' }}</span>
+              </div>
+            </div>
+          }
+        } @else {
+          <div class="col-span-2 py-12 text-center text-slate-400 italic">
+            Aucune question spécifique pour ce niveau.
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Étape 4 : SERVICES OPTIONNELS -->
+    <div *ngIf="currentStep() === 'SERVICES'" class="form-section animate-fade">
+      <div class="section-header-modern">
+        <lucide-icon [name]="ClipboardList" class="text-primary"></lucide-icon>
+        <div>
+          <h2>Services Optionnels</h2>
+          <p>Choisissez les prestations complémentaires.</p>
+        </div>
+      </div>
+
+      <div class="services-selection-grid">
+        <div class="service-card" *ngIf="isServiceEnabled('CANTEEN')" 
+             [class.active]="formData().services.canteen" (click)="formData().services.canteen = !formData().services.canteen">
+          <div class="card-icon"><lucide-icon [name]="ChefHat"></lucide-icon></div>
+          <div class="card-info">
+            <h3>Restauration Scolaire</h3>
+            <p>Accès à la cantine de l'école.</p>
+          </div>
+          <mat-checkbox color="primary" [checked]="formData().services.canteen" (click)="$event.stopPropagation()"></mat-checkbox>
+        </div>
+
+        <div class="service-card" *ngIf="isServiceEnabled('TRANSPORT')" 
+             [class.active]="formData().services.transport" (click)="formData().services.transport = !formData().services.transport">
+          <div class="card-icon"><lucide-icon [name]="Bus"></lucide-icon></div>
+          <div class="card-info">
+            <h3>Transport & Ramassage</h3>
+            <p>Circuit de bus domicile-école.</p>
+          </div>
+          <mat-checkbox color="primary" [checked]="formData().services.transport" (click)="$event.stopPropagation()"></mat-checkbox>
+        </div>
+      </div>
+    </div>
+
+    <!-- Étape 5 : DOCUMENTS -->
     <div *ngIf="currentStep() === 'DOCS'" class="form-section animate-fade">
-      <h2>Documents</h2>
-      <p class="section-desc">Veuillez charger les pièces jointes nécessaires pour l'étude de votre dossier.</p>
+      <div class="section-header-modern">
+        <lucide-icon [name]="FileText" class="text-primary"></lucide-icon>
+        <div>
+          <h2>Pièces Justificatives</h2>
+          <p>Documents requis selon le niveau sélectionné.</p>
+        </div>
+      </div>
       
       <div class="upload-grid">
-        @for (doc of application()?.documents; track doc.code) {
-          <div class="upload-item" [class.uploaded]="doc.status === 'UPLOADED'">
+        @for (doc of effectiveChecklist(); track doc.code) {
+          <div class="upload-item" [class.uploaded]="application()?.documents?.[$index]?.status === 'UPLOADED'">
             <div class="upload-info">
               <span class="upload-label">{{ doc.name }}</span>
               <div class="flex items-center gap-2">
-                <span class="upload-status-tag" [class]="doc.status.toLowerCase()">{{ doc.status }}</span>
-                <span *ngIf="doc.mandatory" class="text-[10px] font-bold text-red-500 uppercase tracking-tighter">(Obligatoire)</span>
+                <span *ngIf="doc.mandatory" class="text-[10px] font-bold text-red-500 uppercase">(Obligatoire)</span>
               </div>
             </div>
             <div class="upload-actions">
               <input type="file" #fileInput hidden (change)="onFileSelected(doc.code, $event)">
-              
-              @if (uploadingDocCode() === doc.code) {
-                <div class="upload-spinner">
-                  <lucide-icon [name]="RefreshCw" [size]="18" class="animate-spin"></lucide-icon>
-                </div>
-              } @else {
-                <button class="btn-upload" (click)="fileInput.click()" [disabled]="doc.status === 'UPLOADED'">
-                  <lucide-icon [name]="doc.status === 'UPLOADED' ? CheckCircle : Upload" [size]="18"></lucide-icon>
-                  {{ doc.status === 'UPLOADED' ? 'Chargé' : 'Choisir' }}
-                </button>
-                
-                <button *ngIf="doc.status === 'UPLOADED'" class="btn-icon-view" (click)="viewDocument(doc.fileUrl)" title="Voir le document">
-                  <lucide-icon [name]="Eye" [size]="18"></lucide-icon>
-                </button>
-              }
+              <button class="btn-upload" (click)="fileInput.click()">
+                <lucide-icon [name]="Upload" [size]="18"></lucide-icon>
+                <span>Choisir</span>
+              </button>
             </div>
           </div>
         }
       </div>
     </div>
 
-    <!-- Étape 4 : RÉCAPITULATIF -->
+    <!-- Étape 6 : RÉCAPITULATIF -->
     <div *ngIf="currentStep() === 'REVIEW'" class="form-section animate-fade">
-      <h2>Vérification</h2>
-      <p class="section-desc">Relisez attentivement les informations avant la soumission finale.</p>
+      <div class="section-header-modern">
+        <lucide-icon [name]="CheckCircle" class="text-primary"></lucide-icon>
+        <div>
+          <h2>Confirmation</h2>
+          <p>Relisez votre dossier avant l'envoi définitif.</p>
+        </div>
+      </div>
       
       <div class="review-grid">
         <div class="review-card">
-          <div class="review-card-header"><lucide-icon [name]="User" [size]="16"></lucide-icon> Candidat</div>
+          <div class="review-card-header">Candidat</div>
           <div class="review-row"><span class="label">Nom complet</span><span class="value">{{ formData().student.firstName }} {{ formData().student.lastName }}</span></div>
           <div class="review-row"><span class="label">Niveau</span><span class="value">{{ selectedLevelName() }}</span></div>
         </div>
-
-        <div class="review-card">
-          <div class="review-card-header"><lucide-icon [name]="Users" [size]="16"></lucide-icon> Responsable</div>
-          <div class="review-row"><span class="label">Nom</span><span class="value">{{ formData().primaryGuardian.firstName }} {{ formData().primaryGuardian.lastName }}</span></div>
-          <div class="review-row"><span class="label">Téléphone</span><span class="value">{{ formData().primaryGuardian.phone }}</span></div>
-        </div>
-
-        <div class="review-card full">
-          <div class="review-card-header"><lucide-icon [name]="FileText" [size]="16"></lucide-icon> État des documents</div>
-          <div class="review-docs">
-            @for (doc of application()?.documents; track doc.code) {
-              <div class="doc-status-line">
-                <span class="doc-name">{{ doc.name }}</span>
-                <div class="doc-status-group">
-                  <span class="badge" [class]="doc.status.toLowerCase()">{{ doc.status }}</span>
-                  <button *ngIf="doc.status === 'UPLOADED'" class="btn-text-icon" (click)="viewDocument(doc.fileUrl)">
-                    <lucide-icon [name]="Eye" [size]="14"></lucide-icon> Voir
-                  </button>
-                </div>
-              </div>
-            }
-          </div>
-        </div>
       </div>
 
-      <!-- TEXTE LÉGAL DYNAMIQUE -->
-      <div class="legal-notice-box animate-in" *ngIf="config()?.legalText">
+      <div class="legal-notice-box animate-in" *ngIf="summary()?.legalText">
         <div class="notice-header">
           <lucide-icon [name]="ShieldCheck" [size]="20" class="text-emerald-600"></lucide-icon>
           <span>Engagement & Consentement</span>
         </div>
-        <p class="notice-content">{{ config()?.legalText }}</p>
+        <p class="notice-content">{{ summary()?.legalText }}</p>
         <label class="consent-checkbox mt-4">
           <input type="checkbox" required>
           <span>Je certifie l'exactitude de ces informations.</span>
         </label>
-      </div>
-
-      <div class="legal-notice" *ngIf="!config()?.legalText">
-        <lucide-icon [name]="GraduationCap" [size]="20"></lucide-icon>
-        <p>En cliquant sur "Soumettre", vous certifiez l'exactitude des informations fournies. Votre dossier sera transmis au secrétariat.</p>
       </div>
     </div>
 
@@ -263,21 +316,29 @@
   <!-- Stepper Actions -->
   <footer class="stepper-footer">
     <button class="btn-outline" (click)="prevStep()" *ngIf="currentStep() !== 'GUARDIAN'">
-      <lucide-icon [name]="ArrowLeft" [size]="18"></lucide-icon> Retour
+      <lucide-icon [name]="ArrowLeft" [size]="18"></lucide-icon> Précédent
     </button>
     <div class="spacer"></div>
-    
-    @if (currentStep() === 'REVIEW') {
-      <button class="btn-primary btn-hero" (click)="submitFinal()" [disabled]="isSubmitting()">
-        <span *ngIf="!isSubmitting()">Soumettre mon dossier <lucide-icon [name]="CheckCircle" [size]="20"></lucide-icon></span>
-        <span *ngIf="isSubmitting()"><lucide-icon [name]="RefreshCw" [size]="20" class="animate-spin"></lucide-icon> Soumission...</span>
-      </button>
-    } @else {
-      <button class="btn-primary" (click)="nextStep()" [disabled]="isSubmitting() || isLoading()">
-        <span *ngIf="!isSubmitting()">Continuer <lucide-icon [name]="ArrowRight" [size]="18"></lucide-icon></span>
-        <span *ngIf="isSubmitting()"><lucide-icon [name]="RefreshCw" [size]="18" class="animate-spin"></lucide-icon> Traitement...</span>
-      </button>
-    }
+    <button class="btn-primary" (click)="nextStep()" [disabled]="isSubmitting()">
+      <span *ngIf="currentStep() !== 'REVIEW'">Suivant <lucide-icon [name]="ArrowRight" [size]="18"></lucide-icon></span>
+      <span *ngIf="currentStep() === 'REVIEW'">Soumettre ma demande <lucide-icon [name]="CheckCircle" [size]="20"></lucide-icon></span>
+    </button>
   </footer>
 
 </div>
+
+<ng-template #initialLoading>
+  <div class="initial-loader" *ngIf="isLoading()">
+    <lucide-icon [name]="RefreshCw" [size]="48" class="animate-spin text-primary"></lucide-icon>
+    <p>Initialisation...</p>
+  </div>
+
+  <div class="portal-closed-view" *ngIf="!isLoading() && isPortalClosed()">
+    <div class="closed-card card">
+      <lucide-icon [name]="AlertTriangle" [size]="48" class="text-amber-500 mx-auto mb-4"></lucide-icon>
+      <h2>Portail Fermé</h2>
+      <p>Les admissions sont closes pour l'année {{ summary()?.academicYearLabel }}.</p>
+      <button class="btn-primary mt-8" routerLink="/">Retour</button>
+    </div>
+  </div>
+</ng-template>

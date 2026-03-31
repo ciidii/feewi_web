@@ -1,214 +1,150 @@
-/* HUB PARENT - STYLES UNIFIÉS */
+/* VARIABLES LOCALES */
 $primary: #2563eb;
 $midnight: #0f172a;
 $slate: #64748b;
 $ice: #f8fafc;
 $border: #e2e8f0;
+$emerald: #10b981;
+$amber: #f59e0b;
 
 .hub-container {
   max-width: 1000px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 3rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
 }
 
-.hub-hero {
-  text-align: center;
-  margin-bottom: 4rem;
-
-  .badge-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1.25rem;
-    border-radius: 9999px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    margin-bottom: 1.5rem;
-    
-    &.open { background: #dcfce7; color: #166534; }
-    &.closed { background: #fee2e2; color: #991b1b; }
-    &.teasing { background: #fef3c7; color: #92400e; }
+// --- SCHOOL BRAND HEADER ---
+.school-brand-header {
+  display: flex; align-items: center; gap: 1.5rem; padding: 1.5rem 2rem;
+  background: white; border-radius: 24px; border: 1px solid $border;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+  
+  .school-logo, .school-logo-placeholder {
+    width: 64px; height: 64px; border-radius: 16px; overflow: hidden;
+    background: $ice; display: grid; place-items: center; border: 1px solid $border;
+    img { width: 100%; height: 100%; object-fit: contain; padding: 8px; }
+    lucide-icon { color: $primary; }
   }
 
-  h1 { font-size: 2.5rem; font-weight: 800; color: $midnight; margin-bottom: 0.5rem; letter-spacing: -0.025em; }
-  p { font-size: 1.1rem; color: $slate; }
+  .school-info {
+    display: flex; flex-direction: column;
+    .portal-label { font-size: 10px; font-weight: 800; text-transform: uppercase; color: $slate; letter-spacing: 0.1em; }
+    .school-name { font-size: 1.5rem; font-weight: 800; color: $midnight; margin: 0; letter-spacing: -0.02em; }
+  }
 }
 
+// --- HUB HERO ---
+.hub-hero {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+
+  .status-belt {
+    display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 1.25rem;
+    border-radius: 9999px; font-size: 0.85rem; font-weight: 600;
+    
+    &.open { background: #f0fdf4; color: #166534; border: 1px solid #dcfce7; }
+    &.teasing { background: #fffbeb; color: #92400e; border: 1px solid #fef3c7; }
+    &.closed { background: #fef2f2; color: #991b1b; border: 1px solid #fee2e2; }
+
+    .dates { font-weight: 400; opacity: 0.8; }
+  }
+
+  h1 { font-family: "Lexend", sans-serif; font-size: 2.5rem; font-weight: 800; color: $midnight; margin: 0; letter-spacing: -0.02em; }
+  .academic-label { font-size: 1.1rem; color: $slate; font-weight: 500; }
+
+  .school-note {
+    max-width: 600px; padding: 1.5rem; background: #eff6ff; border-radius: 20px;
+    border: 1px solid #bfdbfe; display: flex; gap: 1rem; text-align: left;
+    p { font-size: 0.95rem; color: #1e40af; margin: 0; line-height: 1.5; font-weight: 500; }
+    lucide-icon { shrink: 0; margin-top: 2px; }
+  }
+}
+
+// --- HUB GRID ---
 .hub-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  margin-bottom: 4rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
 }
 
 .hub-card {
-  background: #fff;
-  border: 1px solid $border;
-  border-radius: 24px;
-  padding: 2.5rem;
-  display: flex;
-  flex-direction: column;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
+  background: white; border-radius: 28px; border: 1px solid $border; padding: 2.5rem;
+  display: flex; flex-direction: column; gap: 1.5rem; transition: all 0.3s ease;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
 
-  &:hover:not(.disabled) {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
-    border-color: $primary;
+  &:hover:not(.disabled) { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05); border-color: $primary; }
+  &.disabled { opacity: 0.6; pointer-events: none; filter: grayscale(1); }
+
+  &.primary { background: $midnight; color: white; border: none;
+    .card-icon { background: rgba(255,255,255,0.1); color: white; border: none; }
+    h3 { color: white; } p { color: rgba(255,255,255,0.7); }
   }
 
-  &.primary {
-    background: linear-gradient(135deg, #fff 0%, #f0f7ff 100%);
-    border-width: 2px;
-    
-    .card-icon { background: $primary; color: #fff; }
-  }
-
-  &.disabled {
-    opacity: 0.6;
-    filter: grayscale(1);
-    cursor: not-allowed;
-  }
-
-  .card-icon {
-    width: 64px;
-    height: 64px;
-    background: $ice;
-    color: $primary;
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 1.5rem;
-  }
-
+  .card-icon { width: 56px; height: 56px; border-radius: 16px; display: grid; place-items: center; background: $ice; color: $primary; border: 1px solid $border; }
   .card-body {
-    h3 { font-size: 1.25rem; font-weight: 700; color: $midnight; margin-bottom: 0.75rem; }
-    p { font-size: 0.95rem; color: $slate; line-height: 1.5; margin-bottom: 2rem; }
+    display: flex; flex-direction: column; gap: 0.75rem; flex: 1;
+    h3 { font-size: 1.25rem; font-weight: 700; margin: 0; }
+    p { font-size: 0.95rem; color: $slate; margin: 0; line-height: 1.5; }
   }
 }
 
-// Boutons
+// --- ACTIONS ---
 .btn-hub-main {
-  width: 100%;
-  padding: 1rem;
-  background: $primary;
-  color: #fff;
-  border: none;
-  border-radius: 12px;
-  font-weight: 700;
-  display: flex; align-items: center; justify-content: center; gap: 0.75rem;
-  cursor: pointer;
-  transition: all 0.2s;
+  margin-top: auto; height: 48px; background: $primary; color: white; border: none;
+  border-radius: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+  gap: 0.75rem; cursor: pointer; transition: all 0.2s;
   &:hover { background: #1d4ed8; }
 }
 
 .btn-hub-secondary {
-  width: 100%;
-  padding: 0.875rem;
-  background: #fff;
-  color: $midnight;
-  border: 1.5px solid $border;
-  border-radius: 12px;
-  font-weight: 600;
-  display: flex; align-items: center; justify-content: center; gap: 0.75rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  &:hover { background: $ice; border-color: $slate; }
+  margin-top: auto; height: 48px; background: white; color: $midnight; border: 2px solid $midnight;
+  border-radius: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+  gap: 0.75rem; cursor: pointer; transition: all 0.2s;
+  &:hover { background: $midnight; color: white; }
 }
 
-// Formulaire Tracker
 .search-form {
-  display: flex;
-  gap: 0.5rem;
-  
-  .hub-input {
-    flex: 1;
-    padding: 0.75rem 1rem;
-    border: 1.5px solid $border;
-    border-radius: 12px;
-    font-size: 0.9rem;
-    &:focus { outline: none; border-color: $primary; }
-  }
-
-  .btn-hub-icon {
-    width: 48px;
-    height: 48px;
-    background: $midnight;
-    color: #fff;
-    border: none;
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-    &:disabled { opacity: 0.3; cursor: not-allowed; }
-  }
+  margin-top: auto; display: flex; gap: 0.5rem;
+  .hub-input { flex: 1; height: 48px; border-radius: 12px; border: 1.5px solid $border; padding: 0 1rem; font-size: 0.9rem; &:focus { outline: none; border-color: $primary; } }
+  .btn-hub-icon { width: 48px; height: 48px; border-radius: 12px; background: $midnight; color: white; border: none; display: grid; place-items: center; cursor: pointer; &:hover { background: #1e293b; } }
 }
 
-// Alerte de reprise de session
 .resume-alert {
-  background: rgba(37, 99, 235, 0.08);
-  padding: 1rem;
-  border-radius: 16px;
-  border: 1px dashed rgba(37, 99, 235, 0.3);
-
-  p { margin-bottom: 1rem !important; font-size: 0.85rem !important; color: $primary !important; font-weight: 500; }
-  
-  .resume-actions {
-    display: flex;
-    gap: 0.5rem;
-    
-    .btn-resume {
-      flex: 2;
-      padding: 0.6rem;
-      background: $primary;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .btn-reset {
-      flex: 1;
-      padding: 0.6rem;
-      background: #fff;
-      color: #ef4444;
-      border: 1px solid #fee2e2;
-      border-radius: 8px;
-      font-size: 0.8rem;
-      cursor: pointer;
-      &:hover { background: #fef2f2; }
-    }
+  margin-top: auto; padding: 1.25rem; background: rgba(255,255,255,0.05); border-radius: 16px;
+  p { font-size: 0.85rem !important; margin-bottom: 1rem !important; }
+  .resume-actions { display: flex; gap: 0.5rem;
+    button { flex: 1; height: 36px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer; }
+    .btn-resume { background: white; color: $midnight; border: none; }
+    .btn-reset { background: transparent; color: white; border: 1px solid rgba(255,255,255,0.3); &:hover { background: rgba(255,255,255,0.1); } }
   }
 }
 
-.hub-footer {
-  text-align: center;
-  border-top: 1px solid $border;
-  padding-top: 2rem;
-  
-  .info-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.75rem;
-    color: $slate;
-    font-size: 0.9rem;
-    strong { color: $midnight; }
-  }
+// --- SERVICES TEASER ---
+.services-teaser {
+  text-align: center; border-top: 1px solid $border; padding-top: 3rem;
+  h4 { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: $slate; letter-spacing: 0.1em; margin-bottom: 1.5rem; }
+  .services-badges { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+  .s-badge { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: white; border: 1px solid $border; border-radius: 10px; font-size: 0.85rem; font-weight: 600; color: $slate; }
 }
 
-.animate-fade {
-  animation: fadeIn 0.5s ease-out;
+.hub-footer { text-align: center; p { font-size: 0.85rem; color: $slate; } }
+
+.initial-loader {
+  position: fixed; inset: 0; background: white; z-index: 1000;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 1.5rem; p { font-weight: 700; color: $midnight; }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+.animate-fade { animation: fadeIn 0.5s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-@media (max-width: 640px) {
-  .hub-hero h1 { font-size: 1.75rem; }
+@media (max-width: 900px) {
   .hub-grid { grid-template-columns: 1fr; }
+  .hub-hero h1 { font-size: 2rem; }
 }

@@ -1,13 +1,16 @@
-import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, Calendar, Clock, ArrowRight, CheckCircle, Info, Mail, ShieldCheck, Sparkles, Search, RefreshCw, UserCheck } from 'lucide-angular';
+import { 
+  LucideAngularModule, Calendar, Clock, ArrowRight, CheckCircle, 
+  Info, Mail, ShieldCheck, Sparkles, Search, RefreshCw, UserCheck, ChefHat, Bus, GraduationCap
+} from 'lucide-angular';
+import { finalize } from 'rxjs';
 
 import { TenantContextService } from '../../../../core/services/tenant-context.service';
 import { AdmissionSessionService } from '../../../../core/services/admission-session.service';
-import { AcademicService } from '../../../../core/services/academic.service';
-import { AcademicYear } from '../../../../core/models/academic.model';
+import { EnrollmentPublicService, PublicPortalSummary } from '../../../../core/services/enrollment-public.service';
 
 export type WindowStatus = 'TEASING' | 'OPEN' | 'CLOSED';
 
@@ -18,52 +21,57 @@ export type WindowStatus = 'TEASING' | 'OPEN' | 'CLOSED';
   templateUrl: './public-landing.component.html',
   styleUrls: ['./public-landing.component.scss']
 })
-export class PublicLandingComponent implements OnInit, OnDestroy {
+export class PublicLandingComponent implements OnInit {
   private tenantContext = inject(TenantContextService);
   private sessionService = inject(AdmissionSessionService);
-  private academicService = inject(AcademicService);
+  private enrollmentService = inject(EnrollmentPublicService);
   private router = inject(Router);
   
   tenant = this.tenantContext.activeTenant;
   activeSession = this.sessionService.currentSession;
   hasActiveSession = this.sessionService.hasActiveSession;
 
-  // État de la période d'admission (Mocké pour la démo)
-  status = signal<WindowStatus>('OPEN');
-  activeYear = signal<AcademicYear | null>(null);
+  // --- ÉTATS ---
+  isLoading = signal(true);
+  summary = signal<PublicPortalSummary | null>(null);
+  status = signal<WindowStatus>('CLOSED');
 
   // Recherche rapide (Tracker)
   searchReference = '';
 
-  // Dates de la période (Exemple)
-  startDate = new Date('2026-04-01');
-  endDate = new Date('2026-07-31');
-
-  private timer: any;
-
   ngOnInit() {
-    this.updateStatus();
-    this.timer = setInterval(() => this.updateStatus(), 60000);
-    
-    this.academicService.getCurrentYear().subscribe({
-      next: (year) => this.activeYear.set(year),
-      error: () => console.warn('Impossible de charger l\'année active sur le hub')
+    this.loadSummary();
+  }
+
+  private loadSummary() {
+    this.isLoading.set(true);
+    this.enrollmentService.getPortalSummary().pipe(
+      finalize(() => this.isLoading.set(false))
+    ).subscribe({
+      next: (data) => {
+        this.summary.set(data);
+        this.computeStatus(data);
+      },
+      error: (err) => {
+        console.error('[Landing] Error loading summary:', err);
+        this.status.set('CLOSED');
+      }
     });
   }
 
-  ngOnDestroy() {
-    if (this.timer) clearInterval(this.timer);
-  }
-
-  updateStatus() {
-    const now = new Date();
-    // En production, cette info viendrait du service de config (EnrollmentConfig)
-    if (now < this.startDate) {
-      this.status.set('TEASING');
-    } else if (now > this.endDate) {
+  private computeStatus(data: PublicPortalSummary) {
+    if (!data.portalActive) {
       this.status.set('CLOSED');
-    } else {
+      return;
+    }
+
+    // Le backend nous dit directement si on est dans les dates (Section 2.1)
+    if (data.withinDates) {
       this.status.set('OPEN');
+    } else {
+      const now = new Date();
+      const start = new Date(data.registrationStartDate);
+      this.status.set(now < start ? 'TEASING' : 'CLOSED');
     }
   }
 
@@ -80,6 +88,10 @@ export class PublicLandingComponent implements OnInit, OnDestroy {
     }
   }
 
+  isServiceEnabled(code: string): boolean {
+    return this.summary()?.enabledServices?.includes(code) || false;
+  }
+
   // Icônes
   readonly Calendar = Calendar;
   readonly Clock = Clock;
@@ -92,4 +104,7 @@ export class PublicLandingComponent implements OnInit, OnDestroy {
   readonly Search = Search;
   readonly RefreshCw = RefreshCw;
   readonly UserCheck = UserCheck;
+  readonly ChefHat = ChefHat;
+  readonly Bus = Bus;
+  readonly GraduationCap = GraduationCap;
 }
