@@ -16,12 +16,13 @@ import {
   Info,
   RefreshCw
 } from 'lucide-angular';
-import { Subject, debounceTime, distinctUntilChanged, takeUntil, firstValueFrom } from 'rxjs';
+import {Subject, debounceTime, distinctUntilChanged, takeUntil, firstValueFrom, forkJoin} from 'rxjs';
 import { IdentityService } from '../../../../../core/services/identity.service';
 import { EnrollmentPublicService } from '../../../../../core/services/enrollment-public.service';
 import { NotificationService } from '../../../../../shared/services/notification.service';
 import { AcademicService } from '../../../../../core/services/academic.service';
 import { User as StudentUser } from '../../../../../core/models/user.model';
+import {Filiere, Level} from '../../../../../core/models/academic.model';
 
 @Component({
   selector: 'app-secretary-re-enrollment',
@@ -44,16 +45,33 @@ export class SecretaryReEnrollmentComponent implements OnInit, OnDestroy {
   selectedStudent = signal<any>(null);
   searchResults = signal<StudentUser[]>([]);
 
+  // Référentiels
+  levels = signal<Level[]>([]);
+  filieres = signal<Filiere[]>([]);
+
   private searchSubject = new Subject<string>();
   private destroy$ = new Subject<void>();
 
   ngOnInit() {
+    this.loadLevels();
     this.searchSubject.pipe(
       debounceTime(400),
       distinctUntilChanged(),
       takeUntil(this.destroy$)
     ).subscribe(query => {
       this.performSearch(query);
+    });
+  }
+
+  private loadLevels() {
+    forkJoin({
+      levels: this.academicService.getLevels(),
+      filieres: this.academicService.getFilieres()
+    }).subscribe({
+      next: ({ levels, filieres }) => {
+        this.levels.set(levels);
+        this.filieres.set(filieres);
+      }
     });
   }
 
@@ -75,7 +93,6 @@ export class SecretaryReEnrollmentComponent implements OnInit, OnDestroy {
 
     this.isLoading.set(true);
     try {
-      // On utilise IdentityService pour chercher les utilisateurs de type STUDENT
       await firstValueFrom(this.identityService.getStaff(query, 0, 10, 'STUDENT'));
       const page = this.identityService.staffPage();
       this.searchResults.set(page?.content || []);
@@ -91,7 +108,7 @@ export class SecretaryReEnrollmentComponent implements OnInit, OnDestroy {
     this.isLoading.set(true);
     try {
       const year = await firstValueFrom(this.academicService.getCurrentYear());
-      
+
       this.selectedStudent.set({
         id: student.id,
         name: `${student.firstName} ${student.lastName}`,
@@ -101,16 +118,14 @@ export class SecretaryReEnrollmentComponent implements OnInit, OnDestroy {
         phone: student.phone || '',
         academicYearId: year.id,
         academicYearLabel: year.label,
-        // Ces infos devraient idéalement venir d'un service de scolarité (StudentService)
-        // On simule pour l'instant le passage au niveau suivant
-        level: 'Niveau Actuel', 
-        nextLevel: 'Niveau Suivant',
-        nextLevelId: 'uuid-next-level' 
+        level: 'Niveau Actuel (Non renseigné)',
+        nextLevelId: '',
+        filiereId: null
       });
       this.searchQuery.set('');
       this.searchResults.set([]);
     } catch (e) {
-      this.notificationService.error('Erreur lors de la récupération des infos académiques.');
+      this.notificationService.error('Erreur lors de la récupération de l\'année académique.');
     } finally {
       this.isLoading.set(false);
     }
@@ -119,21 +134,24 @@ export class SecretaryReEnrollmentComponent implements OnInit, OnDestroy {
   // Actions
   async onSave() {
     const student = this.selectedStudent();
-    if (!student || !student.id) return;
+    if (!student || !student.id || !student.nextLevelId) {
+      this.notificationService.warning('Veuillez sélectionner un niveau de destination.');
+      return;
+    }
 
     this.isSaving.set(true);
     try {
       const payload = {
         studentId: student.id,
         academicYearId: student.academicYearId,
-        nextLevelId: student.nextLevelId
+        nextLevelId: student.nextLevelId,
+        filiereId: student.filiereId
       };
 
       const res = await firstValueFrom(this.enrollmentService.reEnroll(payload));
       if (res) {
         this.notificationService.success(`Réinscription initiée pour ${student.name}.`);
-        // Redirection vers le détail pour continuer le processus (documents, etc.)
-        this.router.navigate(['/admissions', res.id]);
+        this.router.navigate(['/admin/admissions', res.id]);
       }
     } catch (e) {
       this.notificationService.error('Erreur lors de l\'enregistrement de la réinscription.');

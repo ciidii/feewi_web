@@ -85,22 +85,35 @@
   .btn-change { background: none; border: none; color: var(--fw-slate-medium); font-size: 0.8rem; text-decoration: underline; cursor: pointer; margin-top: 0.5rem; }
 }
 
-.promotion-flow {
+.promotion-flow-vertical {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 1.5rem;
   background: var(--fw-ice);
   padding: 1.5rem;
   border-radius: var(--fw-radius-md);
 
   .level-box {
-    flex: 1; text-align: center; display: flex; flex-direction: column; gap: 0.25rem;
-    .label { font-size: 0.7rem; color: var(--fw-slate-medium); text-transform: uppercase; }
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    .label { font-size: 0.7rem; color: var(--fw-slate-medium); text-transform: uppercase; font-weight: 700; }
     .val { font-weight: 700; color: var(--fw-midnight); font-size: 1.1rem; }
     
-    &.highlight { .val { color: var(--fw-primary); } }
+    &.target { 
+      border-top: 1px dashed var(--fw-border);
+      padding-top: 1.5rem;
+    }
+  }
+
+  .flow-divider {
+    display: flex;
+    justify-content: center;
+    color: var(--fw-primary);
   }
 }
+
+.mt-4 { margin-top: 1rem; }
 
 .check-group {
   display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; cursor: pointer;

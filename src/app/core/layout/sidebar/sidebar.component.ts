@@ -49,7 +49,9 @@ export class SidebarComponent {
 
   // --- 1. ENROLLMENT SERVICE (Opérationnel) ---
   enrollmentItems = [
-    { label: 'Admissions', icon: Briefcase, route: '/admin/admissions' },
+    { label: 'Tableau de bord', icon: BarChart3, route: '/admin/admissions' },
+    { label: 'Liste des dossiers', icon: Briefcase, route: '/admin/admissions/list' },
+    { label: 'Réinscription', icon: UserPlus, route: '/admin/admissions/re-enrollment' },
     { label: 'Paramètres Portail', icon: Globe, route: '/admin/admissions/settings' },
   ];
 

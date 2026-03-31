@@ -11,6 +11,11 @@ export const SCHOOL_APP_ROUTES: Routes = [
     children: [
       {
         path: '',
+        title: 'Tableau de Bord Admissions',
+        loadComponent: () => import('./features/admissions/admission-dashboard/admission-dashboard.component').then(m => m.AdmissionDashboardComponent)
+      },
+      {
+        path: 'list',
         title: 'Liste des Admissions',
         loadComponent: () => import('./features/admissions/admission-list/admission-list.component').then(m => m.AdmissionsComponent)
       },

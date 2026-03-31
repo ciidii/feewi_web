@@ -248,21 +248,46 @@ export class PublicFormStepperComponent implements OnInit {
 
   private initializeApplication() {
     const tenantId = this.tenantContext.activeTenant()?.id || 'default';
+    const guardianData = this.formData().primaryGuardian;
+
     return this.academicService.getCurrentYear().pipe(
       switchMap(year => {
         const payload = {
-          tenantId, type: 'NEW' as const, academicYearId: year.id,
-          primaryGuardian: this.formData().primaryGuardian
+          tenantId, 
+          type: 'NEW' as const, 
+          academicYearId: year.id,
+          primaryGuardian: {
+            firstName: guardianData.firstName,
+            lastName: guardianData.lastName,
+            email: guardianData.email,
+            phone: guardianData.phone,
+            relation: guardianData.relation
+          }
         };
         return this.enrollmentService.createApplication(payload);
       }),
+      // CHANTIER A : Chaînage immédiat pour profession/adresse non supportés par le POST initial
+      switchMap(res => {
+        this.currentApplicationId.set(res.id);
+        this.application.set(res);
+        return this.enrollmentService.updateGuardians(res.id, guardianData).pipe(
+          map(updatedApp => updatedApp)
+        );
+      }),
       tap(res => {
         this.application.set(res);
-        this.currentApplicationId.set(res.id);
-        this.sessionService.saveSession(res.reference, res.accessCode, res.primaryGuardian?.firstName || '', 'STUDENT');
+        this.sessionService.saveSession(
+          res.reference, 
+          res.accessCode || '', 
+          res.primaryGuardian?.firstName || '', 
+          'STUDENT'
+        );
       }),
       map(() => true),
-      catchError(() => of(false))
+      catchError(err => {
+        console.error('[Stepper] Initialization failed:', err);
+        return of(false);
+      })
     );
   }
 

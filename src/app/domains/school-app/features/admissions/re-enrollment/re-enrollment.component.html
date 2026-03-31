@@ -52,22 +52,43 @@
       <!-- Colonne Gauche : Info Élève & Passage -->
       <section class="form-column">
         <div class="card student-card">
-          <div class="card-title">Élève Sélectionné</div>
+          <div class="card-title">Élève Sélectionné & Orientation</div>
           <div class="student-summary">
             <div class="stu-name">{{ selectedStudent().name }}</div>
             <div class="stu-id">Email : {{ selectedStudent().email }}</div>
             <button class="btn-change" (click)="selectedStudent.set(null)">Changer d'élève</button>
           </div>
 
-          <div class="promotion-flow">
-            <div class="level-box">
+          <div class="promotion-flow-vertical">
+            <div class="level-box current">
               <span class="label">Niveau Actuel</span>
               <span class="val">{{ selectedStudent().level }}</span>
             </div>
-            <lucide-icon [name]="ArrowRight" [size]="24" class="text-primary"></lucide-icon>
-            <div class="level-box highlight">
-              <span class="label">Réinscription {{ selectedStudent().academicYearLabel }}</span>
-              <span class="val">{{ selectedStudent().nextLevel }}</span>
+            
+            <div class="flow-divider">
+              <lucide-icon [name]="ArrowRight" [size]="20" class="rotate-90 md:rotate-0"></lucide-icon>
+            </div>
+
+            <div class="level-box target">
+              <span class="label">Réinscription pour {{ selectedStudent().academicYearLabel }}</span>
+              
+              <div class="grid-inputs mt-4">
+                <div class="field">
+                  <label>Niveau de destination *</label>
+                  <select [(ngModel)]="selectedStudent().nextLevelId" class="fw-input highlight">
+                    <option value="">Choisir le niveau...</option>
+                    <option *ngFor="let lvl of levels()" [value]="lvl.id">{{ lvl.name }}</option>
+                  </select>
+                </div>
+
+                <div class="field" *ngIf="selectedStudent().nextLevelId">
+                  <label>Filière (Optionnel)</label>
+                  <select [(ngModel)]="selectedStudent().filiereId" class="fw-input">
+                    <option [ngValue]="null">Aucune filière</option>
+                    <option *ngFor="let f of filieres()" [value]="f.id">{{ f.name }}</option>
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
         </div>

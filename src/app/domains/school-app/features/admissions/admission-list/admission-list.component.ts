@@ -2,18 +2,21 @@ import { Component, inject, signal, ViewEncapsulation, OnInit, computed, OnDestr
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { LucideAngularModule, Filter, Download, Layers, Clock, ShieldCheck, UserCheck, Eye, CheckCircle, XCircle, RefreshCw, Search, UserPlus, ChevronDown } from 'lucide-angular';
-import { firstValueFrom, Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
+import { firstValueFrom, Subject, debounceTime, distinctUntilChanged, takeUntil, finalize } from 'rxjs';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
 import { DataListComponent } from '../../../../../shared/components/data-list/data-list.component';
 import { RowAction, TabItem, TableRow } from '../../../../../shared/models/data-list.models';
 import { EnrollmentAdminService } from '../../../../../core/services/enrollment-admin.service';
 import { AdmissionApplication, AdmissionStatus } from '../../../../../core/models/enrollment.model';
+import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
+import { NotificationService } from '../../../../../shared/services/notification.service';
 
 @Component({
   selector: 'app-admissions',
   standalone: true,
-  imports: [CommonModule, DataListComponent, LucideAngularModule, MatMenuModule],
+  imports: [CommonModule, DataListComponent, LucideAngularModule, MatMenuModule, MatDialogModule],
   templateUrl: './admission-list.component.html',
   styleUrl: './admission-list.component.scss',
   encapsulation: ViewEncapsulation.None
@@ -21,6 +24,8 @@ import { AdmissionApplication, AdmissionStatus } from '../../../../../core/model
 export class AdmissionsComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private enrollmentAdminService = inject(EnrollmentAdminService);
+  private dialog = inject(MatDialog);
+  private notificationService = inject(NotificationService);
 
   readonly Filter = Filter;
   readonly Download = Download;
@@ -159,10 +164,59 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
   handleAction(event: { actionId: string, row: TableRow }) {
     if (event.actionId === 'view') {
       this.router.navigate(['/admin/admissions', event.row.id]);
-    } else {
-      console.log(`Action ${event.actionId} sur le dossier ${event.row.id}`);
-      // Les actions comme valider/rejeter seront implémentées dans le détail ou ici plus tard
+    } else if (event.actionId === 'validate') {
+      this.handleQuickValidate(event.row.id.toString());
+    } else if (event.actionId === 'reject') {
+      this.handleQuickReject(event.row.id.toString());
     }
+  }
+
+  private handleQuickValidate(id: string) {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Confirmer l\'admission',
+        message: 'Êtes-vous sûr de vouloir valider définitivement cette admission ?',
+        confirmLabel: 'Confirmer',
+        type: 'warning'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.isLoading.set(true);
+        this.enrollmentAdminService.validateAdmission(id).pipe(
+          finalize(() => this.isLoading.set(false))
+        ).subscribe(() => {
+          this.notificationService.success('Admission validée.');
+          this.loadAdmissions(this.searchQuery());
+        });
+      }
+    });
+  }
+
+  private handleQuickReject(id: string) {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Rejeter le dossier',
+        message: 'Cette action est irréversible. Souhaitez-vous vraiment rejeter ce dossier ?',
+        confirmLabel: 'Rejeter',
+        type: 'danger'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.isLoading.set(true);
+        this.enrollmentAdminService.rejectAdmission(id, 'Rejet rapide depuis la liste').pipe(
+          finalize(() => this.isLoading.set(false))
+        ).subscribe(() => {
+          this.notificationService.success('Dossier rejeté.');
+          this.loadAdmissions(this.searchQuery());
+        });
+      }
+    });
   }
 
 }
