@@ -1,5 +1,5 @@
 <div class="admission-config-page">
-  
+
   <header class="page-header">
     <div class="header-content">
       <div class="header-left">
@@ -9,7 +9,7 @@
         <div class="title-meta">
           <h1 class="text-2xl font-bold text-slate-900">Gouvernance du Portail</h1>
           <p class="text-sm text-slate-500">
-            Pilotage de l'expérience parent 
+            Pilotage de l'expérience parent
             <span class="text-primary font-semibold" *ngIf="activeYear()">— Année {{ activeYear()?.label }}</span>
           </p>
         </div>
@@ -20,7 +20,7 @@
           <lucide-icon [name]="Eye" [size]="18"></lucide-icon>
           <span>Aperçu Simulateur</span>
         </button>
-        <button class="btn-primary-modern" (click)="onSave()" [disabled]="isSaving() || isLoading()">
+        <button class="btn-primary-modern" (click)="onSave()" [disabled]="isSaving() || isLoading() || !isDirty()">
           <lucide-icon *ngIf="isSaving()" [name]="RefreshCw" [size]="18" class="animate-spin"></lucide-icon>
           <lucide-icon *ngIf="!isSaving()" [name]="Save" [size]="18"></lucide-icon>
           <span>{{ isSaving() ? 'Publication...' : 'Publier les changements' }}</span>
@@ -30,10 +30,10 @@
   </header>
 
   <div class="portal-admin-layout" *ngIf="config(); let cfg">
-    
+
     <aside class="scope-navigation">
       <div class="nav-section-title">Étendue du pilotage</div>
-      
+
       <button class="scope-item" [class.active]="currentScope() === 'GLOBAL'" (click)="setScope('GLOBAL')">
         <lucide-icon [name]="Globe" [size]="18"></lucide-icon>
         <span>Configuration Globale</span>
@@ -41,11 +41,11 @@
 
       <div class="nav-divider"></div>
       <div class="nav-section-title">Surcharges par niveau</div>
-      
+
       <div class="levels-scroll-area">
-        <button 
-          *ngFor="let level of levels()" 
-          class="scope-item level" 
+        <button
+          *ngFor="let level of levels()"
+          class="scope-item level"
           [class.active]="selectedLevelId() === level.id"
           (click)="setScope('LEVEL', level.id)"
         >
@@ -56,18 +56,27 @@
       </div>
     </aside>
 
-    <main class="editor-main">
-      
+    <main class="editor-main" [class.is-level-mode]="currentScope() === 'LEVEL'">
+
       <div class="scope-banner" [class.is-level]="currentScope() === 'LEVEL'">
         <lucide-icon [name]="currentScope() === 'GLOBAL' ? Globe : GraduationCap" [size]="20"></lucide-icon>
         <div class="content">
           <span class="title">{{ currentScope() === 'GLOBAL' ? 'Mode : Configuration par défaut' : 'Mode : Surcharge par niveau' }}</span>
-          <p>{{ currentScope() === 'GLOBAL' ? 'Modifiez les règles s\'appliquant à l\'ensemble de l\'établissement.' : 'Ces paramètres écrasent les règles globales pour ce niveau uniquement.' }}</p>
+          <p>{{ currentScope() === 'GLOBAL' ? 'Modifiez les règles s\'appliquant à l\'ensemble de l\'établissement.' : 'Paramètres spécifiques pour ce niveau.' }}</p>
+        </div>
+
+        <!-- Badge de rappel contextuel -->
+        <div class="ml-auto flex flex-col items-end" *ngIf="currentScope() === 'LEVEL'">
+          <span class="text-[10px] font-bold text-emerald-600 uppercase mb-1">Édition ciblée</span>
+          <div class="inheritance-badge customized">
+            <lucide-icon [name]="ShieldCheck" [size]="14"></lucide-icon>
+            <span>Niveau actif : {{ selectedLevelId() }}</span>
+          </div>
         </div>
       </div>
 
       <div class="sections-container space-y-8">
-        
+
         <!-- 01. DISPONIBILITÉ (GLOBAL ONLY) -->
         <section class="numbered-section" *ngIf="currentScope() === 'GLOBAL'">
           <div class="section-head">
@@ -77,7 +86,7 @@
               <p>Contrôle manuel et automatique de l'ouverture.</p>
             </div>
           </div>
-          
+
           <div class="section-content card-inner">
             <div class="status-control-row">
               <div class="status-info">
@@ -95,11 +104,11 @@
             <div class="date-inputs grid grid-cols-2 gap-6 mt-6" *ngIf="cfg.admissionWindow">
               <div class="form-group">
                 <label>Date d'ouverture automatique</label>
-                <input type="date" [(ngModel)]="cfg.admissionWindow.startDate" class="fw-input-modern">
+                <input type="date" [ngModel]="cfg.admissionWindow.startDate" (ngModelChange)="updateAdmissionWindow({ startDate: $event })" class="fw-input-modern">
               </div>
               <div class="form-group">
                 <label>Date de clôture automatique</label>
-                <input type="date" [(ngModel)]="cfg.admissionWindow.endDate" class="fw-input-modern">
+                <input type="date" [ngModel]="cfg.admissionWindow.endDate" (ngModelChange)="updateAdmissionWindow({ endDate: $event })" class="fw-input-modern">
               </div>
             </div>
           </div>
@@ -118,22 +127,31 @@
             <div class="service-toggle-card" [class.active]="isServiceEnabled('CANTEEN')" (click)="toggleService('CANTEEN')">
               <lucide-icon [name]="ChefHat" [size]="20"></lucide-icon>
               <span>Restauration scolaire</span>
-              <mat-checkbox [checked]="isServiceEnabled('CANTEEN')" color="primary" class="ml-auto" (click)="$event.stopPropagation()"></mat-checkbox>
+              <mat-checkbox [checked]="isServiceEnabled('CANTEEN')" color="primary" class="ml-auto" (change)="toggleService('CANTEEN')" (click)="$event.stopPropagation()"></mat-checkbox>
             </div>
             <div class="service-toggle-card" [class.active]="isServiceEnabled('TRANSPORT')" (click)="toggleService('TRANSPORT')">
               <lucide-icon [name]="Bus" [size]="20"></lucide-icon>
               <span>Transport & Ramassage</span>
-              <mat-checkbox [checked]="isServiceEnabled('TRANSPORT')" color="primary" class="ml-auto" (click)="$event.stopPropagation()"></mat-checkbox>
+              <mat-checkbox [checked]="isServiceEnabled('TRANSPORT')" color="primary" class="ml-auto" (change)="toggleService('TRANSPORT')" (click)="$event.stopPropagation()"></mat-checkbox>
             </div>
           </div>
         </section>
 
         <!-- 03. CHAMPS STANDARDS -->
-        <section class="numbered-section">
+        <section class="numbered-section" [class.is-overridden]="isSectionOverridden('CORE')">
           <div class="section-head">
             <div class="step-pill">{{ currentScope() === 'GLOBAL' ? '03' : '01' }}</div>
             <div class="section-title">
-              <h4>Personnalisation des champs standards</h4>
+              <div class="flex items-center gap-3">
+                <h4>Personnalisation des champs standards</h4>
+
+                <!-- UX Intelligence : Badge d'Héritage -->
+                <div *ngIf="currentScope() === 'LEVEL'" class="inheritance-badge" [class.customized]="isSectionOverridden('CORE')" [class.inherited]="!isSectionOverridden('CORE')">
+                  <lucide-icon [name]="isSectionOverridden('CORE') ? Sparkles : Globe" [size]="12"></lucide-icon>
+                  <span>{{ isSectionOverridden('CORE') ? 'Réglage spécifique' : 'Utilise les réglages école' }}</span>
+                </div>
+                <button *ngIf="isSectionOverridden('CORE')" (click)="resetSectionToGlobal('CORE')" class="btn-reset-link">Revenir au global</button>
+              </div>
               <p>Pilotez la visibilité et l'exigence des champs du noyau dur.</p>
             </div>
           </div>
@@ -160,11 +178,20 @@
         </section>
 
         <!-- 04. DOCUMENTS -->
-        <section class="numbered-section">
+        <section class="numbered-section" [class.is-overridden]="isSectionOverridden('DOCS')">
           <div class="section-head">
             <div class="step-pill">{{ currentScope() === 'GLOBAL' ? '04' : '02' }}</div>
             <div class="section-title">
-              <h4>Exigences Documentaires</h4>
+              <div class="flex items-center gap-3">
+                <h4>Exigences Documentaires</h4>
+
+                <!-- UX Intelligence : Badge d'Héritage -->
+                <div *ngIf="currentScope() === 'LEVEL'" class="inheritance-badge" [class.customized]="isSectionOverridden('DOCS')" [class.inherited]="!isSectionOverridden('DOCS')">
+                  <lucide-icon [name]="isSectionOverridden('DOCS') ? Sparkles : Globe" [size]="12"></lucide-icon>
+                  <span>{{ isSectionOverridden('DOCS') ? 'Liste personnalisée' : 'Utilise les réglages école' }}</span>
+                </div>
+                <button *ngIf="isSectionOverridden('DOCS')" (click)="resetSectionToGlobal('DOCS')" class="btn-reset-link">Réinitialiser la liste</button>
+              </div>
               <p>Pièces justificatives à charger par les parents.</p>
             </div>
           </div>
@@ -192,11 +219,18 @@
         </section>
 
         <!-- 05. QUESTIONS LIBRES -->
-        <section class="numbered-section">
+        <section class="numbered-section" [class.is-overridden]="isSectionOverridden('FIELDS')">
           <div class="section-head">
             <div class="step-pill">{{ currentScope() === 'GLOBAL' ? '05' : '03' }}</div>
             <div class="section-title">
-              <h4>Questions Spécifiques (École)</h4>
+              <div class="flex items-center gap-3">
+                <h4>Questions Spécifiques (École)</h4>
+                <div *ngIf="currentScope() === 'LEVEL'" class="inheritance-badge" [class.customized]="isSectionOverridden('FIELDS')" [class.inherited]="!isSectionOverridden('FIELDS')">
+                  <lucide-icon [name]="isSectionOverridden('FIELDS') ? Sparkles : Globe" [size]="12"></lucide-icon>
+                  <span>{{ isSectionOverridden('FIELDS') ? 'Questions ciblées' : 'Hérité du global' }}</span>
+                </div>
+                <button *ngIf="isSectionOverridden('FIELDS')" (click)="resetSectionToGlobal('FIELDS')" class="btn-reset-link">Effacer les questions</button>
+              </div>
               <p>Champs totalement libres à ajouter au formulaire.</p>
             </div>
           </div>
@@ -221,11 +255,18 @@
         </section>
 
         <!-- 06. POLITIQUE D'ÉVALUATION -->
-        <section class="numbered-section">
+        <section class="numbered-section" [class.is-overridden]="isSectionOverridden('ASSESS')">
           <div class="section-head">
             <div class="step-pill">{{ currentScope() === 'GLOBAL' ? '06' : '04' }}</div>
             <div class="section-title">
-              <h4>Politique d'Évaluation</h4>
+              <div class="flex items-center gap-3">
+                <h4>Politique d'Évaluation</h4>
+                <div *ngIf="currentScope() === 'LEVEL'" class="inheritance-badge" [class.customized]="isSectionOverridden('ASSESS')" [class.inherited]="!isSectionOverridden('ASSESS')">
+                  <lucide-icon [name]="isSectionOverridden('ASSESS') ? Sparkles : Globe" [size]="12"></lucide-icon>
+                  <span>{{ isSectionOverridden('ASSESS') ? 'Examen spécifique' : 'Hérité du global' }}</span>
+                </div>
+                <button *ngIf="isSectionOverridden('ASSESS')" (click)="resetSectionToGlobal('ASSESS')" class="btn-reset-link">Revenir au global</button>
+              </div>
               <p>Définissez les modalités de sélection des candidats.</p>
             </div>
           </div>
@@ -233,7 +274,7 @@
             <div class="grid grid-cols-2 gap-6">
               <div class="form-group">
                 <label>Mode de sélection</label>
-                <select [ngModel]="activeAssessmentConfig().assessmentType" (ngModelChange)="updateAssessmentType($event)" class="fw-input-modern">
+                <select [ngModel]="activeAssessmentConfig().type" (ngModelChange)="updateAssessmentType($event)" class="fw-input-modern">
                   <option value="DOSSIER">Étude de dossier uniquement</option>
                   <option value="EXAM">Concours / Examen d'entrée</option>
                   <option value="INTERVIEW">Entretien oral</option>
@@ -245,21 +286,57 @@
               </div>
             </div>
 
-            <div class="subjects-selector-box pt-4 border-t border-slate-100">
-              <label class="text-xs font-bold text-slate-500 uppercase mb-3 block">Matières à évaluer</label>
-              <div class="flex flex-wrap gap-2 mb-4">
-                <div *ngFor="let sub of activeAssessmentConfig()?.subjects" class="subject-tag">
-                  <span>{{ sub }}</span>
-                  <button (click)="removeSubject(sub)"><lucide-icon [name]="Trash2" [size]="12"></lucide-icon></button>
+            <div class="subjects-management-box pt-6 border-t border-slate-100">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <label class="text-xs font-bold text-slate-900 uppercase tracking-wider block">Matières à évaluer</label>
+                  <p class="text-[11px] text-slate-500">Ajoutez les disciplines qui feront l'objet d'une notation.</p>
                 </div>
-                <div *ngIf="!activeAssessmentConfig()?.subjects?.length" class="text-sm text-slate-400 italic">Aucune matière configurée.</div>
+                <span class="badge-count">{{ activeAssessmentConfig().subjects.length }} matière(s)</span>
               </div>
-              
-              <div class="flex gap-2">
-                <input type="text" #subInput placeholder="Ex: Anglais, Français, Logique..." class="fw-input-modern flex-1 h-10" (keyup.enter)="addSubject(subInput)">
-                <button class="btn-primary-modern h-10 px-4" (click)="addSubject(subInput)">
-                  <lucide-icon [name]="Plus" [size]="16"></lucide-icon>
+
+              <!-- Input Moderne avec bouton intégré -->
+              <div class="tag-input-container group" [class.has-content]="subjectInput.value.trim().length > 0">
+                <lucide-icon [name]="BookOpen" class="input-icon"></lucide-icon>
+                <input
+                  type="text"
+                  #subjectInput
+                  (input)="0"
+                  placeholder="Saisissez une matière (ex: Mathématiques)..."
+                  class="tag-input-field"
+                  (keyup.enter)="addSubject(subjectInput)">
+
+                <button
+                  type="button"
+                  class="btn-add-tag"
+                  [disabled]="!subjectInput.value.trim()"
+                  (click)="addSubject(subjectInput)"
+                  title="Ajouter à la liste">
+                  <lucide-icon [name]="Plus" [size]="18"></lucide-icon>
+                  <span>Ajouter</span>
                 </button>
+              </div>
+              <p class="text-[10px] text-slate-400 mt-2 ml-1 italic">Astuce : Appuyez sur la touche "Entrée" pour valider rapidement.</p>
+
+              <!-- Liste des matières (Chips) -->
+              <div class="subjects-display-area mt-6">
+                @if (activeAssessmentConfig().subjects.length) {
+                  <div class="chips-grid">
+                    @for (sub of activeAssessmentConfig().subjects; track sub) {
+                      <div class="subject-chip animate-in fade-in zoom-in duration-200">
+                        <span class="chip-text">{{ sub }}</span>
+                        <button class="chip-remove" (click)="removeSubject(sub)" title="Retirer">
+                          <lucide-icon [name]="X" [size]="14"></lucide-icon>
+                        </button>
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <div class="empty-subjects-state">
+                    <lucide-icon [name]="ClipboardCheck" [size]="32" class="text-slate-200 mb-2"></lucide-icon>
+                    <p>Aucune matière n'a encore été ajoutée.</p>
+                  </div>
+                }
               </div>
             </div>
           </div>
@@ -277,11 +354,11 @@
           <div class="section-content space-y-4 card-inner">
             <div class="form-group">
               <label>Instructions aux parents (Accueil)</label>
-              <textarea [(ngModel)]="cfg.instructions['general']" rows="3" class="fw-textarea-modern" placeholder="Ex: Veuillez préparer vos documents scannés..."></textarea>
+              <textarea [ngModel]="cfg.instructions['general']" (ngModelChange)="updateInstruction('general', $event)" rows="3" class="fw-textarea-modern" placeholder="Ex: Veuillez préparer vos documents scannés..."></textarea>
             </div>
             <div class="form-group">
               <label>Texte légal / Consentement (RGPD)</label>
-              <textarea [(ngModel)]="cfg.legalText" rows="3" class="fw-textarea-modern" placeholder="Ex: En soumettant ce formulaire, j'accepte que..."></textarea>
+              <textarea [ngModel]="cfg.legalText" (ngModelChange)="updateLegalText($event)" rows="3" class="fw-textarea-modern" placeholder="Ex: En soumettant ce formulaire, j'accepte que..."></textarea>
             </div>
           </div>
         </section>

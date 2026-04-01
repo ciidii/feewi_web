@@ -1,11 +1,11 @@
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { Component, inject, signal, OnInit, computed, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { 
-  LucideAngularModule, Globe, Save, RefreshCw, Eye, 
+import {
+  LucideAngularModule, Globe, Save, RefreshCw, Eye,
   Calendar, FileText, ShieldCheck, ToggleLeft as ToggleIcon,
   ChefHat, Bus, MessageSquare, Plus, Trash2, Settings2,
-  GraduationCap, Info, AlertTriangle, LayoutGrid, UserCog, ClipboardCheck
+  GraduationCap, Info, AlertTriangle, LayoutGrid, UserCog, ClipboardCheck, BookOpen, X, Sparkles
 } from 'lucide-angular';
 import { finalize, forkJoin, Observable, of } from 'rxjs';
 import { EnrollmentAdminService } from '../../../../../core/services/enrollment-admin.service';
@@ -28,11 +28,11 @@ export type ConfigScope = 'GLOBAL' | 'LEVEL';
   selector: 'app-admission-config',
   standalone: true,
   imports: [
-    CommonModule, 
-    FormsModule, 
-    LucideAngularModule, 
-    MatCheckboxModule, 
-    MatDialogModule, 
+    CommonModule,
+    FormsModule,
+    LucideAngularModule,
+    MatCheckboxModule,
+    MatDialogModule,
     MatSelectModule
   ],
   templateUrl: './admission-config.component.html',
@@ -44,20 +44,33 @@ export class AdmissionConfigComponent implements OnInit {
   private notificationService = inject(NotificationService);
   private dialog = inject(MatDialog);
 
+  @ViewChild('subjectInput') subjectInput?: ElementRef<HTMLInputElement>;
+
   // --- ÉTATS ---
   config = signal<EnrollmentConfig | null>(null);
+  initialConfig = signal<EnrollmentConfig | null>(null);
   activeYear = signal<AcademicYear | null>(null);
   levels = signal<Level[]>([]);
-  
+
   isLoading = signal(true);
   isSaving = signal(false);
 
   currentScope = signal<ConfigScope>('GLOBAL');
   selectedLevelId = signal<string | null>(null);
 
+  // --- CALCULS RÉACTIFS ---
+
+  /** Détermine si des modifications ont été effectuées par rapport à l'état initial */
+  isDirty = computed(() => {
+    const current = this.config();
+    const initial = this.initialConfig();
+    if (!current || !initial) return false;
+    return JSON.stringify(current) !== JSON.stringify(initial);
+  });
+
   // Liste des champs standards pilotables
   readonly coreFieldsList = [
-    { key: 'gender', label: 'Sexe / Genre', category: 'Candidat' },
+    { key: 'gender', label: 'Sexe', category: 'Candidat' },
     { key: 'birthPlace', label: 'Lieu de naissance', category: 'Candidat' },
     { key: 'nationality', label: 'Nationalité', category: 'Candidat' },
     { key: 'previousSchool', label: 'École d\'origine', category: 'Candidat' },
@@ -99,34 +112,13 @@ export class AdmissionConfigComponent implements OnInit {
 
   activeAssessmentConfig = computed(() => {
     const cfg = this.config();
-    if (!cfg) return { assessmentType: 'DOSSIER', subjects: [], minPassingGrade: 10 } as AssessmentConfig;
+    if (!cfg) return { type: 'DOSSIER', subjects: [], minPassingGrade: 10 } as AssessmentConfig;
     if (this.currentScope() === 'LEVEL' && this.selectedLevelId()) {
       const override = cfg.levelOverrides?.[this.selectedLevelId()!];
       if (override?.assessmentConfig) return override.assessmentConfig;
     }
     return cfg.defaultAssessmentConfig;
   });
-
-  // Icônes
-  readonly Globe = Globe;
-  readonly Save = Save;
-  readonly RefreshCw = RefreshCw;
-  readonly Eye = Eye;
-  readonly Calendar = Calendar;
-  readonly FileText = FileText;
-  readonly ShieldCheck = ShieldCheck;
-  readonly ToggleIcon = ToggleIcon;
-  readonly ChefHat = ChefHat;
-  readonly Bus = Bus;
-  readonly MessageSquare = MessageSquare;
-  readonly Plus = Plus;
-  readonly Trash2 = Trash2;
-  readonly Settings2 = Settings2;
-  readonly GraduationCap = GraduationCap;
-  readonly Info = Info;
-  readonly LayoutGrid = LayoutGrid;
-  readonly UserCog = UserCog;
-  readonly ClipboardCheck = ClipboardCheck;
 
   ngOnInit() {
     this.loadInitialData();
@@ -150,6 +142,8 @@ export class AdmissionConfigComponent implements OnInit {
           };
         }
         this.config.set(securedConfig);
+        // On clone l'objet pour avoir une référence différente pour la comparaison
+        this.initialConfig.set(JSON.parse(JSON.stringify(securedConfig)));
         this.activeYear.set(year);
         this.levels.set(levels);
       },
@@ -163,7 +157,10 @@ export class AdmissionConfigComponent implements OnInit {
       defaultChecklist: config.defaultChecklist || [],
       defaultFormSchema: config.defaultFormSchema || { customFields: [] },
       defaultCoreOverrides: config.defaultCoreOverrides || {},
-      defaultAssessmentConfig: config.defaultAssessmentConfig || { assessmentType: 'DOSSIER', subjects: [], minPassingGrade: 10 },
+      defaultAssessmentConfig: config.defaultAssessmentConfig ? {
+        ...config.defaultAssessmentConfig,
+        subjects: config.defaultAssessmentConfig.subjects || []
+      } : { type: 'DOSSIER', subjects: [], minPassingGrade: 10 },
       enabledServices: config.enabledServices || [],
       levelOverrides: config.levelOverrides || {},
       instructions: config.instructions || { 'general': '' },
@@ -173,12 +170,21 @@ export class AdmissionConfigComponent implements OnInit {
   }
 
   onSave() {
+    // CHANTIER UX : On force l'ajout de la matière s'il en reste une dans le champ
+    if (this.subjectInput?.nativeElement.value.trim()) {
+      this.addSubject(this.subjectInput.nativeElement);
+    }
+
     const currentConfig = this.config();
     const year = this.activeYear();
     if (!currentConfig || !year) return;
 
     this.isSaving.set(true);
-    const { admissionWindow, portalActive, ...payload } = currentConfig;
+
+    // On n'exclut plus portalActive, on veut envoyer l'état actuel complet
+    // On n'exclut que admissionWindow car c'est une propriété helper pour l'UI
+    // qui n'existe pas sur le modèle de base du backend
+    const { admissionWindow, ...payload } = currentConfig;
 
     let configOp$: Observable<any>;
     if (this.currentScope() === 'GLOBAL') {
@@ -204,6 +210,8 @@ export class AdmissionConfigComponent implements OnInit {
     ).subscribe({
       next: () => {
         this.notificationService.success('Configuration et calendrier publiés avec succès.');
+        // On synchronise le snapshot initial avec le nouvel état sauvegardé
+        this.initialConfig.set(JSON.parse(JSON.stringify(currentConfig)));
       },
       error: (err) => {
         console.error('[AdmissionConfig] Erreur sauvegarde:', err);
@@ -215,6 +223,46 @@ export class AdmissionConfigComponent implements OnInit {
   setScope(scope: ConfigScope, levelId: string | null = null) {
     this.currentScope.set(scope);
     this.selectedLevelId.set(levelId);
+    window.scrollTo(0, 0); // Reset scroll pour le confort
+  }
+
+  /** HELPER UX : Vérifie si une section est personnalisée pour le niveau actuel */
+  isSectionOverridden(section: 'DOCS' | 'CORE' | 'FIELDS' | 'ASSESS'): boolean {
+    if (this.currentScope() === 'GLOBAL') return false;
+    const levelId = this.selectedLevelId();
+    if (!levelId) return false;
+
+    const override = this.config()?.levelOverrides?.[levelId];
+    if (!override) return false;
+
+    switch (section) {
+      case 'DOCS': return !!override.documentChecklist?.length;
+      case 'CORE': return !!(override.coreFieldOverrides && Object.keys(override.coreFieldOverrides).length);
+      case 'FIELDS': return !!override.formSchema?.customFields?.length;
+      case 'ASSESS': return !!override.assessmentConfig;
+      default: return false;
+    }
+  }
+
+  /** ACTION UX : Supprime la surcharge d'une section pour revenir au global */
+  resetSectionToGlobal(section: 'DOCS' | 'CORE' | 'FIELDS' | 'ASSESS') {
+    const current = this.config();
+    const levelId = this.selectedLevelId();
+    if (!current || !levelId) return;
+
+    const levelOverrides = { ...current.levelOverrides };
+    const override = { ...(levelOverrides[levelId] || this.createEmptyLevelOverride()) };
+
+    switch (section) {
+      case 'DOCS': delete override.documentChecklist; break;
+      case 'CORE': delete override.coreFieldOverrides; break;
+      case 'FIELDS': delete override.formSchema; break;
+      case 'ASSESS': delete override.assessmentConfig; break;
+    }
+
+    levelOverrides[levelId] = override;
+    this.config.set({ ...current, levelOverrides });
+    this.notificationService.info('Réglage réinitialisé aux valeurs par défaut de l\'école.');
   }
 
   // --- GESTION DES CHAMPS STANDARDS (Core Overrides) ---
@@ -235,18 +283,24 @@ export class AdmissionConfigComponent implements OnInit {
       this.config.set({ ...current, defaultCoreOverrides: overrides });
     } else {
       const levelId = this.selectedLevelId()!;
-      const levelOverrides = { ...current.levelOverrides };
-      const levelOverride = levelOverrides[levelId] || this.createEmptyLevelOverride();
-      levelOverride.coreFieldOverrides = { ...levelOverride.coreFieldOverrides, [key]: updatedControl };
-      levelOverrides[levelId] = levelOverride;
-      this.config.set({ ...current, levelOverrides });
+      const existingOverride = current.levelOverrides?.[levelId] || this.createEmptyLevelOverride();
+
+      const levelOverride = {
+        ...existingOverride,
+        coreFieldOverrides: { ...existingOverride.coreFieldOverrides, [key]: updatedControl }
+      };
+
+      this.config.set({
+        ...current,
+        levelOverrides: { ...current.levelOverrides, [levelId]: levelOverride }
+      });
     }
   }
 
   // --- GESTION DE L'ÉVALUATION ---
 
   updateAssessmentType(type: 'EXAM' | 'DOSSIER' | 'INTERVIEW') {
-    this.updateActiveAssessment({ assessmentType: type });
+    this.updateActiveAssessment({ type: type });
   }
 
   updateMinGrade(grade: number) {
@@ -256,7 +310,7 @@ export class AdmissionConfigComponent implements OnInit {
   addSubject(subjectInput: HTMLInputElement) {
     const subject = subjectInput.value.trim();
     if (!subject) return;
-    const currentSubjects = this.activeAssessmentConfig().subjects;
+    const currentSubjects = this.activeAssessmentConfig().subjects || [];
     if (!currentSubjects.includes(subject)) {
       this.updateActiveAssessment({ subjects: [...currentSubjects, subject] });
       subjectInput.value = '';
@@ -264,7 +318,7 @@ export class AdmissionConfigComponent implements OnInit {
   }
 
   removeSubject(subject: string) {
-    const updated = this.activeAssessmentConfig().subjects.filter(s => s !== subject);
+    const updated = (this.activeAssessmentConfig().subjects || []).filter(s => s !== subject);
     this.updateActiveAssessment({ subjects: updated });
   }
 
@@ -277,11 +331,17 @@ export class AdmissionConfigComponent implements OnInit {
       this.config.set({ ...current, defaultAssessmentConfig: updated });
     } else {
       const levelId = this.selectedLevelId()!;
-      const overrides = { ...current.levelOverrides };
-      const levelOverride = overrides[levelId] || this.createEmptyLevelOverride();
-      levelOverride.assessmentConfig = updated;
-      overrides[levelId] = levelOverride;
-      this.config.set({ ...current, levelOverrides: overrides });
+      const existingOverride = current.levelOverrides?.[levelId] || this.createEmptyLevelOverride();
+
+      const levelOverride = {
+        ...existingOverride,
+        assessmentConfig: updated
+      };
+
+      this.config.set({
+        ...current,
+        levelOverrides: { ...current.levelOverrides, [levelId]: levelOverride }
+      });
     }
   }
 
@@ -330,24 +390,30 @@ export class AdmissionConfigComponent implements OnInit {
   }
 
   updateDocumentMandatory(code: string, mandatory: boolean) {
-    const updated = this.activeChecklist().map((doc: RequiredDocumentConfig) => 
+    const updated = this.activeChecklist().map((doc: RequiredDocumentConfig) =>
       doc.code === code ? { ...doc, mandatory } : doc
     );
     this.updateActiveChecklist(updated);
   }
 
-  private updateActiveChecklist(list: any[]) {
+  private updateActiveChecklist(list: RequiredDocumentConfig[]) {
     const current = this.config();
     if (!current) return;
     if (this.currentScope() === 'GLOBAL') {
       this.config.set({ ...current, defaultChecklist: list });
     } else {
       const levelId = this.selectedLevelId()!;
-      const overrides = { ...current.levelOverrides };
-      const levelOverride = overrides[levelId] || this.createEmptyLevelOverride();
-      levelOverride.documentChecklist = list;
-      overrides[levelId] = levelOverride;
-      this.config.set({ ...current, levelOverrides: overrides });
+      const existingOverride = current.levelOverrides?.[levelId] || this.createEmptyLevelOverride();
+
+      const levelOverride = {
+        ...existingOverride,
+        documentChecklist: list
+      };
+
+      this.config.set({
+        ...current,
+        levelOverrides: { ...current.levelOverrides, [levelId]: levelOverride }
+      });
     }
   }
 
@@ -404,15 +470,51 @@ export class AdmissionConfigComponent implements OnInit {
       this.config.set({ ...current, defaultFormSchema: { ...current.defaultFormSchema, customFields: list } });
     } else {
       const levelId = this.selectedLevelId()!;
-      const overrides = { ...current.levelOverrides };
-      const levelOverride = overrides[levelId] || this.createEmptyLevelOverride();
-      levelOverride.formSchema = { ...levelOverride.formSchema, customFields: list };
-      overrides[levelId] = levelOverride;
-      this.config.set({ ...current, levelOverrides: overrides });
+      const existingOverride = current.levelOverrides?.[levelId] || this.createEmptyLevelOverride();
+
+      const levelOverride = {
+        ...existingOverride,
+        formSchema: { ...existingOverride.formSchema, customFields: list }
+      };
+
+      this.config.set({
+        ...current,
+        levelOverrides: { ...current.levelOverrides, [levelId]: levelOverride }
+      });
     }
   }
 
   // --- ACTIONS DIVERSES ---
+
+  updateAdmissionWindow(patch: Partial<{ startDate: string; endDate: string }>) {
+    const current = this.config();
+    if (current && current.admissionWindow) {
+      this.updateConfigField({
+        admissionWindow: { ...current.admissionWindow, ...patch }
+      });
+    }
+  }
+
+  updateInstruction(key: string, value: string) {
+    const current = this.config();
+    if (current) {
+      this.updateConfigField({
+        instructions: { ...current.instructions, [key]: value }
+      });
+    }
+  }
+
+  updateLegalText(text: string) {
+    this.updateConfigField({ legalText: text });
+  }
+
+  /** Mise à jour générique d'un champ de la config pour garantir l'immuabilité et la réactivité */
+  updateConfigField(patch: Partial<EnrollmentConfig>) {
+    const current = this.config();
+    if (current) {
+      this.config.set({ ...current, ...patch });
+    }
+  }
 
   private createEmptyLevelOverride(): LevelOverrideConfig {
     return {
@@ -456,4 +558,28 @@ export class AdmissionConfigComponent implements OnInit {
       data: { config: this.config(), activeYear: this.activeYear() }
     });
   }
+
+  // Icônes
+  readonly Globe = Globe;
+  readonly Save = Save;
+  readonly RefreshCw = RefreshCw;
+  readonly Eye = Eye;
+  readonly Calendar = Calendar;
+  readonly FileText = FileText;
+  readonly ShieldCheck = ShieldCheck;
+  readonly ToggleIcon = ToggleIcon;
+  readonly ChefHat = ChefHat;
+  readonly Bus = Bus;
+  readonly MessageSquare = MessageSquare;
+  readonly Plus = Plus;
+  readonly Trash2 = Trash2;
+  readonly Settings2 = Settings2;
+  readonly GraduationCap = GraduationCap;
+  readonly Info = Info;
+  readonly LayoutGrid = LayoutGrid;
+  readonly UserCog = UserCog;
+  readonly ClipboardCheck = ClipboardCheck;
+  protected readonly X = X;
+  protected readonly BookOpen = BookOpen;
+  protected readonly Sparkles = Sparkles;
 }

@@ -1,25 +1,25 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
 import {
-  LucideAngularModule,
-  Users,
-  GraduationCap,
-  TrendingUp,
   Activity,
-  Clock,
-  ShieldCheck,
   CheckCircle,
-  XCircle,
+  Clock,
   FileText,
-  LayoutDashboard,
   Filter,
-  RefreshCw
+  GraduationCap,
+  LayoutDashboard,
+  LucideAngularModule,
+  RefreshCw,
+  ShieldCheck,
+  TrendingUp,
+  Users,
+  XCircle
 } from 'lucide-angular';
-import { EnrollmentAdminService } from '../../../../../core/services/enrollment-admin.service';
-import { AcademicService } from '../../../../../core/services/academic.service';
-import { AdmissionApplication, AdmissionStatus } from '../../../../../core/models/enrollment.model';
-import { Level } from '../../../../../core/models/academic.model';
-import { forkJoin, finalize } from 'rxjs';
+import {EnrollmentAdminService} from '../../../../../core/services/enrollment-admin.service';
+import {AcademicService} from '../../../../../core/services/academic.service';
+import {AdmissionApplication} from '../../../../../core/models/enrollment.model';
+import {Level} from '../../../../../core/models/academic.model';
+import {finalize, forkJoin} from 'rxjs';
 
 @Component({
   selector: 'app-admission-dashboard',
@@ -85,7 +85,7 @@ export class AdmissionDashboardComponent implements OnInit {
     }).pipe(
       finalize(() => this.isLoading.set(false))
     ).subscribe({
-      next: ({ apps, levels }) => {
+      next: ({apps, levels}) => {
         this.applications.set(apps);
         this.levels.set(levels);
       }

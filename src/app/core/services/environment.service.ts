@@ -1,5 +1,5 @@
-import { Inject, Injectable } from '@angular/core';
-import { ENVIRONMENT_CONFIG, Environment } from '../../../environments/environment.interface';
+import {Inject, Injectable} from '@angular/core';
+import {Environment, ENVIRONMENT_CONFIG} from '../../../environments/environment.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -7,7 +7,8 @@ import { ENVIRONMENT_CONFIG, Environment } from '../../../environments/environme
 export class EnvironmentService {
   constructor(
     @Inject(ENVIRONMENT_CONFIG) private readonly _config: Environment
-  ) {}
+  ) {
+  }
 
   get config(): Environment {
     return this._config;
@@ -22,14 +23,14 @@ export class EnvironmentService {
   }
 
   getApiUrl(): string {
-    const { apiUrl, apiVersion } = this._config;
+    const {apiUrl, apiVersion} = this._config;
     // Si apiUrl est vide, on utilise une URL relative (utile pour le proxy de dev)
     return apiUrl ? `${apiUrl}/${apiVersion}` : `/${apiVersion}`;
   }
 
   getServiceUrl(service: keyof Environment['services']): string {
     const servicePath = this._config.services[service];
-    const { apiUrl } = this._config;
+    const {apiUrl} = this._config;
 
     // Si le chemin du service commence par /, on vérifie s'il faut préfixer par l'apiUrl
     if (servicePath.startsWith('/')) {

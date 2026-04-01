@@ -1,9 +1,14 @@
 import {HttpClient, HttpParams} from "@angular/common/http";
-import {inject, Injectable } from "@angular/core";
-import { EnvironmentService } from "./environment.service";
-import { NotificationService } from "../../shared/services/notification.service";
+import {inject, Injectable} from "@angular/core";
+import {EnvironmentService} from "./environment.service";
+import {NotificationService} from "../../shared/services/notification.service";
 import {catchError, Observable, throwError} from "rxjs";
-import {AdmissionApplication, AssessmentRequest, EnrollmentConfig, LevelOverrideConfig} from '../models/enrollment.model';
+import {
+  AdmissionApplication,
+  AssessmentRequest,
+  EnrollmentConfig,
+  LevelOverrideConfig
+} from '../models/enrollment.model';
 
 
 @Injectable({
@@ -13,7 +18,6 @@ export class EnrollmentAdminService {
   private http = inject(HttpClient);
   private envService = inject(EnvironmentService);
   private notificationService = inject(NotificationService);
-
   private readonly baseUrl = this.envService.getServiceUrl('enrollment');
 
   private handleError(message: string) {
@@ -35,7 +39,7 @@ export class EnrollmentAdminService {
 
   searchApplications(query: string): Observable<AdmissionApplication[]> {
     const params = new HttpParams().set('q', query);
-    return this.http.get<AdmissionApplication[]>(`${this.baseUrl}/admin/applications/search`, { params }).pipe(
+    return this.http.get<AdmissionApplication[]>(`${this.baseUrl}/admin/applications/search`, {params}).pipe(
       catchError(this.handleError('Erreur lors de la recherche'))
     );
   }
@@ -72,7 +76,7 @@ export class EnrollmentAdminService {
    */
   updatePortalStatus(active: boolean): Observable<void> {
     const params = new HttpParams().set('active', active.toString());
-    return this.http.patch<void>(`${this.baseUrl}/admin/config/portal-status`, {}, { params }).pipe(
+    return this.http.patch<void>(`${this.baseUrl}/admin/config/portal-status`, {}, {params}).pipe(
       catchError(this.handleError('Erreur lors du changement de statut du portail'))
     );
   }
@@ -135,7 +139,7 @@ export class EnrollmentAdminService {
     return this.http.patch<AdmissionApplication>(
       `${this.baseUrl}/admin/direction/applications/${applicationId}/reject`,
       JSON.stringify(reason),
-      { headers: { 'Content-Type': 'application/json' } }
+      {headers: {'Content-Type': 'application/json'}}
     ).pipe(
       catchError(this.handleError('Erreur lors du rejet du dossier'))
     );

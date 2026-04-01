@@ -15,7 +15,6 @@ export class AdmissionSessionService {
   private readonly STORAGE_KEY = 'feewi_admission_session';
 
   private _currentSession = signal<AdmissionSession | null>(null);
-  
   readonly currentSession = this._currentSession.asReadonly();
   readonly hasActiveSession = computed(() => this._currentSession() !== null);
 
@@ -32,7 +31,7 @@ export class AdmissionSessionService {
       currentStep,
       lastUpdated: Date.now()
     };
-    
+
     try {
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(session));
       this._currentSession.set(session);
