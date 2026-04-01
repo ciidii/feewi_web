@@ -99,12 +99,12 @@
 
         <div class="form-group full" *ngIf="!getCoreControl('profession').hidden">
           <label>{{ getCoreControl('profession').label || 'Profession' }} <span *ngIf="getCoreControl('profession').mandatory">*</span></label>
-          <input type="text" [(ngModel)]="formData().primaryGuardian.profession" class="fw-input">
+          <input type="text" [ngModel]="formData().primaryGuardian.profession" (ngModelChange)="updateGuardianData({ profession: $event })" class="fw-input">
         </div>
 
         <div class="form-group full" *ngIf="!getCoreControl('address').hidden">
           <label>{{ getCoreControl('address').label || 'Adresse' }} <span *ngIf="getCoreControl('address').mandatory">*</span></label>
-          <input type="text" [(ngModel)]="formData().primaryGuardian.address" class="fw-input">
+          <input type="text" [ngModel]="formData().primaryGuardian.address" (ngModelChange)="updateGuardianData({ address: $event })" class="fw-input">
         </div>
       </div>
     </div>
@@ -138,16 +138,16 @@
 
         <div class="form-group">
           <label>Prénoms</label>
-          <input type="text" [(ngModel)]="formData().student.firstName" class="fw-input">
+          <input type="text" [ngModel]="formData().student.firstName" (ngModelChange)="updateStudentData({ firstName: $event })" class="fw-input">
         </div>
         <div class="form-group">
           <label>Nom</label>
-          <input type="text" [(ngModel)]="formData().student.lastName" class="fw-input">
+          <input type="text" [ngModel]="formData().student.lastName" (ngModelChange)="updateStudentData({ lastName: $event })" class="fw-input">
         </div>
 
         <div class="form-group" *ngIf="!getCoreControl('gender').hidden">
           <label>{{ getCoreControl('gender').label || 'Sexe' }} <span *ngIf="getCoreControl('gender').mandatory">*</span></label>
-          <select [(ngModel)]="formData().student.gender" class="fw-input">
+          <select [ngModel]="formData().student.gender" (ngModelChange)="updateStudentData({ gender: $event })" class="fw-input">
             <option value="">Sélectionner...</option>
             <option value="MALE">Masculin</option>
             <option value="FEMALE">Féminin</option>
@@ -156,22 +156,22 @@
 
         <div class="form-group">
           <label>Date de naissance</label>
-          <input type="date" [(ngModel)]="formData().student.birthDate" class="fw-input">
+          <input type="date" [ngModel]="formData().student.birthDate" (ngModelChange)="updateStudentData({ birthDate: $event })" class="fw-input">
         </div>
 
         <div class="form-group" *ngIf="!getCoreControl('birthPlace').hidden">
           <label>{{ getCoreControl('birthPlace').label || 'Lieu de naissance' }} <span *ngIf="getCoreControl('birthPlace').mandatory">*</span></label>
-          <input type="text" [(ngModel)]="formData().student.birthPlace" class="fw-input">
+          <input type="text" [ngModel]="formData().student.birthPlace" (ngModelChange)="updateStudentData({ birthPlace: $event })" class="fw-input">
         </div>
 
         <div class="form-group" *ngIf="!getCoreControl('nationality').hidden">
           <label>{{ getCoreControl('nationality').label || 'Nationalité' }} <span *ngIf="getCoreControl('nationality').mandatory">*</span></label>
-          <input type="text" [(ngModel)]="formData().student.nationality" class="fw-input">
+          <input type="text" [ngModel]="formData().student.nationality" (ngModelChange)="updateStudentData({ nationality: $event })" class="fw-input">
         </div>
 
         <div class="form-group full" *ngIf="!getCoreControl('previousSchool').hidden">
           <label>{{ getCoreControl('previousSchool').label || 'Dernier établissement' }} <span *ngIf="getCoreControl('previousSchool').mandatory">*</span></label>
-          <input type="text" [(ngModel)]="formData().student.previousSchool" class="fw-input">
+          <input type="text" [ngModel]="formData().student.previousSchool" (ngModelChange)="updateStudentData({ previousSchool: $event })" class="fw-input">
         </div>
       </div>
     </div>
@@ -261,18 +261,39 @@
       
       <div class="upload-grid">
         @for (doc of effectiveChecklist(); track doc.code) {
-          <div class="upload-item" [class.uploaded]="application()?.documents?.[$index]?.status === 'UPLOADED'">
+          <div class="upload-item" 
+               [class.uploaded]="application()?.documents?.[$index]?.status === 'UPLOADED'"
+               [class.uploading]="uploadingDocCode() === doc.code">
+            
             <div class="upload-info">
               <span class="upload-label">{{ doc.name }}</span>
               <div class="flex items-center gap-2">
                 <span *ngIf="doc.mandatory" class="text-[10px] font-bold text-red-500 uppercase">(Obligatoire)</span>
+                
+                <!-- Status Badge Réactif -->
+                @if (application()?.documents?.[$index]?.status === 'UPLOADED') {
+                  <span class="status-tag success">
+                    <lucide-icon [name]="CheckCircle" [size]="10"></lucide-icon> Reçu
+                  </span>
+                } @else if (uploadingDocCode() === doc.code) {
+                  <span class="status-tag loading">
+                    <lucide-icon [name]="RefreshCw" [size]="10" class="animate-spin"></lucide-icon> Envoi...
+                  </span>
+                }
               </div>
             </div>
+
             <div class="upload-actions">
               <input type="file" #fileInput hidden (change)="onFileSelected(doc.code, $event)">
-              <button class="btn-upload" (click)="fileInput.click()">
-                <lucide-icon [name]="Upload" [size]="18"></lucide-icon>
-                <span>Choisir</span>
+              
+              <button class="btn-upload" 
+                      (click)="fileInput.click()" 
+                      [disabled]="uploadingDocCode() !== null">
+                
+                <lucide-icon *ngIf="uploadingDocCode() !== doc.code" [name]="Upload" [size]="18"></lucide-icon>
+                <lucide-icon *ngIf="uploadingDocCode() === doc.code" [name]="RefreshCw" [size]="18" class="animate-spin"></lucide-icon>
+                
+                <span>{{ application()?.documents?.[$index]?.status === 'UPLOADED' ? 'Remplacer' : 'Choisir' }}</span>
               </button>
             </div>
           </div>
@@ -305,7 +326,7 @@
         </div>
         <p class="notice-content">{{ summary()?.legalText }}</p>
         <label class="consent-checkbox mt-4">
-          <input type="checkbox" required>
+          <input type="checkbox" [checked]="consentChecked()" (change)="consentChecked.set(!consentChecked())">
           <span>Je certifie l'exactitude de ces informations.</span>
         </label>
       </div>
@@ -319,7 +340,9 @@
       <lucide-icon [name]="ArrowLeft" [size]="18"></lucide-icon> Précédent
     </button>
     <div class="spacer"></div>
-    <button class="btn-primary" (click)="nextStep()" [disabled]="isSubmitting()">
+    <button class="btn-primary" 
+            (click)="currentStep() === 'REVIEW' ? submitFinal() : nextStep()" 
+            [disabled]="isSubmitting() || (currentStep() === 'REVIEW' && !consentChecked())">
       <span *ngIf="currentStep() !== 'REVIEW'">Suivant <lucide-icon [name]="ArrowRight" [size]="18"></lucide-icon></span>
       <span *ngIf="currentStep() === 'REVIEW'">Soumettre ma demande <lucide-icon [name]="CheckCircle" [size]="20"></lucide-icon></span>
     </button>

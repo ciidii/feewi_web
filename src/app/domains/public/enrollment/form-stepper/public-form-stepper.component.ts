@@ -14,7 +14,13 @@ import { AdmissionSessionService } from '../../../../core/services/admission-ses
 import { AcademicService } from '../../../../core/services/academic.service';
 import { TenantContextService } from '../../../../core/services/tenant-context.service';
 import { Level, AcademicYear, Filiere } from '../../../../core/models/academic.model';
-import { AdmissionApplication as Application, CoreFieldControl, CustomFieldConfig, RequiredDocumentConfig } from '../../../../core/models/enrollment.model';
+import {
+  AdmissionApplication as Application,
+  CoreFieldControl,
+  CustomFieldConfig,
+  Guardian,
+  RequiredDocumentConfig
+} from '../../../../core/models/enrollment.model';
 import { Router } from '@angular/router';
 
 import { NotificationService } from '../../../../shared/services/notification.service';
@@ -41,15 +47,16 @@ export class PublicFormStepperComponent implements OnInit {
   // --- ÉTATS ---
   summary = signal<PublicPortalSummary | null>(null);
   effectiveConfig = signal<EffectiveConfigResponse | null>(null);
-  
+
   currentStep = signal<StepperStep>('GUARDIAN');
   currentApplicationId = signal<string | null>(null);
   application = signal<Application | null>(null);
-  
+
   isSubmitting = signal(false);
   isLoading = signal(false);
   uploadingDocCode = signal<string | null>(null);
   isPortalClosed = signal(false);
+  consentChecked = signal(false); // AJOUTÉ : Pour débloquer la soumission finale
 
   // --- RÉFÉRENTIELS ---
   availableLevels = signal<Level[]>([]);
@@ -107,7 +114,7 @@ export class PublicFormStepperComponent implements OnInit {
   currentInstruction = computed(() => {
     const instructions = this.effectiveConfig()?.instructions;
     if (!instructions) return null;
-    
+
     const stepKeyMap: Record<StepperStep, string> = {
       'GUARDIAN': 'step_guardian',
       'STUDENT': 'step_student',
@@ -116,7 +123,7 @@ export class PublicFormStepperComponent implements OnInit {
       'DOCS': 'step_docs',
       'REVIEW': 'step_review'
     };
-    
+
     return instructions[stepKeyMap[this.currentStep()]] || null;
   });
 
@@ -212,6 +219,7 @@ export class PublicFormStepperComponent implements OnInit {
 
     switch(this.currentStep()) {
       case 'GUARDIAN':
+        // CHANTIER UX : Si on a déjà un ID, on met à jour. Sinon on initialise.
         operation$ = this.currentApplicationId() ? this.saveGuardianInfo() : this.initializeApplication();
         break;
       case 'STUDENT':
@@ -225,12 +233,20 @@ export class PublicFormStepperComponent implements OnInit {
         break;
     }
 
-    operation$.pipe(finalize(() => this.isSubmitting.set(false))).subscribe(success => {
-      if (success && currentIndex < steps.length - 1) {
-        const nextStep = steps[currentIndex + 1];
-        this.currentStep.set(nextStep);
-        this.sessionService.updateStep(nextStep);
-        window.scrollTo(0, 0);
+    operation$.pipe(
+      finalize(() => this.isSubmitting.set(false))
+    ).subscribe({
+      next: (success) => {
+        // ON NE PASSE À LA SUITE QUE SI LE SERVEUR A RÉPONDU TRUE
+        if (success && currentIndex < steps.length - 1) {
+          const nextStep = steps[currentIndex + 1];
+          this.currentStep.set(nextStep);
+          this.sessionService.updateStep(nextStep);
+          window.scrollTo(0, 0);
+        }
+      },
+      error: (err) => {
+        console.error('[Stepper] Operation failed, staying on step:', currentIndex);
       }
     });
   }
@@ -246,6 +262,22 @@ export class PublicFormStepperComponent implements OnInit {
     }
   }
 
+  // --- ACTIONS DE MISE À JOUR IMMUABLE (UX REACITIVITY) ---
+
+  updateGuardianData(patch: Partial<any>) {
+    this.formData.update(prev => ({
+      ...prev,
+      primaryGuardian: { ...prev.primaryGuardian, ...patch }
+    }));
+  }
+
+  updateStudentData(patch: Partial<any>) {
+    this.formData.update(prev => ({
+      ...prev,
+      student: { ...prev.student, ...patch }
+    }));
+  }
+
   private initializeApplication() {
     const tenantId = this.tenantContext.activeTenant()?.id || 'default';
     const guardianData = this.formData().primaryGuardian;
@@ -253,8 +285,8 @@ export class PublicFormStepperComponent implements OnInit {
     return this.academicService.getCurrentYear().pipe(
       switchMap(year => {
         const payload = {
-          tenantId, 
-          type: 'NEW' as const, 
+          tenantId,
+          type: 'NEW' as const,
           academicYearId: year.id,
           primaryGuardian: {
             firstName: guardianData.firstName,
@@ -266,22 +298,30 @@ export class PublicFormStepperComponent implements OnInit {
         };
         return this.enrollmentService.createApplication(payload);
       }),
-      // CHANTIER A : Chaînage immédiat pour profession/adresse non supportés par le POST initial
-      switchMap(res => {
-        this.currentApplicationId.set(res.id);
-        this.application.set(res);
-        return this.enrollmentService.updateGuardians(res.id, guardianData).pipe(
-          map(updatedApp => updatedApp)
+      // CHANTIER A : Chaînage immédiat avec WRAPPER pour profession/adresse
+      switchMap(createdApp => {
+        this.currentApplicationId.set(createdApp.id);
+        this.application.set(createdApp);
+
+        // HYPOTHÈSE SENIOR : Le backend attend l'objet wrappé pour valider l'entité
+        const updatePayload = {
+          firstName: guardianData.firstName,
+          lastName: guardianData.lastName,
+          email: guardianData.email,
+          phone: guardianData.phone,
+          relation: guardianData.relation,
+          profession: guardianData.profession,
+          address: guardianData.address
+        };
+
+        return this.enrollmentService.updateGuardians(createdApp.id, updatePayload).pipe(
+          map(updatedApp => updatedApp || createdApp)
         );
       }),
       tap(res => {
+        if (!res) return;
         this.application.set(res);
-        this.sessionService.saveSession(
-          res.reference, 
-          res.accessCode || '', 
-          res.primaryGuardian?.firstName || '', 
-          'STUDENT'
-        );
+        this.sessionService.saveSession(res.reference, res.accessCode || '', res.primaryGuardian?.firstName || '', 'STUDENT');
       }),
       map(() => true),
       catchError(err => {
@@ -292,7 +332,18 @@ export class PublicFormStepperComponent implements OnInit {
   }
 
   private saveGuardianInfo() {
-    return this.enrollmentService.updateGuardians(this.currentApplicationId()!, this.formData().primaryGuardian).pipe(
+    const guardianData = this.formData().primaryGuardian;
+    const payload = {
+      firstName: guardianData.firstName,
+      lastName: guardianData.lastName,
+      email: guardianData.email,
+      phone: guardianData.phone,
+      relation: guardianData.relation,
+      profession: guardianData.profession,
+      address: guardianData.address
+    };
+
+    return this.enrollmentService.updateGuardians(this.currentApplicationId()!, payload).pipe(
       tap(app => this.application.set(app)),
       map(() => true),
       catchError(() => of(false))
@@ -352,20 +403,57 @@ export class PublicFormStepperComponent implements OnInit {
 
   onFileSelected(docCode: string, event: any) {
     const file = event.target.files[0];
-    if (!file || !this.currentApplicationId()) return;
+    const currentApp = this.application();
+    const session = this.sessionService.getSession();
+    
+    // Fallback : on récupère les infos vitales soit dans le signal, soit dans la session persistante
+    const reference = currentApp?.reference || session?.reference;
+    const accessCode = currentApp?.accessCode || session?.accessCode;
+    const appId = this.currentApplicationId();
+
+    console.log(`[Stepper] Tentative d'upload pour ${docCode}:`, { fileName: file?.name, reference, appId });
+    
+    if (!file) return;
+    if (!appId || !reference || !accessCode) {
+      console.warn('[Stepper] Upload impossible : Infos de session incomplètes', { appId, reference });
+      this.notificationService.warning("Session incomplète. Veuillez recommencer l'étape 1.");
+      return;
+    }
+
     this.uploadingDocCode.set(docCode);
+    
     this.documentService.getUploadTicket({
-      fileName: file.name, contentType: file.type, serviceOrigin: 'enrollment'
+      fileName: file.name, 
+      contentType: file.type, 
+      serviceOrigin: 'enrollment'
     }).pipe(
-      switchMap(ticket =>
-        this.documentService.uploadFileDirectly(ticket.uploadUrl, file).pipe(
-          switchMap(() => this.enrollmentService.uploadDocument(this.currentApplicationId()!, docCode, ticket.fileId)),
+      switchMap(ticket => {
+        console.log('[Stepper] Ticket reçu, envoi direct au stockage...');
+        return this.documentService.uploadFileDirectly(ticket.uploadUrl, file).pipe(
           map(() => ticket)
-        )
-      ),
-      switchMap(() => this.enrollmentService.trackApplication(this.application()!.reference, this.application()!.accessCode)),
-      tap(freshApp => this.application.set(freshApp)),
-      finalize(() => this.uploadingDocCode.set(null))
+        );
+      }),
+      switchMap(ticket => {
+        console.log('[Stepper] Upload réussi, liaison au dossier...');
+        return this.enrollmentService.uploadDocument(appId, docCode, ticket.fileId);
+      }),
+      switchMap(() => {
+        console.log('[Stepper] Liaison réussie, rafraîchissement final...');
+        return this.enrollmentService.trackApplication(reference, accessCode);
+      }),
+      tap(freshApp => {
+        this.application.set(freshApp);
+        this.notificationService.success(`Le document "${file.name}" a été chargé.`);
+      }),
+      catchError(err => {
+        console.error('[Stepper] ERREUR UPLOAD:', err);
+        this.notificationService.error("Le fichier n'a pas pu être envoyé.");
+        return of(null);
+      }),
+      finalize(() => {
+        this.uploadingDocCode.set(null);
+        event.target.value = '';
+      })
     ).subscribe();
   }
 

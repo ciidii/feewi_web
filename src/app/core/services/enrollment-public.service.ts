@@ -95,41 +95,53 @@ export class EnrollmentPublicService {
   }
 
   updateCandidate(applicationId: string, request: CandidateUpdateRequest): Observable<AdmissionApplication> {
-    return this.http.patch<AdmissionApplication>(`${this.baseUrl}/applications/${applicationId}/candidate`, request).pipe(
+    return this.http.patch<AdmissionApplication>(`${this.baseUrl}/applications/${applicationId}/candidate`, request, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors de la mise à jour du candidat'))
     );
   }
 
-  updateGuardians(applicationId: string, guardian: Partial<Guardian>): Observable<AdmissionApplication> {
-    return this.http.patch<AdmissionApplication>(`${this.baseUrl}/applications/${applicationId}/guardians`, guardian).pipe(
+  updateGuardians(applicationId: string, guardian: any): Observable<AdmissionApplication> {
+    // Le contrat technique (Section 2.4) attend l'objet GuardianInfo pur.
+    // On s'assure qu'aucun champ parasite n'est envoyé.
+    const payload = {
+      firstName: guardian.firstName,
+      lastName: guardian.lastName,
+      email: guardian.email,
+      phone: guardian.phone,
+      relation: guardian.relation,
+      address: guardian.address,
+      profession: guardian.profession
+    };
+    return this.http.patch<AdmissionApplication>(`${this.baseUrl}/applications/${applicationId}/guardians`, payload, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors de la mise à jour des responsables'))
     );
   }
 
   updateCustomFields(applicationId: string, fields: Record<string, any>): Observable<AdmissionApplication> {
-    return this.http.patch<AdmissionApplication>(`${this.baseUrl}/applications/${applicationId}/custom-fields`, fields).pipe(
+    return this.http.patch<AdmissionApplication>(`${this.baseUrl}/applications/${applicationId}/custom-fields`, fields, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors de l\'enregistrement des informations spécifiques'))
     );
   }
 
   updateSubscriptions(applicationId: string, subscriptions: any[]): Observable<AdmissionApplication> {
-    return this.http.patch<AdmissionApplication>(`${this.baseUrl}/applications/${applicationId}/subscriptions`, subscriptions).pipe(
+    return this.http.patch<AdmissionApplication>(`${this.baseUrl}/applications/${applicationId}/subscriptions`, subscriptions, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors de la gestion des services'))
     );
   }
 
   uploadDocument(applicationId: string, docCode: string, fileId: string): Observable<AdmissionApplication> {
+    const headers = this.getHeaders().set('Content-Type', 'text/plain');
     return this.http.post<AdmissionApplication>(
       `${this.baseUrl}/applications/${applicationId}/documents/${docCode}`, 
       fileId, 
-      { headers: new HttpHeaders().set('Content-Type', 'text/plain') }
+      { headers }
     ).pipe(
       catchError(this.handleError('Erreur lors de la liaison du document'))
     );
   }
 
   submitApplication(applicationId: string): Observable<AdmissionApplication> {
-    return this.http.post<AdmissionApplication>(`${this.baseUrl}/applications/${applicationId}/submit`, {}).pipe(
+    return this.http.post<AdmissionApplication>(`${this.baseUrl}/applications/${applicationId}/submit`, {}, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors de la soumission finale'))
     );
   }

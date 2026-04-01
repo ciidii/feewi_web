@@ -11,7 +11,7 @@ export const environment: Environment = {
     identity: '/api/v1',
     academic: '/api/v1/academic',
     school: '/api/v1/schools',
-    documents: '/api/v1/documents'
+    documents: '/documents/api/v1/documents'
   },
   features: {
     enableAnalytics: false,
