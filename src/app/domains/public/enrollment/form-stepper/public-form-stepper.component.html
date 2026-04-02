@@ -122,7 +122,9 @@
       <div class="grid-form">
         <div class="form-group full">
           <label>Niveau demandé</label>
-          <select [(ngModel)]="formData().student.requestedLevelId" class="fw-input highlight">
+          <select [ngModel]="formData().student.requestedLevelId" 
+                  (ngModelChange)="updateStudentData({ requestedLevelId: $event })"
+                  class="fw-input highlight">
             <option value="">Choisir un niveau...</option>
             <option *ngFor="let level of availableLevels()" [value]="level.id">{{ level.name }}</option>
           </select>

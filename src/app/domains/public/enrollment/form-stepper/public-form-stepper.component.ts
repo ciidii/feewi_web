@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject, OnInit } from '@angular/core';
+import { Component, signal, computed, inject, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -13,7 +13,7 @@ import { DocumentEngineService } from '../../../../core/services/document-engine
 import { AdmissionSessionService } from '../../../../core/services/admission-session.service';
 import { AcademicService } from '../../../../core/services/academic.service';
 import { TenantContextService } from '../../../../core/services/tenant-context.service';
-import { Level, AcademicYear, Filiere } from '../../../../core/models/academic.model';
+import {Level, AcademicYear, Filiere, Cycle} from '../../../../core/models/academic.model';
 import {
   AdmissionApplication as Application,
   CoreFieldControl,
@@ -44,6 +44,17 @@ export class PublicFormStepperComponent implements OnInit {
   private notificationService = inject(NotificationService);
   private router = inject(Router);
 
+  constructor() {
+    effect(() => {
+      console.group('--- [Stepper Debug Trace] ---');
+      console.log('Niveaux chargés:', this.availableLevels().length);
+      console.log('Cycles chargés:', this.availableCycles().length);
+      console.log('Sélection Actuelle:', this.formData().student.requestedLevelId);
+      console.log('État Sélecteur Filière:', this.showFiliereSelector());
+      console.groupEnd();
+    });
+  }
+
   // --- ÉTATS ---
   summary = signal<PublicPortalSummary | null>(null);
   effectiveConfig = signal<EffectiveConfigResponse | null>(null);
@@ -61,6 +72,7 @@ export class PublicFormStepperComponent implements OnInit {
   // --- RÉFÉRENTIELS ---
   availableLevels = signal<Level[]>([]);
   availableFilieres = signal<Filiere[]>([]);
+  availableCycles = signal<Cycle[]>([]); // AJOUTÉ
 
   // --- DONNÉES FORMULAIRE ---
   formData = signal({
@@ -92,7 +104,33 @@ export class PublicFormStepperComponent implements OnInit {
   });
 
   showFiliereSelector = computed(() => {
-    return this.availableFilieres().length > 0 && this.formData().student.requestedLevelId !== '';
+    const levelId = this.formData().student.requestedLevelId;
+    const levels = this.availableLevels();
+    const cycles = this.availableCycles();
+
+    if (!levelId) return false;
+
+    const selectedLevel = levels.find(l => l.id === levelId);
+    if (!selectedLevel) return false;
+
+    // --- DEEP DEBUG LOG ---
+    // On log l'objet brut pour voir si c'est 'cycleId' ou 'cycle_id' ou 'cycle'
+    console.log('[Stepper Debug] Objet Niveau sélectionné:', selectedLevel);
+    
+    // 1. Tentative par objet imbriqué
+    if (selectedLevel.cycle?.cycleCode === 'HIGH_SCHOOL') return true;
+
+    // 2. Tentative par jointure d'ID (attention aux noms de champs)
+    const cycleId = (selectedLevel as any).cycleId || (selectedLevel as any).cycle_id;
+    const matchedCycle = cycles.find(c => c.id === cycleId);
+    
+    if (matchedCycle?.cycleCode === 'HIGH_SCHOOL') return true;
+
+    // 3. Fallback de sécurité par le Nom (si la base de données est mal liée)
+    const name = selectedLevel.name.toLowerCase();
+    const isHighSchoolName = name.includes('seconde') || name.includes('première') || name.includes('terminale') || name.includes('lycée');
+
+    return isHighSchoolName;
   });
 
   selectedLevelName = computed(() => {
@@ -145,13 +183,15 @@ export class PublicFormStepperComponent implements OnInit {
     forkJoin({
       levels: this.academicService.getLevels(),
       filieres: this.academicService.getFilieres(),
+      cycles: this.academicService.getCycles(), // AJOUTÉ
       summary: this.enrollmentService.getPortalSummary()
     }).pipe(
       finalize(() => this.isLoading.set(false))
     ).subscribe({
-      next: ({ levels, filieres, summary }) => {
+      next: ({ levels, filieres, cycles, summary }) => {
         this.availableLevels.set(levels);
         this.availableFilieres.set(filieres);
+        this.availableCycles.set(cycles);
         this.summary.set(summary);
         if (summary && !summary.portalActive) this.isPortalClosed.set(true);
       }
@@ -405,14 +445,14 @@ export class PublicFormStepperComponent implements OnInit {
     const file = event.target.files[0];
     const currentApp = this.application();
     const session = this.sessionService.getSession();
-    
+
     // Fallback : on récupère les infos vitales soit dans le signal, soit dans la session persistante
     const reference = currentApp?.reference || session?.reference;
     const accessCode = currentApp?.accessCode || session?.accessCode;
     const appId = this.currentApplicationId();
 
     console.log(`[Stepper] Tentative d'upload pour ${docCode}:`, { fileName: file?.name, reference, appId });
-    
+
     if (!file) return;
     if (!appId || !reference || !accessCode) {
       console.warn('[Stepper] Upload impossible : Infos de session incomplètes', { appId, reference });
@@ -421,10 +461,10 @@ export class PublicFormStepperComponent implements OnInit {
     }
 
     this.uploadingDocCode.set(docCode);
-    
+
     this.documentService.getUploadTicket({
-      fileName: file.name, 
-      contentType: file.type, 
+      fileName: file.name,
+      contentType: file.type,
       serviceOrigin: 'enrollment'
     }).pipe(
       switchMap(ticket => {
