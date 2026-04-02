@@ -219,6 +219,16 @@
                     </button>
                   </div>
                 </div>
+
+                <!-- NOUVEAU : Orientation Recommandée -->
+                <div class="form-group-modern mt-6" *ngIf="pedagogicalDecision() !== 'REJECTED'">
+                  <label>Orientation recommandée (si différente)</label>
+                  <select [ngModel]="recommendedLevelId()" (ngModelChange)="recommendedLevelId.set($event)" class="fw-select-modern">
+                    <option [ngValue]="null">Maintenir le niveau : {{ levelName() }}</option>
+                    <option *ngFor="let lvl of levels()" [value]="lvl.id">{{ lvl.name }}</option>
+                  </select>
+                  <p class="text-[10px] text-slate-400 mt-1 italic">L'admission finale se fera sur ce niveau si sélectionné.</p>
+                </div>
               </div>
             </div>
           </div>

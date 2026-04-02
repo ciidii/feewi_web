@@ -87,6 +87,7 @@ export class AdmissionDetailComponent implements OnInit {
   evaluationGrades = signal<Record<string, number>>({});
   evaluationComment = '';
   pedagogicalDecision = signal<'ADMITTED' | 'REJECTED' | 'WAITLIST'>('ADMITTED');
+  recommendedLevelId = signal<string | null>(null);
 
   averageScore = computed(() => {
     const grades = Object.values(this.evaluationGrades());
@@ -114,15 +115,23 @@ export class AdmissionDetailComponent implements OnInit {
       app: this.enrollmentAdminService.getApplicationById(id),
       levels: this.academicService.getLevels(),
       filieres: this.academicService.getFilieres(),
-      year: this.academicService.getCurrentYear() // AJOUTÉ
+      year: this.academicService.getCurrentYear()
     }).pipe(
       switchMap(({ app, levels, filieres, year }) => {
         this.application.set(app);
         this.levels.set(levels);
         this.filieres.set(filieres);
-        this.activeYear.set(year); // AJOUTÉ
+        this.activeYear.set(year);
         
-        return this.enrollmentAdminService.getEffectiveConfig(app.levelId);
+        // SECURITÉ : On vérifie la présence du levelId avant l'appel
+        const targetLevelId = app.levelId || (app as any).requestedLevelId;
+        
+        if (targetLevelId) {
+          return this.enrollmentAdminService.getEffectiveConfig(targetLevelId);
+        } else {
+          console.warn('[AdmissionDetail] Dossier sans niveau, fallback config globale');
+          return this.enrollmentAdminService.getConfig();
+        }
       }),
       finalize(() => this.isLoading.set(false))
     ).subscribe({
@@ -135,7 +144,6 @@ export class AdmissionDetailComponent implements OnInit {
           const app = this.application();
           const initialGrades: Record<string, number> = {};
           
-          // SÉCURISATION DU FOREACH
           if (aConfig.subjects && Array.isArray(aConfig.subjects)) {
             aConfig.subjects.forEach((sub: string) => {
               initialGrades[sub] = app?.assessment?.grades?.[sub] || 0;
@@ -148,6 +156,7 @@ export class AdmissionDetailComponent implements OnInit {
         if (data?.assessment) {
           this.evaluationComment = data.assessment.comments || '';
           this.pedagogicalDecision.set(data.assessment.decision as any);
+          this.recommendedLevelId.set(data.assessment.recommendedLevelId || null);
         }
       },
       error: (err) => {
@@ -193,7 +202,8 @@ export class AdmissionDetailComponent implements OnInit {
     const payload: AssessmentRequest = {
       grades: this.evaluationGrades(),
       comments: this.evaluationComment,
-      decision: this.pedagogicalDecision()
+      decision: this.pedagogicalDecision(),
+      recommendedLevelId: this.recommendedLevelId() || undefined
     };
 
     this.enrollmentAdminService.submitAssessment(app.id, payload).pipe(
