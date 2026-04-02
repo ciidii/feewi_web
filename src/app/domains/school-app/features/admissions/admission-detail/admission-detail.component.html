@@ -9,7 +9,7 @@
       <div class="application-identity">
         <div class="ref-pill">#{{ app.reference }}</div>
         <h1>{{ app.candidate?.firstName }} {{ app.candidate?.lastName }}</h1>
-        <span class="app-type">{{ app.type === 'RE_ENROLL' ? 'Réinscription' : 'Nouvelle Inscription' }}</span>
+        <span class="app-type">{{ app.type === 'RE_ENROLLMENT' ? 'Réinscription' : 'Nouvelle Inscription' }}</span>
       </div>
     </div>
 
@@ -275,11 +275,24 @@
                 <span class="status-badge" [class]="doc.status.toLowerCase()">{{ doc.status }}</span>
               </div>
               <div class="doc-action">
-                @if (doc.status === 'MISSING') {
-                  <button class="btn-mini-receive" (click)="receiveDocument(doc.code); $event.stopPropagation()">Recu
-                  </button>
+                @if (uploadingDocCode() === doc.code) {
+                  <lucide-icon [name]="RefreshCw" [size]="16" class="animate-spin text-primary"></lucide-icon>
                 } @else {
-                  <lucide-icon [name]="Eye" [size]="14" class="text-slate-400"></lucide-icon>
+                  <div class="flex items-center gap-2">
+                    @if (doc.status === 'MISSING') {
+                      <button class="btn-mini-receive" (click)="receiveDocument(doc.code); $event.stopPropagation()" title="Marquer comme reçu (papier)">Recu</button>
+                    }
+
+                    <!-- Bouton Upload (Scanné) -->
+                    <input type="file" #adminFileInput hidden (change)="onAdminFileSelected(doc.code, $event)">
+                    <button class="btn-icon-sm" (click)="adminFileInput.click(); $event.stopPropagation()" title="Uploader le scan">
+                      <lucide-icon [name]="Upload" [size]="14"></lucide-icon>
+                    </button>
+
+                    <button *ngIf="doc.status !== 'MISSING'" class="btn-icon-sm primary" (click)="previewDocument(doc); $event.stopPropagation()" title="Voir">
+                      <lucide-icon [name]="Eye" [size]="14"></lucide-icon>
+                    </button>
+                  </div>
                 }
               </div>
             </div>

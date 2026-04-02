@@ -29,3 +29,14 @@ export interface AssessmentRequest {
   decision: string;
   recommendedLevelId?: string;
 }
+
+/** Saisie directe au guichet (Secretariat) */
+export interface FastEntryRequest {
+  tenantId: string;
+  type: 'NEW' | 'RE_ENROLLMENT';
+  academicYearId: string;
+  levelId: string;
+  filiereId?: string | null;
+  candidate: Candidate;
+  primaryGuardian: Partial<Guardian>;
+}

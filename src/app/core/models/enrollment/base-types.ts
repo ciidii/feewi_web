@@ -10,7 +10,7 @@ export type AdmissionStatus =
   | 'CANCELLED'; // Annulé par le parent
 
 /** Type de procédure d'admission */
-export type AdmissionType = 'NEW' | 'RE_ENROLL';
+export type AdmissionType = 'NEW' | 'RE_ENROLLMENT';
 
 /** Lien de parenté du responsable */
 export type GuardianRelation = 'FATHER' | 'MOTHER' | 'GUARDIAN' | 'OTHER';

@@ -689,22 +689,30 @@ $shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 
       }
     }
 
-    .btn-mini-receive {
-      padding: 0.25rem 0.625rem;
-      border-radius: 6px;
-      border: 1px solid $primary;
-      background: transparent;
-      color: $primary;
-      font-size: 0.6875rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
+    .btn-icon-sm {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1.5px solid $gray-200;
+  background: white;
+  color: $gray-500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
 
-      &:hover {
-        background: $primary;
-        color: white;
-      }
-    }
+  &:hover {
+    border-color: $primary;
+    color: $primary;
+    background: $primary-bg;
+  }
+
+  &.primary {
+    color: $primary;
+    border-color: $primary-light;
+  }
+}
   }
 }
 

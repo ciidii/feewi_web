@@ -20,6 +20,11 @@ export const SCHOOL_APP_ROUTES: Routes = [
         loadComponent: () => import('./features/admissions/admission-list/admission-list.component').then(m => m.AdmissionsComponent)
       },
       {
+        path: 'direct',
+        title: 'Saisie Guichet',
+        loadComponent: () => import('./features/admissions/admission-direct-entry/admission-direct-entry.component').then(m => m.AdmissionDirectEntryComponent)
+      },
+      {
         path: 're-enrollment',
         title: 'Réinscription Administrative',
         loadComponent: () => import('./features/admissions/re-enrollment/re-enrollment.component').then(m => m.SecretaryReEnrollmentComponent)

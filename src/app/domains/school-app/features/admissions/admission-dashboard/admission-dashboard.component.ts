@@ -42,7 +42,7 @@ export class AdmissionDashboardComponent implements OnInit {
   totalApps = computed(() => this.applications().length);
 
   newAppsCount = computed(() => this.applications().filter(a => a.type === 'NEW').length);
-  reEnrollCount = computed(() => this.applications().filter(a => a.type === 'RE_ENROLL').length);
+  reEnrollCount = computed(() => this.applications().filter(a => a.type === 'RE_ENROLLMENT').length);
 
   statusStats = computed(() => {
     const apps = this.applications();

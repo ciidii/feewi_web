@@ -1,9 +1,9 @@
-<aside 
+<aside
   class="bg-white border-r border-border-subtle h-[calc(100vh-64px)] transition-all duration-300 relative flex flex-col overflow-hidden select-none"
   [class.w-72]="navService.isSidebarExpanded()"
   [class.w-20]="!navService.isSidebarExpanded()"
 >
-  
+
   <!-- === MONDE 1 : SAAS SYSTEM ADMIN === -->
   <ng-container *ngIf="auth.hasRole('ROLE_SUPER_ADMIN')">
     <div class="p-4 overflow-hidden shrink-0">
@@ -14,8 +14,8 @@
     </div>
 
     <nav class="flex-1 px-3 py-2 space-y-1 overflow-y-auto">
-      <a 
-        *ngFor="let item of saasItems" 
+      <a
+        *ngFor="let item of saasItems"
         [routerLink]="item.route"
         routerLinkActive="bg-amber-50 text-amber-700 font-bold border-r-2 border-amber-600"
         class="flex items-center h-11 px-4 rounded-lg text-slate-medium hover:bg-ice hover:text-amber-600 transition-all group relative border-r-2 border-transparent"
@@ -31,7 +31,7 @@
   <ng-container *ngIf="!auth.hasRole('ROLE_SUPER_ADMIN')">
     <!-- Hero Button École (Contextuel : seulement pour Enrollment ou Dashboard) -->
     <div *ngIf="['dashboard', 'enrollment'].includes(navService.activeService())" class="p-4 flex justify-center shrink-0">
-      <button 
+      <button
         [matMenuTriggerFor]="sidebarEnrollMenu"
         class="flex items-center bg-white border border-border-subtle shadow-sm hover:shadow-md transition-all rounded-2xl h-14 w-full group active:scale-95 overflow-hidden"
         [class.justify-center]="!navService.isSidebarExpanded()"
@@ -43,7 +43,7 @@
       </button>
 
       <mat-menu #sidebarEnrollMenu="matMenu" class="feewi-mat-menu">
-        <button mat-menu-item routerLink="/public/enroll">
+        <button mat-menu-item routerLink="/admin/admissions/direct">
           <lucide-icon [name]="UserPlus" [size]="18" class="mr-3"></lucide-icon>
           <span>Nouveau candidat</span>
         </button>
@@ -55,7 +55,7 @@
     </div>
 
     <nav class="flex-1 px-3 py-2 space-y-1 overflow-y-auto custom-scrollbar">
-      
+
       <!-- CAS 1 : DASHBOARD -->
       <ng-container *ngIf="navService.activeService() === 'dashboard'">
         <div *ngIf="navService.isSidebarExpanded()" class="px-4 py-2 mt-2">

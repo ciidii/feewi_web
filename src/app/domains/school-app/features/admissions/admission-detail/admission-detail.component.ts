@@ -1,13 +1,13 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { finalize, switchMap, forkJoin, of } from 'rxjs';
+import {finalize, switchMap, forkJoin, of, map} from 'rxjs';
 import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 import { AdmissionApplication, RequiredDocument, AssessmentRequest } from '../../../../../core/models/enrollment.model';
 import {
   ArrowLeft, CheckCircle, ChevronLeft, ChevronRight, ClipboardCheck,
   Download, Eye, FileImage, FileSpreadsheet, FileText, GraduationCap,
   History as HistoryIcon, Info, LucideAngularModule, Mail, MapPin,
-  Phone, Plus, Printer, RefreshCw, User, XCircle, Save, ShieldCheck
+  Phone, Plus, Printer, RefreshCw, User, XCircle, Save, ShieldCheck, Upload
 } from 'lucide-angular';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { EnrollmentAdminService } from '../../../../../core/services/enrollment-admin.service';
@@ -40,6 +40,7 @@ export class AdmissionDetailComponent implements OnInit {
   application = signal<AdmissionApplication | null>(null);
   isLoading = signal(true);
   isActionLoading = signal(false);
+  uploadingDocCode = signal<string | null>(null); // AJOUTÉ : Pour le feedback d'upload admin
 
   levels = signal<Level[]>([]);
   filieres = signal<Filiere[]>([]);
@@ -69,10 +70,13 @@ export class AdmissionDetailComponent implements OnInit {
   isReadyForFinalValidation = computed(() => {
     const app = this.application();
     if (!app || app.status !== 'TESTING') return false;
+
+    // VERROU NUMÉRIQUE : Tous les documents obligatoires doivent être UPLOADED
     const mandatoryDocs = app.documents.filter(d => d.mandatory);
-    const allDocsOk = mandatoryDocs.every(d => d.status === 'UPLOADED' || d.status === 'PHYSICAL_RECEIVED');
+    const allDocsUploaded = mandatoryDocs.every(d => d.status === 'UPLOADED');
+
     const assessmentOk = !!app.assessment && !!app.assessment.decision;
-    return allDocsOk && assessmentOk;
+    return allDocsUploaded && assessmentOk;
   });
 
   mandatoryDocsSummary = computed(() => {
@@ -112,7 +116,7 @@ export class AdmissionDetailComponent implements OnInit {
    */
   loadApplication(id: string) {
     this.isLoading.set(true);
-    
+
     forkJoin({
       app: this.enrollmentAdminService.getApplicationById(id),
       levels: this.academicService.getLevels(),
@@ -125,10 +129,10 @@ export class AdmissionDetailComponent implements OnInit {
         this.levels.set(levels);
         this.filieres.set(filieres);
         this.activeYear.set(year);
-        
+
         // SECURITÉ : On lit l'ID dans l'objet 'wish' identifié dans le JSON
         const targetLevelId = app.wish?.levelId;
-        
+
         if (targetLevelId) {
           return this.enrollmentAdminService.getEffectiveConfig(targetLevelId);
         } else {
@@ -143,10 +147,10 @@ export class AdmissionDetailComponent implements OnInit {
         if (aConfig) {
           this.assessmentSubjects.set(aConfig.subjects || []);
           this.minPassingGrade.set(aConfig.minPassingGrade || 10);
-          
+
           const app = this.application();
           const initialGrades: Record<string, number> = {};
-          
+
           if (aConfig.subjects && Array.isArray(aConfig.subjects)) {
             aConfig.subjects.forEach((sub: string) => {
               initialGrades[sub] = app?.assessment?.grades?.[sub] || 0;
@@ -183,6 +187,42 @@ export class AdmissionDetailComponent implements OnInit {
     });
   }
 
+  /**
+   * Action Secrétariat : Numériser un document reçu physiquement
+   * (Phase 3.3 du workflow hybride)
+   */
+  onAdminFileSelected(docCode: string, event: any) {
+    const file = event.target.files[0];
+    const app = this.application();
+
+    if (!file || !app) return;
+
+    this.uploadingDocCode.set(docCode);
+
+    this.documentService.getUploadTicket({
+      fileName: file.name,
+      contentType: file.type,
+      serviceOrigin: 'enrollment'
+    }).pipe(
+      switchMap(ticket =>
+        this.documentService.uploadFileDirectly(ticket.uploadUrl, file).pipe(
+          switchMap(() => this.enrollmentAdminService.linkDocument(app.id, docCode, ticket.fileId)),
+          map(() => ticket)
+        )
+      ),
+      finalize(() => {
+        this.uploadingDocCode.set(null);
+        event.target.value = ''; // Reset input
+      })
+    ).subscribe({
+      next: () => {
+        this.loadApplication(app.id);
+        this.notificationService.success(`Document "${file.name}" numérisé avec succès.`);
+      },
+      error: (err) => console.error('[AdminUpload] Erreur:', err)
+    });
+  }
+
   verifyApplication() {
     const app = this.application();
     if (!app) return;
@@ -201,7 +241,7 @@ export class AdmissionDetailComponent implements OnInit {
     const app = this.application();
     if (!app) return;
     this.isActionLoading.set(true);
-    
+
     const payload: AssessmentRequest = {
       grades: this.evaluationGrades(),
       comments: this.evaluationComment,
@@ -298,4 +338,5 @@ export class AdmissionDetailComponent implements OnInit {
   readonly Save = Save;
   readonly ShieldCheck = ShieldCheck; // AJOUTÉ
   protected readonly Info = Info;
+  protected readonly Upload = Upload;
 }

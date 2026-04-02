@@ -122,7 +122,7 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
     return {
       id: app.id,
       title: candidateName,
-      subtitle: `Dossier #${app.reference} • ${app.type === 'RE_ENROLL' ? 'Réinscription' : 'Nouvelle Admission'}`,
+      subtitle: `Dossier #${app.reference} • ${app.type === 'RE_ENROLLMENT' ? 'Réinscription' : 'Nouvelle Admission'}`,
       avatarLabel: initials || '??',
       date: new Date(app.createdAt).toLocaleDateString(),
       badges: [

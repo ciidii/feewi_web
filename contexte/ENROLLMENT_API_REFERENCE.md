@@ -15,9 +15,42 @@ Ce document est le contrat d'interface technique exhaustif entre le Backend et l
 ---
 
 ## 2. API Publique (Portail Parent)
-Base URL : `/enrollment/api/v1/public/applications`
+Base URL : `/enrollment/api/v1/public`
 
-### 2.1 Création d'un dossier (Initialisation)
+### 2.1 Résumé du portail (Landing Page)
+Point d'entrée unique pour l'accueil du portail. Il fusionne les données d'Admission et les dates du calendrier Académique.
+
+*   **URL** : `GET /config/summary`
+*   **Header Requis** : `X-Tenant-Id: <ID_ECOLE>`
+*   **Description** : Permet au frontend de décider s'il affiche le bouton "S'inscrire" et quel message de bienvenue montrer.
+*   **Réponse (`PublicPortalSummary`)** :
+    | Champ | Type | Description |
+    | :--- | :--- | :--- |
+    | `tenantId` | `string` | Identifiant de l'établissement. |
+    | `portalActive` | `boolean` | État de l'interrupteur manuel (Master Switch). |
+    | `academicYearLabel` | `string` | Libellé de l'année (ex: "2026-2027"). |
+    | `registrationStartDate` | `date` | Date d'ouverture officielle. |
+    | `registrationEndDate` | `date` | Date de clôture officielle. |
+    | `withinDates` | `boolean` | **Vrai** si la date du jour est entre début et fin. |
+    | `welcomeMessage` | `string` | Texte rédigé par l'école pour l'accueil. |
+    | `legalText` | `string` | Règlement intérieur / CGU. |
+    | `enabledServices` | `string[]` | Liste des services (TRANSPORT, CANTEEN). |
+
+### 2.2 Récupérer la configuration effective (Formulaire dynamique)
+Calcul de la règle finale à appliquer selon le niveau choisi.
+
+*   **URL** : `GET /config/{levelId}`
+*   **Description** : Le backend applique l'algorithme suivant : `Config Finale = Config par Défaut + Surcharge du Niveau`.
+*   **Réponse (`EffectiveConfigResponse`)** :
+    | Bloc | Contenu |
+    | :--- | :--- |
+    | `documentChecklist` | Liste des pièces (écrasée si le niveau a sa propre liste). |
+    | `coreFieldOverrides` | Fusion des champs masqués/renommés (Le niveau est prioritaire). |
+    | `formSchema` | Champs JSONB libres (Cercle 3). |
+    | `assessmentConfig` | Type de test (EXAM/DOSSIER) et matières à évaluer. |
+    | `instructions` | Dictionnaire d'aide contextuelle par étape. |
+
+### 2.3 Création d'un dossier (Initialisation)
 *   **URL** : `POST /`
 *   **Description** : Crée un nouveau dossier au statut `DRAFT`.
 *   **Payload (`CreateApplicationRequest`)** :
@@ -122,25 +155,57 @@ Base URL : `/enrollment/api/v1/admin/applications`
 
 ### 3.2 Saisie Directe (Guichet)
 *   **URL** : `POST /direct`
-*   **Payload (`FastEntryRequest`)** : Fusion de `CreateApplicationRequest` + `CandidateInfo`. Crée un dossier directement en statut `SUBMITTED`.
+*   **Payload (`FastEntryRequest`)** : Fusion de `CreateApplicationRequest` + `CandidateInfo`. 
+*   **Action** : Crée un dossier directement en statut `SUBMITTED`. Le système génère automatiquement la référence et le code d'accès.
 
-### 3.3 Traitement Opérationnel
-*   **Évaluation** : `PATCH /{id}/assessment`
+### 3.3 Traitement Opérationnel (Workflow Hybride)
+Une fois le dossier au statut `VERIFIED` (conformité OK), l'administration décide du parcours du candidat :
+
+#### 📦 Gestion des Documents (Numérisation différée)
+Pour les dossiers physiques, le secrétaire marque la réception papier :
+*   **Endpoint** : `PATCH /{id}/documents/{docCode}/receive`
+*   **Effet** : Le document passe en statut `PHYSICAL_RECEIVED`.
+*   **Contrainte** : Le statut `PHYSICAL_RECEIVED` permet de passer en `VERIFIED` mais **bloque** la validation finale (`VALIDATED`).
+
+#### 🔒 Verrou Numérique
+Avant la validation Direction, tout document marqué `mandatory: true` dans la configuration doit impérativement être en statut `UPLOADED`.
+*   **Action** : Le secrétaire doit utiliser `POST /{id}/documents/{docCode}` pour uploader le scan et lever le verrou.
+
+#### CAS A : Admission sur titre (Directe)
+*   **Action** : Passer directement à la validation.
+*   **Endpoint** : `PATCH /api/v1/admin/direction/applications/{id}/validate`
+
+#### CAS B : Examen de niveau requis
+*   **Action** : Le dossier passe au statut `TESTING`.
+*   **Saisie des notes** : `PATCH /api/v1/admin/applications/{id}/assessment`
+*   **Payload** : 
     ```json
     {
-      "grades": { "Maths": 15.5, "Français": 14.0 },
-      "comments": "Texte libre",
-      "decision": "ADMITTED | REFUSED | WAITLISTED",
+      "grades": { "Français": 12.0, "Mathématiques": 14.5 },
+      "comments": "Bon niveau global",
+      "decision": "ADMITTED",
       "recommendedLevelId": "uuid"
     }
     ```
-*   **Réception Physique** : `PATCH /{id}/documents/{docCode}/receive`
-*   **Vérification Admin** : `PATCH /{id}/verify` (Passe à `VERIFIED`)
-*   **Annulation Admin** : `POST /{id}/cancel`
 
 ---
 
-## 4. API Direction (Validation Stratégique)
+## 4. Politique d'Évaluation (Configuration)
+L'école définit les épreuves possibles par niveau dans `levelOverrides`.
+
+### 4.1 Structure de l'objet AssessmentConfig
+```json
+{
+  "assessmentType": "EXAM | DOSSIER | INTERVIEW",
+  "subjects": ["Français", "Mathématiques", "Anglais"],
+  "minPassingGrade": 10.0
+}
+```
+*Le frontend doit utiliser cette liste de `subjects` pour générer dynamiquement le formulaire de saisie des notes.*
+
+---
+
+## 5. API Direction (Validation Stratégique)
 Base URL : `/enrollment/api/v1/admin/direction/applications`
 
 | Méthode | Endpoint | Description |
