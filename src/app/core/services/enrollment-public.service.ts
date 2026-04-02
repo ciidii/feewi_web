@@ -72,9 +72,11 @@ export class EnrollmentPublicService {
     );
   }
 
-  getEffectiveConfig(levelId: string): Observable<EffectiveConfigResponse> {
-    return this.http.get<EffectiveConfigResponse>(`${this.baseUrl}/config/${levelId}`, { headers: this.getHeaders() }).pipe(
-      catchError(this.handleError('Impossible de charger la configuration du niveau'))
+  getEffectiveConfig(levelId?: string): Observable<EffectiveConfigResponse> {
+    // On s'assure que l'URL contient bien le segment /config
+    const url = levelId ? `${this.baseUrl}/config/${levelId}` : `${this.baseUrl}/config/default`;
+    return this.http.get<EffectiveConfigResponse>(url, { headers: this.getHeaders() }).pipe(
+      catchError(this.handleError('Impossible de charger la configuration du formulaire'))
     );
   }
 

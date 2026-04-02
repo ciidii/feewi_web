@@ -57,10 +57,10 @@ export class PublicFormStepperComponent implements OnInit {
 
   // --- ÉTATS ---
   summary = signal<PublicPortalSummary | null>(null);
-  effectiveConfig = signal<EffectiveConfigResponse | null>(null);
+  globalConfig = signal<EffectiveConfigResponse | null>(null); // Socle de base de l'école
+  effectiveConfig = signal<EffectiveConfigResponse | null>(null); // Surcharges du niveau
 
-  currentStep = signal<StepperStep>('GUARDIAN');
-  currentApplicationId = signal<string | null>(null);
+  currentStep = signal<StepperStep>('GUARDIAN');  currentApplicationId = signal<string | null>(null);
   application = signal<Application | null>(null);
 
   isSubmitting = signal(false);
@@ -138,14 +138,38 @@ export class PublicFormStepperComponent implements OnInit {
     return this.availableLevels().find(l => l.id === levelId)?.name || 'Non sélectionné';
   });
 
-  /** Questions Spécifiques Effectives */
+  /** Questions Spécifiques Effectives (FUSION GLOBALE + NIVEAU) */
   effectiveCustomFields = computed(() => {
-    return this.effectiveConfig()?.formSchema?.customFields || [];
+    const globalFields = this.globalConfig()?.formSchema?.customFields || [];
+    const levelFields = this.effectiveConfig()?.formSchema?.customFields || [];
+    
+    // On fusionne les deux listes en évitant les doublons par nom de champ
+    const merged = [...globalFields];
+    levelFields.forEach(lf => {
+      const exists = merged.find(gf => gf.name === lf.name);
+      if (!exists) merged.push(lf);
+    });
+    
+    return merged;
   });
 
-  /** Checklist Effective */
+  /** Checklist Effective (FUSION GLOBALE + NIVEAU) */
   effectiveChecklist = computed(() => {
-    return this.effectiveConfig()?.documentChecklist || [];
+    const globalDocs = this.globalConfig()?.documentChecklist || [];
+    const levelDocs = this.effectiveConfig()?.documentChecklist || [];
+    
+    // On fusionne les documents. Si un code existe dans les deux, le niveau gagne (surcharge).
+    const merged = [...globalDocs];
+    levelDocs.forEach(ld => {
+      const idx = merged.findIndex(gd => gd.code === ld.code);
+      if (idx > -1) {
+        merged[idx] = ld; // La règle du niveau écrase la règle globale pour ce document
+      } else {
+        merged.push(ld); // Nouveau document spécifique au niveau
+      }
+    });
+    
+    return merged;
   });
 
   /** Instructions contextuelles par étape */
@@ -183,16 +207,18 @@ export class PublicFormStepperComponent implements OnInit {
     forkJoin({
       levels: this.academicService.getLevels(),
       filieres: this.academicService.getFilieres(),
-      cycles: this.academicService.getCycles(), // AJOUTÉ
-      summary: this.enrollmentService.getPortalSummary()
+      cycles: this.academicService.getCycles(),
+      summary: this.enrollmentService.getPortalSummary(),
+      globalConfig: this.enrollmentService.getEffectiveConfig() // Charge le global
     }).pipe(
       finalize(() => this.isLoading.set(false))
     ).subscribe({
-      next: ({ levels, filieres, cycles, summary }) => {
+      next: ({ levels, filieres, cycles, summary, globalConfig }) => {
         this.availableLevels.set(levels);
         this.availableFilieres.set(filieres);
         this.availableCycles.set(cycles);
         this.summary.set(summary);
+        this.globalConfig.set(globalConfig);
         if (summary && !summary.portalActive) this.isPortalClosed.set(true);
       }
     });
