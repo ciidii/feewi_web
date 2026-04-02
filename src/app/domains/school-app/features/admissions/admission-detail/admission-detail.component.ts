@@ -18,6 +18,7 @@ import { NotificationService } from '../../../../../shared/services/notification
 import { Filiere, Level, AcademicYear } from '../../../../../core/models/academic.model';
 import { AdmissionWorkflowComponent } from '../components/admission-workflow/admission-workflow.component';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-admission-detail',
@@ -33,6 +34,7 @@ export class AdmissionDetailComponent implements OnInit {
   private academicService = inject(AcademicService);
   private dialog = inject(MatDialog);
   private notificationService = inject(NotificationService);
+  private sanitizer = inject(DomSanitizer);
 
   // --- ÉTATS ---
   application = signal<AdmissionApplication | null>(null);
@@ -45,7 +47,7 @@ export class AdmissionDetailComponent implements OnInit {
 
   showDocumentViewer = signal(false);
   selectedDoc = signal<RequiredDocument | null>(null);
-  selectedDocUrl = signal<string | null>(null);
+  selectedDocUrl = signal<SafeResourceUrl | null>(null);
 
   // --- CONFIGURATION DYNAMIQUE ---
   assessmentSubjects = signal<string[]>([]);
@@ -258,7 +260,11 @@ export class AdmissionDetailComponent implements OnInit {
 
     if (doc.fileUrl) {
       this.documentService.getViewUrl(doc.fileUrl).subscribe({
-        next: (viewUrl) => this.selectedDocUrl.set(viewUrl),
+        next: (viewUrl) => {
+          // SECURISATION : On autorise cette URL pour l'iframe
+          const safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(viewUrl);
+          this.selectedDocUrl.set(safeUrl);
+        },
         error: (err) => console.error('Erreur génération URL de vue:', err)
       });
     }

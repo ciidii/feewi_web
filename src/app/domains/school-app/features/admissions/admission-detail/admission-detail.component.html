@@ -301,11 +301,22 @@
           </button>
         </header>
         <div class="viewer-body">
-          <iframe *ngIf="selectedDocUrl()" [src]="selectedDocUrl()"></iframe>
-          <div class="loading-doc" *ngIf="!selectedDocUrl()">
-            <lucide-icon [name]="RefreshCw" class="animate-spin" [size]="32"></lucide-icon>
-            <p>Chargement du document sécurisé...</p>
-          </div>
+          @if (selectedDocUrl()) {
+            <!-- Cas Image : On utilise une balise img pour un rendu parfait -->
+            @if (selectedDoc()?.name?.toLowerCase()?.includes('photo') || selectedDoc()?.code === 'PHO') {
+              <div class="image-viewer-container">
+                <img [src]="selectedDocUrl()" [alt]="selectedDoc()?.name" class="img-fluid">
+              </div>
+            } @else {
+              <!-- Cas PDF / Autre : On garde l'iframe -->
+              <iframe [src]="selectedDocUrl()"></iframe>
+            }
+          } @else {
+            <div class="loading-doc">
+              <lucide-icon [name]="RefreshCw" class="animate-spin" [size]="32"></lucide-icon>
+              <p>Chargement du document sécurisé...</p>
+            </div>
+          }
         </div>
       </div>
     </div>
