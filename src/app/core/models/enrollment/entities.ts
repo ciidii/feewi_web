@@ -47,9 +47,11 @@ export interface AdmissionApplication {
   accessCode: string;
   type: AdmissionType;
   status: AdmissionStatus;
-  academicYearId: string;
-  levelId: string;
-  filiereId?: string | null;
+  wish: {
+    academicYearId: string;
+    levelId: string;
+    filiereId?: string | null;
+  };
   tenantId: string;
   candidate?: Candidate;
   primaryGuardian?: Guardian;

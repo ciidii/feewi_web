@@ -63,7 +63,7 @@ export class AdmissionDashboardComponent implements OnInit {
   appsByLevel = computed(() => {
     const apps = this.applications();
     return this.levels().map(lvl => {
-      const count = apps.filter(a => a.levelId === lvl.id).length;
+      const count = apps.filter(a => a.wish?.levelId === lvl.id).length;
       const percentage = this.totalApps() > 0 ? (count / this.totalApps()) * 100 : 0;
       return {
         name: lvl.name,

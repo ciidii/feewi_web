@@ -55,13 +55,13 @@ export class AdmissionDetailComponent implements OnInit {
   levelName = computed(() => {
     const app = this.application();
     if (!app) return '...';
-    return this.levels().find(l => l.id === app.levelId)?.name || 'Niveau inconnu';
+    return this.levels().find(l => l.id === app.wish?.levelId)?.name || 'Niveau inconnu';
   });
 
   filiereName = computed(() => {
     const app = this.application();
-    if (!app || !app.filiereId) return null;
-    return this.filieres().find(f => f.id === app.filiereId)?.name || 'Filière inconnue';
+    if (!app || !app.wish?.filiereId) return null;
+    return this.filieres().find(f => f.id === app.wish.filiereId)?.name || 'Filière inconnue';
   });
 
   isReadyForFinalValidation = computed(() => {
@@ -118,18 +118,19 @@ export class AdmissionDetailComponent implements OnInit {
       year: this.academicService.getCurrentYear()
     }).pipe(
       switchMap(({ app, levels, filieres, year }) => {
+        console.log('[AdmissionDetail Debug] Objet APP brut reçu du serveur:', app);
         this.application.set(app);
         this.levels.set(levels);
         this.filieres.set(filieres);
         this.activeYear.set(year);
         
-        // SECURITÉ : On vérifie la présence du levelId avant l'appel
-        const targetLevelId = app.levelId || (app as any).requestedLevelId;
+        // SECURITÉ : On lit l'ID dans l'objet 'wish' identifié dans le JSON
+        const targetLevelId = app.wish?.levelId;
         
         if (targetLevelId) {
           return this.enrollmentAdminService.getEffectiveConfig(targetLevelId);
         } else {
-          console.warn('[AdmissionDetail] Dossier sans niveau, fallback config globale');
+          console.warn('[AdmissionDetail] Dossier sans niveau (wish.levelId absent), fallback config globale');
           return this.enrollmentAdminService.getConfig();
         }
       }),
@@ -173,8 +174,8 @@ export class AdmissionDetailComponent implements OnInit {
     this.enrollmentAdminService.receivePhysicalDocument(app.id, docCode).pipe(
       finalize(() => this.isActionLoading.set(false))
     ).subscribe({
-      next: (updated) => {
-        this.application.set(updated);
+      next: () => {
+        this.loadApplication(app.id); // Refresh complet pour éviter l'écran blanc
         this.notificationService.success('Document marqué comme reçu.');
       }
     });
@@ -187,8 +188,8 @@ export class AdmissionDetailComponent implements OnInit {
     this.enrollmentAdminService.verifyApplication(app.id).pipe(
       finalize(() => this.isActionLoading.set(false))
     ).subscribe({
-      next: (updated) => {
-        this.application.set(updated);
+      next: () => {
+        this.loadApplication(app.id); // Refresh complet
         this.notificationService.success('Dossier validé administrativement.');
       }
     });
@@ -209,8 +210,8 @@ export class AdmissionDetailComponent implements OnInit {
     this.enrollmentAdminService.submitAssessment(app.id, payload).pipe(
       finalize(() => this.isActionLoading.set(false))
     ).subscribe({
-      next: (updated) => {
-        this.application.set(updated);
+      next: () => {
+        this.loadApplication(app.id); // Refresh complet
         this.notificationService.success('Évaluation enregistrée avec succès.');
       }
     });
@@ -242,7 +243,7 @@ export class AdmissionDetailComponent implements OnInit {
     ).subscribe({
       next: (updated) => {
         if (updated) {
-          this.application.set(updated);
+          this.loadApplication(app.id); // Refresh complet
           this.notificationService.success('Admission validée avec succès !');
         }
       }

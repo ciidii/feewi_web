@@ -116,14 +116,14 @@ export class PublicFormStepperComponent implements OnInit {
     // --- DEEP DEBUG LOG ---
     // On log l'objet brut pour voir si c'est 'cycleId' ou 'cycle_id' ou 'cycle'
     console.log('[Stepper Debug] Objet Niveau sélectionné:', selectedLevel);
-    
+
     // 1. Tentative par objet imbriqué
     if (selectedLevel.cycle?.cycleCode === 'HIGH_SCHOOL') return true;
 
     // 2. Tentative par jointure d'ID (attention aux noms de champs)
     const cycleId = (selectedLevel as any).cycleId || (selectedLevel as any).cycle_id;
     const matchedCycle = cycles.find(c => c.id === cycleId);
-    
+
     if (matchedCycle?.cycleCode === 'HIGH_SCHOOL') return true;
 
     // 3. Fallback de sécurité par le Nom (si la base de données est mal liée)
@@ -142,14 +142,14 @@ export class PublicFormStepperComponent implements OnInit {
   effectiveCustomFields = computed(() => {
     const globalFields = this.globalConfig()?.formSchema?.customFields || [];
     const levelFields = this.effectiveConfig()?.formSchema?.customFields || [];
-    
+
     // On fusionne les deux listes en évitant les doublons par nom de champ
     const merged = [...globalFields];
     levelFields.forEach(lf => {
       const exists = merged.find(gf => gf.name === lf.name);
       if (!exists) merged.push(lf);
     });
-    
+
     return merged;
   });
 
@@ -157,7 +157,7 @@ export class PublicFormStepperComponent implements OnInit {
   effectiveChecklist = computed(() => {
     const globalDocs = this.globalConfig()?.documentChecklist || [];
     const levelDocs = this.effectiveConfig()?.documentChecklist || [];
-    
+
     // On fusionne les documents. Si un code existe dans les deux, le niveau gagne (surcharge).
     const merged = [...globalDocs];
     levelDocs.forEach(ld => {
@@ -168,7 +168,7 @@ export class PublicFormStepperComponent implements OnInit {
         merged.push(ld); // Nouveau document spécifique au niveau
       }
     });
-    
+
     return merged;
   });
 
@@ -234,7 +234,7 @@ export class PublicFormStepperComponent implements OnInit {
             this.application.set(app);
             this.currentApplicationId.set(app.id);
             this.resumeFormData(app);
-            if (app.levelId) return this.enrollmentService.getEffectiveConfig(app.levelId);
+            if (app.wish?.levelId) return this.enrollmentService.getEffectiveConfig(app.wish.levelId);
           }
           return of(null);
         }),
@@ -271,8 +271,8 @@ export class PublicFormStepperComponent implements OnInit {
         birthPlace: app.candidate?.birthPlace || '',
         nationality: app.candidate?.nationality || 'Sénégalaise',
         previousSchool: app.candidate?.previousSchool || '',
-        requestedLevelId: app.levelId || '',
-        filiereId: app.filiereId || null
+        requestedLevelId: app.wish?.levelId || '',
+        filiereId: app.wish?.filiereId || null
       }
     }));
   }
@@ -432,7 +432,7 @@ export class PublicFormStepperComponent implements OnInit {
 
     return this.enrollmentService.updateCandidate(this.currentApplicationId()!, payload).pipe(
       switchMap(app => {
-        const effectiveLevelId = app?.levelId || payload.levelId;
+        const effectiveLevelId = app?.wish.levelId || payload.levelId;
         if (app) this.application.set(app);
         return this.enrollmentService.getEffectiveConfig(effectiveLevelId);
       }),
