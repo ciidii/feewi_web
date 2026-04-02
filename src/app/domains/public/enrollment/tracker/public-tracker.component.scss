@@ -67,20 +67,55 @@ $border: #e2e8f0;
 
 /* APPLICATION VIEW */
 .tracker-header {
-  text-align: center;
-  .success-icon { color: #10b981; margin-bottom: 1rem; }
-  h1 { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.25rem; }
-  p { color: $slate; }
-  .header-divider { height: 1px; background: $border; margin: 1.5rem 0; }
+  padding: 2.5rem; margin-bottom: 2rem;
   
-  .status-badge {
-    display: inline-block; padding: 0.5rem 1.5rem; border-radius: 9999px;
-    font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
-    &.submitted { background: #eff6ff; color: #2563eb; }
-    &.verified { background: #f0fdf4; color: #166534; }
-    &.validated { background: #f0fdf4; color: #10b981; border: 1px solid #10b981; }
+  .header-main-info {
+    display: flex; align-items: center; gap: 2rem; margin-bottom: 2rem;
+    
+    .success-icon {
+      width: 80px; height: 80px; border-radius: 24px; display: grid; place-items: center;
+      background: #f1f5f9; color: #64748b;
+      &.success { background: #dcfce7; color: #10b981; }
+      &.danger { background: #fee2e2; color: #ef4444; }
+      &.warning { background: #fffbeb; color: #d97706; }
+      &.info { background: #eff6ff; color: #2563eb; }
+    }
+
+    .header-text {
+      flex: 1;
+      h1 { font-size: 1.75rem; font-weight: 800; color: #0f172a; margin: 0; }
+      p { font-size: 1rem; color: #64748b; margin: 4px 0 0; }
+    }
   }
 }
+
+.status-badge {
+  padding: 6px 16px; border-radius: 999px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+  background: #f1f5f9; color: #64748b;
+  &.success { background: #10b981; color: white; }
+  &.danger { background: #ef4444; color: white; }
+  &.warning { background: #f59e0b; color: white; }
+  &.info { background: #3b82f6; color: white; }
+}
+
+.school-instruction-box {
+  background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 16px; padding: 1.5rem;
+  .instruction-header {
+    display: flex; align-items: center; gap: 0.75rem; font-size: 0.75rem; font-weight: 800; color: #2563eb; text-transform: uppercase; margin-bottom: 0.75rem;
+  }
+  .instruction-content { font-size: 0.95rem; color: #1e40af; line-height: 1.6; font-weight: 500; margin: 0; }
+}
+
+.rejection-alert {
+  display: flex; gap: 1.5rem; padding: 1.5rem; background: #fef2f2; border: 1px solid #fecaca; border-radius: 16px;
+  lucide-icon { color: #ef4444; shrink: 0; }
+  .content {
+    h3 { font-size: 1rem; font-weight: 700; color: #991b1b; margin: 0; }
+    p { font-size: 0.9rem; color: #b91c1c; margin: 4px 0 0; line-height: 1.5; }
+  }
+}
+
+.mb-8 { margin-bottom: 2rem; }
 
 .tracker-main {
   display: grid; grid-template-columns: 1fr 300px; gap: 2rem;
@@ -98,38 +133,74 @@ $border: #e2e8f0;
   }
 }
 
-/* TIMELINE */
+/* TIMELINE DYNAMIQUE */
 .timeline {
-  position: relative; padding-left: 2rem;
+  position: relative; padding-left: 3rem;
   &::before {
-    content: ''; position: absolute; left: 7px; top: 0; bottom: 0;
-    width: 2px; background: $border;
+    content: ''; position: absolute; left: 11px; top: 0; bottom: 0;
+    width: 2px; background: #e2e8f0;
   }
 }
 
 .timeline-item {
-  position: relative; padding-bottom: 2.5rem;
+  position: relative; padding-bottom: 3rem;
   
   .timeline-dot {
-    position: absolute; left: -2rem; top: 0; width: 16px; height: 16px;
-    border-radius: 50%; background: #fff; border: 2px solid $border;
+    position: absolute; left: -3rem; top: 0; width: 24px; height: 24px;
+    border-radius: 50%; background: #fff; border: 2px solid #cbd5e1;
     z-index: 1; display: flex; align-items: center; justify-content: center;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    color: transparent;
   }
 
   &.completed {
-    .timeline-dot { background: #10b981; border-color: #10b981; color: #fff; }
     &::before { background: #10b981; }
+    .timeline-dot { 
+      background: #10b981; border-color: #10b981; color: #fff;
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+    }
+    h3 { color: #065f46; }
   }
 
   &.active {
-    .timeline-dot { border-color: $primary; border-width: 4px; }
-    h3 { color: $primary; }
+    .timeline-dot { 
+      border-color: #2563eb; border-width: 3px; 
+      background: #fff; color: #2563eb;
+      animation: pulse-blue 2s infinite;
+    }
+    h3 { color: #2563eb; }
+    p { color: #1e40af; font-weight: 500; }
+  }
+
+  &.warning {
+    .timeline-dot { 
+      background: #f59e0b; border-color: #f59e0b; color: white;
+      animation: pulse-amber 2s infinite;
+    }
+    h3 { color: #b45309; }
+  }
+
+  &.failed {
+    .timeline-dot { background: #ef4444; border-color: #ef4444; color: white; }
+    h3 { color: #991b1b; }
   }
 
   .timeline-content {
-    h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.25rem; color: $midnight; }
-    p { font-size: 0.9rem; color: $slate; line-height: 1.4; }
+    h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; transition: color 0.3s; }
+    p { font-size: 0.9rem; color: #64748b; line-height: 1.5; margin: 0; }
   }
+}
+
+@keyframes pulse-blue {
+  0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+}
+
+@keyframes pulse-amber {
+  0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
 }
 
 /* SIDEBAR */
@@ -165,6 +236,28 @@ $border: #e2e8f0;
   from { opacity: 0; transform: translateY(15px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+.docs-mini-list {
+  display: flex; flex-direction: column; gap: 0.75rem;
+}
+
+.doc-mini-item {
+  display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1rem;
+  background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;
+  
+  lucide-icon { color: #94a3b8; }
+  .name { font-size: 0.85rem; font-weight: 600; color: #475569; flex: 1; }
+  .status { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #94a3b8; }
+
+  &.uploaded {
+    border-color: #dcfce7; background: #fff;
+    lucide-icon { color: #10b981; }
+    .name { color: #0f172a; }
+    .status { color: #10b981; }
+  }
+}
+
+.mt-8 { margin-top: 2rem; }
 
 @media (max-width: 768px) {
   .tracker-main { grid-template-columns: 1fr; }

@@ -91,6 +91,27 @@ export class PublicTrackerComponent implements OnInit {
     });
   }
 
+  getStatusLabel(status: string): string {
+    const labels: Record<string, string> = {
+      'DRAFT': 'En cours de saisie',
+      'SUBMITTED': 'Dossier déposé',
+      'VERIFIED': 'Pièces validées',
+      'TESTING': 'Évaluation en cours',
+      'WAITLIST': 'En liste d\'attente',
+      'VALIDATED': 'Admission confirmée !',
+      'REJECTED': 'Dossier non retenu',
+      'CANCELLED': 'Demande annulée'
+    };
+    return labels[status] || status;
+  }
+
+  getStatusClass(status: string): string {
+    if (status === 'VALIDATED') return 'success';
+    if (status === 'REJECTED' || status === 'CANCELLED') return 'danger';
+    if (status === 'WAITLIST' || status === 'TESTING') return 'warning';
+    return 'info';
+  }
+
   // Icônes
   readonly Clock = Clock;
   readonly CheckCircle = CheckCircle;
