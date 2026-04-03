@@ -1,0 +1,226 @@
+<div class="student-detail-container pb-12">
+  @if (isLoading()) {
+    <div class="flex items-center justify-center h-64">
+      <lucide-icon [name]="RefreshCw" class="w-8 h-8 text-blue-500 animate-spin"></lucide-icon>
+    </div>
+  } @else if (student(); as s) {
+    <!-- BARRE DE PILOTAGE SUPÉRIEURE (Sticky) -->
+    <div class="sticky top-0 z-20 bg-slate-50/80 backdrop-blur-md border-b border-slate-200 py-4 mb-8">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <a routerLink="/admin/registry/students" class="p-2 hover:bg-white rounded-lg border border-transparent hover:border-slate-200 transition-all text-slate-500">
+            <lucide-icon [name]="ArrowLeft" class="w-5 h-5"></lucide-icon>
+          </a>
+          <div>
+            <div class="flex items-center gap-3">
+              <h1 class="text-xl font-display font-bold text-slate-900">{{ fullName() }}</h1>
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-medium" 
+                    [ngClass]="{
+                      'bg-emerald-100 text-emerald-700': s.status === 'ACTIVE',
+                      'bg-amber-100 text-amber-700': s.status === 'SUSPENDED',
+                      'bg-rose-100 text-rose-700': s.status === 'LEFT',
+                      'bg-slate-100 text-slate-600': s.status === 'ARCHIVED'
+                    }">
+                {{ getStatusLabel(s.status) }}
+              </span>
+            </div>
+            <p class="text-sm text-slate-500">Matricule : {{ s.registrationNumber }} • Niveau actuel : {{ currentLevelName() }}</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button (click)="toggleStatus()" class="px-4 py-2 text-sm font-medium border rounded-lg transition-colors"
+                  [ngClass]="s.status === 'ACTIVE' ? 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50' : 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700'">
+            {{ s.status === 'ACTIVE' ? 'Suspendre' : 'Réactiver' }}
+          </button>
+          <button class="px-4 py-2 text-sm font-medium bg-white text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+            <lucide-icon [name]="Printer" class="w-4 h-4 inline-block mr-2"></lucide-icon>
+            Imprimer Fiche
+          </button>
+          <button class="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-sm transition-colors">
+            <lucide-icon [name]="Edit" class="w-4 h-4 inline-block mr-2"></lucide-icon>
+            Modifier
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- GRILLE DE CONTENU (Fluid Layout) -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- COLONNE PRINCIPALE (2/3) -->
+      <div class="lg:col-span-2 space-y-8">
+        
+        <!-- SECTION : ÉTAT CIVIL & IDENTITÉ -->
+        <section class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+          <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+            <h2 class="font-display font-semibold text-slate-900 flex items-center gap-2">
+              <lucide-icon [name]="User" class="w-4 h-4 text-blue-500"></lucide-icon>
+              Identité & État Civil
+            </h2>
+          </div>
+          <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
+            <div>
+              <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Nom complet</p>
+              <p class="text-slate-900 font-medium">{{ fullName() }}</p>
+            </div>
+            <div>
+              <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Genre</p>
+              <p class="text-slate-900 font-medium">{{ s.gender === 'M' ? 'Masculin' : 'Féminin' }}</p>
+            </div>
+            <div>
+              <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Date de naissance</p>
+              <p class="text-slate-900 font-medium flex items-center gap-2">
+                <lucide-icon [name]="Calendar" class="w-4 h-4 text-slate-400"></lucide-icon>
+                {{ s.birthDate | date:'longDate' }}
+              </p>
+            </div>
+            <div>
+              <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Lieu de naissance</p>
+              <p class="text-slate-900 font-medium flex items-center gap-2">
+                <lucide-icon [name]="MapPin" class="w-4 h-4 text-slate-400"></lucide-icon>
+                {{ s.customFields?.['birth_place'] || 'Non renseigné' }}
+              </p>
+            </div>
+            <div>
+              <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Nationalité</p>
+              <p class="text-slate-900 font-medium">{{ s.customFields?.['nationality'] || 'Non renseignée' }}</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION : RESPONSABLES LÉGAUX -->
+        <section class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+          <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+            <h2 class="font-display font-semibold text-slate-900 flex items-center gap-2">
+              <lucide-icon [name]="Users" class="w-4 h-4 text-blue-500"></lucide-icon>
+              Responsables Légaux
+            </h2>
+          </div>
+          <div class="divide-y divide-slate-100">
+            @for (guardian of s.guardians; track guardian.guardianEmail) {
+              <div class="p-6 flex items-start justify-between">
+                <div class="flex gap-4">
+                  <div class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
+                    <lucide-icon [name]="User" class="w-5 h-5"></lucide-icon>
+                  </div>
+                  <div>
+                    <h3 class="font-medium text-slate-900">{{ guardian.guardianEmail }}</h3>
+                    <p class="text-sm text-slate-500">{{ getRelationLabel(guardian.relation) }} @if (guardian.financialResponsible) { • <span class="text-blue-600 font-medium">Responsable Financier</span> }</p>
+                  </div>
+                </div>
+                <div class="flex gap-2">
+                  <button class="p-2 hover:bg-slate-50 rounded-lg text-slate-400 hover:text-blue-600 transition-colors">
+                    <lucide-icon [name]="Mail" class="w-4 h-4"></lucide-icon>
+                  </button>
+                </div>
+              </div>
+            } @empty {
+              <div class="p-12 text-center text-slate-500">
+                Aucun responsable enregistré.
+              </div>
+            }
+          </div>
+        </section>
+
+        <!-- SECTION : CHAMPS PERSONNALISÉS -->
+        @if (s.customFields && (s.customFields | keyvalue).length > 0) {
+          <section class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+            <div class="px-6 py-4 border-b border-slate-100">
+              <h2 class="font-display font-semibold text-slate-900">Informations Spécifiques</h2>
+            </div>
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
+              @for (field of s.customFields | keyvalue; track field.key) {
+                <div>
+                  <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">{{ field.key }}</p>
+                  <p class="text-slate-900 font-medium">{{ field.value || '-' }}</p>
+                </div>
+              }
+            </div>
+          </section>
+        }
+      </div>
+
+      <!-- COLONNE LATERALE (1/3) -->
+      <div class="space-y-8">
+        
+        <!-- PHOTO & STATUT RAPIDE -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 text-center shadow-sm">
+          <div class="w-32 h-32 mx-auto rounded-3xl bg-slate-50 border-4 border-white shadow-md flex items-center justify-center text-slate-300 mb-4 overflow-hidden">
+            <lucide-icon [name]="User" class="w-16 h-16"></lucide-icon>
+          </div>
+          <h3 class="font-display font-bold text-slate-900">{{ fullName() }}</h3>
+          <p class="text-sm text-slate-500 mb-6">{{ s.registrationNumber }}</p>
+          
+          <div class="flex items-center justify-center gap-2 px-4 py-2 bg-slate-50 rounded-xl text-xs font-medium text-slate-600 border border-slate-100">
+            <lucide-icon [name]="History" class="w-3 h-3"></lucide-icon>
+            Inscrit le {{ s.birthDate | date:'mediumDate' }}
+          </div>
+        </div>
+
+        <!-- CONTACT D'URGENCE & SANTÉ -->
+        <section class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+          <div class="px-6 py-4 border-b border-slate-100">
+            <h2 class="font-display font-semibold text-slate-900 flex items-center gap-2">
+              <lucide-icon [name]="Stethoscope" class="w-4 h-4 text-rose-500"></lucide-icon>
+              Santé & Urgence
+            </h2>
+          </div>
+          <div class="p-6 space-y-6">
+            @if (s.emergencyContact) {
+              <div class="bg-rose-50 rounded-xl p-4 border border-rose-100">
+                <p class="text-xs font-bold text-rose-600 uppercase tracking-wider mb-2">Contact d'urgence</p>
+                <p class="font-bold text-slate-900">{{ s.emergencyContact.name }}</p>
+                <p class="text-sm text-slate-600 mb-2">{{ s.emergencyContact.relation }}</p>
+                <a [href]="'tel:' + s.emergencyContact.phone" class="flex items-center gap-2 text-rose-600 font-bold hover:underline">
+                  <lucide-icon [name]="Phone" class="w-4 h-4"></lucide-icon>
+                  {{ s.emergencyContact.phone }}
+                </a>
+              </div>
+            }
+            
+            <div class="grid grid-cols-2 gap-4">
+              <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Groupe Sanguin</p>
+                <p class="font-bold text-slate-900">{{ s.bloodGroup || '?' }}</p>
+              </div>
+              <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Allergies</p>
+                <p class="font-bold text-rose-600 truncate" [title]="s.criticalAllergies || 'Aucune'">{{ s.criticalAllergies || 'Aucune' }}</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- HISTORIQUE SCOLAIRE -->
+        <section class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+          <div class="px-6 py-4 border-b border-slate-100">
+            <h2 class="font-display font-semibold text-slate-900 flex items-center gap-2">
+              <lucide-icon [name]="History" class="w-4 h-4 text-slate-500"></lucide-icon>
+              Parcours Scolaire
+            </h2>
+          </div>
+          <div class="p-6">
+            <div class="space-y-6 relative before:absolute before:inset-0 before:left-3 before:w-0.5 before:bg-slate-100">
+              @for (h of s.history; track h.academicYearId) {
+                <div class="relative pl-8">
+                  <div class="absolute left-1.5 top-1.5 w-3 h-3 rounded-full bg-blue-500 border-4 border-white shadow-sm"></div>
+                  <h4 class="text-sm font-bold text-slate-900">{{ h.levelName || 'Niveau ' + h.levelId }}</h4>
+                  <p class="text-xs text-slate-500">Année : {{ h.academicYearId }}</p>
+                  <span class="inline-block mt-1 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase"
+                        [ngClass]="{
+                          'bg-emerald-50 text-emerald-600': h.result === 'ADMITTED' || h.result === 'PROMOTED',
+                          'bg-rose-50 text-rose-600': h.result === 'REJECTED' || h.result === 'REPEATED'
+                        }">
+                    {{ h.result }}
+                  </span>
+                </div>
+              } @empty {
+                <p class="text-sm text-slate-500 text-center">Aucun historique disponible.</p>
+              }
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  }
+</div>

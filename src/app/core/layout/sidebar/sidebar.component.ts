@@ -57,8 +57,8 @@ export class SidebarComponent {
 
   // --- 2. STUDENT REGISTRY (Référentiel) ---
   registryItems = [
-    { label: 'Liste des élèves', icon: Users, route: '/admin/students' },
-    { label: 'Dossiers scolaires', icon: FileText, route: '/admin/students/records' },
+    { label: 'Liste des élèves', icon: Users, route: '/admin/registry/students' },
+    { label: 'Dossiers scolaires', icon: FileText, route: '/admin/registry/students/records' },
   ];
 
   // --- 3. ACADEMIC STRUCTURE (Référentiel & Pilotage) ---

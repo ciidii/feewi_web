@@ -102,6 +102,21 @@ export const SCHOOL_APP_ROUTES: Routes = [
     ]
   },
   {
+    path: 'registry',
+    children: [
+      {
+        path: 'students',
+        title: 'Répertoire des Élèves',
+        loadComponent: () => import('./features/registry/student-list/student-list.component').then(m => m.StudentListComponent)
+      },
+      {
+        path: 'students/:id',
+        title: 'Dossier Élève',
+        loadComponent: () => import('./features/registry/student-detail/student-detail.component').then(m => m.StudentDetailComponent)
+      }
+    ]
+  },
+  {
     path: '',
     redirectTo: 'dashboard',
     pathMatch: 'full'
