@@ -6,10 +6,12 @@ import {TenantContextService} from "./tenant-context.service";
 import {catchError, Observable, throwError} from "rxjs";
 import {
   AdmissionApplication,
+  AdmissionStatus,
   AssessmentRequest,
   EnrollmentConfig,
   LevelOverrideConfig
 } from '../models/enrollment.model';
+import { Page } from "../models/school.model";
 
 
 @Injectable({
@@ -38,16 +40,32 @@ export class EnrollmentAdminService {
 
   // --- GESTION DES DOSSIERS ---
 
-  getApplications(): Observable<AdmissionApplication[]> {
-    return this.http.get<AdmissionApplication[]>(`${this.baseUrl}/admin/applications`, { headers: this.getHeaders() }).pipe(
-      catchError(this.handleError('Erreur lors du chargement des dossiers'))
-    );
-  }
+  /**
+   * Liste & Recherche Avancée (Paginée) - API V1
+   */
+  getApplications(params: {
+    q?: string,
+    status?: AdmissionStatus,
+    levelId?: string,
+    academicYearId?: string,
+    channel?: 'DIGITAL' | 'DIRECT',
+    page?: number,
+    size?: number
+  } = {}): Observable<Page<AdmissionApplication>> {
+    let httpParams = new HttpParams();
+    if (params.q) httpParams = httpParams.set('q', params.q);
+    if (params.status) httpParams = httpParams.set('status', params.status);
+    if (params.levelId) httpParams = httpParams.set('levelId', params.levelId);
+    if (params.academicYearId) httpParams = httpParams.set('academicYearId', params.academicYearId);
+    if (params.channel) httpParams = httpParams.set('channel', params.channel);
+    if (params.page !== undefined) httpParams = httpParams.set('page', params.page.toString());
+    if (params.size !== undefined) httpParams = httpParams.set('size', params.size.toString());
 
-  searchApplications(query: string): Observable<AdmissionApplication[]> {
-    const params = new HttpParams().set('q', query);
-    return this.http.get<AdmissionApplication[]>(`${this.baseUrl}/admin/applications/search`, { params, headers: this.getHeaders() }).pipe(
-      catchError(this.handleError('Erreur lors de la recherche'))
+    return this.http.get<Page<AdmissionApplication>>(`${this.baseUrl}/admin/applications`, { 
+      params: httpParams, 
+      headers: this.getHeaders() 
+    }).pipe(
+      catchError(this.handleError('Erreur lors du chargement des dossiers'))
     );
   }
 
@@ -166,6 +184,12 @@ export class EnrollmentAdminService {
   validateAdmission(applicationId: string): Observable<AdmissionApplication> {
     return this.http.patch<AdmissionApplication>(`${this.baseUrl}/admin/direction/applications/${applicationId}/validate`, {}, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors de la validation finale'))
+    );
+  }
+
+  overruleAdmission(applicationId: string): Observable<AdmissionApplication> {
+    return this.http.patch<AdmissionApplication>(`${this.baseUrl}/admin/direction/applications/${applicationId}/overrule`, {}, { headers: this.getHeaders() }).pipe(
+      catchError(this.handleError('Erreur lors de la validation avec dérogation'))
     );
   }
 

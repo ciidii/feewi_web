@@ -292,6 +292,39 @@ export class AdmissionDetailComponent implements OnInit {
     });
   }
 
+  overruleFinal() {
+    const app = this.application();
+    if (!app) return;
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Validation avec dérogation',
+        message: 'Vous allez valider ce dossier malgré des pièces manquantes ou un verrou numérique. Confirmer ?',
+        confirmLabel: 'Passer outre et Valider',
+        type: 'danger'
+      }
+    });
+
+    dialogRef.afterClosed().pipe(
+      switchMap(confirmed => {
+        if (confirmed) {
+          this.isActionLoading.set(true);
+          return this.enrollmentAdminService.overruleAdmission(app.id);
+        }
+        return of(null);
+      }),
+      finalize(() => this.isActionLoading.set(false))
+    ).subscribe({
+      next: (updated) => {
+        if (updated) {
+          this.loadApplication(app.id);
+          this.notificationService.warning('Admission validée par dérogation.');
+        }
+      }
+    });
+  }
+
   previewDocument(doc: RequiredDocument) {
     if (doc.status === 'MISSING') return;
     this.selectedDoc.set(doc);

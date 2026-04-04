@@ -35,10 +35,16 @@
           </button>
         }
         @if (app.status === 'TESTING') {
-          <button class="btn-action success" (click)="validateFinal()" [disabled]="isActionLoading()">
+          <button *ngIf="isReadyForFinalValidation()" class="btn-action success" (click)="validateFinal()" [disabled]="isActionLoading()">
             <lucide-icon [name]="isActionLoading() ? RefreshCw : GraduationCap" [size]="18"
                          [class.animate-spin]="isActionLoading()"></lucide-icon>
             <span>Valider l'Admission</span>
+          </button>
+
+          <button *ngIf="!isReadyForFinalValidation()" class="btn-action warning" (click)="overruleFinal()" [disabled]="isActionLoading()">
+            <lucide-icon [name]="isActionLoading() ? RefreshCw : ShieldCheck" [size]="18"
+                         [class.animate-spin]="isActionLoading()"></lucide-icon>
+            <span>Valider (Dérogation)</span>
           </button>
         }
         <button class="btn-icon-only" title="Imprimer le dossier">

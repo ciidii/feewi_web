@@ -21,7 +21,7 @@
           [value]="searchQuery()">
       </div>
       
-      <button class="btn-action" (click)="loadAdmissions(searchQuery())" [disabled]="isLoading()">
+      <button class="btn-action" (click)="loadAdmissions()" [disabled]="isLoading()">
         <lucide-icon [name]="RefreshCw" [size]="18" [class.animate-spin]="isLoading()"></lucide-icon>
         <span>Actualiser</span>
       </button>
@@ -36,13 +36,17 @@
   <div class="page-content">
     
     <app-data-list
-      [data]="filteredAdmissions()"
+      [data]="admissionRows()"
       [tabs]="admissionTabs()"
       [activeTab]="activeTab()"
       [actions]="admissionActions"
       [isLoading]="isLoading()"
+      [page]="currentPage()"
+      [total]="totalElements()"
+      [totalPages]="totalPages()"
       defaultView="table"
       (onTabChange)="onTabChange($event)"
+      (onPageChange)="onPageChange($event)"
       (onAction)="handleAction($event)"
       (onRowClick)="handleAction({ actionId: 'view', row: $event })"
     ></app-data-list>

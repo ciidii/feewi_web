@@ -80,13 +80,15 @@ export class AdmissionDashboardComponent implements OnInit {
   loadData() {
     this.isLoading.set(true);
     forkJoin({
-      apps: this.enrollmentService.getApplications(),
+      // On demande une taille large pour le dashboard afin d'avoir les stats globales
+      // Idéalement, il faudrait un endpoint /stats dédié.
+      apps: this.enrollmentService.getApplications({ size: 1000 }),
       levels: this.academicService.getLevels()
     }).pipe(
       finalize(() => this.isLoading.set(false))
     ).subscribe({
       next: ({apps, levels}) => {
-        this.applications.set(apps);
+        this.applications.set(apps.content || []);
         this.levels.set(levels);
       }
     });

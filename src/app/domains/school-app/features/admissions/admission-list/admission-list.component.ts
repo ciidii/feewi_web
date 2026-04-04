@@ -38,24 +38,23 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
 
   // --- ÉTATS ---
   activeTab = signal('Tous');
-  rawApplications = signal<AdmissionApplication[]>([]);
   searchQuery = signal('');
   isLoading = signal(false);
+  
+  // Pagination
+  currentPage = signal(0);
+  pageSize = signal(20);
+  totalElements = signal(0);
+  totalPages = signal(1);
+
+  rawApplications = signal<AdmissionApplication[]>([]);
 
   private searchSubject = new Subject<string>();
   private destroy$ = new Subject<void>();
 
-  // --- LOGIQUE DE FILTRAGE ---
-  filteredAdmissions = computed(() => {
-    const apps = this.rawApplications();
-    const tab = this.activeTab();
-
-    let filtered = apps;
-    if (tab === 'À Vérifier') filtered = apps.filter(a => a.status === 'SUBMITTED');
-    if (tab === 'À Évaluer') filtered = apps.filter(a => a.status === 'VERIFIED');
-    if (tab === 'En Décision') filtered = apps.filter(a => ['TESTING', 'WAITLIST'].includes(a.status));
-
-    return filtered.map(app => this.mapToTableRow(app));
+  // --- LOGIQUE DE FILTRAGE (Relayée au Backend) ---
+  admissionRows = computed(() => {
+    return this.rawApplications().map(app => this.mapToTableRow(app));
   });
 
   // --- CONFIGURATION UI ---
@@ -66,12 +65,13 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
   ];
 
   admissionTabs = computed<TabItem[]>(() => {
-    const apps = this.rawApplications();
+    // Note: Dans une version paginée, les compteurs par onglet proviennent idéalement d'un endpoint summary
+    // Pour l'instant on garde la structure avec le total global
     return [
-      { label: 'Tous', icon: Layers, count: apps.length },
-      { label: 'À Vérifier', icon: Clock, count: apps.filter(a => a.status === 'SUBMITTED').length },
-      { label: 'À Évaluer', icon: ShieldCheck, count: apps.filter(a => a.status === 'VERIFIED').length },
-      { label: 'En Décision', icon: UserCheck, count: apps.filter(a => ['TESTING', 'WAITLIST'].includes(a.status)).length }
+      { label: 'Tous', icon: Layers, count: this.totalElements() },
+      { label: 'À Vérifier', icon: Clock },
+      { label: 'À Évaluer', icon: ShieldCheck },
+      { label: 'En Décision', icon: UserCheck }
     ];
   });
 
@@ -84,7 +84,8 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
       distinctUntilChanged(),
       takeUntil(this.destroy$)
     ).subscribe(query => {
-      this.loadAdmissions(query);
+      this.currentPage.set(0);
+      this.loadAdmissions();
     });
   }
 
@@ -99,20 +100,39 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
     this.searchSubject.next(query);
   }
 
-  async loadAdmissions(query?: string) {
+  async loadAdmissions() {
     this.isLoading.set(true);
-    try {
-      const request = query
-        ? this.enrollmentAdminService.searchApplications(query)
-        : this.enrollmentAdminService.getApplications();
+    
+    let status: AdmissionStatus | undefined;
+    const tab = this.activeTab();
+    if (tab === 'À Vérifier') status = 'SUBMITTED';
+    if (tab === 'À Évaluer') status = 'VERIFIED';
+    if (tab === 'En Décision') status = 'TESTING'; // Simplification pour l'exemple
 
-      const data = await firstValueFrom(request);
-      this.rawApplications.set(data || []);
+    try {
+      const response = await firstValueFrom(
+        this.enrollmentAdminService.getApplications({
+          q: this.searchQuery(),
+          status: status,
+          page: this.currentPage(),
+          size: this.pageSize()
+        })
+      );
+
+      this.rawApplications.set(response.content || []);
+      this.totalElements.set(response.totalElements);
+      this.totalPages.set(response.totalPages);
     } catch (e) {
       console.error('Erreur lors du chargement des admissions:', e);
+      this.notificationService.error('Erreur lors du chargement des données');
     } finally {
       this.isLoading.set(false);
     }
+  }
+
+  onPageChange(page: number) {
+    this.currentPage.set(page);
+    this.loadAdmissions();
   }
 
   private mapToTableRow(app: AdmissionApplication): TableRow {
@@ -189,7 +209,7 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
           finalize(() => this.isLoading.set(false))
         ).subscribe(() => {
           this.notificationService.success('Admission validée.');
-          this.loadAdmissions(this.searchQuery());
+          this.loadAdmissions();
         });
       }
     });
@@ -213,7 +233,7 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
           finalize(() => this.isLoading.set(false))
         ).subscribe(() => {
           this.notificationService.success('Dossier rejeté.');
-          this.loadAdmissions(this.searchQuery());
+          this.loadAdmissions();
         });
       }
     });
