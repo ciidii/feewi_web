@@ -1,30 +1,47 @@
-import { Component, signal, computed, inject, OnInit, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import {Component, computed, effect, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {
-  LucideAngularModule, User, Users, FileText, Sparkles, CheckCircle,
-  ArrowLeft, ArrowRight, Upload, X, GraduationCap, RefreshCw, Eye,
-  Info, ShieldCheck, MessageSquare, ChefHat, Bus, ClipboardList, AlertTriangle, FileSpreadsheet, FileImage
+  AlertTriangle,
+  ArrowLeft,
+  ArrowRight,
+  Bus,
+  CheckCircle,
+  ChefHat,
+  ClipboardList,
+  Eye,
+  FileImage,
+  FileSpreadsheet,
+  FileText,
+  GraduationCap,
+  Info,
+  LucideAngularModule,
+  MessageSquare,
+  RefreshCw,
+  ShieldCheck,
+  Sparkles,
+  Upload,
+  User,
+  Users,
+  X
 } from 'lucide-angular';
-import { catchError, finalize, forkJoin, map, of, switchMap, tap, Observable } from 'rxjs';
+import {catchError, finalize, forkJoin, map, Observable, of, switchMap, tap} from 'rxjs';
 
-import { EnrollmentPublicService, PublicPortalSummary, EffectiveConfigResponse } from '../../../../core/services/enrollment-public.service';
-import { DocumentEngineService } from '../../../../core/services/document-engine.service';
-import { AdmissionSessionService } from '../../../../core/services/admission-session.service';
-import { AcademicService } from '../../../../core/services/academic.service';
-import { TenantContextService } from '../../../../core/services/tenant-context.service';
-import {Level, AcademicYear, Filiere, Cycle} from '../../../../core/models/academic.model';
 import {
-  AdmissionApplication as Application,
-  CoreFieldControl,
-  CustomFieldConfig,
-  Guardian,
-  RequiredDocumentConfig
-} from '../../../../core/models/enrollment.model';
-import { Router } from '@angular/router';
+  EffectiveConfigResponse,
+  EnrollmentPublicService,
+  PublicPortalSummary
+} from '../../../../core/services/enrollment-public.service';
+import {DocumentEngineService} from '../../../../core/services/document-engine.service';
+import {AdmissionSessionService} from '../../../../core/services/admission-session.service';
+import {AcademicService} from '../../../../core/services/academic.service';
+import {TenantContextService} from '../../../../core/services/tenant-context.service';
+import {Cycle, Filiere, Level} from '../../../../core/models/academic.model';
+import {AdmissionApplication as Application, CoreFieldControl} from '../../../../core/models/enrollment.model';
+import {Router} from '@angular/router';
 
-import { NotificationService } from '../../../../shared/services/notification.service';
-import { MatCheckbox } from '@angular/material/checkbox';
+import {NotificationService} from '../../../../shared/services/notification.service';
+import {MatCheckbox} from '@angular/material/checkbox';
 
 export type StepperStep = 'GUARDIAN' | 'STUDENT' | 'SPECIFIC' | 'SERVICES' | 'DOCS' | 'REVIEW';
 
@@ -60,7 +77,8 @@ export class PublicFormStepperComponent implements OnInit {
   globalConfig = signal<EffectiveConfigResponse | null>(null); // Socle de base de l'école
   effectiveConfig = signal<EffectiveConfigResponse | null>(null); // Surcharges du niveau
 
-  currentStep = signal<StepperStep>('GUARDIAN');  currentApplicationId = signal<string | null>(null);
+  currentStep = signal<StepperStep>('GUARDIAN');
+  currentApplicationId = signal<string | null>(null);
   application = signal<Application | null>(null);
 
   isSubmitting = signal(false);
@@ -190,7 +208,7 @@ export class PublicFormStepperComponent implements OnInit {
   });
 
   getCoreControl(key: string): CoreFieldControl {
-    return this.effectiveConfig()?.coreFieldOverrides?.[key] || { label: '', hidden: false, mandatory: false };
+    return this.effectiveConfig()?.coreFieldOverrides?.[key] || {label: '', hidden: false, mandatory: false};
   }
 
   isServiceEnabled(code: string): boolean {
@@ -213,7 +231,7 @@ export class PublicFormStepperComponent implements OnInit {
     }).pipe(
       finalize(() => this.isLoading.set(false))
     ).subscribe({
-      next: ({ levels, filieres, cycles, summary, globalConfig }) => {
+      next: ({levels, filieres, cycles, summary, globalConfig}) => {
         this.availableLevels.set(levels);
         this.availableFilieres.set(filieres);
         this.availableCycles.set(cycles);
@@ -283,7 +301,7 @@ export class PublicFormStepperComponent implements OnInit {
     this.isSubmitting.set(true);
     let operation$: Observable<any> = of(true);
 
-    switch(this.currentStep()) {
+    switch (this.currentStep()) {
       case 'GUARDIAN':
         // CHANTIER UX : Si on a déjà un ID, on met à jour. Sinon on initialise.
         operation$ = this.currentApplicationId() ? this.saveGuardianInfo() : this.initializeApplication();
@@ -333,14 +351,14 @@ export class PublicFormStepperComponent implements OnInit {
   updateGuardianData(patch: Partial<any>) {
     this.formData.update(prev => ({
       ...prev,
-      primaryGuardian: { ...prev.primaryGuardian, ...patch }
+      primaryGuardian: {...prev.primaryGuardian, ...patch}
     }));
   }
 
   updateStudentData(patch: Partial<any>) {
     this.formData.update(prev => ({
       ...prev,
-      student: { ...prev.student, ...patch }
+      student: {...prev.student, ...patch}
     }));
   }
 
@@ -458,8 +476,8 @@ export class PublicFormStepperComponent implements OnInit {
 
   private saveSubscriptions() {
     const subs = [];
-    if (this.formData().services.canteen) subs.push({ serviceCode: 'CANTEEN', optionCode: 'STANDARD' });
-    if (this.formData().services.transport) subs.push({ serviceCode: 'TRANSPORT', optionCode: 'STANDARD' });
+    if (this.formData().services.canteen) subs.push({serviceCode: 'CANTEEN', optionCode: 'STANDARD'});
+    if (this.formData().services.transport) subs.push({serviceCode: 'TRANSPORT', optionCode: 'STANDARD'});
     return this.enrollmentService.updateSubscriptions(this.currentApplicationId()!, subs).pipe(
       tap(app => this.application.set(app)),
       map(() => true),
@@ -477,11 +495,11 @@ export class PublicFormStepperComponent implements OnInit {
     const accessCode = currentApp?.accessCode || session?.accessCode;
     const appId = this.currentApplicationId();
 
-    console.log(`[Stepper] Tentative d'upload pour ${docCode}:`, { fileName: file?.name, reference, appId });
+    console.log(`[Stepper] Tentative d'upload pour ${docCode}:`, {fileName: file?.name, reference, appId});
 
     if (!file) return;
     if (!appId || !reference || !accessCode) {
-      console.warn('[Stepper] Upload impossible : Infos de session incomplètes', { appId, reference });
+      console.warn('[Stepper] Upload impossible : Infos de session incomplètes', {appId, reference});
       this.notificationService.warning("Session incomplète. Veuillez recommencer l'étape 1.");
       return;
     }
@@ -537,7 +555,7 @@ export class PublicFormStepperComponent implements OnInit {
         this.notificationService.success('Dossier soumis avec succès.');
         this.sessionService.clearSession();
         this.router.navigate(['/enrollment/tracker', finalApp.reference], {
-          queryParams: { accessCode: finalApp.accessCode }
+          queryParams: {accessCode: finalApp.accessCode}
         });
       },
       error: (err) => console.error('Erreur soumission finale:', err)
