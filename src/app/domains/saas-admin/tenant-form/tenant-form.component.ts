@@ -60,11 +60,39 @@ export class TenantFormComponent {
     phone: ['', [Validators.required, Validators.pattern(/^\+?[0-9\s-]{8,}$/)]],
     streetAddress: ['', Validators.required],
     city: ['', Validators.required],
+    educationTemplate: ['SN_FR', Validators.required],
+    allowedCycles: [[], [Validators.required, Validators.minLength(1)]],
     adminEmail: ['', [Validators.required, Validators.email]],
     adminFirstName: ['', Validators.required],
     adminLastName: ['', Validators.required],
     adminPassword: ['', [Validators.required, Validators.minLength(8)]]
   });
+
+  educationTemplates = [
+    { code: 'SN_FR', label: 'Sénégal (Français)' },
+    { code: 'GMB_EN', label: 'Gambie (Anglais)' },
+    { code: 'GUI_FR', label: 'Guinée (Français)' }
+  ];
+
+  cycleOptions = [
+    { code: 'PRE_SCHOOL', label: 'Préscolaire / Maternelle' },
+    { code: 'PRIMARY', label: 'Primaire / Élémentaire' },
+    { code: 'MIDDLE_SCHOOL', label: 'Moyen / Collège' },
+    { code: 'HIGH_SCHOOL', label: 'Secondaire / Lycée' }
+  ];
+
+  toggleCycle(code: string) {
+    const current = this.tenantForm.get('allowedCycles')?.value as string[];
+    const next = current.includes(code)
+      ? current.filter(c => c !== code)
+      : [...current, code];
+    this.tenantForm.get('allowedCycles')?.setValue(next);
+    this.tenantForm.get('allowedCycles')?.markAsTouched();
+  }
+
+  isCycleSelected(code: string): boolean {
+    return (this.tenantForm.get('allowedCycles')?.value as string[]).includes(code);
+  }
 
   isInvalid(controlName: string): boolean {
     const control = this.tenantForm.get(controlName);

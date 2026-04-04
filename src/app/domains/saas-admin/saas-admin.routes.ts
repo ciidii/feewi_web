@@ -12,6 +12,16 @@ export const SAAS_ADMIN_ROUTES: Routes = [
     loadComponent: () => import('./tenant-detail/tenant-detail.component').then(m => m.TenantDetailComponent)
   },
   {
+    path: 'stats',
+    title: 'Statistiques Globales',
+    loadComponent: () => import('./saas-stats/saas-stats.component').then(m => m.SaasStatsComponent)
+  },
+  {
+    path: 'audit',
+    title: 'Audit Système',
+    loadComponent: () => import('./global-audit/global-audit.component').then(m => m.GlobalAuditComponent)
+  },
+  {
     path: '',
     redirectTo: 'tenants',
     pathMatch: 'full'

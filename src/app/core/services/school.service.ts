@@ -2,6 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { catchError, finalize, map, Observable, tap, throwError } from 'rxjs';
 import { School, Page, PublicSchoolResponse } from '../models/school.model';
+import { AuditLog } from '../models/audit.model';
 import { EnvironmentService } from './environment.service';
 import { NotificationService } from '../../shared/services/notification.service';
 
@@ -14,6 +15,7 @@ export class SchoolService {
   private notificationService = inject(NotificationService);
 
   private readonly API_URL = this.envService.getServiceUrl('school');
+  private readonly IDENTITY_API_URL = this.envService.getServiceUrl('identity');
 
   // État global pour les écoles (Signals)
   private _schoolsPage = signal<Page<School> | null>(null);
@@ -85,6 +87,33 @@ export class SchoolService {
     return this.http.put<School>(`${this.API_URL}/${id}`, school).pipe(
       catchError(this.handleError('Erreur lors de la mise à jour de l\'établissement')),
       finalize(() => this._loading.set(false))
+    );
+  }
+
+  /**
+   * Change le statut d'un établissement (Suspendre/Activer)
+   * Endpoint: PATCH /schools/{id}/status
+   */
+  updateSchoolStatus(id: string, status: 'ACTIVE' | 'SUSPENDED' | 'TRIAL'): Observable<void> {
+    this._loading.set(true);
+    return this.http.patch<void>(`${this.API_URL}/${id}/status`, { status }).pipe(
+      tap(() => this.notificationService.success(`Statut mis à jour : ${status}`)),
+      catchError(this.handleError('Erreur lors de la mise à jour du statut')),
+      finalize(() => this._loading.set(false))
+    );
+  }
+
+  /**
+   * Journal d'audit global (SaaS Level)
+   * Endpoint: GET /audit
+   */
+  getGlobalAuditLogs(page: number = 0, size: number = 20): Observable<Page<AuditLog>> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    return this.http.get<Page<AuditLog>>(`${this.IDENTITY_API_URL}/audit`, { params }).pipe(
+      catchError(this.handleError('Erreur lors du chargement du journal d\'audit global'))
     );
   }
 }

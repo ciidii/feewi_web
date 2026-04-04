@@ -1,23 +1,26 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
-import { 
-  LucideAngularModule, 
-  ArrowLeft, Building2, Mail, Phone, MapPin, 
-  Globe, Calendar, ShieldCheck, CheckCircle, 
+import {
+  LucideAngularModule,
+  ArrowLeft, Building2, Mail, Phone, MapPin,
+  Globe, Calendar, ShieldCheck, CheckCircle,
   XCircle, Edit, Trash2, Printer, MoreVertical,
   Activity, Users, CreditCard, History, ChevronRight,
-  User, ExternalLink
+  User, ExternalLink, RefreshCw
 } from 'lucide-angular';
 import { SchoolService } from '../../../core/services/school.service';
 import { School } from '../../../core/models/school.model';
 import { NotificationService } from '../../../shared/services/notification.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-tenant-detail',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, RouterModule],
+  imports: [CommonModule, LucideAngularModule, RouterModule, MatDialogModule],
   templateUrl: './tenant-detail.component.html',
   styleUrls: ['./tenant-detail.component.scss']
 })
@@ -27,9 +30,11 @@ export class TenantDetailComponent implements OnInit {
   private schoolService = inject(SchoolService);
   private notificationService = inject(NotificationService);
   private authService = inject(AuthService);
+  private dialog = inject(MatDialog);
 
   school = signal<School | null>(null);
   isLoading = signal(true);
+  isActionLoading = signal(false);
 
   // Icônes
   readonly ArrowLeft = ArrowLeft;
@@ -82,15 +87,48 @@ export class TenantDetailComponent implements OnInit {
   async onImpersonate() {
     const s = this.school();
     if (!s || !s.tenantId) return;
-    
-    this.notificationService.info(`Connexion en cours sur le tenant ${s.tenantId}...`);
-    // Note: L'impersonnalisation nécessite l'ID de l'admin de l'école dans l'API V2
-    // Pour l'instant on simule ou on utilise l'ID si dispo
-    this.notificationService.warning("Action en cours d'intégration API.");
+
+    // Dans une implémentation réelle, nous devrions avoir l'ID de l'admin
+    // Pour l'instant, nous affichons un message d'information
+    this.notificationService.info(`Tentative de connexion en tant qu'administrateur de ${s.name}...`);
+
+    // Simulation: si nous avions l'ID de l'utilisateur admin
+    // this.authService.impersonate(adminUserId).subscribe(...)
+    this.notificationService.warning("L'identifiant de l'administrateur est requis pour cette action.");
+  }
+
+  onChangeStatus() {
+    const s = this.school();
+    if (!s || !s.id) return;
+
+    const isCurrentlyActive = s.status === 'ACTIVE' || s.active !== false;
+    const newStatus = isCurrentlyActive ? 'SUSPENDED' : 'ACTIVE';
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: isCurrentlyActive ? 'Suspendre l\'établissement' : 'Réactiver l\'établissement',
+        message: `Êtes-vous sûr de vouloir ${isCurrentlyActive ? 'suspendre' : 'réactiver'} l'accès pour ${s.name} ?`,
+        confirmLabel: isCurrentlyActive ? 'Suspendre' : 'Réactiver',
+        type: isCurrentlyActive ? 'danger' : 'primary'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.isActionLoading.set(true);
+        this.schoolService.updateSchoolStatus(s.id!, newStatus).pipe(
+          finalize(() => this.isActionLoading.set(false))
+        ).subscribe(() => {
+          this.loadSchool(s.id!);
+        });
+      }
+    });
   }
 
   onEdit() {
-    this.notificationService.info("Ouverture du formulaire d'édition...");
+    // Cette partie pourrait ouvrir la modale d'édition existante
+    this.notificationService.info("Redirection vers le formulaire d'édition...");
   }
 
   formatDate(date?: string): string {
@@ -101,4 +139,6 @@ export class TenantDetailComponent implements OnInit {
       year: 'numeric'
     });
   }
+
+  protected readonly RefreshCw = RefreshCw;
 }

@@ -12,6 +12,9 @@ export interface School {
   adminFirstName: string;
   adminLastName: string;
   adminPassword?: string;
+  educationTemplate?: string; // ex: SN_FR, GMB_EN
+  allowedCycles?: string[];   // ex: ["PRIMARY", "MIDDLE"]
+  status?: 'TRIAL' | 'ACTIVE' | 'SUSPENDED';
   active?: boolean;
   createdAt?: string;
 }
