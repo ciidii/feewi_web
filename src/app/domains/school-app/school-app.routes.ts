@@ -113,6 +113,11 @@ export const SCHOOL_APP_ROUTES: Routes = [
         path: 'students/:id',
         title: 'Dossier Élève',
         loadComponent: () => import('./features/registry/student-detail/student-detail.component').then(m => m.StudentDetailComponent)
+      },
+      {
+        path: 'students/:id/edit',
+        title: 'Modifier Élève',
+        loadComponent: () => import('./features/registry/student-edit-form/student-edit-form.component').then(m => m.StudentEditFormComponent)
       }
     ]
   },

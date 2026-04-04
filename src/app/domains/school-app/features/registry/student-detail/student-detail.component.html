@@ -37,10 +37,10 @@
             <lucide-icon [name]="Printer" class="w-4 h-4 inline-block mr-2"></lucide-icon>
             Imprimer Fiche
           </button>
-          <button class="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-sm transition-colors">
+          <a [routerLink]="['/admin/registry/students', s.id, 'edit']" class="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-sm transition-colors flex items-center">
             <lucide-icon [name]="Edit" class="w-4 h-4 inline-block mr-2"></lucide-icon>
             Modifier
-          </button>
+          </a>
         </div>
       </div>
     </div>
