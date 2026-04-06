@@ -1,7 +1,7 @@
 import { Component, inject, signal, ViewEncapsulation, OnInit, computed, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { LucideAngularModule, Filter, Download, Layers, Clock, ShieldCheck, UserCheck, Eye, CheckCircle, XCircle, RefreshCw, Search, UserPlus, ChevronDown } from 'lucide-angular';
+import { LucideAngularModule, Filter, Download, Layers, Clock, ShieldCheck, UserCheck, Eye, CheckCircle, XCircle, RefreshCw, Search, UserPlus, ChevronDown, X } from 'lucide-angular';
 import { firstValueFrom, Subject, debounceTime, distinctUntilChanged, takeUntil, finalize } from 'rxjs';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -9,14 +9,17 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { DataListComponent } from '../../../../../shared/components/data-list/data-list.component';
 import { RowAction, TabItem, TableRow } from '../../../../../shared/models/data-list.models';
 import { EnrollmentAdminService } from '../../../../../core/services/enrollment-admin.service';
+import { AcademicService } from '../../../../../core/services/academic.service';
 import { AdmissionApplication, AdmissionStatus } from '../../../../../core/models/enrollment.model';
+import { Level, AcademicYear } from '../../../../../core/models/academic.model';
 import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 import { NotificationService } from '../../../../../shared/services/notification.service';
+import {FormsModule} from '@angular/forms';
 
 @Component({
   selector: 'app-admissions',
   standalone: true,
-  imports: [CommonModule, DataListComponent, LucideAngularModule, MatMenuModule, MatDialogModule],
+  imports: [CommonModule, DataListComponent, LucideAngularModule, MatMenuModule, MatDialogModule, FormsModule],
   templateUrl: './admission-list.component.html',
   styleUrl: './admission-list.component.scss',
   encapsulation: ViewEncapsulation.None
@@ -24,6 +27,7 @@ import { NotificationService } from '../../../../../shared/services/notification
 export class AdmissionsComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private enrollmentAdminService = inject(EnrollmentAdminService);
+  private academicService = inject(AcademicService);
   private dialog = inject(MatDialog);
   private notificationService = inject(NotificationService);
 
@@ -35,12 +39,23 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
   readonly ChevronDown = ChevronDown;
   readonly UserPlus = UserPlus;
   readonly UserCheck = UserCheck;
+  readonly X = X;
 
   // --- ÉTATS ---
   activeTab = signal('Tous');
   searchQuery = signal('');
   isLoading = signal(false);
-  
+  isFilterDrawerOpen = signal(false);
+
+  // Filtres Avancés
+  selectedLevel = signal<string>('');
+  selectedYear = signal<string>('');
+  selectedChannel = signal<string>('');
+
+  // Données de référence pour les filtres
+  levels = signal<Level[]>([]);
+  years = signal<AcademicYear[]>([]);
+
   // Pagination
   currentPage = signal(0);
   pageSize = signal(20);
@@ -57,6 +72,48 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
     return this.rawApplications().map(app => this.mapToTableRow(app));
   });
 
+  // --- FILTER CHIPS LOGIC ---
+  activeFilterChips = computed(() => {
+    const chips: { key: string, label: string, value: string }[] = [];
+
+    if (this.searchQuery()) {
+      chips.push({ key: 'q', label: 'Recherche', value: this.searchQuery() });
+    }
+
+    if (this.selectedYear()) {
+      const year = this.years().find(y => y.id === this.selectedYear());
+      if (year) chips.push({ key: 'year', label: 'Année', value: year.label });
+    }
+
+    if (this.selectedLevel()) {
+      const level = this.levels().find(l => l.id === this.selectedLevel());
+      if (level) chips.push({ key: 'level', label: 'Niveau', value: level.name });
+    }
+
+    if (this.selectedChannel()) {
+      const label = this.selectedChannel() === 'DIGITAL' ? 'Portail Public' : 'Saisie Guichet';
+      chips.push({ key: 'channel', label: 'Canal', value: label });
+    }
+
+    return chips;
+  });
+
+  removeFilter(key: string) {
+    if (key === 'q') this.searchQuery.set('');
+    if (key === 'year') this.selectedYear.set('');
+    if (key === 'level') this.selectedLevel.set('');
+    if (key === 'channel') this.selectedChannel.set('');
+    this.onFilterChange();
+  }
+
+  clearAllFilters() {
+    this.searchQuery.set('');
+    this.selectedYear.set('');
+    this.selectedLevel.set('');
+    this.selectedChannel.set('');
+    this.onFilterChange();
+  }
+
   // --- CONFIGURATION UI ---
   readonly admissionActions: RowAction[] = [
     { id: 'view', label: 'Voir le dossier', icon: Eye, type: 'primary' },
@@ -65,8 +122,6 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
   ];
 
   admissionTabs = computed<TabItem[]>(() => {
-    // Note: Dans une version paginée, les compteurs par onglet proviennent idéalement d'un endpoint summary
-    // Pour l'instant on garde la structure avec le total global
     return [
       { label: 'Tous', icon: Layers, count: this.totalElements() },
       { label: 'À Vérifier', icon: Clock },
@@ -76,6 +131,7 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
   });
 
   async ngOnInit() {
+    this.loadFilterData();
     await this.loadAdmissions();
 
     // Setup search debounce
@@ -89,6 +145,11 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
     });
   }
 
+  loadFilterData() {
+    this.academicService.getLevels().subscribe(levels => this.levels.set(levels));
+    this.academicService.getYears().subscribe(years => this.years.set(years));
+  }
+
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
@@ -100,20 +161,28 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
     this.searchSubject.next(query);
   }
 
+  onFilterChange() {
+    this.currentPage.set(0);
+    this.loadAdmissions();
+  }
+
   async loadAdmissions() {
     this.isLoading.set(true);
-    
+
     let status: AdmissionStatus | undefined;
     const tab = this.activeTab();
     if (tab === 'À Vérifier') status = 'SUBMITTED';
     if (tab === 'À Évaluer') status = 'VERIFIED';
-    if (tab === 'En Décision') status = 'TESTING'; // Simplification pour l'exemple
+    if (tab === 'En Décision') status = 'TESTING';
 
     try {
       const response = await firstValueFrom(
         this.enrollmentAdminService.getApplications({
           q: this.searchQuery(),
           status: status,
+          levelId: this.selectedLevel() || undefined,
+          academicYearId: this.selectedYear() || undefined,
+          channel: (this.selectedChannel() as any) || undefined,
           page: this.currentPage(),
           size: this.pageSize()
         })
@@ -239,4 +308,5 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
     });
   }
 
+  protected readonly CheckCircle = CheckCircle;
 }

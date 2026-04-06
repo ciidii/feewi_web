@@ -75,6 +75,17 @@
         </button>
       </nav>
 
+      <!-- Bouton Filtres -->
+      <button 
+        *ngIf="showFilterButton()"
+        (click)="toggleFilters()" 
+        class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
+        [ngClass]="isFiltersOpen() ? 'bg-primary-50 text-primary-700 border border-primary-200' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'"
+      >
+        <lucide-icon [name]="Filter" class="w-4 h-4"></lucide-icon>
+        <span>Filtres</span>
+      </button>
+
       <!-- Zone droite (sélecteur de vues + recherche) -->
       <div class="ml-auto flex items-center gap-3">
 
@@ -154,6 +165,20 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- Barre de Filtres Avancés (Dépliable) -->
+  <div *ngIf="isFiltersOpen()" class="flex items-center gap-4 bg-slate-50/50 border-b border-slate-100 px-6 py-3 animate-in slide-in-from-top duration-200">
+    <div class="flex items-center gap-2 text-slate-400 mr-2">
+      <lucide-icon [name]="Filter" class="w-3.5 h-3.5"></lucide-icon>
+      <span class="text-[10px] font-bold uppercase tracking-widest">Filtres actifs</span>
+    </div>
+    <div class="flex flex-1 items-center gap-3">
+      <ng-content select="[filters]"></ng-content>
+    </div>
+    <button (click)="isFiltersOpen.set(false)" class="text-[10px] font-bold text-primary-600 hover:underline">
+      Réinitialiser
+    </button>
   </div>
 
   <!-- ======================================= -->

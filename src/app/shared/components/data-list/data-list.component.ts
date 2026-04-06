@@ -21,7 +21,8 @@ import {
   Inbox,
   ChevronDown,
   Sparkles,
-  Check
+  Check,
+  Filter
 } from 'lucide-angular';
 
 // Importer les modèles
@@ -114,6 +115,9 @@ export class DataListComponent {
 
   /** Afficher ou non la barre de recherche */
   showSearch = input<boolean>(true);
+
+  /** Afficher ou non le bouton de filtres */
+  showFilterButton = input<boolean>(true);
 
   /** Actions disponibles sur chaque ligne */
   actions = input<RowAction[]>([]);
@@ -488,6 +492,13 @@ export class DataListComponent {
   protected readonly ChevronDown = ChevronDown;
   protected readonly Sparkles = Sparkles;
   protected readonly Check = Check;
+  protected readonly Filter = Filter;
+
+  isFiltersOpen = signal(false);
+
+  toggleFilters() {
+    this.isFiltersOpen.update(v => !v);
+  }
 }
 
 
