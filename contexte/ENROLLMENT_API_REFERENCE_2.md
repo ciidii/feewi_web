@@ -86,6 +86,27 @@ Base URL : `/enrollment/api/v1/admin/admissions`
 3.  **Responsabilité Financière** : Nouveau flag `isFinancialResponsible` dans l'objet Guardian.
 4.  **URLs** : Normalisation sur le pluriel `/admissions` pour tous les endpoints.
 
+### 🟦 Architecture de Configuration (Piliers)
+La configuration n'est plus globale mais segmentée pour correspondre à la saisie utilisateur.
+
+| Ancienne Structure (V1) | Nouvelle Structure (V2) | Impact |
+| :--- | :--- | :--- |
+| `defaultCoreOverrides` | `pillarConfigs.{name}.coreFields` | Les règles (caché/obligatoire) sont isolées par pilier. |
+| `defaultFormSchema` | `pillarConfigs.{name}.customFields` | Les champs libres sont distribués dans les piliers. |
+| `LevelOverrideConfig` | `pillarConfigs` (Partial) | Possibilité de surcharger un pilier complet par niveau. |
+
+**Exemple de configuration d'un Pilier (`PillarConfig`) :**
+```json
+{
+  "coreFields": {
+    "birthPlace": { "label": "Lieu de naissance", "hidden": false, "mandatory": true }
+  },
+  "customFields": [
+    { "name": "previous_avg", "label": "Moyenne annuelle", "type": "number", "required": true }
+  ]
+}
+```
+
 ---
 
 ## 5. Exemple de Modèle Typescript (Cible)

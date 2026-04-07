@@ -1,42 +1,58 @@
-import { AdmissionType, AssessmentType } from './base-types';
-import { Candidate, Guardian } from './entities';
+import { AdmissionType } from './base-types';
+import { IdentityPillar, MedicalPillar, SchoolingPillar, FamilyPillar, AdmissionBundle, Admission } from './entities';
+import { PillarConfig, RequiredDocumentConfig } from './config';
 
-export interface ApplicationCreateRequest {
+/** --- PORTAIL PUBLIC (Landing & Config) --- */
+
+export interface PublicPortalSummary {
   tenantId: string;
-  type: 'NEW';
-  academicYearId: string;
-  levelId?: string | null;
-  filiereId?: string | null;
-  primaryGuardian: Partial<Guardian>;
+  portalActive: boolean;
+  registrationMode: 'PARENT_ONLY' | 'ASSISTED' | 'OPEN';
+  academicYearLabel: string;
+  withinDates: boolean;
+  registrationStartDate: string;
+  registrationEndDate: string;
+  enabledServices: string[];
+  /** Statut temps-réel des niveaux (pour désactiver le choix dans le formulaire) */
+  levelStatuses: Record<string, { active: boolean, full: boolean }>;
 }
 
-export interface ReEnrollRequest {
-  studentId: string;
-  academicYearId: string;
-  nextLevelId: string;
-  filiereId?: string | null;
+/** Réponse pour le générateur de formulaire dynamique */
+export interface EffectiveConfigResponse {
+  /** Liste des piliers avec leurs libellés et champs personnalisés */
+  pillars: Record<string, PillarConfig>;
+  /** Pièces justificatives finales (Global + Surcharges) */
+  documentChecklist: RequiredDocumentConfig[];
 }
 
-export interface CandidateUpdateRequest {
-  info: Partial<Candidate>;
-  levelId: string;
-  filiereId?: string | null;
-}
+/** --- REQUESTS (POST / PUT / PATCH) --- */
 
-export interface AssessmentRequest {
-  grades: Record<string, number>;
-  comments: string;
-  decision: string;
-  recommendedLevelId?: string;
-}
-
-/** Saisie directe au guichet (Secretariat) */
-export interface FastEntryRequest {
+export interface CreateBundleRequest {
   tenantId: string;
-  type: 'NEW' | 'RE_ENROLLMENT';
-  academicYearId: string;
-  levelId: string;
-  filiereId?: string | null;
-  candidate: Candidate;
-  primaryGuardian: Partial<Guardian>;
+  family: {
+    primaryGuardian: Partial<FamilyPillar['primaryGuardian']>;
+    secondaryGuardian?: Partial<FamilyPillar['secondaryGuardian']>;
+    homeAddress: string;
+    customFields?: Record<string, any>;
+  };
+  children: Array<{
+    firstName: string;
+    lastName: string;
+    gender: 'MALE' | 'FEMALE';
+    academicYearId: string;
+    levelId: string;
+    filiereId?: string | null;
+  }>;
+}
+
+/** --- RESPONSES --- */
+
+export interface AdmissionBundleResponse extends AdmissionBundle {}
+
+export interface AdmissionPageResponse {
+  content: Admission[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
 }

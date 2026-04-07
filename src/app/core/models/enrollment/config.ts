@@ -1,21 +1,40 @@
 import { AssessmentType } from './base-types';
 
-/** Configuration globale du portail d'admission */
+/** Configuration globale du portail d'admission (Vision V3) */
 export interface EnrollmentConfig {
   tenantId: string;
   portalActive: boolean;
-  admissionWindow?: {
-    startDate: string;
-    endDate: string;
-  };
-  defaultChecklist: RequiredDocumentConfig[];
-  defaultCoreOverrides: Record<string, CoreFieldControl>;
-  defaultFormSchema: FormSchemaConfig;
+  registrationMode: 'PARENT_ONLY' | 'ASSISTED' | 'OPEN';
+  academicYearLabel: string;
+  
+  /** Les Piliers configurés (pillar_identity, pillar_medical, etc.) */
+  pillars: Record<string, PillarConfig>;
+  
+  /** Checklist globale par défaut */
+  documentChecklist: RequiredDocumentConfig[];
+  
+  /** Paramètres par défaut pour les tests de niveau */
   defaultAssessmentConfig: AssessmentConfig;
+  
+  /** Surcharges (Fermeture de niveau, Quotas) */
   levelOverrides: Record<string, LevelOverrideConfig>;
-  instructions: Record<string, string>;
-  legalText: string;
-  enabledServices: string[];
+}
+
+export interface PillarConfig {
+  label: string;
+  /** Champs personnalisés ajoutés par l'école dans ce pilier */
+  customFields: CustomFieldConfig[];
+  /** Règles sur les champs système (optionnel dans la V3) */
+  coreFields?: Record<string, FieldControl>;
+}
+
+export interface CustomFieldConfig {
+  name: string;
+  label: string;
+  type: 'TEXT' | 'NUMBER' | 'DATE' | 'BOOLEAN'; // Normalisation V3
+  required: boolean;
+  placeholder?: string;
+  options?: string[];
 }
 
 export interface RequiredDocumentConfig {
@@ -24,23 +43,10 @@ export interface RequiredDocumentConfig {
   mandatory: boolean;
 }
 
-export interface CoreFieldControl {
+export interface FieldControl {
   label: string;
   hidden: boolean;
   mandatory: boolean;
-}
-
-export interface FormSchemaConfig {
-  customFields?: CustomFieldConfig[];
-}
-
-export interface CustomFieldConfig {
-  name: string;
-  label: string;
-  type: 'text' | 'number' | 'date' | 'boolean' | 'select';
-  required: boolean;
-  placeholder?: string;
-  options?: string[];
 }
 
 export interface AssessmentConfig {
@@ -50,8 +56,9 @@ export interface AssessmentConfig {
 }
 
 export interface LevelOverrideConfig {
+  active: boolean;
+  full: boolean;
+  maxNewEnrollments?: number;
   documentChecklist?: RequiredDocumentConfig[];
-  coreFieldOverrides?: Record<string, CoreFieldControl>;
-  formSchema?: FormSchemaConfig;
   assessmentConfig?: AssessmentConfig;
 }

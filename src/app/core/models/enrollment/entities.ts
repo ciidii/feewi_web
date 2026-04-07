@@ -1,17 +1,35 @@
 import { AdmissionStatus, AdmissionType, DocumentStatus, GuardianRelation } from './base-types';
 
-/** Informations d'identité du candidat (Élève) */
-export interface Candidate {
+/** --- PILIER 1 : IDENTITÉ (CANDIDAT) --- */
+export interface IdentityPillar {
   firstName: string;
   lastName: string;
   gender: 'MALE' | 'FEMALE';
   birthDate: string;
   birthPlace: string;
   nationality?: string;
-  previousSchool?: string;
+  customFields?: Record<string, any>;
 }
 
-/** Informations sur les responsables légaux */
+/** --- PILIER 2 : SANTÉ (MÉDICAL) --- */
+export interface MedicalPillar {
+  bloodGroup?: string;
+  criticalAllergies?: string;
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
+  customFields?: Record<string, any>;
+}
+
+/** --- PILIER 3 : FAMILLE (RESPONSABLES) --- */
+export interface FamilyPillar {
+  bundleId: string;
+  primaryGuardian: Guardian;
+  secondaryGuardian?: Guardian;
+  homeAddress: string;
+  customFields?: Record<string, any>;
+}
+
+/** Informations détaillées sur un responsable */
 export interface Guardian {
   firstName: string;
   lastName: string;
@@ -19,10 +37,20 @@ export interface Guardian {
   phone: string;
   profession?: string;
   relation: GuardianRelation;
-  address: string;
+  isFinancialResponsible: boolean; // Nouveau flag V2
 }
 
-/** Résultat de l'évaluation pédagogique par la commission */
+/** --- PILIER 4 : SCOLARITÉ (VŒUX & PARCOURS) --- */
+export interface SchoolingPillar {
+  academicYearId: string;
+  levelId: string;
+  filiereId?: string | null;
+  previousSchool?: string;
+  customFields?: Record<string, any>;
+}
+
+/** --- ÉVALUATION & DOCUMENTS --- */
+
 export interface Assessment {
   grades: Record<string, number>;
   comments?: string;
@@ -31,7 +59,6 @@ export interface Assessment {
   assessedAt?: string;
 }
 
-/** Représentation d'un document réel dans un dossier */
 export interface RequiredDocument {
   code: string;
   name: string;
@@ -40,25 +67,46 @@ export interface RequiredDocument {
   fileUrl?: string;
 }
 
-/** Entité Centrale : Demande d'Admission */
-export interface AdmissionApplication {
+/** --- ENTITÉ BRANCHE : ADMISSION INDIVIDUELLE --- */
+export interface Admission {
   id: string;
+  bundleId: string;
   reference: string;
-  accessCode: string;
-  type: AdmissionType;
   status: AdmissionStatus;
-  wish: {
-    academicYearId: string;
-    levelId: string;
-    filiereId?: string | null;
-  };
+  type: AdmissionType;
   tenantId: string;
-  candidate?: Candidate;
-  primaryGuardian?: Guardian;
+  
+  // Les 4 Piliers Core
+  identity: IdentityPillar;
+  medical: MedicalPillar;
+  family: FamilyPillar;
+  schooling: SchoolingPillar;
+  
+  // Piliers libres (Extensions spécifiques à l'école)
+  extraPillars?: Record<string, any>;
+  
   documents: RequiredDocument[];
   assessment?: Assessment;
   trackerMessage: string;
+  
   createdAt: string;
   updatedAt: string;
   submittedAt?: string;
 }
+
+/** --- ENTITÉ TRONC : BUNDLE FAMILIAL --- */
+export interface AdmissionBundle {
+  id: string;
+  tenantId: string;
+  accessCode: string; // Désormais au niveau du bundle
+  family: FamilyPillar;
+  admissions: Admission[]; // Liste des enfants
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** 
+ * Fallback de compatibilité pour éviter de casser tout le code immédiatement 
+ * @deprecated Utilisez 'Admission' ou 'AdmissionBundle'
+ */
+export type AdmissionApplication = Admission;
