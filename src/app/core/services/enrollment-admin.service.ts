@@ -61,16 +61,16 @@ export class EnrollmentAdminService {
     if (params.page !== undefined) httpParams = httpParams.set('page', params.page.toString());
     if (params.size !== undefined) httpParams = httpParams.set('size', params.size.toString());
 
-    return this.http.get<Page<AdmissionApplication>>(`${this.baseUrl}/admin/applications`, { 
-      params: httpParams, 
-      headers: this.getHeaders() 
+    return this.http.get<Page<AdmissionApplication>>(`${this.baseUrl}/admin/admissions`, {
+      params: httpParams,
+      headers: this.getHeaders()
     }).pipe(
       catchError(this.handleError('Erreur lors du chargement des dossiers'))
     );
   }
 
   getApplicationById(id: string): Observable<AdmissionApplication> {
-    return this.http.get<AdmissionApplication>(`${this.baseUrl}/admin/applications/${id}/details`, { headers: this.getHeaders() }).pipe(
+    return this.http.get<AdmissionApplication>(`${this.baseUrl}/admin/admissions/${id}/details`, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Impossible de récupérer le dossier'))
     );
   }
@@ -79,7 +79,7 @@ export class EnrollmentAdminService {
    * Saisie directe au guichet (Secretariat)
    */
   createDirectApplication(request: any): Observable<AdmissionApplication> {
-    return this.http.post<AdmissionApplication>(`${this.baseUrl}/admin/applications/direct`, request, { headers: this.getHeaders() }).pipe(
+    return this.http.post<AdmissionApplication>(`${this.baseUrl}/admin/admissions/direct`, request, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors de la création du dossier direct'))
     );
   }
@@ -139,7 +139,7 @@ export class EnrollmentAdminService {
 
   receivePhysicalDocument(applicationId: string, docCode: string): Observable<AdmissionApplication> {
     return this.http.patch<AdmissionApplication>(
-      `${this.baseUrl}/admin/applications/${applicationId}/documents/${docCode}/receive`,
+      `${this.baseUrl}/admin/admissions/${applicationId}/documents/${docCode}/receive`,
       {},
       { headers: this.getHeaders() }
     ).pipe(
@@ -153,9 +153,9 @@ export class EnrollmentAdminService {
    */
   linkDocument(applicationId: string, docCode: string, fileId: string): Observable<AdmissionApplication> {
     const headers = this.getHeaders().set('Content-Type', 'text/plain');
-    // On appelle /public/applications/... au lieu de /admin/applications/...
+    // On appelle /public/admissions/... au lieu de /admin/admissions/...
     return this.http.post<AdmissionApplication>(
-      `${this.baseUrl}/public/applications/${applicationId}/documents/${docCode}`,
+      `${this.baseUrl}/public/admissions/${applicationId}/documents/${docCode}`,
       fileId,
       { headers }
     ).pipe(
@@ -164,14 +164,14 @@ export class EnrollmentAdminService {
   }
 
   verifyApplication(applicationId: string): Observable<AdmissionApplication> {
-    return this.http.patch<AdmissionApplication>(`${this.baseUrl}/admin/applications/${applicationId}/verify`, {}, { headers: this.getHeaders() }).pipe(
+    return this.http.patch<AdmissionApplication>(`${this.baseUrl}/admin/admissions/${applicationId}/verify`, {}, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors de la vérification administrative'))
     );
   }
 
   submitAssessment(applicationId: string, assessment: AssessmentRequest): Observable<AdmissionApplication> {
     return this.http.patch<AdmissionApplication>(
-      `${this.baseUrl}/admin/applications/${applicationId}/assessment`,
+      `${this.baseUrl}/admin/admissions/${applicationId}/assessment`,
       assessment,
       { headers: this.getHeaders() }
     ).pipe(
@@ -182,20 +182,20 @@ export class EnrollmentAdminService {
   // --- API DIRECTION ---
 
   validateAdmission(applicationId: string): Observable<AdmissionApplication> {
-    return this.http.patch<AdmissionApplication>(`${this.baseUrl}/admin/direction/applications/${applicationId}/validate`, {}, { headers: this.getHeaders() }).pipe(
+    return this.http.patch<AdmissionApplication>(`${this.baseUrl}/admin/direction/admissions/${applicationId}/validate`, {}, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors de la validation finale'))
     );
   }
 
   overruleAdmission(applicationId: string): Observable<AdmissionApplication> {
-    return this.http.patch<AdmissionApplication>(`${this.baseUrl}/admin/direction/applications/${applicationId}/overrule`, {}, { headers: this.getHeaders() }).pipe(
+    return this.http.patch<AdmissionApplication>(`${this.baseUrl}/admin/direction/admissions/${applicationId}/overrule`, {}, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors de la validation avec dérogation'))
     );
   }
 
   rejectAdmission(applicationId: string, reason: string): Observable<AdmissionApplication> {
     return this.http.patch<AdmissionApplication>(
-      `${this.baseUrl}/admin/direction/applications/${applicationId}/reject`,
+      `${this.baseUrl}/admin/direction/admissions/${applicationId}/reject`,
       JSON.stringify(reason),
       { headers: this.getHeaders().set('Content-Type', 'application/json') }
     ).pipe(

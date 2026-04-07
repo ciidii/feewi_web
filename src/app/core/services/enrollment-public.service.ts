@@ -1,11 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, catchError, throwError } from 'rxjs';
-import { 
-  AdmissionApplication, 
-  ApplicationCreateRequest, 
-  ReEnrollRequest, 
-  CandidateUpdateRequest, 
+import {
+  AdmissionApplication,
+  ApplicationCreateRequest,
+  ReEnrollRequest,
+  CandidateUpdateRequest,
   Guardian,
   EnrollmentConfig,
   RequiredDocumentConfig,
@@ -45,7 +45,7 @@ export class EnrollmentPublicService {
   private tenantContext = inject(TenantContextService);
   private envService = inject(EnvironmentService);
   private notificationService = inject(NotificationService);
-  
+
   private readonly baseUrl = `${this.envService.getServiceUrl('enrollment')}/public`;
 
   private getHeaders(): HttpHeaders {
@@ -81,7 +81,7 @@ export class EnrollmentPublicService {
   }
 
   createApplication(request: ApplicationCreateRequest): Observable<AdmissionApplication> {
-    return this.http.post<AdmissionApplication>(`${this.baseUrl}/applications`, request, {
+    return this.http.post<AdmissionApplication>(`${this.baseUrl}/admissions`, request, {
       headers: this.getHeaders()
     }).pipe(
       catchError(this.handleError('Erreur lors de l\'initialisation du dossier'))
@@ -89,7 +89,7 @@ export class EnrollmentPublicService {
   }
 
   reEnroll(request: ReEnrollRequest): Observable<AdmissionApplication> {
-    return this.http.post<AdmissionApplication>(`${this.baseUrl}/applications/re-enroll`, request, {
+    return this.http.post<AdmissionApplication>(`${this.baseUrl}/admissions/re-enroll`, request, {
       headers: this.getHeaders()
     }).pipe(
       catchError(this.handleError('Erreur lors de la réinscription'))
@@ -97,7 +97,7 @@ export class EnrollmentPublicService {
   }
 
   updateCandidate(applicationId: string, request: CandidateUpdateRequest): Observable<AdmissionApplication> {
-    return this.http.patch<AdmissionApplication>(`${this.baseUrl}/applications/${applicationId}/candidate`, request, { headers: this.getHeaders() }).pipe(
+    return this.http.patch<AdmissionApplication>(`${this.baseUrl}/admissions/${applicationId}/candidate`, request, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors de la mise à jour du candidat'))
     );
   }
@@ -114,19 +114,19 @@ export class EnrollmentPublicService {
       address: guardian.address,
       profession: guardian.profession
     };
-    return this.http.patch<AdmissionApplication>(`${this.baseUrl}/applications/${applicationId}/guardians`, payload, { headers: this.getHeaders() }).pipe(
+    return this.http.patch<AdmissionApplication>(`${this.baseUrl}/admissions/${applicationId}/guardians`, payload, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors de la mise à jour des responsables'))
     );
   }
 
   updateCustomFields(applicationId: string, fields: Record<string, any>): Observable<AdmissionApplication> {
-    return this.http.patch<AdmissionApplication>(`${this.baseUrl}/applications/${applicationId}/custom-fields`, fields, { headers: this.getHeaders() }).pipe(
+    return this.http.patch<AdmissionApplication>(`${this.baseUrl}/admissions/${applicationId}/custom-fields`, fields, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors de l\'enregistrement des informations spécifiques'))
     );
   }
 
   updateSubscriptions(applicationId: string, subscriptions: any[]): Observable<AdmissionApplication> {
-    return this.http.patch<AdmissionApplication>(`${this.baseUrl}/applications/${applicationId}/subscriptions`, subscriptions, { headers: this.getHeaders() }).pipe(
+    return this.http.patch<AdmissionApplication>(`${this.baseUrl}/admissions/${applicationId}/subscriptions`, subscriptions, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors de la gestion des services'))
     );
   }
@@ -134,8 +134,8 @@ export class EnrollmentPublicService {
   uploadDocument(applicationId: string, docCode: string, fileId: string): Observable<AdmissionApplication> {
     const headers = this.getHeaders().set('Content-Type', 'text/plain');
     return this.http.post<AdmissionApplication>(
-      `${this.baseUrl}/applications/${applicationId}/documents/${docCode}`, 
-      fileId, 
+      `${this.baseUrl}/admissions/${applicationId}/documents/${docCode}`,
+      fileId,
       { headers }
     ).pipe(
       catchError(this.handleError('Erreur lors de la liaison du document'))
@@ -143,14 +143,14 @@ export class EnrollmentPublicService {
   }
 
   submitApplication(applicationId: string): Observable<AdmissionApplication> {
-    return this.http.post<AdmissionApplication>(`${this.baseUrl}/applications/${applicationId}/submit`, {}, { headers: this.getHeaders() }).pipe(
+    return this.http.post<AdmissionApplication>(`${this.baseUrl}/admissions/${applicationId}/submit`, {}, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors de la soumission finale'))
     );
   }
 
   trackApplication(reference: string, accessCode: string): Observable<AdmissionApplication> {
     const params = new HttpParams().set('accessCode', accessCode);
-    return this.http.get<AdmissionApplication>(`${this.baseUrl}/applications/${reference}/track`, { params }).pipe(
+    return this.http.get<AdmissionApplication>(`${this.baseUrl}/admissions/${reference}/track`, { params }).pipe(
       catchError(this.handleError('Dossier introuvable ou code incorrect'))
     );
   }
