@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { Router, RouterModule } from '@angular/router';
 import {
   LucideAngularModule,
   School as SchoolIcon,
@@ -16,7 +16,8 @@ import {
   Lock,
   Quote,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  ArrowLeft
 } from 'lucide-angular';
 import { SchoolService } from '../../../core/services/school.service';
 import { NotificationService } from '../../../shared/services/notification.service';
@@ -25,14 +26,14 @@ import { FormShellComponent } from '../../../shared/components/form-shell/form-s
 @Component({
   selector: 'app-tenant-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, LucideAngularModule, FormShellComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, LucideAngularModule, FormShellComponent],
   templateUrl: './tenant-form.component.html',
   styleUrl: './tenant-form.component.scss'
 })
 export class TenantFormComponent {
   private fb = inject(FormBuilder);
+  private router = inject(Router);
   private schoolService = inject(SchoolService);
-  private dialogRef = inject(MatDialogRef<TenantFormComponent>);
   private notificationService = inject(NotificationService);
 
   readonly X = X;
@@ -48,6 +49,7 @@ export class TenantFormComponent {
   readonly Quote = Quote;
   readonly CheckCircle2 = CheckCircle2;
   readonly AlertCircle = AlertCircle;
+  readonly ArrowLeft = ArrowLeft;
 
   isLoading = signal(false);
   error = signal<string | null>(null);
@@ -116,7 +118,7 @@ export class TenantFormComponent {
   }
 
   close() {
-    this.dialogRef.close();
+    this.router.navigate(['/saas/tenants']);
   }
 
   onSubmit() {
@@ -131,8 +133,8 @@ export class TenantFormComponent {
 
     this.schoolService.createSchool(this.tenantForm.value).subscribe({
       next: (result) => {
-        this.notificationService.success('Tenant cree avec succes.', 'Creation terminee');
-        this.dialogRef.close(result);
+        this.notificationService.success('Etablissement cree avec succes.', 'Creation terminee');
+        this.router.navigate(['/saas/tenants']);
         this.isLoading.set(false);
       },
       error: (err: any) => {

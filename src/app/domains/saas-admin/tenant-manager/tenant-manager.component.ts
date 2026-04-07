@@ -1,6 +1,7 @@
 import { Component, computed, inject, OnInit, signal, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { RouterModule } from '@angular/router';
 import { DataListComponent } from '../../../shared/components/data-list/data-list.component';
 import { RowAction, TabItem, TableRow } from '../../../shared/models/data-list.models';
 import { LucideAngularModule, Building2, Plus, Globe, ShieldCheck, Activity, Eye, Trash2 } from 'lucide-angular';
@@ -14,7 +15,7 @@ import {Router} from '@angular/router';
 @Component({
   selector: 'app-tenant-manager',
   standalone: true,
-  imports: [CommonModule, DataListComponent, LucideAngularModule, MatDialogModule],
+  imports: [CommonModule, DataListComponent, LucideAngularModule, MatDialogModule, RouterModule],
   templateUrl: './tenant-manager.component.html',
   styleUrl: './tenant-manager.component.scss',
   encapsulation: ViewEncapsulation.None
@@ -84,7 +85,7 @@ export class TenantManagerComponent implements OnInit {
 
   openCreateModal() {
     const dialogRef = this.dialog.open(TenantFormComponent, {
-      width: '500px',
+      width: '850px',
       maxWidth: '95vw',
       panelClass: 'feewi-dialog-panel'
     });

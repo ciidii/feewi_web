@@ -1,151 +1,194 @@
-<app-form-shell
-  title="Provisioning Système"
-  subtitle="Enregistrement d'un nouvel établissement"
-  [icon]="SchoolIcon"
-  saveLabel="Confirmer l'ouverture"
-  cancelLabel="Annuler"
-  [isLoading]="isLoading()"
-  (save)="onSubmit()"
-  (cancel)="close()"
->
-  <form [formGroup]="tenantForm" class="space-y-10">
-
-    <!-- Erreur API Globale -->
-    <div *ngIf="error()" class="p-4 bg-red-50 border border-red-100 rounded-xl flex gap-3 items-start animate-in shake">
-      <lucide-icon [name]="AlertCircle" class="w-5 h-5 text-red-600 shrink-0"></lucide-icon>
-      <div class="space-y-1">
-        <p class="text-xs font-bold text-red-700">Erreur critique</p>
-        <p class="text-xs text-red-600/80 font-medium">{{ error() }}</p>
+<div class="feewi-page-container">
+  
+  <!-- HEADER DE PAGE DÉDIÉ (REMPLACE FORM-SHELL) -->
+  <header class="page-header-premium">
+    <div class="header-left">
+      <button (click)="close()" class="btn-back">
+        <lucide-icon [name]="ArrowLeft" [size]="18"></lucide-icon>
+      </button>
+      <div class="title-stack">
+        <div class="flex items-center gap-2">
+          <h1 class="page-title">Configuration d'Établissement</h1>
+          <span class="status-badge">Nouveau Tenant</span>
+        </div>
+        <p class="page-subtitle">Initialisez les paramètres système et l'accès administrateur maître pour ce nouvel établissement.</p>
       </div>
     </div>
 
-    <!-- SECTION 1 : IDENTITÉ -->
-    <div class="space-y-6">
-      <div class="flex items-center gap-3">
-        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">01. Identité de l'école</span>
-        <div class="h-px flex-1 bg-slate-200"></div>
+    <div class="header-actions">
+      <button (click)="close()" class="btn-cancel">
+        Annuler
+      </button>
+      <button 
+        (click)="onSubmit()" 
+        [disabled]="isLoading()"
+        class="btn-save-premium"
+      >
+        <lucide-icon *ngIf="isLoading()" [name]="Loader2" class="w-4 h-4 animate-spin"></lucide-icon>
+        <lucide-icon *ngIf="!isLoading()" [name]="ShieldCheck" class="w-4 h-4"></lucide-icon>
+        <span>{{ isLoading() ? 'Déploiement en cours...' : 'Déployer le Tenant' }}</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- CORPS DU FORMULAIRE -->
+  <main class="form-content-area">
+    <form [formGroup]="tenantForm" class="space-y-16 max-w-5xl mx-auto pb-24">
+
+      <!-- Erreur API Globale -->
+      <div *ngIf="error()" class="error-banner animate-in shake">
+        <div class="icon-box">
+          <lucide-icon [name]="AlertCircle" class="w-5 h-5"></lucide-icon>
+        </div>
+        <div class="content">
+          <p class="error-title">Échec du provisioning</p>
+          <p class="error-message">{{ error() }}</p>
+        </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Nom officiel -->
-        <div class="space-y-2 md:col-span-2">
-          <label class="text-xs font-bold text-slate-700 ml-1">Nom officiel <span class="text-red-500">*</span></label>
-          <div class="relative">
-            <lucide-icon [name]="SchoolIcon" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></lucide-icon>
-            <input type="text" formControlName="name" placeholder="Lycée Blaise Diagne" class="fw-input-modern pl-11" [class.error]="isInvalid('name')"/>
+      <!-- SECTION 1 : IDENTITÉ & RÉSEAU -->
+      <section class="form-section-premium">
+        <div class="section-info">
+          <div class="icon-tag">01</div>
+          <h3 class="section-title">Identité & Domaine</h3>
+          <p class="section-desc">Identifiez l'école sur le réseau Feewi et réservez son URL d'accès unique.</p>
+        </div>
+
+        <div class="section-card">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="field-group md:col-span-2">
+              <label class="premium-label">Nom officiel de l'école</label>
+              <div class="input-wrapper">
+                <lucide-icon [name]="SchoolIcon" class="prefix-icon"></lucide-icon>
+                <input type="text" formControlName="name" placeholder="Ex: Institution Sainte Marie" class="premium-input-field pl-12" [class.error]="isInvalid('name')"/>
+              </div>
+              <p *ngIf="isInvalid('name')" class="field-error">{{ getErrorMessage('name') }}</p>
+            </div>
+
+            <div class="field-group">
+              <label class="premium-label">URL d'accès réservée</label>
+              <div class="flex">
+                <input type="text" formControlName="tenantId" placeholder="nom-ecole" class="premium-input-field-left" [class.error]="isInvalid('tenantId')"/>
+                <div class="url-suffix">.feewi.io</div>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label class="premium-label">Contact Téléphonique</label>
+              <div class="input-wrapper">
+                <lucide-icon [name]="Phone" class="prefix-icon"></lucide-icon>
+                <input type="text" formControlName="phone" placeholder="+221 ..." class="premium-input-field pl-12"/>
+              </div>
+            </div>
           </div>
-          <p *ngIf="isInvalid('name')" class="text-[10px] font-bold text-red-500 ml-1">{{ getErrorMessage('name') }}</p>
+        </div>
+      </section>
+
+      <!-- SECTION 2 : CONFIGURATION PÉDAGOGIQUE -->
+      <section class="form-section-premium">
+        <div class="section-info">
+          <div class="icon-tag">02</div>
+          <h3 class="section-title">Modèle Pédagogique</h3>
+          <p class="section-desc">Configurez le système éducatif national et les cycles d'enseignement actifs.</p>
         </div>
 
-        <!-- Sous-domaine -->
-        <div class="space-y-2">
-          <label class="text-xs font-bold text-slate-700 ml-1">Sous-domaine réservé <span class="text-red-500">*</span></label>
-          <div class="relative">
-            <lucide-icon [name]="Globe" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></lucide-icon>
-            <input type="text" formControlName="tenantId" placeholder="blaise-diagne" class="fw-input-modern pl-11 pr-20" [class.error]="isInvalid('tenantId')"/>
-            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded">.feewi.io</span>
+        <div class="section-card">
+          <div class="space-y-8">
+            <div class="field-group">
+              <label class="premium-label">Système de référence</label>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                @for (t of educationTemplates; track t.code) {
+                  <div 
+                    (click)="tenantForm.get('educationTemplate')?.setValue(t.code)"
+                    class="selection-card"
+                    [class.active]="tenantForm.get('educationTemplate')?.value === t.code"
+                  >
+                    <div class="check-circle" *ngIf="tenantForm.get('educationTemplate')?.value === t.code">
+                      <lucide-icon [name]="CheckCircle2" [size]="14"></lucide-icon>
+                    </div>
+                    <span class="card-label">{{ t.label }}</span>
+                    <span class="card-hint">Niveaux & Matières</span>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label class="premium-label">Cycles à activer</label>
+              <div class="flex flex-wrap gap-3">
+                @for (cycle of cycleOptions; track cycle.code) {
+                  <button 
+                    type="button"
+                    (click)="toggleCycle(cycle.code)"
+                    class="chip-selection"
+                    [class.active]="isCycleSelected(cycle.code)"
+                  >
+                    {{ cycle.label }}
+                  </button>
+                }
+              </div>
+            </div>
           </div>
         </div>
+      </section>
 
-        <!-- Téléphone -->
-        <div class="space-y-2">
-          <label class="text-xs font-bold text-slate-700 ml-1">Téléphone <span class="text-red-500">*</span></label>
-          <div class="relative">
-            <lucide-icon [name]="Phone" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></lucide-icon>
-            <input type="text" formControlName="phone" placeholder="+221 ..." class="fw-input-modern pl-11"/>
+      <!-- SECTION 3 : LOCALISATION & ADMIN -->
+      <section class="form-section-premium">
+        <div class="section-info">
+          <div class="icon-tag">03</div>
+          <h3 class="section-title">Accès & Sécurité</h3>
+          <p class="section-desc">Coordonnées institutionnelles et création du compte administrateur maître.</p>
+        </div>
+
+        <div class="lg:col-span-2 space-y-6">
+          <div class="section-card grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="field-group md:col-span-2">
+              <label class="premium-label">Adresse Physique</label>
+              <input type="text" formControlName="streetAddress" class="premium-input-field"/>
+            </div>
+            <div class="field-group">
+              <label class="premium-label">Ville</label>
+              <input type="text" formControlName="city" class="premium-input-field"/>
+            </div>
+            <div class="field-group">
+              <label class="premium-label">Email Institutionnel</label>
+              <input type="email" formControlName="email" class="premium-input-field"/>
+            </div>
+          </div>
+
+          <!-- ADMIN BOX -->
+          <div class="admin-vault-card">
+            <div class="vault-header">
+              <div class="vault-icon">
+                <lucide-icon [name]="Lock" [size]="20"></lucide-icon>
+              </div>
+              <div>
+                <h4 class="vault-title">Compte Administrateur Racine</h4>
+                <p class="vault-desc">Ces identifiants permettront de configurer tout l'établissement.</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+              <div class="field-group">
+                <label class="vault-label">Prénom</label>
+                <input type="text" formControlName="adminFirstName" class="vault-input"/>
+              </div>
+              <div class="field-group">
+                <label class="vault-label">Nom</label>
+                <input type="text" formControlName="adminLastName" class="vault-input"/>
+              </div>
+              <div class="field-group md:col-span-2">
+                <label class="vault-label">Email de connexion (Login)</label>
+                <input type="email" formControlName="adminEmail" class="vault-input"/>
+              </div>
+              <div class="field-group md:col-span-2">
+                <label class="vault-label">Mot de passe temporaire</label>
+                <input type="password" formControlName="adminPassword" class="vault-input"/>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- SECTION 2 : CONFIGURATION PÉDAGOGIQUE -->
-    <div class="space-y-6">
-      <div class="flex items-center gap-3">
-        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">02. Modèle & Cycles</span>
-        <div class="h-px flex-1 bg-slate-200"></div>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Template Pays -->
-        <div class="space-y-2">
-          <label class="text-xs font-bold text-slate-700 ml-1">Système National <span class="text-red-500">*</span></label>
-          <select formControlName="educationTemplate" class="fw-input-modern w-full appearance-none">
-            @for (t of educationTemplates; track t.code) {
-              <option [value]="t.code">{{ t.label }}</option>
-            }
-          </select>
-          <p class="text-[10px] text-slate-500 italic ml-1">Détermine les niveaux et matières par défaut.</p>
-        </div>
-
-        <!-- Cycles autorisés -->
-        <div class="space-y-2">
-          <label class="text-xs font-bold text-slate-700 ml-1">Cycles à activer <span class="text-red-500">*</span></label>
-          <div class="flex flex-wrap gap-2">
-            @for (cycle of cycleOptions; track cycle.code) {
-              <button 
-                type="button"
-                (click)="toggleCycle(cycle.code)"
-                [class]="isCycleSelected(cycle.code) 
-                  ? 'px-3 py-1.5 rounded-lg border-2 border-primary bg-primary-50 text-primary text-[11px] font-bold' 
-                  : 'px-3 py-1.5 rounded-lg border-2 border-slate-100 bg-slate-50 text-slate-500 text-[11px] font-bold hover:border-slate-200 transition-all'"
-              >
-                {{ cycle.label }}
-              </button>
-            }
-          </div>
-          <p *ngIf="isInvalid('allowedCycles')" class="text-[10px] font-bold text-red-500 ml-1">Sélectionnez au moins un cycle.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- SECTION 3 : LOCALISATION -->
-    <div class="space-y-6">
-      <div class="flex items-center gap-3">
-        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">03. Localisation & Contact</span>
-        <div class="h-px flex-1 bg-slate-200"></div>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="space-y-2 md:col-span-2">
-          <label class="text-xs font-bold text-slate-700 ml-1">Adresse physique <span class="text-red-500">*</span></label>
-          <input type="text" formControlName="streetAddress" placeholder="Rue ..." class="fw-input-modern"/>
-        </div>
-        <div class="space-y-2">
-          <label class="text-xs font-bold text-slate-700 ml-1">Ville <span class="text-red-500">*</span></label>
-          <input type="text" formControlName="city" placeholder="Dakar" class="fw-input-modern"/>
-        </div>
-        <div class="space-y-2">
-          <label class="text-xs font-bold text-slate-700 ml-1">Email institutionnel <span class="text-red-500">*</span></label>
-          <input type="email" formControlName="email" placeholder="contact@..." class="fw-input-modern"/>
-        </div>
-      </div>
-    </div>
-
-    <!-- SECTION 4 : ADMIN -->
-    <div class="space-y-6">
-      <div class="flex items-center gap-3">
-        <span class="text-[10px] font-bold text-primary uppercase tracking-widest">04. Compte Administrateur Initial</span>
-        <div class="h-px flex-1 bg-primary/10"></div>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-primary-50/30 rounded-2xl border border-primary-100">
-        <div class="space-y-2">
-          <label class="text-xs font-bold text-primary/80 ml-1">Prénom <span class="text-red-500">*</span></label>
-          <input type="text" formControlName="adminFirstName" class="fw-input-modern border-primary/20"/>
-        </div>
-        <div class="space-y-2">
-          <label class="text-xs font-bold text-primary/80 ml-1">Nom <span class="text-red-500">*</span></label>
-          <input type="text" formControlName="adminLastName" class="fw-input-modern border-primary/20"/>
-        </div>
-        <div class="space-y-2 md:col-span-2">
-          <label class="text-xs font-bold text-primary/80 ml-1">Email de connexion Admin <span class="text-red-500">*</span></label>
-          <input type="email" formControlName="adminEmail" class="fw-input-modern border-primary/20"/>
-        </div>
-        <div class="space-y-2 md:col-span-2">
-          <label class="text-xs font-bold text-primary/80 ml-1">Mot de passe provisoire <span class="text-red-500">*</span></label>
-          <input type="password" formControlName="adminPassword" class="fw-input-modern border-primary/20"/>
-        </div>
-      </div>
-    </div>
-  </form>
-</app-form-shell>
+      </section>
+    </form>
+  </main>
+</div>

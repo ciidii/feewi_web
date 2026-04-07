@@ -7,6 +7,11 @@ export const SAAS_ADMIN_ROUTES: Routes = [
     loadComponent: () => import('./tenant-manager/tenant-manager.component').then(m => m.TenantManagerComponent)
   },
   {
+    path: 'tenants/new',
+    title: 'Nouvel Établissement',
+    loadComponent: () => import('./tenant-form/tenant-form.component').then(m => m.TenantFormComponent)
+  },
+  {
     path: 'tenants/:id',
     title: 'Détails de l’Établissement',
     loadComponent: () => import('./tenant-detail/tenant-detail.component').then(m => m.TenantDetailComponent)
