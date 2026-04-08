@@ -159,9 +159,10 @@ export class AdmissionDetailComponent implements OnInit {
           return this.enrollmentAdminService.getEffectiveConfig(targetLevelId);
         } else {
           return this.enrollmentAdminService.getConfig().pipe(
-            map(cfg => ({documentChecklist: cfg.documentChecklist, assessmentConfig: cfg.defaultAssessmentConfig}))
+            map(cfg => ({ documentChecklist: cfg.documentChecklist, assessmentConfig: cfg.assessmentConfig }))
           );
         }
+
       }),
       finalize(() => this.isLoading.set(false))
     ).subscribe({

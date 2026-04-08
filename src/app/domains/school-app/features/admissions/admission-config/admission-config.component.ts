@@ -6,7 +6,7 @@ import {
   Calendar, FileText, ShieldCheck, ToggleLeft as ToggleIcon,
   ChefHat, Bus, MessageSquare, Plus, Trash2, Settings2,
   GraduationCap, Info, AlertTriangle, LayoutGrid, UserCog, ClipboardCheck, BookOpen, X, Sparkles,
-  HeartPulse, Users, School, Layout, Type, Hash, Lock
+  HeartPulse, Users, School, Layout, Type, Hash, Lock, ChevronRight, ClipboardList
 } from 'lucide-angular';
 import { finalize, forkJoin, Observable, of, switchMap } from 'rxjs';
 import { EnrollmentAdminService } from '../../../../../core/services/enrollment-admin.service';
@@ -30,7 +30,8 @@ import { CustomFieldFormComponent } from './components/custom-field-form/custom-
 import { PortalPreviewDialogComponent } from './components/portal-preview-dialog/portal-preview-dialog.component';
 import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 
-export type ConfigTab = 'PILLARS' | 'DOCUMENTS' | 'WORKFLOW';
+export type ConfigTab = 'PILLARS' | 'DOCUMENTS' | 'ASSESSMENT' | 'WORKFLOW';
+export type ConfigScope = 'GLOBAL' | 'LEVEL';
 
 @Component({
   selector: 'app-admission-config',
@@ -63,15 +64,20 @@ export class AdmissionConfigComponent implements OnInit {
   isLoading = signal(true);
   isSaving = signal(false);
 
+  // Navigation CMS
+  currentScope = signal<ConfigScope>('GLOBAL');
+  selectedLevelId = signal<string | null>(null);
   activeTab = signal<ConfigTab>('PILLARS');
   activePillarKey = signal<string>('pillar_identity');
 
   readonly systemPillars = [
-    { key: 'pillar_identity', label: 'Identité de l\'élève', icon: UserCog, desc: 'État civil et informations de base.' },
-    { key: 'pillar_medical', label: 'Santé & Médical', icon: HeartPulse, desc: 'Données vitales et urgences.' },
-    { key: 'pillar_family', label: 'Famille & Responsables', icon: Users, desc: 'Parents et adresse de résidence.' },
-    { key: 'pillar_schooling', label: 'Vœux & Scolarité', icon: School, desc: 'Orientation et parcours scolaire.' }
+    { key: 'pillar_identity', label: 'Identité', icon: UserCog },
+    { key: 'pillar_medical', label: 'Santé', icon: HeartPulse },
+    { key: 'pillar_family', label: 'Famille', icon: Users },
+    { key: 'pillar_schooling', label: 'Scolarité', icon: School }
   ];
+
+  // --- CALCULS RÉACTIFS ---
 
   isDirty = computed(() => {
     const current = this.config();
@@ -86,7 +92,6 @@ export class AdmissionConfigComponent implements OnInit {
     return cfg.pillars[this.activePillarKey()] || null;
   });
 
-  /** Checklist active pour le template HTML (V4) */
   activeChecklist = computed(() => this.config()?.documentChecklist || []);
 
   ngOnInit() {
@@ -117,56 +122,52 @@ export class AdmissionConfigComponent implements OnInit {
     if (!currentConfig) return;
 
     this.isSaving.set(true);
-    this.enrollmentService.updateConfig(currentConfig).pipe(
+    
+    let obs$: Observable<any>;
+    if (this.currentScope() === 'GLOBAL') {
+      obs$ = this.enrollmentService.updateConfig(currentConfig);
+    } else {
+      const override: LevelOverrideConfig = { active: true, full: false };
+      obs$ = this.enrollmentService.updateLevelOverride(this.selectedLevelId()!, override);
+    }
+
+    obs$.pipe(
       finalize(() => this.isSaving.set(false))
     ).subscribe({
-      next: (updated) => {
-        this.notificationService.success('Configuration publiée.');
-        this.initialConfig.set(JSON.parse(JSON.stringify(updated)));
+      next: () => {
+        this.notificationService.success('Configuration publiée avec succès.');
+        this.initialConfig.set(JSON.parse(JSON.stringify(currentConfig)));
       },
-      error: () => this.notificationService.error('Erreur de sauvegarde.')
+      error: () => this.notificationService.error('Erreur lors de la synchronisation.')
     });
   }
 
-  setActivePillar(key: string) {
-    this.activePillarKey.set(key);
+  setScope(scope: ConfigScope, levelId: string | null = null) {
+    this.currentScope.set(scope);
+    this.selectedLevelId.set(levelId);
   }
+
+  // --- GESTION DES CHAMPS ---
 
   updateSystemField(fieldName: string, patch: Partial<FieldConfig>) {
     const current = this.config();
     if (!current) return;
-
     const pillarKey = this.activePillarKey();
     const pillar = { ...current.pillars[pillarKey] };
-    pillar.systemFields = pillar.systemFields.map(f => 
-      f.name === fieldName ? { ...f, ...patch } : f
-    );
-
-    this.config.set({
-      ...current,
-      pillars: { ...current.pillars, [pillarKey]: pillar }
-    });
+    pillar.systemFields = pillar.systemFields.map(f => f.name === fieldName ? { ...f, ...patch } : f);
+    this.config.set({ ...current, pillars: { ...current.pillars, [pillarKey]: pillar } });
   }
 
   addCustomField() {
-    const dialogRef = this.dialog.open(CustomFieldFormComponent, {
-      width: '500px',
-      panelClass: 'feewi-dialog-panel'
-    });
-
+    const dialogRef = this.dialog.open(CustomFieldFormComponent, { width: '500px', panelClass: 'feewi-dialog-panel' });
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         const current = this.config();
         if (!current) return;
-
         const pillarKey = this.activePillarKey();
         const pillar = { ...current.pillars[pillarKey] };
         pillar.customFields = [...pillar.customFields, result];
-
-        this.config.set({
-          ...current,
-          pillars: { ...current.pillars, [pillarKey]: pillar }
-        });
+        this.config.set({ ...current, pillars: { ...current.pillars, [pillarKey]: pillar } });
       }
     });
   }
@@ -174,32 +175,27 @@ export class AdmissionConfigComponent implements OnInit {
   removeCustomField(fieldName: string) {
     const current = this.config();
     if (!current) return;
-
     const pillarKey = this.activePillarKey();
     const pillar = { ...current.pillars[pillarKey] };
     pillar.customFields = pillar.customFields.filter(f => f.name !== fieldName);
-
-    this.config.set({
-      ...current,
-      pillars: { ...current.pillars, [pillarKey]: pillar }
-    });
+    this.config.set({ ...current, pillars: { ...current.pillars, [pillarKey]: pillar } });
   }
+
+  // --- GESTION DES DOCUMENTS ---
 
   updateDocumentMandatory(code: string, mandatory: boolean) {
     const current = this.config();
     if (!current) return;
-    const checklist = current.documentChecklist.map(doc => 
-      doc.code === code ? { ...doc, mandatory } : doc
-    );
+    const checklist = current.documentChecklist.map(doc => doc.code === code ? { ...doc, mandatory } : doc);
     this.config.set({ ...current, documentChecklist: checklist });
   }
 
   addDocumentType() {
     const dialogRef = this.dialog.open(DocumentTypeFormComponent, { width: '450px', panelClass: 'feewi-dialog-panel' });
     dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        const current = this.config();
-        if (current) this.config.set({ ...current, documentChecklist: [...current.documentChecklist, result] });
+      if (result && this.config()) {
+        const current = this.config()!;
+        this.config.set({ ...current, documentChecklist: [...current.documentChecklist, result] });
       }
     });
   }
@@ -210,12 +206,43 @@ export class AdmissionConfigComponent implements OnInit {
     this.config.set({ ...current, documentChecklist: current.documentChecklist.filter(d => d.code !== code) });
   }
 
+  // --- GESTION DE L'ÉVALUATION (ASSESSMENT) ---
+
+  updateAssessmentType(type: any) {
+    const current = this.config();
+    if (current) {
+      this.config.set({ ...current, assessmentConfig: { ...current.assessmentConfig, type } });
+    }
+  }
+
+  addSubject(input: HTMLInputElement) {
+    const val = input.value.trim();
+    const current = this.config();
+    if (val && current) {
+      const subjects = [...current.assessmentConfig.subjects];
+      if (!subjects.includes(val)) {
+        subjects.push(val);
+        this.config.set({ ...current, assessmentConfig: { ...current.assessmentConfig, subjects } });
+        input.value = '';
+      }
+    }
+  }
+
+  removeSubject(subject: string) {
+    const current = this.config();
+    if (current) {
+      const subjects = current.assessmentConfig.subjects.filter(s => s !== subject);
+      this.config.set({ ...current, assessmentConfig: { ...current.assessmentConfig, subjects } });
+    }
+  }
+
+  // --- ACTIONS DE MAINTENANCE ---
+
   resetToSystemDefaults() {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '450px',
       data: { title: 'Réinitialiser ?', message: 'Restaurer les 4 piliers système par défaut ?', confirmLabel: 'Réinitialiser', type: 'danger' }
     });
-
     dialogRef.afterClosed().subscribe(confirmed => {
       if (confirmed) {
         this.isLoading.set(true);
@@ -225,7 +252,7 @@ export class AdmissionConfigComponent implements OnInit {
         ).subscribe(config => {
           this.config.set(config);
           this.initialConfig.set(JSON.parse(JSON.stringify(config)));
-          this.notificationService.success('Standards restaurés.');
+          this.notificationService.success('Standards système restaurés.');
         });
       }
     });
@@ -252,6 +279,7 @@ export class AdmissionConfigComponent implements OnInit {
     });
   }
 
+  // Icônes
   readonly Settings2 = Settings2;
   readonly Eye = Eye;
   readonly Save = Save;
@@ -274,6 +302,8 @@ export class AdmissionConfigComponent implements OnInit {
   readonly Users = Users;
   readonly School = School;
   readonly Lock = Lock;
+  readonly ChevronRight = ChevronRight;
+  readonly ClipboardList = ClipboardList;
   protected readonly FileText = FileText;
   protected readonly Calendar = Calendar;
 }

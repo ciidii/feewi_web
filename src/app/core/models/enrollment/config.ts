@@ -1,53 +1,48 @@
 import { AssessmentType } from './base-types';
 
-/** Configuration globale du portail d'admission (Vision V3) */
+/** Configuration globale du portail d'admission (Vision V4) */
 export interface EnrollmentConfig {
   tenantId: string;
   portalActive: boolean;
-  registrationMode: 'PARENT_ONLY' | 'ASSISTED' | 'OPEN';
+  registrationMode: 'PARENT_ONLY' | 'SELF_ONLY' | 'OPEN';
   academicYearLabel: string;
   
-  /** Les Piliers configurés (pillar_identity, pillar_medical, etc.) */
+  /** Les Piliers configurés (Identité, Santé, Famille, Scolarité) */
   pillars: Record<string, PillarConfig>;
   
-  /** Checklist globale par défaut */
+  /** Checklist globale */
   documentChecklist: RequiredDocumentConfig[];
   
-  /** Paramètres par défaut pour les tests de niveau */
-  defaultAssessmentConfig: AssessmentConfig;
+  /** Configuration des tests de niveau (V4) */
+  assessmentConfig: AssessmentConfig;
   
-  /** Surcharges (Fermeture de niveau, Quotas) */
   levelOverrides: Record<string, LevelOverrideConfig>;
-
-  /** Textes CMS (Rajoutés pour le Frontend) */
   instructions: Record<string, string>;
   legalText: string;
 }
 
+/** Structure d'un Pilier thématique */
 export interface PillarConfig {
   label: string;
-  customFields: CustomFieldConfig[];
-  coreFields?: Record<string, FieldControl>;
+  /** Champs indispensables au moteur Feewi (Libellé modifiable) */
+  systemFields: FieldConfig[];
+  /** Champs libres créés par l'établissement (Totalement éditables) */
+  customFields: FieldConfig[];
 }
 
-export interface CustomFieldConfig {
+/** Définition d'un champ (Système ou CMS) */
+export interface FieldConfig {
   name: string;
   label: string;
   type: 'TEXT' | 'NUMBER' | 'DATE' | 'BOOLEAN';
-  required: boolean;
+  mandatory: boolean;
   placeholder?: string;
-  options?: string[];
+  options?: string[]; // Pour évolutions futures
 }
 
 export interface RequiredDocumentConfig {
   code: string;
   name: string;
-  mandatory: boolean;
-}
-
-export interface FieldControl {
-  label: string;
-  hidden: boolean;
   mandatory: boolean;
 }
 
@@ -61,9 +56,8 @@ export interface LevelOverrideConfig {
   active: boolean;
   full: boolean;
   maxNewEnrollments?: number;
-  documentChecklist?: RequiredDocumentConfig[];
-  assessmentConfig?: AssessmentConfig;
 }
 
-/** @deprecated */
-export type CoreFieldControl = FieldControl;
+/** @deprecated Fallback pour composants non migrés */
+export type CustomFieldConfig = FieldConfig;
+export type CoreFieldControl = FieldConfig;
