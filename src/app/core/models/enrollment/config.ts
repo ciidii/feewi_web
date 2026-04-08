@@ -1,29 +1,30 @@
 import { AssessmentType } from './base-types';
 
-/** Configuration globale du portail d'admission (Vision V5) */
+/** Configuration globale du portail d'admission (Vision Finale V5) */
 export interface EnrollmentConfig {
   tenantId: string;
   portalActive: boolean;
   registrationMode: 'PARENT_ONLY' | 'SELF_ONLY' | 'OPEN';
-  academicYearLabel: string;
   
-  /** Les Piliers configurés */
+  /** Les Piliers configurés (Structure V5) */
   pillars: Record<string, PillarConfig>;
   
-  /** Checklist globale */
-  documentChecklist: RequiredDocumentConfig[];
+  /** Checklist globale (Nom backend : defaultChecklist) */
+  defaultChecklist: RequiredDocumentConfig[];
   
-  /** Configuration des tests de niveau (V5) */
-  assessmentConfig: AssessmentConfig;
+  /** Configuration des tests (Nom backend : defaultAssessmentConfig) */
+  defaultAssessmentConfig: AssessmentConfig | null;
   
-  /** Contrôle temporel : Verrous par année scolaire (V5) */
-  yearOverrides: Record<string, YearOverrideConfig>;
-  
-  /** Surcharges par niveau (V5) */
+  /** Contrôle temporel */
+  yearOverrides: Record<string, any>;
   levelOverrides: Record<string, LevelOverrideConfig>;
   
   instructions: Record<string, string>;
-  legalText: string;
+  legalText: string | null;
+
+  /** Alias pour compatibilité Frontend */
+  documentChecklist?: RequiredDocumentConfig[]; 
+  assessmentConfig?: AssessmentConfig;
 }
 
 export interface PillarConfig {
@@ -36,7 +37,7 @@ export interface PillarConfig {
 export interface FieldConfig {
   name: string;
   label: string;
-  type: 'TEXT' | 'NUMBER' | 'DATE' | 'BOOLEAN';
+  type: string;
   mandatory: boolean;
   placeholder?: string;
 }
@@ -50,23 +51,19 @@ export interface RequiredDocumentConfig {
 export interface AssessmentConfig {
   type: AssessmentType;
   subjectsEnabled: boolean;
-  subjects: Record<string, number>; // Matière -> Coefficient
+  subjects: Record<string, number>; 
   minPassingGrade: number;
-}
-
-export interface YearOverrideConfig {
-  active: boolean; // Si l'année est visible/sélectionnable sur le portail
-  registrationEndDate?: string;
 }
 
 export interface LevelOverrideConfig {
   active: boolean;
   full: boolean;
-  maxNewEnrollments?: number;
-  pillarOverrides?: Record<string, PillarConfig>;
-  assessmentConfig?: AssessmentConfig;
+  maxNewEnrollments?: number | null;
+  documentChecklist?: RequiredDocumentConfig[] | null;
+  pillarOverrides?: Record<string, PillarConfig> | null;
+  assessmentConfig?: AssessmentConfig | null;
+  coreFieldOverrides?: Record<string, any>;
 }
 
-/** @deprecated */
-export type CustomFieldConfig = FieldConfig;
-export type CoreFieldControl = FieldConfig;
+/** Fallback compatibilité */
+export type RequiredDocumentOld = RequiredDocumentConfig;

@@ -16,8 +16,7 @@ import {
   FieldConfig, 
   LevelOverrideConfig, 
   AssessmentConfig,
-  PillarConfig,
-  YearOverrideConfig
+  PillarConfig
 } from '../../../../../core/models/enrollment.model';
 import { NotificationService } from '../../../../../shared/services/notification.service';
 import { AcademicService } from '../../../../../core/services/academic.service';
@@ -61,12 +60,11 @@ export class AdmissionConfigComponent implements OnInit {
   initialConfig = signal<EnrollmentConfig | null>(null);
   activeYear = signal<AcademicYear | null>(null);
   levels = signal<Level[]>([]);
-  availableYears = signal<AcademicYear[]>([]); // Toutes les années du système
+  availableYears = signal<AcademicYear[]>([]);
 
   isLoading = signal(true);
   isSaving = signal(false);
 
-  // Navigation CMS
   currentScope = signal<ConfigScope>('GLOBAL');
   selectedLevelId = signal<string | null>(null);
   activeTab = signal<ConfigTab>('PILLARS');
@@ -85,8 +83,6 @@ export class AdmissionConfigComponent implements OnInit {
     { key: 'pillar_schooling', label: 'Scolarité', icon: School }
   ];
 
-  // --- CALCULS RÉACTIFS ---
-
   isDirty = computed(() => {
     const current = this.config();
     const initial = this.initialConfig();
@@ -100,10 +96,10 @@ export class AdmissionConfigComponent implements OnInit {
     return cfg.pillars[this.activePillarKey()] || null;
   });
 
-  activeChecklist = computed(() => this.config()?.documentChecklist || []);
+  activeChecklist = computed(() => this.config()?.defaultChecklist || []);
 
   assessmentSubjectsList = computed(() => {
-    const subjects = this.config()?.assessmentConfig?.subjects || {};
+    const subjects = this.config()?.defaultAssessmentConfig?.subjects || {};
     return Object.entries(subjects).map(([name, coef]) => ({ name, coef }));
   });
 
@@ -122,11 +118,16 @@ export class AdmissionConfigComponent implements OnInit {
       finalize(() => this.isLoading.set(false))
     ).subscribe({
       next: ({ config, activeYear, allYears, levels }) => {
-        // Sécurité V5 : Initialisation des verrous
-        if (!config.yearOverrides) config.yearOverrides = {};
-        if (!config.assessmentConfig) {
-          config.assessmentConfig = { type: 'DOSSIER', subjectsEnabled: false, subjects: {}, minPassingGrade: 10 };
+        // Sécurité V5 : Aligner sur le JSON Backend
+        if (!config.defaultAssessmentConfig) {
+          config.defaultAssessmentConfig = { type: 'DOSSIER', subjectsEnabled: false, subjects: {}, minPassingGrade: 10 };
         }
+        if (!config.defaultChecklist) config.defaultChecklist = [];
+        if (!config.yearOverrides) config.yearOverrides = {};
+
+        // Alias pour compatibilité templates
+        config.assessmentConfig = config.defaultAssessmentConfig;
+        config.documentChecklist = config.defaultChecklist;
 
         this.config.set(config);
         this.initialConfig.set(JSON.parse(JSON.stringify(config)));
@@ -143,48 +144,31 @@ export class AdmissionConfigComponent implements OnInit {
     if (!currentConfig) return;
 
     this.isSaving.set(true);
-    
     let obs$: Observable<any>;
+    
     if (this.currentScope() === 'GLOBAL') {
       obs$ = this.enrollmentService.updateConfig(currentConfig);
     } else {
-      const override: LevelOverrideConfig = { active: true, full: false };
+      const override: LevelOverrideConfig = {
+        active: true,
+        full: currentConfig.levelOverrides[this.selectedLevelId()!]?.full ?? false,
+        pillarOverrides: currentConfig.pillars,
+        assessmentConfig: currentConfig.defaultAssessmentConfig
+      };
       obs$ = this.enrollmentService.updateLevelOverride(this.selectedLevelId()!, override);
     }
 
-    obs$.pipe(
-      finalize(() => this.isSaving.set(false))
-    ).subscribe({
+    obs$.pipe(finalize(() => this.isSaving.set(false))).subscribe({
       next: () => {
         this.notificationService.success('Configuration publiée.');
         this.initialConfig.set(JSON.parse(JSON.stringify(currentConfig)));
-      },
-      error: () => this.notificationService.error('Erreur de sauvegarde.')
+      }
     });
   }
 
   setScope(scope: ConfigScope, levelId: string | null = null) {
     this.currentScope.set(scope);
     this.selectedLevelId.set(levelId);
-  }
-
-  // --- GESTION TEMPORELLE (V5) ---
-
-  isYearActive(yearId: string): boolean {
-    const config = this.config();
-    if (!config) return false;
-    // Si pas de surcharge, l'année est considérée active par défaut
-    return config.yearOverrides[yearId]?.active ?? true;
-  }
-
-  toggleYearVisibility(yearId: string) {
-    const current = this.config();
-    if (current) {
-      const overrides = { ...current.yearOverrides };
-      const currentStatus = overrides[yearId]?.active ?? true;
-      overrides[yearId] = { ...overrides[yearId], active: !currentStatus };
-      this.config.set({ ...current, yearOverrides: overrides });
-    }
   }
 
   // --- GESTION DES CHAMPS ---
@@ -226,8 +210,12 @@ export class AdmissionConfigComponent implements OnInit {
   updateDocumentMandatory(code: string, mandatory: boolean) {
     const current = this.config();
     if (!current) return;
-    const checklist = current.documentChecklist.map(doc => doc.code === code ? { ...doc, mandatory } : doc);
-    this.config.set({ ...current, documentChecklist: checklist });
+    const checklist = current.defaultChecklist.map(doc => doc.code === code ? { ...doc, mandatory } : doc);
+    this.config.set({ 
+      ...current, 
+      defaultChecklist: checklist,
+      documentChecklist: checklist // Alias
+    });
   }
 
   addDocumentType() {
@@ -235,7 +223,12 @@ export class AdmissionConfigComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result && this.config()) {
         const current = this.config()!;
-        this.config.set({ ...current, documentChecklist: [...current.documentChecklist, result] });
+        const updated = [...current.defaultChecklist, result];
+        this.config.set({ 
+          ...current, 
+          defaultChecklist: updated,
+          documentChecklist: updated // Alias
+        });
       }
     });
   }
@@ -243,99 +236,111 @@ export class AdmissionConfigComponent implements OnInit {
   removeDocumentType(code: string) {
     const current = this.config();
     if (!current) return;
-    this.config.set({ ...current, documentChecklist: current.documentChecklist.filter(d => d.code !== code) });
+    const updated = current.defaultChecklist.filter(d => d.code !== code);
+    this.config.set({ 
+      ...current, 
+      defaultChecklist: updated,
+      documentChecklist: updated // Alias
+    });
   }
 
   // --- GESTION DE L'ÉVALUATION ---
 
   updateAssessmentType(type: any) {
     const current = this.config();
-    if (current) {
-      this.config.set({ ...current, assessmentConfig: { ...current.assessmentConfig, type } });
+    if (current && current.defaultAssessmentConfig) {
+      const updated = { ...current.defaultAssessmentConfig, type };
+      this.config.set({ 
+        ...current, 
+        defaultAssessmentConfig: updated,
+        assessmentConfig: updated // Alias
+      });
     }
   }
 
   updateMinPassingGrade(grade: number) {
     const current = this.config();
-    if (current) {
-      this.config.set({ ...current, assessmentConfig: { ...current.assessmentConfig, minPassingGrade: grade } });
+    if (current && current.defaultAssessmentConfig) {
+      const updated = { ...current.defaultAssessmentConfig, minPassingGrade: grade };
+      this.config.set({ 
+        ...current, 
+        defaultAssessmentConfig: updated,
+        assessmentConfig: updated // Alias
+      });
     }
   }
 
   addSubject(input: HTMLInputElement) {
     const val = input.value.trim();
     const current = this.config();
-    if (val && current) {
-      const subjects = { ...current.assessmentConfig.subjects };
-      if (!subjects[val]) {
-        subjects[val] = 1;
-        this.config.set({ ...current, assessmentConfig: { ...current.assessmentConfig, subjects } });
-        input.value = '';
-      }
+    if (val && current && current.defaultAssessmentConfig) {
+      const subjects = { ...current.defaultAssessmentConfig.subjects };
+      subjects[val] = 1;
+      const updated = { ...current.defaultAssessmentConfig, subjects };
+      this.config.set({ 
+        ...current, 
+        defaultAssessmentConfig: updated,
+        assessmentConfig: updated // Alias
+      });
+      input.value = '';
     }
   }
 
   updateSubjectCoef(subject: string, coef: number) {
     const current = this.config();
-    if (current) {
-      const subjects = { ...current.assessmentConfig.subjects, [subject]: coef };
-      this.config.set({ ...current, assessmentConfig: { ...current.assessmentConfig, subjects } });
+    if (current && current.defaultAssessmentConfig) {
+      const subjects = { ...current.defaultAssessmentConfig.subjects, [subject]: coef };
+      const updated = { ...current.defaultAssessmentConfig, subjects };
+      this.config.set({ 
+        ...current, 
+        defaultAssessmentConfig: updated,
+        assessmentConfig: updated // Alias
+      });
     }
   }
 
   removeSubject(subject: string) {
     const current = this.config();
-    if (current) {
-      const subjects = { ...current.assessmentConfig.subjects };
+    if (current && current.defaultAssessmentConfig) {
+      const subjects = { ...current.defaultAssessmentConfig.subjects };
       delete subjects[subject];
-      this.config.set({ ...current, assessmentConfig: { ...current.assessmentConfig, subjects } });
+      const updated = { ...current.defaultAssessmentConfig, subjects };
+      this.config.set({ 
+        ...current, 
+        defaultAssessmentConfig: updated,
+        assessmentConfig: updated // Alias
+      });
     }
   }
 
-  // --- ACTIONS DE MAINTENANCE ---
+  // --- MAINTENANCE ---
 
   resetToSystemDefaults() {
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '450px',
-      data: { title: 'Réinitialiser ?', message: 'Restaurer les 4 piliers système par défaut ?', confirmLabel: 'Réinitialiser', type: 'danger' }
-    });
-    dialogRef.afterClosed().subscribe(confirmed => {
-      if (confirmed) {
-        this.isLoading.set(true);
-        this.enrollmentService.resetConfig().pipe(
-          switchMap(() => this.enrollmentService.getConfig()),
-          finalize(() => this.isLoading.set(false))
-        ).subscribe(config => {
-          this.config.set(config);
-          this.initialConfig.set(JSON.parse(JSON.stringify(config)));
-          this.notificationService.success('Standards système restaurés.');
-        });
-      }
-    });
+    this.enrollmentService.resetConfig().subscribe(() => this.loadInitialData());
   }
 
   togglePortal() {
     const current = this.config();
     if (!current) return;
-    const newStatus = !current.portalActive;
-    this.isSaving.set(true);
-    this.enrollmentService.updatePortalStatus(newStatus).pipe(finalize(() => this.isSaving.set(false))).subscribe({
-      next: () => {
-        this.config.set({ ...current, portalActive: newStatus });
-        this.notificationService.info(newStatus ? 'Portail ouvert.' : 'Portail fermé.');
-      }
-    });
+    this.enrollmentService.updatePortalStatus(!current.portalActive).subscribe(() => this.loadInitialData());
   }
 
   previewPortal() {
     this.dialog.open(PortalPreviewDialogComponent, {
-      width: '100vw', height: '100vh', maxWidth: '100vw', maxHeight: '100vh',
-      panelClass: 'full-screen-dialog',
-      data: { config: this.config(), activeYear: this.activeYear() }
+      width: '100vw', height: '100vh', data: { config: this.config(), activeYear: this.activeYear() }
     });
   }
 
-  // Icônes
+  isYearActive(id: string) { return this.config()?.yearOverrides[id]?.active ?? true; }
+  toggleYearVisibility(id: string) {
+    const current = this.config();
+    if (current) {
+      const active = !this.isYearActive(id);
+      const yearOverrides = { ...current.yearOverrides, [id]: { active } };
+      this.config.set({ ...current, yearOverrides });
+    }
+  }
+
   readonly Settings2 = Settings2;
   readonly Eye = Eye;
   readonly Save = Save;
@@ -345,14 +350,11 @@ export class AdmissionConfigComponent implements OnInit {
   readonly ShieldCheck = ShieldCheck;
   readonly Plus = Plus;
   readonly Trash2 = Trash2;
-  readonly BookOpen = BookOpen;
   readonly X = X;
   readonly Sparkles = Sparkles;
   readonly Info = Info;
   readonly MessageSquare = MessageSquare;
   readonly Layout = Layout;
-  readonly Type = Type;
-  readonly Hash = Hash;
   readonly Lock = Lock;
   readonly ChevronRight = ChevronRight;
   readonly ClipboardList = ClipboardList;
@@ -362,4 +364,7 @@ export class AdmissionConfigComponent implements OnInit {
   readonly School = School;
   protected readonly FileText = FileText;
   protected readonly LayoutGrid = LayoutGrid;
+  readonly Type = Type;
+  readonly Hash = Hash;
+  readonly ToggleIcon = ToggleIcon;
 }
