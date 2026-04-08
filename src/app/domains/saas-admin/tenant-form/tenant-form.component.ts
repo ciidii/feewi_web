@@ -26,7 +26,7 @@ import { FormShellComponent } from '../../../shared/components/form-shell/form-s
 @Component({
   selector: 'app-tenant-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, LucideAngularModule, FormShellComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, LucideAngularModule],
   templateUrl: './tenant-form.component.html',
   styleUrl: './tenant-form.component.scss'
 })

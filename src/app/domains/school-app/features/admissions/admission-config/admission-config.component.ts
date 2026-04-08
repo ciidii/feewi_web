@@ -6,16 +6,15 @@ import {
   Calendar, FileText, ShieldCheck, ToggleLeft as ToggleIcon,
   ChefHat, Bus, MessageSquare, Plus, Trash2, Settings2,
   GraduationCap, Info, AlertTriangle, LayoutGrid, UserCog, ClipboardCheck, BookOpen, X, Sparkles,
-  HeartPulse, Users, School, Layout, Type, Hash
+  HeartPulse, Users, School, Layout, Type, Hash, Lock
 } from 'lucide-angular';
-import { finalize, forkJoin, Observable, of } from 'rxjs';
+import { finalize, forkJoin, Observable, of, switchMap } from 'rxjs';
 import { EnrollmentAdminService } from '../../../../../core/services/enrollment-admin.service';
-import {
-  EnrollmentConfig,
-  RequiredDocumentConfig,
-  FieldControl,
-  CustomFieldConfig,
-  LevelOverrideConfig,
+import { 
+  EnrollmentConfig, 
+  RequiredDocumentConfig, 
+  FieldConfig, 
+  LevelOverrideConfig, 
   AssessmentConfig,
   PillarConfig
 } from '../../../../../core/models/enrollment.model';
@@ -64,19 +63,15 @@ export class AdmissionConfigComponent implements OnInit {
   isLoading = signal(true);
   isSaving = signal(false);
 
-  // Navigation CMS
   activeTab = signal<ConfigTab>('PILLARS');
   activePillarKey = signal<string>('pillar_identity');
 
-  // --- RÉFÉRENTIELS ---
   readonly systemPillars = [
-    { key: 'pillar_identity', label: 'Identité de l\'élève', icon: UserCog, desc: 'État civil, naissance et nationalité.' },
-    { key: 'pillar_medical', label: 'Santé & Médical', icon: HeartPulse, desc: 'Groupes sanguins, allergies et urgences.' },
-    { key: 'pillar_family', label: 'Famille & Responsables', icon: Users, desc: 'Informations sur les parents et adresse.' },
-    { key: 'pillar_schooling', label: 'Vœux & Scolarité', icon: School, desc: 'Orientation, cycles et école d\'origine.' }
+    { key: 'pillar_identity', label: 'Identité de l\'élève', icon: UserCog, desc: 'État civil et informations de base.' },
+    { key: 'pillar_medical', label: 'Santé & Médical', icon: HeartPulse, desc: 'Données vitales et urgences.' },
+    { key: 'pillar_family', label: 'Famille & Responsables', icon: Users, desc: 'Parents et adresse de résidence.' },
+    { key: 'pillar_schooling', label: 'Vœux & Scolarité', icon: School, desc: 'Orientation et parcours scolaire.' }
   ];
-
-  // --- CALCULS RÉACTIFS ---
 
   isDirty = computed(() => {
     const current = this.config();
@@ -85,22 +80,14 @@ export class AdmissionConfigComponent implements OnInit {
     return JSON.stringify(current) !== JSON.stringify(initial);
   });
 
-  /** Le pilier actuellement sélectionné pour édition */
   activePillar = computed<PillarConfig | null>(() => {
     const cfg = this.config();
     if (!cfg) return null;
     return cfg.pillars[this.activePillarKey()] || null;
   });
 
-  /** Liste ordonnée des champs système pour le pilier actif */
-  activeCoreFields = computed(() => {
-    const pillar = this.activePillar();
-    if (!pillar || !pillar.coreFields) return [];
-    return Object.entries(pillar.coreFields).map(([key, control]) => ({
-      key,
-      ...control
-    }));
-  });
+  /** Checklist active pour le template HTML (V4) */
+  activeChecklist = computed(() => this.config()?.documentChecklist || []);
 
   ngOnInit() {
     this.loadInitialData();
@@ -134,28 +121,26 @@ export class AdmissionConfigComponent implements OnInit {
       finalize(() => this.isSaving.set(false))
     ).subscribe({
       next: (updated) => {
-        this.notificationService.success('Configuration publiée avec succès sur le portail.');
+        this.notificationService.success('Configuration publiée.');
         this.initialConfig.set(JSON.parse(JSON.stringify(updated)));
       },
-      error: () => this.notificationService.error('Échec de la synchronisation avec le serveur.')
+      error: () => this.notificationService.error('Erreur de sauvegarde.')
     });
   }
-
-  // --- GESTION DES PILIERS (LOGIQUE) ---
 
   setActivePillar(key: string) {
     this.activePillarKey.set(key);
   }
 
-  updateCoreField(fieldKey: string, patch: Partial<FieldControl>) {
+  updateSystemField(fieldName: string, patch: Partial<FieldConfig>) {
     const current = this.config();
     if (!current) return;
 
     const pillarKey = this.activePillarKey();
     const pillar = { ...current.pillars[pillarKey] };
-    if (!pillar.coreFields) pillar.coreFields = {};
-
-    pillar.coreFields[fieldKey] = { ...pillar.coreFields[fieldKey], ...patch };
+    pillar.systemFields = pillar.systemFields.map(f => 
+      f.name === fieldName ? { ...f, ...patch } : f
+    );
 
     this.config.set({
       ...current,
@@ -200,35 +185,21 @@ export class AdmissionConfigComponent implements OnInit {
     });
   }
 
-  // --- GESTION DES DOCUMENTS (GLOBAL) ---
-
-  activeChecklist = computed(() => this.config()?.documentChecklist || []);
-
   updateDocumentMandatory(code: string, mandatory: boolean) {
     const current = this.config();
     if (!current) return;
-
-    const checklist = current.documentChecklist.map(doc =>
+    const checklist = current.documentChecklist.map(doc => 
       doc.code === code ? { ...doc, mandatory } : doc
     );
-
     this.config.set({ ...current, documentChecklist: checklist });
   }
 
   addDocumentType() {
-    const dialogRef = this.dialog.open(DocumentTypeFormComponent, {
-      width: '450px',
-      panelClass: 'feewi-dialog-panel'
-    });
+    const dialogRef = this.dialog.open(DocumentTypeFormComponent, { width: '450px', panelClass: 'feewi-dialog-panel' });
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         const current = this.config();
-        if (current) {
-          this.config.set({
-            ...current,
-            documentChecklist: [...current.documentChecklist, result]
-          });
-        }
+        if (current) this.config.set({ ...current, documentChecklist: [...current.documentChecklist, result] });
       }
     });
   }
@@ -236,13 +207,29 @@ export class AdmissionConfigComponent implements OnInit {
   removeDocumentType(code: string) {
     const current = this.config();
     if (!current) return;
-    this.config.set({
-      ...current,
-      documentChecklist: current.documentChecklist.filter(d => d.code !== code)
-    });
+    this.config.set({ ...current, documentChecklist: current.documentChecklist.filter(d => d.code !== code) });
   }
 
-  // --- ACTIONS DE STATUT ---
+  resetToSystemDefaults() {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '450px',
+      data: { title: 'Réinitialiser ?', message: 'Restaurer les 4 piliers système par défaut ?', confirmLabel: 'Réinitialiser', type: 'danger' }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.isLoading.set(true);
+        this.enrollmentService.resetConfig().pipe(
+          switchMap(() => this.enrollmentService.getConfig()),
+          finalize(() => this.isLoading.set(false))
+        ).subscribe(config => {
+          this.config.set(config);
+          this.initialConfig.set(JSON.parse(JSON.stringify(config)));
+          this.notificationService.success('Standards restaurés.');
+        });
+      }
+    });
+  }
 
   togglePortal() {
     const current = this.config();
@@ -252,7 +239,7 @@ export class AdmissionConfigComponent implements OnInit {
     this.enrollmentService.updatePortalStatus(newStatus).pipe(finalize(() => this.isSaving.set(false))).subscribe({
       next: () => {
         this.config.set({ ...current, portalActive: newStatus });
-        this.notificationService.info(newStatus ? 'Le portail est maintenant ouvert.' : 'Le portail a été fermé.');
+        this.notificationService.info(newStatus ? 'Portail ouvert.' : 'Portail fermé.');
       }
     });
   }
@@ -265,7 +252,6 @@ export class AdmissionConfigComponent implements OnInit {
     });
   }
 
-  // Icônes
   readonly Settings2 = Settings2;
   readonly Eye = Eye;
   readonly Save = Save;
@@ -284,6 +270,10 @@ export class AdmissionConfigComponent implements OnInit {
   readonly Type = Type;
   readonly Hash = Hash;
   readonly ToggleIcon = ToggleIcon;
+  readonly HeartPulse = HeartPulse;
+  readonly Users = Users;
+  readonly School = School;
+  readonly Lock = Lock;
   protected readonly FileText = FileText;
   protected readonly Calendar = Calendar;
 }

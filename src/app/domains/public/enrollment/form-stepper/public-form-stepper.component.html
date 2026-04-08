@@ -16,7 +16,7 @@
     </div>
   </header>
 
-  <!-- Stepper Nav (5 étapes V3) -->
+  <!-- Stepper Nav (5 étapes V4) -->
   <div class="stepper-nav">
     <div class="progress-bar">
       <div class="progress-fill" [style.width.%]="progress()"></div>
@@ -85,16 +85,15 @@
         </div>
         <div class="form-group full">
           <label>Adresse de résidence</label>
-          <input type="text" [(ngModel)]="formData().family.homeAddress" class="fw-input" placeholder="Quartier, Rue, Villa...">
+          <input type="text" [(ngModel)]="formData().family.homeAddress" class="fw-input" placeholder="Quartier, Ville...">
         </div>
 
-        <!-- CHAMPS CMS DYNAMIQUES DU PILIER FAMILLE -->
+        <!-- CHAMPS CMS DYNAMIQUES (FAMILLE) -->
         @if (getPillarConfig('pillar_family'); as pConfig) {
           @for (f of pConfig.customFields; track f.name) {
             <div class="form-group" [class.full]="f.type === 'TEXT'">
-              <label>{{ f.label }} <span *ngIf="f.required" class="text-red-500">*</span></label>
-              <input [type]="f.type === 'NUMBER' ? 'number' : 'text'" 
-                     [(ngModel)]="formData().customFields['pillar_family'][f.name]" class="fw-input">
+              <label>{{ f.label }} <span *ngIf="f.mandatory" class="text-red-500">*</span></label>
+              <input type="text" [(ngModel)]="formData().customFields['pillar_family'][f.name]" class="fw-input">
             </div>
           }
         }
@@ -142,11 +141,11 @@
           <input type="date" [(ngModel)]="formData().identity.birthDate" class="fw-input">
         </div>
 
-        <!-- CHAMPS CMS DYNAMIQUES DU PILIER IDENTITÉ -->
+        <!-- CHAMPS CMS DYNAMIQUES (IDENTITÉ) -->
         @if (getPillarConfig('pillar_identity'); as pConfig) {
           @for (f of pConfig.customFields; track f.name) {
             <div class="form-group">
-              <label>{{ f.label }} <span *ngIf="f.required" class="text-red-500">*</span></label>
+              <label>{{ f.label }} <span *ngIf="f.mandatory" class="text-red-500">*</span></label>
               <input type="text" [(ngModel)]="formData().customFields['pillar_identity'][f.name]" class="fw-input">
             </div>
           }
@@ -177,15 +176,15 @@
         </div>
 
         <div class="form-group full">
-          <label>Allergies connues ou maladies chroniques</label>
-          <textarea [(ngModel)]="formData().medical.criticalAllergies" class="fw-input" rows="3" placeholder="Ex: Asthme, Allergie aux arachides..."></textarea>
+          <label>Allergies connues</label>
+          <textarea [(ngModel)]="formData().medical.criticalAllergies" class="fw-input" rows="2"></textarea>
         </div>
 
-        <!-- CHAMPS CMS DYNAMIQUES DU PILIER MÉDICAL -->
+        <!-- CHAMPS CMS DYNAMIQUES (MÉDICAL) -->
         @if (getPillarConfig('pillar_medical'); as pConfig) {
           @for (f of pConfig.customFields; track f.name) {
             <div class="form-group">
-              <label>{{ f.label }} <span *ngIf="f.required" class="text-red-500">*</span></label>
+              <label>{{ f.label }} <span *ngIf="f.mandatory" class="text-red-500">*</span></label>
               <input type="text" [(ngModel)]="formData().customFields['pillar_medical'][f.name]" class="fw-input">
             </div>
           }
@@ -199,7 +198,7 @@
         <lucide-icon [name]="FileText" class="text-primary"></lucide-icon>
         <div>
           <h2>Pièces Justificatives</h2>
-          <p>Veuillez charger les documents requis au format PDF ou Image.</p>
+          <p>Chargez les documents requis.</p>
         </div>
       </div>
       
@@ -228,30 +227,28 @@
       <div class="section-header-modern">
         <lucide-icon [name]="CheckCircle" class="text-primary"></lucide-icon>
         <div>
-          <h2>Confirmation Finale</h2>
-          <p>Relisez les informations de <strong>{{ formData().identity.firstName }}</strong> avant l'envoi.</p>
+          <h2>Confirmation</h2>
+          <p>Relisez votre dossier avant l'envoi.</p>
         </div>
       </div>
       
       <div class="review-grid">
         <div class="review-card">
-          <div class="review-card-header">Vérification de l'Identité</div>
-          <div class="review-row"><span class="label">Candidat</span><span class="value">{{ formData().identity.firstName }} {{ formData().identity.lastName }}</span></div>
-          <div class="review-row"><span class="label">Niveau</span><span class="value">{{ formData().schooling.requestedLevelId }}</span></div>
+          <div class="review-card-header">Candidat</div>
+          <div class="review-row"><span class="label">Nom complet</span><span class="value">{{ formData().identity.firstName }} {{ formData().identity.lastName }}</span></div>
         </div>
       </div>
 
       <div class="legal-notice-box animate-in">
         <label class="consent-checkbox">
           <input type="checkbox" [(ngModel)]="consentChecked">
-          <span>Je certifie sur l'honneur l'exactitude des informations fournies.</span>
+          <span>Je certifie l'exactitude des informations fournies.</span>
         </label>
       </div>
     </div>
 
   </div>
 
-  <!-- Stepper Actions -->
   <footer class="stepper-footer">
     <button class="btn-outline" (click)="prevStep()" *ngIf="currentStep() !== 'GUARDIAN'">
       <lucide-icon [name]="ArrowLeft" [size]="18"></lucide-icon> Précédent
@@ -270,6 +267,6 @@
 <ng-template #initialLoading>
   <div class="initial-loader" *ngIf="isLoading()">
     <lucide-icon [name]="RefreshCw" [size]="48" class="animate-spin text-primary"></lucide-icon>
-    <p>Initialisation du portail V3...</p>
+    <p>Initialisation V4...</p>
   </div>
 </ng-template>

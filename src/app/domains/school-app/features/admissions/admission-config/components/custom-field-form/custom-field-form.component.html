@@ -31,12 +31,11 @@
     <div class="grid grid-cols-2 gap-4">
       <div class="space-y-2">
         <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Type de réponse</label>
-        <select formControlName="type" class="fw-input-field" (change)="onTypeChange()">
-          <option value="text">Texte court</option>
-          <option value="number">Nombre</option>
-          <option value="date">Date</option>
-          <option value="boolean">Case à cocher (Oui/Non)</option>
-          <option value="select">Liste de choix</option>
+        <select formControlName="type" class="fw-input-field">
+          <option value="TEXT">Texte court</option>
+          <option value="NUMBER">Nombre</option>
+          <option value="DATE">Date</option>
+          <option value="BOOLEAN">Case à cocher (Oui/Non)</option>
         </select>
       </div>
 
@@ -51,25 +50,6 @@
       </div>
     </div>
 
-    <!-- Section Options (Si Select) -->
-    <div *ngIf="fieldForm.get('type')?.value === 'select'" class="space-y-3 p-4 bg-slate-50 rounded-xl border border-slate-200 animate-in fade-in">
-      <div class="flex items-center justify-between">
-        <label class="text-xs font-bold text-slate-600 uppercase tracking-widest">Options de la liste</label>
-        <button type="button" (click)="addOption()" class="text-primary hover:text-primary-700 text-xs font-bold flex items-center gap-1">
-          <lucide-icon [name]="Plus" class="w-3 h-3"></lucide-icon> Ajouter
-        </button>
-      </div>
-      
-      <div formArrayName="options" class="space-y-2">
-        <div *ngFor="let opt of options.controls; let i = index" class="flex gap-2 animate-in slide-in-from-left duration-200">
-          <input [formControlName]="i" placeholder="Option {{i+1}}" class="fw-input-field text-sm h-10" />
-          <button type="button" (click)="removeOption(i)" class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all">
-            <lucide-icon [name]="Trash2" class="w-4 h-4"></lucide-icon>
-          </button>
-        </div>
-      </div>
-    </div>
-
     <!-- Option Obligatoire -->
     <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
       <div class="flex items-center gap-3">
@@ -77,7 +57,7 @@
         <span class="text-sm font-semibold text-slate-700">Rendre cette réponse obligatoire</span>
       </div>
       <label class="relative inline-flex items-center cursor-pointer">
-        <input type="checkbox" formControlName="required" class="sr-only peer">
+        <input type="checkbox" formControlName="mandatory" class="sr-only peer">
         <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
       </label>
     </div>

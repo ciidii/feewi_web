@@ -1,4 +1,4 @@
-import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {Component, computed, effect, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {
@@ -10,9 +10,10 @@ import {
   ChefHat,
   ClipboardList,
   Eye,
+  FileImage,
+  FileSpreadsheet,
   FileText,
   GraduationCap,
-  HeartPulse,
   Info,
   LucideAngularModule,
   MessageSquare,
@@ -22,33 +23,32 @@ import {
   Upload,
   User,
   Users,
-  X
+  X,
+  HeartPulse,
+  School
 } from 'lucide-angular';
-import {catchError, finalize, forkJoin, map, Observable, of, switchMap, tap} from 'rxjs';
+import {catchError, finalize, forkJoin, Observable, of, switchMap, tap, map} from 'rxjs';
 
-import {EnrollmentPublicService} from '../../../../core/services/enrollment-public.service';
+import {
+  EnrollmentPublicService
+} from '../../../../core/services/enrollment-public.service';
 import {DocumentEngineService} from '../../../../core/services/document-engine.service';
 import {AdmissionSessionService} from '../../../../core/services/admission-session.service';
 import {AcademicService} from '../../../../core/services/academic.service';
 import {TenantContextService} from '../../../../core/services/tenant-context.service';
-import {Filiere, Level} from '../../../../core/models/academic.model';
-import {
-  Admission,
-  CreateBundleRequest,
-  EffectiveConfigResponse,
-  FieldControl,
-  PublicPortalSummary
-} from '../../../../core/models/enrollment.model';
+import {Cycle, Filiere, Level} from '../../../../core/models/academic.model';
+import {Admission, CreateBundleRequest, FieldConfig, EffectiveConfigResponse, PublicPortalSummary} from '../../../../core/models/enrollment.model';
 import {Router} from '@angular/router';
 
 import {NotificationService} from '../../../../shared/services/notification.service';
+import {MatCheckbox} from '@angular/material/checkbox';
 
 export type StepperStep = 'GUARDIAN' | 'STUDENT' | 'MEDICAL' | 'DOCS' | 'REVIEW';
 
 @Component({
   selector: 'app-public-form-stepper',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule, MatCheckbox],
   templateUrl: './public-form-stepper.component.html',
   styleUrls: ['./public-form-stepper.component.scss']
 })
@@ -79,7 +79,7 @@ export class PublicFormStepperComponent implements OnInit {
   availableLevels = signal<Level[]>([]);
   availableFilieres = signal<Filiere[]>([]);
 
-  // --- DONNÉES FORMULAIRE (V3 Pillars) ---
+  // --- DONNÉES FORMULAIRE (V4) ---
   formData = signal({
     family: {
       primaryGuardian: {
@@ -101,7 +101,7 @@ export class PublicFormStepperComponent implements OnInit {
       filiereId: null as string | null,
       previousSchool: ''
     },
-    customFields: {} as Record<string, Record<string, any>> // Par pilier
+    customFields: {} as Record<string, Record<string, any>>
   });
 
   progress = computed(() => {
@@ -272,7 +272,7 @@ export class PublicFormStepperComponent implements OnInit {
   private savePillar(pillar: 'identity' | 'medical' | 'schooling' | 'family', configKey: string) {
     const id = this.currentAdmissionId();
     if (!id) return of(false);
-
+    
     const pillarData = {
       ...(this.formData() as any)[pillar],
       customFields: this.formData().customFields[configKey]
@@ -281,15 +281,12 @@ export class PublicFormStepperComponent implements OnInit {
     return this.enrollmentService.updatePillar(id, pillar, pillarData).pipe(
       switchMap(app => {
         this.application.set(app);
-        // Si on vient de choisir le niveau, on charge la config effective pour les étapes suivantes
         if (pillar === 'schooling' && app.schooling.levelId) {
           return this.enrollmentService.getEffectiveConfig(app.schooling.levelId);
         }
         return of(null);
       }),
-      tap(config => {
-        if (config) this.effectiveConfig.set(config);
-      }),
+      tap(config => { if (config) this.effectiveConfig.set(config); }),
       map(() => true),
       catchError(() => of(false))
     );
@@ -303,15 +300,14 @@ export class PublicFormStepperComponent implements OnInit {
     }
   }
 
-  // --- HELPERS CMS ---
-
   getPillarConfig(key: string) {
     return this.effectiveConfig()?.pillars[key] || null;
   }
 
-  getCoreControl(pillarKey: string, fieldKey: string): FieldControl {
+  /** Recherche un champ système par son nom dans un pilier */
+  getSystemField(pillarKey: string, fieldName: string): FieldConfig | null {
     const pillar = this.getPillarConfig(pillarKey);
-    return pillar?.coreFields?.[fieldKey] || {label: '', hidden: false, mandatory: false};
+    return pillar?.systemFields.find((f: FieldConfig) => f.name === fieldName) || null;
   }
 
   onFileSelected(docCode: string, event: any) {
@@ -320,11 +316,7 @@ export class PublicFormStepperComponent implements OnInit {
     if (!file || !id) return;
 
     this.uploadingDocCode.set(docCode);
-    this.documentService.getUploadTicket({
-      fileName: file.name,
-      contentType: file.type,
-      serviceOrigin: 'enrollment'
-    }).pipe(
+    this.documentService.getUploadTicket({ fileName: file.name, contentType: file.type, serviceOrigin: 'enrollment' }).pipe(
       switchMap(ticket => this.documentService.uploadFileDirectly(ticket.uploadUrl, file).pipe(map(() => ticket))),
       switchMap(ticket => this.enrollmentService.uploadDocument(id, docCode, ticket.fileId)),
       finalize(() => this.uploadingDocCode.set(null))
@@ -333,13 +325,14 @@ export class PublicFormStepperComponent implements OnInit {
 
   submitFinal() {
     const id = this.currentAdmissionId();
-    if (!id) return;
+    const app = this.application();
+    if (!id || !app) return;
     this.isSubmitting.set(true);
     this.enrollmentService.submitApplication(id).pipe(
       finalize(() => this.isSubmitting.set(false))
-    ).subscribe(app => {
+    ).subscribe(res => {
       this.sessionService.clearSession();
-      this.router.navigate(['/enrollment/tracker', app.reference], {queryParams: {accessCode: this.application()?.family?.bundleId}});
+      this.router.navigate(['/enrollment/tracker', res.reference], { queryParams: { accessCode: app.bundleId } });
     });
   }
 
