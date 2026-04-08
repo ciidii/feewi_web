@@ -10,11 +10,11 @@ import {
 } from 'lucide-angular';
 import { finalize, forkJoin, Observable, of, switchMap } from 'rxjs';
 import { EnrollmentAdminService } from '../../../../../core/services/enrollment-admin.service';
-import { 
-  EnrollmentConfig, 
-  RequiredDocumentConfig, 
-  FieldConfig, 
-  LevelOverrideConfig, 
+import {
+  EnrollmentConfig,
+  RequiredDocumentConfig,
+  FieldConfig,
+  LevelOverrideConfig,
   AssessmentConfig,
   PillarConfig
 } from '../../../../../core/models/enrollment.model';
@@ -145,7 +145,7 @@ export class AdmissionConfigComponent implements OnInit {
 
     this.isSaving.set(true);
     let obs$: Observable<any>;
-    
+
     if (this.currentScope() === 'GLOBAL') {
       obs$ = this.enrollmentService.updateConfig(currentConfig);
     } else {
@@ -211,8 +211,8 @@ export class AdmissionConfigComponent implements OnInit {
     const current = this.config();
     if (!current) return;
     const checklist = current.defaultChecklist.map(doc => doc.code === code ? { ...doc, mandatory } : doc);
-    this.config.set({ 
-      ...current, 
+    this.config.set({
+      ...current,
       defaultChecklist: checklist,
       documentChecklist: checklist // Alias
     });
@@ -224,8 +224,8 @@ export class AdmissionConfigComponent implements OnInit {
       if (result && this.config()) {
         const current = this.config()!;
         const updated = [...current.defaultChecklist, result];
-        this.config.set({ 
-          ...current, 
+        this.config.set({
+          ...current,
           defaultChecklist: updated,
           documentChecklist: updated // Alias
         });
@@ -237,8 +237,8 @@ export class AdmissionConfigComponent implements OnInit {
     const current = this.config();
     if (!current) return;
     const updated = current.defaultChecklist.filter(d => d.code !== code);
-    this.config.set({ 
-      ...current, 
+    this.config.set({
+      ...current,
       defaultChecklist: updated,
       documentChecklist: updated // Alias
     });
@@ -250,8 +250,8 @@ export class AdmissionConfigComponent implements OnInit {
     const current = this.config();
     if (current && current.defaultAssessmentConfig) {
       const updated = { ...current.defaultAssessmentConfig, type };
-      this.config.set({ 
-        ...current, 
+      this.config.set({
+        ...current,
         defaultAssessmentConfig: updated,
         assessmentConfig: updated // Alias
       });
@@ -262,8 +262,8 @@ export class AdmissionConfigComponent implements OnInit {
     const current = this.config();
     if (current && current.defaultAssessmentConfig) {
       const updated = { ...current.defaultAssessmentConfig, minPassingGrade: grade };
-      this.config.set({ 
-        ...current, 
+      this.config.set({
+        ...current,
         defaultAssessmentConfig: updated,
         assessmentConfig: updated // Alias
       });
@@ -277,8 +277,8 @@ export class AdmissionConfigComponent implements OnInit {
       const subjects = { ...current.defaultAssessmentConfig.subjects };
       subjects[val] = 1;
       const updated = { ...current.defaultAssessmentConfig, subjects };
-      this.config.set({ 
-        ...current, 
+      this.config.set({
+        ...current,
         defaultAssessmentConfig: updated,
         assessmentConfig: updated // Alias
       });
@@ -291,8 +291,8 @@ export class AdmissionConfigComponent implements OnInit {
     if (current && current.defaultAssessmentConfig) {
       const subjects = { ...current.defaultAssessmentConfig.subjects, [subject]: coef };
       const updated = { ...current.defaultAssessmentConfig, subjects };
-      this.config.set({ 
-        ...current, 
+      this.config.set({
+        ...current,
         defaultAssessmentConfig: updated,
         assessmentConfig: updated // Alias
       });
@@ -305,8 +305,8 @@ export class AdmissionConfigComponent implements OnInit {
       const subjects = { ...current.defaultAssessmentConfig.subjects };
       delete subjects[subject];
       const updated = { ...current.defaultAssessmentConfig, subjects };
-      this.config.set({ 
-        ...current, 
+      this.config.set({
+        ...current,
         defaultAssessmentConfig: updated,
         assessmentConfig: updated // Alias
       });
@@ -316,7 +316,30 @@ export class AdmissionConfigComponent implements OnInit {
   // --- MAINTENANCE ---
 
   resetToSystemDefaults() {
-    this.enrollmentService.resetConfig().subscribe(() => this.loadInitialData());
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '480px',
+      data: {
+        title: 'Réinitialisation d\'usine',
+        message: 'Êtes-vous absolument sûr ? Cette action supprimera tous vos champs personnalisés, vos documents et votre politique d\'évaluation pour restaurer les standards Feewi. Cette opération est irréversible.',
+        confirmLabel: 'Réinitialiser tout',
+        cancelLabel: 'Annuler',
+        type: 'danger'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.isLoading.set(true);
+        this.enrollmentService.resetConfig().pipe(
+          finalize(() => this.isLoading.set(false))
+        ).subscribe({
+          next: () => {
+            this.notificationService.success('La configuration a été réinitialisée avec succès.');
+            this.loadInitialData();
+          }
+        });
+      }
+    });
   }
 
   togglePortal() {
@@ -367,4 +390,5 @@ export class AdmissionConfigComponent implements OnInit {
   readonly Type = Type;
   readonly Hash = Hash;
   readonly ToggleIcon = ToggleIcon;
+  protected readonly AlertTriangle = AlertTriangle;
 }

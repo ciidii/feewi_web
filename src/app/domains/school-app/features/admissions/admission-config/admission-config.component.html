@@ -154,7 +154,9 @@
           </div>
           <div class="docs-grid">
             <div *ngFor="let doc of activeChecklist()" class="doc-card">
-              <lucide-icon [name]="FileText" class="text-primary"></lucide-icon>
+              <div class="doc-icon-box">
+                <lucide-icon [name]="FileText" [size]="24"></lucide-icon>
+              </div>
               <div class="info">
                 <span class="name">{{ doc.name }}</span>
                 <span class="code">{{ doc.code }}</span>
@@ -162,12 +164,15 @@
               <div class="actions">
                 <label class="check-label">
                   <input type="checkbox" [checked]="doc.mandatory" (change)="updateDocumentMandatory(doc.code, $any($event.target).checked)">
-                  <span>Obligatoire</span>
+                  <span>Requis</span>
                 </label>
-                <button (click)="removeDocumentType(doc.code)" class="text-slate-300 hover:text-red-500 transition-colors"><lucide-icon [name]="Trash2" [size]="16"></lucide-icon></button>
+                <button (click)="removeDocumentType(doc.code)" class="btn-delete-doc">
+                  <lucide-icon [name]="Trash2" [size]="16"></lucide-icon>
+                </button>
               </div>
             </div>
           </div>
+
         </div>
       </ng-container>
 
@@ -238,48 +243,80 @@
         </div>
       </ng-container>
 
-      <!-- CONTENU : WORKFLOW -->
+      <!-- CONTENU : WORKFLOW (PREMIUM PILOTAGE) -->
       <ng-container *ngIf="activeTab() === 'WORKFLOW'">
-        <div class="workflow-editor max-w-3xl animate-in fade-in space-y-12">
+        <div class="workflow-editor max-w-4xl animate-in fade-in space-y-10">
           
-          <!-- Master Switch -->
-          <div class="status-card" [class.active]="cfg.portalActive">
-            <div class="text">
-              <span class="title">Portail Public : {{ cfg.portalActive ? 'OUVERT' : 'FERMÉ' }}</span>
-              <p>Si fermé, aucun nouveau dossier ne pourra être créé par les parents.</p>
-            </div>
-            <button (click)="togglePortal()" class="btn-toggle" [class.active]="cfg.portalActive">{{ cfg.portalActive ? 'Fermer' : 'Ouvrir' }}</button>
-          </div>
-
-          <!-- Gestion des Années (V5) -->
+          <!-- Bloc 1 : Master Switch -->
           <section class="config-section">
             <div class="section-header">
-              <h3>Disponibilité par Année</h3>
-              <p>Sélectionnez les années scolaires visibles sur le portail parent.</p>
+              <h3>Visibilité du Portail</h3>
+              <p>Interrupteur général contrôlant l'accès public pour toute l'école.</p>
             </div>
-            <div class="space-y-4">
-              <div *ngFor="let year of availableYears()" class="p-4 bg-white border border-slate-100 rounded-xl flex items-center justify-between shadow-sm">
-                <div class="flex items-center gap-4">
-                  <div class="p-2 bg-slate-100 rounded-lg"><lucide-icon [name]="Calendar" [size]="18"></lucide-icon></div>
-                  <div>
-                    <span class="font-bold text-slate-800">{{ year.label }}</span>
-                    <span class="ml-2 text-xs text-slate-400">Fin : {{ year.adminEndDate | date:'shortDate' }}</span>
-                  </div>
-                </div>
-                <label class="btn-toggle" [class.active]="isYearActive(year.id)" (click)="toggleYearVisibility(year.id)">
+            
+            <div class="master-switch-card" [class.active]="cfg.portalActive">
+              <div class="status-icon-box">
+                <lucide-icon [name]="cfg.portalActive ? Globe : Lock" [size]="32"></lucide-icon>
+              </div>
+              <div class="status-info">
+                <span class="status-badge-premium">{{ cfg.portalActive ? 'Portail en ligne' : 'Portail hors-ligne' }}</span>
+                <h4 class="status-title">{{ cfg.portalActive ? 'Les parents peuvent soumettre des dossiers' : 'L\'accès aux formulaires est suspendu' }}</h4>
+                <p class="status-desc">Ce réglage prévaut sur toutes les dates d'ouverture par année ou par niveau.</p>
+              </div>
+              <div class="action-toggle">
+                <label class="btn-toggle large" [class.active]="cfg.portalActive" (click)="togglePortal()">
                   <div class="toggle-track"><div class="toggle-thumb"></div></div>
                 </label>
               </div>
             </div>
           </section>
 
-          <div class="danger-zone">
-            <h4 class="text-red-500 font-bold text-xs uppercase tracking-widest mb-4">Actions Critiques</h4>
-            <div class="p-6 bg-red-50 rounded-2xl border border-red-100 flex items-center justify-between">
-              <p class="text-sm text-red-800">Restaurer la configuration d'usine ?</p>
-              <button (click)="resetToSystemDefaults()" class="btn-reset-danger">Réinitialiser</button>
+          <!-- Bloc 2 : Temporalité Multi-Années -->
+          <section class="config-section">
+            <div class="section-header">
+              <h3>Calendrier de Recrutement</h3>
+              <p>Activez les années scolaires pour lesquelles vous souhaitez recevoir des candidatures.</p>
             </div>
-          </div>
+            
+            <div class="years-grid-v5">
+              <div *ngFor="let year of availableYears()" class="year-config-card" [class.inactive]="!isYearActive(year.id)">
+                <div class="year-icon-box">
+                  <lucide-icon [name]="Calendar" [size]="20"></lucide-icon>
+                </div>
+                <div class="year-meta">
+                  <span class="year-label">{{ year.label }}</span>
+                  <span class="year-deadline">Clôture : {{ year.adminEndDate | date:'mediumDate' }}</span>
+                </div>
+                <div class="year-toggle">
+                  <label class="btn-toggle" [class.active]="isYearActive(year.id)" (click)="toggleYearVisibility(year.id)">
+                    <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Bloc 3 : Maintenance -->
+          <section class="config-section danger-zone-section">
+            <div class="section-header">
+              <h3 class="text-red-500">Maintenance & Secours</h3>
+              <p>Actions irréversibles de réinitialisation du moteur CMS.</p>
+            </div>
+            
+            <div class="danger-card">
+              <div class="danger-icon-box">
+                <lucide-icon [name]="AlertTriangle" [size]="24"></lucide-icon>
+              </div>
+              <div class="danger-info">
+                <h4>Restaurer la configuration d'usine</h4>
+                <p>Supprime toutes les personnalisations (champs, documents, examens) pour revenir aux standards Feewi.</p>
+              </div>
+              <button (click)="resetToSystemDefaults()" class="btn-reset-premium">
+                Réinitialiser
+              </button>
+            </div>
+          </section>
+
         </div>
       </ng-container>
 
