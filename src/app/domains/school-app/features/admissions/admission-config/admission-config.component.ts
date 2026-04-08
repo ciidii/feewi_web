@@ -16,7 +16,8 @@ import {
   FieldConfig, 
   LevelOverrideConfig, 
   AssessmentConfig,
-  PillarConfig
+  PillarConfig,
+  YearOverrideConfig
 } from '../../../../../core/models/enrollment.model';
 import { NotificationService } from '../../../../../shared/services/notification.service';
 import { AcademicService } from '../../../../../core/services/academic.service';
@@ -60,6 +61,7 @@ export class AdmissionConfigComponent implements OnInit {
   initialConfig = signal<EnrollmentConfig | null>(null);
   activeYear = signal<AcademicYear | null>(null);
   levels = signal<Level[]>([]);
+  availableYears = signal<AcademicYear[]>([]); // Toutes les années du système
 
   isLoading = signal(true);
   isSaving = signal(false);
@@ -69,6 +71,12 @@ export class AdmissionConfigComponent implements OnInit {
   selectedLevelId = signal<string | null>(null);
   activeTab = signal<ConfigTab>('PILLARS');
   activePillarKey = signal<string>('pillar_identity');
+
+  selectedLevelName = computed(() => {
+    const id = this.selectedLevelId();
+    if (!id) return '';
+    return this.levels().find(l => l.id === id)?.name || id;
+  });
 
   readonly systemPillars = [
     { key: 'pillar_identity', label: 'Identité', icon: UserCog },
@@ -94,6 +102,11 @@ export class AdmissionConfigComponent implements OnInit {
 
   activeChecklist = computed(() => this.config()?.documentChecklist || []);
 
+  assessmentSubjectsList = computed(() => {
+    const subjects = this.config()?.assessmentConfig?.subjects || {};
+    return Object.entries(subjects).map(([name, coef]) => ({ name, coef }));
+  });
+
   ngOnInit() {
     this.loadInitialData();
   }
@@ -102,15 +115,23 @@ export class AdmissionConfigComponent implements OnInit {
     this.isLoading.set(true);
     forkJoin({
       config: this.enrollmentService.getConfig(),
-      year: this.academicService.getCurrentYear(),
+      activeYear: this.academicService.getCurrentYear(),
+      allYears: this.academicService.getYears(),
       levels: this.academicService.getLevels()
     }).pipe(
       finalize(() => this.isLoading.set(false))
     ).subscribe({
-      next: ({ config, year, levels }) => {
+      next: ({ config, activeYear, allYears, levels }) => {
+        // Sécurité V5 : Initialisation des verrous
+        if (!config.yearOverrides) config.yearOverrides = {};
+        if (!config.assessmentConfig) {
+          config.assessmentConfig = { type: 'DOSSIER', subjectsEnabled: false, subjects: {}, minPassingGrade: 10 };
+        }
+
         this.config.set(config);
         this.initialConfig.set(JSON.parse(JSON.stringify(config)));
-        this.activeYear.set(year);
+        this.activeYear.set(activeYear);
+        this.availableYears.set(allYears);
         this.levels.set(levels);
       },
       error: (err) => console.error('[AdmissionConfig] Erreur initialisation:', err)
@@ -135,16 +156,35 @@ export class AdmissionConfigComponent implements OnInit {
       finalize(() => this.isSaving.set(false))
     ).subscribe({
       next: () => {
-        this.notificationService.success('Configuration publiée avec succès.');
+        this.notificationService.success('Configuration publiée.');
         this.initialConfig.set(JSON.parse(JSON.stringify(currentConfig)));
       },
-      error: () => this.notificationService.error('Erreur lors de la synchronisation.')
+      error: () => this.notificationService.error('Erreur de sauvegarde.')
     });
   }
 
   setScope(scope: ConfigScope, levelId: string | null = null) {
     this.currentScope.set(scope);
     this.selectedLevelId.set(levelId);
+  }
+
+  // --- GESTION TEMPORELLE (V5) ---
+
+  isYearActive(yearId: string): boolean {
+    const config = this.config();
+    if (!config) return false;
+    // Si pas de surcharge, l'année est considérée active par défaut
+    return config.yearOverrides[yearId]?.active ?? true;
+  }
+
+  toggleYearVisibility(yearId: string) {
+    const current = this.config();
+    if (current) {
+      const overrides = { ...current.yearOverrides };
+      const currentStatus = overrides[yearId]?.active ?? true;
+      overrides[yearId] = { ...overrides[yearId], active: !currentStatus };
+      this.config.set({ ...current, yearOverrides: overrides });
+    }
   }
 
   // --- GESTION DES CHAMPS ---
@@ -206,7 +246,7 @@ export class AdmissionConfigComponent implements OnInit {
     this.config.set({ ...current, documentChecklist: current.documentChecklist.filter(d => d.code !== code) });
   }
 
-  // --- GESTION DE L'ÉVALUATION (ASSESSMENT) ---
+  // --- GESTION DE L'ÉVALUATION ---
 
   updateAssessmentType(type: any) {
     const current = this.config();
@@ -215,23 +255,39 @@ export class AdmissionConfigComponent implements OnInit {
     }
   }
 
+  updateMinPassingGrade(grade: number) {
+    const current = this.config();
+    if (current) {
+      this.config.set({ ...current, assessmentConfig: { ...current.assessmentConfig, minPassingGrade: grade } });
+    }
+  }
+
   addSubject(input: HTMLInputElement) {
     const val = input.value.trim();
     const current = this.config();
     if (val && current) {
-      const subjects = [...current.assessmentConfig.subjects];
-      if (!subjects.includes(val)) {
-        subjects.push(val);
+      const subjects = { ...current.assessmentConfig.subjects };
+      if (!subjects[val]) {
+        subjects[val] = 1;
         this.config.set({ ...current, assessmentConfig: { ...current.assessmentConfig, subjects } });
         input.value = '';
       }
     }
   }
 
+  updateSubjectCoef(subject: string, coef: number) {
+    const current = this.config();
+    if (current) {
+      const subjects = { ...current.assessmentConfig.subjects, [subject]: coef };
+      this.config.set({ ...current, assessmentConfig: { ...current.assessmentConfig, subjects } });
+    }
+  }
+
   removeSubject(subject: string) {
     const current = this.config();
     if (current) {
-      const subjects = current.assessmentConfig.subjects.filter(s => s !== subject);
+      const subjects = { ...current.assessmentConfig.subjects };
+      delete subjects[subject];
       this.config.set({ ...current, assessmentConfig: { ...current.assessmentConfig, subjects } });
     }
   }
@@ -297,13 +353,13 @@ export class AdmissionConfigComponent implements OnInit {
   readonly Layout = Layout;
   readonly Type = Type;
   readonly Hash = Hash;
-  readonly ToggleIcon = ToggleIcon;
-  readonly HeartPulse = HeartPulse;
-  readonly Users = Users;
-  readonly School = School;
   readonly Lock = Lock;
   readonly ChevronRight = ChevronRight;
   readonly ClipboardList = ClipboardList;
+  readonly Calendar = Calendar;
+  readonly HeartPulse = HeartPulse;
+  readonly Users = Users;
+  readonly School = School;
   protected readonly FileText = FileText;
-  protected readonly Calendar = Calendar;
+  protected readonly LayoutGrid = LayoutGrid;
 }

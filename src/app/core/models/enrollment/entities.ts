@@ -8,6 +8,7 @@ export interface IdentityPillar {
   birthDate: string;
   birthPlace: string;
   nationality?: string;
+  /** Champs CMS spécifiques au pilier Identité */
   customFields?: Record<string, any>;
 }
 
@@ -17,19 +18,19 @@ export interface MedicalPillar {
   criticalAllergies?: string;
   emergencyContactName?: string;
   emergencyContactPhone?: string;
+  /** Champs CMS spécifiques au pilier Médical */
   customFields?: Record<string, any>;
 }
 
 /** --- PILIER 3 : FAMILLE (RESPONSABLES) --- */
 export interface FamilyPillar {
-  bundleId: string;
   primaryGuardian: Guardian;
   secondaryGuardian?: Guardian;
   homeAddress: string;
+  /** Champs CMS spécifiques au pilier Famille */
   customFields?: Record<string, any>;
 }
 
-/** Informations détaillées sur un responsable */
 export interface Guardian {
   firstName: string;
   lastName: string;
@@ -37,7 +38,7 @@ export interface Guardian {
   phone: string;
   profession?: string;
   relation: GuardianRelation;
-  isFinancialResponsible: boolean; // Nouveau flag V2
+  isFinancialResponsible: boolean;
 }
 
 /** --- PILIER 4 : SCOLARITÉ (VŒUX & PARCOURS) --- */
@@ -46,6 +47,7 @@ export interface SchoolingPillar {
   levelId: string;
   filiereId?: string | null;
   previousSchool?: string;
+  /** Champs CMS spécifiques au pilier Scolarité */
   customFields?: Record<string, any>;
 }
 
@@ -53,6 +55,7 @@ export interface SchoolingPillar {
 
 export interface Assessment {
   grades: Record<string, number>;
+  averageGrade?: number; // Calculé par le backend V5
   comments?: string;
   decision: string;
   recommendedLevelId?: string;
@@ -76,13 +79,11 @@ export interface Admission {
   type: AdmissionType;
   tenantId: string;
   
-  // Les 4 Piliers Core
   identity: IdentityPillar;
   medical: MedicalPillar;
   family: FamilyPillar;
   schooling: SchoolingPillar;
   
-  // Piliers libres (Extensions spécifiques à l'école)
   extraPillars?: Record<string, any>;
   
   documents: RequiredDocument[];
@@ -98,15 +99,12 @@ export interface Admission {
 export interface AdmissionBundle {
   id: string;
   tenantId: string;
-  accessCode: string; // Désormais au niveau du bundle
+  accessCode: string;
   family: FamilyPillar;
-  admissions: Admission[]; // Liste des enfants
+  admissions: Admission[];
   createdAt: string;
   updatedAt: string;
 }
 
-/** 
- * Fallback de compatibilité pour éviter de casser tout le code immédiatement 
- * @deprecated Utilisez 'Admission' ou 'AdmissionBundle'
- */
+/** @deprecated Fallback pour compatibilité */
 export type AdmissionApplication = Admission;

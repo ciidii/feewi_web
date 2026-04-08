@@ -1,128 +1,82 @@
-<div class="hub-container animate-fade" *ngIf="!isLoading(); else initialLoading">
+<div class="landing-page" *ngIf="summary(); let s">
   
-  <!-- Header Institutionnel (Branding) -->
-  <header class="school-brand-header">
-    <div class="school-logo" *ngIf="tenant()?.logoUrl; else defaultLogo">
-      <img [src]="tenant()?.logoUrl" [alt]="tenant()?.name">
-    </div>
-    <ng-template #defaultLogo>
-      <div class="school-logo-placeholder">
-        <lucide-icon [name]="GraduationCap" [size]="32"></lucide-icon>
+  <header class="hub-header">
+    <div class="header-main">
+      <div class="portal-badge">
+        <lucide-icon [name]="ShieldCheck" [size]="14"></lucide-icon>
+        <span>Portail d'Admission Officiel</span>
       </div>
-    </ng-template>
-    <div class="school-info">
-      <span class="portal-label">Portail d'Admission Officiel</span>
-      <h2 class="school-name">{{ tenant()?.name || 'Établissement Partenaire' }}</h2>
+      <h1 class="school-name">{{ s.tenantId | uppercase }}</h1>
+      <div class="status-indicator" [class.open]="s.portalActive" [class.closed]="!s.portalActive">
+        <lucide-icon [name]="s.portalActive ? CheckCircle : Clock" [size]="16"></lucide-icon>
+        <span>{{ s.portalActive ? 'Inscriptions Ouvertes' : 'Inscriptions Clôturées' }}</span>
+      </div>
     </div>
   </header>
 
-  <!-- Hero & Instructions Dynamiques (Section 2.1) -->
-  <section class="hub-hero" *ngIf="summary(); let s">
-    <div class="status-belt" [class]="status().toLowerCase()">
-      <lucide-icon [name]="status() === 'OPEN' ? CheckCircle : Clock" [size]="16"></lucide-icon>
-      <span>Les admissions sont actuellement <strong>{{ status() === 'OPEN' ? 'OUVERTES' : 'FERMÉES' }}</strong></span>
-      <span class="dates">
-        (Du {{ s.registrationStartDate | date:'dd/MM' }} au {{ s.registrationEndDate | date:'dd/MM/yyyy' }})
-      </span>
-    </div>
-
-    <h1>Bienvenue sur votre espace Admission</h1>
-    <p class="academic-label">Année Académique {{ s.academicYearLabel }}</p>
-
-    <!-- Message de bienvenue rédigé par l'école -->
+  <main class="hub-content animate-fade">
+    
+    <!-- Zone de Message -->
     <div class="school-note" *ngIf="s.welcomeMessage">
       <lucide-icon [name]="Info" [size]="20" class="text-primary"></lucide-icon>
       <p>{{ s.welcomeMessage }}</p>
     </div>
-  </section>
 
-  <!-- Grille d'Aiguillage -->
-  <div class="hub-grid">
-    
-    <!-- CARTE 1 : NOUVELLE INSCRIPTION -->
-    <div class="hub-card primary" [class.disabled]="status() !== 'OPEN'">
-      <div class="card-icon">
-        <lucide-icon [name]="Sparkles" [size]="32"></lucide-icon>
-      </div>
-      <div class="card-body">
-        <h3>Nouvelle Inscription</h3>
-        <p>Inscrivez votre enfant pour la première fois au sein de notre établissement.</p>
-        
-        @if (hasActiveSession()) {
-          <div class="resume-alert">
-            <p>Un dossier pour <strong>{{ activeSession()?.studentName }}</strong> est en cours.</p>
-            <div class="resume-actions">
-              <button class="btn-resume" routerLink="form-stepper">Reprendre la saisie</button>
-              <button class="btn-reset" (click)="resetSession()">Recommencer</button>
-            </div>
+    <!-- Choix de l'année (V5) -->
+    <section class="years-selection" *ngIf="s.portalActive">
+      <h2 class="section-title">Choisissez votre année de rentrée</h2>
+      <div class="years-grid">
+        <div *ngFor="let year of activeYears()" class="year-card highlight">
+          <div class="card-icon"><lucide-icon [name]="Calendar" [size]="24"></lucide-icon></div>
+          <div class="card-info">
+            <h3>Année {{ year.label }}</h3>
+            <p>Clôture des dossiers le {{ year.registrationEndDate | date:'longDate' }}</p>
           </div>
-        } @else {
-          <button class="btn-hub-main" routerLink="form-stepper" [disabled]="status() !== 'OPEN'">
-            Créer un dossier <lucide-icon [name]="ArrowRight" [size]="18"></lucide-icon>
+          <button class="btn-start" [routerLink]="['/enrollment/form']" [queryParams]="{ yearId: year.id }">
+            Commencer <lucide-icon [name]="ArrowRight" [size]="16"></lucide-icon>
           </button>
-        }
+        </div>
       </div>
+    </section>
+
+    <!-- Si le portail est fermé -->
+    <div class="closed-state" *ngIf="!s.portalActive">
+      <div class="closed-icon"><lucide-icon [name]="Clock" [size]="48"></lucide-icon></div>
+      <h2>Les inscriptions sont actuellement fermées</h2>
+      <p>L'établissement n'accepte plus de nouveaux dossiers pour le moment. Veuillez contacter le secrétariat pour plus d'informations.</p>
     </div>
 
-    <!-- CARTE 2 : RÉINSCRIPTION (Si activée) -->
-    <div class="hub-card" *ngIf="isServiceEnabled('RE_ENROLLMENT')">
-      <div class="card-icon text-amber-600 bg-amber-50">
-        <lucide-icon [name]="RefreshCw" [size]="28"></lucide-icon>
+    <div class="hub-grid">
+      <!-- Bloc Suivi -->
+      <div class="hub-card tracker-card">
+        <div class="card-icon"><lucide-icon [name]="Search" [size]="24"></lucide-icon></div>
+        <div class="card-body">
+          <h3>Suivre un dossier</h3>
+          <p>Consultez l'avancement d'une demande déjà soumise.</p>
+          <button class="btn-secondary" routerLink="/enrollment/tracker">Accéder au suivi</button>
+        </div>
       </div>
-      <div class="card-body">
-        <h3>Réinscription</h3>
-        <p>Espace réservé aux élèves déjà scolarisés chez nous l'année dernière.</p>
-        <button class="btn-hub-secondary" routerLink="soft-enrollment">
-          Renouveler <lucide-icon [name]="UserCheck" [size]="18"></lucide-icon>
-        </button>
-      </div>
-    </div>
 
-    <!-- CARTE 3 : SUIVI DE DOSSIER -->
-    <div class="hub-card">
-      <div class="card-icon text-slate-600 bg-slate-50">
-        <lucide-icon [name]="Search" [size]="28"></lucide-icon>
-      </div>
-      <div class="card-body">
-        <h3>Suivre mon dossier</h3>
-        <p>Consultez l'avancement ou complétez vos pièces jointes.</p>
-        
-        <div class="search-form">
-          <input type="text" placeholder="Référence ADM-..." [(ngModel)]="searchReference" class="hub-input">
-          <button class="btn-hub-icon" (click)="goToTracker()" [disabled]="!searchReference">
-            <lucide-icon [name]="ArrowRight" [size]="20"></lucide-icon>
-          </button>
+      <!-- Bloc Documents -->
+      <div class="hub-card docs-card">
+        <div class="card-icon"><lucide-icon [name]="FileText" [size]="24"></lucide-icon></div>
+        <div class="card-body">
+          <h3>Pièces à fournir</h3>
+          <p>Consultez la liste des documents obligatoires.</p>
+          <button class="btn-outline">Voir la checklist</button>
         </div>
       </div>
     </div>
 
-  </div>
+  </main>
 
-  <!-- Services Optionnels Disponibles (Section 2.1) -->
-  <section class="services-teaser" *ngIf="summary()?.enabledServices?.length">
-    <h4>Services disponibles au sein de l'école</h4>
-    <div class="services-badges">
-      <div class="s-badge" *ngIf="isServiceEnabled('CANTEEN')">
-        <lucide-icon [name]="ChefHat" [size]="16"></lucide-icon>
-        <span>Restauration scolaire</span>
-      </div>
-      <div class="s-badge" *ngIf="isServiceEnabled('TRANSPORT')">
-        <lucide-icon [name]="Bus" [size]="16"></lucide-icon>
-        <span>Transport & Ramassage</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- Footer -->
   <footer class="hub-footer">
-    <p>Sécurisé par <strong>Feewi Education</strong> • &copy; 2026</p>
+    <p>© 2026 Feewi Education • Tous droits réservés</p>
   </footer>
 
 </div>
 
-<ng-template #initialLoading>
-  <div class="initial-loader">
-    <lucide-icon [name]="RefreshCw" [size]="48" class="animate-spin text-primary"></lucide-icon>
-    <p>Chargement du portail...</p>
-  </div>
-</ng-template>
+<div class="initial-loader" *ngIf="isLoading()">
+  <lucide-icon [name]="RefreshCw" [size]="48" class="animate-spin text-primary"></lucide-icon>
+  <p>Chargement du portail...</p>
+</div>

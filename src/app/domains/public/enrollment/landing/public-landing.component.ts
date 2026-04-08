@@ -1,110 +1,64 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
-import { FormsModule } from '@angular/forms';
-import { 
-  LucideAngularModule, Calendar, Clock, ArrowRight, CheckCircle, 
-  Info, Mail, ShieldCheck, Sparkles, Search, RefreshCw, UserCheck, ChefHat, Bus, GraduationCap
+import { RouterModule } from '@angular/router';
+import {
+  LucideAngularModule,
+  CheckCircle,
+  Clock,
+  Sparkles,
+  Search,
+  ArrowRight,
+  Info,
+  Calendar,
+  FileText,
+  ShieldCheck,
+  Globe, RefreshCw
 } from 'lucide-angular';
+import { EnrollmentPublicService } from '../../../../core/services/enrollment-public.service';
 import { finalize } from 'rxjs';
-
-import { TenantContextService } from '../../../../core/services/tenant-context.service';
-import { AdmissionSessionService } from '../../../../core/services/admission-session.service';
-import { EnrollmentPublicService, PublicPortalSummary } from '../../../../core/services/enrollment-public.service';
-
-export type WindowStatus = 'TEASING' | 'OPEN' | 'CLOSED';
+import {PublicPortalSummary} from '../../../../core/models/enrollment';
 
 @Component({
   selector: 'app-public-landing',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule, FormsModule],
+  imports: [CommonModule, RouterModule, LucideAngularModule],
   templateUrl: './public-landing.component.html',
   styleUrls: ['./public-landing.component.scss']
 })
 export class PublicLandingComponent implements OnInit {
-  private tenantContext = inject(TenantContextService);
-  private sessionService = inject(AdmissionSessionService);
   private enrollmentService = inject(EnrollmentPublicService);
-  private router = inject(Router);
-  
-  tenant = this.tenantContext.activeTenant;
-  activeSession = this.sessionService.currentSession;
-  hasActiveSession = this.sessionService.hasActiveSession;
 
-  // --- ÉTATS ---
-  isLoading = signal(true);
   summary = signal<PublicPortalSummary | null>(null);
-  status = signal<WindowStatus>('CLOSED');
+  isLoading = signal(true);
 
-  // Recherche rapide (Tracker)
-  searchReference = '';
+  // V5 : Liste des années filtrées (uniquement celles marquées actives dans le CMS)
+  activeYears = computed(() => {
+    return this.summary()?.availableYears.filter(y => y.active) || [];
+  });
 
   ngOnInit() {
     this.loadSummary();
   }
 
-  private loadSummary() {
+  loadSummary() {
     this.isLoading.set(true);
     this.enrollmentService.getPortalSummary().pipe(
       finalize(() => this.isLoading.set(false))
-    ).subscribe({
-      next: (data) => {
-        this.summary.set(data);
-        this.computeStatus(data);
-      },
-      error: (err) => {
-        console.error('[Landing] Error loading summary:', err);
-        this.status.set('CLOSED');
-      }
+    ).subscribe(data => {
+      this.summary.set(data);
     });
   }
 
-  private computeStatus(data: PublicPortalSummary) {
-    if (!data.portalActive) {
-      this.status.set('CLOSED');
-      return;
-    }
-
-    // Le backend nous dit directement si on est dans les dates (Section 2.1)
-    if (data.withinDates) {
-      this.status.set('OPEN');
-    } else {
-      const now = new Date();
-      const start = new Date(data.registrationStartDate);
-      this.status.set(now < start ? 'TEASING' : 'CLOSED');
-    }
-  }
-
-  resetSession() {
-    if (confirm('Souhaitez-vous vraiment effacer votre dossier en cours pour en créer un nouveau ?')) {
-      this.sessionService.clearSession();
-      this.router.navigate(['/enrollment/form-stepper']);
-    }
-  }
-
-  goToTracker() {
-    if (this.searchReference.trim()) {
-      this.router.navigate(['/enrollment/tracker', this.searchReference.trim()]);
-    }
-  }
-
-  isServiceEnabled(code: string): boolean {
-    return this.summary()?.enabledServices?.includes(code) || false;
-  }
-
   // Icônes
-  readonly Calendar = Calendar;
-  readonly Clock = Clock;
-  readonly ArrowRight = ArrowRight;
   readonly CheckCircle = CheckCircle;
-  readonly Info = Info;
-  readonly Mail = Mail;
-  readonly ShieldCheck = ShieldCheck;
+  readonly Clock = Clock;
   readonly Sparkles = Sparkles;
   readonly Search = Search;
-  readonly RefreshCw = RefreshCw;
-  readonly UserCheck = UserCheck;
-  readonly ChefHat = ChefHat;
-  readonly Bus = Bus;
-  readonly GraduationCap = GraduationCap;
+  readonly ArrowRight = ArrowRight;
+  readonly Info = Info;
+  readonly Calendar = Calendar;
+  readonly FileText = FileText;
+  readonly ShieldCheck = ShieldCheck;
+  readonly Globe = Globe;
+  protected readonly RefreshCw = RefreshCw;
 }

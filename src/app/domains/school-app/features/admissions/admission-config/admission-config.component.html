@@ -50,17 +50,25 @@
 
   <div class="portal-admin-layout" *ngIf="config(); let cfg">
 
-    <!-- SIDEBAR : SÉLECTION DU CONTEXTE -->
+    <!-- SIDEBAR : SÉLECTION DU CONTEXTE (Qui ?) -->
     <aside class="scope-sidebar">
       <div class="nav-section-title">Portée de l'édition</div>
+      
       <button class="scope-item" [class.active]="currentScope() === 'GLOBAL'" (click)="setScope('GLOBAL')">
         <div class="icon-box"><lucide-icon [name]="Globe" [size]="18"></lucide-icon></div>
-        <span>Toute l'établissement</span>
+        <span>Réglages de l'école</span>
       </button>
+
       <div class="nav-divider"></div>
       <div class="nav-section-title">Surcharges par niveau</div>
+      
       <div class="levels-scroll">
-        <button *ngFor="let level of levels()" class="scope-item level" [class.active]="selectedLevelId() === level.id" (click)="setScope('LEVEL', level.id)">
+        <button 
+          *ngFor="let level of levels()"
+          class="scope-item level" 
+          [class.active]="selectedLevelId() === level.id"
+          (click)="setScope('LEVEL', level.id)"
+        >
           <lucide-icon [name]="GraduationCap" [size]="16"></lucide-icon>
           <span class="truncate">{{ level.name }}</span>
           <lucide-icon *ngIf="selectedLevelId() === level.id" [name]="ChevronRight" [size]="14" class="ml-auto"></lucide-icon>
@@ -74,8 +82,8 @@
       <div class="context-banner" [class.is-level]="currentScope() === 'LEVEL'">
         <lucide-icon [name]="currentScope() === 'GLOBAL' ? ShieldCheck : Sparkles" [size]="20"></lucide-icon>
         <div class="content">
-          <span class="scope-label">{{ currentScope() === 'GLOBAL' ? 'Configuration Standard' : 'Surcharge Spécifique' }}</span>
-          <h2 class="context-title">{{ currentScope() === 'GLOBAL' ? 'Réglages par défaut de l\'école' : 'Édition pour : ' + selectedLevelId() }}</h2>
+          <span class="scope-label">{{ currentScope() === 'GLOBAL' ? 'Politique Globale' : 'Personnalisation du niveau' }}</span>
+          <h2 class="context-title">{{ currentScope() === 'GLOBAL' ? 'Réglages par défaut de l\'établissement' : 'Configuration : ' + (selectedLevelName() || 'Niveau sélectionné') }}</h2>
         </div>
       </div>
 
@@ -96,7 +104,7 @@
                   <lucide-icon [name]="Lock" [size]="14" class="text-slate-400"></lucide-icon>
                   <h3>Champs Moteur (Libellés)</h3>
                 </div>
-                <p>Personnalisez le nom des champs obligatoires Feewi pour ce pilier.</p>
+                <p>Modifiez les noms affichés pour les champs système.</p>
               </div>
               <div class="fields-grid">
                 <div *ngFor="let field of pillar.systemFields" class="field-edit-card">
@@ -111,9 +119,9 @@
                 <div>
                   <div class="flex items-center gap-2">
                     <lucide-icon [name]="Plus" [size]="14" class="text-primary"></lucide-icon>
-                    <h3>Questions Libres</h3>
+                    <h3>Questions Personnalisées (CMS)</h3>
                   </div>
-                  <p>Ajoutez des questions spécifiques à votre établissement.</p>
+                  <p>Questions ajoutées par votre établissement.</p>
                 </div>
                 <button (click)="addCustomField()" class="btn-add-action">
                   <lucide-icon [name]="Plus" [size]="16"></lucide-icon> Ajouter
@@ -128,7 +136,7 @@
                   </div>
                   <button class="btn-del" (click)="removeCustomField(custom.name)"><lucide-icon [name]="Trash2" [size]="14"></lucide-icon></button>
                 </div>
-                <div *ngIf="pillar.customFields.length === 0" class="empty-state-dashed">Aucun champ personnalisé.</div>
+                <div *ngIf="pillar.customFields.length === 0" class="empty-state-dashed">Aucun champ personnalisé pour ce pilier.</div>
               </div>
             </section>
           </div>
@@ -139,9 +147,9 @@
       <ng-container *ngIf="activeTab() === 'DOCUMENTS'">
         <div class="documents-editor animate-in fade-in">
           <div class="flex justify-between items-center mb-8">
-            <h3 class="text-lg font-bold text-slate-800">Checklist des justificatifs</h3>
+            <h3 class="text-lg font-bold text-slate-800">Pièces Justificatives</h3>
             <button class="btn-add-action" (click)="addDocumentType()">
-              <lucide-icon [name]="Plus" [size]="16"></lucide-icon> Nouveau type
+              <lucide-icon [name]="Plus" [size]="16"></lucide-icon> Ajouter un document
             </button>
           </div>
           <div class="docs-grid">
@@ -154,57 +162,78 @@
               <div class="actions">
                 <label class="check-label">
                   <input type="checkbox" [checked]="doc.mandatory" (change)="updateDocumentMandatory(doc.code, $any($event.target).checked)">
-                  <span>Requis</span>
+                  <span>Obligatoire</span>
                 </label>
-                <button (click)="removeDocumentType(doc.code)" class="text-slate-300 hover:text-red-500 transition-colors">
-                  <lucide-icon [name]="Trash2" [size]="16"></lucide-icon>
-                </button>
+                <button (click)="removeDocumentType(doc.code)" class="text-slate-300 hover:text-red-500 transition-colors"><lucide-icon [name]="Trash2" [size]="16"></lucide-icon></button>
               </div>
             </div>
           </div>
         </div>
       </ng-container>
 
-      <!-- CONTENU : ASSESSMENT -->
+      <!-- CONTENU : ASSESSMENT (RÉACTIF V5) -->
       <ng-container *ngIf="activeTab() === 'ASSESSMENT'">
         <div class="assessment-editor animate-in fade-in max-w-4xl space-y-10">
           <section class="config-section">
             <div class="section-header">
-              <h3>Modalités d'Évaluation</h3>
-              <p>Définissez comment les candidats sont sélectionnés pour l'admission.</p>
+              <h3>Critères de sélection</h3>
+              <p>Comment l'école décide-t-elle de l'admission d'un candidat ?</p>
             </div>
-            <div class="grid grid-cols-2 gap-8 bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
-              <div class="form-group">
-                <label class="premium-label">Mode de sélection</label>
-                <select [ngModel]="cfg.assessmentConfig.type" (ngModelChange)="updateAssessmentType($event)" class="premium-select">
-                  <option value="DOSSIER">Étude de dossier uniquement</option>
-                  <option value="EXAM">Concours / Examen d'entrée</option>
-                  <option value="INTERVIEW">Entretien oral</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="premium-label">Moyenne d'admission (/20)</label>
-                <input type="number" [(ngModel)]="cfg.assessmentConfig.minPassingGrade" class="premium-input-field" min="0" max="20" step="0.5">
+            <div class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm space-y-8">
+              <div class="grid grid-cols-2 gap-8">
+                <div class="form-group">
+                  <label class="premium-label">Type d'Évaluation</label>
+                  <select [ngModel]="cfg.assessmentConfig.type" (ngModelChange)="updateAssessmentType($event)" class="premium-select">
+                    <option value="DOSSIER">Étude de dossier uniquement</option>
+                    <option value="EXAM">Examen / Concours d'entrée</option>
+                    <option value="INTERVIEW">Entretien de motivation</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="premium-label">Moyenne d'admission (/20)</label>
+                  <input type="number" [ngModel]="cfg.assessmentConfig.minPassingGrade" (ngModelChange)="updateMinPassingGrade($event)" class="premium-input-field" min="0" max="20" step="0.5">
+                </div>
               </div>
             </div>
           </section>
 
-          <section class="config-section" *ngIf="cfg.assessmentConfig.type === 'EXAM'">
+          <!-- Gestion des Matières avec Coefficients (V5) -->
+          <section class="config-section" *ngIf="cfg.assessmentConfig.type !== 'DOSSIER'">
             <div class="section-header">
-              <h3>Matières à évaluer</h3>
-              <p>Ajoutez les disciplines qui feront l'objet d'une notation.</p>
+              <h3>Matières & Pondérations</h3>
+              <p>Définissez les matières et leurs coefficients pour le calcul de la moyenne pondérée.</p>
             </div>
             <div class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm space-y-6">
               <div class="flex gap-2">
                 <input type="text" #subjectInput placeholder="Nom de la matière..." class="premium-input-field" (keyup.enter)="addSubject(subjectInput)">
                 <button (click)="addSubject(subjectInput)" class="btn-add-action">Ajouter</button>
               </div>
-              <div class="subjects-chips-flex flex flex-wrap gap-2">
-                <div *ngFor="let sub of cfg.assessmentConfig.subjects" class="subject-chip">
-                  <span>{{ sub }}</span>
-                  <button (click)="removeSubject(sub)"><lucide-icon [name]="X" [size]="12"></lucide-icon></button>
+
+              <div class="subjects-grid-v5 mt-4" *ngIf="assessmentSubjectsList().length > 0; else noSubjects">
+                <div class="grid-header">
+                  <span>Discipline</span>
+                  <span class="text-center">Coefficient</span>
+                  <span class="text-right">Action</span>
+                </div>
+                <div *ngFor="let sub of assessmentSubjectsList()" class="subject-row-v5">
+                  <span class="subject-name">{{ sub.name }}</span>
+                  <div class="coef-input-wrapper">
+                    <input type="number" [ngModel]="sub.coef" (ngModelChange)="updateSubjectCoef(sub.name, $event)" min="1" max="10" class="coef-input">
+                  </div>
+                  <div class="text-right">
+                    <button (click)="removeSubject(sub.name)" class="btn-remove-subject">
+                      <lucide-icon [name]="Trash2" [size]="14"></lucide-icon>
+                    </button>
+                  </div>
                 </div>
               </div>
+
+              <ng-template #noSubjects>
+                <div class="empty-subjects-note">
+                  <lucide-icon [name]="Info" [size]="14"></lucide-icon>
+                  <span>Notation globale active (aucune matière définie).</span>
+                </div>
+              </ng-template>
             </div>
           </section>
         </div>
@@ -213,17 +242,42 @@
       <!-- CONTENU : WORKFLOW -->
       <ng-container *ngIf="activeTab() === 'WORKFLOW'">
         <div class="workflow-editor max-w-3xl animate-in fade-in space-y-12">
+          
+          <!-- Master Switch -->
           <div class="status-card" [class.active]="cfg.portalActive">
             <div class="text">
-              <span class="title">Statut du Portail : {{ cfg.portalActive ? 'ACTIF' : 'FERMÉ' }}</span>
-              <p>Contrôle l'accès public au formulaire.</p>
+              <span class="title">Portail Public : {{ cfg.portalActive ? 'OUVERT' : 'FERMÉ' }}</span>
+              <p>Si fermé, aucun nouveau dossier ne pourra être créé par les parents.</p>
             </div>
-            <button (click)="togglePortal()" class="btn-toggle" [class.active]="cfg.portalActive">{{ cfg.portalActive ? 'Désactiver' : 'Activer' }}</button>
+            <button (click)="togglePortal()" class="btn-toggle" [class.active]="cfg.portalActive">{{ cfg.portalActive ? 'Fermer' : 'Ouvrir' }}</button>
           </div>
+
+          <!-- Gestion des Années (V5) -->
+          <section class="config-section">
+            <div class="section-header">
+              <h3>Disponibilité par Année</h3>
+              <p>Sélectionnez les années scolaires visibles sur le portail parent.</p>
+            </div>
+            <div class="space-y-4">
+              <div *ngFor="let year of availableYears()" class="p-4 bg-white border border-slate-100 rounded-xl flex items-center justify-between shadow-sm">
+                <div class="flex items-center gap-4">
+                  <div class="p-2 bg-slate-100 rounded-lg"><lucide-icon [name]="Calendar" [size]="18"></lucide-icon></div>
+                  <div>
+                    <span class="font-bold text-slate-800">{{ year.label }}</span>
+                    <span class="ml-2 text-xs text-slate-400">Fin : {{ year.adminEndDate | date:'shortDate' }}</span>
+                  </div>
+                </div>
+                <label class="btn-toggle" [class.active]="isYearActive(year.id)" (click)="toggleYearVisibility(year.id)">
+                  <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                </label>
+              </div>
+            </div>
+          </section>
+
           <div class="danger-zone">
-            <h4 class="text-red-500 font-bold text-xs uppercase tracking-widest mb-4">Maintenance</h4>
+            <h4 class="text-red-500 font-bold text-xs uppercase tracking-widest mb-4">Actions Critiques</h4>
             <div class="p-6 bg-red-50 rounded-2xl border border-red-100 flex items-center justify-between">
-              <p class="text-sm text-red-800">Restaurer la configuration Feewi d'usine ?</p>
+              <p class="text-sm text-red-800">Restaurer la configuration d'usine ?</p>
               <button (click)="resetToSystemDefaults()" class="btn-reset-danger">Réinitialiser</button>
             </div>
           </div>
@@ -235,6 +289,6 @@
 
   <div class="loading-overlay" *ngIf="isLoading()">
     <lucide-icon [name]="RefreshCw" [size]="48" class="animate-spin text-primary"></lucide-icon>
-    <p>Initialisation V4...</p>
+    <p>Chargement du moteur CMS...</p>
   </div>
 </div>

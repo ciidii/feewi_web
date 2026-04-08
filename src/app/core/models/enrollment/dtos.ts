@@ -7,14 +7,17 @@ import { PillarConfig, RequiredDocumentConfig } from './config';
 export interface PublicPortalSummary {
   tenantId: string;
   portalActive: boolean;
-  registrationMode: 'PARENT_ONLY' | 'ASSISTED' | 'OPEN';
-  academicYearLabel: string;
+  registrationMode: 'PARENT_ONLY' | 'SELF_ONLY' | 'OPEN';
   withinDates: boolean;
-  registrationStartDate: string;
-  registrationEndDate: string;
-  enabledServices: string[];
-  welcomeMessage?: string; // Rajouté pour le Landing
-  /** Statut temps-réel des niveaux */
+  welcomeMessage?: string;
+  /** Liste des années scolaires ouvertes au recrutement (V5) */
+  availableYears: Array<{
+    id: string;
+    label: string;
+    registrationEndDate: string;
+    active: boolean;
+  }>;
+  /** Statut temps-réel des niveaux (pour l'année en cours ou sélectionnée) */
   levelStatuses: Record<string, { active: boolean, full: boolean }>;
 }
 
