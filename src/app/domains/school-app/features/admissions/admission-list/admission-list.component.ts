@@ -10,7 +10,7 @@ import { DataListComponent } from '../../../../../shared/components/data-list/da
 import { RowAction, TabItem, TableRow } from '../../../../../shared/models/data-list.models';
 import { EnrollmentAdminService } from '../../../../../core/services/enrollment-admin.service';
 import { AcademicService } from '../../../../../core/services/academic.service';
-import { AdmissionApplication, AdmissionStatus } from '../../../../../core/models/enrollment.model';
+import { Admission, AdmissionStatus } from '../../../../../core/models/enrollment.model';
 import { Level, AcademicYear } from '../../../../../core/models/academic.model';
 import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 import { NotificationService } from '../../../../../shared/services/notification.service';
@@ -31,15 +31,7 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
   private dialog = inject(MatDialog);
   private notificationService = inject(NotificationService);
 
-  readonly Filter = Filter;
-  readonly Download = Download;
-  readonly Layers = Layers;
-  readonly RefreshCw = RefreshCw;
-  readonly Search = Search;
-  readonly ChevronDown = ChevronDown;
-  readonly UserPlus = UserPlus;
-  readonly UserCheck = UserCheck;
-  readonly X = X;
+
 
   // --- ÉTATS ---
   activeTab = signal('Tous');
@@ -62,7 +54,7 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
   totalElements = signal(0);
   totalPages = signal(1);
 
-  rawApplications = signal<AdmissionApplication[]>([]);
+  rawApplications = signal<Admission[]>([]);
 
   private searchSubject = new Subject<string>();
   private destroy$ = new Subject<void>();
@@ -204,9 +196,9 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
     this.loadAdmissions();
   }
 
-  private mapToTableRow(app: AdmissionApplication): TableRow {
-    const candidateName = `${app.candidate?.firstName || ''} ${app.candidate?.lastName || ''}`.trim() || 'Candidat inconnu';
-    const initials = (app.candidate?.firstName?.[0] || '') + (app.candidate?.lastName?.[0] || '');
+  private mapToTableRow(app: Admission): TableRow {
+    const candidateName = `${app.identity?.firstName || ''} ${app.identity?.lastName || ''}`.trim() || 'Candidat inconnu';
+    const initials = (app.identity?.firstName?.[0] || '') + (app.identity?.lastName?.[0] || '');
 
     return {
       id: app.id,
@@ -309,4 +301,13 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
   }
 
   protected readonly CheckCircle = CheckCircle;
+  readonly Filter = Filter;
+  readonly Download = Download;
+  readonly Layers = Layers;
+  readonly RefreshCw = RefreshCw;
+  readonly Search = Search;
+  readonly ChevronDown = ChevronDown;
+  readonly UserPlus = UserPlus;
+  readonly UserCheck = UserCheck;
+  readonly X = X;
 }

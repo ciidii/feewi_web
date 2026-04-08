@@ -5,14 +5,15 @@ import {NotificationService} from "../../shared/services/notification.service";
 import {TenantContextService} from "./tenant-context.service";
 import {catchError, Observable, throwError} from "rxjs";
 import {
-  AdmissionApplication,
+  Admission,
+  AdmissionPageResponse,
   AdmissionStatus,
-  AssessmentRequest,
+  EffectiveConfigResponse,
   EnrollmentConfig,
-  LevelOverrideConfig
+  LevelOverrideConfig,
+  FastEntryRequest,
+  AssessmentRequest
 } from '../models/enrollment.model';
-import { Page } from "../models/school.model";
-
 
 @Injectable({
   providedIn: 'root'
@@ -22,7 +23,7 @@ export class EnrollmentAdminService {
   private envService = inject(EnvironmentService);
   private notificationService = inject(NotificationService);
   private tenantContext = inject(TenantContextService);
-  private readonly baseUrl = this.envService.getServiceUrl('enrollment');
+  private readonly baseUrl = `${this.envService.getServiceUrl('enrollment')}/admin`;
 
   private getHeaders(): HttpHeaders {
     const tenantId = this.tenantContext.activeTenant()?.id || 'default';
@@ -41,7 +42,7 @@ export class EnrollmentAdminService {
   // --- GESTION DES DOSSIERS ---
 
   /**
-   * Liste & Recherche Avancée (Paginée) - API V1
+   * Liste & Recherche Avancée (Paginée) - Vision V3
    */
   getApplications(params: {
     q?: string,
@@ -51,7 +52,7 @@ export class EnrollmentAdminService {
     channel?: 'DIGITAL' | 'DIRECT',
     page?: number,
     size?: number
-  } = {}): Observable<Page<AdmissionApplication>> {
+  } = {}): Observable<AdmissionPageResponse> {
     let httpParams = new HttpParams();
     if (params.q) httpParams = httpParams.set('q', params.q);
     if (params.status) httpParams = httpParams.set('status', params.status);
@@ -61,7 +62,7 @@ export class EnrollmentAdminService {
     if (params.page !== undefined) httpParams = httpParams.set('page', params.page.toString());
     if (params.size !== undefined) httpParams = httpParams.set('size', params.size.toString());
 
-    return this.http.get<Page<AdmissionApplication>>(`${this.baseUrl}/admin/admissions`, {
+    return this.http.get<AdmissionPageResponse>(`${this.baseUrl}/admissions`, {
       params: httpParams,
       headers: this.getHeaders()
     }).pipe(
@@ -69,135 +70,136 @@ export class EnrollmentAdminService {
     );
   }
 
-  getApplicationById(id: string): Observable<AdmissionApplication> {
-    return this.http.get<AdmissionApplication>(`${this.baseUrl}/admin/admissions/${id}/details`, { headers: this.getHeaders() }).pipe(
+  /** Détail complet d'une admission (incluant tous les piliers) */
+  getApplicationById(id: string): Observable<Admission> {
+    return this.http.get<Admission>(`${this.baseUrl}/admissions/${id}/details`, {headers: this.getHeaders()}).pipe(
       catchError(this.handleError('Impossible de récupérer le dossier'))
     );
   }
 
   /**
-   * Saisie directe au guichet (Secretariat)
+   * Saisie directe au guichet (Secretariat V3)
    */
-  createDirectApplication(request: any): Observable<AdmissionApplication> {
-    return this.http.post<AdmissionApplication>(`${this.baseUrl}/admin/admissions/direct`, request, { headers: this.getHeaders() }).pipe(
+  createDirectApplication(request: FastEntryRequest): Observable<Admission> {
+    return this.http.post<Admission>(`${this.baseUrl}/admissions/direct`, request, {headers: this.getHeaders()}).pipe(
       catchError(this.handleError('Erreur lors de la création du dossier direct'))
     );
   }
 
-  // --- CONFIGURATION DU PORTAIL ---
+  // --- CONFIGURATION CMS DU PORTAIL ---
 
   /**
-   * Récupérer la configuration (Endpoint: /enrollment/api/v1/admin/config)
+   * Récupérer la structure complète du formulaire (Piliers & Champs)
    */
   getConfig(): Observable<EnrollmentConfig> {
-    return this.http.get<EnrollmentConfig>(`${this.baseUrl}/admin/config`, { headers: this.getHeaders() }).pipe(
+    return this.http.get<EnrollmentConfig>(`${this.baseUrl}/config`, {headers: this.getHeaders()}).pipe(
       catchError(this.handleError('Impossible de charger la configuration du portail'))
     );
   }
 
   /**
-   * Mettre à jour la configuration (Endpoint: /enrollment/api/v1/admin/config)
+   * Mettre à jour l'intégralité du CMS
    */
   updateConfig(config: EnrollmentConfig): Observable<EnrollmentConfig> {
-    return this.http.put<EnrollmentConfig>(`${this.baseUrl}/admin/config`, config, { headers: this.getHeaders() }).pipe(
+    return this.http.put<EnrollmentConfig>(`${this.baseUrl}/config`, config, {headers: this.getHeaders()}).pipe(
       catchError(this.handleError('Erreur lors de la mise à jour de la configuration'))
     );
   }
 
   /**
-   * Gérer l'état du portail (Master Switch)
-   * Endpoint: PATCH /admin/config/portal-status?active=true|false
+   * Réinitialiser la configuration aux standards système Feewi
    */
+  resetConfig(): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/config/reset`, {}, {headers: this.getHeaders()}).pipe(
+      catchError(this.handleError('Erreur lors de la réinitialisation de la configuration'))
+    );
+  }
+
+  /** Gérer le Master Switch du portail parent */
   updatePortalStatus(active: boolean): Observable<void> {
     const params = new HttpParams().set('active', active.toString());
-    return this.http.patch<void>(`${this.baseUrl}/admin/config/portal-status`, {}, { params, headers: this.getHeaders() }).pipe(
+    return this.http.patch<void>(`${this.baseUrl}/config/portal-status`, {}, {params, headers: this.getHeaders()}).pipe(
       catchError(this.handleError('Erreur lors du changement de statut du portail'))
     );
   }
 
   /**
-   * Personnaliser un niveau spécifique (Surcharge)
-   * Endpoint: PATCH /admin/config/level-overrides/{levelId}
+   * Appliquer des exceptions par niveau (Quotas, fermeture spécifique)
    */
   updateLevelOverride(levelId: string, override: LevelOverrideConfig): Observable<void> {
-    return this.http.patch<void>(`${this.baseUrl}/admin/config/level-overrides/${levelId}`, override, { headers: this.getHeaders() }).pipe(
+    return this.http.patch<void>(`${this.baseUrl}/config/level-overrides/${levelId}`, override, {headers: this.getHeaders()}).pipe(
       catchError(this.handleError('Erreur lors de la personnalisation du niveau'))
     );
   }
 
   /**
-   * Récupère la configuration effective pour un niveau (Fusion Global + Surcharges)
-   * On utilise le endpoint public car c'est lui qui gère la fusion.
+   * Récupère la fusion Global + Surcharges pour un niveau
    */
-  getEffectiveConfig(levelId: string): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/public/config/${levelId}`, { headers: this.getHeaders() }).pipe(
+  getEffectiveConfig(levelId: string): Observable<EffectiveConfigResponse> {
+    const url = `${this.envService.getServiceUrl('enrollment')}/public/config/${levelId}`;
+    return this.http.get<EffectiveConfigResponse>(url, {headers: this.getHeaders()}).pipe(
       catchError(this.handleError('Impossible de charger la configuration effective du niveau'))
     );
   }
 
-  // --- ACTIONS MÉTIER ---
+  // --- ACTIONS OPÉRATIONNELLES (WORKFLOW) ---
 
-  receivePhysicalDocument(applicationId: string, docCode: string): Observable<AdmissionApplication> {
-    return this.http.patch<AdmissionApplication>(
-      `${this.baseUrl}/admin/admissions/${applicationId}/documents/${docCode}/receive`,
+  receivePhysicalDocument(admissionId: string, docCode: string): Observable<Admission> {
+    return this.http.patch<Admission>(
+      `${this.baseUrl}/admissions/${admissionId}/documents/${docCode}/receive`,
       {},
-      { headers: this.getHeaders() }
+      {headers: this.getHeaders()}
     ).pipe(
-      catchError(this.handleError('Erreur lors de la validation du document'))
+      catchError(this.handleError('Erreur lors de la validation du document physique'))
     );
   }
 
-  /**
-   * Lier un fichier uploadé à un document du dossier
-   * Note: On utilise le point d'accès public car l'action de liaison est partagée
-   */
-  linkDocument(applicationId: string, docCode: string, fileId: string): Observable<AdmissionApplication> {
+  /** Lier un fichier numérisé à un dossier */
+  linkDocument(admissionId: string, docCode: string, fileId: string): Observable<Admission> {
     const headers = this.getHeaders().set('Content-Type', 'text/plain');
-    // On appelle /public/admissions/... au lieu de /admin/admissions/...
-    return this.http.post<AdmissionApplication>(
-      `${this.baseUrl}/public/admissions/${applicationId}/documents/${docCode}`,
-      fileId,
-      { headers }
-    ).pipe(
+    const url = `${this.envService.getServiceUrl('enrollment')}/public/admissions/${admissionId}/documents/${docCode}`;
+    return this.http.post<Admission>(url, fileId, {headers}).pipe(
       catchError(this.handleError('Erreur lors de la liaison du document numérisé'))
     );
   }
 
-  verifyApplication(applicationId: string): Observable<AdmissionApplication> {
-    return this.http.patch<AdmissionApplication>(`${this.baseUrl}/admin/admissions/${applicationId}/verify`, {}, { headers: this.getHeaders() }).pipe(
+  /** Valider la conformité administrative (Secrétariat) */
+  verifyApplication(admissionId: string): Observable<Admission> {
+    return this.http.patch<Admission>(`${this.baseUrl}/admissions/${admissionId}/verify`, {}, {headers: this.getHeaders()}).pipe(
       catchError(this.handleError('Erreur lors de la vérification administrative'))
     );
   }
 
-  submitAssessment(applicationId: string, assessment: AssessmentRequest): Observable<AdmissionApplication> {
-    return this.http.patch<AdmissionApplication>(
-      `${this.baseUrl}/admin/admissions/${applicationId}/assessment`,
+  /** Enregistrer les résultats de l'examen de niveau */
+  submitAssessment(admissionId: string, assessment: AssessmentRequest): Observable<Admission> {
+    return this.http.patch<Admission>(
+      `${this.baseUrl}/admissions/${admissionId}/assessment`,
       assessment,
-      { headers: this.getHeaders() }
+      {headers: this.getHeaders()}
     ).pipe(
       catchError(this.handleError('Erreur lors de l\'enregistrement de l\'évaluation'))
     );
   }
 
-  // --- API DIRECTION ---
+  // --- API DIRECTION (DÉCISIONS FINALES) ---
 
-  validateAdmission(applicationId: string): Observable<AdmissionApplication> {
-    return this.http.patch<AdmissionApplication>(`${this.baseUrl}/admin/direction/admissions/${applicationId}/validate`, {}, { headers: this.getHeaders() }).pipe(
+  validateAdmission(admissionId: string): Observable<Admission> {
+    return this.http.patch<Admission>(`${this.baseUrl}/direction/admissions/${admissionId}/validate`, {}, {headers: this.getHeaders()}).pipe(
       catchError(this.handleError('Erreur lors de la validation finale'))
     );
   }
 
-  overruleAdmission(applicationId: string): Observable<AdmissionApplication> {
-    return this.http.patch<AdmissionApplication>(`${this.baseUrl}/admin/direction/admissions/${applicationId}/overrule`, {}, { headers: this.getHeaders() }).pipe(
+  overruleAdmission(admissionId: string): Observable<Admission> {
+    return this.http.patch<Admission>(`${this.baseUrl}/direction/admissions/${admissionId}/overrule`, {}, {headers: this.getHeaders()}).pipe(
       catchError(this.handleError('Erreur lors de la validation avec dérogation'))
     );
   }
 
-  rejectAdmission(applicationId: string, reason: string): Observable<AdmissionApplication> {
-    return this.http.patch<AdmissionApplication>(
-      `${this.baseUrl}/admin/direction/admissions/${applicationId}/reject`,
+  rejectAdmission(admissionId: string, reason: string): Observable<Admission> {
+    return this.http.patch<Admission>(
+      `${this.baseUrl}/direction/admissions/${admissionId}/reject`,
       JSON.stringify(reason),
-      { headers: this.getHeaders().set('Content-Type', 'application/json') }
+      {headers: this.getHeaders().set('Content-Type', 'application/json')}
     ).pipe(
       catchError(this.handleError('Erreur lors du rejet du dossier'))
     );

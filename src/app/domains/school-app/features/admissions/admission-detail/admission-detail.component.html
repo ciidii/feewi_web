@@ -8,13 +8,12 @@
       </button>
       <div class="application-identity">
         <div class="ref-pill">#{{ app.reference }}</div>
-        <h1>{{ app.candidate?.firstName }} {{ app.candidate?.lastName }}</h1>
+        <h1>{{ app.identity?.firstName }} {{ app.identity?.lastName }}</h1>
         <span class="app-type">{{ app.type === 'RE_ENROLLMENT' ? 'Réinscription' : 'Nouvelle Inscription' }}</span>
       </div>
     </div>
 
     <div class="header-center">
-      <!-- Workflow intégré directement dans l'en-tête -->
       <app-admission-workflow [state]="app.status"></app-admission-workflow>
     </div>
 
@@ -61,15 +60,15 @@
 
       <div class="grid grid-cols-12 gap-6">
 
-        <!-- CARTE : IDENTITÉ -->
-        <section class="card col-span-12">
+        <!-- PILIER 1 : IDENTITÉ -->
+        <section class="card col-span-12" *ngIf="app.identity">
           <div class="card-header-modern">
             <div class="icon-box">
               <lucide-icon [name]="User" [size]="18"></lucide-icon>
             </div>
             <div class="title-meta">
-              <h2>État Civil & Parcours</h2>
-              <p>Données officielles du candidat pour l'année {{ activeYear()?.label }}</p>
+              <h2>Pilier : Identité de l'élève</h2>
+              <p>État civil et informations de base du candidat.</p>
             </div>
           </div>
 
@@ -77,82 +76,127 @@
             <div class="info-grid-modern">
               <div class="data-item">
                 <label>Prénom(s)</label>
-                <div class="value">{{ app.candidate?.firstName }}</div>
+                <div class="value">{{ app.identity.firstName }}</div>
               </div>
               <div class="data-item">
                 <label>Nom de famille</label>
-                <div class="value">{{ app.candidate?.lastName }}</div>
+                <div class="value">{{ app.identity.lastName }}</div>
               </div>
               <div class="data-item">
                 <label>Date de Naissance</label>
-                <div class="value">{{ app.candidate?.birthDate | date:'longDate' }}</div>
+                <div class="value">{{ app.identity.birthDate | date:'longDate' }}</div>
               </div>
               <div class="data-item">
                 <label>Genre</label>
-                <div class="value">{{ app.candidate?.gender === 'MALE' ? 'Masculin' : 'Féminin' }}</div>
+                <div class="value">{{ app.identity.gender === 'MALE' ? 'Masculin' : 'Féminin' }}</div>
               </div>
+              <div class="data-item">
+                <label>Lieu de Naissance</label>
+                <div class="value">{{ app.identity.birthPlace }}</div>
+              </div>
+              <div class="data-item">
+                <label>Nationalité</label>
+                <div class="value">{{ app.identity.nationality || 'Non renseignée' }}</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PILIER 2 : SANTÉ (NOUVEAU) -->
+        <section class="card col-span-12" *ngIf="app.medical">
+          <div class="card-header-modern">
+            <div class="icon-box text-rose-600 bg-rose-50">
+              <lucide-icon [name]="HeartPulse" [size]="18"></lucide-icon>
+            </div>
+            <div class="title-meta">
+              <h2>Pilier : Santé & Médical</h2>
+              <p>Informations vitales et contacts d'urgence.</p>
+            </div>
+          </div>
+          <div class="card-content">
+            <div class="info-grid-modern">
+              <div class="data-item">
+                <label>Groupe Sanguin</label>
+                <div class="value">{{ app.medical.bloodGroup || 'Non renseigné' }}</div>
+              </div>
+              <div class="data-item col-span-3">
+                <label>Allergies Critiques</label>
+                <div class="value text-rose-600 font-bold">{{ app.medical.criticalAllergies || 'Aucune signalée' }}</div>
+              </div>
+              <div class="data-item">
+                <label>Contact Urgence (Nom)</label>
+                <div class="value">{{ app.medical.emergencyContactName || 'Non renseigné' }}</div>
+              </div>
+              <div class="data-item">
+                <label>Contact Urgence (Tél)</label>
+                <div class="value font-mono">{{ app.medical.emergencyContactPhone || 'Non renseigné' }}</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PILIER 3 : FAMILLE -->
+        <section class="card col-span-12" *ngIf="app.family">
+          <div class="card-header-modern">
+            <div class="icon-box text-emerald-600 bg-emerald-50">
+              <lucide-icon [name]="Users" [size]="18"></lucide-icon>
+            </div>
+            <div class="title-meta">
+              <h2>Pilier : Famille & Responsables</h2>
+              <p>Structure familiale et contacts des tuteurs.</p>
+            </div>
+          </div>
+          <div class="card-content">
+            <div class="parent-profile" *ngIf="app.family.primaryGuardian">
+              <div class="profile-header">
+                <div class="avatar-circle">{{ app.family.primaryGuardian.firstName[0] }}{{ app.family.primaryGuardian.lastName[0] }}</div>
+                <div class="profile-info">
+                  <h3>{{ app.family.primaryGuardian.firstName }} {{ app.family.primaryGuardian.lastName }}</h3>
+                  <div class="flex gap-2">
+                    <span class="relation-tag">{{ app.family.primaryGuardian.relation }}</span>
+                    <span class="relation-tag financial" *ngIf="app.family.primaryGuardian.isFinancialResponsible">Responsable Financier</span>
+                  </div>
+                </div>
+              </div>
+              <div class="contact-strip">
+                <div class="contact-item"><lucide-icon [name]="Mail" [size]="14"></lucide-icon> {{ app.family.primaryGuardian.email }}</div>
+                <div class="contact-item"><lucide-icon [name]="Phone" [size]="14"></lucide-icon> {{ app.family.primaryGuardian.phone }}</div>
+                <div class="contact-item"><lucide-icon [name]="MapPin" [size]="14"></lucide-icon> {{ app.family.homeAddress }}</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PILIER 4 : SCOLARITÉ -->
+        <section class="card col-span-12" *ngIf="app.schooling">
+          <div class="card-header-modern">
+            <div class="icon-box text-amber-600 bg-amber-50">
+              <lucide-icon [name]="School" [size]="18"></lucide-icon>
+            </div>
+            <div class="title-meta">
+              <h2>Pilier : Vœux & Scolarité</h2>
+              <p>Orientation demandée et historique scolaire.</p>
+            </div>
+          </div>
+          <div class="card-content">
+            <div class="info-grid-modern">
               <div class="data-item highlight">
                 <label>Niveau demandé</label>
                 <div class="value-badge">{{ levelName() }}</div>
               </div>
-              @if (filiereName()) {
-                <div class="data-item highlight">
-                  <label>Série / Filière</label>
-                  <div class="value-badge secondary">{{ filiereName() }}</div>
-                </div>
-              }
-              <div class="data-item">
-                <label>Lieu de Naissance</label>
-                <div class="value">{{ app.candidate?.birthPlace }}</div>
+              <div class="data-item highlight" *ngIf="filiereName()">
+                <label>Série / Filière</label>
+                <div class="value-badge secondary">{{ filiereName() }}</div>
               </div>
-              <div class="data-item">
-                <label>Nationalité</label>
-                <div class="value">{{ app.candidate?.nationality || 'Non renseignée' }}</div>
+              <div class="data-item col-span-2">
+                <label>Dernier établissement fréquenté</label>
+                <div class="value">{{ app.schooling.previousSchool || 'Non renseigné' }}</div>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- CARTE : RESPONSABLE -->
-        <section class="card col-span-12">
-          <div class="card-header-modern">
-            <div class="icon-box">
-              <lucide-icon [name]="ShieldCheck" [size]="18"></lucide-icon>
-            </div>
-            <div class="title-meta">
-              <h2>Responsable Légal</h2>
-              <p>Coordonnées du tuteur principal du dossier</p>
-            </div>
-          </div>
-          <div class="card-content">
-            <div class="parent-profile" *ngIf="app.primaryGuardian">
-              <div class="profile-header">
-                <div class="avatar-circle">{{ app.primaryGuardian.firstName[0] }}{{ app.primaryGuardian.lastName[0] }}
-                </div>
-                <div class="profile-info">
-                  <h3>{{ app.primaryGuardian.firstName }} {{ app.primaryGuardian.lastName }}</h3>
-                  <span class="relation-tag">{{ app.primaryGuardian.relation }}</span>
-                </div>
-              </div>
-              <div class="contact-strip">
-                <div class="contact-item">
-                  <lucide-icon [name]="Mail" [size]="14"></lucide-icon>
-                  {{ app.primaryGuardian.email }}
-                </div>
-                <div class="contact-item">
-                  <lucide-icon [name]="Phone" [size]="14"></lucide-icon>
-                  {{ app.primaryGuardian.phone }}
-                </div>
-                <div class="contact-item">
-                  <lucide-icon [name]="MapPin" [size]="14"></lucide-icon>
-                  {{ app.primaryGuardian.address || 'Adresse non fournie' }}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- CARTE : ÉVALUATION (SI ÉTAPE ATTEINTE) -->
+        <!-- CARTE : ÉVALUATION -->
         <section class="card col-span-12 assessment-card"
                  *ngIf="['VERIFIED', 'TESTING', 'VALIDATED', 'REJECTED'].includes(app.status)">
           <div class="card-header-modern">
@@ -161,7 +205,7 @@
             </div>
             <div class="title-meta">
               <h2>Évaluation Pédagogique</h2>
-              <p>Saisie des notes et décision de la commission</p>
+              <p>Saisie des notes et décision de la commission.</p>
             </div>
             <div class="avg-score-badge" [class.success]="+averageScore() >= minPassingGrade()"
                  [class.danger]="+averageScore() < minPassingGrade() && +averageScore() > 0">
@@ -171,13 +215,12 @@
 
           <div class="card-content">
             <div class="evaluation-layout">
-              <!-- Tableau des notes -->
               <div class="grades-column">
                 <table class="modern-eval-table">
                   <thead>
                   <tr>
                     <th>Discipline</th>
-                    <th>Note obtenue</th>
+                    <th>Note</th>
                   </tr>
                   </thead>
                   <tbody>
@@ -185,55 +228,27 @@
                       <tr>
                         <td class="subject-name">{{ subject }}</td>
                         <td class="grade-input-cell">
-                          <input type="number"
-                                 [ngModel]="evaluationGrades()[subject]"
-                                 (ngModelChange)="updateGrade(subject, $event)"
-                                 min="0" max="20" class="grade-input"
-                                 [disabled]="app.status === 'VALIDATED' || app.status === 'REJECTED'">
+                          <input type="number" [ngModel]="evaluationGrades()[subject]" (ngModelChange)="updateGrade(subject, $event)" min="0" max="20" class="grade-input" [disabled]="app.status === 'VALIDATED' || app.status === 'REJECTED'">
                         </td>
-                      </tr>
-                    }
-                    @if (assessmentSubjects().length === 0) {
-                      <tr>
-                        <td colspan="2" class="empty-state">Aucune matière configurée.</td>
                       </tr>
                     }
                   </tbody>
                 </table>
               </div>
 
-              <!-- Observations & Décision -->
               <div class="decision-column">
                 <div class="form-group-modern">
                   <label>Observations du jury</label>
-                  <textarea [(ngModel)]="evaluationComment" rows="4" placeholder="Points forts, points faibles..."
-                            [disabled]="app.status === 'VALIDATED' || app.status === 'REJECTED'"></textarea>
+                  <textarea [(ngModel)]="evaluationComment" rows="4" placeholder="Points forts, points faibles..." [disabled]="app.status === 'VALIDATED' || app.status === 'REJECTED'"></textarea>
                 </div>
 
                 <div class="decision-selector-modern">
                   <label>Décision pédagogique</label>
                   <div class="choice-group">
-                    <button class="btn-choice red" [class.active]="pedagogicalDecision() === 'REJECTED'"
-                            (click)="pedagogicalDecision.set('REJECTED')" [disabled]="app.status === 'VALIDATED'">Refusé
-                    </button>
-                    <button class="btn-choice amber" [class.active]="pedagogicalDecision() === 'WAITLIST'"
-                            (click)="pedagogicalDecision.set('WAITLIST')" [disabled]="app.status === 'VALIDATED'">
-                      Attente
-                    </button>
-                    <button class="btn-choice green" [class.active]="pedagogicalDecision() === 'ADMITTED'"
-                            (click)="pedagogicalDecision.set('ADMITTED')" [disabled]="app.status === 'VALIDATED'">Admis
-                    </button>
+                    <button class="btn-choice red" [class.active]="pedagogicalDecision() === 'REJECTED'" (click)="pedagogicalDecision.set('REJECTED')" [disabled]="app.status === 'VALIDATED'">Refusé</button>
+                    <button class="btn-choice amber" [class.active]="pedagogicalDecision() === 'WAITLIST'" (click)="pedagogicalDecision.set('WAITLIST')" [disabled]="app.status === 'VALIDATED'">Attente</button>
+                    <button class="btn-choice green" [class.active]="pedagogicalDecision() === 'ADMITTED'" (click)="pedagogicalDecision.set('ADMITTED')" [disabled]="app.status === 'VALIDATED'">Admis</button>
                   </div>
-                </div>
-
-                <!-- NOUVEAU : Orientation Recommandée -->
-                <div class="form-group-modern mt-6" *ngIf="pedagogicalDecision() !== 'REJECTED'">
-                  <label>Orientation recommandée (si différente)</label>
-                  <select [ngModel]="recommendedLevelId()" (ngModelChange)="recommendedLevelId.set($event)" class="fw-select-modern">
-                    <option [ngValue]="null">Maintenir le niveau : {{ levelName() }}</option>
-                    <option *ngFor="let lvl of levels()" [value]="lvl.id">{{ lvl.name }}</option>
-                  </select>
-                  <p class="text-[10px] text-slate-400 mt-1 italic">L'admission finale se fera sur ce niveau si sélectionné.</p>
                 </div>
               </div>
             </div>
@@ -243,10 +258,8 @@
       </div>
     </div>
 
-    <!-- COLONNE DROITE : DOCUMENTS (FIXE) -->
+    <!-- COLONNE DROITE : DOCUMENTS -->
     <aside class="side-column">
-
-      <!-- RÉSUMÉ DE CONFORMITÉ -->
       <div class="conformity-card" [class.ready]="isReadyForFinalValidation()">
         <div class="card-header">
           <lucide-icon [name]="isReadyForFinalValidation() ? CheckCircle : Info" [size]="20"></lucide-icon>
@@ -264,15 +277,11 @@
         </div>
       </div>
 
-      <!-- LISTE DES DOCUMENTS -->
       <div class="docs-section-modern">
         <h3 class="section-title">Pièces Justificatives</h3>
         <div class="docs-stack">
           @for (doc of app.documents; track doc.code) {
-            <div class="doc-card-modern"
-                 [class.active]="selectedDoc()?.code === doc.code"
-                 [class.missing]="doc.status === 'MISSING'"
-                 (click)="previewDocument(doc)">
+            <div class="doc-card-modern" [class.active]="selectedDoc()?.code === doc.code" [class.missing]="doc.status === 'MISSING'" (click)="previewDocument(doc)">
               <div class="doc-type-icon">
                 <lucide-icon [name]="getFileIcon(doc.name)" [size]="18"></lucide-icon>
               </div>
@@ -286,16 +295,13 @@
                 } @else {
                   <div class="flex items-center gap-2">
                     @if (doc.status === 'MISSING') {
-                      <button class="btn-mini-receive" (click)="receiveDocument(doc.code); $event.stopPropagation()" title="Marquer comme reçu (papier)">Recu</button>
+                      <button class="btn-mini-receive" (click)="receiveDocument(doc.code); $event.stopPropagation()">Recu</button>
                     }
-
-                    <!-- Bouton Upload (Scanné) -->
                     <input type="file" #adminFileInput hidden (change)="onAdminFileSelected(doc.code, $event)">
                     <button class="btn-icon-sm" (click)="adminFileInput.click(); $event.stopPropagation()" title="Uploader le scan">
                       <lucide-icon [name]="Upload" [size]="14"></lucide-icon>
                     </button>
-
-                    <button *ngIf="doc.status !== 'MISSING'" class="btn-icon-sm primary" (click)="previewDocument(doc); $event.stopPropagation()" title="Voir">
+                    <button *ngIf="doc.status !== 'MISSING'" class="btn-icon-sm primary" (click)="previewDocument(doc); $event.stopPropagation()">
                       <lucide-icon [name]="Eye" [size]="14"></lucide-icon>
                     </button>
                   </div>
@@ -321,20 +327,7 @@
         </header>
         <div class="viewer-body">
           @if (selectedDocUrl()) {
-            <!-- Cas Image : On utilise une balise img pour un rendu parfait -->
-            @if (selectedDoc()?.name?.toLowerCase()?.includes('photo') || selectedDoc()?.code === 'PHO') {
-              <div class="image-viewer-container">
-                <img [src]="selectedDocUrl()" [alt]="selectedDoc()?.name" class="img-fluid">
-              </div>
-            } @else {
-              <!-- Cas PDF / Autre : On garde l'iframe -->
-              <iframe [src]="selectedDocUrl()"></iframe>
-            }
-          } @else {
-            <div class="loading-doc">
-              <lucide-icon [name]="RefreshCw" class="animate-spin" [size]="32"></lucide-icon>
-              <p>Chargement du document sécurisé...</p>
-            </div>
+            <iframe [src]="selectedDocUrl()"></iframe>
           }
         </div>
       </div>
@@ -343,10 +336,9 @@
   </main>
 </div>
 
-<!-- CHARGEMENT INITIAL -->
 <div class="initial-loader" *ngIf="isLoading()">
   <div class="loader-content">
     <lucide-icon [name]="RefreshCw" [size]="48" class="animate-spin text-primary"></lucide-icon>
-    <p>Ouverture du dossier numérique...</p>
+    <p>Ouverture du dossier numérique V3...</p>
   </div>
 </div>

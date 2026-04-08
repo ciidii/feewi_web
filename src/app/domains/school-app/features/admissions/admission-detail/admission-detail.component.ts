@@ -1,24 +1,48 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import {finalize, switchMap, forkJoin, of, map} from 'rxjs';
-import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
-import { AdmissionApplication, RequiredDocument, AssessmentRequest } from '../../../../../core/models/enrollment.model';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {finalize, forkJoin, map, of, switchMap} from 'rxjs';
+import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
+import {Admission, AssessmentRequest, RequiredDocument} from '../../../../../core/models/enrollment.model';
 import {
-  ArrowLeft, CheckCircle, ChevronLeft, ChevronRight, ClipboardCheck,
-  Download, Eye, FileImage, FileSpreadsheet, FileText, GraduationCap,
-  History as HistoryIcon, Info, LucideAngularModule, Mail, MapPin,
-  Phone, Plus, Printer, RefreshCw, User, XCircle, Save, ShieldCheck, Upload
+  ArrowLeft,
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+  ClipboardCheck,
+  Download,
+  Eye,
+  FileImage,
+  FileSpreadsheet,
+  FileText,
+  GraduationCap,
+  HeartPulse,
+  History as HistoryIcon,
+  Info,
+  LucideAngularModule,
+  Mail,
+  MapPin,
+  Phone,
+  Plus,
+  Printer,
+  RefreshCw,
+  Save,
+  School,
+  ShieldCheck,
+  Upload,
+  User,
+  Users,
+  XCircle
 } from 'lucide-angular';
-import { ActivatedRoute, RouterModule } from '@angular/router';
-import { EnrollmentAdminService } from '../../../../../core/services/enrollment-admin.service';
-import { DocumentEngineService } from '../../../../../core/services/document-engine.service';
-import { AcademicService } from '../../../../../core/services/academic.service';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { NotificationService } from '../../../../../shared/services/notification.service';
-import { Filiere, Level, AcademicYear } from '../../../../../core/models/academic.model';
-import { AdmissionWorkflowComponent } from '../components/admission-workflow/admission-workflow.component';
-import { FormsModule } from '@angular/forms';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import {ActivatedRoute, RouterModule} from '@angular/router';
+import {EnrollmentAdminService} from '../../../../../core/services/enrollment-admin.service';
+import {DocumentEngineService} from '../../../../../core/services/document-engine.service';
+import {AcademicService} from '../../../../../core/services/academic.service';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import {NotificationService} from '../../../../../shared/services/notification.service';
+import {AcademicYear, Filiere, Level} from '../../../../../core/models/academic.model';
+import {AdmissionWorkflowComponent} from '../components/admission-workflow/admission-workflow.component';
+import {FormsModule} from '@angular/forms';
+import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
 
 @Component({
   selector: 'app-admission-detail',
@@ -37,14 +61,14 @@ export class AdmissionDetailComponent implements OnInit {
   private sanitizer = inject(DomSanitizer);
 
   // --- ÉTATS ---
-  application = signal<AdmissionApplication | null>(null);
+  application = signal<Admission | null>(null);
   isLoading = signal(true);
   isActionLoading = signal(false);
-  uploadingDocCode = signal<string | null>(null); // AJOUTÉ : Pour le feedback d'upload admin
+  uploadingDocCode = signal<string | null>(null);
 
   levels = signal<Level[]>([]);
   filieres = signal<Filiere[]>([]);
-  activeYear = signal<AcademicYear | null>(null); // AJOUTÉ
+  activeYear = signal<AcademicYear | null>(null);
 
   showDocumentViewer = signal(false);
   selectedDoc = signal<RequiredDocument | null>(null);
@@ -54,17 +78,17 @@ export class AdmissionDetailComponent implements OnInit {
   assessmentSubjects = signal<string[]>([]);
   minPassingGrade = signal<number>(10);
 
-  // --- CALCULS RÉACTIFS ---
+  // --- CALCULS RÉACTIFS (Mapping Piliers V3) ---
   levelName = computed(() => {
     const app = this.application();
     if (!app) return '...';
-    return this.levels().find(l => l.id === app.wish?.levelId)?.name || 'Niveau inconnu';
+    return this.levels().find(l => l.id === app.schooling?.levelId)?.name || 'Niveau inconnu';
   });
 
   filiereName = computed(() => {
     const app = this.application();
-    if (!app || !app.wish?.filiereId) return null;
-    return this.filieres().find(f => f.id === app.wish.filiereId)?.name || 'Filière inconnue';
+    if (!app || !app.schooling?.filiereId) return null;
+    return this.filieres().find(f => f.id === app.schooling.filiereId)?.name || 'Filière inconnue';
   });
 
   isReadyForFinalValidation = computed(() => {
@@ -81,7 +105,7 @@ export class AdmissionDetailComponent implements OnInit {
 
   mandatoryDocsSummary = computed(() => {
     const app = this.application();
-    if (!app) return { total: 0, received: 0 };
+    if (!app) return {total: 0, received: 0};
     const mandatory = app.documents.filter(d => d.mandatory);
     return {
       total: mandatory.length,
@@ -103,7 +127,7 @@ export class AdmissionDetailComponent implements OnInit {
   });
 
   updateGrade(subject: string, value: number) {
-    this.evaluationGrades.update(prev => ({ ...prev, [subject]: value }));
+    this.evaluationGrades.update(prev => ({...prev, [subject]: value}));
   }
 
   ngOnInit() {
@@ -112,7 +136,7 @@ export class AdmissionDetailComponent implements OnInit {
   }
 
   /**
-   * Chargement réactif des données (RxJS pur)
+   * Chargement réactif des données (V3)
    */
   loadApplication(id: string) {
     this.isLoading.set(true);
@@ -123,27 +147,26 @@ export class AdmissionDetailComponent implements OnInit {
       filieres: this.academicService.getFilieres(),
       year: this.academicService.getCurrentYear()
     }).pipe(
-      switchMap(({ app, levels, filieres, year }) => {
-        console.log('[AdmissionDetail Debug] Objet APP brut reçu du serveur:', app);
+      switchMap(({app, levels, filieres, year}) => {
         this.application.set(app);
         this.levels.set(levels);
         this.filieres.set(filieres);
         this.activeYear.set(year);
 
-        // SECURITÉ : On lit l'ID dans l'objet 'wish' identifié dans le JSON
-        const targetLevelId = app.wish?.levelId;
+        const targetLevelId = app.schooling?.levelId;
 
         if (targetLevelId) {
           return this.enrollmentAdminService.getEffectiveConfig(targetLevelId);
         } else {
-          console.warn('[AdmissionDetail] Dossier sans niveau (wish.levelId absent), fallback config globale');
-          return this.enrollmentAdminService.getConfig();
+          return this.enrollmentAdminService.getConfig().pipe(
+            map(cfg => ({documentChecklist: cfg.documentChecklist, assessmentConfig: cfg.defaultAssessmentConfig}))
+          );
         }
       }),
       finalize(() => this.isLoading.set(false))
     ).subscribe({
-      next: (effectiveConfig) => {
-        const aConfig = effectiveConfig.assessmentConfig || effectiveConfig.defaultAssessmentConfig;
+      next: (effectiveConfig: any) => {
+        const aConfig = effectiveConfig.assessmentConfig;
         if (aConfig) {
           this.assessmentSubjects.set(aConfig.subjects || []);
           this.minPassingGrade.set(aConfig.minPassingGrade || 10);
@@ -181,16 +204,12 @@ export class AdmissionDetailComponent implements OnInit {
       finalize(() => this.isActionLoading.set(false))
     ).subscribe({
       next: () => {
-        this.loadApplication(app.id); // Refresh complet pour éviter l'écran blanc
+        this.loadApplication(app.id);
         this.notificationService.success('Document marqué comme reçu.');
       }
     });
   }
 
-  /**
-   * Action Secrétariat : Numériser un document reçu physiquement
-   * (Phase 3.3 du workflow hybride)
-   */
   onAdminFileSelected(docCode: string, event: any) {
     const file = event.target.files[0];
     const app = this.application();
@@ -231,7 +250,7 @@ export class AdmissionDetailComponent implements OnInit {
       finalize(() => this.isActionLoading.set(false))
     ).subscribe({
       next: () => {
-        this.loadApplication(app.id); // Refresh complet
+        this.loadApplication(app.id);
         this.notificationService.success('Dossier validé administrativement.');
       }
     });
@@ -253,7 +272,7 @@ export class AdmissionDetailComponent implements OnInit {
       finalize(() => this.isActionLoading.set(false))
     ).subscribe({
       next: () => {
-        this.loadApplication(app.id); // Refresh complet
+        this.loadApplication(app.id);
         this.notificationService.success('Évaluation enregistrée avec succès.');
       }
     });
@@ -285,7 +304,7 @@ export class AdmissionDetailComponent implements OnInit {
     ).subscribe({
       next: (updated) => {
         if (updated) {
-          this.loadApplication(app.id); // Refresh complet
+          this.loadApplication(app.id);
           this.notificationService.success('Admission validée avec succès !');
         }
       }
@@ -334,7 +353,6 @@ export class AdmissionDetailComponent implements OnInit {
     if (doc.fileUrl) {
       this.documentService.getViewUrl(doc.fileUrl).subscribe({
         next: (viewUrl) => {
-          // SECURISATION : On autorise cette URL pour l'iframe
           const safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(viewUrl);
           this.selectedDocUrl.set(safeUrl);
         },
@@ -369,7 +387,10 @@ export class AdmissionDetailComponent implements OnInit {
   readonly HistoryIcon = HistoryIcon;
   readonly RefreshCw = RefreshCw;
   readonly Save = Save;
-  readonly ShieldCheck = ShieldCheck; // AJOUTÉ
+  readonly ShieldCheck = ShieldCheck;
+  readonly HeartPulse = HeartPulse;
+  readonly School = School;
+  readonly Users = Users;
   protected readonly Info = Info;
   protected readonly Upload = Upload;
 }
