@@ -16,29 +16,25 @@
     </div>
   </header>
 
-  <!-- Stepper Nav (6 étapes) -->
+  <!-- Stepper Nav (5 étapes V3) -->
   <div class="stepper-nav">
     <div class="progress-bar">
       <div class="progress-fill" [style.width.%]="progress()"></div>
     </div>
     <div class="steps-indicators">
-      <div class="step-indicator" [class.active]="currentStep() === 'GUARDIAN'" [class.completed]="progress() > 16">
+      <div class="step-indicator" [class.active]="currentStep() === 'GUARDIAN'" [class.completed]="progress() > 20">
         <div class="step-circle"><lucide-icon [name]="Users" [size]="14"></lucide-icon></div>
-        <span class="step-label">Tuteur</span>
+        <span class="step-label">Famille</span>
       </div>
-      <div class="step-indicator" [class.active]="currentStep() === 'STUDENT'" [class.completed]="progress() > 33">
+      <div class="step-indicator" [class.active]="currentStep() === 'STUDENT'" [class.completed]="progress() > 40">
         <div class="step-circle"><lucide-icon [name]="User" [size]="14"></lucide-icon></div>
         <span class="step-label">Enfant</span>
       </div>
-      <div class="step-indicator" [class.active]="currentStep() === 'SPECIFIC'" [class.completed]="progress() > 50">
-        <div class="step-circle"><lucide-icon [name]="MessageSquare" [size]="14"></lucide-icon></div>
-        <span class="step-label">Questions</span>
+      <div class="step-indicator" [class.active]="currentStep() === 'MEDICAL'" [class.completed]="progress() > 60">
+        <div class="step-circle"><lucide-icon [name]="HeartPulse" [size]="14"></lucide-icon></div>
+        <span class="step-label">Santé</span>
       </div>
-      <div class="step-indicator" [class.active]="currentStep() === 'SERVICES'" [class.completed]="progress() > 66">
-        <div class="step-circle"><lucide-icon [name]="ChefHat" [size]="14"></lucide-icon></div>
-        <span class="step-label">Services</span>
-      </div>
-      <div class="step-indicator" [class.active]="currentStep() === 'DOCS'" [class.completed]="progress() > 83">
+      <div class="step-indicator" [class.active]="currentStep() === 'DOCS'" [class.completed]="progress() > 80">
         <div class="step-circle"><lucide-icon [name]="FileText" [size]="14"></lucide-icon></div>
         <span class="step-label">Pièces</span>
       </div>
@@ -49,31 +45,22 @@
     </div>
   </div>
 
-  <!-- INSTRUCTIONS CONTEXTUELLES (Section 2.2) -->
-  <div class="instructions-alert animate-fade" *ngIf="currentInstruction()">
-    <lucide-icon [name]="Info" [size]="20"></lucide-icon>
-    <div class="content">
-      <span class="title">Note de l'établissement</span>
-      <p>{{ currentInstruction() }}</p>
-    </div>
-  </div>
-
   <div class="stepper-content card">
     
-    <!-- Étape 1 : LE TUTEUR -->
+    <!-- Étape 1 : LE TUTEUR (PILIER FAMILLE) -->
     <div *ngIf="currentStep() === 'GUARDIAN'" class="form-section animate-fade">
       <div class="section-header-modern">
         <lucide-icon [name]="Users" class="text-primary"></lucide-icon>
         <div>
-          <h2>Qui êtes-vous ?</h2>
-          <p>Identifiez-vous pour sécuriser le dossier de votre enfant.</p>
+          <h2>Informations Familiales</h2>
+          <p>Identifiez le responsable légal pour sécuriser le dossier.</p>
         </div>
       </div>
       
       <div class="grid-form">
         <div class="form-group full">
           <label>Lien avec l'enfant</label>
-          <select [(ngModel)]="formData().primaryGuardian.relation" class="fw-input" [disabled]="currentApplicationId() !== null">
+          <select [(ngModel)]="formData().family.primaryGuardian.relation" class="fw-input">
             <option value="FATHER">Père</option>
             <option value="MOTHER">Mère</option>
             <option value="GUARDIAN">Tuteur / Tutrice</option>
@@ -81,35 +68,40 @@
         </div>
 
         <div class="form-group">
-          <label>Votre Nom</label>
-          <input type="text" [(ngModel)]="formData().primaryGuardian.lastName" class="fw-input" [disabled]="currentApplicationId() !== null">
+          <label>Nom du responsable</label>
+          <input type="text" [(ngModel)]="formData().family.primaryGuardian.lastName" class="fw-input">
         </div>
         <div class="form-group">
-          <label>Votre Prénom</label>
-          <input type="text" [(ngModel)]="formData().primaryGuardian.firstName" class="fw-input" [disabled]="currentApplicationId() !== null">
+          <label>Prénom du responsable</label>
+          <input type="text" [(ngModel)]="formData().family.primaryGuardian.firstName" class="fw-input">
         </div>
         <div class="form-group">
-          <label>Email</label>
-          <input type="email" [(ngModel)]="formData().primaryGuardian.email" class="fw-input" [disabled]="currentApplicationId() !== null">
+          <label>Email de contact</label>
+          <input type="email" [(ngModel)]="formData().family.primaryGuardian.email" class="fw-input">
         </div>
         <div class="form-group">
-          <label>Téléphone</label>
-          <input type="tel" [(ngModel)]="formData().primaryGuardian.phone" class="fw-input" [disabled]="currentApplicationId() !== null">
+          <label>Téléphone mobile</label>
+          <input type="tel" [(ngModel)]="formData().family.primaryGuardian.phone" class="fw-input">
+        </div>
+        <div class="form-group full">
+          <label>Adresse de résidence</label>
+          <input type="text" [(ngModel)]="formData().family.homeAddress" class="fw-input" placeholder="Quartier, Rue, Villa...">
         </div>
 
-        <div class="form-group full" *ngIf="!getCoreControl('profession').hidden">
-          <label>{{ getCoreControl('profession').label || 'Profession' }} <span *ngIf="getCoreControl('profession').mandatory">*</span></label>
-          <input type="text" [ngModel]="formData().primaryGuardian.profession" (ngModelChange)="updateGuardianData({ profession: $event })" class="fw-input">
-        </div>
-
-        <div class="form-group full" *ngIf="!getCoreControl('address').hidden">
-          <label>{{ getCoreControl('address').label || 'Adresse' }} <span *ngIf="getCoreControl('address').mandatory">*</span></label>
-          <input type="text" [ngModel]="formData().primaryGuardian.address" (ngModelChange)="updateGuardianData({ address: $event })" class="fw-input">
-        </div>
+        <!-- CHAMPS CMS DYNAMIQUES DU PILIER FAMILLE -->
+        @if (getPillarConfig('pillar_family'); as pConfig) {
+          @for (f of pConfig.customFields; track f.name) {
+            <div class="form-group" [class.full]="f.type === 'TEXT'">
+              <label>{{ f.label }} <span *ngIf="f.required" class="text-red-500">*</span></label>
+              <input [type]="f.type === 'NUMBER' ? 'number' : 'text'" 
+                     [(ngModel)]="formData().customFields['pillar_family'][f.name]" class="fw-input">
+            </div>
+          }
+        }
       </div>
     </div>
 
-    <!-- Étape 2 : L'ENFANT & NIVEAU -->
+    <!-- Étape 2 : L'ENFANT (PILIER IDENTITÉ + SCOLARITÉ) -->
     <div *ngIf="currentStep() === 'STUDENT'" class="form-section animate-fade">
       <div class="section-header-modern">
         <lucide-icon [name]="GraduationCap" class="text-primary"></lucide-icon>
@@ -121,36 +113,25 @@
       
       <div class="grid-form">
         <div class="form-group full">
-          <label>Niveau demandé</label>
-          <select [ngModel]="formData().student.requestedLevelId" 
-                  (ngModelChange)="updateStudentData({ requestedLevelId: $event })"
-                  class="fw-input highlight">
+          <label>Niveau scolaire demandé</label>
+          <select [(ngModel)]="formData().schooling.requestedLevelId" class="fw-input highlight">
             <option value="">Choisir un niveau...</option>
             <option *ngFor="let level of availableLevels()" [value]="level.id">{{ level.name }}</option>
           </select>
         </div>
 
-        <div class="form-group full" *ngIf="showFiliereSelector()">
-          <label>Série / Filière</label>
-          <select [(ngModel)]="formData().student.filiereId" class="fw-input highlight">
-            <option value="">Sélectionner une filière...</option>
-            <option *ngFor="let filiere of availableFilieres()" [value]="filiere.id">{{ filiere.name }}</option>
-          </select>
-        </div>
-
         <div class="form-group">
           <label>Prénoms</label>
-          <input type="text" [ngModel]="formData().student.firstName" (ngModelChange)="updateStudentData({ firstName: $event })" class="fw-input">
+          <input type="text" [(ngModel)]="formData().identity.firstName" class="fw-input">
         </div>
         <div class="form-group">
-          <label>Nom</label>
-          <input type="text" [ngModel]="formData().student.lastName" (ngModelChange)="updateStudentData({ lastName: $event })" class="fw-input">
+          <label>Nom de famille</label>
+          <input type="text" [(ngModel)]="formData().identity.lastName" class="fw-input">
         </div>
 
-        <div class="form-group" *ngIf="!getCoreControl('gender').hidden">
-          <label>{{ getCoreControl('gender').label || 'Sexe' }} <span *ngIf="getCoreControl('gender').mandatory">*</span></label>
-          <select [ngModel]="formData().student.gender" (ngModelChange)="updateStudentData({ gender: $event })" class="fw-input">
-            <option value="">Sélectionner...</option>
+        <div class="form-group">
+          <label>Sexe</label>
+          <select [(ngModel)]="formData().identity.gender" class="fw-input">
             <option value="MALE">Masculin</option>
             <option value="FEMALE">Féminin</option>
           </select>
@@ -158,143 +139,82 @@
 
         <div class="form-group">
           <label>Date de naissance</label>
-          <input type="date" [ngModel]="formData().student.birthDate" (ngModelChange)="updateStudentData({ birthDate: $event })" class="fw-input">
+          <input type="date" [(ngModel)]="formData().identity.birthDate" class="fw-input">
         </div>
 
-        <div class="form-group" *ngIf="!getCoreControl('birthPlace').hidden">
-          <label>{{ getCoreControl('birthPlace').label || 'Lieu de naissance' }} <span *ngIf="getCoreControl('birthPlace').mandatory">*</span></label>
-          <input type="text" [ngModel]="formData().student.birthPlace" (ngModelChange)="updateStudentData({ birthPlace: $event })" class="fw-input">
-        </div>
-
-        <div class="form-group" *ngIf="!getCoreControl('nationality').hidden">
-          <label>{{ getCoreControl('nationality').label || 'Nationalité' }} <span *ngIf="getCoreControl('nationality').mandatory">*</span></label>
-          <input type="text" [ngModel]="formData().student.nationality" (ngModelChange)="updateStudentData({ nationality: $event })" class="fw-input">
-        </div>
-
-        <div class="form-group full" *ngIf="!getCoreControl('previousSchool').hidden">
-          <label>{{ getCoreControl('previousSchool').label || 'Dernier établissement' }} <span *ngIf="getCoreControl('previousSchool').mandatory">*</span></label>
-          <input type="text" [ngModel]="formData().student.previousSchool" (ngModelChange)="updateStudentData({ previousSchool: $event })" class="fw-input">
-        </div>
-      </div>
-    </div>
-
-    <!-- Étape 3 : QUESTIONS SPÉCIFIQUES (CERCLE 3) -->
-    <div *ngIf="currentStep() === 'SPECIFIC'" class="form-section animate-fade">
-      <div class="section-header-modern">
-        <lucide-icon [name]="MessageSquare" class="text-primary"></lucide-icon>
-        <div>
-          <h2>Questions Spécifiques</h2>
-          <p>Informations complémentaires requises par l'école.</p>
-        </div>
-      </div>
-
-      <div class="grid-form">
-        @if (effectiveCustomFields().length) {
-          @for (field of effectiveCustomFields(); track field.name) {
-            <div class="form-group" [class.full]="field.type === 'text'">
-              <label>{{ field.label }} <span *ngIf="field.required" class="text-red-500">*</span></label>
-              
-              <input *ngIf="field.type === 'text' || field.type === 'number'" 
-                     [type]="field.type" [(ngModel)]="formData().specificResponses[field.name]" class="fw-input">
-              
-              <input *ngIf="field.type === 'date'" type="date" [(ngModel)]="formData().specificResponses[field.name]" class="fw-input">
-
-              <select *ngIf="field.type === 'select'" [(ngModel)]="formData().specificResponses[field.name]" class="fw-input">
-                <option value="">Sélectionner...</option>
-                <option *ngFor="let opt of field.options" [value]="opt">{{ opt }}</option>
-              </select>
-
-              <div *ngIf="field.type === 'boolean'" class="flex items-center gap-3 py-2">
-                <mat-checkbox color="primary" [(ngModel)]="formData().specificResponses[field.name]"></mat-checkbox>
-                <span class="text-sm font-medium">{{ field.placeholder || 'Cocher si concerné' }}</span>
-              </div>
+        <!-- CHAMPS CMS DYNAMIQUES DU PILIER IDENTITÉ -->
+        @if (getPillarConfig('pillar_identity'); as pConfig) {
+          @for (f of pConfig.customFields; track f.name) {
+            <div class="form-group">
+              <label>{{ f.label }} <span *ngIf="f.required" class="text-red-500">*</span></label>
+              <input type="text" [(ngModel)]="formData().customFields['pillar_identity'][f.name]" class="fw-input">
             </div>
           }
-        } @else {
-          <div class="col-span-2 py-12 text-center text-slate-400 italic">
-            Aucune question spécifique pour ce niveau.
-          </div>
         }
       </div>
     </div>
 
-    <!-- Étape 4 : SERVICES OPTIONNELS -->
-    <div *ngIf="currentStep() === 'SERVICES'" class="form-section animate-fade">
+    <!-- Étape 3 : SANTÉ (PILIER MÉDICAL) -->
+    <div *ngIf="currentStep() === 'MEDICAL'" class="form-section animate-fade">
       <div class="section-header-modern">
-        <lucide-icon [name]="ClipboardList" class="text-primary"></lucide-icon>
+        <lucide-icon [name]="HeartPulse" class="text-rose-600"></lucide-icon>
         <div>
-          <h2>Services Optionnels</h2>
-          <p>Choisissez les prestations complémentaires.</p>
+          <h2>Santé & Aptitudes</h2>
+          <p>Informations médicales nécessaires à la vie scolaire.</p>
         </div>
       </div>
 
-      <div class="services-selection-grid">
-        <div class="service-card" *ngIf="isServiceEnabled('CANTEEN')" 
-             [class.active]="formData().services.canteen" (click)="formData().services.canteen = !formData().services.canteen">
-          <div class="card-icon"><lucide-icon [name]="ChefHat"></lucide-icon></div>
-          <div class="card-info">
-            <h3>Restauration Scolaire</h3>
-            <p>Accès à la cantine de l'école.</p>
-          </div>
-          <mat-checkbox color="primary" [checked]="formData().services.canteen" (click)="$event.stopPropagation()"></mat-checkbox>
+      <div class="grid-form">
+        <div class="form-group">
+          <label>Groupe Sanguin</label>
+          <select [(ngModel)]="formData().medical.bloodGroup" class="fw-input">
+            <option value="">Inconnu</option>
+            <option value="O+">O+</option><option value="O-">O-</option>
+            <option value="A+">A+</option><option value="A-">A-</option>
+            <option value="B+">B+</option><option value="B-">B-</option>
+            <option value="AB+">AB+</option><option value="AB-">AB-</option>
+          </select>
         </div>
 
-        <div class="service-card" *ngIf="isServiceEnabled('TRANSPORT')" 
-             [class.active]="formData().services.transport" (click)="formData().services.transport = !formData().services.transport">
-          <div class="card-icon"><lucide-icon [name]="Bus"></lucide-icon></div>
-          <div class="card-info">
-            <h3>Transport & Ramassage</h3>
-            <p>Circuit de bus domicile-école.</p>
-          </div>
-          <mat-checkbox color="primary" [checked]="formData().services.transport" (click)="$event.stopPropagation()"></mat-checkbox>
+        <div class="form-group full">
+          <label>Allergies connues ou maladies chroniques</label>
+          <textarea [(ngModel)]="formData().medical.criticalAllergies" class="fw-input" rows="3" placeholder="Ex: Asthme, Allergie aux arachides..."></textarea>
         </div>
+
+        <!-- CHAMPS CMS DYNAMIQUES DU PILIER MÉDICAL -->
+        @if (getPillarConfig('pillar_medical'); as pConfig) {
+          @for (f of pConfig.customFields; track f.name) {
+            <div class="form-group">
+              <label>{{ f.label }} <span *ngIf="f.required" class="text-red-500">*</span></label>
+              <input type="text" [(ngModel)]="formData().customFields['pillar_medical'][f.name]" class="fw-input">
+            </div>
+          }
+        }
       </div>
     </div>
 
-    <!-- Étape 5 : DOCUMENTS -->
+    <!-- Étape 4 : DOCUMENTS -->
     <div *ngIf="currentStep() === 'DOCS'" class="form-section animate-fade">
       <div class="section-header-modern">
         <lucide-icon [name]="FileText" class="text-primary"></lucide-icon>
         <div>
           <h2>Pièces Justificatives</h2>
-          <p>Documents requis selon le niveau sélectionné.</p>
+          <p>Veuillez charger les documents requis au format PDF ou Image.</p>
         </div>
       </div>
       
       <div class="upload-grid">
-        @for (doc of effectiveChecklist(); track doc.code) {
-          <div class="upload-item" 
-               [class.uploaded]="application()?.documents?.[$index]?.status === 'UPLOADED'"
-               [class.uploading]="uploadingDocCode() === doc.code">
-            
+        @for (doc of effectiveConfig()?.documentChecklist; track doc.code) {
+          <div class="upload-item" [class.uploaded]="application()?.documents?.[$index]?.status === 'UPLOADED'">
             <div class="upload-info">
               <span class="upload-label">{{ doc.name }}</span>
-              <div class="flex items-center gap-2">
-                <span *ngIf="doc.mandatory" class="text-[10px] font-bold text-red-500 uppercase">(Obligatoire)</span>
-                
-                <!-- Status Badge Réactif -->
-                @if (application()?.documents?.[$index]?.status === 'UPLOADED') {
-                  <span class="status-tag success">
-                    <lucide-icon [name]="CheckCircle" [size]="10"></lucide-icon> Reçu
-                  </span>
-                } @else if (uploadingDocCode() === doc.code) {
-                  <span class="status-tag loading">
-                    <lucide-icon [name]="RefreshCw" [size]="10" class="animate-spin"></lucide-icon> Envoi...
-                  </span>
-                }
-              </div>
+              <span *ngIf="doc.mandatory" class="text-[10px] font-bold text-red-500 uppercase">(Obligatoire)</span>
             </div>
-
             <div class="upload-actions">
               <input type="file" #fileInput hidden (change)="onFileSelected(doc.code, $event)">
-              
-              <button class="btn-upload" 
-                      (click)="fileInput.click()" 
-                      [disabled]="uploadingDocCode() !== null">
-                
+              <button class="btn-upload" (click)="fileInput.click()" [disabled]="uploadingDocCode() !== null">
                 <lucide-icon *ngIf="uploadingDocCode() !== doc.code" [name]="Upload" [size]="18"></lucide-icon>
                 <lucide-icon *ngIf="uploadingDocCode() === doc.code" [name]="RefreshCw" [size]="18" class="animate-spin"></lucide-icon>
-                
                 <span>{{ application()?.documents?.[$index]?.status === 'UPLOADED' ? 'Remplacer' : 'Choisir' }}</span>
               </button>
             </div>
@@ -303,33 +223,28 @@
       </div>
     </div>
 
-    <!-- Étape 6 : RÉCAPITULATIF -->
+    <!-- Étape 5 : RÉCAPITULATIF -->
     <div *ngIf="currentStep() === 'REVIEW'" class="form-section animate-fade">
       <div class="section-header-modern">
         <lucide-icon [name]="CheckCircle" class="text-primary"></lucide-icon>
         <div>
-          <h2>Confirmation</h2>
-          <p>Relisez votre dossier avant l'envoi définitif.</p>
+          <h2>Confirmation Finale</h2>
+          <p>Relisez les informations de <strong>{{ formData().identity.firstName }}</strong> avant l'envoi.</p>
         </div>
       </div>
       
       <div class="review-grid">
         <div class="review-card">
-          <div class="review-card-header">Candidat</div>
-          <div class="review-row"><span class="label">Nom complet</span><span class="value">{{ formData().student.firstName }} {{ formData().student.lastName }}</span></div>
-          <div class="review-row"><span class="label">Niveau</span><span class="value">{{ selectedLevelName() }}</span></div>
+          <div class="review-card-header">Vérification de l'Identité</div>
+          <div class="review-row"><span class="label">Candidat</span><span class="value">{{ formData().identity.firstName }} {{ formData().identity.lastName }}</span></div>
+          <div class="review-row"><span class="label">Niveau</span><span class="value">{{ formData().schooling.requestedLevelId }}</span></div>
         </div>
       </div>
 
-      <div class="legal-notice-box animate-in" *ngIf="summary()?.legalText">
-        <div class="notice-header">
-          <lucide-icon [name]="ShieldCheck" [size]="20" class="text-emerald-600"></lucide-icon>
-          <span>Engagement & Consentement</span>
-        </div>
-        <p class="notice-content">{{ summary()?.legalText }}</p>
-        <label class="consent-checkbox mt-4">
-          <input type="checkbox" [checked]="consentChecked()" (change)="consentChecked.set(!consentChecked())">
-          <span>Je certifie l'exactitude de ces informations.</span>
+      <div class="legal-notice-box animate-in">
+        <label class="consent-checkbox">
+          <input type="checkbox" [(ngModel)]="consentChecked">
+          <span>Je certifie sur l'honneur l'exactitude des informations fournies.</span>
         </label>
       </div>
     </div>
@@ -344,9 +259,9 @@
     <div class="spacer"></div>
     <button class="btn-primary" 
             (click)="currentStep() === 'REVIEW' ? submitFinal() : nextStep()" 
-            [disabled]="isSubmitting() || (currentStep() === 'REVIEW' && !consentChecked())">
+            [disabled]="isSubmitting() || (currentStep() === 'REVIEW' && !consentChecked)">
       <span *ngIf="currentStep() !== 'REVIEW'">Suivant <lucide-icon [name]="ArrowRight" [size]="18"></lucide-icon></span>
-      <span *ngIf="currentStep() === 'REVIEW'">Soumettre ma demande <lucide-icon [name]="CheckCircle" [size]="20"></lucide-icon></span>
+      <span *ngIf="currentStep() === 'REVIEW'">Soumettre le dossier <lucide-icon [name]="CheckCircle" [size]="20"></lucide-icon></span>
     </button>
   </footer>
 
@@ -355,15 +270,6 @@
 <ng-template #initialLoading>
   <div class="initial-loader" *ngIf="isLoading()">
     <lucide-icon [name]="RefreshCw" [size]="48" class="animate-spin text-primary"></lucide-icon>
-    <p>Initialisation...</p>
-  </div>
-
-  <div class="portal-closed-view" *ngIf="!isLoading() && isPortalClosed()">
-    <div class="closed-card card">
-      <lucide-icon [name]="AlertTriangle" [size]="48" class="text-amber-500 mx-auto mb-4"></lucide-icon>
-      <h2>Portail Fermé</h2>
-      <p>Les admissions sont closes pour l'année {{ summary()?.academicYearLabel }}.</p>
-      <button class="btn-primary mt-8" routerLink="/">Retour</button>
-    </div>
+    <p>Initialisation du portail V3...</p>
   </div>
 </ng-template>

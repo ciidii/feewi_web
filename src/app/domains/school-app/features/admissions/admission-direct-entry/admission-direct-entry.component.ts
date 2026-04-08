@@ -2,15 +2,16 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { 
-  LucideAngularModule, UserPlus, Save, X, RefreshCw, 
-  User, ShieldCheck, GraduationCap, MapPin, Phone, Mail, BookOpen
+import {
+  LucideAngularModule, UserPlus, Save, X, RefreshCw,
+  User, ShieldCheck, GraduationCap, MapPin, Phone, Mail, BookOpen, HeartPulse, Users, School
 } from 'lucide-angular';
 import { EnrollmentAdminService } from '../../../../../core/services/enrollment-admin.service';
 import { AcademicService } from '../../../../../core/services/academic.service';
 import { TenantContextService } from '../../../../../core/services/tenant-context.service';
 import { NotificationService } from '../../../../../shared/services/notification.service';
 import { Level, Filiere, AcademicYear } from '../../../../../core/models/academic.model';
+import { FastEntryRequest } from '../../../../../core/models/enrollment.model';
 import { finalize, forkJoin } from 'rxjs';
 
 @Component({
@@ -48,38 +49,43 @@ export class AdmissionDirectEntryComponent implements OnInit {
 
   private initForm() {
     this.entryForm = this.fb.group({
-      // Vœu Scolaire
+      // Pilier Scolarité (Vœu)
       academicYearId: ['', Validators.required],
       levelId: ['', Validators.required],
       filiereId: [null],
+      previousSchool: [''],
 
-      // Responsable Légal
-      primaryGuardian: this.fb.group({
-        firstName: ['', [Validators.required, Validators.minLength(2)]],
-        lastName: ['', [Validators.required, Validators.minLength(2)]],
-        email: ['', [Validators.email]],
-        phone: ['', Validators.required],
-        relation: ['FATHER', Validators.required],
-        profession: [''],
-        address: ['', Validators.required]
+      // Pilier Famille
+      family: this.fb.group({
+        primaryGuardian: this.fb.group({
+          firstName: ['', [Validators.required, Validators.minLength(2)]],
+          lastName: ['', [Validators.required, Validators.minLength(2)]],
+          email: ['', [Validators.email]],
+          phone: ['', Validators.required],
+          relation: ['FATHER', Validators.required],
+          isFinancialResponsible: [true]
+        }),
+        homeAddress: ['', Validators.required]
       }),
 
-      // Identité du Candidat
-      candidate: this.fb.group({
+      // Pilier Identité (Enfant)
+      identity: this.fb.group({
         firstName: ['', [Validators.required, Validators.minLength(2)]],
         lastName: ['', [Validators.required, Validators.minLength(2)]],
         gender: ['', Validators.required],
         birthDate: ['', Validators.required],
         birthPlace: ['', Validators.required],
-        nationality: ['Sénégalaise', Validators.required],
-        previousSchool: ['']
+        nationality: ['Sénégalaise', Validators.required]
+      }),
+
+      // Pilier Médical (Optionnel au guichet)
+      medical: this.fb.group({
+        bloodGroup: [''],
+        criticalAllergies: ['']
       })
     });
   }
 
-  /**
-   * Chargement des référentiels nécessaires au formulaire
-   */
   loadData() {
     this.isLoading.set(true);
     forkJoin({
@@ -93,58 +99,47 @@ export class AdmissionDirectEntryComponent implements OnInit {
         this.activeYear.set(year);
         this.levels.set(levels);
         this.filieres.set(filieres);
-        
-        if (year) {
-          this.entryForm.patchValue({ academicYearId: year.id });
-        }
-      },
-      error: () => this.notificationService.error('Erreur lors du chargement des référentiels.')
+        if (year) this.entryForm.patchValue({ academicYearId: year.id });
+      }
     });
   }
 
   onSave() {
     if (this.entryForm.invalid) {
       this.entryForm.markAllAsTouched();
-      this.notificationService.warning('Veuillez remplir tous les champs obligatoires.');
+      this.notificationService.warning('Veuillez remplir les champs obligatoires.');
       return;
     }
 
     this.isSaving.set(true);
-    
-    // CONSTRUCTION DU PAYLOAD (Alignement strict DTO Java)
-    const rawValue = this.entryForm.value;
-    const currentTenantId = this.tenantContext.activeTenant()?.id || 'default';
+    const val = this.entryForm.value;
+    const tenantId = this.tenantContext.activeTenant()?.id || 'default';
 
-    const payload = {
-      tenantId: currentTenantId,
-      type: 'NEW', // Doit matcher l'enum ApplicationType.NEW du Java
-      academicYearId: rawValue.academicYearId,
-      levelId: rawValue.levelId,
-      filiereId: rawValue.filiereId || null, // Forcer null si vide
-      candidate: rawValue.candidate,
-      primaryGuardian: {
-        ...rawValue.primaryGuardian,
-        email: rawValue.primaryGuardian.email || null // Nettoyage chaîne vide
+    // CONSTRUCTION DU PAYLOAD V3 PAR PILIERS
+    const payload: FastEntryRequest = {
+      tenantId,
+      academicYearId: val.academicYearId,
+      family: val.family,
+      identity: val.identity,
+      medical: val.medical,
+      schooling: {
+        academicYearId: val.academicYearId,
+        levelId: val.levelId,
+        filiereId: val.filiereId,
+        previousSchool: val.previousSchool
       }
     };
-
-    console.log('[DirectEntry] Payload envoyé au Backend Java:', payload);
 
     this.enrollmentService.createDirectApplication(payload).pipe(
       finalize(() => this.isSaving.set(false))
     ).subscribe({
       next: (res) => {
-        this.notificationService.success(`Dossier créé avec succès (Réf: ${res.reference})`);
+        this.notificationService.success(`Dossier créé (Réf: ${res.reference})`);
         this.router.navigate(['/admin/admissions', res.id]);
-      },
-      error: (err) => {
-        console.error('[DirectEntry] Erreur lors de la création directe:', err);
-        // L'erreur 409 sera notifiée par le service EnrollmentAdminService
       }
     });
   }
 
-  // Icônes
   readonly UserPlus = UserPlus;
   readonly Save = Save;
   readonly X = X;
@@ -156,4 +151,7 @@ export class AdmissionDirectEntryComponent implements OnInit {
   readonly Phone = Phone;
   readonly Mail = Mail;
   readonly BookOpen = BookOpen;
+  readonly HeartPulse = HeartPulse;
+  protected readonly Users = Users;
+  protected readonly School = School;
 }

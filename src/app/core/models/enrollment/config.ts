@@ -18,20 +18,22 @@ export interface EnrollmentConfig {
   
   /** Surcharges (Fermeture de niveau, Quotas) */
   levelOverrides: Record<string, LevelOverrideConfig>;
+
+  /** Textes CMS (Rajoutés pour le Frontend) */
+  instructions: Record<string, string>;
+  legalText: string;
 }
 
 export interface PillarConfig {
   label: string;
-  /** Champs personnalisés ajoutés par l'école dans ce pilier */
   customFields: CustomFieldConfig[];
-  /** Règles sur les champs système (optionnel dans la V3) */
   coreFields?: Record<string, FieldControl>;
 }
 
 export interface CustomFieldConfig {
   name: string;
   label: string;
-  type: 'TEXT' | 'NUMBER' | 'DATE' | 'BOOLEAN'; // Normalisation V3
+  type: 'TEXT' | 'NUMBER' | 'DATE' | 'BOOLEAN';
   required: boolean;
   placeholder?: string;
   options?: string[];
@@ -62,3 +64,6 @@ export interface LevelOverrideConfig {
   documentChecklist?: RequiredDocumentConfig[];
   assessmentConfig?: AssessmentConfig;
 }
+
+/** @deprecated */
+export type CoreFieldControl = FieldControl;

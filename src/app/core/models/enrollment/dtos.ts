@@ -1,5 +1,5 @@
 import { AdmissionType } from './base-types';
-import { IdentityPillar, MedicalPillar, SchoolingPillar, FamilyPillar, AdmissionBundle, Admission } from './entities';
+import { IdentityPillar, MedicalPillar, SchoolingPillar, FamilyPillar, AdmissionBundle, Admission, Guardian } from './entities';
 import { PillarConfig, RequiredDocumentConfig } from './config';
 
 /** --- PORTAIL PUBLIC (Landing & Config) --- */
@@ -13,7 +13,8 @@ export interface PublicPortalSummary {
   registrationStartDate: string;
   registrationEndDate: string;
   enabledServices: string[];
-  /** Statut temps-réel des niveaux (pour désactiver le choix dans le formulaire) */
+  welcomeMessage?: string; // Rajouté pour le Landing
+  /** Statut temps-réel des niveaux */
   levelStatuses: Record<string, { active: boolean, full: boolean }>;
 }
 
@@ -23,15 +24,17 @@ export interface EffectiveConfigResponse {
   pillars: Record<string, PillarConfig>;
   /** Pièces justificatives finales (Global + Surcharges) */
   documentChecklist: RequiredDocumentConfig[];
+  /** Instructions par étape */
+  instructions?: Record<string, string>;
 }
 
-/** --- REQUESTS (POST / PUT / PATCH) --- */
+/** --- REQUESTS --- */
 
 export interface CreateBundleRequest {
   tenantId: string;
   family: {
-    primaryGuardian: Partial<FamilyPillar['primaryGuardian']>;
-    secondaryGuardian?: Partial<FamilyPillar['secondaryGuardian']>;
+    primaryGuardian: Partial<Guardian>;
+    secondaryGuardian?: Partial<Guardian>;
     homeAddress: string;
     customFields?: Record<string, any>;
   };
@@ -45,6 +48,29 @@ export interface CreateBundleRequest {
   }>;
 }
 
+export interface ReEnrollRequest {
+  studentId: string;
+  academicYearId: string;
+  nextLevelId: string;
+  filiereId?: string | null;
+}
+
+export interface AssessmentRequest {
+  grades: Record<string, number>;
+  comments: string;
+  decision: string;
+  recommendedLevelId?: string;
+}
+
+export interface FastEntryRequest {
+  tenantId: string;
+  academicYearId: string;
+  family: Partial<FamilyPillar>;
+  identity: IdentityPillar;
+  medical?: MedicalPillar;
+  schooling: SchoolingPillar;
+}
+
 /** --- RESPONSES --- */
 
 export interface AdmissionBundleResponse extends AdmissionBundle {}
@@ -55,4 +81,12 @@ export interface AdmissionPageResponse {
   totalPages: number;
   size: number;
   number: number;
+}
+
+/** @deprecated */
+export interface ApplicationCreateRequest extends CreateBundleRequest {}
+export interface CandidateUpdateRequest {
+  info: Partial<IdentityPillar>;
+  levelId: string;
+  filiereId?: string | null;
 }

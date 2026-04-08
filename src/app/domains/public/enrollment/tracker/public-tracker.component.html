@@ -48,7 +48,7 @@
           <lucide-icon [name]="app.status === 'VALIDATED' ? CheckCircle : (app.status === 'REJECTED' ? Info : Clock)" [size]="48"></lucide-icon>
         </div>
         <div class="header-text">
-          <h1>Bonjour, {{ app.candidate?.firstName || 'Candidat' }}</h1>
+          <h1>Bonjour, {{ app.identity?.firstName || 'Candidat' }}</h1>
           <p>Suivi de votre demande : <strong>{{ app.reference }}</strong></p>
         </div>
         <div class="status-badge-container">

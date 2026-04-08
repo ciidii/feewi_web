@@ -8,7 +8,7 @@
       </button>
       <div class="application-identity">
         <div class="ref-pill">#{{ app.reference }}</div>
-        <h1>{{ app.identity?.firstName }} {{ app.identity?.lastName }}</h1>
+        <h1>{{ app.identity.firstName }} {{ app.identity.lastName }}</h1>
         <span class="app-type">{{ app.type === 'RE_ENROLLMENT' ? 'Réinscription' : 'Nouvelle Inscription' }}</span>
       </div>
     </div>

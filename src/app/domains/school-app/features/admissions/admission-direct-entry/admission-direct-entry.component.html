@@ -6,13 +6,13 @@
         <lucide-icon [name]="UserPlus" [size]="24"></lucide-icon>
       </div>
       <div class="title-meta">
-        <h1 class="text-2xl font-bold text-slate-900">Saisie Directe au Guichet</h1>
-        <p class="text-sm text-slate-500">Enregistrement express d'un nouveau candidat présent physiquement.</p>
+        <h1 class="text-2xl font-bold text-slate-900">Saisie Directe au Guichet (V3)</h1>
+        <p class="text-sm text-slate-500">Enregistrement express par Piliers d'un nouveau candidat.</p>
       </div>
     </div>
 
     <div class="header-actions">
-      <button class="btn-outline-modern" routerLink="/admin/admissions/list">
+      <button class="btn-outline-modern" routerLink="/admin/admissions">
         <lucide-icon [name]="X" [size]="18"></lucide-icon>
         <span>Annuler</span>
       </button>
@@ -27,12 +27,12 @@
   <main class="entry-content p-8" *ngIf="!isLoading(); else loadingView">
     <form [formGroup]="entryForm" class="grid grid-cols-12 gap-8">
       
-      <!-- COLONNE 1 : VŒU SCOLAIRE -->
+      <!-- PILIER : ORIENTATION & SCOLARITÉ -->
       <div class="col-span-12 lg:col-span-3 space-y-6">
         <section class="form-section-card">
           <div class="section-title">
-            <lucide-icon [name]="GraduationCap" [size]="18"></lucide-icon>
-            <h3>Orientation</h3>
+            <lucide-icon [name]="School" [size]="18"></lucide-icon>
+            <h3>Scolarité</h3>
           </div>
           <div class="section-body space-y-4">
             <div class="form-group">
@@ -46,73 +46,82 @@
                 <option *ngFor="let lvl of levels()" [value]="lvl.id">{{ lvl.name }}</option>
               </select>
             </div>
-            <div class="form-group" *ngIf="entryForm.get('levelId')?.value">
-              <label>Série / Filière</label>
-              <select formControlName="filiereId" class="fw-select-modern">
-                <option [ngValue]="null">Aucune</option>
-                <option *ngFor="let fil of filieres()" [value]="fil.id">{{ fil.name }}</option>
+            <div class="form-group">
+              <label>Dernier établissement</label>
+              <input type="text" formControlName="previousSchool" class="fw-input-modern" placeholder="École d'origine">
+            </div>
+          </div>
+        </section>
+
+        <!-- PILIER MÉDICAL (Express) -->
+        <section class="form-section-card" formGroupName="medical">
+          <div class="section-title">
+            <lucide-icon [name]="HeartPulse" [size]="18"></lucide-icon>
+            <h3>Santé</h3>
+          </div>
+          <div class="section-body space-y-4">
+            <div class="form-group">
+              <label>Groupe Sanguin</label>
+              <select formControlName="bloodGroup" class="fw-select-modern">
+                <option value="">Inconnu</option>
+                <option value="O+">O+</option><option value="O-">O-</option>
+                <option value="A+">A+</option><option value="A-">A-</option>
+                <option value="B+">B+</option><option value="B-">B-</option>
+                <option value="AB+">AB+</option><option value="AB-">AB-</option>
               </select>
+            </div>
+            <div class="form-group">
+              <label>Allergies Critiques</label>
+              <textarea formControlName="criticalAllergies" rows="2" class="fw-textarea-modern" placeholder="Allergies..."></textarea>
             </div>
           </div>
         </section>
       </div>
 
-      <!-- COLONNE 2 : RESPONSABLE LÉGAL -->
-      <div class="col-span-12 lg:col-span-4 space-y-6" formGroupName="primaryGuardian">
+      <!-- PILIER : FAMILLE -->
+      <div class="col-span-12 lg:col-span-4 space-y-6" formGroupName="family">
         <section class="form-section-card">
           <div class="section-title">
-            <lucide-icon [name]="ShieldCheck" [size]="18"></lucide-icon>
-            <h3>Tuteur / Responsable</h3>
+            <lucide-icon [name]="Users" [size]="18"></lucide-icon>
+            <h3>Famille & Responsable</h3>
           </div>
-          <div class="section-body grid grid-cols-2 gap-4">
-            <div class="form-group col-span-2">
+          <div class="section-body space-y-4" formGroupName="primaryGuardian">
+            <div class="grid grid-cols-2 gap-4">
+              <div class="form-group">
+                <label>Nom *</label>
+                <input type="text" formControlName="lastName" class="fw-input-modern" placeholder="Nom">
+              </div>
+              <div class="form-group">
+                <label>Prénom *</label>
+                <input type="text" formControlName="firstName" class="fw-input-modern" placeholder="Prénom">
+              </div>
+            </div>
+            <div class="form-group">
               <label>Lien de parenté *</label>
               <select formControlName="relation" class="fw-select-modern">
                 <option value="FATHER">Père</option>
                 <option value="MOTHER">Mère</option>
                 <option value="GUARDIAN">Tuteur Légal</option>
-                <option value="OTHER">Autre</option>
               </select>
             </div>
             <div class="form-group">
-              <label>Nom *</label>
-              <input type="text" formControlName="lastName" class="fw-input-modern" placeholder="Ex: DIOP">
-            </div>
-            <div class="form-group">
-              <label>Prénom *</label>
-              <input type="text" formControlName="firstName" class="fw-input-modern" placeholder="Ex: Moussa">
-            </div>
-            <div class="form-group">
               <label>Téléphone *</label>
-              <div class="relative">
-                <lucide-icon [name]="Phone" class="absolute left-3 top-3 text-slate-400" [size]="16"></lucide-icon>
-                <input type="tel" formControlName="phone" class="fw-input-modern pl-10" placeholder="+221 ...">
-              </div>
+              <input type="tel" formControlName="phone" class="fw-input-modern" placeholder="+221 ...">
             </div>
             <div class="form-group">
               <label>Email</label>
-              <div class="relative">
-                <lucide-icon [name]="Mail" class="absolute left-3 top-3 text-slate-400" [size]="16"></lucide-icon>
-                <input type="email" formControlName="email" class="fw-input-modern pl-10" placeholder="parent@mail.com">
-              </div>
+              <input type="email" formControlName="email" class="fw-input-modern" placeholder="parent@mail.com">
             </div>
-            <div class="form-group col-span-2">
+            <div class="form-group">
               <label>Adresse Physique *</label>
-              <div class="relative">
-                <lucide-icon [name]="MapPin" class="absolute left-3 top-3 text-slate-400" [size]="16"></lucide-icon>
-                <input type="text" formControlName="address" class="fw-input-modern pl-10" placeholder="Ex: Liberté 6, Dakar">
-              </div>
-            </div>
-            <div class="form-group col-span-2">
-              <label>Profession</label>
-              <input type="text" formControlName="profession" class="fw-input-modern" placeholder="Ex: Comptable">
+              <input type="text" formControlName="homeAddress" [formControl]="$any(entryForm.get('family.homeAddress'))" class="fw-input-modern" placeholder="Quartier, Ville">
             </div>
           </div>
         </section>
       </div>
 
-      <!-- COLONNE 3 : IDENTITÉ DE L'ÉLÈVE -->
-      <div class="col-span-12 lg:col-span-5 space-y-6" formGroupName="candidate">
+      <!-- PILIER : IDENTITÉ ENFANT -->
+      <div class="col-span-12 lg:col-span-5 space-y-6" formGroupName="identity">
         <section class="form-section-card student-section">
           <div class="section-title">
             <lucide-icon [name]="User" [size]="18"></lucide-icon>
@@ -121,16 +130,15 @@
           <div class="section-body grid grid-cols-2 gap-4">
             <div class="form-group">
               <label>Nom de famille *</label>
-              <input type="text" formControlName="lastName" class="fw-input-modern" placeholder="Nom de l'enfant">
+              <input type="text" formControlName="lastName" class="fw-input-modern">
             </div>
             <div class="form-group">
               <label>Prénoms *</label>
-              <input type="text" formControlName="firstName" class="fw-input-modern" placeholder="Prénoms de l'enfant">
+              <input type="text" formControlName="firstName" class="fw-input-modern">
             </div>
             <div class="form-group">
               <label>Sexe / Genre *</label>
               <select formControlName="gender" class="fw-select-modern">
-                <option value="">Sélectionner...</option>
                 <option value="MALE">Masculin</option>
                 <option value="FEMALE">Féminin</option>
               </select>
@@ -141,27 +149,19 @@
             </div>
             <div class="form-group">
               <label>Lieu de naissance *</label>
-              <input type="text" formControlName="birthPlace" class="fw-input-modern" placeholder="Ville ou Commune">
+              <input type="text" formControlName="birthPlace" class="fw-input-modern">
             </div>
             <div class="form-group">
               <label>Nationalité *</label>
               <input type="text" formControlName="nationality" class="fw-input-modern">
             </div>
-            <div class="form-group col-span-2">
-              <label>Dernier établissement fréquenté</label>
-              <div class="relative">
-                <lucide-icon [name]="BookOpen" class="absolute left-3 top-3 text-slate-400" [size]="16"></lucide-icon>
-                <input type="text" formControlName="previousSchool" class="fw-input-modern pl-10" placeholder="Ex: École primaire de Fann">
-              </div>
-            </div>
           </div>
         </section>
 
-        <!-- Information finale -->
         <div class="info-alert-box">
-          <lucide-icon [name]="RefreshCw" class="text-amber-600" [size]="20"></lucide-icon>
+          <lucide-icon [name]="ShieldCheck" class="text-emerald-600" [size]="20"></lucide-icon>
           <div class="content">
-            <p><strong>Note :</strong> En validant ce formulaire, le dossier sera immédiatement créé au statut <span class="status-pill">SOUMIS</span>. Vous pourrez ensuite procéder à la vérification des documents originaux.</p>
+            <p><strong>Note :</strong> La saisie au guichet crée un dossier immédiatement vérifiable. Les pièces jointes pourront être numérisées après validation.</p>
           </div>
         </div>
       </div>
@@ -172,7 +172,7 @@
   <ng-template #loadingView>
     <div class="loading-overlay">
       <lucide-icon [name]="RefreshCw" [size]="48" class="animate-spin text-primary"></lucide-icon>
-      <p>Synchronisation avec le registre scolaire...</p>
+      <p>Synchronisation V3...</p>
     </div>
   </ng-template>
 
