@@ -1,272 +1,287 @@
-<div class="stepper-wrapper" *ngIf="summary() && !isPortalClosed(); else initialLoading">
+<div class="onboarding-layout" *ngIf="summary(); else initialLoading">
   
-  <!-- ENTÊTE INSTITUTIONNEL -->
-  <header class="school-brand-header animate-fade">
-    <div class="school-logo" *ngIf="tenantContext.activeTenant()?.logoUrl; else defaultLogo">
-      <img [src]="tenantContext.activeTenant()?.logoUrl" [alt]="tenantContext.activeTenant()?.name">
-    </div>
-    <ng-template #defaultLogo>
-      <div class="school-logo-placeholder">
-        <lucide-icon [name]="GraduationCap" [size]="32"></lucide-icon>
+  <!-- BARRE LATÉRALE DE PROGRESSION (CONTEXTE) -->
+  <aside class="onboarding-sidebar">
+    <div class="sidebar-header">
+      <div class="school-logo">
+        <img *ngIf="tenantContext.activeTenant()?.logoUrl" [src]="tenantContext.activeTenant()?.logoUrl" [alt]="tenantContext.activeTenant()?.name">
+        <lucide-icon *ngIf="!tenantContext.activeTenant()?.logoUrl" [name]="GraduationCap" [size]="28"></lucide-icon>
       </div>
-    </ng-template>
-    <div class="school-info">
-      <span class="portal-label">Portail d'Admission Officiel</span>
-      <h2 class="school-name">{{ tenantContext.activeTenant()?.name || 'Établissement Partenaire' }}</h2>
+      <div class="school-meta">
+        <span class="school-name">{{ tenantContext.activeTenant()?.name || 'Établissement' }}</span>
+        <span class="year-pill" *ngIf="targetYearId()">Rentrée {{ targetYearId() }}</span>
+      </div>
     </div>
-  </header>
 
-  <!-- Stepper Nav (5 étapes V4) -->
-  <div class="stepper-nav">
-    <div class="progress-bar">
-      <div class="progress-fill" [style.width.%]="progress()"></div>
-    </div>
-    <div class="steps-indicators">
-      <div class="step-indicator" [class.active]="currentStep() === 'GUARDIAN'" [class.completed]="progress() > 20">
-        <div class="step-circle"><lucide-icon [name]="Users" [size]="14"></lucide-icon></div>
-        <span class="step-label">Famille</span>
+    <nav class="onboarding-nav">
+      <div class="nav-step" [class.active]="currentStep() === 'GUARDIAN'" [class.completed]="progress() > 20">
+        <div class="step-icon"><lucide-icon [name]="Users"></lucide-icon></div>
+        <div class="step-text">
+          <span class="step-label">La Famille</span>
+          <span class="step-desc">Responsable légal</span>
+        </div>
       </div>
-      <div class="step-indicator" [class.active]="currentStep() === 'STUDENT'" [class.completed]="progress() > 40">
-        <div class="step-circle"><lucide-icon [name]="User" [size]="14"></lucide-icon></div>
-        <span class="step-label">Enfant</span>
+      <div class="nav-step" [class.active]="currentStep() === 'STUDENT'" [class.completed]="progress() > 40">
+        <div class="step-icon"><lucide-icon [name]="User"></lucide-icon></div>
+        <div class="step-text">
+          <span class="step-label">L'Enfant</span>
+          <span class="step-desc">Identité & État civil</span>
+        </div>
       </div>
-      <div class="step-indicator" [class.active]="currentStep() === 'MEDICAL'" [class.completed]="progress() > 60">
-        <div class="step-circle"><lucide-icon [name]="HeartPulse" [size]="14"></lucide-icon></div>
-        <span class="step-label">Santé</span>
+      <div class="nav-step" [class.active]="currentStep() === 'MEDICAL'" [class.completed]="progress() > 60">
+        <div class="step-icon"><lucide-icon [name]="HeartPulse"></lucide-icon></div>
+        <div class="step-text">
+          <span class="step-label">Santé</span>
+          <span class="step-desc">Données médicales</span>
+        </div>
       </div>
-      <div class="step-indicator" [class.active]="currentStep() === 'DOCS'" [class.completed]="progress() > 80">
-        <div class="step-circle"><lucide-icon [name]="FileText" [size]="14"></lucide-icon></div>
-        <span class="step-label">Pièces</span>
+      <div class="nav-step" [class.active]="currentStep() === 'DOCS'" [class.completed]="progress() > 80">
+        <div class="step-icon"><lucide-icon [name]="FileText"></lucide-icon></div>
+        <div class="step-text">
+          <span class="step-label">Documents</span>
+          <span class="step-desc">Coffre-fort numérique</span>
+        </div>
       </div>
-      <div class="step-indicator" [class.active]="currentStep() === 'REVIEW'">
-        <div class="step-circle"><lucide-icon [name]="CheckCircle" [size]="14"></lucide-icon></div>
-        <span class="step-label">Récap</span>
+      <div class="nav-step" [class.active]="currentStep() === 'REVIEW'">
+        <div class="step-icon"><lucide-icon [name]="CheckCircle"></lucide-icon></div>
+        <div class="step-text">
+          <span class="step-label">Validation</span>
+          <span class="step-desc">Récapitulatif final</span>
+        </div>
       </div>
-    </div>
-  </div>
+    </nav>
 
-  <div class="stepper-content card">
+    <div class="sidebar-footer">
+      <div class="help-box">
+        <lucide-icon [name]="Info" [size]="16"></lucide-icon>
+        <span>Besoin d'aide ? Contactez le secrétariat.</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ZONE DE SAISIE CENTRALE (MOTEUR DE RENDU DYNAMIQUE) -->
+  <main class="onboarding-main">
     
-    <!-- Étape 1 : LE TUTEUR (PILIER FAMILLE) -->
-    <div *ngIf="currentStep() === 'GUARDIAN'" class="form-section animate-fade">
-      <div class="section-header-modern">
-        <lucide-icon [name]="Users" class="text-primary"></lucide-icon>
-        <div>
-          <h2>Informations Familiales</h2>
-          <p>Identifiez le responsable légal pour sécuriser le dossier.</p>
-        </div>
-      </div>
+    <div class="main-container animate-slide-in">
       
-      <div class="grid-form">
-        <div class="form-group full">
-          <label>Lien avec l'enfant</label>
-          <select [(ngModel)]="formData().family.primaryGuardian.relation" class="fw-input">
-            <option value="FATHER">Père</option>
-            <option value="MOTHER">Mère</option>
-            <option value="GUARDIAN">Tuteur / Tutrice</option>
-          </select>
+      <!-- ÉTAPE 1 : RESPONSABLE (PILIER FAMILLE) -->
+      <div *ngIf="currentStep() === 'GUARDIAN'" class="step-content">
+        <div class="content-header">
+          <h1>Qui êtes-vous ?</h1>
+          <p>Identifiez le responsable légal pour initier le dossier.</p>
         </div>
 
-        <div class="form-group">
-          <label>Nom du responsable</label>
-          <input type="text" [(ngModel)]="formData().family.primaryGuardian.lastName" class="fw-input">
-        </div>
-        <div class="form-group">
-          <label>Prénom du responsable</label>
-          <input type="text" [(ngModel)]="formData().family.primaryGuardian.firstName" class="fw-input">
-        </div>
-        <div class="form-group">
-          <label>Email de contact</label>
-          <input type="email" [(ngModel)]="formData().family.primaryGuardian.email" class="fw-input">
-        </div>
-        <div class="form-group">
-          <label>Téléphone mobile</label>
-          <input type="tel" [(ngModel)]="formData().family.primaryGuardian.phone" class="fw-input">
-        </div>
-        <div class="form-group full">
-          <label>Adresse de résidence</label>
-          <input type="text" [(ngModel)]="formData().family.homeAddress" class="fw-input" placeholder="Quartier, Ville...">
-        </div>
+        <div class="premium-form-grid">
+          <div class="form-group">
+            <label>Votre lien de parenté</label>
+            <select [(ngModel)]="formStore.pillar_family.relation" class="premium-select">
+              <option value="FATHER">Père</option>
+              <option value="MOTHER">Mère</option>
+              <option value="GUARDIAN">Tuteur Légal</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Email de contact</label>
+            <input type="email" [(ngModel)]="formStore.pillar_family.email" class="premium-input" placeholder="nom@exemple.com">
+          </div>
+          <div class="form-group">
+            <label>Nom</label>
+            <input type="text" [(ngModel)]="formStore.pillar_family.lastName" class="premium-input">
+          </div>
+          <div class="form-group">
+            <label>Prénom</label>
+            <input type="text" [(ngModel)]="formStore.pillar_family.firstName" class="premium-input">
+          </div>
+          <div class="form-group full">
+            <label>Adresse de résidence</label>
+            <input type="text" [(ngModel)]="formStore.pillar_family.homeAddress" class="premium-input">
+          </div>
 
-        <!-- CHAMPS CMS DYNAMIQUES (FAMILLE) -->
-        @if (getPillarConfig('pillar_family'); as pConfig) {
-          @for (f of pConfig.customFields; track f.name) {
-            <div class="form-group" [class.full]="f.type === 'TEXT'">
-              <label>{{ f.label }} <span *ngIf="f.mandatory" class="text-red-500">*</span></label>
-              <input type="text" [(ngModel)]="formData().customFields['pillar_family'][f.name]" class="fw-input">
+          <!-- CHAMPS DYNAMIQUES CMS FAMILLE -->
+          <ng-container *ngIf="getPillarConfig('pillar_family'); let pCfg">
+            <div *ngFor="let field of pCfg.customFields" class="form-group" [class.full]="field.type === 'TEXT'">
+              <label>{{ field.label }} <span *ngIf="field.mandatory" class="text-red-500">*</span></label>
+              <input type="text" [(ngModel)]="formStore.pillar_family[field.name]" class="premium-input">
             </div>
-          }
-        }
-      </div>
-    </div>
-
-    <!-- Étape 2 : L'ENFANT (PILIER IDENTITÉ + SCOLARITÉ) -->
-    <div *ngIf="currentStep() === 'STUDENT'" class="form-section animate-fade">
-      <div class="section-header-modern">
-        <lucide-icon [name]="GraduationCap" class="text-primary"></lucide-icon>
-        <div>
-          <h2>Identité du Candidat</h2>
-          <p>Informations sur l'enfant pour son inscription.</p>
+          </ng-container>
         </div>
       </div>
-      
-      <div class="grid-form">
-        <div class="form-group full">
-          <label>Niveau scolaire demandé</label>
-          <select [(ngModel)]="formData().schooling.requestedLevelId" class="fw-input highlight">
-            <option value="">Choisir un niveau...</option>
-            <option *ngFor="let level of availableLevels()" [value]="level.id">{{ level.name }}</option>
-          </select>
+
+      <!-- ÉTAPE 2 : ENFANT (PILIER IDENTITÉ + SCOLARITÉ) -->
+      <div *ngIf="currentStep() === 'STUDENT'" class="step-content">
+        <div class="content-header">
+          <h1>L'Enfant</h1>
+          <p>Informations d'état civil et vœu de scolarité.</p>
         </div>
 
-        <div class="form-group">
-          <label>Prénoms</label>
-          <input type="text" [(ngModel)]="formData().identity.firstName" class="fw-input">
-        </div>
-        <div class="form-group">
-          <label>Nom de famille</label>
-          <input type="text" [(ngModel)]="formData().identity.lastName" class="fw-input">
-        </div>
+        <div class="premium-form-grid">
+          <div class="form-group full">
+            <label>Niveau scolaire demandé</label>
+            <select [(ngModel)]="formStore.pillar_schooling.levelId" (change)="onLevelChange()" class="premium-select highlight">
+              <option value="">Sélectionnez un niveau...</option>
+              <option *ngFor="let level of availableLevels()" [value]="level.id">{{ level.name }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Prénoms</label>
+            <input type="text" [(ngModel)]="formStore.pillar_identity.firstName" class="premium-input">
+          </div>
+          <div class="form-group">
+            <label>Nom de famille</label>
+            <input type="text" [(ngModel)]="formStore.pillar_identity.lastName" class="premium-input">
+          </div>
+          <div class="form-group">
+            <label>Sexe</label>
+            <select [(ngModel)]="formStore.pillar_identity.gender" class="premium-select">
+              <option value="MALE">Masculin</option>
+              <option value="FEMALE">Féminin</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Date de naissance</label>
+            <input type="date" [(ngModel)]="formStore.pillar_identity.birthDate" class="premium-input">
+          </div>
 
-        <div class="form-group">
-          <label>Sexe</label>
-          <select [(ngModel)]="formData().identity.gender" class="fw-input">
-            <option value="MALE">Masculin</option>
-            <option value="FEMALE">Féminin</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Date de naissance</label>
-          <input type="date" [(ngModel)]="formData().identity.birthDate" class="fw-input">
-        </div>
-
-        <!-- CHAMPS CMS DYNAMIQUES (IDENTITÉ) -->
-        @if (getPillarConfig('pillar_identity'); as pConfig) {
-          @for (f of pConfig.customFields; track f.name) {
-            <div class="form-group">
-              <label>{{ f.label }} <span *ngIf="f.mandatory" class="text-red-500">*</span></label>
-              <input type="text" [(ngModel)]="formData().customFields['pillar_identity'][f.name]" class="fw-input">
+          <!-- CHAMPS DYNAMIQUES CMS IDENTITÉ -->
+          <ng-container *ngIf="getPillarConfig('pillar_identity'); let pCfg">
+            <div *ngFor="let field of pCfg.customFields" class="form-group">
+              <label>{{ field.label }}</label>
+              <input type="text" [(ngModel)]="formStore.pillar_identity[field.name]" class="premium-input">
             </div>
-          }
-        }
-      </div>
-    </div>
-
-    <!-- Étape 3 : SANTÉ (PILIER MÉDICAL) -->
-    <div *ngIf="currentStep() === 'MEDICAL'" class="form-section animate-fade">
-      <div class="section-header-modern">
-        <lucide-icon [name]="HeartPulse" class="text-rose-600"></lucide-icon>
-        <div>
-          <h2>Santé & Aptitudes</h2>
-          <p>Informations médicales nécessaires à la vie scolaire.</p>
+          </ng-container>
         </div>
       </div>
 
-      <div class="grid-form">
-        <div class="form-group">
-          <label>Groupe Sanguin</label>
-          <select [(ngModel)]="formData().medical.bloodGroup" class="fw-input">
-            <option value="">Inconnu</option>
-            <option value="O+">O+</option><option value="O-">O-</option>
-            <option value="A+">A+</option><option value="A-">A-</option>
-            <option value="B+">B+</option><option value="B-">B-</option>
-            <option value="AB+">AB+</option><option value="AB-">AB-</option>
-          </select>
+      <!-- ÉTAPE 3 : SANTÉ (PILIER MÉDICAL) -->
+      <div *ngIf="currentStep() === 'MEDICAL'" class="step-content">
+        <div class="content-header">
+          <h1>Santé</h1>
+          <p>Données médicales confidentielles.</p>
         </div>
 
-        <div class="form-group full">
-          <label>Allergies connues</label>
-          <textarea [(ngModel)]="formData().medical.criticalAllergies" class="fw-input" rows="2"></textarea>
-        </div>
+        <div class="premium-form-grid">
+          <div class="form-group">
+            <label>Groupe Sanguin</label>
+            <select [(ngModel)]="formStore.pillar_medical.bloodGroup" class="premium-select">
+              <option value="">Inconnu</option>
+              <option value="O+">O+</option><option value="O-">O-</option>
+              <option value="A+">A+</option><option value="A-">A-</option>
+              <option value="B+">B+</option><option value="B-">B-</option>
+              <option value="AB+">AB+</option><option value="AB-">AB-</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label>Allergies connues</label>
+            <textarea [(ngModel)]="formStore.pillar_medical.criticalAllergies" class="premium-textarea" rows="3"></textarea>
+          </div>
 
-        <!-- CHAMPS CMS DYNAMIQUES (MÉDICAL) -->
-        @if (getPillarConfig('pillar_medical'); as pConfig) {
-          @for (f of pConfig.customFields; track f.name) {
-            <div class="form-group">
-              <label>{{ f.label }} <span *ngIf="f.mandatory" class="text-red-500">*</span></label>
-              <input type="text" [(ngModel)]="formData().customFields['pillar_medical'][f.name]" class="fw-input">
+          <!-- CHAMPS DYNAMIQUES CMS MÉDICAL -->
+          <ng-container *ngIf="getPillarConfig('pillar_medical'); let pCfg">
+            <div *ngFor="let field of pCfg.customFields" class="form-group">
+              <label>{{ field.label }}</label>
+              <input type="text" [(ngModel)]="formStore.pillar_medical[field.name]" class="premium-input">
             </div>
-          }
-        }
-      </div>
-    </div>
-
-    <!-- Étape 4 : DOCUMENTS -->
-    <div *ngIf="currentStep() === 'DOCS'" class="form-section animate-fade">
-      <div class="section-header-modern">
-        <lucide-icon [name]="FileText" class="text-primary"></lucide-icon>
-        <div>
-          <h2>Pièces Justificatives</h2>
-          <p>Chargez les documents requis.</p>
+          </ng-container>
         </div>
       </div>
-      
-      <div class="upload-grid">
-        @for (doc of effectiveConfig()?.documentChecklist; track doc.code) {
-          <div class="upload-item" [class.uploaded]="application()?.documents?.[$index]?.status === 'UPLOADED'">
-            <div class="upload-info">
-              <span class="upload-label">{{ doc.name }}</span>
-              <span *ngIf="doc.mandatory" class="text-[10px] font-bold text-red-500 uppercase">(Obligatoire)</span>
+
+      <!-- ÉTAPE 4 : DOCUMENTS -->
+      <div *ngIf="currentStep() === 'DOCS'" class="step-content">
+        <div class="content-header">
+          <h1>Vault Documentaire</h1>
+          <p>Veuillez charger les pièces justificatives demandées.</p>
+        </div>
+
+        <div class="vault-grid">
+          <div *ngFor="let doc of effectiveConfig()?.defaultChecklist; let i = index" class="vault-card" 
+               [class.success]="application()?.documents?.[i]?.status === 'UPLOADED'">
+            <div class="vault-info">
+              <span class="vault-label">{{ doc.name }}</span>
+              <span class="vault-meta">{{ doc.mandatory ? 'Requis' : 'Optionnel' }}</span>
             </div>
-            <div class="upload-actions">
+            <div class="vault-action">
               <input type="file" #fileInput hidden (change)="onFileSelected(doc.code, $event)">
-              <button class="btn-upload" (click)="fileInput.click()" [disabled]="uploadingDocCode() !== null">
+              <button type="button" class="btn-vault" (click)="fileInput.click()" [disabled]="uploadingDocCode() !== null">
                 <lucide-icon *ngIf="uploadingDocCode() !== doc.code" [name]="Upload" [size]="18"></lucide-icon>
                 <lucide-icon *ngIf="uploadingDocCode() === doc.code" [name]="RefreshCw" [size]="18" class="animate-spin"></lucide-icon>
-                <span>{{ application()?.documents?.[$index]?.status === 'UPLOADED' ? 'Remplacer' : 'Choisir' }}</span>
+                <span>Charger</span>
               </button>
             </div>
           </div>
-        }
-      </div>
-    </div>
-
-    <!-- Étape 5 : RÉCAPITULATIF -->
-    <div *ngIf="currentStep() === 'REVIEW'" class="form-section animate-fade">
-      <div class="section-header-modern">
-        <lucide-icon [name]="CheckCircle" class="text-primary"></lucide-icon>
-        <div>
-          <h2>Confirmation</h2>
-          <p>Relisez votre dossier avant l'envoi.</p>
-        </div>
-      </div>
-      
-      <div class="review-grid">
-        <div class="review-card">
-          <div class="review-card-header">Candidat</div>
-          <div class="review-row"><span class="label">Nom complet</span><span class="value">{{ formData().identity.firstName }} {{ formData().identity.lastName }}</span></div>
         </div>
       </div>
 
-      <div class="legal-notice-box animate-in">
-        <label class="consent-checkbox">
-          <input type="checkbox" [(ngModel)]="consentChecked">
-          <span>Je certifie l'exactitude des informations fournies.</span>
-        </label>
+      <!-- ÉTAPE 5 : REVIEW -->
+      <div *ngIf="currentStep() === 'REVIEW'" class="step-content">
+        <div class="content-header">
+          <h1>Validation Finale</h1>
+          <p>Veuillez contrôler les informations avant l'envoi au secrétariat.</p>
+        </div>
+
+        <div class="review-grid-v6">
+          <div class="review-card-premium">
+            <span class="card-tag">Responsable Légal</span>
+            <div class="row">
+              <span class="label">Identité</span>
+              <span class="value">{{ formStore.pillar_family.firstName }} {{ formStore.pillar_family.lastName }}</span>
+            </div>
+            <div class="row">
+              <span class="label">Lien / Parenté</span>
+              <span class="value">{{ formStore.pillar_family.relation }}</span>
+            </div>
+            <div class="row">
+              <span class="label">Contact</span>
+              <span class="value">{{ formStore.pillar_family.phone }}</span>
+            </div>
+          </div>
+
+          <div class="review-card-premium">
+            <span class="card-tag">Le Candidat</span>
+            <div class="row">
+              <span class="label">Élève</span>
+              <span class="value">{{ formStore.pillar_identity.firstName }} {{ formStore.pillar_identity.lastName }}</span>
+            </div>
+            <div class="row">
+              <span class="label">Niveau visé</span>
+              <span class="value">{{ formStore.pillar_schooling.levelId }}</span>
+            </div>
+            <div class="row">
+              <span class="label">Naissance</span>
+              <span class="value">{{ formStore.pillar_identity.birthDate | date:'longDate' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="legal-consent">
+          <label class="premium-checkbox">
+            <input type="checkbox" [(ngModel)]="consentChecked">
+            <div class="checkmark"></div>
+            <span>Je certifie l'exactitude des informations fournies dans ce dossier.</span>
+          </label>
+        </div>
       </div>
+
+      <!-- FOOTER DE NAVIGATION -->
+      <footer class="onboarding-footer">
+        <button type="button" class="btn-ghost" (click)="prevStep()" *ngIf="currentStep() !== 'GUARDIAN'">
+          <lucide-icon [name]="ArrowLeft" [size]="18"></lucide-icon> Retour
+        </button>
+        <div class="spacer"></div>
+        <button type="button" class="btn-premium-action" (click)="currentStep() === 'REVIEW' ? submitFinal() : nextStep()" [disabled]="isSubmitting() || (currentStep() === 'REVIEW' && !consentChecked)">
+          <lucide-icon *ngIf="isSubmitting()" [name]="RefreshCw" [size]="20" class="animate-spin"></lucide-icon>
+          <span>{{ currentStep() === 'REVIEW' ? 'Soumettre' : 'Continuer' }}</span>
+          <lucide-icon *ngIf="!isSubmitting() && currentStep() !== 'REVIEW'" [name]="ArrowRight" [size]="20"></lucide-icon>
+        </button>
+      </footer>
+
     </div>
-
-  </div>
-
-  <footer class="stepper-footer">
-    <button class="btn-outline" (click)="prevStep()" *ngIf="currentStep() !== 'GUARDIAN'">
-      <lucide-icon [name]="ArrowLeft" [size]="18"></lucide-icon> Précédent
-    </button>
-    <div class="spacer"></div>
-    <button class="btn-primary" 
-            (click)="currentStep() === 'REVIEW' ? submitFinal() : nextStep()" 
-            [disabled]="isSubmitting() || (currentStep() === 'REVIEW' && !consentChecked)">
-      <span *ngIf="currentStep() !== 'REVIEW'">Suivant <lucide-icon [name]="ArrowRight" [size]="18"></lucide-icon></span>
-      <span *ngIf="currentStep() === 'REVIEW'">Soumettre le dossier <lucide-icon [name]="CheckCircle" [size]="20"></lucide-icon></span>
-    </button>
-  </footer>
+  </main>
 
 </div>
 
 <ng-template #initialLoading>
-  <div class="initial-loader" *ngIf="isLoading()">
+  <div class="onboarding-loader">
     <lucide-icon [name]="RefreshCw" [size]="48" class="animate-spin text-primary"></lucide-icon>
-    <p>Initialisation V4...</p>
+    <p>Sécurisation du portail...</p>
   </div>
 </ng-template>
