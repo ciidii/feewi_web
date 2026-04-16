@@ -1,12 +1,12 @@
 <div class="simulator-frame">
   <div class="preview-banner">
     <lucide-icon [name]="Globe" class="w-3 h-3"></lucide-icon>
-    <span>MODE SIMULATION</span>
+    <span>MODE SIMULATION V4 (PILOTÉ PAR LES PILIERS)</span>
   </div>
 
   <div class="hub-container custom-scrollbar">
     
-    <!-- Header simulé -->
+    <!-- Hero Section -->
     <header class="hub-hero">
       <div class="badge-status" [class.open]="portalStatus === 'OPEN'" [class.closed]="portalStatus === 'CLOSED'">
         <lucide-icon [name]="portalStatus === 'OPEN' ? CheckCircle : Clock" [size]="14"></lucide-icon>
@@ -16,34 +16,41 @@
       <p>Année Académique {{ activeYear()?.label || '2026-2027' }}</p>
     </header>
 
-    <!-- Bloc Instructions -->
-    <div class="instructions-box" *ngIf="config().instructions?.['general']">
-      <lucide-icon [name]="Info" [size]="16"></lucide-icon>
-      <p>{{ config().instructions['general'] }}</p>
-    </div>
-
-    <!-- Grille d'Aiguillage simulée -->
-    <div class="hub-grid">
-      <div class="hub-card primary" [class.disabled]="portalStatus === 'CLOSED'">
-        <div class="card-icon"><lucide-icon [name]="Sparkles" [size]="24"></lucide-icon></div>
-        <div class="card-body">
-          <h3>Nouvelle Inscription</h3>
-          <button class="btn-hub-main" [disabled]="portalStatus === 'CLOSED'">Commencer</button>
+    <!-- Rendu Dynamique des Piliers -->
+    <section class="preview-section">
+      <div class="section-title-preview">Structure générée du formulaire</div>
+      
+      <div class="pillars-preview-stack">
+        <div *ngFor="let pillar of pillarsList()" class="pillar-card-mock">
+          <div class="pillar-header">
+            <lucide-icon [name]="pillar.icon" [size]="16"></lucide-icon>
+            <span>{{ pillar.label }}</span>
+          </div>
+          
+          <div class="pillar-fields-mock">
+            <!-- 🔒 Champs Système (Feewi Engine) -->
+            <div *ngFor="let sys of pillar.systemFields" class="field-mock system">
+              <lucide-icon [name]="Lock" [size]="10" class="opacity-40"></lucide-icon>
+              <span class="label">{{ sys.label }}</span>
+              <span class="type">{{ sys.type }}</span>
+              <span class="tag" *ngIf="sys.mandatory">Obligatoire</span>
+            </div>
+            
+            <!-- ➕ Champs CMS (École) -->
+            <div *ngFor="let custom of pillar.customFields" class="field-mock custom">
+              <lucide-icon [name]="Plus" [size]="10"></lucide-icon>
+              <span class="label">{{ custom.label }}</span>
+              <span class="type">{{ custom.type }}</span>
+              <span class="tag" *ngIf="custom.mandatory">Requis</span>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="hub-card">
-        <div class="card-icon"><lucide-icon [name]="Search" [size]="24"></lucide-icon></div>
-        <div class="card-body">
-          <h3>Suivi</h3>
-          <button class="btn-hub-secondary">Accéder</button>
-        </div>
-      </div>
-    </div>
+    </section>
 
-    <!-- Preview des Documents (Utilisation de defaultChecklist) -->
     <!-- Documents -->
     <section class="preview-section">
-      <div class="section-title-preview">Checklist Documents</div>
+      <div class="section-title-preview">Checklist Pièces Justificatives</div>
       <div class="docs-preview-stack">
         <div *ngFor="let doc of config().documentChecklist" class="doc-pill-mock">
           <span class="dot" [class.mandatory]="doc.mandatory"></span>
@@ -55,12 +62,11 @@
     <!-- Mentions Légales -->
     <div class="legal-box" *ngIf="config().legalText">
       <div class="checkbox-mock"></div>
-      <p>{{ config().legalText }}</p>
+      <p class="truncate-legal">{{ config().legalText }}</p>
     </div>
 
-    <!-- Footer simulé -->
     <footer class="hub-footer">
-      <p>© 2026 Feewi Education</p>
+      <p>© 2026 Feewi Education • Portail Admission V4</p>
     </footer>
   </div>
 </div>

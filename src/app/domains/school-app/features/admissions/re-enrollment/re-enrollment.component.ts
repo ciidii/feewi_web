@@ -148,7 +148,7 @@ export class SecretaryReEnrollmentComponent implements OnInit, OnDestroy {
         filiereId: student.filiereId
       };
 
-      const res = await firstValueFrom(this.enrollmentService.reEnroll(payload));
+      const res: any = await firstValueFrom(this.enrollmentService.reEnroll(payload));
       if (res) {
         this.notificationService.success(`Réinscription initiée pour ${student.name}.`);
         this.router.navigate(['/admin/admissions', res.id]);

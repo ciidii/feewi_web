@@ -22,6 +22,9 @@ export interface EnrollmentConfig {
   instructions: Record<string, string>;
   legalText: string | null;
 
+  /** Services complémentaires activés (Cantine, Transport, etc.) */
+  enabledServices: string[];
+
   /** Alias pour compatibilité Frontend */
   documentChecklist?: RequiredDocumentConfig[]; 
   assessmentConfig?: AssessmentConfig;

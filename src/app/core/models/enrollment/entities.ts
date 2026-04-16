@@ -99,6 +99,7 @@ export interface Admission {
 export interface AdmissionBundle {
   id: string;
   tenantId: string;
+  reference: string; // Ajouté (ex: FAM-2026-XXXX)
   accessCode: string;
   family: FamilyPillar;
   admissions: Admission[];

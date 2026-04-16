@@ -105,11 +105,11 @@ export class SoftEnrollmentComponent implements OnInit {
     }).pipe(
       finalize(() => this.isLoading.set(false))
     ).subscribe({
-      next: (res) => {
+      next: (res: AdmissionApplication) => {
         this.application.set(res);
         this.currentStep.set('SUCCESS');
       },
-      error: (e) => {
+      error: (e: any) => {
         console.error('Erreur lors de la réinscription:', e);
         alert('Impossible de valider la réinscription pour le moment.');
       }

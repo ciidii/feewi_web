@@ -1,6 +1,6 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable, catchError, throwError } from 'rxjs';
+import {Injectable, inject} from '@angular/core';
+import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
+import {Observable, catchError, throwError} from 'rxjs';
 import {
   Admission,
   AdmissionBundleResponse,
@@ -9,9 +9,9 @@ import {
   EffectiveConfigResponse,
   PublicPortalSummary
 } from '../models/enrollment.model';
-import { TenantContextService } from './tenant-context.service';
-import { EnvironmentService } from './environment.service';
-import { NotificationService } from '../../shared/services/notification.service';
+import {TenantContextService} from './tenant-context.service';
+import {EnvironmentService} from './environment.service';
+import {NotificationService} from '../../shared/services/notification.service';
 
 @Injectable({
   providedIn: 'root'
@@ -41,9 +41,9 @@ export class EnrollmentPublicService {
   }
 
   /** Résumé du portail V5/V6 */
-  getPortalSummary(): Observable<PublicPortalSummary> {
+  getPortalConfigSummary(): Observable<PublicPortalSummary> {
     const url = `${this.envService.getServiceUrl('enrollment')}/public/config/summary`;
-    return this.http.get<PublicPortalSummary>(url, { headers: this.getHeaders() }).pipe(
+    return this.http.get<PublicPortalSummary>(url, {headers: this.getHeaders()}).pipe(
       catchError(this.handleError('Impossible de charger le résumé du portail'))
     );
   }
@@ -51,7 +51,7 @@ export class EnrollmentPublicService {
   /** Configuration dynamique par niveau (Source du moteur de rendu) */
   getEffectiveConfig(levelId: string): Observable<EffectiveConfigResponse> {
     const url = `${this.envService.getServiceUrl('enrollment')}/public/config/${levelId}`;
-    return this.http.get<EffectiveConfigResponse>(url, { headers: this.getHeaders() }).pipe(
+    return this.http.get<EffectiveConfigResponse>(url, {headers: this.getHeaders()}).pipe(
       catchError(this.handleError('Impossible de charger la configuration'))
     );
   }
@@ -63,40 +63,47 @@ export class EnrollmentPublicService {
     }).pipe(catchError(this.handleError('Erreur initialisation')));
   }
 
-  /** 
+  /**
    * V6 : Mise à jour d'un pilier Enfant
    * PATCH /admissions/{id}/pillars/{pillarKey}
    */
   updateChildPillar(admissionId: string, pillarKey: string, data: any): Observable<Admission> {
-    return this.http.patch<Admission>(`${this.baseUrl}/${admissionId}/pillars/${pillarKey}`, data, { 
-      headers: this.getHeaders() 
+    return this.http.patch<Admission>(`${this.baseUrl}/${admissionId}/pillars/${pillarKey}`, data, {
+      headers: this.getHeaders()
     }).pipe(catchError(this.handleError(`Erreur sur le pilier ${pillarKey}`)));
   }
 
-  /** 
+  /**
    * V6 : Mise à jour du pilier Famille (Shared)
    * PATCH /admissions/bundles/{id}/pillars/pillar_family
    */
   updateFamilyPillar(bundleId: string, data: any): Observable<AdmissionBundleResponse> {
-    return this.http.patch<AdmissionBundleResponse>(`${this.baseUrl}/bundles/${bundleId}/pillars/pillar_family`, data, { 
-      headers: this.getHeaders() 
+    return this.http.patch<AdmissionBundleResponse>(`${this.baseUrl}/bundles/${bundleId}/pillars/pillar_family`, data, {
+      headers: this.getHeaders()
     }).pipe(catchError(this.handleError('Erreur sur le volet famille')));
+  }
+
+  /** Réinscription (V6) */
+  reEnroll(request: ReEnrollRequest): Observable<Admission> {
+    return this.http.post<Admission>(`${this.baseUrl}/re-enroll`, request, {
+      headers: this.getHeaders()
+    }).pipe(catchError(this.handleError('Erreur lors de la réinscription')));
   }
 
   uploadDocument(admissionId: string, docCode: string, fileId: string): Observable<Admission> {
     const headers = this.getHeaders().set('Content-Type', 'text/plain');
-    return this.http.post<Admission>(`${this.baseUrl}/${admissionId}/documents/${docCode}`, fileId, { headers })
+    return this.http.post<Admission>(`${this.baseUrl}/${admissionId}/documents/${docCode}`, fileId, {headers})
       .pipe(catchError(this.handleError('Erreur document')));
   }
 
   submitApplication(admissionId: string): Observable<Admission> {
-    return this.http.post<Admission>(`${this.baseUrl}/${admissionId}/submit`, {}, { headers: this.getHeaders() })
+    return this.http.post<Admission>(`${this.baseUrl}/${admissionId}/submit`, {}, {headers: this.getHeaders()})
       .pipe(catchError(this.handleError('Erreur soumission')));
   }
 
   trackApplication(reference: string, accessCode: string): Observable<Admission> {
     const params = new HttpParams().set('accessCode', accessCode);
-    return this.http.get<Admission>(`${this.baseUrl}/${reference}/track`, { params })
+    return this.http.get<Admission>(`${this.baseUrl}/${reference}/track`, {params})
       .pipe(catchError(this.handleError('Suivi introuvable')));
   }
 }

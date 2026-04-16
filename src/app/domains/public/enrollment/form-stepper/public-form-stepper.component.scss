@@ -1,4 +1,4 @@
-@use '../../../../../../styles/tokens' as *;
+@use '../../../../../styles/tokens' as *;
 
 :host {
   display: block;
@@ -88,6 +88,57 @@
       display: flex; gap: 0.75rem; align-items: center;
       span { font-size: 11px; font-weight: 600; line-height: 1.4; opacity: 0.8; }
     }
+  }
+}
+
+/* --- SESSION RECOVERY BOX (V6) --- */
+.session-recovery-box {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+
+  .recovery-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--fw-primary);
+    margin-bottom: 1rem;
+  }
+
+  .recovery-codes {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    .code-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      
+      .label { font-size: 11px; opacity: 0.6; }
+      .value { 
+        font-family: monospace; 
+        font-weight: 800; 
+        color: white; 
+        font-size: 0.875rem;
+        letter-spacing: 0.05em;
+        
+        &.secret { color: var(--fw-primary); }
+      }
+    }
+  }
+
+  .recovery-hint {
+    margin-top: 1rem;
+    font-size: 10px;
+    color: var(--fw-slate-medium);
+    font-style: italic;
+    line-height: 1.4;
   }
 }
 
@@ -186,7 +237,7 @@
     justify-content: space-between;
     padding: 1rem 0;
     border-bottom: 1px solid var(--fw-ice);
-    
+
     &:last-child { border: none; }
 
     .label { font-weight: 600; color: var(--fw-slate-medium); font-size: 0.875rem; }
@@ -208,7 +259,7 @@
     cursor: pointer;
     font-weight: 700;
     color: var(--fw-midnight);
-    
+
     input { width: 24px; height: 24px; accent-color: var(--fw-success); }
   }
 }
@@ -260,6 +311,56 @@
     &:hover {
       color: var(--fw-midnight);
     }
+  }
+}
+
+/* --- SERVICES CARDS V6 --- */
+.service-card-premium {
+  background: white;
+  padding: 2rem;
+  border-radius: 24px;
+  border: 2px solid var(--fw-border);
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    border-color: var(--fw-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--fw-shadow-md);
+  }
+
+  &.active {
+    border-color: var(--fw-primary);
+    background: var(--fw-primary-alpha);
+    .check-box { background: var(--fw-primary); border-color: var(--fw-primary); &::after { content: '✓'; color: white; display: grid; place-items: center; font-size: 12px; } }
+  }
+
+  .icon-box {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: var(--fw-ice);
+    color: var(--fw-primary);
+    display: grid;
+    place-items: center;
+    lucide-icon { width: 24px; height: 24px; }
+  }
+
+  .info {
+    flex: 1;
+    .title { font-weight: 800; color: var(--fw-midnight); font-size: 1.125rem; }
+    p { font-size: 0.875rem; color: var(--fw-slate-medium); margin-top: 4px; }
+  }
+
+  .check-box {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid var(--fw-border);
+    transition: all 0.2s;
   }
 }
 

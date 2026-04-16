@@ -38,12 +38,6 @@ Permet au parent de choisir son année de rentrée.
       "label": "2025-2026",
       "registrationEndDate": "2025-09-30",
       "active": true
-    },
-    {
-      "id": "uuid-2026",
-      "label": "2026-2027",
-      "registrationEndDate": "2026-09-15",
-      "active": true
     }
   ]
 }
@@ -51,12 +45,41 @@ Permet au parent de choisir son année de rentrée.
 
 ---
 
-## 3. API Administration (Configuration)
+## 3. API Administration (Configuration & Pilotage)
 Base URL : `/enrollment/api/v1/admin/config`
 
-### 3.1 Contrôle Temporel & Opérationnel
-*   **Verrou par Année** : `PUT /` (Champ `yearOverrides`). Permet de masquer une année du portail public.
-*   **Verrou par Niveau** : `PATCH /level-overrides/{levelId}`. Permet de fermer les inscriptions pour une classe précise (ex: 6ème complète).
+### 3.1 Le Master Switch (Interrupteur Global)
+*   **URL** : `PATCH /portal-status?active={true|false}`
+*   **Description** : Coupe ou ouvre instantanément TOUT le portail public, quelles que soient les dates.
+
+### 3.2 Gestion de la Structure (Piliers & Champs)
+*   **Récupérer** : `GET /` (Retourne l'objet `EnrollmentConfig` complet).
+*   **Sauvegarder** : `PUT /`
+  *   **Usage** : Permet de modifier les labels des piliers, d'ajouter/supprimer des champs personnalisés et de définir le `registrationMode`.
+  *   **Contrainte (Gouvernance)** : On ne peut pas désactiver les piliers `pillar_identity` et `pillar_family`.
+
+### 3.3 Contrôle Temporel (Par Année Scolaire)
+*   **URL** : `PUT /` (Champ `yearOverrides`)
+*   **Description** : Permet de gérer la liste des années visibles sur le portail public.
+*   **Objet `YearOverride`** :
+```json
+"yearOverrides": {
+  "uuid-année-2026": { "active": true },
+  "uuid-année-2025": { "active": false } 
+}
+```
+
+### 3.4 Contrôle Opérationnel (Par Niveau / Classe)
+*   **URL** : `PATCH /level-overrides/{levelId}`
+*   **Description** : Fine-tuning pour un niveau spécifique.
+*   **Champs Clés** :
+  *   `active` (boolean) : Ferme les inscriptions pour ce niveau uniquement (ex: 6ème complète).
+  *   `maxNewEnrollments` (int) : Définit le quota de places nouvelles pour l'année.
+  *   `pillarOverrides` : Permet de demander des champs différents (ex: "L'enfant est-il propre ?" uniquement en Maternelle).
+
+### 3.5 Procédure de Secours
+*   **URL** : `POST /reset`
+*   **Usage** : Réinitialise tout (Piliers, Checklist, Dates) aux valeurs d'usine de Feewi.
 
 ---
 
@@ -64,36 +87,27 @@ Base URL : `/enrollment/api/v1/admin/config`
 Base URL : `/enrollment/api/v1/admin/admissions`
 
 ### 4.1 Saisie des Notes (`PATCH /{id}/assessment`)
-*   **Payload** : 
-```json
-{
-  "grades": { "Mathématiques": 14.0, "Français": 11.5 },
-  "comments": "Bon niveau",
-  "recommendedLevelId": "uuid"
-}
-```
-*   **Réponse** : L'objet contient `averageGrade` (ex: `12.93`).
+Le backend calcule automatiquement `averageGrade` et suggère la `decision`.
 
 ---
 
 ## 5. Modèles de Données (Typescript)
 
 ```typescript
-export interface Admission {
-  id: string;
-  reference: string;
-  identity: IdentityPillar;
-  medical: MedicalPillar;
-  schooling: SchoolingPillar;
-  status: string;
+export interface LevelOverride {
+  active: boolean;
+  maxNewEnrollments?: number;
+  pillarOverrides: Record<string, PillarConfig>;
+  assessmentConfig: AssessmentConfig;
 }
 
-export interface Assessment {
-  grades: Record<string, number>;
-  averageGrade?: number;
-  decision: 'ADMITTED' | 'ADMITTED_WITH_RESERVE' | 'REJECTED';
+export interface PillarConfig {
+  label: string;
+  enabled: boolean;
+  systemFields: SystemFieldDefinition[];
+  customFields: CustomFieldDefinition[];
 }
 ```
 
 ---
-*Documentation Technique - Mise à jour Workflow, Calculs & Temporalité - Avril 2026*
+*Documentation Technique - Pilotage CMS & Flux - Avril 2026*

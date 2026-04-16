@@ -27,6 +27,8 @@ export interface EffectiveConfigResponse {
   pillars: Record<string, PillarConfig>;
   /** Pièces justificatives finales (Global + Surcharges) */
   documentChecklist: RequiredDocumentConfig[];
+  /** Services activés pour ce niveau */
+  enabledServices: string[];
   /** Instructions par étape */
   instructions?: Record<string, string>;
 }

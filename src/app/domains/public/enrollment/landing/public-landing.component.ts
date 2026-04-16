@@ -42,7 +42,7 @@ export class PublicLandingComponent implements OnInit {
 
   loadSummary() {
     this.isLoading.set(true);
-    this.enrollmentService.getPortalSummary().pipe(
+    this.enrollmentService.getPortalConfigSummary().pipe(
       finalize(() => this.isLoading.set(false))
     ).subscribe(data => {
       this.summary.set(data);
