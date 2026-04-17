@@ -3,6 +3,8 @@ import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {
   AlertTriangle,
+  Calendar,
+  CalendarClock,
   ClipboardList,
   Eye,
   FileText,
@@ -25,11 +27,20 @@ import {
   ToggleLeft as ToggleIcon,
   Trash2,
   UserCog,
-  Users
+  Users,
+  Wrench
 } from 'lucide-angular';
 import {finalize, forkJoin, Observable} from 'rxjs';
 import {EnrollmentAdminService} from '../../../../../core/services/enrollment-admin.service';
-import {EnrollmentConfig, FieldConfig, LevelOverrideConfig, PresetDocumentConfig} from '../../../../../core/models/enrollment.model';
+import {
+  EnrollmentConfig,
+  FieldConfig,
+  LevelOverrideConfig,
+  PresetDocumentConfig,
+  ServiceConfig,
+  ServicesSchemaConfig,
+  YearOverrideConfig
+} from '../../../../../core/models/enrollment.model';
 import {NotificationService} from '../../../../../shared/services/notification.service';
 import {AcademicService} from '../../../../../core/services/academic.service';
 import {AcademicYear, Level} from '../../../../../core/models/academic.model';
@@ -38,9 +49,10 @@ import {DocumentTypeFormComponent} from './components/document-type-form/documen
 import {CustomFieldFormComponent} from './components/custom-field-form/custom-field-form.component';
 import {PortalPreviewDialogComponent} from './components/portal-preview-dialog/portal-preview-dialog.component';
 import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
+import {ServiceFormComponent} from './components/service-form/service-form.component';
 
-export type ConfigTab = 'PILLARS' | 'DOCUMENTS' | 'ASSESSMENT' | 'WORKFLOW';
-export type ConfigScope = 'GLOBAL' | 'LEVEL';
+export type ConfigTab = 'PILLARS' | 'DOCUMENTS' | 'ASSESSMENT' | 'SERVICES' | 'WORKFLOW';
+export type ConfigScope = 'GLOBAL' | 'LEVEL' | 'YEAR';
 
 @Component({
   selector: 'app-admission-config',
@@ -67,8 +79,20 @@ export class AdmissionConfigComponent implements OnInit {
   isSaving = signal(false);
   currentScope = signal<ConfigScope>('GLOBAL');
   selectedLevelId = signal<string | null>(null);
+  selectedYearId = signal<string | null>(null);
   activeTab = signal<ConfigTab>('PILLARS');
   activePillarKey = signal<string>('identity');
+
+  // Year override local form state (isolated from global config)
+  yearOverrideForm = signal<YearOverrideConfig>({
+    enrollmentOpen: true,
+    openFrom: null,
+    openUntil: null,
+    allowedTypes: ['NEW_ENROLLMENT', 'RE_ENROLLMENT'],
+    registrationMode: null,
+    welcomeMessage: null
+  });
+  isYearOverrideSaving = signal(false);
 
   // --- STATIC DATA ---
   readonly systemPillars = [
@@ -85,7 +109,7 @@ export class AdmissionConfigComponent implements OnInit {
   ];
 
   readonly registrationModes = [
-    {value: 'PARENT_ONLY', label: 'Portail parents', desc: 'Inscription en ligne uniquement',  icon: Users},
+    {value: 'PARENT_ONLY', label: 'Portail parents', desc: 'Inscription en ligne uniquement',   icon: Users},
     {value: 'ADMIN_ONLY',  label: 'Guichet seul',    desc: 'Saisie directe par le secrétariat', icon: UserCog},
     {value: 'BOTH',        label: 'Mode mixte',      desc: 'Portail et guichet activés',         icon: Globe}
   ];
@@ -94,6 +118,11 @@ export class AdmissionConfigComponent implements OnInit {
   selectedLevelName = computed(() => {
     const id = this.selectedLevelId();
     return id ? (this.levels().find(l => l.id === id)?.name || id) : '';
+  });
+
+  selectedYearName = computed(() => {
+    const id = this.selectedYearId();
+    return id ? (this.availableYears().find(y => y.id === id)?.label || id) : '';
   });
 
   isDirty = computed(() => {
@@ -111,7 +140,6 @@ export class AdmissionConfigComponent implements OnInit {
     this.systemPillars.find(p => p.key === this.activePillarKey())?.label || ''
   );
 
-  /** Core field labels: coreFieldControls for identity/medical/schooling, guardianCoreFieldControls for family */
   activePillarCoreFields = computed<{name: string; label: string}[]>(() => {
     const pillar = this.activePillar();
     if (!pillar) return [];
@@ -122,7 +150,6 @@ export class AdmissionConfigComponent implements OnInit {
     return Object.entries(controls as Record<string, any>).map(([name, ctrl]) => ({name, label: ctrl.label as string}));
   });
 
-  /** Custom fields: customFields for most pillars, guardianCustomFields for family */
   activePillarCustomFields = computed<FieldConfig[]>(() => {
     const pillar = this.activePillar();
     if (!pillar) return [];
@@ -135,6 +162,18 @@ export class AdmissionConfigComponent implements OnInit {
     Object.entries(this.config()?.schema?.assessment?.subjects || {})
       .map(([name, coef]) => ({name, coef}))
   );
+
+  activeServices = computed<ServiceConfig[]>(() =>
+    this.config()?.schema?.services?.availableServices || []
+  );
+
+  servicesEnabled = computed(() =>
+    this.config()?.schema?.services?.enabled ?? false
+  );
+
+  hasYearOverride(yearId: string): boolean {
+    return !!(this.config() as any)?.yearOverrides?.[yearId];
+  }
 
   // --- HELPERS ---
   isPillarEnabled(key: string): boolean {
@@ -160,6 +199,8 @@ export class AdmissionConfigComponent implements OnInit {
           config.schema.assessment = {type: 'DOSSIER', subjects: {}, maxGrade: 20, minPassingGrade: 10};
         if (!config.schema.documents.presetDocuments)
           config.schema.documents.presetDocuments = [];
+        if (!config.schema.services)
+          config.schema.services = {enabled: false, availableServices: []};
         this.config.set(config);
         this.initialConfig.set(JSON.parse(JSON.stringify(config)));
         this.activeYear.set(activeYear);
@@ -191,9 +232,82 @@ export class AdmissionConfigComponent implements OnInit {
     });
   }
 
-  setScope(scope: ConfigScope, levelId: string | null = null) {
+  setScope(scope: ConfigScope, id: string | null = null) {
     this.currentScope.set(scope);
-    this.selectedLevelId.set(levelId);
+    if (scope === 'LEVEL') {
+      this.selectedLevelId.set(id);
+      this.selectedYearId.set(null);
+    } else if (scope === 'YEAR') {
+      this.selectedYearId.set(id);
+      this.selectedLevelId.set(null);
+      this.loadYearOverrideForm(id!);
+    } else {
+      this.selectedLevelId.set(null);
+      this.selectedYearId.set(null);
+    }
+  }
+
+  private loadYearOverrideForm(yearId: string) {
+    const existing = (this.config() as any)?.yearOverrides?.[yearId];
+    if (existing) {
+      this.yearOverrideForm.set({...existing});
+    } else {
+      this.yearOverrideForm.set({
+        enrollmentOpen: true,
+        openFrom: null,
+        openUntil: null,
+        allowedTypes: ['NEW_ENROLLMENT', 'RE_ENROLLMENT'],
+        registrationMode: null,
+        welcomeMessage: null
+      });
+    }
+  }
+
+  updateYearOverrideField<K extends keyof YearOverrideConfig>(key: K, value: YearOverrideConfig[K]) {
+    this.yearOverrideForm.update(f => ({...f, [key]: value}));
+  }
+
+  toggleYearAllowedType(type: 'NEW_ENROLLMENT' | 'RE_ENROLLMENT') {
+    const current = this.yearOverrideForm().allowedTypes ?? [];
+    const updated = current.includes(type)
+      ? current.filter(t => t !== type)
+      : [...current, type];
+    this.yearOverrideForm.update(f => ({...f, allowedTypes: updated}));
+  }
+
+  saveYearOverride() {
+    const yearId = this.selectedYearId();
+    if (!yearId) return;
+    this.isYearOverrideSaving.set(true);
+    this.enrollmentService.updateYearOverride(yearId, this.yearOverrideForm())
+      .pipe(finalize(() => this.isYearOverrideSaving.set(false)))
+      .subscribe({
+        next: () => {
+          this.notificationService.success('Override année publié.');
+          this.loadInitialData();
+        }
+      });
+  }
+
+  deleteYearOverride() {
+    const yearId = this.selectedYearId();
+    if (!yearId) return;
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Supprimer l\'override',
+        message: 'L\'année reviendra au comportement ouvert par défaut.',
+        confirmLabel: 'Supprimer',
+        cancelLabel: 'Annuler',
+        type: 'danger'
+      }
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.isYearOverrideSaving.set(true);
+      this.enrollmentService.deleteYearOverride(yearId)
+        .pipe(finalize(() => this.isYearOverrideSaving.set(false)))
+        .subscribe({next: () => { this.notificationService.success('Override supprimé.'); this.loadInitialData(); }});
+    });
   }
 
   // --- PILLAR METHODS ---
@@ -250,6 +364,15 @@ export class AdmissionConfigComponent implements OnInit {
     this.config.set({...current, schema: {...current.schema, documents: {...current.schema.documents, presetDocuments}}});
   }
 
+  updateDocumentName(code: string, name: string) {
+    const current = this.config();
+    if (!current) return;
+    const presetDocuments = current.schema.documents.presetDocuments.map((d: PresetDocumentConfig) =>
+      d.code === code ? {...d, name} : d
+    );
+    this.config.set({...current, schema: {...current.schema, documents: {...current.schema.documents, presetDocuments}}});
+  }
+
   addDocumentType() {
     this.dialog.open(DocumentTypeFormComponent, {width: '450px', panelClass: 'feewi-dialog-panel'})
       .afterClosed().subscribe(result => {
@@ -264,15 +387,6 @@ export class AdmissionConfigComponent implements OnInit {
     const current = this.config();
     if (!current) return;
     const presetDocuments = current.schema.documents.presetDocuments.filter((d: PresetDocumentConfig) => d.code !== code);
-    this.config.set({...current, schema: {...current.schema, documents: {...current.schema.documents, presetDocuments}}});
-  }
-
-  updateDocumentName(code: string, name: string) {
-    const current = this.config();
-    if (!current) return;
-    const presetDocuments = current.schema.documents.presetDocuments.map((d: PresetDocumentConfig) =>
-      d.code === code ? {...d, name} : d
-    );
     this.config.set({...current, schema: {...current.schema, documents: {...current.schema.documents, presetDocuments}}});
   }
 
@@ -312,6 +426,41 @@ export class AdmissionConfigComponent implements OnInit {
     const subjects = {...c.schema.assessment.subjects};
     delete subjects[subject];
     this.config.set({...c, schema: {...c.schema, assessment: {...c.schema.assessment, subjects}}});
+  }
+
+  // --- SERVICES METHODS ---
+
+  private patchServices(patch: Partial<ServicesSchemaConfig>) {
+    const c = this.config();
+    if (!c) return;
+    const services = {...(c.schema.services ?? {enabled: false, availableServices: []}), ...patch};
+    this.config.set({...c, schema: {...c.schema, services}});
+  }
+
+  toggleServicesEnabled() {
+    this.patchServices({enabled: !this.servicesEnabled()});
+  }
+
+  addService() {
+    this.dialog.open(ServiceFormComponent, {width: '500px', panelClass: 'feewi-dialog-panel'})
+      .afterClosed().subscribe((result: ServiceConfig | undefined) => {
+        if (!result) return;
+        this.patchServices({
+          availableServices: [...this.activeServices(), result]
+        });
+      });
+  }
+
+  updateServiceMandatory(code: string, mandatory: boolean) {
+    this.patchServices({
+      availableServices: this.activeServices().map(s => s.code === code ? {...s, mandatory} : s)
+    });
+  }
+
+  removeService(code: string) {
+    this.patchServices({
+      availableServices: this.activeServices().filter(s => s.code !== code)
+    });
   }
 
   // --- WORKFLOW METHODS ---
@@ -366,4 +515,5 @@ export class AdmissionConfigComponent implements OnInit {
   readonly HeartPulse = HeartPulse; readonly Users = Users; readonly School = School;
   readonly FileText = FileText; readonly Hash = Hash; readonly ToggleIcon = ToggleIcon;
   readonly AlertTriangle = AlertTriangle; readonly UserCog = UserCog;
+  readonly Calendar = Calendar; readonly CalendarClock = CalendarClock; readonly Wrench = Wrench;
 }
