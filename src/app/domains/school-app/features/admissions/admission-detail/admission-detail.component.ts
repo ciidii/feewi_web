@@ -82,12 +82,12 @@ export class AdmissionDetailComponent implements OnInit {
   levelName = computed(() => {
     const app = this.application();
     if (!app) return '...';
-    return this.levels().find(l => l.id === app.schooling?.levelId)?.name || 'Niveau inconnu';
+    return this.levels().find(l => l.id === app.schooling.levelId)?.name || 'Niveau inconnu';
   });
 
   filiereName = computed(() => {
     const app = this.application();
-    if (!app || !app.schooling?.filiereId) return null;
+    if (!app || !app.schooling.filiereId) return null;
     return this.filieres().find(f => f.id === app.schooling.filiereId)?.name || 'Filière inconnue';
   });
 
@@ -109,7 +109,7 @@ export class AdmissionDetailComponent implements OnInit {
     const mandatory = app.documents.filter(d => d.mandatory);
     return {
       total: mandatory.length,
-      received: mandatory.filter(d => d.status === 'UPLOADED' || d.status === 'PHYSICAL_RECEIVED').length
+      received: mandatory.filter(d => d.status === 'UPLOADED' || d.status === 'RECEIVED').length
     };
   });
 
@@ -153,13 +153,13 @@ export class AdmissionDetailComponent implements OnInit {
         this.filieres.set(filieres);
         this.activeYear.set(year);
 
-        const targetLevelId = app.schooling?.levelId;
+        const targetLevelId = app.schooling.levelId;
 
         if (targetLevelId) {
           return this.enrollmentAdminService.getEffectiveConfig(targetLevelId);
         } else {
           return this.enrollmentAdminService.getConfig().pipe(
-            map(cfg => ({ documentChecklist: cfg.documentChecklist, assessmentConfig: cfg.assessmentConfig }))
+            map(cfg => ({ schema: cfg.schema }))
           );
         }
 
@@ -167,19 +167,17 @@ export class AdmissionDetailComponent implements OnInit {
       finalize(() => this.isLoading.set(false))
     ).subscribe({
       next: (effectiveConfig: any) => {
-        const aConfig = effectiveConfig.assessmentConfig;
+        const aConfig = effectiveConfig?.schema?.assessment;
         if (aConfig) {
-          this.assessmentSubjects.set(aConfig.subjects || []);
+          const subjectKeys = Object.keys(aConfig.subjects || {});
+          this.assessmentSubjects.set(subjectKeys);
           this.minPassingGrade.set(aConfig.minPassingGrade || 10);
 
           const app = this.application();
           const initialGrades: Record<string, number> = {};
-
-          if (aConfig.subjects && Array.isArray(aConfig.subjects)) {
-            aConfig.subjects.forEach((sub: string) => {
-              initialGrades[sub] = app?.assessment?.grades?.[sub] || 0;
-            });
-          }
+          subjectKeys.forEach((sub: string) => {
+            initialGrades[sub] = app?.assessment?.grades?.[sub] || 0;
+          });
           this.evaluationGrades.set(initialGrades);
         }
 
@@ -265,8 +263,7 @@ export class AdmissionDetailComponent implements OnInit {
     const payload: AssessmentRequest = {
       grades: this.evaluationGrades(),
       comments: this.evaluationComment,
-      decision: this.pedagogicalDecision(),
-      recommendedLevelId: this.recommendedLevelId() || undefined
+      recommendedLevelId: this.recommendedLevelId()
     };
 
     this.enrollmentAdminService.submitAssessment(app.id, payload).pipe(

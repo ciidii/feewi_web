@@ -1,4 +1,4 @@
-<div class="onboarding-layout" *ngIf="summary() && !isPortalClosed(); else initialLoading">
+<div class="onboarding-layout" *ngIf="config() && !isPortalClosed(); else initialLoading">
 
   <!-- BARRE LATÉRALE DE PROGRESSION -->
   <aside class="onboarding-sidebar">
@@ -26,7 +26,7 @@
         <div class="step-icon"><lucide-icon [name]="HeartPulse"></lucide-icon></div>
         <div class="step-text"><span class="step-label">Santé</span></div>
       </div>
-      <div class="nav-step" *ngIf="hasService('CANTEEN') || hasService('TRANSPORT')" [class.active]="currentStep() === 'SERVICES'" [class.completed]="progress() > 60">
+      <div class="nav-step" *ngIf="config()?.enabledServices?.includes('CANTEEN') || config()?.enabledServices?.includes('TRANSPORT')" [class.active]="currentStep() === 'SERVICES'" [class.completed]="progress() > 60">
         <div class="step-icon"><lucide-icon [name]="LayoutGrid"></lucide-icon></div>
         <div class="step-text"><span class="step-label">Services</span></div>
       </div>
@@ -57,47 +57,46 @@
   <main class="onboarding-main">
     <div class="main-container">
 
-      <!-- COMPOSANTS DE MISSION (DYNAMIQUES) -->
       <app-step-family
         *ngIf="currentStep() === 'GUARDIAN'"
-        [data]="formStore.pillar_family"
-        [config]="effectiveConfig()?.pillars?.['pillar_family']">
+        [data]="formStore.family"
+        [customFields]="config()?.schema?.family?.guardianCustomFields || []">
       </app-step-family>
 
       <app-step-identity
         *ngIf="currentStep() === 'STUDENT'"
-        [identity]="formStore.pillar_identity"
-        [schooling]="formStore.pillar_schooling"
-        [config]="effectiveConfig()?.pillars?.['pillar_identity']"
+        [identity]="formStore.identity"
+        [schooling]="formStore.schooling"
+        [customFields]="config()?.schema?.identity?.customFields || []"
         [availableLevels]="availableLevels()"
         (onLevelChange)="onLevelChange($event)">
       </app-step-identity>
 
       <app-step-medical
         *ngIf="currentStep() === 'MEDICAL'"
-        [medical]="formStore.pillar_medical"
-        [config]="effectiveConfig()?.pillars?.['pillar_medical']">
+        [medical]="formStore.medical"
+        [customFields]="config()?.schema?.medical?.customFields || []">
       </app-step-medical>
 
       <app-step-services
         *ngIf="currentStep() === 'SERVICES'"
         [services]="formStore.services"
-        [enabledServices]="effectiveConfig()?.enabledServices || []">
+        [enabledServices]="config()?.enabledServices || []">
       </app-step-services>
 
       <app-step-vault
         *ngIf="currentStep() === 'DOCS'"
-        [checklist]="effectiveConfig()?.documentChecklist || []"
-        [application]="application()"
+        [checklist]="config()?.schema?.documents?.presetDocuments || []"
+        [application]="admission()"
         [uploadingDocCode]="uploadingDocCode()"
         (onFileSelected)="onVaultFileSelected($event)">
       </app-step-vault>
 
       <app-step-review
         *ngIf="currentStep() === 'REVIEW'"
-        [family]="formStore.pillar_family"
-        [identity]="formStore.pillar_identity"
-        [schooling]="formStore.pillar_schooling"
+        [family]="formStore.family"
+        [identity]="formStore.identity"
+        [schooling]="formStore.schooling"
         [consent]="consent">
       </app-step-review>
 

@@ -9,7 +9,7 @@ import {
 import { ActivatedRoute } from '@angular/router';
 import { EnrollmentPublicService } from '../../../../core/services/enrollment-public.service';
 import { AdmissionSessionService } from '../../../../core/services/admission-session.service';
-import { AdmissionApplication } from '../../../../core/models/enrollment.model';
+import { Admission } from '../../../../core/models/enrollment.model';
 import { finalize, firstValueFrom } from 'rxjs';
 
 @Component({
@@ -26,7 +26,7 @@ export class PublicTrackerComponent implements OnInit {
   private sessionService = inject(AdmissionSessionService);
 
   // État du dossier chargé depuis l'API
-  application = signal<AdmissionApplication | null>(null);
+  application = signal<Admission | null>(null);
   isLoading = signal(false);
   error = signal<string | null>(null);
 
@@ -55,7 +55,7 @@ export class PublicTrackerComponent implements OnInit {
     const queryAccessCode = this.route.snapshot.queryParamMap.get('accessCode');
     const session = this.sessionService.getSession();
 
-    const accessCode = queryAccessCode || (session?.reference === reference ? session?.accessCode : null);
+    const accessCode = queryAccessCode || session?.accessCode || null;
 
     if (!accessCode) {
       this.isLoading.set(false);
@@ -64,10 +64,10 @@ export class PublicTrackerComponent implements OnInit {
 
     this.isLoading.set(true);
     this.error.set(null);
-    this.enrollmentService.trackApplication(reference, accessCode).pipe(
+    this.enrollmentService.trackAdmission(reference, accessCode).pipe(
       finalize(() => this.isLoading.set(false))
     ).subscribe({
-      next: (res) => this.application.set(res),
+      next: (res: Admission) => this.application.set(res),
       error: () => this.error.set('Référence ou code d’accès incorrect. Veuillez vérifier vos informations.')
     });
   }
@@ -77,10 +77,10 @@ export class PublicTrackerComponent implements OnInit {
 
     this.isLoading.set(true);
     this.error.set(null);
-    this.enrollmentService.trackApplication(this.searchData.reference, this.searchData.accessCode).pipe(
+    this.enrollmentService.trackAdmission(this.searchData.reference, this.searchData.accessCode).pipe(
       finalize(() => this.isLoading.set(false))
     ).subscribe({
-      next: (res) => {
+      next: (res: Admission) => {
         this.application.set(res);
         this.router.navigate(['/enrollment/tracker', res.reference], {
           queryParams: { accessCode: this.searchData.accessCode },

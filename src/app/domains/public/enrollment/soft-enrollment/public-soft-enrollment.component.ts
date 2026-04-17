@@ -24,8 +24,9 @@ import { delay, finalize, firstValueFrom, of } from 'rxjs';
 
 import { EnrollmentPublicService } from '../../../../core/services/enrollment-public.service';
 import { AcademicService } from '../../../../core/services/academic.service';
+import { TenantContextService } from '../../../../core/services/tenant-context.service';
 import { AcademicYear } from '../../../../core/models/academic.model';
-import { AdmissionApplication } from '../../../../core/models/enrollment.model';
+import { Admission } from '../../../../core/models/enrollment.model';
 
 export type SoftStep = 'SEARCH' | 'CONFIRM' | 'SUCCESS';
 
@@ -39,6 +40,7 @@ export type SoftStep = 'SEARCH' | 'CONFIRM' | 'SUCCESS';
 export class SoftEnrollmentComponent implements OnInit {
   private enrollmentService = inject(EnrollmentPublicService);
   private academicService = inject(AcademicService);
+  private tenantContext = inject(TenantContextService);
   private router = inject(Router);
 
   // --- ÉTATS ---
@@ -56,7 +58,7 @@ export class SoftEnrollmentComponent implements OnInit {
   student = signal<any>(null);
 
   // Simulation d'une application de réinscription créée
-  application = signal<AdmissionApplication | null>(null);
+  application = signal<Admission | null>(null);
 
   ngOnInit() {
     this.academicService.getCurrentYear().subscribe({
@@ -99,13 +101,14 @@ export class SoftEnrollmentComponent implements OnInit {
 
     this.isLoading.set(true);
     this.enrollmentService.reEnroll({
+      tenantId: this.tenantContext.activeTenant()?.id ?? '',
       studentId: studentData.id,
       academicYearId: yearId,
       nextLevelId: 'level-uuid-mocked'
     }).pipe(
       finalize(() => this.isLoading.set(false))
     ).subscribe({
-      next: (res: AdmissionApplication) => {
+      next: (res: Admission) => {
         this.application.set(res);
         this.currentStep.set('SUCCESS');
       },

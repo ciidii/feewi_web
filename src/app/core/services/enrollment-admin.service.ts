@@ -8,10 +8,10 @@ import {
   Admission,
   AdmissionPageResponse,
   AdmissionStatus,
-  EffectiveConfigResponse,
+  LevelConfigResponse,
   EnrollmentConfig,
   LevelOverrideConfig,
-  FastEntryRequest,
+  DirectEntryRequest,
   AssessmentRequest
 } from '../models/enrollment.model';
 
@@ -80,7 +80,7 @@ export class EnrollmentAdminService {
   /**
    * Saisie directe au guichet (Secretariat V3)
    */
-  createDirectApplication(request: FastEntryRequest): Observable<Admission> {
+  createDirectApplication(request: DirectEntryRequest): Observable<Admission> {
     return this.http.post<Admission>(`${this.baseUrl}/admissions/direct`, request, {headers: this.getHeaders()}).pipe(
       catchError(this.handleError('Erreur lors de la création du dossier direct'))
     );
@@ -135,9 +135,9 @@ export class EnrollmentAdminService {
   /**
    * Récupère la fusion Global + Surcharges pour un niveau
    */
-  getEffectiveConfig(levelId: string): Observable<EffectiveConfigResponse> {
-    const url = `${this.envService.getServiceUrl('enrollment')}/public/config/${levelId}`;
-    return this.http.get<EffectiveConfigResponse>(url, {headers: this.getHeaders()}).pipe(
+  getEffectiveConfig(levelId: string): Observable<LevelConfigResponse> {
+    const url = `${this.envService.getServiceUrl('enrollment')}/api/v1/public/config/${levelId}`;
+    return this.http.get<LevelConfigResponse>(url, {headers: this.getHeaders()}).pipe(
       catchError(this.handleError('Impossible de charger la configuration effective du niveau'))
     );
   }

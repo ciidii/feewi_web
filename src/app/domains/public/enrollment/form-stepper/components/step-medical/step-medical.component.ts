@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
-import {PillarConfig} from '../../../../../../core/models/enrollment';
+import { FieldConfig } from '../../../../../../core/models/enrollment';
 
 @Component({
   selector: 'app-step-medical',
@@ -18,7 +18,7 @@ import {PillarConfig} from '../../../../../../core/models/enrollment';
       <div class="premium-form-grid">
         <div class="form-group">
           <label>Groupe Sanguin</label>
-          <select [(ngModel)]="medical.bloodGroup" class="premium-select">
+          <select [(ngModel)]="medical.customFields['bloodGroup']" class="premium-select">
             <option value="">Inconnu</option>
             <option value="O+">O+</option><option value="O-">O-</option>
             <option value="A+">A+</option><option value="A-">A-</option>
@@ -28,14 +28,14 @@ import {PillarConfig} from '../../../../../../core/models/enrollment';
         </div>
         <div class="form-group full">
           <label>Allergies connues</label>
-          <textarea [(ngModel)]="medical.criticalAllergies" class="premium-textarea" rows="3"></textarea>
+          <textarea [(ngModel)]="medical.customFields['criticalAllergies']" class="premium-textarea" rows="3"></textarea>
         </div>
 
         <!-- CHAMPS DYNAMIQUES CMS MEDICAL -->
-        <ng-container *ngIf="config">
-          <div *ngFor="let field of config.customFields" class="form-group">
+        <ng-container *ngIf="customFields?.length">
+          <div *ngFor="let field of customFields" class="form-group">
             <label>{{ field.label }}</label>
-            <input type="text" [(ngModel)]="medical[field.name]" class="premium-input">
+            <input type="text" [(ngModel)]="medical.customFields[field.name]" class="premium-input">
           </div>
         </ng-container>
       </div>
@@ -44,5 +44,5 @@ import {PillarConfig} from '../../../../../../core/models/enrollment';
 })
 export class StepMedicalComponent {
   @Input() medical: any;
-  @Input() config?: PillarConfig;
+  @Input() customFields: FieldConfig[] = [];
 }

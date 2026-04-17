@@ -17,7 +17,7 @@ import {
 } from 'lucide-angular';
 import {EnrollmentAdminService} from '../../../../../core/services/enrollment-admin.service';
 import {AcademicService} from '../../../../../core/services/academic.service';
-import {AdmissionApplication} from '../../../../../core/models/enrollment.model';
+import {Admission} from '../../../../../core/models/enrollment.model';
 import {Level} from '../../../../../core/models/academic.model';
 import {finalize, forkJoin} from 'rxjs';
 
@@ -33,7 +33,7 @@ export class AdmissionDashboardComponent implements OnInit {
   private academicService = inject(AcademicService);
 
   // --- ÉTATS ---
-  applications = signal<AdmissionApplication[]>([]);
+  applications = signal<Admission[]>([]);
   levels = signal<Level[]>([]);
   isLoading = signal(true);
 
@@ -41,7 +41,7 @@ export class AdmissionDashboardComponent implements OnInit {
 
   totalApps = computed(() => this.applications().length);
 
-  newAppsCount = computed(() => this.applications().filter(a => a.type === 'NEW').length);
+  newAppsCount = computed(() => this.applications().filter(a => a.type === 'NEW_ENROLLMENT').length);
   reEnrollCount = computed(() => this.applications().filter(a => a.type === 'RE_ENROLLMENT').length);
 
   statusStats = computed(() => {

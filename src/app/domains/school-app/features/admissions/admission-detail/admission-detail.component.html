@@ -96,7 +96,7 @@
               </div>
               <div class="data-item">
                 <label>Nationalité</label>
-                <div class="value">{{ app.identity.nationality || 'Non renseignée' }}</div>
+                <div class="value">{{ app.identity.customFields?.['nationality'] || 'Non renseignée' }}</div>
               </div>
             </div>
           </div>
@@ -117,26 +117,26 @@
             <div class="info-grid-modern">
               <div class="data-item">
                 <label>Groupe Sanguin</label>
-                <div class="value">{{ app.medical.bloodGroup || 'Non renseigné' }}</div>
+                <div class="value">{{ app.medical.customFields?.['bloodGroup'] || 'Non renseigné' }}</div>
               </div>
               <div class="data-item col-span-3">
                 <label>Allergies Critiques</label>
-                <div class="value text-rose-600 font-bold">{{ app.medical.criticalAllergies || 'Aucune signalée' }}</div>
+                <div class="value text-rose-600 font-bold">{{ app.medical.customFields?.['criticalAllergies'] || 'Aucune signalée' }}</div>
               </div>
               <div class="data-item">
                 <label>Contact Urgence (Nom)</label>
-                <div class="value">{{ app.medical.emergencyContactName || 'Non renseigné' }}</div>
+                <div class="value">{{ app.medical.customFields?.['emergencyContactName'] || 'Non renseigné' }}</div>
               </div>
               <div class="data-item">
                 <label>Contact Urgence (Tél)</label>
-                <div class="value font-mono">{{ app.medical.emergencyContactPhone || 'Non renseigné' }}</div>
+                <div class="value font-mono">{{ app.medical.customFields?.['emergencyContactPhone'] || 'Non renseigné' }}</div>
               </div>
             </div>
           </div>
         </section>
 
         <!-- PILIER 3 : FAMILLE -->
-        <section class="card col-span-12" *ngIf="app.family">
+        <section class="card col-span-12" *ngIf="app.primaryGuardian">
           <div class="card-header-modern">
             <div class="icon-box text-emerald-600 bg-emerald-50">
               <lucide-icon [name]="Users" [size]="18"></lucide-icon>
@@ -147,21 +147,20 @@
             </div>
           </div>
           <div class="card-content">
-            <div class="parent-profile" *ngIf="app.family.primaryGuardian">
+            <div class="parent-profile">
               <div class="profile-header">
-                <div class="avatar-circle">{{ app.family.primaryGuardian.firstName[0] }}{{ app.family.primaryGuardian.lastName[0] }}</div>
+                <div class="avatar-circle">{{ app.primaryGuardian.firstName[0] }}{{ app.primaryGuardian.lastName[0] }}</div>
                 <div class="profile-info">
-                  <h3>{{ app.family.primaryGuardian.firstName }} {{ app.family.primaryGuardian.lastName }}</h3>
+                  <h3>{{ app.primaryGuardian.firstName }} {{ app.primaryGuardian.lastName }}</h3>
                   <div class="flex gap-2">
-                    <span class="relation-tag">{{ app.family.primaryGuardian.relation }}</span>
-                    <span class="relation-tag financial" *ngIf="app.family.primaryGuardian.isFinancialResponsible">Responsable Financier</span>
+                    <span class="relation-tag">{{ app.primaryGuardian.relation }}</span>
+                    <span class="relation-tag financial" *ngIf="app.primaryGuardian.financialResponsible">Responsable Financier</span>
                   </div>
                 </div>
               </div>
               <div class="contact-strip">
-                <div class="contact-item"><lucide-icon [name]="Mail" [size]="14"></lucide-icon> {{ app.family.primaryGuardian.email }}</div>
-                <div class="contact-item"><lucide-icon [name]="Phone" [size]="14"></lucide-icon> {{ app.family.primaryGuardian.phone }}</div>
-                <div class="contact-item"><lucide-icon [name]="MapPin" [size]="14"></lucide-icon> {{ app.family.homeAddress }}</div>
+                <div class="contact-item"><lucide-icon [name]="Mail" [size]="14"></lucide-icon> {{ app.primaryGuardian.email }}</div>
+                <div class="contact-item"><lucide-icon [name]="Phone" [size]="14"></lucide-icon> {{ app.primaryGuardian.phone }}</div>
               </div>
             </div>
           </div>
@@ -190,7 +189,7 @@
               </div>
               <div class="data-item col-span-2">
                 <label>Dernier établissement fréquenté</label>
-                <div class="value">{{ app.schooling.previousSchool || 'Non renseigné' }}</div>
+                <div class="value">{{ app.schooling.customFields?.['previousSchool'] || 'Non renseigné' }}</div>
               </div>
             </div>
           </div>

@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
-import {PillarConfig} from '../../../../../../core/models/enrollment';
+import { FieldConfig } from '../../../../../../core/models/enrollment';
 
 @Component({
   selector: 'app-step-identity',
@@ -44,10 +44,10 @@ import {PillarConfig} from '../../../../../../core/models/enrollment';
         </div>
 
         <!-- CHAMPS DYNAMIQUES CMS IDENTITY -->
-        <ng-container *ngIf="config">
-          <div *ngFor="let field of config.customFields" class="form-group">
+        <ng-container *ngIf="customFields?.length">
+          <div *ngFor="let field of customFields" class="form-group">
             <label>{{ field.label }}</label>
-            <input type="text" [(ngModel)]="identity[field.name]" class="premium-input">
+            <input type="text" [(ngModel)]="identity.customFields[field.name]" class="premium-input">
           </div>
         </ng-container>
       </div>
@@ -57,7 +57,7 @@ import {PillarConfig} from '../../../../../../core/models/enrollment';
 export class StepIdentityComponent {
   @Input() identity: any;
   @Input() schooling: any;
-  @Input() config?: PillarConfig;
+  @Input() customFields: FieldConfig[] = [];
   @Input() availableLevels: any[] = [];
   @Output() onLevelChange = new EventEmitter<string>();
 }

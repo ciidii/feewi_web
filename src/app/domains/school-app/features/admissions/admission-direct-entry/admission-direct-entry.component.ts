@@ -11,7 +11,7 @@ import { AcademicService } from '../../../../../core/services/academic.service';
 import { TenantContextService } from '../../../../../core/services/tenant-context.service';
 import { NotificationService } from '../../../../../shared/services/notification.service';
 import { Level, Filiere, AcademicYear } from '../../../../../core/models/academic.model';
-import { FastEntryRequest } from '../../../../../core/models/enrollment.model';
+import { DirectEntryRequest } from '../../../../../core/models/enrollment.model';
 import { finalize, forkJoin } from 'rxjs';
 
 @Component({
@@ -115,18 +115,26 @@ export class AdmissionDirectEntryComponent implements OnInit {
     const val = this.entryForm.value;
     const tenantId = this.tenantContext.activeTenant()?.id || 'default';
 
-    // CONSTRUCTION DU PAYLOAD V3 PAR PILIERS
-    const payload: FastEntryRequest = {
+    const payload: DirectEntryRequest = {
       tenantId,
+      type: 'NEW_ENROLLMENT',
       academicYearId: val.academicYearId,
-      family: val.family,
-      identity: val.identity,
-      medical: val.medical,
-      schooling: {
-        academicYearId: val.academicYearId,
-        levelId: val.levelId,
-        filiereId: val.filiereId,
-        previousSchool: val.previousSchool
+      levelId: val.levelId,
+      identity: {
+        firstName: val.identity.firstName,
+        lastName: val.identity.lastName,
+        gender: val.identity.gender,
+        birthDate: val.identity.birthDate,
+        birthPlace: val.identity.birthPlace,
+        customFields: {nationality: val.identity.nationality}
+      },
+      primaryGuardian: {
+        firstName: val.family.primaryGuardian.firstName,
+        lastName: val.family.primaryGuardian.lastName,
+        phone: val.family.primaryGuardian.phone,
+        relation: val.family.primaryGuardian.relation,
+        financialResponsible: val.family.primaryGuardian.isFinancialResponsible ?? true,
+        customFields: {homeAddress: val.family.homeAddress}
       }
     };
 

@@ -219,6 +219,7 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
       'SUBMITTED': 'Soumis',
       'VERIFIED': 'Vérifié',
       'TESTING': 'Évaluation',
+      'ADMITTED': 'Admis pédago.',
       'WAITLIST': 'Attente',
       'VALIDATED': 'Admis',
       'REJECTED': 'Refusé',

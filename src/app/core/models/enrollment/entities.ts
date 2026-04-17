@@ -89,6 +89,8 @@ export interface Admission {
   subscriptions?: ServiceSubscription[];
   assessment?: Assessment | null;
   trackerMessage: string;
+  /** Résolu depuis le bundle par l'endpoint admin /details */
+  primaryGuardian?: Guardian;
 
   createdAt: string;
   updatedAt: string;

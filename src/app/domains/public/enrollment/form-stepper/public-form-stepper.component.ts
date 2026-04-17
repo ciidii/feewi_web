@@ -153,11 +153,11 @@ export class PublicFormStepperComponent implements OnInit {
 
   private syncStoreFromAdmission(bundle: AdmissionBundle, adm: Admission) {
     this.formStore.family = {
-      primaryGuardian: { ...bundle.family.primaryGuardian, customFields: bundle.family.primaryGuardian.customFields ?? {} },
+      primaryGuardian: { ...bundle.family.primaryGuardian, email: bundle.family.primaryGuardian.email ?? '', customFields: bundle.family.primaryGuardian.customFields ?? {} },
       customFields: bundle.family.customFields ?? { homeAddress: '' }
     };
     this.formStore.identity = { ...adm.identity, customFields: adm.identity.customFields ?? {} };
-    this.formStore.schooling = { ...adm.schooling, customFields: adm.schooling.customFields ?? {} };
+    this.formStore.schooling = { ...adm.schooling, filiereId: adm.schooling.filiereId ?? null, customFields: adm.schooling.customFields ?? {} };
     this.formStore.medical = { customFields: adm.medical?.customFields ?? {} };
   }
 
@@ -288,7 +288,7 @@ export class PublicFormStepperComponent implements OnInit {
     this.uploadingDocCode.set(data.code);
     this.documentService.getUploadTicket({ fileName: file.name, contentType: file.type, serviceOrigin: 'enrollment' }).pipe(
       switchMap(ticket => this.documentService.uploadFileDirectly(ticket.uploadUrl, file).pipe(
-        switchMap(() => this.enrollmentService.uploadDocument(admissionId, data.code, ticket.fileUrl))
+        switchMap(() => this.enrollmentService.uploadDocument(admissionId, data.code, ticket.fileId))
       )),
       finalize(() => this.uploadingDocCode.set(null))
     ).subscribe({
