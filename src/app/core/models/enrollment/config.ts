@@ -9,6 +9,7 @@ export interface FieldConfig {
   mandatory: boolean;
   preset?: boolean;
   placeholder?: string;
+  options?: string[];
 }
 
 export interface CoreFieldControl {

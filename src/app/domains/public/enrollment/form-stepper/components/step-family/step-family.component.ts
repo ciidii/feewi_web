@@ -17,7 +17,7 @@ import {FieldConfig} from '../../../../../../core/models/enrollment';
 
       <div class="premium-form-grid">
         <div class="form-group">
-          <label>Votre lien de parenté</label>
+          <label>{{ coreLabel('relation') }}</label>
           <select [(ngModel)]="data.primaryGuardian.relation" class="premium-select">
             <option value="FATHER">Père</option>
             <option value="MOTHER">Mère</option>
@@ -33,27 +33,31 @@ import {FieldConfig} from '../../../../../../core/models/enrollment';
           <input type="email" [(ngModel)]="data.primaryGuardian.email" class="premium-input" placeholder="nom@exemple.com">
         </div>
         <div class="form-group">
-          <label>Nom</label>
+          <label>{{ coreLabel('lastName') }}</label>
           <input type="text" [(ngModel)]="data.primaryGuardian.lastName" class="premium-input">
         </div>
         <div class="form-group">
-          <label>Prénom</label>
+          <label>{{ coreLabel('firstName') }}</label>
           <input type="text" [(ngModel)]="data.primaryGuardian.firstName" class="premium-input">
         </div>
         <div class="form-group">
-          <label>Téléphone Mobile</label>
+          <label>{{ coreLabel('phone') }}</label>
           <input type="tel" [(ngModel)]="data.primaryGuardian.phone" class="premium-input">
         </div>
-        <div class="form-group">
-          <label>Adresse de résidence</label>
-          <input type="text" [(ngModel)]="data.customFields['homeAddress']" class="premium-input">
-        </div>
 
-        <!-- CHAMPS DYNAMIQUES CMS -->
-        <ng-container *ngIf="customFields?.length">
-          <div *ngFor="let field of customFields" class="form-group" [class.full]="field.type === 'TEXT'">
+        <!-- CHAMPS DYNAMIQUES CMS FAMILLE (dont adresse si configurée) -->
+        <ng-container *ngFor="let field of customFields">
+          <div class="form-group" [class.full]="field.type === 'TEXTAREA' || field.type === 'TEXT'">
             <label>{{ field.label }} <span *ngIf="field.mandatory" class="text-red-500">*</span></label>
-            <input type="text" [(ngModel)]="data.primaryGuardian.customFields[field.name]" class="premium-input">
+            <ng-container [ngSwitch]="field.type">
+              <select *ngSwitchCase="'SELECT'" [(ngModel)]="data.primaryGuardian.customFields[field.name]" class="premium-select">
+                <option value="">Sélectionner...</option>
+                <option *ngFor="let opt of field.options ?? []" [value]="opt">{{ opt }}</option>
+              </select>
+              <textarea *ngSwitchCase="'TEXTAREA'" [(ngModel)]="data.primaryGuardian.customFields[field.name]" class="premium-textarea" rows="3"></textarea>
+              <input *ngSwitchCase="'DATE'" type="date" [(ngModel)]="data.primaryGuardian.customFields[field.name]" class="premium-input">
+              <input *ngSwitchDefault type="text" [(ngModel)]="data.primaryGuardian.customFields[field.name]" class="premium-input">
+            </ng-container>
           </div>
         </ng-container>
       </div>
@@ -62,5 +66,10 @@ import {FieldConfig} from '../../../../../../core/models/enrollment';
 })
 export class StepFamilyComponent {
   @Input() data: any;
+  @Input() coreFieldControls: Record<string, { label: string }> = {};
   @Input() customFields: FieldConfig[] = [];
+
+  coreLabel(field: string): string {
+    return this.coreFieldControls?.[field]?.label ?? field;
+  }
 }

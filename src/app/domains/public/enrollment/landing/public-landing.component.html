@@ -22,28 +22,71 @@
       <p>{{ welcomeMessage() }}</p>
     </div>
 
-    <!-- Choix de l'année (V5) -->
-    <section class="years-selection" *ngIf="s.portalActive">
+    <!-- Choix de l'année (V8) -->
+    <section class="years-selection" *ngIf="s.portalActive && !noYearsAvailable()">
       <h2 class="section-title">Choisissez votre année de rentrée</h2>
       <div class="years-grid">
-        <div *ngFor="let year of activeYears()" class="year-card highlight">
-          <div class="card-icon"><lucide-icon [name]="Calendar" [size]="24"></lucide-icon></div>
-          <div class="card-info">
+        <div *ngFor="let year of yearCards()" class="year-card highlight" [class.admin-only]="year.isAdminOnly">
+          <div class="year-header">
+            <span class="year-badge" [class.planning]="year.state === 'PLANNING'">
+              {{ year.state === 'PLANNING' ? 'Pré-inscriptions' : 'Inscriptions' }}
+            </span>
             <h3>Année {{ year.label }}</h3>
-            <p>Clôture des dossiers le {{ year.registrationEndDate | date:'longDate' }}</p>
           </div>
-          <button class="btn-start" [routerLink]="['/enrollment/form']" [queryParams]="{ yearId: year.id }">
-            Commencer <lucide-icon [name]="ArrowRight" [size]="16"></lucide-icon>
-          </button>
+          
+          <div class="year-dates">
+            Du {{ year.registrationStartDate | date:'dd MMM' }}
+            au {{ year.registrationEndDate | date:'dd MMM yyyy' }}
+          </div>
+
+          <p *ngIf="year.welcomeMessage" class="year-message">{{ year.welcomeMessage }}</p>
+
+          <!-- Mode ADMIN_ONLY → pas de formulaire en ligne -->
+          <div *ngIf="year.isAdminOnly" class="admin-only-notice">
+            <lucide-icon [name]="Phone" [size]="16"></lucide-icon>
+            <span>Inscriptions uniquement au guichet — contacter le secrétariat.</span>
+          </div>
+
+          <!-- Mode en ligne -->
+          <ng-container *ngIf="!year.isAdminOnly">
+            <!-- Les deux types autorisés -->
+            <div *ngIf="year.hasBothTypes" class="type-buttons">
+              <button class="btn-type new"
+                      [routerLink]="['/enrollment/form']"
+                      [queryParams]="{ yearId: year.id, type: 'NEW_ENROLLMENT' }">
+                Nouvelle inscription
+              </button>
+              <button class="btn-type re"
+                      [routerLink]="['/enrollment/form']"
+                      [queryParams]="{ yearId: year.id, type: 'RE_ENROLLMENT' }">
+                Réinscription
+              </button>
+            </div>
+
+            <!-- Un seul type -->
+            <button *ngIf="!year.hasBothTypes && year.canNewEnrollment"
+                    class="btn-start"
+                    [routerLink]="['/enrollment/form']"
+                    [queryParams]="{ yearId: year.id, type: 'NEW_ENROLLMENT' }">
+              Commencer <lucide-icon [name]="ArrowRight" [size]="16"></lucide-icon>
+            </button>
+
+            <button *ngIf="!year.hasBothTypes && year.canReEnrollment"
+                    class="btn-start re"
+                    [routerLink]="['/enrollment/form']"
+                    [queryParams]="{ yearId: year.id, type: 'RE_ENROLLMENT' }">
+              Réinscription <lucide-icon [name]="ArrowRight" [size]="16"></lucide-icon>
+            </button>
+          </ng-container>
         </div>
       </div>
     </section>
 
-    <!-- Si le portail est fermé -->
-    <div class="closed-state" *ngIf="!s.portalActive">
+    <!-- Si aucune année n'est disponible ou portail fermé -->
+    <div class="closed-state" *ngIf="!s.portalActive || noYearsAvailable()">
       <div class="closed-icon"><lucide-icon [name]="Clock" [size]="48"></lucide-icon></div>
-      <h2>Les inscriptions sont actuellement fermées</h2>
-      <p>L'établissement n'accepte plus de nouveaux dossiers pour le moment. Veuillez contacter le secrétariat pour plus d'informations.</p>
+      <h2>{{ !s.portalActive ? 'Les inscriptions sont actuellement fermées' : 'Inscriptions temporairement fermées' }}</h2>
+      <p>{{ !s.portalActive ? 'L\'établissement n\'accepte plus de nouveaux dossiers pour le moment.' : 'Aucune période d\'inscription n\'est ouverte pour le moment.' }} Veuillez contacter le secrétariat pour plus d'informations.</p>
     </div>
 
     <div class="hub-grid">

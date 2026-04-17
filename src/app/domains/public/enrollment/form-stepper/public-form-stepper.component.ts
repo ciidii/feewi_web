@@ -66,12 +66,16 @@ export class PublicFormStepperComponent implements OnInit {
 
   // --- CONTEXTE ---
   config = signal<DefaultConfigResponse | null>(null);
+  levelConfig = signal<any | null>(null);
   availableLevels = signal<any[]>([]);
   targetYearId = signal<string | null>(null);
+  admissionType = signal<'NEW_ENROLLMENT' | 'RE_ENROLLMENT'>('NEW_ENROLLMENT');
 
   // --- DOMAIN ---
   bundle = signal<AdmissionBundle | null>(null);
   admission = signal<Admission | null>(null);
+
+  effectiveSchema = computed(() => this.levelConfig()?.schema ?? this.config()?.schema);
 
   // Données de formulaire locales (source de vérité UI)
   formStore = {
@@ -90,6 +94,7 @@ export class PublicFormStepperComponent implements OnInit {
     },
     schooling: {
       academicYearId: '', levelId: '',
+      cycleType: undefined as string | undefined,
       filiereId: null as string | null,
       customFields: {} as Record<string, any>
     },
@@ -103,6 +108,11 @@ export class PublicFormStepperComponent implements OnInit {
     this.config()?.schema?.services?.availableServices?.map(s => s.code) ?? []
   );
 
+  selectedLevelName = computed(() => {
+    const levelId = this.formStore.schooling.levelId;
+    return this.availableLevels().find(l => l.id === levelId)?.name ?? levelId;
+  });
+
   progress = computed(() => {
     const steps = this.getFilteredSteps();
     return ((steps.indexOf(this.currentStep()) + 1) / steps.length) * 100;
@@ -112,7 +122,9 @@ export class PublicFormStepperComponent implements OnInit {
   accessCode = computed(() => this.bundle()?.accessCode ?? '');
 
   ngOnInit() {
-    this.targetYearId.set(this.route.snapshot.queryParamMap.get('yearId'));
+    const params = this.route.snapshot.queryParamMap;
+    this.targetYearId.set(params.get('yearId'));
+    this.admissionType.set((params.get('type') as any) ?? 'NEW_ENROLLMENT');
     this.loadBootstrapData();
   }
 
@@ -146,7 +158,9 @@ export class PublicFormStepperComponent implements OnInit {
         if (firstAdmission) {
           this.syncStoreFromAdmission(bundle, firstAdmission);
           if (firstAdmission.schooling?.levelId) {
-            this.enrollmentService.getLevelConfig(firstAdmission.schooling.levelId).subscribe(cfg => this.config.set(cfg));
+            this.enrollmentService.getLevelConfig(firstAdmission.schooling.levelId).subscribe(cfg => {
+              this.levelConfig.set(cfg);
+            });
           }
         }
         if (session.currentStep) this.currentStep.set(session.currentStep as StepperStep);
@@ -161,14 +175,23 @@ export class PublicFormStepperComponent implements OnInit {
       customFields: bundle.family.customFields ?? { homeAddress: '' }
     };
     this.formStore.identity = { ...adm.identity, customFields: adm.identity.customFields ?? {} };
-    this.formStore.schooling = { ...adm.schooling, filiereId: adm.schooling.filiereId ?? null, customFields: adm.schooling.customFields ?? {} };
+    this.formStore.schooling = { ...adm.schooling, cycleType: adm.schooling.cycleType ?? undefined, filiereId: adm.schooling.filiereId ?? null, customFields: adm.schooling.customFields ?? {} };
     this.formStore.medical = { customFields: adm.medical?.customFields ?? {} };
   }
 
   onLevelChange(levelId: string) {
     if (!levelId) return;
     this.formStore.schooling.levelId = levelId;
-    this.enrollmentService.getLevelConfig(levelId).subscribe(cfg => this.config.set(cfg));
+    
+    // Dériver le cycleType depuis la liste des niveaux
+    const level = this.availableLevels().find(l => l.id === levelId);
+    if (level?.cycleType) {
+      this.formStore.schooling.cycleType = level.cycleType;
+    }
+
+    this.enrollmentService.getLevelConfig(levelId).subscribe(cfg => {
+      this.levelConfig.set(cfg);
+    });
   }
 
   getFilteredSteps(): StepperStep[] {
@@ -240,9 +263,10 @@ export class PublicFormStepperComponent implements OnInit {
       firstName: this.formStore.identity.firstName || 'Candidat',
       lastName: this.formStore.identity.lastName || this.formStore.family.primaryGuardian.lastName,
       gender: this.formStore.identity.gender,
-      type: 'NEW_ENROLLMENT',
+      type: this.admissionType(),
       academicYearId: this.targetYearId() ?? 'current',
-      levelId: this.formStore.schooling.levelId || 'TEMP'
+      levelId: this.formStore.schooling.levelId || 'TEMP',
+      cycleType: this.formStore.schooling.cycleType as any
     };
 
     const child = await this.enrollmentService.addChild(bundle.id, addChildReq).toPromise();

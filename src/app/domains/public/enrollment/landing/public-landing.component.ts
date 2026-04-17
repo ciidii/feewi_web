@@ -12,11 +12,11 @@ import {
   Calendar,
   FileText,
   ShieldCheck,
-  Globe, RefreshCw
+  Globe, RefreshCw, Phone
 } from 'lucide-angular';
 import { EnrollmentPublicService } from '../../../../core/services/enrollment-public.service';
 import { finalize } from 'rxjs';
-import {PublicPortalSummary} from '../../../../core/models/enrollment';
+import { PublicPortalSummary } from '../../../../core/models/enrollment';
 
 @Component({
   selector: 'app-public-landing',
@@ -33,6 +33,21 @@ export class PublicLandingComponent implements OnInit {
 
   activeYears = computed(() =>
     this.summary()?.availableYears.filter(y => y.active) ?? []
+  );
+
+  yearCards = computed(() => {
+    const years = this.summary()?.availableYears ?? [];
+    return years.map(y => ({
+      ...y,
+      isAdminOnly: y.registrationMode === 'ADMIN_ONLY',
+      canNewEnrollment: y.allowedTypes.includes('NEW_ENROLLMENT'),
+      canReEnrollment: y.allowedTypes.includes('RE_ENROLLMENT'),
+      hasBothTypes: y.allowedTypes.length === 2
+    }));
+  });
+
+  noYearsAvailable = computed(() =>
+    this.summary() !== null && this.activeYears().length === 0
   );
 
   welcomeMessage = computed(() =>
@@ -63,5 +78,6 @@ export class PublicLandingComponent implements OnInit {
   readonly FileText = FileText;
   readonly ShieldCheck = ShieldCheck;
   readonly Globe = Globe;
+  readonly Phone = Phone;
   protected readonly RefreshCw = RefreshCw;
 }

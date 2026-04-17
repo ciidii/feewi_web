@@ -1,4 +1,4 @@
-import { AdmissionStatus, AdmissionType, AdmissionChannel, DocumentStatus, GuardianRelation } from './base-types';
+import { AdmissionStatus, AdmissionType, AdmissionChannel, DocumentStatus, GuardianRelation, CycleType } from './base-types';
 
 // --- PILIER IDENTITÉ ---
 
@@ -44,6 +44,7 @@ export interface SchoolingPillar {
   academicYearId: string;
   levelId: string;
   filiereId?: string | null;
+  cycleType?: CycleType;
   customFields?: Record<string, any>;
 }
 

@@ -55,7 +55,7 @@ export class EnrollmentPublicService {
 
   getDefaultConfig(): Observable<DefaultConfigResponse> {
     return this.http
-      .get<DefaultConfigResponse>(`${this.base}/api/v1/public/config/default`, { headers: this.getHeaders() })
+      .get<DefaultConfigResponse>(`${this.base}/api/v1/public/config`, { headers: this.getHeaders() })
       .pipe(catchError(this.handleError('Impossible de charger la configuration')));
   }
 

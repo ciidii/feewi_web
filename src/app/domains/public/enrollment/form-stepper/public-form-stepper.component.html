@@ -60,14 +60,16 @@
       <app-step-family
         *ngIf="currentStep() === 'GUARDIAN'"
         [data]="formStore.family"
-        [customFields]="config()?.schema?.family?.guardianCustomFields || []">
+        [coreFieldControls]="effectiveSchema()?.family?.guardianCoreFieldControls || {}"
+        [customFields]="effectiveSchema()?.family?.guardianCustomFields || []">
       </app-step-family>
 
       <app-step-identity
         *ngIf="currentStep() === 'STUDENT'"
         [identity]="formStore.identity"
         [schooling]="formStore.schooling"
-        [customFields]="config()?.schema?.identity?.customFields || []"
+        [coreFieldControls]="effectiveSchema()?.identity?.coreFieldControls || {}"
+        [customFields]="effectiveSchema()?.identity?.customFields || []"
         [availableLevels]="availableLevels()"
         (onLevelChange)="onLevelChange($event)">
       </app-step-identity>
@@ -75,19 +77,18 @@
       <app-step-medical
         *ngIf="currentStep() === 'MEDICAL'"
         [medical]="formStore.medical"
-        [customFields]="config()?.schema?.medical?.customFields || []">
+        [customFields]="effectiveSchema()?.medical?.customFields || []">
       </app-step-medical>
 
       <app-step-services
         *ngIf="currentStep() === 'SERVICES'"
-        [services]="formStore.services"
-        [enabledServices]="availableServiceCodes()">
+        [availableServices]="effectiveSchema()?.services?.availableServices || []"
+        (selectionsChange)="formStore.services = $event">
       </app-step-services>
 
       <app-step-vault
         *ngIf="currentStep() === 'DOCS'"
-        [checklist]="config()?.schema?.documents?.presetDocuments || []"
-        [application]="admission()"
+        [documents]="admission()?.documents || []"
         [uploadingDocCode]="uploadingDocCode()"
         (onFileSelected)="onVaultFileSelected($event)">
       </app-step-vault>
@@ -97,8 +98,13 @@
         [family]="formStore.family"
         [identity]="formStore.identity"
         [schooling]="formStore.schooling"
+        [levelName]="selectedLevelName()"
+        [pendingServices]="formStore.services"
+        [admission]="admission()"
+        [legalText]="config()?.legalText || ''"
         [consent]="consent">
       </app-step-review>
+
 
       <!-- NAVIGATION FOOTER -->
       <footer class="onboarding-footer">

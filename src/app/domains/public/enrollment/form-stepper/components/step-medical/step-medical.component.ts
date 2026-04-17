@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule } from 'lucide-angular';
+import { LucideAngularModule, Info } from 'lucide-angular';
 import { FieldConfig } from '../../../../../../core/models/enrollment';
 
 @Component({
@@ -15,34 +15,35 @@ import { FieldConfig } from '../../../../../../core/models/enrollment';
         <p>Données médicales confidentielles.</p>
       </div>
 
-      <div class="premium-form-grid">
-        <div class="form-group">
-          <label>Groupe Sanguin</label>
-          <select [(ngModel)]="medical.customFields['bloodGroup']" class="premium-select">
-            <option value="">Inconnu</option>
-            <option value="O+">O+</option><option value="O-">O-</option>
-            <option value="A+">A+</option><option value="A-">A-</option>
-            <option value="B+">B+</option><option value="B-">B-</option>
-            <option value="AB+">AB+</option><option value="AB-">AB-</option>
-          </select>
-        </div>
-        <div class="form-group full">
-          <label>Allergies connues</label>
-          <textarea [(ngModel)]="medical.customFields['criticalAllergies']" class="premium-textarea" rows="3"></textarea>
-        </div>
-
-        <!-- CHAMPS DYNAMIQUES CMS MEDICAL -->
-        <ng-container *ngIf="customFields?.length">
-          <div *ngFor="let field of customFields" class="form-group">
-            <label>{{ field.label }}</label>
-            <input type="text" [(ngModel)]="medical.customFields[field.name]" class="premium-input">
+      <div class="premium-form-grid" *ngIf="customFields.length > 0; else noMedical">
+        <ng-container *ngFor="let field of customFields">
+          <div class="form-group" [class.full]="field.type === 'TEXTAREA'">
+            <label>{{ field.label }} <span *ngIf="field.mandatory" class="text-red-500">*</span></label>
+            <ng-container [ngSwitch]="field.type">
+              <select *ngSwitchCase="'SELECT'" [(ngModel)]="medical.customFields[field.name]" class="premium-select">
+                <option value="">—</option>
+                <option *ngFor="let opt of field.options ?? []" [value]="opt">{{ opt }}</option>
+              </select>
+              <textarea *ngSwitchCase="'TEXTAREA'" [(ngModel)]="medical.customFields[field.name]" class="premium-textarea" rows="3"></textarea>
+              <input *ngSwitchCase="'DATE'" type="date" [(ngModel)]="medical.customFields[field.name]" class="premium-input">
+              <input *ngSwitchDefault type="text" [(ngModel)]="medical.customFields[field.name]" class="premium-input">
+            </ng-container>
           </div>
         </ng-container>
       </div>
+
+      <ng-template #noMedical>
+        <div class="empty-step-hint flex items-center gap-3 p-6 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+          <lucide-icon [name]="Info" [size]="20" class="text-slate-400"></lucide-icon>
+          <p class="text-slate-500 font-medium">Aucune information médicale requise par l'établissement.</p>
+        </div>
+      </ng-template>
     </div>
   `
 })
 export class StepMedicalComponent {
   @Input() medical: any;
   @Input() customFields: FieldConfig[] = [];
+
+  readonly Info = Info;
 }

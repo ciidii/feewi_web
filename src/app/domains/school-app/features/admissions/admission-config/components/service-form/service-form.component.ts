@@ -3,8 +3,8 @@ import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {LucideAngularModule, Plus, Trash2, X} from 'lucide-angular';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {ServiceConfig} from '../../../../../../core/models/enrollment.model';
-import {labelToCode} from '../../../../../../core/utils/enrollment-utils';
+import {labelToCode} from '../../../../../../../core/utils/enrollment-utils';
+import {ServiceConfig} from '../../../../../../../core/models/enrollment';
 
 @Component({
   selector: 'app-service-form',
