@@ -1,82 +1,115 @@
-import { AdmissionType } from './base-types';
-import { IdentityPillar, MedicalPillar, SchoolingPillar, FamilyPillar, AdmissionBundle, Admission, Guardian } from './entities';
-import { PillarConfig, RequiredDocumentConfig } from './config';
+import { AdmissionType, RegistrationMode } from './base-types';
+import { AdmissionBundle, Admission, Guardian } from './entities';
+import { EnrollmentSchema, PresetDocumentConfig, AssessmentSchemaConfig } from './config';
 
-/** --- PORTAIL PUBLIC (Landing & Config) --- */
+// --- PORTAIL PUBLIC ---
 
 export interface PublicPortalSummary {
   tenantId: string;
   portalActive: boolean;
-  registrationMode: 'PARENT_ONLY' | 'SELF_ONLY' | 'OPEN';
-  withinDates: boolean;
-  welcomeMessage?: string;
-  /** Liste des années scolaires ouvertes au recrutement (V5) */
+  registrationMode: RegistrationMode;
   availableYears: Array<{
     id: string;
     label: string;
+    registrationStartDate: string;
     registrationEndDate: string;
     active: boolean;
   }>;
-  /** Statut temps-réel des niveaux (pour l'année en cours ou sélectionnée) */
-  levelStatuses: Record<string, { active: boolean, full: boolean }>;
-}
-
-/** Réponse pour le générateur de formulaire dynamique */
-export interface EffectiveConfigResponse {
-  /** Liste des piliers avec leurs libellés et champs personnalisés */
-  pillars: Record<string, PillarConfig>;
-  /** Pièces justificatives finales (Global + Surcharges) */
-  documentChecklist: RequiredDocumentConfig[];
-  /** Services activés pour ce niveau */
+  welcomeMessage?: string;
+  legalText?: string;
   enabledServices: string[];
-  /** Instructions par étape */
-  instructions?: Record<string, string>;
+  levelStatuses: Record<string, { active: boolean; full: boolean }>;
 }
 
-/** --- REQUESTS --- */
+// --- CONFIG EFFECTIVE ---
+
+export interface DefaultConfigResponse {
+  portalActive: boolean;
+  registrationMode: RegistrationMode;
+  schema: EnrollmentSchema;
+  documentChecklist: PresetDocumentConfig[];
+  assessmentConfig: AssessmentSchemaConfig;
+  instructions: Record<string, string>;
+  enabledServices: string[];
+}
+
+export interface LevelConfigResponse extends DefaultConfigResponse {
+  levelId: string;
+}
+
+// --- REQUESTS PORTAIL PARENT ---
 
 export interface CreateBundleRequest {
   tenantId: string;
   family: {
-    primaryGuardian: Partial<Guardian>;
+    primaryGuardian: {
+      firstName: string;
+      lastName: string;
+      email?: string;
+      phone: string;
+      relation: string;
+      financialResponsible: boolean;
+      customFields?: Record<string, any>;
+    };
     secondaryGuardian?: Partial<Guardian>;
-    homeAddress: string;
     customFields?: Record<string, any>;
   };
-  children: Array<{
-    firstName: string;
-    lastName: string;
-    gender: 'MALE' | 'FEMALE';
-    academicYearId: string;
-    levelId: string;
-    filiereId?: string | null;
-  }>;
+}
+
+export interface AddChildRequest {
+  firstName: string;
+  lastName: string;
+  gender: 'MALE' | 'FEMALE';
+  type: AdmissionType;
+  academicYearId: string;
+  levelId: string;
+  filiereId?: string | null;
+}
+
+export interface ServiceSubscriptionRequest {
+  serviceCode: string;
+  option: string;
 }
 
 export interface ReEnrollRequest {
+  tenantId: string;
   studentId: string;
   academicYearId: string;
   nextLevelId: string;
-  filiereId?: string | null;
 }
+
+// --- REQUESTS ADMIN ---
 
 export interface AssessmentRequest {
   grades: Record<string, number>;
   comments: string;
-  decision: string;
-  recommendedLevelId?: string;
+  recommendedLevelId?: string | null;
 }
 
-export interface FastEntryRequest {
+export interface DirectEntryRequest {
   tenantId: string;
+  type: AdmissionType;
   academicYearId: string;
-  family: Partial<FamilyPillar>;
-  identity: IdentityPillar;
-  medical?: MedicalPillar;
-  schooling: SchoolingPillar;
+  levelId: string;
+  identity: {
+    firstName: string;
+    lastName: string;
+    gender: 'MALE' | 'FEMALE';
+    birthDate: string;
+    birthPlace: string;
+    customFields?: Record<string, any>;
+  };
+  primaryGuardian: {
+    firstName: string;
+    lastName: string;
+    phone: string;
+    relation: string;
+    financialResponsible: boolean;
+    customFields?: Record<string, any>;
+  };
 }
 
-/** --- RESPONSES --- */
+// --- RESPONSES ---
 
 export interface AdmissionBundleResponse extends AdmissionBundle {}
 
@@ -86,12 +119,4 @@ export interface AdmissionPageResponse {
   totalPages: number;
   size: number;
   number: number;
-}
-
-/** @deprecated */
-export interface ApplicationCreateRequest extends CreateBundleRequest {}
-export interface CandidateUpdateRequest {
-  info: Partial<IdentityPillar>;
-  levelId: string;
-  filiereId?: string | null;
 }

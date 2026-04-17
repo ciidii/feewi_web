@@ -1,22 +1,26 @@
-/** États du workflow d'un dossier d'admission */
-export type AdmissionStatus = 
-  | 'DRAFT'      // Brouillon (Parent)
-  | 'SUBMITTED'  // Envoyé (Parent -> Admin)
-  | 'VERIFIED'   // Conforme (Secrétariat)
-  | 'TESTING'    // Évaluation en cours (Pédagogique)
-  | 'WAITLIST'   // Liste d'attente
-  | 'VALIDATED'  // Admis définitivement
-  | 'REJECTED'   // Refusé
-  | 'CANCELLED'; // Annulé par le parent
+export type AdmissionStatus =
+  | 'DRAFT'
+  | 'SUBMITTED'
+  | 'VERIFIED'
+  | 'TESTING'
+  | 'ADMITTED'
+  | 'WAITLIST'
+  | 'VALIDATED'
+  | 'REJECTED'
+  | 'CANCELLED';
 
-/** Type de procédure d'admission */
-export type AdmissionType = 'NEW' | 'RE_ENROLLMENT';
+export type AdmissionType = 'NEW_ENROLLMENT' | 'RE_ENROLLMENT';
 
-/** Lien de parenté du responsable */
-export type GuardianRelation = 'FATHER' | 'MOTHER' | 'GUARDIAN' | 'OTHER';
+export type AdmissionChannel = 'DIGITAL' | 'DIRECT';
 
-/** État de traitement d'une pièce justificative */
-export type DocumentStatus = 'MISSING' | 'PHYSICAL_RECEIVED' | 'UPLOADED';
+export type GuardianRelation = 'FATHER' | 'MOTHER' | 'UNCLE' | 'AUNT' | 'GRANDPARENT' | 'GUARDIAN' | 'OTHER';
 
-/** Type d'évaluation pour la sélection */
-export type AssessmentType = 'EXAM' | 'DOSSIER' | 'INTERVIEW' | null;
+export type DocumentStatus = 'MISSING' | 'UPLOADED' | 'RECEIVED' | 'VERIFIED' | 'REJECTED';
+
+export type AssessmentType = 'EXAM' | 'DOSSIER' | 'INTERVIEW' | 'MIXED';
+
+export type AssessmentDecision = 'ADMITTED' | 'ADMITTED_WITH_RESERVE' | 'REJECTED';
+
+export type RegistrationMode = 'PARENT_ONLY' | 'ADMIN_ONLY' | 'BOTH';
+
+export type FieldType = 'TEXT' | 'TEXTAREA' | 'DATE' | 'SELECT' | 'BOOLEAN' | 'NUMBER';

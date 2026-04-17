@@ -1,33 +1,30 @@
-import { AdmissionStatus, AdmissionType, DocumentStatus, GuardianRelation } from './base-types';
+import { AdmissionStatus, AdmissionType, AdmissionChannel, DocumentStatus, GuardianRelation } from './base-types';
 
-/** --- PILIER 1 : IDENTITÉ (CANDIDAT) --- */
+// --- PILIER IDENTITÉ ---
+
 export interface IdentityPillar {
   firstName: string;
   lastName: string;
   gender: 'MALE' | 'FEMALE';
   birthDate: string;
   birthPlace: string;
-  nationality?: string;
-  /** Champs CMS spécifiques au pilier Identité */
   customFields?: Record<string, any>;
 }
 
-/** --- PILIER 2 : SANTÉ (MÉDICAL) --- */
+// --- PILIER MÉDICAL ---
+// Tous les champs (bloodGroup, criticalAllergies, emergencyContact*)
+// transitent via customFields — définis par la config école
+
 export interface MedicalPillar {
-  bloodGroup?: string;
-  criticalAllergies?: string;
-  emergencyContactName?: string;
-  emergencyContactPhone?: string;
-  /** Champs CMS spécifiques au pilier Médical */
   customFields?: Record<string, any>;
 }
 
-/** --- PILIER 3 : FAMILLE (RESPONSABLES) --- */
+// --- PILIER FAMILLE ---
+// homeAddress transite via customFields
+
 export interface FamilyPillar {
   primaryGuardian: Guardian;
   secondaryGuardian?: Guardian;
-  homeAddress: string;
-  /** Champs CMS spécifiques au pilier Famille */
   customFields?: Record<string, any>;
 }
 
@@ -36,76 +33,76 @@ export interface Guardian {
   lastName: string;
   email?: string;
   phone: string;
-  profession?: string;
   relation: GuardianRelation;
-  isFinancialResponsible: boolean;
+  financialResponsible: boolean;
+  customFields?: Record<string, any>;
 }
 
-/** --- PILIER 4 : SCOLARITÉ (VŒUX & PARCOURS) --- */
+// --- PILIER SCOLARITÉ ---
+
 export interface SchoolingPillar {
   academicYearId: string;
   levelId: string;
   filiereId?: string | null;
-  previousSchool?: string;
-  /** Champs CMS spécifiques au pilier Scolarité */
   customFields?: Record<string, any>;
 }
 
-/** --- ÉVALUATION & DOCUMENTS --- */
-
-export interface Assessment {
-  grades: Record<string, number>;
-  averageGrade?: number; // Calculé par le backend V5
-  comments?: string;
-  decision: string;
-  recommendedLevelId?: string;
-  assessedAt?: string;
-}
+// --- DOCUMENTS & ÉVALUATION ---
 
 export interface RequiredDocument {
   code: string;
   name: string;
   mandatory: boolean;
   status: DocumentStatus;
-  fileUrl?: string;
+  fileUrl?: string | null;
 }
 
-/** --- ENTITÉ BRANCHE : ADMISSION INDIVIDUELLE --- */
+export interface Assessment {
+  grades: Record<string, number>;
+  averageGrade?: number;
+  comments?: string;
+  decision?: string;
+  recommendedLevelId?: string | null;
+  assessedAt?: string;
+}
+
+export interface ServiceSubscription {
+  serviceCode: string;
+  option: string;
+}
+
+// --- ADMISSION (ENFANT) ---
+
 export interface Admission {
   id: string;
   bundleId: string;
   reference: string;
-  status: AdmissionStatus;
   type: AdmissionType;
-  tenantId: string;
-  
+  channel: AdmissionChannel;
+  status: AdmissionStatus;
+
   identity: IdentityPillar;
   medical: MedicalPillar;
-  family: FamilyPillar;
   schooling: SchoolingPillar;
-  
-  extraPillars?: Record<string, any>;
-  
+
   documents: RequiredDocument[];
-  assessment?: Assessment;
+  subscriptions?: ServiceSubscription[];
+  assessment?: Assessment | null;
   trackerMessage: string;
-  
+
   createdAt: string;
   updatedAt: string;
   submittedAt?: string;
 }
 
-/** --- ENTITÉ TRONC : BUNDLE FAMILIAL --- */
+// --- BUNDLE (FAMILLE) ---
+
 export interface AdmissionBundle {
   id: string;
-  tenantId: string;
-  reference: string; // Ajouté (ex: FAM-2026-XXXX)
+  reference: string;
   accessCode: string;
+  status: AdmissionStatus;
   family: FamilyPillar;
   admissions: Admission[];
   createdAt: string;
-  updatedAt: string;
 }
-
-/** @deprecated Fallback pour compatibilité */
-export type AdmissionApplication = Admission;

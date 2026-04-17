@@ -1,72 +1,91 @@
-import { AssessmentType } from './base-types';
+import { AssessmentType, FieldType, RegistrationMode } from './base-types';
 
-/** Configuration globale du portail d'admission (Vision Finale V5) */
-export interface EnrollmentConfig {
-  tenantId: string;
-  portalActive: boolean;
-  registrationMode: 'PARENT_ONLY' | 'SELF_ONLY' | 'OPEN';
-  
-  /** Les Piliers configurés (Structure V5) */
-  pillars: Record<string, PillarConfig>;
-  
-  /** Checklist globale (Nom backend : defaultChecklist) */
-  defaultChecklist: RequiredDocumentConfig[];
-  
-  /** Configuration des tests (Nom backend : defaultAssessmentConfig) */
-  defaultAssessmentConfig: AssessmentConfig | null;
-  
-  /** Contrôle temporel */
-  yearOverrides: Record<string, any>;
-  levelOverrides: Record<string, LevelOverrideConfig>;
-  
-  instructions: Record<string, string>;
-  legalText: string | null;
-
-  /** Services complémentaires activés (Cantine, Transport, etc.) */
-  enabledServices: string[];
-
-  /** Alias pour compatibilité Frontend */
-  documentChecklist?: RequiredDocumentConfig[]; 
-  assessmentConfig?: AssessmentConfig;
-}
-
-export interface PillarConfig {
-  label: string;
-  enabled: boolean;
-  systemFields: FieldConfig[];
-  customFields: FieldConfig[];
-}
+// --- CHAMPS ---
 
 export interface FieldConfig {
   name: string;
   label: string;
-  type: string;
+  type: FieldType;
   mandatory: boolean;
+  preset?: boolean;
   placeholder?: string;
 }
 
-export interface RequiredDocumentConfig {
+export interface CoreFieldControl {
+  label: string;
+}
+
+// --- SCHÉMA PAR PILIER ---
+
+export interface IdentitySchemaConfig {
+  coreFieldControls: Record<string, CoreFieldControl>;
+  customFields: FieldConfig[];
+}
+
+export interface FamilySchemaConfig {
+  enabled: boolean;
+  allowedWithoutGuardian: boolean;
+  guardianCoreFieldControls: Record<string, CoreFieldControl>;
+  guardianCustomFields: FieldConfig[];
+}
+
+export interface MedicalSchemaConfig {
+  enabled: boolean;
+  customFields: FieldConfig[];
+}
+
+export interface SchoolingSchemaConfig {
+  enabled: boolean;
+  customFields: FieldConfig[];
+}
+
+export interface DocumentSchemaConfig {
+  enabled: boolean;
+  presetDocuments: PresetDocumentConfig[];
+}
+
+export interface PresetDocumentConfig {
   code: string;
   name: string;
   mandatory: boolean;
 }
 
-export interface AssessmentConfig {
+export interface AssessmentSchemaConfig {
   type: AssessmentType;
-  subjectsEnabled: boolean;
-  subjects: Record<string, number>; 
+  subjects: Record<string, number>;
+  maxGrade: number;
   minPassingGrade: number;
 }
 
-export interface LevelOverrideConfig {
-  active: boolean;
-  full: boolean;
-  maxNewEnrollments?: number | null;
-  documentChecklist?: RequiredDocumentConfig[] | null;
-  pillarOverrides?: Record<string, PillarConfig> | null;
-  assessmentConfig?: AssessmentConfig | null;
-  coreFieldOverrides?: Record<string, any>;
+// --- SCHÉMA GLOBAL ---
+
+export interface EnrollmentSchema {
+  identity: IdentitySchemaConfig;
+  family: FamilySchemaConfig;
+  medical: MedicalSchemaConfig;
+  schooling: SchoolingSchemaConfig;
+  documents: DocumentSchemaConfig;
+  assessment: AssessmentSchemaConfig;
 }
 
-/** Fallback compatibilité */
-export type RequiredDocumentOld = RequiredDocumentConfig;
+// --- CONFIG NIVEAU (OVERRIDE) ---
+
+export interface LevelOverrideConfig {
+  active: boolean;
+  maxNewEnrollments?: number | null;
+  documentChecklist?: PresetDocumentConfig[] | null;
+  assessmentConfig?: AssessmentSchemaConfig | null;
+}
+
+// --- CONFIG GLOBALE ÉTABLISSEMENT ---
+
+export interface EnrollmentConfig {
+  tenantId: string;
+  portalActive: boolean;
+  registrationMode: RegistrationMode;
+  schema: EnrollmentSchema;
+  levelOverrides: Record<string, LevelOverrideConfig>;
+  instructions: Record<string, string>;
+  legalText: string | null;
+  enabledServices: string[];
+}
