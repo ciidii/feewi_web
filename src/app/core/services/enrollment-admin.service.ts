@@ -127,8 +127,14 @@ export class EnrollmentAdminService {
   }
 
   updateLevelOverride(levelId: string, override: LevelOverrideConfig): Observable<void> {
-    return this.http.patch<void>(`${this.baseUrl}/config/level-overrides/${levelId}`, override, {headers: this.getHeaders()}).pipe(
+    return this.http.put<void>(`${this.baseUrl}/config/level-overrides/${levelId}`, override, {headers: this.getHeaders()}).pipe(
       catchError(this.handleError('Erreur lors de la personnalisation du niveau'))
+    );
+  }
+
+  deleteLevelOverride(levelId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/config/level-overrides/${levelId}`, {headers: this.getHeaders()}).pipe(
+      catchError(this.handleError('Erreur lors de la suppression de l\'override de niveau'))
     );
   }
 

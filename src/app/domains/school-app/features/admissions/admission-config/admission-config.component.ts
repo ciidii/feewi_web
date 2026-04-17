@@ -94,6 +94,15 @@ export class AdmissionConfigComponent implements OnInit {
   });
   isYearOverrideSaving = signal(false);
 
+  // Level override local form state (isolated from global config)
+  levelOverrideForm = signal<LevelOverrideConfig>({
+    active: true,
+    maxNewEnrollments: null,
+    additionalDocuments: [],
+    assessment: null
+  });
+  isLevelOverrideSaving = signal(false);
+
   // --- STATIC DATA ---
   readonly systemPillars = [
     {key: 'identity',  label: 'Identité',  icon: UserCog},
@@ -175,6 +184,21 @@ export class AdmissionConfigComponent implements OnInit {
     return !!(this.config() as any)?.yearOverrides?.[yearId];
   }
 
+  hasLevelOverride(levelId: string): boolean {
+    return !!(this.config() as any)?.levelOverrides?.[levelId];
+  }
+
+  levelDocsList = computed<PresetDocumentConfig[]>(() =>
+    this.levelOverrideForm().additionalDocuments || []
+  );
+
+  levelAssessmentEnabled = computed(() => !!this.levelOverrideForm().assessment);
+
+  levelAssessmentSubjectsList = computed(() =>
+    Object.entries(this.levelOverrideForm().assessment?.subjects || {})
+      .map(([name, coef]) => ({name, coef}))
+  );
+
   // --- HELPERS ---
   isPillarEnabled(key: string): boolean {
     if (key === 'identity') return true;
@@ -213,23 +237,16 @@ export class AdmissionConfigComponent implements OnInit {
 
   onSave() {
     const cfg = this.config();
-    if (!cfg) return;
+    if (!cfg || this.currentScope() !== 'GLOBAL') return;
     this.isSaving.set(true);
-    let obs$: Observable<any>;
-
-    if (this.currentScope() === 'GLOBAL') {
-      obs$ = this.enrollmentService.updateConfig(cfg);
-    } else {
-      const override: LevelOverrideConfig = {active: true, assessment: cfg.schema.assessment};
-      obs$ = this.enrollmentService.updateLevelOverride(this.selectedLevelId()!, override);
-    }
-
-    obs$.pipe(finalize(() => this.isSaving.set(false))).subscribe({
-      next: () => {
-        this.notificationService.success('Configuration publiée.');
-        this.initialConfig.set(JSON.parse(JSON.stringify(cfg)));
-      }
-    });
+    this.enrollmentService.updateConfig(cfg)
+      .pipe(finalize(() => this.isSaving.set(false)))
+      .subscribe({
+        next: () => {
+          this.notificationService.success('Configuration publiée.');
+          this.initialConfig.set(JSON.parse(JSON.stringify(cfg)));
+        }
+      });
   }
 
   setScope(scope: ConfigScope, id: string | null = null) {
@@ -237,6 +254,7 @@ export class AdmissionConfigComponent implements OnInit {
     if (scope === 'LEVEL') {
       this.selectedLevelId.set(id);
       this.selectedYearId.set(null);
+      this.loadLevelOverrideForm(id!);
     } else if (scope === 'YEAR') {
       this.selectedYearId.set(id);
       this.selectedLevelId.set(null);
@@ -261,6 +279,14 @@ export class AdmissionConfigComponent implements OnInit {
         welcomeMessage: null
       });
     }
+  }
+
+  private loadLevelOverrideForm(levelId: string) {
+    const existing = (this.config() as any)?.levelOverrides?.[levelId];
+    this.levelOverrideForm.set(existing
+      ? JSON.parse(JSON.stringify(existing))
+      : {active: true, maxNewEnrollments: null, additionalDocuments: [], assessment: null}
+    );
   }
 
   updateYearOverrideField<K extends keyof YearOverrideConfig>(key: K, value: YearOverrideConfig[K]) {
@@ -306,6 +332,110 @@ export class AdmissionConfigComponent implements OnInit {
       this.isYearOverrideSaving.set(true);
       this.enrollmentService.deleteYearOverride(yearId)
         .pipe(finalize(() => this.isYearOverrideSaving.set(false)))
+        .subscribe({next: () => { this.notificationService.success('Override supprimé.'); this.loadInitialData(); }});
+    });
+  }
+
+  // --- LEVEL OVERRIDE METHODS ---
+
+  updateLevelOverrideField<K extends keyof LevelOverrideConfig>(key: K, value: LevelOverrideConfig[K]) {
+    this.levelOverrideForm.update(f => ({...f, [key]: value}));
+  }
+
+  addLevelDoc() {
+    this.dialog.open(DocumentTypeFormComponent, {width: '450px', panelClass: 'feewi-dialog-panel'})
+      .afterClosed().subscribe(result => {
+        if (!result) return;
+        this.levelOverrideForm.update(f => ({
+          ...f, additionalDocuments: [...(f.additionalDocuments || []), result]
+        }));
+      });
+  }
+
+  removeLevelDoc(code: string) {
+    this.levelOverrideForm.update(f => ({
+      ...f, additionalDocuments: (f.additionalDocuments || []).filter(d => d.code !== code)
+    }));
+  }
+
+  updateLevelDocMandatory(code: string, mandatory: boolean) {
+    this.levelOverrideForm.update(f => ({
+      ...f,
+      additionalDocuments: (f.additionalDocuments || []).map(d => d.code === code ? {...d, mandatory} : d)
+    }));
+  }
+
+  toggleLevelAssessmentOverride() {
+    if (this.levelAssessmentEnabled()) {
+      this.levelOverrideForm.update(f => ({...f, assessment: null}));
+    } else {
+      const base = this.config()?.schema?.assessment;
+      const fallback = {type: 'DOSSIER' as const, subjects: {}, maxGrade: 20, minPassingGrade: 10};
+      this.levelOverrideForm.update(f => ({
+        ...f, assessment: base ? JSON.parse(JSON.stringify(base)) : fallback
+      }));
+    }
+  }
+
+  updateLevelAssessmentType(type: any) {
+    this.levelOverrideForm.update(f => ({
+      ...f, assessment: f.assessment ? {...f.assessment, type} : null
+    }));
+  }
+
+  updateLevelMinPassingGrade(grade: number) {
+    this.levelOverrideForm.update(f => ({
+      ...f, assessment: f.assessment ? {...f.assessment, minPassingGrade: grade} : null
+    }));
+  }
+
+  addLevelSubject(input: HTMLInputElement) {
+    const val = input.value.trim();
+    if (!val || !this.levelOverrideForm().assessment) return;
+    this.levelOverrideForm.update(f => ({
+      ...f, assessment: {...f.assessment!, subjects: {...f.assessment!.subjects, [val]: 1}}
+    }));
+    input.value = '';
+  }
+
+  updateLevelSubjectCoef(subject: string, coef: number) {
+    this.levelOverrideForm.update(f => ({
+      ...f, assessment: f.assessment ? {...f.assessment, subjects: {...f.assessment.subjects, [subject]: coef}} : null
+    }));
+  }
+
+  removeLevelSubject(subject: string) {
+    const subjects = {...this.levelOverrideForm().assessment?.subjects};
+    delete subjects[subject];
+    this.levelOverrideForm.update(f => ({
+      ...f, assessment: f.assessment ? {...f.assessment, subjects} : null
+    }));
+  }
+
+  saveLevelOverride() {
+    const levelId = this.selectedLevelId();
+    if (!levelId) return;
+    this.isLevelOverrideSaving.set(true);
+    this.enrollmentService.updateLevelOverride(levelId, this.levelOverrideForm())
+      .pipe(finalize(() => this.isLevelOverrideSaving.set(false)))
+      .subscribe({next: () => { this.notificationService.success('Override niveau publié.'); this.loadInitialData(); }});
+  }
+
+  deleteLevelOverride() {
+    const levelId = this.selectedLevelId();
+    if (!levelId) return;
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Supprimer l\'override niveau',
+        message: 'Ce niveau reviendra à la configuration globale de l\'école.',
+        confirmLabel: 'Supprimer', cancelLabel: 'Annuler', type: 'danger'
+      }
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.isLevelOverrideSaving.set(true);
+      this.enrollmentService.deleteLevelOverride(levelId)
+        .pipe(finalize(() => this.isLevelOverrideSaving.set(false)))
         .subscribe({next: () => { this.notificationService.success('Override supprimé.'); this.loadInitialData(); }});
     });
   }
