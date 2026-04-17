@@ -11,6 +11,9 @@ import {
   LevelConfigResponse,
   EnrollmentConfig,
   LevelOverrideConfig,
+  CycleOverrideConfig,
+  YearOverrideConfig,
+  CycleType,
   DirectEntryRequest,
   AssessmentRequest
 } from '../models/enrollment.model';
@@ -123,18 +126,36 @@ export class EnrollmentAdminService {
     );
   }
 
-  /**
-   * Appliquer des exceptions par niveau (Quotas, fermeture spécifique)
-   */
   updateLevelOverride(levelId: string, override: LevelOverrideConfig): Observable<void> {
     return this.http.patch<void>(`${this.baseUrl}/config/level-overrides/${levelId}`, override, {headers: this.getHeaders()}).pipe(
       catchError(this.handleError('Erreur lors de la personnalisation du niveau'))
     );
   }
 
-  /**
-   * Récupère la fusion Global + Surcharges pour un niveau
-   */
+  updateYearOverride(yearId: string, override: YearOverrideConfig): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/config/year-overrides/${yearId}`, override, {headers: this.getHeaders()}).pipe(
+      catchError(this.handleError('Erreur lors de la configuration de l\'année'))
+    );
+  }
+
+  deleteYearOverride(yearId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/config/year-overrides/${yearId}`, {headers: this.getHeaders()}).pipe(
+      catchError(this.handleError('Erreur lors de la suppression de l\'override d\'année'))
+    );
+  }
+
+  updateCycleOverride(cycleType: CycleType, override: CycleOverrideConfig): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/config/cycle-overrides/${cycleType}`, override, {headers: this.getHeaders()}).pipe(
+      catchError(this.handleError('Erreur lors de la configuration du cycle'))
+    );
+  }
+
+  deleteCycleOverride(cycleType: CycleType): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/config/cycle-overrides/${cycleType}`, {headers: this.getHeaders()}).pipe(
+      catchError(this.handleError('Erreur lors de la suppression de l\'override de cycle'))
+    );
+  }
+
   getEffectiveConfig(levelId: string): Observable<LevelConfigResponse> {
     const url = `${this.envService.getServiceUrl('enrollment')}/api/v1/public/config/${levelId}`;
     return this.http.get<LevelConfigResponse>(url, {headers: this.getHeaders()}).pipe(
@@ -202,6 +223,18 @@ export class EnrollmentAdminService {
       {headers: this.getHeaders().set('Content-Type', 'application/json')}
     ).pipe(
       catchError(this.handleError('Erreur lors du rejet du dossier'))
+    );
+  }
+
+  waitlistAdmission(admissionId: string): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/direction/admissions/${admissionId}/waitlist`, {}, {headers: this.getHeaders()}).pipe(
+      catchError(this.handleError('Erreur lors du passage en liste d\'attente'))
+    );
+  }
+
+  bulkValidate(admissionIds: string[]): Observable<Admission[]> {
+    return this.http.post<Admission[]>(`${this.baseUrl}/direction/admissions/bulk-validate`, admissionIds, {headers: this.getHeaders()}).pipe(
+      catchError(this.handleError('Erreur lors de la validation en masse'))
     );
   }
 }
