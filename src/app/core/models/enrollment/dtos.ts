@@ -1,24 +1,27 @@
-import { AdmissionType, RegistrationMode } from './base-types';
+import { AcademicYearState, AdmissionType, CycleType, RegistrationMode } from './base-types';
 import { AdmissionBundle, Admission, Guardian } from './entities';
-import { EnrollmentSchema, PresetDocumentConfig, AssessmentSchemaConfig } from './config';
+import { EnrollmentSchema } from './config';
 
 // --- PORTAIL PUBLIC ---
+
+export interface AvailableYearSummary {
+  id: string;
+  label: string;
+  state: AcademicYearState;
+  registrationStartDate: string;
+  registrationEndDate: string;
+  active: boolean;
+  allowedTypes: AdmissionType[];
+  registrationMode: RegistrationMode;
+  welcomeMessage?: string;
+  levelStatuses: Record<string, { active: boolean; full: boolean }>;
+}
 
 export interface PublicPortalSummary {
   tenantId: string;
   portalActive: boolean;
-  registrationMode: RegistrationMode;
-  availableYears: Array<{
-    id: string;
-    label: string;
-    registrationStartDate: string;
-    registrationEndDate: string;
-    active: boolean;
-  }>;
-  welcomeMessage?: string;
   legalText?: string;
-  enabledServices: string[];
-  levelStatuses: Record<string, { active: boolean; full: boolean }>;
+  availableYears: AvailableYearSummary[];
 }
 
 // --- CONFIG EFFECTIVE ---
@@ -27,10 +30,8 @@ export interface DefaultConfigResponse {
   portalActive: boolean;
   registrationMode: RegistrationMode;
   schema: EnrollmentSchema;
-  documentChecklist: PresetDocumentConfig[];
-  assessmentConfig: AssessmentSchemaConfig;
   instructions: Record<string, string>;
-  enabledServices: string[];
+  legalText?: string;
 }
 
 export interface LevelConfigResponse extends DefaultConfigResponse {
@@ -64,11 +65,12 @@ export interface AddChildRequest {
   academicYearId: string;
   levelId: string;
   filiereId?: string | null;
+  cycleType?: CycleType;
 }
 
 export interface ServiceSubscriptionRequest {
   serviceCode: string;
-  option: string;
+  optionCode: string;
 }
 
 export interface ReEnrollRequest {

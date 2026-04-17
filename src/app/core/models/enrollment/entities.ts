@@ -68,7 +68,7 @@ export interface Assessment {
 
 export interface ServiceSubscription {
   serviceCode: string;
-  option: string;
+  optionCode: string;
 }
 
 // --- ADMISSION (ENFANT) ---
