@@ -179,7 +179,7 @@ export class AdmissionConfigComponent implements OnInit {
     if (this.currentScope() === 'GLOBAL') {
       obs$ = this.enrollmentService.updateConfig(cfg);
     } else {
-      const override: LevelOverrideConfig = {active: true, assessmentConfig: cfg.schema.assessment};
+      const override: LevelOverrideConfig = {active: true, assessment: cfg.schema.assessment};
       obs$ = this.enrollmentService.updateLevelOverride(this.selectedLevelId()!, override);
     }
 
