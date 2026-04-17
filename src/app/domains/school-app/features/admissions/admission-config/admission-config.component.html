@@ -25,7 +25,7 @@
           <lucide-icon [name]="Eye" [size]="15"></lucide-icon>
           <span>Simulateur</span>
         </button>
-        <button class="btn-save" (click)="onSave()" [disabled]="isSaving() || isLoading() || !isDirty()">
+        <button class="btn-save" [class.is-dirty]="isDirty()" (click)="onSave()" [disabled]="isSaving() || isLoading() || !isDirty()">
           <lucide-icon *ngIf="isSaving()" [name]="RefreshCw" [size]="15" class="animate-spin"></lucide-icon>
           <lucide-icon *ngIf="!isSaving()" [name]="Save" [size]="15"></lucide-icon>
           <span>{{ isSaving() ? 'Publication...' : 'Publier' }}</span>
@@ -95,14 +95,15 @@
     </aside>
 
     <!-- MAIN EDITOR -->
-    <main class="editor-container" [class.level-mode]="currentScope() === 'LEVEL'">
+    <main class="editor-container" [class.level-mode]="currentScope() === 'LEVEL'" [class.has-dirty-bar]="isDirty()">
 
       <div class="context-banner" [class.is-level]="currentScope() === 'LEVEL'">
         <lucide-icon [name]="currentScope() === 'GLOBAL' ? ShieldCheck : Sparkles" [size]="16"></lucide-icon>
-        <div>
+        <div class="banner-text">
           <span class="scope-chip">{{ currentScope() === 'GLOBAL' ? 'Politique globale' : 'Surcharge niveau' }}</span>
           <p>{{ currentScope() === 'GLOBAL' ? 'Ces réglages s\'appliquent à toute l\'école par défaut.' : 'Configuration spécifique pour : ' + (selectedLevelName() || '…') }}</p>
         </div>
+        <span class="dirty-badge" *ngIf="isDirty()">● Modifications en attente</span>
       </div>
 
       <!-- ══════════ TAB : PILLARS ══════════ -->
@@ -187,9 +188,12 @@
                   <span class="mandatory-chip" [class.required]="f.mandatory">
                     {{ f.mandatory ? 'Requis' : 'Optionnel' }}
                   </span>
-                  <button class="btn-icon-del" (click)="removeCustomField(f.name)" title="Supprimer">
+                  <button *ngIf="!f.preset" class="btn-icon-del" (click)="removeCustomField(f.name)" title="Supprimer">
                     <lucide-icon [name]="Trash2" [size]="13"></lucide-icon>
                   </button>
+                  <div *ngIf="f.preset" class="btn-lock" title="Champ système — non supprimable">
+                    <lucide-icon [name]="Lock" [size]="13"></lucide-icon>
+                  </div>
                 </div>
 
                 <div *ngIf="activePillarCustomFields().length === 0" class="empty-custom-hint">
@@ -226,7 +230,7 @@
             <div *ngFor="let doc of activeChecklist()" class="doc-row">
               <div class="doc-name-cell">
                 <div class="doc-icon"><lucide-icon [name]="FileText" [size]="15"></lucide-icon></div>
-                <span>{{ doc.name }}</span>
+                <input type="text" [value]="doc.name" (change)="updateDocumentName(doc.code, $any($event.target).value)" class="doc-name-input" placeholder="Nom du document…">
               </div>
               <code class="doc-code">{{ doc.code }}</code>
               <div class="mandatory-cell">
@@ -385,6 +389,24 @@
       </ng-container>
 
     </main>
+  </div>
+
+  <!-- STICKY SAVE BAR -->
+  <div class="sticky-save-bar" *ngIf="isDirty()">
+    <div class="save-bar-content">
+      <span class="save-bar-label">
+        <span class="save-dot"></span>
+        Modifications non publiées
+      </span>
+      <div class="save-bar-actions">
+        <button class="btn-discard" (click)="discardChanges()" [disabled]="isSaving()">Annuler</button>
+        <button class="btn-publish" (click)="onSave()" [disabled]="isSaving()">
+          <lucide-icon *ngIf="isSaving()" [name]="RefreshCw" [size]="14" class="animate-spin"></lucide-icon>
+          <lucide-icon *ngIf="!isSaving()" [name]="Save" [size]="14"></lucide-icon>
+          <span>{{ isSaving() ? 'Publication…' : 'Publier les modifications' }}</span>
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- LOADER -->

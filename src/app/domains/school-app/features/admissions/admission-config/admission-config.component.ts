@@ -267,6 +267,15 @@ export class AdmissionConfigComponent implements OnInit {
     this.config.set({...current, schema: {...current.schema, documents: {...current.schema.documents, presetDocuments}}});
   }
 
+  updateDocumentName(code: string, name: string) {
+    const current = this.config();
+    if (!current) return;
+    const presetDocuments = current.schema.documents.presetDocuments.map((d: PresetDocumentConfig) =>
+      d.code === code ? {...d, name} : d
+    );
+    this.config.set({...current, schema: {...current.schema, documents: {...current.schema.documents, presetDocuments}}});
+  }
+
   // --- ASSESSMENT METHODS ---
 
   updateAssessmentType(type: any) {
@@ -322,6 +331,11 @@ export class AdmissionConfigComponent implements OnInit {
     this.dialog.open(PortalPreviewDialogComponent, {
       width: '100vw', height: '100vh', data: {config: this.config(), activeYear: this.activeYear()}
     });
+  }
+
+  discardChanges() {
+    const initial = this.initialConfig();
+    if (initial) this.config.set(JSON.parse(JSON.stringify(initial)));
   }
 
   resetToSystemDefaults() {
