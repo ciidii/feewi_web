@@ -19,6 +19,7 @@ import {
 import {Subject, debounceTime, distinctUntilChanged, takeUntil, firstValueFrom, forkJoin} from 'rxjs';
 import { IdentityService } from '../../../../../core/services/identity.service';
 import { EnrollmentPublicService } from '../../../../../core/services/enrollment-public.service';
+import { TenantContextService } from '../../../../../core/services/tenant-context.service';
 import { NotificationService } from '../../../../../shared/services/notification.service';
 import { AcademicService } from '../../../../../core/services/academic.service';
 import { User as StudentUser } from '../../../../../core/models/user.model';
@@ -35,6 +36,7 @@ export class SecretaryReEnrollmentComponent implements OnInit, OnDestroy {
   private identityService = inject(IdentityService);
   private enrollmentService = inject(EnrollmentPublicService);
   private academicService = inject(AcademicService);
+  private tenantContext = inject(TenantContextService);
   private notificationService = inject(NotificationService);
   private router = inject(Router);
 
@@ -142,10 +144,10 @@ export class SecretaryReEnrollmentComponent implements OnInit, OnDestroy {
     this.isSaving.set(true);
     try {
       const payload = {
+        tenantId: this.tenantContext.activeTenant()?.id ?? '',
         studentId: student.id,
         academicYearId: student.academicYearId,
-        nextLevelId: student.nextLevelId,
-        filiereId: student.filiereId
+        nextLevelId: student.nextLevelId
       };
 
       const res: any = await firstValueFrom(this.enrollmentService.reEnroll(payload));

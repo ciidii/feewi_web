@@ -33,24 +33,49 @@ export class PortalPreviewComponent {
   config = input.required<EnrollmentConfig>();
   activeYear = input<AcademicYear | null>(null);
 
-  /** Transforme le dictionnaire de piliers en liste ordonnée pour le rendu V4 */
+  /** Construit la liste des piliers depuis le schéma v7 pour le rendu */
   pillarsList = computed(() => {
-    const cfg = this.config();
-    const systemMeta: Record<string, { icon: any }> = {
-      pillar_identity: { icon: UserCog },
-      pillar_medical: { icon: HeartPulse },
-      pillar_family: { icon: Users },
-      pillar_schooling: { icon: School }
-    };
-
-    return Object.entries(cfg.pillars).map(([key, p]) => ({
-      key,
-      label: p.label,
-      icon: systemMeta[key]?.icon || Sparkles,
-      systemFields: p.systemFields,
-      customFields: p.customFields
-    }));
+    const schema = this.config().schema;
+    const pillars = [
+      {
+        key: 'identity',
+        label: 'Identité',
+        icon: UserCog,
+        systemFields: Object.entries(schema.identity.coreFieldControls).map(([name, ctrl]) => ({
+          name, label: ctrl.label, type: 'TEXT', mandatory: true
+        })),
+        customFields: schema.identity.customFields
+      },
+      {
+        key: 'family',
+        label: 'Famille',
+        icon: Users,
+        systemFields: Object.entries(schema.family.guardianCoreFieldControls).map(([name, ctrl]) => ({
+          name, label: ctrl.label, type: 'TEXT', mandatory: true
+        })),
+        customFields: schema.family.guardianCustomFields
+      },
+      {
+        key: 'medical',
+        label: 'Santé',
+        icon: HeartPulse,
+        systemFields: [],
+        customFields: schema.medical.customFields
+      },
+      {
+        key: 'schooling',
+        label: 'Scolarité',
+        icon: School,
+        systemFields: [],
+        customFields: schema.schooling.customFields
+      }
+    ];
+    return pillars.filter(p => p.systemFields.length > 0 || p.customFields.length > 0);
   });
+
+  get documentChecklist() {
+    return this.config().schema.documents.presetDocuments;
+  }
 
   // Icônes
   readonly Globe = Globe;
