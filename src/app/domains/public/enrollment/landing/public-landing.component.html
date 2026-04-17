@@ -17,9 +17,9 @@
   <main class="hub-content animate-fade">
     
     <!-- Zone de Message -->
-    <div class="school-note" *ngIf="s.welcomeMessage">
+    <div class="school-note" *ngIf="welcomeMessage()">
       <lucide-icon [name]="Info" [size]="20" class="text-primary"></lucide-icon>
-      <p>{{ s.welcomeMessage }}</p>
+      <p>{{ welcomeMessage() }}</p>
     </div>
 
     <!-- Choix de l'année (V5) -->

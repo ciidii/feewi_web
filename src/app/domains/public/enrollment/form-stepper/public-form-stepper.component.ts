@@ -99,6 +99,10 @@ export class PublicFormStepperComponent implements OnInit {
     services: [] as ServiceSubscriptionRequest[]
   };
 
+  availableServiceCodes = computed(() =>
+    this.config()?.schema?.services?.availableServices?.map(s => s.code) ?? []
+  );
+
   progress = computed(() => {
     const steps = this.getFilteredSteps();
     return ((steps.indexOf(this.currentStep()) + 1) / steps.length) * 100;

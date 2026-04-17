@@ -81,7 +81,7 @@
       <app-step-services
         *ngIf="currentStep() === 'SERVICES'"
         [services]="formStore.services"
-        [enabledServices]="(config()?.schema?.services?.availableServices || []).map(s => s.code)">
+        [enabledServices]="availableServiceCodes()">
       </app-step-services>
 
       <app-step-vault

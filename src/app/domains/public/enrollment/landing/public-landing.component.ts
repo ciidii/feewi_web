@@ -31,10 +31,13 @@ export class PublicLandingComponent implements OnInit {
   summary = signal<PublicPortalSummary | null>(null);
   isLoading = signal(true);
 
-  // V5 : Liste des années filtrées (uniquement celles marquées actives dans le CMS)
-  activeYears = computed(() => {
-    return this.summary()?.availableYears.filter(y => y.active) || [];
-  });
+  activeYears = computed(() =>
+    this.summary()?.availableYears.filter(y => y.active) ?? []
+  );
+
+  welcomeMessage = computed(() =>
+    this.activeYears()[0]?.welcomeMessage ?? null
+  );
 
   ngOnInit() {
     this.loadSummary();
