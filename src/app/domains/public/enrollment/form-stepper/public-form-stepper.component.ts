@@ -169,7 +169,7 @@ export class PublicFormStepperComponent implements OnInit {
 
   getFilteredSteps(): StepperStep[] {
     const steps: StepperStep[] = ['GUARDIAN', 'STUDENT', 'MEDICAL'];
-    if (this.config()?.enabledServices?.length) steps.push('SERVICES');
+    if (this.config()?.schema?.services?.enabled) steps.push('SERVICES');
     steps.push('DOCS', 'REVIEW');
     return steps;
   }

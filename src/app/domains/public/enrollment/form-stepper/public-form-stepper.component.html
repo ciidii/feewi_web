@@ -26,7 +26,7 @@
         <div class="step-icon"><lucide-icon [name]="HeartPulse"></lucide-icon></div>
         <div class="step-text"><span class="step-label">Santé</span></div>
       </div>
-      <div class="nav-step" *ngIf="config()?.enabledServices?.includes('CANTEEN') || config()?.enabledServices?.includes('TRANSPORT')" [class.active]="currentStep() === 'SERVICES'" [class.completed]="progress() > 60">
+      <div class="nav-step" *ngIf="config()?.schema?.services?.enabled" [class.active]="currentStep() === 'SERVICES'" [class.completed]="progress() > 60">
         <div class="step-icon"><lucide-icon [name]="LayoutGrid"></lucide-icon></div>
         <div class="step-text"><span class="step-label">Services</span></div>
       </div>
@@ -81,7 +81,7 @@
       <app-step-services
         *ngIf="currentStep() === 'SERVICES'"
         [services]="formStore.services"
-        [enabledServices]="config()?.enabledServices || []">
+        [enabledServices]="(config()?.schema?.services?.availableServices || []).map(s => s.code)">
       </app-step-services>
 
       <app-step-vault
