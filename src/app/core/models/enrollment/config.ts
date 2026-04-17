@@ -1,4 +1,4 @@
-import { AssessmentType, FieldType, RegistrationMode } from './base-types';
+import { AssessmentType, CycleType, FieldType, RegistrationMode } from './base-types';
 
 // --- CHAMPS ---
 
@@ -57,6 +57,21 @@ export interface AssessmentSchemaConfig {
   minPassingGrade: number;
 }
 
+// --- SCHÉMA SERVICES PARASCOLAIRES ---
+
+export interface ServiceConfig {
+  code: string;
+  label: string;
+  options: string[];
+  mandatory: boolean;
+  preset?: boolean;
+}
+
+export interface ServicesSchemaConfig {
+  enabled: boolean;
+  availableServices: ServiceConfig[];
+}
+
 // --- SCHÉMA GLOBAL ---
 
 export interface EnrollmentSchema {
@@ -66,6 +81,7 @@ export interface EnrollmentSchema {
   schooling: SchoolingSchemaConfig;
   documents: DocumentSchemaConfig;
   assessment: AssessmentSchemaConfig;
+  services?: ServicesSchemaConfig;
 }
 
 // --- CONFIG NIVEAU (OVERRIDE) ---
@@ -73,8 +89,27 @@ export interface EnrollmentSchema {
 export interface LevelOverrideConfig {
   active: boolean;
   maxNewEnrollments?: number | null;
-  documentChecklist?: PresetDocumentConfig[] | null;
-  assessmentConfig?: AssessmentSchemaConfig | null;
+  additionalDocuments?: PresetDocumentConfig[] | null;
+  assessment?: AssessmentSchemaConfig | null;
+}
+
+// --- CONFIG CYCLE (OVERRIDE) ---
+
+export interface CycleOverrideConfig {
+  assessment?: AssessmentSchemaConfig | null;
+  additionalDocuments?: PresetDocumentConfig[] | null;
+  additionalServices?: ServiceConfig[] | null;
+}
+
+// --- CONFIG ANNÉE (OVERRIDE) ---
+
+export interface YearOverrideConfig {
+  enrollmentOpen: boolean;
+  openFrom?: string | null;
+  openUntil?: string | null;
+  allowedTypes?: ('NEW_ENROLLMENT' | 'RE_ENROLLMENT')[] | null;
+  registrationMode?: RegistrationMode | null;
+  welcomeMessage?: string | null;
 }
 
 // --- CONFIG GLOBALE ÉTABLISSEMENT ---
