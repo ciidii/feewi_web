@@ -40,8 +40,9 @@ Ce document suit l'état d'avancement du projet, les décisions architecturales 
     - [x] Jalon 1.2.1 : Shell & Navigation du FormStepper terminée.
     - [x] Jalon 1.2.2 : Modernisation du Step HUB terminée.
     - [x] Jalon 1.2.3 : Modernisation de l'étape Parent (Guardian) terminée.
-    - [x] **Jalon 1.2.4 : Modernisation des étapes Enfant (Student, Medical, Services).**
-        - Refonte visuelle de `StepIdentity`, `StepMedical` et `StepServices`.
-        - Utilisation de `FwBadge` et des utilitaires de formulaires.
-        - Amélioration de l'UX pour la sélection des services et du niveau scolaire.
-    - [ ] Jalon 1.2.5 : Modernisation du Moteur de Documents (Vault).
+    - [x] Jalon 1.2.4 : Modernisation des étapes Enfant (Student, Medical, Services) terminée.
+    - [x] **Jalon 1.2.5 : Modernisation du Moteur de Documents (Vault).**
+        - Refonte des cartes de documents avec statuts colorés et badges.
+        - Intégration de `FwButton` pour l'upload et le remplacement de fichiers.
+        - Ajout d'une section d'aide visuelle pour les formats supportés.
+    - [ ] Jalon 1.2.6 : Modernisation de la synthèse finale (Review).
