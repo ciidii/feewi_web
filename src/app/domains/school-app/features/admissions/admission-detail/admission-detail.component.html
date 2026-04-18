@@ -26,27 +26,36 @@
             <span>Vérifier conformité</span>
           </button>
         }
-        @if (app.status === 'VERIFIED') {
-          <button class="btn-action primary" (click)="submitAssessment()" [disabled]="isActionLoading()">
-            <lucide-icon [name]="isActionLoading() ? RefreshCw : ClipboardCheck" [size]="18"
-                         [class.animate-spin]="isActionLoading()"></lucide-icon>
-            <span>Clôturer l'évaluation</span>
-          </button>
-        }
-        @if (app.status === 'TESTING') {
+
+        @if (['ADMITTED', 'WAITLIST', 'TESTING'].includes(app.status)) {
           <button *ngIf="isReadyForFinalValidation()" class="btn-action success" (click)="validateFinal()" [disabled]="isActionLoading()">
             <lucide-icon [name]="isActionLoading() ? RefreshCw : GraduationCap" [size]="18"
                          [class.animate-spin]="isActionLoading()"></lucide-icon>
             <span>Valider l'Admission</span>
           </button>
 
-          <button *ngIf="!isReadyForFinalValidation()" class="btn-action warning" (click)="overruleFinal()" [disabled]="isActionLoading()">
+          <button *ngIf="!isReadyForFinalValidation() && app.status !== 'ADMITTED'" class="btn-action warning" (click)="overruleFinal()" [disabled]="isActionLoading()">
             <lucide-icon [name]="isActionLoading() ? RefreshCw : ShieldCheck" [size]="18"
                          [class.animate-spin]="isActionLoading()"></lucide-icon>
             <span>Valider (Dérogation)</span>
           </button>
         }
-        <button class="btn-icon-only" title="Imprimer le dossier">
+
+        @if (!['VALIDATED', 'REJECTED', 'CANCELLED'].includes(app.status)) {
+          <div class="flex items-center gap-2 ml-2 pl-4 border-l border-slate-200">
+            <button class="btn-icon-only text-amber-600 hover:bg-amber-50" (click)="waitlistFinal()" title="Mettre en attente" [disabled]="isActionLoading()">
+              <lucide-icon [name]="HistoryIcon" [size]="18"></lucide-icon>
+            </button>
+            <button class="btn-icon-only text-rose-600 hover:bg-rose-50" (click)="rejectFinal()" title="Rejeter le dossier" [disabled]="isActionLoading()">
+              <lucide-icon [name]="XCircle" [size]="18"></lucide-icon>
+            </button>
+            <button class="btn-icon-only text-slate-400 hover:bg-slate-100" (click)="cancelAdmission()" title="Annuler le dossier" [disabled]="isActionLoading()">
+              <lucide-icon [name]="Trash2" [size]="18"></lucide-icon>
+            </button>
+          </div>
+        }
+
+        <button class="btn-icon-only ml-2" title="Imprimer le dossier">
           <lucide-icon [name]="Printer" [size]="18"></lucide-icon>
         </button>
       </div>
@@ -248,6 +257,13 @@
                     <button class="btn-choice amber" [class.active]="pedagogicalDecision() === 'WAITLIST'" (click)="pedagogicalDecision.set('WAITLIST')" [disabled]="app.status === 'VALIDATED'">Attente</button>
                     <button class="btn-choice green" [class.active]="pedagogicalDecision() === 'ADMITTED'" (click)="pedagogicalDecision.set('ADMITTED')" [disabled]="app.status === 'VALIDATED'">Admis</button>
                   </div>
+
+                  <button class="w-full mt-6 h-12 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 transition-all disabled:opacity-50"
+                          (click)="submitPedagogicalDecision()"
+                          [disabled]="isActionLoading() || app.status === 'VALIDATED'">
+                    <lucide-icon *ngIf="isActionLoading()" [name]="RefreshCw" [size]="18" class="animate-spin mr-2 inline"></lucide-icon>
+                    Confirmer la décision pédagogique
+                  </button>
                 </div>
               </div>
             </div>

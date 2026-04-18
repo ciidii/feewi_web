@@ -122,6 +122,7 @@ export interface EnrollmentConfig {
   registrationMode: RegistrationMode;
   schema: EnrollmentSchema;
   levelOverrides: Record<string, LevelOverrideConfig>;
+  cycleOverrides?: Record<string, CycleOverrideConfig>;
   instructions: Record<string, string>;
   legalText: string | null;
   enabledServices: string[];

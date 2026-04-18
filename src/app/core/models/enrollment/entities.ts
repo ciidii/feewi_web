@@ -43,6 +43,7 @@ export interface Guardian {
 export interface SchoolingPillar {
   academicYearId: string;
   levelId: string;
+  levelLabel?: string;
   filiereId?: string | null;
   cycleType?: CycleType;
   customFields?: Record<string, any>;

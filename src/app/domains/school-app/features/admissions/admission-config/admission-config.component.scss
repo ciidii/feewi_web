@@ -149,17 +149,67 @@
     }
   }
 
-  .level-item {
-    font-size: 0.8125rem; font-weight: 600; color: var(--fw-midnight);
-    .level-name { flex: 1; text-align: left; }
-    .override-dot { width: 6px; height: 6px; border-radius: 50%; background: #f59e0b; flex-shrink: 0; }
-    &.active .level-name { color: var(--fw-primary); }
-  }
-
   .levels-scroll {
     overflow-y: auto; flex: 1;
     &::-webkit-scrollbar { width: 3px; }
     &::-webkit-scrollbar-thumb { background: var(--fw-border); border-radius: 10px; }
+  }
+
+  // ── Groupes hiérarchiques cycle > niveaux ───────────────────────────────────
+  .cycle-group { margin-bottom: 0.125rem; }
+
+  .cycle-header {
+    display: flex; align-items: center; gap: 0.5rem;
+    width: 100%; padding: 0.35rem 0.5rem; border-radius: 7px;
+    border: none; background: transparent; cursor: pointer;
+    transition: background 0.12s;
+
+    .cycle-icon {
+      width: 20px; height: 20px; border-radius: 5px; flex-shrink: 0;
+      display: grid; place-items: center;
+      background: var(--fw-ice); color: var(--fw-slate-medium);
+      transition: all 0.12s;
+    }
+
+    .cycle-name {
+      flex: 1; text-align: left;
+      font-size: 0.75rem; font-weight: 700; color: var(--fw-midnight);
+      transition: color 0.12s;
+    }
+
+    .override-dot { width: 6px; height: 6px; border-radius: 50%; background: #f59e0b; flex-shrink: 0; }
+
+    &:hover { background: var(--fw-ice); }
+
+    &.active {
+      background: var(--fw-primary-alpha);
+      .cycle-icon { background: var(--fw-primary); color: white; }
+      .cycle-name { color: var(--fw-primary); }
+    }
+  }
+
+  .cycle-levels {
+    margin-left: 0.875rem;
+    padding-left: 0.625rem;
+    border-left: 1.5px solid var(--fw-border);
+    margin-bottom: 0.375rem;
+  }
+
+  .level-subitem {
+    display: flex; align-items: center; gap: 0.375rem;
+    width: 100%; padding: 0.275rem 0.5rem; border-radius: 6px;
+    border: none; background: transparent; cursor: pointer;
+    transition: background 0.12s;
+    font-size: 0.8rem; font-weight: 500; color: var(--fw-slate-medium);
+
+    .override-dot { width: 5px; height: 5px; border-radius: 50%; background: #f59e0b; flex-shrink: 0; }
+
+    &:hover { background: var(--fw-ice); color: var(--fw-midnight); }
+
+    &.active {
+      background: var(--fw-primary-alpha);
+      color: var(--fw-primary); font-weight: 600;
+    }
   }
 }
 

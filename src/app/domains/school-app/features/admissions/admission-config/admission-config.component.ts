@@ -33,6 +33,7 @@ import {
 import {finalize, forkJoin, Observable} from 'rxjs';
 import {EnrollmentAdminService} from '../../../../../core/services/enrollment-admin.service';
 import {
+  CycleOverrideConfig,
   EnrollmentConfig,
   FieldConfig,
   LevelOverrideConfig,
@@ -41,9 +42,10 @@ import {
   ServicesSchemaConfig,
   YearOverrideConfig
 } from '../../../../../core/models/enrollment.model';
+import { CycleType } from '../../../../../core/models/enrollment/base-types';
 import {NotificationService} from '../../../../../shared/services/notification.service';
 import {AcademicService} from '../../../../../core/services/academic.service';
-import {AcademicYear, Level} from '../../../../../core/models/academic.model';
+import {AcademicYear, Cycle, Level} from '../../../../../core/models/academic.model';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {DocumentTypeFormComponent} from './components/document-type-form/document-type-form.component';
 import {CustomFieldFormComponent} from './components/custom-field-form/custom-field-form.component';
@@ -52,7 +54,7 @@ import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-d
 import {ServiceFormComponent} from './components/service-form/service-form.component';
 
 export type ConfigTab = 'PILLARS' | 'DOCUMENTS' | 'ASSESSMENT' | 'SERVICES' | 'WORKFLOW';
-export type ConfigScope = 'GLOBAL' | 'LEVEL' | 'YEAR';
+export type ConfigScope = 'GLOBAL' | 'LEVEL' | 'YEAR' | 'CYCLE';
 
 @Component({
   selector: 'app-admission-config',
@@ -74,6 +76,7 @@ export class AdmissionConfigComponent implements OnInit {
   initialConfig = signal<EnrollmentConfig | null>(null);
   activeYear = signal<AcademicYear | null>(null);
   levels = signal<Level[]>([]);
+  academicCycles = signal<Cycle[]>([]);
   availableYears = signal<AcademicYear[]>([]);
   isLoading = signal(true);
   isSaving = signal(false);
@@ -103,7 +106,23 @@ export class AdmissionConfigComponent implements OnInit {
   });
   isLevelOverrideSaving = signal(false);
 
+  // Cycle override local form state (isolated from global config)
+  cycleOverrideForm = signal<CycleOverrideConfig>({
+    assessment: null,
+    additionalDocuments: [],
+    additionalServices: []
+  });
+  selectedCycleType = signal<CycleType | null>(null);
+  isCycleOverrideSaving = signal(false);
+
   // --- STATIC DATA ---
+  readonly cycles: { type: CycleType; label: string; icon: any }[] = [
+    { type: 'MATERNAL',     label: 'Préscolaire / Maternelle', icon: Sparkles     },
+    { type: 'PRIMARY',      label: 'École primaire',           icon: School       },
+    { type: 'MIDDLE_SCHOOL',label: 'Collège',                  icon: Users        },
+    { type: 'HIGH_SCHOOL',  label: 'Lycée',                    icon: GraduationCap},
+  ];
+
   readonly systemPillars = [
     {key: 'identity',  label: 'Identité',  icon: UserCog},
     {key: 'medical',   label: 'Santé',     icon: HeartPulse},
@@ -132,6 +151,24 @@ export class AdmissionConfigComponent implements OnInit {
   selectedYearName = computed(() => {
     const id = this.selectedYearId();
     return id ? (this.availableYears().find(y => y.id === id)?.label || id) : '';
+  });
+
+  selectedCycleName = computed(() => {
+    const t = this.selectedCycleType();
+    return t ? (this.cycles.find(c => c.type === t)?.label || t) : '';
+  });
+
+  levelsByCycle = computed(() => {
+    const allLevels = this.levels();
+    const cycleMap = new Map(this.academicCycles().map(c => [c.id, c.cycleCode]));
+    return this.cycles
+      .map(c => ({
+        cycle: c,
+        levels: allLevels
+          .filter(l => cycleMap.get(l.cycleId) === c.type)
+          .sort((a, b) => a.rank - b.rank)
+      }))
+      .filter(g => g.levels.length > 0 || this.hasCycleOverride(g.cycle.type));
   });
 
   isDirty = computed(() => {
@@ -188,11 +225,30 @@ export class AdmissionConfigComponent implements OnInit {
     return !!(this.config() as any)?.levelOverrides?.[levelId];
   }
 
+  hasCycleOverride(cycleType: CycleType): boolean {
+    return !!(this.config()?.cycleOverrides?.[cycleType]);
+  }
+
   levelDocsList = computed<PresetDocumentConfig[]>(() =>
     this.levelOverrideForm().additionalDocuments || []
   );
 
   levelAssessmentEnabled = computed(() => !!this.levelOverrideForm().assessment);
+
+  cycleDocsList = computed<PresetDocumentConfig[]>(() =>
+    this.cycleOverrideForm().additionalDocuments || []
+  );
+
+  cycleServicesList = computed<ServiceConfig[]>(() =>
+    this.cycleOverrideForm().additionalServices || []
+  );
+
+  cycleAssessmentEnabled = computed(() => !!this.cycleOverrideForm().assessment);
+
+  cycleAssessmentSubjectsList = computed(() =>
+    Object.entries(this.cycleOverrideForm().assessment?.subjects || {})
+      .map(([name, coef]) => ({name, coef}))
+  );
 
   levelAssessmentSubjectsList = computed(() =>
     Object.entries(this.levelOverrideForm().assessment?.subjects || {})
@@ -216,9 +272,10 @@ export class AdmissionConfigComponent implements OnInit {
       config: this.enrollmentService.getConfig(),
       activeYear: this.academicService.getCurrentYear(),
       allYears: this.academicService.getYears(),
-      levels: this.academicService.getLevels()
+      levels: this.academicService.getLevels(),
+      cycles: this.academicService.getCycles()
     }).pipe(finalize(() => this.isLoading.set(false))).subscribe({
-      next: ({config, activeYear, allYears, levels}) => {
+      next: ({config, activeYear, allYears, levels, cycles}) => {
         if (!config.schema.assessment)
           config.schema.assessment = {type: 'DOSSIER', subjects: {}, maxGrade: 20, minPassingGrade: 10};
         if (!config.schema.documents.presetDocuments)
@@ -230,6 +287,7 @@ export class AdmissionConfigComponent implements OnInit {
         this.activeYear.set(activeYear);
         this.availableYears.set(allYears);
         this.levels.set(levels);
+        this.academicCycles.set(cycles);
       },
       error: (err) => console.error('[AdmissionConfig]', err)
     });
@@ -254,14 +312,22 @@ export class AdmissionConfigComponent implements OnInit {
     if (scope === 'LEVEL') {
       this.selectedLevelId.set(id);
       this.selectedYearId.set(null);
+      this.selectedCycleType.set(null);
       this.loadLevelOverrideForm(id!);
     } else if (scope === 'YEAR') {
       this.selectedYearId.set(id);
       this.selectedLevelId.set(null);
+      this.selectedCycleType.set(null);
       this.loadYearOverrideForm(id!);
+    } else if (scope === 'CYCLE') {
+      this.selectedCycleType.set(id as CycleType);
+      this.selectedLevelId.set(null);
+      this.selectedYearId.set(null);
+      this.loadCycleOverrideForm(id as CycleType);
     } else {
       this.selectedLevelId.set(null);
       this.selectedYearId.set(null);
+      this.selectedCycleType.set(null);
     }
   }
 
@@ -438,6 +504,130 @@ export class AdmissionConfigComponent implements OnInit {
         .pipe(finalize(() => this.isLevelOverrideSaving.set(false)))
         .subscribe({next: () => { this.notificationService.success('Override supprimé.'); this.loadInitialData(); }});
     });
+  }
+
+  // --- CYCLE OVERRIDE METHODS ---
+
+  private loadCycleOverrideForm(cycleType: CycleType) {
+    const existing = this.config()?.cycleOverrides?.[cycleType];
+    this.cycleOverrideForm.set(existing
+      ? JSON.parse(JSON.stringify(existing))
+      : { assessment: null, additionalDocuments: [], additionalServices: [] }
+    );
+  }
+
+  saveCycleOverride() {
+    const cycleType = this.selectedCycleType();
+    if (!cycleType) return;
+    this.isCycleOverrideSaving.set(true);
+    this.enrollmentService.updateCycleOverride(cycleType, this.cycleOverrideForm())
+      .pipe(finalize(() => this.isCycleOverrideSaving.set(false)))
+      .subscribe({ next: () => { this.notificationService.success('Override cycle publié.'); this.loadInitialData(); }});
+  }
+
+  deleteCycleOverride() {
+    const cycleType = this.selectedCycleType();
+    if (!cycleType) return;
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Supprimer l\'override de cycle',
+        message: 'Ce cycle reviendra à la configuration globale de l\'école.',
+        confirmLabel: 'Supprimer', cancelLabel: 'Annuler', type: 'danger'
+      }
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.isCycleOverrideSaving.set(true);
+      this.enrollmentService.deleteCycleOverride(cycleType)
+        .pipe(finalize(() => this.isCycleOverrideSaving.set(false)))
+        .subscribe({ next: () => { this.notificationService.success('Override supprimé.'); this.loadInitialData(); }});
+    });
+  }
+
+  addCycleDoc() {
+    this.dialog.open(DocumentTypeFormComponent, {width: '450px', panelClass: 'feewi-dialog-panel'})
+      .afterClosed().subscribe(result => {
+        if (!result) return;
+        this.cycleOverrideForm.update(f => ({
+          ...f, additionalDocuments: [...(f.additionalDocuments || []), result]
+        }));
+      });
+  }
+
+  removeCycleDoc(code: string) {
+    this.cycleOverrideForm.update(f => ({
+      ...f, additionalDocuments: (f.additionalDocuments || []).filter(d => d.code !== code)
+    }));
+  }
+
+  updateCycleDocMandatory(code: string, mandatory: boolean) {
+    this.cycleOverrideForm.update(f => ({
+      ...f,
+      additionalDocuments: (f.additionalDocuments || []).map(d => d.code === code ? {...d, mandatory} : d)
+    }));
+  }
+
+  addCycleService() {
+    this.dialog.open(ServiceFormComponent, {width: '500px', panelClass: 'feewi-dialog-panel'})
+      .afterClosed().subscribe((result: ServiceConfig | undefined) => {
+        if (!result) return;
+        this.cycleOverrideForm.update(f => ({
+          ...f, additionalServices: [...(f.additionalServices || []), result]
+        }));
+      });
+  }
+
+  removeCycleService(code: string) {
+    this.cycleOverrideForm.update(f => ({
+      ...f, additionalServices: (f.additionalServices || []).filter(s => s.code !== code)
+    }));
+  }
+
+  toggleCycleAssessmentOverride() {
+    if (this.cycleAssessmentEnabled()) {
+      this.cycleOverrideForm.update(f => ({...f, assessment: null}));
+    } else {
+      const base = this.config()?.schema?.assessment;
+      const fallback = {type: 'DOSSIER' as const, subjects: {}, maxGrade: 20, minPassingGrade: 10};
+      this.cycleOverrideForm.update(f => ({
+        ...f, assessment: base ? JSON.parse(JSON.stringify(base)) : fallback
+      }));
+    }
+  }
+
+  updateCycleAssessmentType(type: any) {
+    this.cycleOverrideForm.update(f => ({
+      ...f, assessment: f.assessment ? {...f.assessment, type} : null
+    }));
+  }
+
+  updateCycleMinPassingGrade(grade: number) {
+    this.cycleOverrideForm.update(f => ({
+      ...f, assessment: f.assessment ? {...f.assessment, minPassingGrade: grade} : null
+    }));
+  }
+
+  addCycleSubject(input: HTMLInputElement) {
+    const val = input.value.trim();
+    if (!val || !this.cycleOverrideForm().assessment) return;
+    this.cycleOverrideForm.update(f => ({
+      ...f, assessment: {...f.assessment!, subjects: {...f.assessment!.subjects, [val]: 1}}
+    }));
+    input.value = '';
+  }
+
+  updateCycleSubjectCoef(subject: string, coef: number) {
+    this.cycleOverrideForm.update(f => ({
+      ...f, assessment: f.assessment ? {...f.assessment, subjects: {...f.assessment.subjects, [subject]: coef}} : null
+    }));
+  }
+
+  removeCycleSubject(subject: string) {
+    const subjects = {...this.cycleOverrideForm().assessment?.subjects};
+    delete subjects[subject];
+    this.cycleOverrideForm.update(f => ({
+      ...f, assessment: f.assessment ? {...f.assessment, subjects} : null
+    }));
   }
 
   // --- PILLAR METHODS ---

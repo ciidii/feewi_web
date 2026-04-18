@@ -28,6 +28,7 @@ import {
   Save,
   School,
   ShieldCheck,
+  Trash2,
   Upload,
   User,
   Users,
@@ -93,15 +94,107 @@ export class AdmissionDetailComponent implements OnInit {
 
   isReadyForFinalValidation = computed(() => {
     const app = this.application();
-    if (!app || app.status !== 'TESTING') return false;
+    if (!app) return false;
 
-    // VERROU NUMÉRIQUE : Tous les documents obligatoires doivent être UPLOADED
+    // Un dossier peut être validé s'il est ADMITTED ou WAITLIST (après évaluation)
+    // ou s'il est en TESTING (évaluation en cours mais Direction souhaite trancher)
+    const validStatus = ['ADMITTED', 'WAITLIST', 'TESTING'].includes(app.status);
+    if (!validStatus) return false;
+
+    // VERROU NUMÉRIQUE : Tous les documents obligatoires doivent être traitées (UPLOADED, RECEIVED ou VERIFIED)
     const mandatoryDocs = app.documents.filter(d => d.mandatory);
-    const allDocsUploaded = mandatoryDocs.every(d => d.status === 'UPLOADED');
+    const allDocsProcessed = mandatoryDocs.every(d =>
+      ['UPLOADED', 'RECEIVED', 'VERIFIED'].includes(d.status)
+    );
 
-    const assessmentOk = !!app.assessment && !!app.assessment.decision;
-    return allDocsUploaded && assessmentOk;
+    const assessmentOk = !!app.assessment;
+    return allDocsProcessed && assessmentOk;
   });
+
+  // ... (dans la classe)
+
+  rejectFinal() {
+    const app = this.application();
+    if (!app) return;
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '450px',
+      data: {
+        title: 'Rejeter la candidature',
+        message: 'Veuillez saisir le motif du rejet qui sera visible par les parents :',
+        confirmLabel: 'Confirmer le Rejet',
+        type: 'danger',
+        showInput: true,
+        inputPlaceholder: 'Ex: Niveau insuffisant pour le niveau demandé.'
+      }
+    });
+
+    dialogRef.afterClosed().pipe(
+      switchMap(result => {
+        if (result?.confirmed) {
+          this.isActionLoading.set(true);
+          return this.enrollmentAdminService.rejectAdmission(app.id, result.inputValue);
+        }
+        return of(null);
+      }),
+      finalize(() => this.isActionLoading.set(false))
+    ).subscribe({
+      next: (updated) => {
+        if (updated) {
+          this.loadApplication(app.id);
+          this.notificationService.error('Candidature rejetée.');
+        }
+      }
+    });
+  }
+
+  waitlistFinal() {
+    const app = this.application();
+    if (!app) return;
+
+    this.isActionLoading.set(true);
+    this.enrollmentAdminService.waitlistAdmission(app.id).pipe(
+      finalize(() => this.isActionLoading.set(false))
+    ).subscribe({
+      next: () => {
+        this.loadApplication(app.id);
+        this.notificationService.warning('Dossier placé en liste d\'attente.');
+      }
+    });
+  }
+
+  cancelAdmission() {
+    const app = this.application();
+    if (!app) return;
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Annuler le dossier',
+        message: 'Souhaitez-vous vraiment annuler ce dossier ? Cette action est définitive.',
+        confirmLabel: 'Annuler définitivement',
+        type: 'danger'
+      }
+    });
+
+    dialogRef.afterClosed().pipe(
+      switchMap(confirmed => {
+        if (confirmed) {
+          this.isActionLoading.set(true);
+          return this.enrollmentAdminService.cancelAdmission(app.id);
+        }
+        return of(null);
+      }),
+      finalize(() => this.isActionLoading.set(false))
+    ).subscribe({
+      next: (success) => {
+        if (success !== null) {
+          this.loadApplication(app.id);
+          this.notificationService.info('Dossier annulé.');
+        }
+      }
+    });
+  }
 
   mandatoryDocsSummary = computed(() => {
     const app = this.application();
@@ -128,6 +221,43 @@ export class AdmissionDetailComponent implements OnInit {
 
   updateGrade(subject: string, value: number) {
     this.evaluationGrades.update(prev => ({...prev, [subject]: value}));
+  }
+
+  /**
+   * Soumission de la décision pédagogique (Direction / Commission)
+   */
+  submitPedagogicalDecision() {
+    const app = this.application();
+    if (!app) return;
+
+    this.isActionLoading.set(true);
+    const decision = this.pedagogicalDecision();
+
+    // 1. D'abord on enregistre les notes et commentaires (Assessment)
+    const assessmentPayload: AssessmentRequest = {
+      grades: this.evaluationGrades(),
+      comments: this.evaluationComment,
+      recommendedLevelId: this.recommendedLevelId()
+    };
+
+    this.enrollmentAdminService.submitAssessment(app.id, assessmentPayload).pipe(
+      switchMap(() => {
+        // 2. Ensuite on déclenche l'action de direction correspondante
+        if (decision === 'REJECTED') {
+          return this.enrollmentAdminService.rejectAdmission(app.id, this.evaluationComment || 'Refus suite à évaluation.');
+        } else if (decision === 'WAITLIST') {
+          return this.enrollmentAdminService.waitlistAdmission(app.id);
+        }
+        // Si ADMITTED, le serveur a déjà calculé le statut ADMITTED via submitAssessment
+        return of(true);
+      }),
+      finalize(() => this.isActionLoading.set(false))
+    ).subscribe({
+      next: () => {
+        this.loadApplication(app.id);
+        this.notificationService.success('Décision pédagogique enregistrée.');
+      }
+    });
   }
 
   ngOnInit() {
@@ -391,4 +521,5 @@ export class AdmissionDetailComponent implements OnInit {
   readonly Users = Users;
   protected readonly Info = Info;
   protected readonly Upload = Upload;
+  protected readonly Trash2 = Trash2;
 }

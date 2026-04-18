@@ -26,7 +26,7 @@
           <span>Simulateur</span>
         </button>
         <button class="btn-save" [class.is-dirty]="isDirty()" (click)="onSave()"
-                [disabled]="isSaving() || isLoading() || !isDirty() || currentScope() === 'YEAR'">
+                [disabled]="isSaving() || isLoading() || !isDirty() || currentScope() === 'YEAR' || currentScope() === 'CYCLE'">
           <lucide-icon *ngIf="isSaving()" [name]="RefreshCw" [size]="15" class="animate-spin"></lucide-icon>
           <lucide-icon *ngIf="!isSaving()" [name]="Save" [size]="15"></lucide-icon>
           <span>{{ isSaving() ? 'Publication...' : 'Publier' }}</span>
@@ -37,7 +37,7 @@
     </div>
   </header>
 
-  <!-- TABS (masqués en scope YEAR et LEVEL — ces éditeurs sont autonomes) -->
+  <!-- TABS (masqués en scope YEAR, CYCLE et LEVEL — ces éditeurs sont autonomes) -->
   <nav class="cms-tabs-nav" *ngIf="currentScope() === 'GLOBAL'">
     <div class="tabs-container">
       <button class="tab-item" [class.active]="activeTab() === 'PILLARS'" (click)="activeTab.set('PILLARS')">
@@ -106,21 +106,34 @@
       </div>
 
       <div class="levels-scroll">
-        <button
-          *ngFor="let level of levels()"
-          class="scope-item level-item"
-          [class.active]="selectedLevelId() === level.id"
-          (click)="setScope('LEVEL', level.id)"
-        >
-          <div class="scope-icon level"><lucide-icon [name]="GraduationCap" [size]="13"></lucide-icon></div>
-          <span class="truncate level-name">{{ level.name }}</span>
-          <span class="override-dot" *ngIf="hasLevelOverride(level.id)" title="Surcharge active"></span>
-        </button>
+        <div *ngFor="let group of levelsByCycle()" class="cycle-group">
+
+          <!-- En-tête cycle — clic → override cycle -->
+          <button class="cycle-header"
+                  [class.active]="selectedCycleType() === group.cycle.type && currentScope() === 'CYCLE'"
+                  (click)="setScope('CYCLE', group.cycle.type)">
+            <div class="cycle-icon"><lucide-icon [name]="group.cycle.icon" [size]="13"></lucide-icon></div>
+            <span class="cycle-name">{{ group.cycle.label }}</span>
+            <span class="override-dot" *ngIf="hasCycleOverride(group.cycle.type)" title="Override cycle actif"></span>
+          </button>
+
+          <!-- Niveaux du cycle -->
+          <div class="cycle-levels" *ngIf="group.levels.length > 0">
+            <button *ngFor="let level of group.levels"
+                    class="level-subitem"
+                    [class.active]="selectedLevelId() === level.id"
+                    (click)="setScope('LEVEL', level.id)">
+              <span class="truncate">{{ level.name }}</span>
+              <span class="override-dot" *ngIf="hasLevelOverride(level.id)" title="Override niveau actif"></span>
+            </button>
+          </div>
+
+        </div>
       </div>
     </aside>
 
     <!-- MAIN EDITOR -->
-    <main class="editor-container" [class.level-mode]="currentScope() === 'LEVEL'"
+    <main class="editor-container" [class.level-mode]="currentScope() === 'LEVEL' || currentScope() === 'CYCLE'"
           [class.year-mode]="currentScope() === 'YEAR'" [class.has-dirty-bar]="isDirty() && currentScope() === 'GLOBAL'">
 
       <!-- CONTEXT BANNER (portée GLOBAL uniquement) -->
@@ -245,6 +258,192 @@
               <lucide-icon *ngIf="isYearOverrideSaving()" [name]="RefreshCw" [size]="15" class="animate-spin"></lucide-icon>
               <lucide-icon *ngIf="!isYearOverrideSaving()" [name]="Save" [size]="15"></lucide-icon>
               <span>{{ isYearOverrideSaving() ? 'Publication…' : 'Publier l\'override' }}</span>
+            </button>
+          </div>
+
+        </div>
+      </ng-container>
+
+      <!-- ══════════ CYCLE OVERRIDE EDITOR ══════════ -->
+      <ng-container *ngIf="currentScope() === 'CYCLE'">
+        <div class="year-override-editor">
+
+          <div class="year-editor-header">
+            <div class="year-icon"><lucide-icon [name]="GraduationCap" [size]="20"></lucide-icon></div>
+            <div>
+              <h3>Override — {{ selectedCycleName() }}</h3>
+              <p>Règles partagées par tous les niveaux de ce cycle.</p>
+            </div>
+            <button class="btn-del-override" *ngIf="hasCycleOverride(selectedCycleType()!)"
+                    (click)="deleteCycleOverride()" [disabled]="isCycleOverrideSaving()">
+              <lucide-icon [name]="Trash2" [size]="14"></lucide-icon>
+              Supprimer l'override
+            </button>
+          </div>
+
+          <!-- Documents additionnels -->
+          <div class="editor-section">
+            <div class="section-toolbar" style="margin-bottom:0">
+              <div>
+                <h3>Documents additionnels</h3>
+                <p>Pièces supplémentaires requises pour tous les niveaux de ce cycle. <span class="label-hint">(s'ajoutent à la liste globale)</span></p>
+              </div>
+              <button class="btn-add-primary" (click)="addCycleDoc()">
+                <lucide-icon [name]="Plus" [size]="15"></lucide-icon> Ajouter
+              </button>
+            </div>
+            <div class="docs-table" style="margin-top:1rem" *ngIf="cycleDocsList().length > 0; else emptyCycleDocs">
+              <div class="docs-table-header">
+                <span>Document</span><span>Code</span><span>Obligatoire</span><span></span>
+              </div>
+              <div *ngFor="let doc of cycleDocsList()" class="doc-row">
+                <div class="doc-name-cell">
+                  <div class="doc-icon"><lucide-icon [name]="FileText" [size]="15"></lucide-icon></div>
+                  <span style="font-size:0.875rem;font-weight:500">{{ doc.name }}</span>
+                </div>
+                <code class="doc-code">{{ doc.code }}</code>
+                <div class="mandatory-cell">
+                  <label class="toggle-switch sm" [class.on]="doc.mandatory"
+                         (click)="updateCycleDocMandatory(doc.code, !doc.mandatory)">
+                    <div class="track"><div class="thumb"></div></div>
+                  </label>
+                  <span [class.text-required]="doc.mandatory">{{ doc.mandatory ? 'Oui' : 'Non' }}</span>
+                </div>
+                <button class="btn-icon-del" (click)="removeCycleDoc(doc.code)" title="Supprimer">
+                  <lucide-icon [name]="Trash2" [size]="13"></lucide-icon>
+                </button>
+              </div>
+            </div>
+            <ng-template #emptyCycleDocs>
+              <div class="empty-inline" style="margin-top:0.75rem">
+                <lucide-icon [name]="Info" [size]="14"></lucide-icon>
+                <span>Aucun document additionnel — ce cycle utilise uniquement la liste globale.</span>
+              </div>
+            </ng-template>
+          </div>
+
+          <!-- Services additionnels -->
+          <div class="editor-section">
+            <div class="section-toolbar" style="margin-bottom:0">
+              <div>
+                <h3>Services additionnels</h3>
+                <p>Services parascolaires spécifiques à ce cycle. <span class="label-hint">(s'ajoutent aux services globaux)</span></p>
+              </div>
+              <button class="btn-add-primary" (click)="addCycleService()">
+                <lucide-icon [name]="Plus" [size]="15"></lucide-icon> Ajouter
+              </button>
+            </div>
+            <div class="services-table" style="margin-top:1rem" *ngIf="cycleServicesList().length > 0; else emptyCycleServices">
+              <div class="services-table-header">
+                <span>Service</span><span>Options</span><span>Obligatoire</span><span></span>
+              </div>
+              <div *ngFor="let svc of cycleServicesList()" class="service-row">
+                <div class="service-name-cell">
+                  <div class="service-icon"><lucide-icon [name]="Wrench" [size]="14"></lucide-icon></div>
+                  <div>
+                    <span class="svc-label">{{ svc.label }}</span>
+                    <code class="svc-code">{{ svc.code }}</code>
+                  </div>
+                </div>
+                <div class="option-chips">
+                  <span *ngFor="let opt of svc.options" class="opt-chip">{{ opt }}</span>
+                  <span *ngIf="!svc.options.length" class="no-options">Sans option</span>
+                </div>
+                <div class="mandatory-cell">
+                  <label class="toggle-switch sm" [class.on]="svc.mandatory">
+                    <div class="track"><div class="thumb"></div></div>
+                  </label>
+                  <span>{{ svc.mandatory ? 'Oui' : 'Non' }}</span>
+                </div>
+                <button class="btn-icon-del" (click)="removeCycleService(svc.code)" title="Supprimer">
+                  <lucide-icon [name]="Trash2" [size]="13"></lucide-icon>
+                </button>
+              </div>
+            </div>
+            <ng-template #emptyCycleServices>
+              <div class="empty-inline" style="margin-top:0.75rem">
+                <lucide-icon [name]="Info" [size]="14"></lucide-icon>
+                <span>Aucun service additionnel — ce cycle utilise les services globaux uniquement.</span>
+              </div>
+            </ng-template>
+          </div>
+
+          <!-- Override évaluation -->
+          <div class="editor-section">
+            <div class="section-label">Override évaluation</div>
+            <div class="portal-toggle-card" [class.open]="cycleAssessmentEnabled()">
+              <div class="portal-icon">
+                <lucide-icon [name]="ClipboardList" [size]="24"></lucide-icon>
+              </div>
+              <div class="portal-info">
+                <strong>{{ cycleAssessmentEnabled() ? 'Évaluation spécifique active' : 'Hérite de la configuration globale' }}</strong>
+                <span>{{ cycleAssessmentEnabled() ? 'Ce cycle a son propre processus d\'évaluation.' : 'Activer pour définir un processus différent pour ce cycle.' }}</span>
+              </div>
+              <label class="toggle-switch lg" [class.on]="cycleAssessmentEnabled()" (click)="toggleCycleAssessmentOverride()">
+                <div class="track"><div class="thumb"></div></div>
+              </label>
+            </div>
+
+            <ng-container *ngIf="cycleAssessmentEnabled() && cycleOverrideForm().assessment; let aCycle">
+              <div style="margin-top:1.25rem">
+                <div class="assessment-type-grid">
+                  <button *ngFor="let t of assessmentTypes" class="type-card"
+                          [class.active]="aCycle.type === t.value" (click)="updateCycleAssessmentType(t.value)">
+                    <div class="type-icon"><lucide-icon [name]="t.icon" [size]="20"></lucide-icon></div>
+                    <span class="type-name">{{ t.label }}</span>
+                    <span class="type-desc">{{ t.desc }}</span>
+                    <div class="type-check" *ngIf="aCycle.type === t.value">
+                      <lucide-icon [name]="ShieldCheck" [size]="12"></lucide-icon>
+                    </div>
+                  </button>
+                </div>
+                <div class="grade-threshold-row" style="margin-top:1rem">
+                  <input type="number" [ngModel]="aCycle.minPassingGrade"
+                         (ngModelChange)="updateCycleMinPassingGrade($event)"
+                         class="grade-input-lg" min="0" [max]="aCycle.maxGrade" step="0.5">
+                  <span class="grade-sep">/</span>
+                  <span class="grade-max">{{ aCycle.maxGrade }}</span>
+                  <span class="grade-hint">Note minimale d'admission.</span>
+                </div>
+                <div *ngIf="aCycle.type === 'EXAM' || aCycle.type === 'MIXED'" style="margin-top:1rem">
+                  <div class="subject-add-row">
+                    <input type="text" #cycleSubjectInput placeholder="Ex : Mathématiques" class="subject-input"
+                           (keyup.enter)="addCycleSubject(cycleSubjectInput)">
+                    <button class="btn-add-secondary" (click)="addCycleSubject(cycleSubjectInput)">
+                      <lucide-icon [name]="Plus" [size]="13"></lucide-icon> Ajouter
+                    </button>
+                  </div>
+                  <div class="subjects-table" *ngIf="cycleAssessmentSubjectsList().length > 0; else noCycleSubjects">
+                    <div class="subjects-header"><span>Matière</span><span class="text-center">Coefficient</span><span></span></div>
+                    <div *ngFor="let s of cycleAssessmentSubjectsList()" class="subject-row">
+                      <span class="subject-name">{{ s.name }}</span>
+                      <div class="coef-cell">
+                        <button class="coef-btn" (click)="updateCycleSubjectCoef(s.name, +s.coef - 1)" [disabled]="+s.coef <= 1">−</button>
+                        <span class="coef-val">{{ s.coef }}</span>
+                        <button class="coef-btn" (click)="updateCycleSubjectCoef(s.name, +s.coef + 1)" [disabled]="+s.coef >= 10">+</button>
+                      </div>
+                      <button class="btn-icon-del" (click)="removeCycleSubject(s.name)">
+                        <lucide-icon [name]="Trash2" [size]="13"></lucide-icon>
+                      </button>
+                    </div>
+                  </div>
+                  <ng-template #noCycleSubjects>
+                    <div class="empty-inline">
+                      <lucide-icon [name]="Info" [size]="14"></lucide-icon>
+                      <span>Aucune matière — la note sera saisie de façon globale.</span>
+                    </div>
+                  </ng-template>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+
+          <!-- Actions -->
+          <div class="year-editor-actions">
+            <button class="btn-save-year" (click)="saveCycleOverride()" [disabled]="isCycleOverrideSaving()">
+              <lucide-icon *ngIf="isCycleOverrideSaving()" [name]="RefreshCw" [size]="15" class="animate-spin"></lucide-icon>
+              <lucide-icon *ngIf="!isCycleOverrideSaving()" [name]="Save" [size]="15"></lucide-icon>
+              <span>{{ isCycleOverrideSaving() ? 'Publication…' : 'Publier l\'override' }}</span>
             </button>
           </div>
 
