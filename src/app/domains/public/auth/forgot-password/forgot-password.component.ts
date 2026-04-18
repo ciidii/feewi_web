@@ -2,14 +2,15 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { LucideAngularModule, Mail, Send, ArrowLeft, Loader2, Info, AlertCircle, KeyRound } from 'lucide-angular';
+import { LucideAngularModule, Mail, ArrowLeft, Info, KeyRound } from 'lucide-angular';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../shared/services/notification.service';
+import { FwButtonComponent } from '../../../../shared/components/button/button.component';
 
 @Component({
   selector: 'app-forgot-password',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, LucideAngularModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, LucideAngularModule, FwButtonComponent],
   templateUrl: './forgot-password.component.html',
   styleUrl: './forgot-password.component.scss'
 })
@@ -20,11 +21,8 @@ export class ForgotPasswordComponent {
   private notificationService = inject(NotificationService);
 
   readonly Mail = Mail;
-  readonly Send = Send;
   readonly ArrowLeft = ArrowLeft;
-  readonly Loader2 = Loader2;
   readonly Info = Info;
-  readonly AlertCircle = AlertCircle;
   readonly KeyRound = KeyRound;
 
   isLoading = signal(false);

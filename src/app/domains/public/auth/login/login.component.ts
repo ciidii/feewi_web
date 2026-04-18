@@ -2,11 +2,9 @@ import { Component, inject, signal, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { LucideAngularModule, Lock, Mail, Loader2, Eye, EyeOff } from 'lucide-angular';
+import { LucideAngularModule, Lock, Mail, Loader2, Eye, EyeOff, AlertCircle } from 'lucide-angular';
 import { AuthService } from '../../../../core/services/auth.service';
+import { FwButtonComponent } from '../../../../shared/components/button/button.component';
 
 @Component({
   selector: 'app-login',
@@ -16,10 +14,8 @@ import { AuthService } from '../../../../core/services/auth.service';
     FormsModule,
     ReactiveFormsModule,
     RouterModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    LucideAngularModule
+    LucideAngularModule,
+    FwButtonComponent
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
@@ -44,6 +40,7 @@ export class LoginComponent {
   readonly Loader2 = Loader2;
   readonly Eye = Eye;
   readonly EyeOff = EyeOff;
+  readonly AlertCircle = AlertCircle;
 
   togglePassword() {
     this.showPassword.update(v => !v);

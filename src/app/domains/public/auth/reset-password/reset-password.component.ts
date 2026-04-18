@@ -9,12 +9,11 @@ import {
   Mail,
   ShieldCheck,
   Lock,
-  Loader2,
-  RefreshCcw,
-  AlertCircle
+  RefreshCcw
 } from 'lucide-angular';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../shared/services/notification.service';
+import { FwButtonComponent } from '../../../../shared/components/button/button.component';
 
 function passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
   const password = control.get('newPassword')?.value;
@@ -26,7 +25,7 @@ function passwordMatchValidator(control: AbstractControl): ValidationErrors | nu
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, LucideAngularModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, LucideAngularModule, FwButtonComponent],
   templateUrl: './reset-password.component.html',
   styleUrl: './reset-password.component.scss'
 })
@@ -42,9 +41,7 @@ export class ResetPasswordComponent {
   readonly Mail = Mail;
   readonly ShieldCheck = ShieldCheck;
   readonly Lock = Lock;
-  readonly Loader2 = Loader2;
   readonly RefreshCcw = RefreshCcw;
-  readonly AlertCircle = AlertCircle;
 
   isLoading = signal(false);
 
@@ -75,7 +72,7 @@ export class ResetPasswordComponent {
     if (control?.hasError('required')) return 'Ce champ est obligatoire';
     if (control?.hasError('email')) return 'Format email invalide';
     if (control?.hasError('pattern')) return 'Le code doit contenir 6 chiffres';
-    if (control?.hasError('minlength')) return 'Le mot de passe doit contenir au moins 8 caracteres';
+    if (control?.hasError('minlength')) return 'Le mot de passe doit contenir au moins 8 caractères';
     return 'Champ invalide';
   }
 
@@ -87,7 +84,7 @@ export class ResetPasswordComponent {
   onSubmit() {
     if (this.resetForm.invalid) {
       this.resetForm.markAllAsTouched();
-      this.notificationService.warning('Verifiez les champs du formulaire.', 'Formulaire incomplet');
+      this.notificationService.warning('Vérifiez les champs du formulaire.', 'Formulaire incomplet');
       return;
     }
 
@@ -100,12 +97,12 @@ export class ResetPasswordComponent {
       newPassword: newPassword!
     }).subscribe({
       next: () => {
-        this.notificationService.success('Mot de passe reinitialise avec succes.', 'Operation terminee');
+        this.notificationService.success('Mot de passe réinitialisé avec succès.', 'Opération terminée');
         this.router.navigate(['/auth/login']);
       },
       error: (err: any) => {
-        const message = err?.error?.message || err?.message || 'Impossible de reinitialiser le mot de passe.';
-        this.notificationService.error(message, 'Echec de reinitialisation');
+        const message = err?.error?.message || err?.message || 'Impossible de réinitialiser le mot de passe.';
+        this.notificationService.error(message, 'Échec de réinitialisation');
         this.isLoading.set(false);
       },
       complete: () => {

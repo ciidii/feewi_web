@@ -1,6 +1,7 @@
-import { Component, Input, computed, signal } from '@angular/common';
+
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule, Loader2 } from 'lucide-angular';
+import {Component, computed, Input} from '@angular/core';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 export type ButtonSize = 'sm' | 'md' | 'lg';
