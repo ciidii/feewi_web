@@ -1,88 +1,116 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CheckCircle, FileText, LayoutGrid, LucideAngularModule, User, Users } from 'lucide-angular';
+import { CheckCircle, FileText, LayoutGrid, LucideAngularModule, User, Users, ClipboardCheck, Mail, Phone, ShieldAlert, Sparkles } from 'lucide-angular';
 import { Admission } from '../../../../../../core/models/enrollment/entities';
+import { FwBadgeComponent } from '../../../../../../shared/components/badge/badge.component';
 
 @Component({
   selector: 'app-step-review',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [CommonModule, FormsModule, LucideAngularModule, FwBadgeComponent],
   template: `
-    <div>
+    <div class="animate-fade">
+      <!-- Header -->
       <div class="mb-10">
-        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Validation finale</h1>
-        <p class="text-slate-500 mt-2">Vérifiez l'ensemble du dossier avant l'envoi au secrétariat.</p>
+        <div class="inline-flex items-center justify-center w-12 h-12 bg-primary-alpha text-primary rounded-xl mb-4">
+          <lucide-icon [name]="ClipboardCheck" [size]="24"></lucide-icon>
+        </div>
+        <h1 class="text-3xl font-display font-black text-midnight tracking-tight">Vérification finale</h1>
+        <p class="text-sm text-text-secondary font-medium mt-2 max-w-lg">
+          Veuillez relire attentivement l'ensemble des informations saisies avant de soumettre définitivement votre dossier.
+        </p>
       </div>
 
-      <div class="flex flex-col gap-4">
+      <div class="space-y-6">
 
         <!-- Responsable légal -->
-        <div class="p-5 rounded-2xl border border-slate-100 bg-white">
-          <div class="flex items-center gap-2.5 mb-4">
-            <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-              <lucide-icon [name]="Users" [size]="15"></lucide-icon>
+        <div class="p-6 rounded-2xl border-2 border-border bg-white shadow-sm">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 rounded-xl bg-surface-sunken text-midnight flex items-center justify-center">
+              <lucide-icon [name]="Users" [size]="20"></lucide-icon>
             </div>
-            <h3 class="font-bold text-slate-800 text-sm">Responsable légal</h3>
+            <h3 class="font-display font-black text-midnight text-base uppercase tracking-tight">Dossier Familial</h3>
           </div>
-          <div class="grid grid-cols-2 gap-3 text-sm">
-            <div>
-              <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">Identité</p>
-              <p class="font-semibold text-slate-700">{{ family.primaryGuardian.firstName }} {{ family.primaryGuardian.lastName }}</p>
+          <div class="grid grid-cols-2 gap-8">
+            <div class="flex items-start gap-3">
+              <div class="w-8 h-8 rounded-full bg-surface-sunken flex items-center justify-center shrink-0">
+                <lucide-icon [name]="User" [size]="14" class="text-text-tertiary"></lucide-icon>
+              </div>
+              <div>
+                <p class="text-[10px] font-black uppercase text-text-tertiary tracking-widest mb-1">Responsable Principal</p>
+                <p class="font-bold text-midnight leading-tight">{{ family.primaryGuardian.firstName }} {{ family.primaryGuardian.lastName }}</p>
+                <p class="text-xs text-text-secondary mt-1 font-medium italic">Lien : {{ family.primaryGuardian.relation }}</p>
+              </div>
             </div>
-            <div>
-              <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">Contact</p>
-              <p class="font-semibold text-slate-700">{{ family.primaryGuardian.phone }}</p>
-              <p class="text-slate-500 text-xs">{{ family.primaryGuardian.email }}</p>
+            <div class="space-y-3">
+              <div class="flex items-center gap-3 text-sm font-bold text-midnight">
+                <lucide-icon [name]="Phone" [size]="14" class="text-primary"></lucide-icon>
+                {{ family.primaryGuardian.phone }}
+              </div>
+              <div class="flex items-center gap-3 text-sm font-bold text-midnight">
+                <lucide-icon [name]="Mail" [size]="14" class="text-primary"></lucide-icon>
+                {{ family.primaryGuardian.email || 'Non renseigné' }}
+              </div>
             </div>
           </div>
         </div>
 
         <!-- Un bloc par enfant -->
         <div *ngFor="let adm of admissions; let i = index"
-             class="p-5 rounded-2xl border border-slate-100 bg-white">
-          <div class="flex items-center gap-2.5 mb-4">
-            <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
-              <lucide-icon [name]="User" [size]="15"></lucide-icon>
+             class="p-6 rounded-2xl border-2 border-border bg-white shadow-sm">
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20">
+                <lucide-icon [name]="User" [size]="20"></lucide-icon>
+              </div>
+              <div>
+                <h3 class="font-display font-black text-midnight text-base uppercase tracking-tight">
+                  Élève {{ i + 1 }}
+                </h3>
+                <p class="text-sm font-bold text-primary">{{ adm.identity.firstName }} {{ adm.identity.lastName }}</p>
+              </div>
             </div>
-            <h3 class="font-bold text-slate-800 text-sm">
-              Enfant {{ i + 1 }} — {{ adm.identity.firstName }} {{ adm.identity.lastName }}
-            </h3>
+            <app-fw-badge [status]="'SUBMITTED'" size="xs"></app-fw-badge>
           </div>
 
-          <div class="grid grid-cols-2 gap-4 text-sm">
-            <!-- Niveau -->
-            <div>
-              <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">Niveau visé</p>
-              <span class="inline-block px-2.5 py-1 bg-indigo-50 text-indigo-700 font-bold text-xs rounded-lg">
-                {{ levelName(adm) }}
-              </span>
+          <div class="grid grid-cols-2 gap-8">
+            <!-- Niveau & Services -->
+            <div class="space-y-6">
+              <div>
+                <p class="text-[10px] font-black uppercase text-text-tertiary tracking-widest mb-2">Inscription</p>
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-surface-sunken rounded-lg font-black text-midnight text-xs">
+                  <lucide-icon [name]="Sparkles" [size]="12" class="text-primary"></lucide-icon>
+                  {{ levelName(adm) }}
+                </div>
+              </div>
+
+              <div *ngIf="adm.subscriptions?.length">
+                <p class="text-[10px] font-black uppercase text-text-tertiary tracking-widest mb-2">Options & Services</p>
+                <div class="flex flex-wrap gap-2">
+                  <span *ngFor="let sub of adm.subscriptions"
+                        class="px-2.5 py-1 bg-primary-alpha/5 border border-primary-alpha rounded-lg text-[10px] font-black uppercase tracking-tight text-primary">
+                    {{ sub.serviceCode }}<span *ngIf="sub.optionCode"> · {{ sub.optionCode }}</span>
+                  </span>
+                </div>
+              </div>
             </div>
 
             <!-- Documents -->
             <div>
-              <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">Documents</p>
-              <div class="flex flex-col gap-1">
-                <div *ngFor="let doc of adm.documents" class="flex justify-between text-xs">
-                  <span class="text-slate-600">{{ doc.name }}</span>
-                  <span class="font-bold"
-                        [class.text-emerald-600]="isDocOk(doc.status)"
-                        [class.text-red-500]="!isDocOk(doc.status)">
-                    {{ isDocOk(doc.status) ? '✓' : '—' }}
-                  </span>
+              <p class="text-[10px] font-black uppercase text-text-tertiary tracking-widest mb-2">Pièces Justificatives</p>
+              <div class="space-y-1.5">
+                <div *ngFor="let doc of adm.documents" class="flex items-center justify-between p-2 rounded-lg bg-surface-sunken">
+                  <span class="text-xs font-bold text-text-secondary truncate pr-4">{{ doc.name }}</span>
+                  <div class="flex items-center justify-center w-5 h-5 rounded-full"
+                       [class.bg-success-border]="isDocOk(doc.status)"
+                       [class.text-success]="isDocOk(doc.status)"
+                       [class.bg-error-border]="!isDocOk(doc.status)"
+                       [class.text-error]="!isDocOk(doc.status)">
+                    <lucide-icon [name]="isDocOk(doc.status) ? CheckCircle : ShieldAlert" [size]="12"></lucide-icon>
+                  </div>
                 </div>
-                <p *ngIf="!adm.documents?.length" class="text-xs text-slate-400">Aucun document requis</p>
-              </div>
-            </div>
-
-            <!-- Services -->
-            <div *ngIf="adm.subscriptions?.length" class="col-span-2">
-              <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">Services</p>
-              <div class="flex flex-wrap gap-2">
-                <span *ngFor="let sub of adm.subscriptions"
-                      class="px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700">
-                  {{ sub.serviceCode }}<span *ngIf="sub.optionCode"> · {{ sub.optionCode }}</span>
-                </span>
+                <p *ngIf="!adm.documents?.length" class="text-xs text-text-tertiary italic">Aucun document requis</p>
               </div>
             </div>
           </div>
@@ -91,27 +119,39 @@ import { Admission } from '../../../../../../core/models/enrollment/entities';
       </div>
 
       <!-- Consentement légal -->
-      <div class="mt-8 p-6 bg-slate-900 rounded-3xl">
-        <p *ngIf="legalText" class="text-sm text-white/70 leading-relaxed mb-5">{{ legalText }}</p>
-        <p *ngIf="!legalText" class="text-sm text-white/70 leading-relaxed mb-5">
-          Je certifie sur l'honneur l'exactitude des informations fournies.
-          Toute fausse déclaration pourra entraîner l'annulation de la candidature.
-        </p>
-        <label class="flex items-center gap-3 cursor-pointer">
-          <div class="relative w-5 h-5 shrink-0">
+      <div class="mt-12 p-8 bg-midnight rounded-3xl text-white shadow-xl">
+        <div class="flex items-start gap-4 mb-8">
+          <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+            <lucide-icon [name]="ShieldAlert" [size]="20" class="text-primary"></lucide-icon>
+          </div>
+          <div class="text-xs leading-relaxed opacity-80 font-medium">
+            <p *ngIf="legalText" class="mb-4">{{ legalText }}</p>
+            <p *ngIf="!legalText">
+              Je certifie sur l'honneur l'exactitude des informations fournies dans ce formulaire. 
+              Je comprends que toute fausse déclaration ou omission volontaire pourra entraîner l'annulation de la candidature de l'enfant auprès de l'établissement.
+            </p>
+          </div>
+        </div>
+
+        <label class="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 cursor-pointer hover:bg-white/10 transition-colors group">
+          <div class="relative w-6 h-6 shrink-0">
             <input type="checkbox" [(ngModel)]="consent.checked"
-                   class="peer absolute inset-0 opacity-0 cursor-pointer w-5 h-5">
-            <div class="w-5 h-5 rounded-md border-2 border-white/30 transition-all
-                        peer-checked:bg-blue-500 peer-checked:border-blue-500
+                   class="peer absolute inset-0 opacity-0 cursor-pointer w-6 h-6">
+            <div class="w-6 h-6 rounded-lg border-2 border-white/20 transition-all
+                        peer-checked:bg-primary peer-checked:border-primary
                         flex items-center justify-center">
-              <lucide-icon *ngIf="consent.checked" [name]="CheckCircle" [size]="13" class="text-white"></lucide-icon>
+              <lucide-icon *ngIf="consent.checked" [name]="CheckCircle" [size]="14" class="text-white"></lucide-icon>
             </div>
           </div>
-          <span class="text-sm font-bold text-white">J'accepte les conditions et je valide le dossier</span>
+          <span class="text-sm font-black uppercase tracking-tight">Je confirme la validité de mon dossier familial</span>
         </label>
       </div>
     </div>
-  `
+  `,
+  styles: [`
+    .animate-fade { animation: fadeIn 0.4s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  `]
 })
 export class StepReviewComponent {
   @Input() family: any;
@@ -133,4 +173,9 @@ export class StepReviewComponent {
   readonly LayoutGrid = LayoutGrid;
   readonly FileText = FileText;
   readonly CheckCircle = CheckCircle;
+  readonly ClipboardCheck = ClipboardCheck;
+  readonly Mail = Mail;
+  readonly Phone = Phone;
+  readonly ShieldAlert = ShieldAlert;
+  readonly Sparkles = Sparkles;
 }

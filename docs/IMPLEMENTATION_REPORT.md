@@ -41,8 +41,9 @@ Ce document suit l'état d'avancement du projet, les décisions architecturales 
     - [x] Jalon 1.2.2 : Modernisation du Step HUB terminée.
     - [x] Jalon 1.2.3 : Modernisation de l'étape Parent (Guardian) terminée.
     - [x] Jalon 1.2.4 : Modernisation des étapes Enfant (Student, Medical, Services) terminée.
-    - [x] **Jalon 1.2.5 : Modernisation du Moteur de Documents (Vault).**
-        - Refonte des cartes de documents avec statuts colorés et badges.
-        - Intégration de `FwButton` pour l'upload et le remplacement de fichiers.
-        - Ajout d'une section d'aide visuelle pour les formats supportés.
-    - [ ] Jalon 1.2.6 : Modernisation de la synthèse finale (Review).
+    - [x] Jalon 1.2.5 : Modernisation du Moteur de Documents (Vault) terminée.
+    - [x] **Jalon 1.2.6 : Modernisation de la synthèse finale (Review).**
+        - Refonte visuelle du récapitulatif familial et des fiches élèves.
+        - Utilisation de `FwBadge` et des icônes contextuelles (Phone, Mail).
+        - Modernisation de la section de consentement légal avec une esthétique "dark mode" premium.
+    - [ ] Jalon 1.2.7 : Modernisation de la Landing et du Tracker.
