@@ -1,9 +1,6 @@
-@use '../../../../../styles/tokens' as *;
-
 :host {
   display: block;
   height: 100vh;
-  background-color: white;
   overflow: hidden;
 }
 
@@ -16,7 +13,7 @@
 
 /* --- SIDEBAR DE PROGRESSION (GAUCHE) --- */
 .onboarding-sidebar {
-  background: var(--fw-midnight);
+  background: #0f172a; // var(--fw-midnight)
   padding: 3rem 2.5rem;
   display: flex;
   flex-direction: column;
@@ -34,13 +31,13 @@
       width: 48px; height: 48px; border-radius: 12px; background: white;
       display: grid; place-items: center; overflow: hidden;
       img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
-      lucide-icon { color: var(--fw-primary); }
+      lucide-icon { color: #2563eb; }
     }
 
     .school-meta {
       display: flex; flex-direction: column;
       .school-name { font-weight: 800; font-size: 1.125rem; letter-spacing: -0.02em; }
-      .year-pill { font-size: 10px; font-weight: 700; color: var(--fw-primary); text-transform: uppercase; margin-top: 2px; }
+      .year-pill { font-size: 10px; font-weight: 700; color: #2563eb; text-transform: uppercase; margin-top: 2px; }
     }
   }
 
@@ -59,13 +56,13 @@
 
       &.active {
         opacity: 1;
-        .step-icon { background: var(--fw-primary); color: white; border-color: var(--fw-primary); transform: scale(1.1); box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.2); }
+        .step-icon { background: #2563eb; color: white; border-color: #2563eb; transform: scale(1.1); box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.2); }
         .step-label { color: white; }
       }
 
       &.completed {
         opacity: 0.8;
-        .step-icon { background: var(--fw-success); color: white; border-color: var(--fw-success); }
+        .step-icon { background: #10b981; color: white; border-color: #10b981; }
       }
 
       .step-icon {
@@ -77,21 +74,12 @@
       .step-text {
         display: flex; flex-direction: column;
         .step-label { font-size: 0.875rem; font-weight: 800; letter-spacing: 0.02em; }
-        .step-desc { font-size: 11px; opacity: 0.6; font-weight: 500; }
       }
-    }
-  }
-
-  .sidebar-footer {
-    .help-box {
-      padding: 1.25rem; background: rgba(255,255,255,0.05); border-radius: 16px;
-      display: flex; gap: 0.75rem; align-items: center;
-      span { font-size: 11px; font-weight: 600; line-height: 1.4; opacity: 0.8; }
     }
   }
 }
 
-/* --- SESSION RECOVERY BOX (V6) --- */
+/* --- SESSION RECOVERY BOX --- */
 .session-recovery-box {
   margin: 2rem 0;
   padding: 1.5rem;
@@ -106,7 +94,7 @@
     font-size: 10px;
     font-weight: 800;
     text-transform: uppercase;
-    color: var(--fw-primary);
+    color: #2563eb;
     margin-bottom: 1rem;
   }
 
@@ -119,32 +107,24 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      
+
       .label { font-size: 11px; opacity: 0.6; }
-      .value { 
-        font-family: monospace; 
-        font-weight: 800; 
-        color: white; 
+      .value {
+        font-family: monospace;
+        font-weight: 800;
+        color: white;
         font-size: 0.875rem;
         letter-spacing: 0.05em;
-        
-        &.secret { color: var(--fw-primary); }
+
+        &.secret { color: #2563eb; }
       }
     }
-  }
-
-  .recovery-hint {
-    margin-top: 1rem;
-    font-size: 10px;
-    color: var(--fw-slate-medium);
-    font-style: italic;
-    line-height: 1.4;
   }
 }
 
 /* --- ZONE DE SAISIE (DROITE) --- */
 .onboarding-main {
-  background: var(--fw-ice);
+  background: #f8fafc;
   overflow-y: auto;
   display: flex;
   justify-content: center;
@@ -159,123 +139,18 @@
   }
 }
 
-.content-header {
-  margin-bottom: 4rem;
-  h1 { font-size: 2.5rem; font-weight: 800; color: var(--fw-midnight); margin: 0; letter-spacing: -0.03em; }
-  p { font-size: 1.125rem; color: var(--fw-slate-medium); margin-top: 0.75rem; line-height: 1.5; }
-}
-
-/* --- FORMULAIRE PREMIUM --- */
-.premium-form-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem;
-  .full { grid-column: span 2; }
-}
-
-.form-group {
-  display: flex; flex-direction: column; gap: 0.75rem;
-  label { font-size: 0.8125rem; font-weight: 800; text-transform: uppercase; color: var(--fw-slate-medium); letter-spacing: 0.05em; }
-}
-
-.premium-input, .premium-select, .premium-textarea {
-  height: 60px; padding: 0 1.5rem; border: 2px solid var(--fw-border); border-radius: 18px;
-  font-size: 1rem; font-weight: 600; color: var(--fw-midnight); transition: all 0.3s ease;
-  background: white;
-
-  &:focus { outline: none; border-color: var(--fw-primary); box-shadow: 0 0 0 5px var(--fw-primary-alpha); transform: translateY(-1px); }
-}
-
-.premium-textarea { height: auto; padding: 1.5rem; }
-
-/* --- VAULT GRID --- */
-.vault-grid { display: flex; flex-direction: column; gap: 1.25rem; }
-.vault-card {
-  background: white; padding: 1.5rem 2rem; border-radius: 24px; border: 2px solid var(--fw-border);
-  display: flex; align-items: center; gap: 1.5rem; transition: all 0.3s;
-
-  &.success { border-color: var(--fw-success); background: #f0fdf4; .vault-icon { background: var(--fw-success); color: white; } }
-
-  .vault-icon { width: 48px; height: 48px; border-radius: 14px; background: var(--fw-ice); color: var(--fw-primary); display: grid; place-items: center; }
-  .vault-info { flex: 1; display: flex; flex-direction: column; .vault-label { font-weight: 800; } .vault-meta { font-size: 11px; color: var(--fw-slate-medium); font-weight: 600; } }
-}
-
-.btn-vault {
-  height: 44px; padding: 0 1.5rem; border-radius: 12px; border: 2px solid var(--fw-border);
-  background: white; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;
-  &:hover { border-color: var(--fw-primary); color: var(--fw-primary); }
-}
-
-/* --- REVIEW STACK V6 --- */
-.review-grid-v6 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  margin-bottom: 3rem;
-}
-
-.review-card-premium {
-  background: white;
-  padding: 2.5rem;
-  border-radius: 28px;
-  border: 1px solid var(--fw-border);
-  box-shadow: var(--fw-shadow-sm);
-
-  .card-tag {
-    display: inline-block;
-    padding: 4px 12px;
-    background: var(--fw-primary-alpha);
-    color: var(--fw-primary);
-    border-radius: 20px;
-    font-size: 10px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 1.5rem;
-  }
-
-  .row {
-    display: flex;
-    justify-content: space-between;
-    padding: 1rem 0;
-    border-bottom: 1px solid var(--fw-ice);
-
-    &:last-child { border: none; }
-
-    .label { font-weight: 600; color: var(--fw-slate-medium); font-size: 0.875rem; }
-    .value { font-weight: 800; color: var(--fw-midnight); }
-  }
-}
-
-.legal-consent {
-  margin-top: 4rem;
-  padding: 2.5rem;
-  background: white;
-  border-radius: 24px;
-  border: 1px solid var(--fw-border);
-
-  .premium-checkbox {
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
-    cursor: pointer;
-    font-weight: 700;
-    color: var(--fw-midnight);
-
-    input { width: 24px; height: 24px; accent-color: var(--fw-success); }
-  }
-}
-
 /* --- NAVIGATION FOOTER --- */
 .onboarding-footer {
   margin-top: 5rem;
   display: flex;
   align-items: center;
-  border-top: 1px solid var(--fw-border);
+  border-top: 1px solid #e2e8f0;
   padding-top: 3rem;
 
   .btn-premium-action {
     height: 68px;
     padding: 0 3.5rem;
-    background: var(--fw-midnight);
+    background: #0f172a;
     color: white;
     border: none;
     border-radius: 22px;
@@ -289,9 +164,9 @@
     box-shadow: 0 15px 30px -5px rgba(15, 23, 42, 0.25);
 
     &:hover:not(:disabled) {
-      background: var(--fw-primary);
+      background: #2563eb;
       transform: translateY(-4px);
-      box-shadow: 0 20px 40px -8px var(--fw-primary-alpha);
+      box-shadow: 0 20px 40px -8px rgba(37, 99, 235, 0.4);
     }
     &:disabled {
       opacity: 0.5;
@@ -302,80 +177,27 @@
   .btn-ghost {
     background: transparent;
     border: none;
-    color: var(--fw-slate-medium);
+    color: #64748b;
     font-weight: 700;
     display: flex;
     align-items: center;
     gap: 0.5rem;
     cursor: pointer;
-    &:hover {
-      color: var(--fw-midnight);
-    }
-  }
-}
-
-/* --- SERVICES CARDS V6 --- */
-.service-card-premium {
-  background: white;
-  padding: 2rem;
-  border-radius: 24px;
-  border: 2px solid var(--fw-border);
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-  &:hover {
-    border-color: var(--fw-primary);
-    transform: translateY(-2px);
-    box-shadow: var(--fw-shadow-md);
+    &:hover { color: #0f172a; }
   }
 
-  &.active {
-    border-color: var(--fw-primary);
-    background: var(--fw-primary-alpha);
-    .check-box { background: var(--fw-primary); border-color: var(--fw-primary); &::after { content: '✓'; color: white; display: grid; place-items: center; font-size: 12px; } }
-  }
-
-  .icon-box {
-    width: 56px;
-    height: 56px;
-    border-radius: 16px;
-    background: var(--fw-ice);
-    color: var(--fw-primary);
-    display: grid;
-    place-items: center;
-    lucide-icon { width: 24px; height: 24px; }
-  }
-
-  .info {
-    flex: 1;
-    .title { font-weight: 800; color: var(--fw-midnight); font-size: 1.125rem; }
-    p { font-size: 0.875rem; color: var(--fw-slate-medium); margin-top: 4px; }
-  }
-
-  .check-box {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    border: 2px solid var(--fw-border);
-    transition: all 0.2s;
-  }
+  .spacer { flex: 1; }
 }
 
 .onboarding-loader {
   position: fixed; inset: 0; background: white; z-index: 1000;
-  display: grid; place-items: center;
-  p { font-weight: 800; color: var(--fw-midnight); margin-top: 1rem; }
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 1.5rem;
+  p { font-weight: 800; color: #0f172a; }
 }
-
-/* --- ANIMATIONS --- */
-.animate-slide-in { animation: slideIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-@keyframes slideIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
 
 @media (max-width: 1024px) {
   .onboarding-layout { grid-template-columns: 1fr; }
-  .onboarding-sidebar { height: auto; border-right: none; border-bottom: 1px solid var(--fw-border); }
+  .onboarding-sidebar { height: auto; border-right: none; border-bottom: 1px solid #e2e8f0; }
   .onboarding-nav { display: none; }
 }

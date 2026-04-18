@@ -1,11 +1,9 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   ArrowLeft, ArrowRight, CheckCircle, FileText, GraduationCap,
-  HeartPulse, Info, LayoutGrid, Lock, LucideAngularModule,
-  RefreshCw, User, Users
+  HeartPulse, LayoutGrid, Lock, LucideAngularModule, RefreshCw, User, Users
 } from 'lucide-angular';
 import { finalize, forkJoin, switchMap } from 'rxjs';
 
@@ -16,13 +14,12 @@ import { AcademicService } from '../../../../core/services/academic.service';
 import { TenantContextService } from '../../../../core/services/tenant-context.service';
 import { NotificationService } from '../../../../shared/services/notification.service';
 
+import { Admission } from '../../../../core/models/enrollment/entities';
 import {
-  Admission, AdmissionBundle
-} from '../../../../core/models/enrollment/entities';
-import {
-  AddChildRequest,
-  CreateBundleRequest,
+  AdmissionBundleResponse,
+  AvailableYearSummary,
   DefaultConfigResponse,
+  LevelConfigResponse,
   ServiceSubscriptionRequest,
 } from '../../../../core/models/enrollment/dtos';
 
@@ -35,11 +32,16 @@ import { StepReviewComponent } from './components/step-review/step-review.compon
 
 export type StepperStep = 'GUARDIAN' | 'STUDENT' | 'MEDICAL' | 'SERVICES' | 'DOCS' | 'REVIEW';
 
+const STEP_LABELS: Record<StepperStep, string> = {
+  GUARDIAN: 'Famille', STUDENT: 'Élève', MEDICAL: 'Santé',
+  SERVICES: 'Services', DOCS: 'Documents', REVIEW: 'Validation'
+};
+
 @Component({
   selector: 'app-public-form-stepper',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule,
+    CommonModule, LucideAngularModule,
     StepFamilyComponent, StepIdentityComponent, StepMedicalComponent,
     StepServicesComponent, StepVaultComponent, StepReviewComponent
   ],
@@ -47,48 +49,66 @@ export type StepperStep = 'GUARDIAN' | 'STUDENT' | 'MEDICAL' | 'SERVICES' | 'DOC
   styleUrls: ['./public-form-stepper.component.scss']
 })
 export class PublicFormStepperComponent implements OnInit {
-  private enrollmentService = inject(EnrollmentPublicService);
-  private documentService = inject(DocumentEngineService);
-  private sessionService = inject(AdmissionSessionService);
-  private academicService = inject(AcademicService);
-  private notificationService = inject(NotificationService);
-  public tenantContext = inject(TenantContextService);
+  private enrollment = inject(EnrollmentPublicService);
+  private docEngine = inject(DocumentEngineService);
+  private session = inject(AdmissionSessionService);
+  private academic = inject(AcademicService);
+  private notify = inject(NotificationService);
+  tenantCtx = inject(TenantContextService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
-  // --- ÉTATS ---
-  currentStep = signal<StepperStep>('GUARDIAN');
-  isLoading = signal(false);
-  isSubmitting = signal(false);
-  uploadingDocCode = signal<string | null>(null);
-  isPortalClosed = signal(false);
-  consent = { checked: false };
+  // ── État ─────────────────────────────────────────────────────────────────
+  step = signal<StepperStep>('GUARDIAN');
+  loading = signal(false);
+  submitting = signal(false);
+  uploadingDoc = signal<string | null>(null);
+  portalClosed = signal(false);
 
-  // --- CONTEXTE ---
+  // ── Config ────────────────────────────────────────────────────────────────
   config = signal<DefaultConfigResponse | null>(null);
-  levelConfig = signal<any | null>(null);
-  availableLevels = signal<any[]>([]);
-  targetYearId = signal<string | null>(null);
+  levelConfig = signal<LevelConfigResponse | null>(null);
+  levels = signal<any[]>([]);
+  availableYears = signal<AvailableYearSummary[]>([]);
   admissionType = signal<'NEW_ENROLLMENT' | 'RE_ENROLLMENT'>('NEW_ENROLLMENT');
 
-  // --- DOMAIN ---
-  bundle = signal<AdmissionBundle | null>(null);
+  // ── Domaine ───────────────────────────────────────────────────────────────
+  bundle = signal<AdmissionBundleResponse | null>(null);
   admission = signal<Admission | null>(null);
 
-  effectiveSchema = computed(() => this.levelConfig()?.schema ?? this.config()?.schema);
+  // ── Computed ─────────────────────────────────────────────────────────────
+  schema = computed(() => this.levelConfig()?.schema ?? this.config()?.schema);
 
-  // Données de formulaire locales (source de vérité UI)
-  formStore = {
+  filteredSteps = computed<StepperStep[]>(() => {
+    const base: StepperStep[] = ['GUARDIAN', 'STUDENT', 'MEDICAL'];
+    if (this.config()?.schema?.services?.enabled) base.push('SERVICES');
+    base.push('DOCS', 'REVIEW');
+    return base;
+  });
+
+  progress = computed(() => {
+    const list = this.filteredSteps();
+    return ((list.indexOf(this.step()) + 1) / list.length) * 100;
+  });
+
+  bundleRef = computed(() => this.bundle()?.reference ?? '');
+  accessCode = computed(() => this.bundle()?.accessCode ?? '');
+  levelName = computed(() => this.levels().find(l => l.id === this.store.schooling.levelId)?.name ?? '');
+  selectedYearLabel = computed(() => this.availableYears().find(y => y.id === this.store.schooling.academicYearId)?.label ?? '');
+
+  // ── Store de formulaire (source de vérité UI) ─────────────────────────────
+  store = {
     family: {
       primaryGuardian: {
-        firstName: '', lastName: '', email: '',
-        phone: '', relation: 'FATHER', financialResponsible: true,
+        firstName: '', lastName: '', email: '', phone: '',
+        relation: 'FATHER', financialResponsible: true,
         customFields: {} as Record<string, any>
       },
-      customFields: { homeAddress: '' } as Record<string, any>
+      customFields: {} as Record<string, any>
     },
     identity: {
-      firstName: '', lastName: '', gender: 'MALE' as 'MALE' | 'FEMALE',
+      firstName: '', lastName: '',
+      gender: 'MALE' as 'MALE' | 'FEMALE',
       birthDate: '', birthPlace: '',
       customFields: {} as Record<string, any>
     },
@@ -98,267 +118,271 @@ export class PublicFormStepperComponent implements OnInit {
       filiereId: null as string | null,
       customFields: {} as Record<string, any>
     },
-    medical: {
-      customFields: {} as Record<string, any>
-    },
+    medical: { customFields: {} as Record<string, any> },
     services: [] as ServiceSubscriptionRequest[]
   };
 
-  availableServiceCodes = computed(() =>
-    this.config()?.schema?.services?.availableServices?.map(s => s.code) ?? []
-  );
+  consent = { checked: false };
 
-  selectedLevelName = computed(() => {
-    const levelId = this.formStore.schooling.levelId;
-    return this.availableLevels().find(l => l.id === levelId)?.name ?? levelId;
-  });
-
-  progress = computed(() => {
-    const steps = this.getFilteredSteps();
-    return ((steps.indexOf(this.currentStep()) + 1) / steps.length) * 100;
-  });
-
-  bundleRef = computed(() => this.bundle()?.reference ?? '');
-  accessCode = computed(() => this.bundle()?.accessCode ?? '');
-
+  // ── Init ──────────────────────────────────────────────────────────────────
   ngOnInit() {
-    const params = this.route.snapshot.queryParamMap;
-    this.targetYearId.set(params.get('yearId'));
-    this.admissionType.set((params.get('type') as any) ?? 'NEW_ENROLLMENT');
-    this.loadBootstrapData();
+    const p = this.route.snapshot.queryParamMap;
+    const yearFromParam = p.get('yearId');
+    if (yearFromParam) this.store.schooling.academicYearId = yearFromParam;
+    this.admissionType.set((p.get('type') as any) ?? 'NEW_ENROLLMENT');
+    this.loadConfig();
   }
 
-  private loadBootstrapData() {
-    this.isLoading.set(true);
+  private loadConfig() {
+    this.loading.set(true);
     forkJoin({
-      config: this.enrollmentService.getDefaultConfig(),
-      levels: this.academicService.getLevels()
-    }).pipe(finalize(() => this.isLoading.set(false))).subscribe({
-      next: ({ config, levels }) => {
+      config: this.enrollment.getDefaultConfig(),
+      levels: this.academic.getLevels(),
+      summary: this.enrollment.getPortalSummary()
+    }).pipe(finalize(() => this.loading.set(false))).subscribe({
+      next: ({ config, levels, summary }) => {
         this.config.set(config);
-        this.availableLevels.set(levels);
-        if (!config.portalActive) this.isPortalClosed.set(true);
-        this.checkExistingSession();
+        this.levels.set(levels);
+        if (!config.portalActive) { this.portalClosed.set(true); return; }
+
+        const years = summary.availableYears ?? [];
+        this.availableYears.set(years);
+
+        // Auto-sélectionner l'année si pas déjà choisie (query param ou session)
+        if (!this.store.schooling.academicYearId) {
+          const active = years.find(y => y.active) ?? years[0];
+          if (active) this.store.schooling.academicYearId = active.id;
+        }
+
+        this.restoreSession();
       }
     });
   }
 
-  private checkExistingSession() {
-    const session = this.sessionService.getSession();
-    if (!session) return;
+  private restoreSession() {
+    const s = this.session.getSession();
+    if (!s) return;
 
-    this.isLoading.set(true);
-    this.enrollmentService.getBundle(session.bundleId, session.accessCode).pipe(
-      finalize(() => this.isLoading.set(false))
+    this.loading.set(true);
+    this.enrollment.getBundle(s.bundleId, s.accessCode).pipe(
+      finalize(() => this.loading.set(false))
     ).subscribe({
-      next: (bundle) => {
+      next: bundle => {
         this.bundle.set(bundle);
-        const firstAdmission = bundle.admissions?.[0] ?? null;
-        this.admission.set(firstAdmission);
-        if (firstAdmission) {
-          this.syncStoreFromAdmission(bundle, firstAdmission);
-          if (firstAdmission.schooling?.levelId) {
-            this.enrollmentService.getLevelConfig(firstAdmission.schooling.levelId).subscribe(cfg => {
-              this.levelConfig.set(cfg);
-            });
+        const adm = bundle.admissions?.[0] ?? null;
+        this.admission.set(adm);
+        if (adm) {
+          this.syncStore(bundle, adm);
+          if (adm.schooling?.levelId) {
+            this.enrollment.getLevelConfig(adm.schooling.levelId).subscribe(cfg => this.levelConfig.set(cfg));
           }
         }
-        if (session.currentStep) this.currentStep.set(session.currentStep as StepperStep);
+        // Si bundle OK mais pas encore d'admission → repositionner à STUDENT
+        const saved = (s.currentStep as StepperStep) ?? 'STUDENT';
+        this.step.set(!adm && saved !== 'GUARDIAN' ? 'STUDENT' : saved);
       },
-      error: () => this.sessionService.clearSession()
+      error: () => this.session.clearSession()
     });
   }
 
-  private syncStoreFromAdmission(bundle: AdmissionBundle, adm: Admission) {
-    this.formStore.family = {
-      primaryGuardian: { ...bundle.family.primaryGuardian, email: bundle.family.primaryGuardian.email ?? '', customFields: bundle.family.primaryGuardian.customFields ?? {} },
-      customFields: bundle.family.customFields ?? { homeAddress: '' }
+  private syncStore(bundle: AdmissionBundleResponse, adm: Admission) {
+    const pg = bundle.family.primaryGuardian;
+    this.store.family = {
+      primaryGuardian: { ...pg, email: pg.email ?? '', customFields: pg.customFields ?? {} },
+      customFields: bundle.family.customFields ?? {}
     };
-    this.formStore.identity = { ...adm.identity, customFields: adm.identity.customFields ?? {} };
-    this.formStore.schooling = { ...adm.schooling, cycleType: adm.schooling.cycleType ?? undefined, filiereId: adm.schooling.filiereId ?? null, customFields: adm.schooling.customFields ?? {} };
-    this.formStore.medical = { customFields: adm.medical?.customFields ?? {} };
+    this.store.identity = { ...adm.identity, customFields: adm.identity.customFields ?? {} };
+    this.store.schooling = {
+      ...adm.schooling,
+      cycleType: adm.schooling.cycleType ?? undefined,
+      filiereId: adm.schooling.filiereId ?? null,
+      customFields: adm.schooling.customFields ?? {}
+    };
+    this.store.medical = { customFields: adm.medical?.customFields ?? {} };
   }
 
+  // ── Niveau ────────────────────────────────────────────────────────────────
   onLevelChange(levelId: string) {
-    if (!levelId) return;
-    this.formStore.schooling.levelId = levelId;
-    
-    // Dériver le cycleType depuis la liste des niveaux
-    const level = this.availableLevels().find(l => l.id === levelId);
-    if (level?.cycleType) {
-      this.formStore.schooling.cycleType = level.cycleType;
-    }
-
-    this.enrollmentService.getLevelConfig(levelId).subscribe(cfg => {
-      this.levelConfig.set(cfg);
-    });
+    this.store.schooling.levelId = levelId;
+    const level = this.levels().find(l => l.id === levelId);
+    if (level?.cycleType) this.store.schooling.cycleType = level.cycleType;
+    if (levelId) this.enrollment.getLevelConfig(levelId).subscribe(cfg => this.levelConfig.set(cfg));
   }
 
-  getFilteredSteps(): StepperStep[] {
-    const steps: StepperStep[] = ['GUARDIAN', 'STUDENT', 'MEDICAL'];
-    if (this.config()?.schema?.services?.enabled) steps.push('SERVICES');
-    steps.push('DOCS', 'REVIEW');
-    return steps;
-  }
-
-  async nextStep() {
-    const steps = this.getFilteredSteps();
-    const currentIndex = steps.indexOf(this.currentStep());
-    this.isSubmitting.set(true);
-    let success = false;
-
+  // ── Navigation ────────────────────────────────────────────────────────────
+  async next() {
+    this.submitting.set(true);
     try {
-      switch (this.currentStep()) {
-        case 'GUARDIAN':
-          success = await this.handleGuardianStep();
-          break;
-        case 'STUDENT':
-          success = await this.syncPillar('pillar_identity', this.formStore.identity)
-            && await this.syncPillar('pillar_schooling', this.formStore.schooling);
-          break;
-        case 'MEDICAL':
-          success = await this.syncPillar('pillar_medical', this.formStore.medical);
-          break;
-        case 'SERVICES':
-          success = await this.handleServicesStep();
-          break;
-        default:
-          success = true;
-      }
-
-      if (success && currentIndex < steps.length - 1) {
-        const next = steps[currentIndex + 1];
-        this.currentStep.set(next);
-        this.sessionService.updateStep(next);
+      const ok = await this.runCurrentStep();
+      if (!ok) return;
+      const list = this.filteredSteps();
+      const idx = list.indexOf(this.step());
+      if (idx < list.length - 1) {
+        const next = list[idx + 1];
+        this.step.set(next);
+        this.session.updateStep(next);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     } finally {
-      this.isSubmitting.set(false);
+      this.submitting.set(false);
     }
   }
 
-  private async handleGuardianStep(): Promise<boolean> {
+  prev() {
+    const list = this.filteredSteps();
+    const idx = list.indexOf(this.step());
+    if (idx > 0) this.step.set(list[idx - 1]);
+  }
+
+  // ── Logique par étape ─────────────────────────────────────────────────────
+  private async runCurrentStep(): Promise<boolean> {
+    switch (this.step()) {
+      case 'GUARDIAN': return this.saveGuardian();
+      case 'STUDENT':  return this.saveStudent();
+      case 'MEDICAL':  return this.savePillar('pillar_medical', this.store.medical);
+      case 'SERVICES': return this.saveServices();
+      default:         return true;
+    }
+  }
+
+  private async saveGuardian(): Promise<boolean> {
+    const tenantId = this.tenantCtx.activeTenant()?.id;
+    if (!tenantId) { this.notify.error('Contexte école non chargé. Veuillez rafraîchir la page.'); return false; }
+
     const bundleId = this.bundle()?.id;
+    const familyPayload = this.buildFamilyPayload();
 
     if (bundleId) {
-      // Bundle existant — mise à jour famille uniquement
-      await this.enrollmentService.updateFamilyPillar(bundleId, this.formStore.family).toPromise();
+      await this.enrollment.updateFamilyPillar(bundleId, familyPayload).toPromise();
       return true;
     }
 
-    // Nouveau bundle — ÉTAPE 1 : créer le bundle
-    const createReq: CreateBundleRequest = {
-      tenantId: this.tenantContext.activeTenant()?.id ?? '',
-      family: this.formStore.family
-    };
-
-    const bundle = await this.enrollmentService.createBundle(createReq).toPromise();
+    const bundle = await this.enrollment.createBundle({ tenantId, family: familyPayload }).toPromise();
     if (!bundle?.id) return false;
-
     this.bundle.set(bundle);
-    this.sessionService.saveSession(bundle.id, bundle.accessCode, this.formStore.family.primaryGuardian.firstName, 'STUDENT');
-
-    // ÉTAPE 2 : ajouter le premier enfant
-    const addChildReq: AddChildRequest = {
-      firstName: this.formStore.identity.firstName || 'Candidat',
-      lastName: this.formStore.identity.lastName || this.formStore.family.primaryGuardian.lastName,
-      gender: this.formStore.identity.gender,
-      type: this.admissionType(),
-      academicYearId: this.targetYearId() ?? 'current',
-      levelId: this.formStore.schooling.levelId || 'TEMP',
-      cycleType: this.formStore.schooling.cycleType as any
-    };
-
-    const child = await this.enrollmentService.addChild(bundle.id, addChildReq).toPromise();
-    if (!child?.id) return false;
-
-    this.admission.set(child);
+    this.session.saveSession(bundle.id, bundle.accessCode, this.store.family.primaryGuardian.firstName, 'STUDENT');
     return true;
   }
 
-  private async syncPillar(pillarKey: string, data: any): Promise<boolean> {
-    const admissionId = this.admission()?.id;
-    if (!admissionId) {
-      this.notificationService.error('ID Admission manquant. Veuillez recommencer.');
-      return false;
-    }
-    try {
-      await this.enrollmentService.updateChildPillar(admissionId, pillarKey, data).toPromise();
-      return true;
-    } catch {
-      return false;
-    }
+  /** Nettoie le payload famille avant envoi : supprime les chaînes vides sur les champs optionnels. */
+  private buildFamilyPayload() {
+    const pg = { ...this.store.family.primaryGuardian };
+    if (!pg.email?.trim()) delete (pg as any).email;
+    return { ...this.store.family, primaryGuardian: pg };
   }
 
-  private async handleServicesStep(): Promise<boolean> {
+  private async saveStudent(): Promise<boolean> {
+    if (!this.store.schooling.academicYearId) {
+      this.notify.error('Veuillez sélectionner une année scolaire.');
+      return false;
+    }
+    if (!this.store.schooling.levelId) {
+      this.notify.error('Veuillez sélectionner un niveau scolaire.');
+      return false;
+    }
+
+    // Premier passage : créer l'admission avec les données réelles
+    if (!this.admission()) {
+      const bundleId = this.bundle()?.id;
+      if (!bundleId) { this.notify.error('Dossier familial manquant.'); return false; }
+
+      const child = await this.enrollment.addChild(bundleId, {
+        firstName: this.store.identity.firstName || this.store.family.primaryGuardian.lastName,
+        lastName: this.store.identity.lastName || this.store.family.primaryGuardian.lastName,
+        gender: this.store.identity.gender,
+        type: this.admissionType(),
+        academicYearId: this.store.schooling.academicYearId,
+        levelId: this.store.schooling.levelId,
+        cycleType: this.store.schooling.cycleType as any
+      }).toPromise();
+
+      if (!child?.id) return false;
+      this.admission.set(child);
+    }
+
+    // Toujours mettre à jour les piliers avec les données complètes
+    return (
+      await this.savePillar('pillar_identity', this.store.identity) &&
+      await this.savePillar('pillar_schooling', this.store.schooling)
+    );
+  }
+
+  private async savePillar(key: string, data: any): Promise<boolean> {
+    const admissionId = this.admission()?.id;
+    if (!admissionId) { this.notify.error('ID Admission manquant.'); return false; }
+    try {
+      await this.enrollment.updateChildPillar(admissionId, key, data).toPromise();
+      return true;
+    } catch { return false; }
+  }
+
+  private async saveServices(): Promise<boolean> {
     const admissionId = this.admission()?.id;
     if (!admissionId) return false;
-    if (!this.formStore.services.length) return true;
+    if (!this.store.services.length) return true;
     try {
-      await this.enrollmentService.subscribeServices(admissionId, this.formStore.services).toPromise();
+      await this.enrollment.subscribeServices(admissionId, this.store.services).toPromise();
       return true;
-    } catch {
-      return false;
-    }
+    } catch { return false; }
   }
 
-  prevStep() {
-    const steps = this.getFilteredSteps();
-    const idx = steps.indexOf(this.currentStep());
-    if (idx > 0) this.currentStep.set(steps[idx - 1]);
-  }
-
-  onVaultFileSelected(data: { code: string; event: any }) {
-    const file: File = data.event.target.files[0];
+  // ── Upload document ───────────────────────────────────────────────────────
+  onDocUpload(data: { code: string; file: File }) {
     const admissionId = this.admission()?.id;
-    if (!file || !admissionId) return;
+    if (!admissionId) return;
 
-    this.uploadingDocCode.set(data.code);
-    this.documentService.getUploadTicket({ fileName: file.name, contentType: file.type, serviceOrigin: 'enrollment' }).pipe(
-      switchMap(ticket => this.documentService.uploadFileDirectly(ticket.uploadUrl, file).pipe(
-        switchMap(() => this.enrollmentService.uploadDocument(admissionId, data.code, ticket.fileId))
-      )),
-      finalize(() => this.uploadingDocCode.set(null))
-    ).subscribe({
-      next: () => {
-        // Rafraîchir les documents de l'admission depuis le bundle en session
-        const session = this.sessionService.getSession();
-        if (session) {
-          this.enrollmentService.getBundle(session.bundleId, session.accessCode).subscribe(bundle => {
-            this.bundle.set(bundle);
-            const adm = bundle.admissions.find(a => a.id === admissionId);
-            if (adm) this.admission.set(adm);
-          });
-        }
-      }
+    this.uploadingDoc.set(data.code);
+    this.docEngine.getUploadTicket({ fileName: data.file.name, contentType: data.file.type, serviceOrigin: 'enrollment' }).pipe(
+      switchMap(ticket =>
+        this.docEngine.uploadFileDirectly(ticket.uploadUrl, data.file).pipe(
+          switchMap(() => this.enrollment.uploadDocument(admissionId, data.code, ticket.fileId))
+        )
+      ),
+      finalize(() => this.uploadingDoc.set(null))
+    ).subscribe({ next: () => this.refreshBundle() });
+  }
+
+  private refreshBundle() {
+    const s = this.session.getSession();
+    if (!s) return;
+    this.enrollment.getBundle(s.bundleId, s.accessCode).subscribe(bundle => {
+      this.bundle.set(bundle);
+      const adm = bundle.admissions.find(a => a.id === this.admission()?.id);
+      if (adm) this.admission.set(adm);
     });
   }
 
-  submitFinal() {
+  // ── Soumission finale ─────────────────────────────────────────────────────
+  submit() {
     const bundleId = this.bundle()?.id;
-    if (!bundleId) return;
+    if (!bundleId || !this.consent.checked) return;
 
-    this.isSubmitting.set(true);
-    this.enrollmentService.submitBundle(bundleId).pipe(
-      finalize(() => this.isSubmitting.set(false))
+    this.submitting.set(true);
+    this.enrollment.submitBundle(bundleId).pipe(
+      finalize(() => this.submitting.set(false))
     ).subscribe(bundle => {
-      this.sessionService.clearSession();
+      this.session.clearSession();
       this.router.navigate(['/enrollment/tracker', bundle.reference], {
         queryParams: { accessCode: bundle.accessCode }
       });
     });
   }
 
+  // ── Helpers vue ───────────────────────────────────────────────────────────
+  isStepDone(index: number): boolean {
+    return index < this.filteredSteps().indexOf(this.step());
+  }
+
+  stepLabel(s: StepperStep): string { return STEP_LABELS[s]; }
+
+  stepIcon(s: StepperStep): any {
+    return { GUARDIAN: Users, STUDENT: User, MEDICAL: HeartPulse, SERVICES: LayoutGrid, DOCS: FileText, REVIEW: CheckCircle }[s];
+  }
+
+  // ── Icônes ────────────────────────────────────────────────────────────────
   readonly GraduationCap = GraduationCap;
-  readonly Users = Users;
-  readonly User = User;
-  readonly HeartPulse = HeartPulse;
-  readonly FileText = FileText;
-  readonly CheckCircle = CheckCircle;
   readonly Lock = Lock;
-  readonly Info = Info;
   readonly ArrowLeft = ArrowLeft;
   readonly ArrowRight = ArrowRight;
-  protected readonly RefreshCw = RefreshCw;
-  protected readonly LayoutGrid = LayoutGrid;
+  readonly RefreshCw = RefreshCw;
 }

@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, CheckCircle, User, Users, HeartPulse, LayoutGrid, FileText, Info } from 'lucide-angular';
+import { CheckCircle, FileText, HeartPulse, LayoutGrid, LucideAngularModule, User, Users } from 'lucide-angular';
 import { Admission } from '../../../../../../core/models/enrollment';
 
 @Component({
@@ -9,128 +9,145 @@ import { Admission } from '../../../../../../core/models/enrollment';
   standalone: true,
   imports: [CommonModule, FormsModule, LucideAngularModule],
   template: `
-    <div class="step-content animate-fade">
-      <div class="content-header">
-        <h1>Validation Finale</h1>
-        <p>Veuillez contrôler les informations avant l'envoi au secrétariat.</p>
+    <div>
+      <div class="mb-10">
+        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Validation finale</h1>
+        <p class="text-slate-500 mt-2">Vérifiez les informations avant l'envoi au secrétariat.</p>
       </div>
 
-      <div class="review-sections space-y-6">
-        <!-- Section Famille -->
-        <div class="review-card-premium p-6 border-2 border-slate-100 rounded-2xl bg-white">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-              <lucide-icon [name]="Users" [size]="18"></lucide-icon>
+      <div class="flex flex-col gap-4">
+
+        <!-- Responsable légal -->
+        <div class="p-5 rounded-2xl border border-slate-100 bg-white">
+          <div class="flex items-center gap-2.5 mb-4">
+            <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+              <lucide-icon [name]="Users" [size]="15"></lucide-icon>
             </div>
-            <h3 class="font-bold text-slate-800">Responsable Légal</h3>
+            <h3 class="font-bold text-slate-800 text-sm">Responsable légal</h3>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-            <div class="row flex flex-col">
-              <span class="label text-xs font-bold text-slate-400 uppercase tracking-wider">Identité</span>
-              <span class="value font-semibold text-slate-700">{{ family.primaryGuardian.firstName }} {{ family.primaryGuardian.lastName }}</span>
+          <div class="grid grid-cols-2 gap-3 text-sm">
+            <div>
+              <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">Identité</p>
+              <p class="font-semibold text-slate-700">{{ family.primaryGuardian.firstName }} {{ family.primaryGuardian.lastName }}</p>
             </div>
-            <div class="row flex flex-col">
-              <span class="label text-xs font-bold text-slate-400 uppercase tracking-wider">Contact</span>
-              <span class="value font-semibold text-slate-700">{{ family.primaryGuardian.email }} / {{ family.primaryGuardian.phone }}</span>
+            <div>
+              <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">Contact</p>
+              <p class="font-semibold text-slate-700">{{ family.primaryGuardian.phone }}</p>
+              <p class="text-slate-500 text-xs">{{ family.primaryGuardian.email }}</p>
             </div>
           </div>
         </div>
 
-        <!-- Section Élève -->
-        <div class="review-card-premium p-6 border-2 border-slate-100 rounded-2xl bg-white">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
-              <lucide-icon [name]="User" [size]="18"></lucide-icon>
+        <!-- Élève -->
+        <div class="p-5 rounded-2xl border border-slate-100 bg-white">
+          <div class="flex items-center gap-2.5 mb-4">
+            <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+              <lucide-icon [name]="User" [size]="15"></lucide-icon>
             </div>
-            <h3 class="font-bold text-slate-800">Candidat</h3>
+            <h3 class="font-bold text-slate-800 text-sm">Candidat</h3>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-            <div class="row flex flex-col">
-              <span class="label text-xs font-bold text-slate-400 uppercase tracking-wider">Élève</span>
-              <span class="value font-semibold text-slate-700">{{ identity.firstName }} {{ identity.lastName }}</span>
+          <div class="grid grid-cols-2 gap-3 text-sm">
+            <div>
+              <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">Élève</p>
+              <p class="font-semibold text-slate-700">{{ identity.firstName }} {{ identity.lastName }}</p>
             </div>
-            <div class="row flex flex-col">
-              <span class="label text-xs font-bold text-slate-400 uppercase tracking-wider">Niveau visé</span>
-              <span class="value font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded text-sm w-fit">{{ levelName || schooling.levelId }}</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Section Services (sélections locales, avant soumission) -->
-        <div class="review-card-premium p-6 border-2 border-slate-100 rounded-2xl bg-white" *ngIf="pendingServices?.length">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
-              <lucide-icon [name]="LayoutGrid" [size]="18"></lucide-icon>
-            </div>
-            <h3 class="font-bold text-slate-800">Services Souscrits</h3>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <div *ngFor="let sub of pendingServices" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl flex items-center gap-2">
-              <span class="text-sm font-bold text-slate-700">{{ sub.serviceCode }}</span>
-              <span *ngIf="sub.optionCode" class="text-xs text-slate-400">• {{ sub.optionCode }}</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Section Documents -->
-        <div class="review-card-premium p-6 border-2 border-slate-100 rounded-2xl bg-white">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <lucide-icon [name]="FileText" [size]="18"></lucide-icon>
-            </div>
-            <h3 class="font-bold text-slate-800">Documents</h3>
-          </div>
-          <div class="space-y-2">
-            <div *ngFor="let doc of admission?.documents" class="flex items-center justify-between text-sm">
-              <span class="text-slate-600">{{ doc.name }}</span>
-              <span class="font-bold" [class.text-emerald-600]="doc.status === 'UPLOADED'" [class.text-red-500]="doc.status === 'MISSING'">
-                {{ doc.status === 'UPLOADED' ? 'Chargé' : 'Manquant' }}
+            <div>
+              <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">Niveau visé</p>
+              <span class="inline-block px-2.5 py-1 bg-indigo-50 text-indigo-700 font-bold text-xs rounded-lg">
+                {{ levelName || schooling.levelId }}
               </span>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="legal-consent mt-8 p-6 bg-slate-900 text-white rounded-3xl">
-        <div class="legal-text text-sm opacity-80 mb-6 leading-relaxed" *ngIf="legalText">{{ legalText }}</div>
-        <div class="legal-text text-sm opacity-80 mb-6 leading-relaxed" *ngIf="!legalText">
-          Je certifie sur l'honneur l'exactitude des informations fournies dans ce dossier d'inscription. 
-          Toute fausse déclaration pourra entraîner l'annulation de la candidature.
-        </div>
-        
-        <label class="premium-checkbox flex items-center gap-4 cursor-pointer">
-          <div class="relative w-6 h-6">
-            <input type="checkbox" [(ngModel)]="consent.checked" class="peer absolute inset-0 opacity-0 cursor-pointer">
-            <div class="checkmark w-6 h-6 rounded-lg border-2 border-white/30 peer-checked:bg-blue-500 peer-checked:border-blue-500 transition-all flex items-center justify-center">
-              <lucide-icon [name]="CheckCircle" [size]="16" class="text-white opacity-0 peer-checked:opacity-100"></lucide-icon>
+        <!-- Services souscrits -->
+        <div *ngIf="pendingServices?.length" class="p-5 rounded-2xl border border-slate-100 bg-white">
+          <div class="flex items-center gap-2.5 mb-4">
+            <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+              <lucide-icon [name]="LayoutGrid" [size]="15"></lucide-icon>
+            </div>
+            <h3 class="font-bold text-slate-800 text-sm">Services souscrits</h3>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <div *ngFor="let sub of pendingServices"
+                 class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl">
+              <span class="text-xs font-bold text-slate-700">{{ sub.serviceCode }}</span>
+              <span *ngIf="sub.optionCode" class="text-xs text-slate-400">· {{ sub.optionCode }}</span>
             </div>
           </div>
-          <span class="font-bold select-none">J'accepte les conditions et je valide mon dossier</span>
+        </div>
+
+        <!-- Documents -->
+        <div class="p-5 rounded-2xl border border-slate-100 bg-white">
+          <div class="flex items-center gap-2.5 mb-4">
+            <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <lucide-icon [name]="FileText" [size]="15"></lucide-icon>
+            </div>
+            <h3 class="font-bold text-slate-800 text-sm">Documents</h3>
+          </div>
+          <div *ngIf="admission?.documents?.length; else noDocs" class="flex flex-col gap-2">
+            <div *ngFor="let doc of admission?.documents"
+                 class="flex items-center justify-between text-xs">
+              <span class="text-slate-600 font-medium">{{ doc.name }}</span>
+              <span class="font-bold"
+                    [class.text-emerald-600]="doc.status === 'UPLOADED' || doc.status === 'RECEIVED' || doc.status === 'VERIFIED'"
+                    [class.text-red-500]="doc.status === 'MISSING'"
+                    [class.text-red-400]="doc.status === 'REJECTED'">
+                {{ docStatusText(doc.status) }}
+              </span>
+            </div>
+          </div>
+          <ng-template #noDocs>
+            <p class="text-xs text-slate-400 font-medium">Aucun document requis.</p>
+          </ng-template>
+        </div>
+
+      </div>
+
+      <!-- Consentement légal -->
+      <div class="mt-8 p-6 bg-slate-900 rounded-3xl">
+        <p *ngIf="legalText" class="text-sm text-white/70 leading-relaxed mb-5">{{ legalText }}</p>
+        <p *ngIf="!legalText" class="text-sm text-white/70 leading-relaxed mb-5">
+          Je certifie sur l'honneur l'exactitude des informations fournies dans ce dossier d'inscription.
+          Toute fausse déclaration pourra entraîner l'annulation de la candidature.
+        </p>
+
+        <label class="flex items-center gap-3 cursor-pointer">
+          <div class="relative w-5 h-5 shrink-0">
+            <input type="checkbox" [(ngModel)]="consent.checked"
+                   class="peer absolute inset-0 opacity-0 cursor-pointer w-5 h-5">
+            <div class="w-5 h-5 rounded-md border-2 border-white/30 transition-all
+                        peer-checked:bg-blue-500 peer-checked:border-blue-500
+                        flex items-center justify-center">
+              <lucide-icon *ngIf="consent.checked" [name]="CheckCircle" [size]="13" class="text-white"></lucide-icon>
+            </div>
+          </div>
+          <span class="text-sm font-bold text-white">
+            J'accepte les conditions et je valide mon dossier
+          </span>
         </label>
       </div>
     </div>
-  `,
-  styles: [`
-    .review-sections { display: flex; flex-direction: column; gap: 1rem; }
-    .row .label { color: #64748b; margin-bottom: 2px; }
-    .row .value { color: #0f172a; }
-  `]
+  `
 })
 export class StepReviewComponent {
   @Input() family: any;
   @Input() identity: any;
   @Input() schooling: any;
-  @Input() levelName: string = '';
+  @Input() levelName = '';
   @Input() admission: Admission | null = null;
-  @Input() legalText: string = '';
+  @Input() legalText = '';
   @Input() consent: { checked: boolean } = { checked: false };
   @Input() pendingServices: any[] = [];
 
-  readonly User = User;
+  docStatusText(status: string): string {
+    return ({ UPLOADED: '✓ Chargé', RECEIVED: '✓ Reçu', VERIFIED: '✓ Vérifié', REJECTED: '✕ Rejeté', MISSING: '— Manquant' } as Record<string, string>)[status] ?? status;
+  }
+
   readonly Users = Users;
+  readonly User = User;
   readonly HeartPulse = HeartPulse;
   readonly LayoutGrid = LayoutGrid;
   readonly FileText = FileText;
   readonly CheckCircle = CheckCircle;
-  readonly Info = Info;
 }
