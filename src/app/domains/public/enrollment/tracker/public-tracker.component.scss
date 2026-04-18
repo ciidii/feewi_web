@@ -34,14 +34,23 @@
     color: var(--fw-text-secondary);
     text-decoration: none;
     transition: color 0.2s ease;
-    &:hover { color: var(--fw-midnight); }
+    &:hover {
+      color: var(--fw-midnight);
+    }
   }
 
-  .brand { display: flex; align-items: center; gap: 8px; font-size: 0.875rem; }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+  }
 }
 
 // ── MAIN CONTENT ────────────────────────────────────────────────────────────
-.main-content { padding: 64px 0 120px; }
+.main-content {
+  padding: 64px 0 120px;
+}
 
 // ── SEARCH STATE ────────────────────────────────────────────────────────────
 .search-state {
@@ -73,8 +82,17 @@
       margin: 0 auto 16px;
     }
 
-    h1 { font-family: var(--fw-font-display); font-size: 1.5rem; font-weight: 800; margin-bottom: 8px; }
-    p { font-size: 0.875rem; color: var(--fw-text-tertiary); line-height: 1.5; }
+    h1 {
+      font-family: var(--fw-font-display);
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    p {
+      font-size: 0.875rem;
+      color: var(--fw-text-tertiary);
+      line-height: 1.5;
+    }
   }
 
   .error-box {
@@ -99,10 +117,22 @@
     margin-bottom: 32px;
     background: white;
     border: 2px solid var(--fw-border);
-    
-    &.validated { border-color: var(--fw-success); background: var(--fw-success-bg); .banner-icon { color: var(--fw-success); } }
-    &.rejected, &.cancelled { border-color: var(--fw-error); background: var(--fw-error-bg); .banner-icon { color: var(--fw-error); } }
-    &.waitlist, &.testing { border-color: var(--fw-warning); background: var(--fw-warning-bg); .banner-icon { color: var(--fw-warning); } }
+
+    &.validated {
+      border-color: var(--fw-success);
+      background: var(--fw-success-bg);
+      .banner-icon { color: var(--fw-success); }
+    }
+    &.rejected, &.cancelled {
+      border-color: var(--fw-error);
+      background: var(--fw-error-bg);
+      .banner-icon { color: var(--fw-error); }
+    }
+    &.waitlist, &.testing {
+      border-color: var(--fw-warning);
+      background: var(--fw-warning-bg);
+      .banner-icon { color: var(--fw-warning); }
+    }
 
     .banner-content { display: flex; justify-content: space-between; align-items: center; }
     .reference { font-family: var(--fw-font-display); font-size: 1.75rem; font-weight: 900; margin: 8px 0 4px; }
@@ -116,7 +146,12 @@
     gap: 32px;
   }
 
-  .card-title { font-family: var(--fw-font-display); font-size: 1.125rem; font-weight: 800; margin-bottom: 24px; }
+  .card-title {
+    font-family: var(--fw-font-display);
+    font-size: 1.125rem;
+    font-weight: 800;
+    margin-bottom: 24px;
+  }
 
   // TIMELINE
   .timeline-card {
@@ -148,8 +183,14 @@
       }
 
       &.done {
-        .t-dot { background: var(--fw-primary); color: white; border-color: var(--fw-primary); }
-        &:not(:last-child)::before { background: var(--fw-primary); }
+        .t-dot {
+          background: var(--fw-primary);
+          color: white;
+          border-color: var(--fw-primary);
+        }
+        &:not(:last-child)::before {
+          background: var(--fw-primary);
+        }
       }
 
       .t-dot {
@@ -198,7 +239,14 @@
       display: flex;
       gap: 16px;
 
-      .card-icon { width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 12px; display: grid; place-items: center; shrink-0; }
+      .card-icon {
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+      }
       h3 { font-size: 0.9375rem; font-weight: 800; margin-bottom: 4px; }
       p { font-size: 0.75rem; opacity: 0.6; line-height: 1.5; margin-bottom: 16px; }
       .contact-actions { display: flex; gap: 8px; }
@@ -226,7 +274,15 @@
 .loading-state {
   text-align: center;
   padding: 80px 0;
-  .spinner { width: 40px; height: 40px; border: 3px solid var(--fw-border); border-top-color: var(--fw-primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--fw-border);
+    border-top-color: var(--fw-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
