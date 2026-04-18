@@ -23,7 +23,7 @@ import { FwPublicHeaderComponent } from '../../../../shared/layout/public-header
 @Component({
   selector: 'app-public-landing',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule, FwButtonComponent, FwPublicHeaderComponent],
+  imports: [CommonModule, RouterModule, LucideAngularModule, FwButtonComponent],
   templateUrl: './public-landing.component.html',
   styleUrls: ['./public-landing.component.scss']
 })

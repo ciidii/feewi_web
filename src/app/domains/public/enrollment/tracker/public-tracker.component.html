@@ -1,7 +1,7 @@
 <app-fw-public-header></app-fw-public-header>
 
 <div class="tracker-page bg-surface-page min-h-screen">
-  
+
   <main class="main-content container animate-fade">
 
     <!-- ÉTAT : RECHERCHE -->
@@ -18,13 +18,13 @@
         <form (ngSubmit)="onSearch()" class="search-form">
           <div class="fw-field">
             <label class="fw-label">Référence du dossier</label>
-            <input type="text" [(ngModel)]="searchData.reference" name="ref" 
+            <input type="text" [(ngModel)]="searchData.reference" name="ref"
                    class="fw-input" placeholder="Ex: ADM-2026-XXXXX" required>
           </div>
 
           <div class="fw-field">
             <label class="fw-label">Code d'accès confidentiel</label>
-            <input type="text" [(ngModel)]="searchData.accessCode" name="code" 
+            <input type="text" [(ngModel)]="searchData.accessCode" name="code"
                    class="fw-input font-mono tracking-widest" placeholder="••••••••" required>
           </div>
 
@@ -48,99 +48,178 @@
 
     <!-- ÉTAT : DÉTAIL DU DOSSIER -->
     <div *ngIf="application(); let app" class="detail-state">
-      
-      <!-- Top Card : Statut Actuel -->
+
+      <!-- BANNER STATUT -->
       <div class="status-banner" [class]="app.status.toLowerCase()">
         <div class="banner-content">
           <div class="status-info">
             <app-fw-badge [status]="app.status" size="sm"></app-fw-badge>
-            <h2 class="reference">Dossier #{{ app.reference }}</h2>
+            <h2 class="reference">{{ app.reference }}</h2>
             <p class="student-name">{{ app.identity.firstName }} {{ app.identity.lastName }}</p>
-            
-            <!-- Resume Action for Drafts -->
+
+            <!-- Message lisible du serveur -->
+            <div class="tracker-message" *ngIf="app.trackerMessage">
+              <lucide-icon [name]="MessageSquare" [size]="15"></lucide-icon>
+              <span>{{ app.trackerMessage }}</span>
+            </div>
+
+            <!-- CTA continuer pour DRAFT -->
             <div *ngIf="app.status === 'DRAFT'" class="mt-6">
-              <app-fw-button 
-                variant="primary" 
-                size="md" 
-                [icon]="ArrowRight" 
-                iconPosition="right"
+              <app-fw-button
+                variant="primary" size="md"
+                [icon]="ArrowRight" iconPosition="right"
                 [routerLink]="['/enrollment/form-stepper']"
-                [queryParams]="{ reference: app.reference, accessCode: searchData.accessCode }"
-              >
+                [queryParams]="{ reference: app.reference, accessCode: resolvedAccessCode() }">
                 Continuer l'inscription
               </app-fw-button>
             </div>
           </div>
           <div class="banner-icon">
-            <lucide-icon [name]="CheckCircle" [size]="48" *ngIf="app.status === 'VALIDATED'"></lucide-icon>
-            <lucide-icon [name]="Clock" [size]="48" *ngIf="app.status !== 'VALIDATED'"></lucide-icon>
+            <lucide-icon [name]="CheckCircle" [size]="52" *ngIf="app.status === 'VALIDATED'"></lucide-icon>
+            <lucide-icon [name]="Sparkles"    [size]="52" *ngIf="app.status === 'ADMITTED'"></lucide-icon>
+            <lucide-icon [name]="Clock"       [size]="52" *ngIf="app.status === 'WAITLIST'"></lucide-icon>
+            <lucide-icon [name]="ShieldCheck" [size]="52" *ngIf="['SUBMITTED','VERIFIED','TESTING'].includes(app.status)"></lucide-icon>
+            <lucide-icon [name]="Info"        [size]="52" *ngIf="['DRAFT','REJECTED','CANCELLED'].includes(app.status)"></lucide-icon>
           </div>
         </div>
       </div>
 
       <div class="grid-layout">
+
         <!-- Timeline de progression -->
         <div class="timeline-card">
           <h3 class="card-title">Étapes de traitement</h3>
           <div class="timeline">
-            <div class="timeline-item" [class.done]="true">
+
+            <div class="timeline-item" [class.done]="true" [class.current]="app.status === 'DRAFT'">
               <div class="t-dot"><lucide-icon [name]="Check" [size]="12"></lucide-icon></div>
               <div class="t-content">
                 <p class="t-label">Dépôt du dossier</p>
-                <p class="t-date">Soumis par la famille</p>
+                <p class="t-date">Dossier créé par la famille</p>
               </div>
             </div>
-            <div class="timeline-item" [class.done]="['VERIFIED', 'TESTING', 'VALIDATED'].includes(app.status)">
+
+            <div class="timeline-item"
+                 [class.done]="['SUBMITTED','VERIFIED','TESTING','ADMITTED','WAITLIST','VALIDATED'].includes(app.status)"
+                 [class.current]="app.status === 'SUBMITTED'">
               <div class="t-dot">
-                <lucide-icon [name]="Check" [size]="12" *ngIf="['VERIFIED', 'TESTING', 'VALIDATED'].includes(app.status)"></lucide-icon>
+                <lucide-icon [name]="Check" [size]="12"
+                  *ngIf="['SUBMITTED','VERIFIED','TESTING','ADMITTED','WAITLIST','VALIDATED'].includes(app.status)">
+                </lucide-icon>
+              </div>
+              <div class="t-content">
+                <p class="t-label">Dossier soumis</p>
+                <p class="t-date">En attente du secrétariat</p>
+              </div>
+            </div>
+
+            <div class="timeline-item"
+                 [class.done]="['VERIFIED','TESTING','ADMITTED','WAITLIST','VALIDATED'].includes(app.status)"
+                 [class.current]="app.status === 'VERIFIED'">
+              <div class="t-dot">
+                <lucide-icon [name]="Check" [size]="12"
+                  *ngIf="['VERIFIED','TESTING','ADMITTED','WAITLIST','VALIDATED'].includes(app.status)">
+                </lucide-icon>
               </div>
               <div class="t-content">
                 <p class="t-label">Vérification administrative</p>
                 <p class="t-date">Contrôle des pièces justificatives</p>
               </div>
             </div>
-            <div class="timeline-item" [class.done]="['TESTING', 'VALIDATED'].includes(app.status)">
+
+            <div class="timeline-item"
+                 [class.done]="['TESTING','ADMITTED','WAITLIST','VALIDATED'].includes(app.status)"
+                 [class.current]="app.status === 'TESTING'">
               <div class="t-dot">
-                <lucide-icon [name]="Check" [size]="12" *ngIf="['TESTING', 'VALIDATED'].includes(app.status)"></lucide-icon>
+                <lucide-icon [name]="Check" [size]="12"
+                  *ngIf="['TESTING','ADMITTED','WAITLIST','VALIDATED'].includes(app.status)">
+                </lucide-icon>
               </div>
               <div class="t-content">
                 <p class="t-label">Évaluation pédagogique</p>
                 <p class="t-date">Décision de la direction</p>
               </div>
             </div>
-            <div class="timeline-item" [class.done]="app.status === 'VALIDATED'">
+
+            <div class="timeline-item"
+                 [class.done]="['ADMITTED','WAITLIST','VALIDATED'].includes(app.status)"
+                 [class.current]="app.status === 'ADMITTED' || app.status === 'WAITLIST'">
+              <div class="t-dot">
+                <lucide-icon [name]="Check" [size]="12"
+                  *ngIf="['ADMITTED','WAITLIST','VALIDATED'].includes(app.status)">
+                </lucide-icon>
+              </div>
+              <div class="t-content">
+                <p class="t-label">{{ app.status === 'WAITLIST' ? 'Liste d\'attente' : 'Candidat admis' }}</p>
+                <p class="t-date">{{ app.status === 'WAITLIST' ? 'En attente d\'une place disponible' : 'Offre d\'admission émise' }}</p>
+              </div>
+            </div>
+
+            <div class="timeline-item" [class.done]="app.status === 'VALIDATED'" [class.current]="app.status === 'VALIDATED'">
               <div class="t-dot">
                 <lucide-icon [name]="Sparkles" [size]="12" *ngIf="app.status === 'VALIDATED'"></lucide-icon>
               </div>
               <div class="t-content">
-                <p class="t-label">Admission finale</p>
+                <p class="t-label">Admission définitive</p>
                 <p class="t-date">Confirmation & Inscription</p>
               </div>
             </div>
+
+            <!-- État terminal négatif -->
+            <div class="timeline-item rejected" *ngIf="app.status === 'REJECTED' || app.status === 'CANCELLED'">
+              <div class="t-dot rejected"></div>
+              <div class="t-content">
+                <p class="t-label">{{ app.status === 'REJECTED' ? 'Dossier rejeté' : 'Dossier annulé' }}</p>
+                <p class="t-date">Processus terminé</p>
+              </div>
+            </div>
+
           </div>
         </div>
 
-        <!-- Infos & Documents -->
+        <!-- Sidebar infos -->
         <div class="info-sidebar">
+
+          <!-- Résumé -->
           <div class="summary-card">
             <h3 class="card-title">Résumé de l'inscription</h3>
             <div class="summary-list">
               <div class="s-item">
-                <span class="s-label">Niveau scolaire</span>
-                <span class="s-value">{{ app.schooling.levelId }}</span>
+                <span class="s-label">Élève</span>
+                <span class="s-value">{{ app.identity.firstName }} {{ app.identity.lastName }}</span>
               </div>
               <div class="s-item">
-                <span class="s-label">Année académique</span>
-                <span class="s-value">{{ app.schooling.academicYearId }}</span>
+                <span class="s-label">Niveau demandé</span>
+                <span class="s-value">{{ app.schooling.levelLabel || app.schooling.levelId }}</span>
+              </div>
+              <div class="s-item" *ngIf="app.type">
+                <span class="s-label">Type</span>
+                <span class="s-value">{{ app.type === 'RE_ENROLLMENT' ? 'Réinscription' : 'Nouvelle inscription' }}</span>
               </div>
             </div>
           </div>
 
+          <!-- Pièces justificatives -->
+          <div class="docs-card" *ngIf="app.documents && app.documents.length > 0">
+            <h3 class="card-title">
+              <lucide-icon [name]="FileText" [size]="16"></lucide-icon>
+              Pièces justificatives
+            </h3>
+            <div class="docs-list">
+              <div *ngFor="let doc of app.documents" class="doc-row" [class]="'doc-' + doc.status.toLowerCase()">
+                <div class="doc-status-dot"></div>
+                <span class="doc-name">{{ doc.name }}</span>
+                <span class="doc-badge">{{ docStatusLabel(doc.status) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contact -->
           <div class="contact-card">
             <div class="card-icon"><lucide-icon [name]="MessageSquare" [size]="20"></lucide-icon></div>
             <div class="card-body">
               <h3>Besoin d'aide ?</h3>
-              <p>Contactez notre service admission pour toute question relative à ce dossier.</p>
+              <p>Contactez notre service admission pour toute question.</p>
               <div class="contact-actions">
                 <app-fw-button variant="secondary" size="sm" [icon]="Phone">Appeler</app-fw-button>
                 <app-fw-button variant="secondary" size="sm" [icon]="Mail">Email</app-fw-button>

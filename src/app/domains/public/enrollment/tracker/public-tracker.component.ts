@@ -2,11 +2,16 @@ import {Component, signal, computed, inject, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, Clock, CheckCircle, MessageSquare, Phone, Mail, FileText, Info, ArrowLeft, RefreshCw, Search, ArrowRight, ShieldCheck, LayoutGrid, Check, Sparkles } from 'lucide-angular';
+import {
+  LucideAngularModule,
+  Clock, CheckCircle, MessageSquare, Phone, Mail, FileText,
+  Info, ArrowLeft, RefreshCw, Search, ArrowRight, ShieldCheck,
+  LayoutGrid, Check, Sparkles, XCircle, AlertTriangle
+} from 'lucide-angular';
 import { ActivatedRoute } from '@angular/router';
 import { EnrollmentPublicService } from '../../../../core/services/enrollment-public.service';
 import { AdmissionSessionService } from '../../../../core/services/admission-session.service';
-import { Admission } from '../../../../core/models/enrollment.model';
+import { Admission, DocumentStatus } from '../../../../core/models/enrollment.model';
 import { finalize } from 'rxjs';
 import { FwButtonComponent } from '../../../../shared/components/button/button.component';
 import { FwBadgeComponent } from '../../../../shared/components/badge/badge.component';
@@ -16,7 +21,7 @@ import { FwPublicHeaderComponent } from '../../../../shared/layout/public-header
 @Component({
   selector: 'app-public-tracker',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule, FormsModule, FwButtonComponent, FwBadgeComponent, FwEmptyStateComponent, FwPublicHeaderComponent],
+  imports: [CommonModule, RouterModule, LucideAngularModule, FormsModule, FwButtonComponent, FwBadgeComponent, FwPublicHeaderComponent],
   templateUrl: './public-tracker.component.html',
   styleUrls: ['./public-tracker.component.scss']
 })
@@ -27,16 +32,19 @@ export class PublicTrackerComponent implements OnInit {
   private enrollmentService = inject(EnrollmentPublicService);
   private sessionService = inject(AdmissionSessionService);
 
-  // État du dossier chargé depuis l'API
   application = signal<Admission | null>(null);
   isLoading = signal(false);
   error = signal<string | null>(null);
 
-  // Formulaire de recherche (si pas d'ID en URL)
-  searchData = {
-    reference: '',
-    accessCode: ''
-  };
+  searchData = { reference: '', accessCode: '' };
+
+  // Code d'accès résolu : URL param > session > formulaire
+  resolvedAccessCode = computed(() => {
+    return this.route.snapshot.queryParamMap.get('accessCode')
+      || this.sessionService.getSession()?.accessCode
+      || this.searchData.accessCode
+      || '';
+  });
 
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
@@ -51,14 +59,8 @@ export class PublicTrackerComponent implements OnInit {
   }
 
   loadApplicationData(reference: string) {
-    const queryAccessCode = this.route.snapshot.queryParamMap.get('accessCode');
-    const session = this.sessionService.getSession();
-    const accessCode = queryAccessCode || session?.accessCode || null;
-
-    if (!accessCode) {
-      this.isLoading.set(false);
-      return;
-    }
+    const accessCode = this.resolvedAccessCode();
+    if (!accessCode) { this.isLoading.set(false); return; }
 
     this.isLoading.set(true);
     this.error.set(null);
@@ -66,7 +68,7 @@ export class PublicTrackerComponent implements OnInit {
       finalize(() => this.isLoading.set(false))
     ).subscribe({
       next: (res: Admission) => this.application.set(res),
-      error: () => this.error.set('Référence ou code d’accès incorrect. Veuillez vérifier vos informations.')
+      error: () => this.error.set('Référence ou code d\'accès incorrect. Veuillez vérifier vos informations.')
     });
   }
 
@@ -89,6 +91,17 @@ export class PublicTrackerComponent implements OnInit {
     });
   }
 
+  docStatusLabel(status: DocumentStatus): string {
+    const labels: Record<DocumentStatus, string> = {
+      MISSING:  'Manquant',
+      UPLOADED: 'Déposé',
+      RECEIVED: 'Reçu',
+      VERIFIED: 'Vérifié',
+      REJECTED: 'Refusé'
+    };
+    return labels[status] ?? status;
+  }
+
   // Icônes
   readonly Clock = Clock;
   readonly CheckCircle = CheckCircle;
@@ -105,4 +118,6 @@ export class PublicTrackerComponent implements OnInit {
   readonly LayoutGrid = LayoutGrid;
   readonly Check = Check;
   readonly Sparkles = Sparkles;
+  readonly XCircle = XCircle;
+  readonly AlertTriangle = AlertTriangle;
 }
