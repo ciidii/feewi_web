@@ -38,8 +38,8 @@ Ce document suit l'état d'avancement du projet, les décisions architecturales 
 - **18/04/2026** : 
     - [x] Refonte de la section Authentification (Phase 1.1) terminée.
     - [x] Jalon 1.2.1 : Shell & Navigation du FormStepper terminée.
-    - [x] **Jalon 1.2.2 : Modernisation du Step HUB.**
-        - Utilisation de `FwBadge` pour le statut des enfants.
-        - Utilisation de `FwEmptyState` pour le cas "Zéro enfant".
-        - Refonte des cartes enfants et des boutons d'action.
-    - [ ] Jalon 1.2.3 : Modernisation de l'étape Parent (Guardian).
+    - [x] Jalon 1.2.2 : Modernisation du Step HUB terminée.
+    - [x] **Jalon 1.2.3 : Modernisation de l'étape Parent (Guardian).**
+        - Application systématique de `.fw-field` et `.fw-input`.
+        - Organisation du formulaire en grille responsive.
+    - [ ] Jalon 1.2.4 : Modernisation des étapes Enfant (Student, Medical, Services).
