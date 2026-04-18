@@ -36,10 +36,9 @@ Ce document suit l'état d'avancement du projet, les décisions architecturales 
 
 ### Journal de bord
 - **18/04/2026** : 
-    - Initialisation de la refonte du `LoginComponent`. 
-    - Utilisation des composants `FwButton` et des utilitaires `.fw-input` / `.fw-field`.
-    - Migration des couleurs vers les variables sémantiques.
-    - [x] Refonte Login terminée.
-    - [x] Refonte Forgot Password terminée.
-    - [x] Refonte Reset Password terminée.
-    - [x] **Section Authentification (Phase 1.1) : 100% terminée.**
+    - [x] Refonte de la section Authentification (Phase 1.1) terminée.
+    - [x] **Jalon 1.2.1 : Shell & Navigation du FormStepper.**
+        - Modernisation de la sidebar avec contextes (Famille vs Enfant).
+        - Intégration du composant `FwButton` pour toute la navigation.
+        - Refonte du Layout (CSS Grid/Flex) et utilisation des tokens.
+    - [ ] Jalon 1.2.2 : Modernisation du Step HUB.

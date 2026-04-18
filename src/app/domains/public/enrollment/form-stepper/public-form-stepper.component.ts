@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   ArrowLeft, ArrowRight, CheckCircle, FileText, GraduationCap,
-  HeartPulse, LayoutGrid, Lock, LucideAngularModule, RefreshCw, User, Users
+  HeartPulse, LayoutGrid, Lock, LucideAngularModule, User, Users,
+  ChevronRight, Sparkles, ShieldCheck, ClipboardCheck, RefreshCw
 } from 'lucide-angular';
 import { finalize, forkJoin, switchMap } from 'rxjs';
 
@@ -30,6 +31,7 @@ import { StepServicesComponent } from './components/step-services/step-services.
 import { StepVaultComponent } from './components/step-vault/step-vault.component';
 import { StepReviewComponent } from './components/step-review/step-review.component';
 import { StepHubComponent } from './components/step-hub/step-hub.component';
+import { FwButtonComponent } from '../../../../shared/components/button/button.component';
 
 export type GlobalPhase = 'GUARDIAN' | 'HUB' | 'REVIEW';
 export type ChildPhase  = 'STUDENT'  | 'MEDICAL' | 'SERVICES' | 'DOCS';
@@ -43,7 +45,7 @@ const CHILD_STEPS: ChildPhase[] = ['STUDENT', 'MEDICAL', 'SERVICES', 'DOCS'];
     CommonModule, LucideAngularModule,
     StepFamilyComponent, StepIdentityComponent, StepMedicalComponent,
     StepServicesComponent, StepVaultComponent, StepReviewComponent,
-    StepHubComponent
+    StepHubComponent, FwButtonComponent
   ],
   templateUrl: './public-form-stepper.component.html',
   styleUrls: ['./public-form-stepper.component.scss']
@@ -473,7 +475,15 @@ export class PublicFormStepperComponent implements OnInit {
   readonly Lock     = Lock;
   readonly ArrowLeft  = ArrowLeft;
   readonly ArrowRight = ArrowRight;
-  readonly RefreshCw  = RefreshCw;
   readonly Users = Users;
+  readonly User = User;
+  readonly HeartPulse = HeartPulse;
+  readonly LayoutGrid = LayoutGrid;
+  readonly FileText = FileText;
   readonly CheckCircle = CheckCircle;
+  readonly ChevronRight = ChevronRight;
+  readonly Sparkles = Sparkles;
+  readonly ShieldCheck = ShieldCheck;
+  readonly ClipboardCheck = ClipboardCheck;
+  readonly RefreshCw = RefreshCw;
 }
