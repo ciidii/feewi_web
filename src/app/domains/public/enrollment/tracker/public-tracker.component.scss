@@ -331,6 +331,84 @@
   }
 }
 
+// ── DECISION PANEL ───────────────────────────────────────────────────────────
+.decision-panel {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px 28px;
+  border-radius: var(--fw-radius-xl);
+  border: 2px solid var(--fw-border);
+  background: white;
+  margin-bottom: 28px;
+
+  &.ds-payment_required {
+    border-color: var(--fw-success);
+    background: var(--fw-success-bg);
+    .dp-icon { color: var(--fw-success); }
+    .dp-title { color: var(--fw-success); }
+  }
+
+  &.ds-parent_choice {
+    border-color: var(--fw-warning);
+    background: var(--fw-warning-bg);
+    .dp-icon { color: var(--fw-warning); }
+  }
+
+  &.ds-closed {
+    border-color: var(--fw-border);
+    background: var(--fw-surface-sunken);
+    .dp-icon { color: var(--fw-text-tertiary); }
+  }
+
+  .dp-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.7);
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+
+  .dp-body {
+    flex: 1;
+
+    .dp-title {
+      font-family: var(--fw-font-display);
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--fw-midnight);
+      margin-bottom: 4px;
+    }
+
+    .dp-sub {
+      font-size: 0.8125rem;
+      color: var(--fw-text-secondary);
+      line-height: 1.5;
+    }
+  }
+
+  .dp-actions {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+}
+
+// ── ADMITTED NOTICE (dans le détail enfant) ───────────────────────────────────
+.admitted-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--fw-primary);
+  background: rgba(var(--fw-primary-rgb), 0.06);
+  border-radius: var(--fw-radius-md);
+  padding: 10px 14px;
+}
+
 // ── ADMISSION DETAIL (SHARED) ───────────────────────────────────────────────
 .status-banner {
   padding: 40px;

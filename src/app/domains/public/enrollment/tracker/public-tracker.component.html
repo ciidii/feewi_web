@@ -102,6 +102,55 @@
         </div>
       </div>
 
+      <!-- ── Panel décision (piloté par decisionState) ── -->
+      <div *ngIf="!selectedAdmission()" class="decision-panel"
+           [class]="'ds-' + bundle()?.decisionState?.toLowerCase()">
+
+        <!-- PAYMENT_REQUIRED : tous admis, paiement attendu -->
+        <ng-container *ngIf="bundle()?.decisionState === 'PAYMENT_REQUIRED'">
+          <div class="dp-icon"><lucide-icon [name]="Sparkles" [size]="24"></lucide-icon></div>
+          <div class="dp-body">
+            <p class="dp-title">Tous vos enfants ont été admis !</p>
+            <p class="dp-sub">Confirmez pour finaliser leur inscription et procéder au paiement des frais.</p>
+          </div>
+          <div class="dp-actions">
+            <app-fw-button variant="primary" [icon]="CheckCircle" iconPosition="right"
+                           [loading]="isDeciding()" (click)="onConfirmAdmitted()">
+              Confirmer et payer
+            </app-fw-button>
+          </div>
+        </ng-container>
+
+        <!-- PARENT_CHOICE : mix admis / refusés -->
+        <ng-container *ngIf="bundle()?.decisionState === 'PARENT_CHOICE'">
+          <div class="dp-icon dp-warning"><lucide-icon [name]="AlertTriangle" [size]="24"></lucide-icon></div>
+          <div class="dp-body">
+            <p class="dp-title">Décision requise</p>
+            <p class="dp-sub">Certains dossiers ont été admis, d'autres refusés. Choisissez de valider les admis ou d'annuler l'ensemble.</p>
+          </div>
+          <div class="dp-actions">
+            <app-fw-button variant="primary" [icon]="CheckCircle" iconPosition="right"
+                           [loading]="isDeciding()" (click)="onConfirmAdmitted()">
+              Valider les admis
+            </app-fw-button>
+            <app-fw-button variant="danger" [icon]="XCircle"
+                           [loading]="isDeciding()" (click)="onCancelAll()">
+              Tout annuler
+            </app-fw-button>
+          </div>
+        </ng-container>
+
+        <!-- CLOSED : état final -->
+        <ng-container *ngIf="bundle()?.decisionState === 'CLOSED'">
+          <div class="dp-icon dp-closed"><lucide-icon [name]="CheckCircle" [size]="24"></lucide-icon></div>
+          <div class="dp-body">
+            <p class="dp-title">Dossier clôturé</p>
+            <p class="dp-sub">Toutes les inscriptions ont été traitées. Aucune action supplémentaire n'est requise.</p>
+          </div>
+        </ng-container>
+
+      </div>
+
       <!-- Vue détail d'un enfant sélectionné OU liste -->
       <div *ngIf="selectedAdmission(); let app" class="single-wrapper">
         <button class="back-to-list" (click)="selectedAdmission.set(null)" *ngIf="admissions().length > 1">
@@ -117,7 +166,7 @@
           <div class="child-avatar">{{ a.identity.firstName[0] }}{{ a.identity.lastName[0] }}</div>
           <div class="child-info">
             <span class="child-name">{{ a.identity.firstName }} {{ a.identity.lastName }}</span>
-            <span class="child-level">{{ a.schooling.levelLabel || a.schooling.levelId }}</span>
+            <span class="child-level">{{ a.schooling?.levelLabel || a.schooling?.levelId }}</span>
             <span class="child-message">{{ a.trackerMessage }}</span>
           </div>
           <div class="child-right">
@@ -172,13 +221,10 @@
           </app-fw-button>
         </div>
 
-        <!-- CTA ADMITTED : confirmer -->
-        <div *ngIf="app.status === 'ADMITTED'" class="mt-6">
-          <app-fw-button variant="primary" size="md" [icon]="CheckCircle" iconPosition="right"
-                         [loading]="isConfirming()"
-                         (click)="confirmAdmission(app)">
-            Confirmer mon inscription
-          </app-fw-button>
+        <!-- ADMITTED : message d'attente (décision au niveau bundle) -->
+        <div *ngIf="app.status === 'ADMITTED'" class="admitted-notice mt-6">
+          <lucide-icon [name]="Sparkles" [size]="16"></lucide-icon>
+          <span>Retournez à la vue famille pour confirmer l'inscription.</span>
         </div>
       </div>
       <div class="banner-icon">

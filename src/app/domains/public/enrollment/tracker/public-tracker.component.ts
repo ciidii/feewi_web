@@ -11,6 +11,7 @@ import {
 import {EnrollmentPublicService} from '../../../../core/services/enrollment-public.service';
 import {AdmissionSessionService} from '../../../../core/services/admission-session.service';
 import {Admission, AdmissionBundleResponse, DocumentStatus} from '../../../../core/models/enrollment.model';
+import {BundleDecisionState} from '../../../../core/models/enrollment/entities';
 import {finalize} from 'rxjs';
 import {FwButtonComponent} from '../../../../shared/components/button/button.component';
 import {FwBadgeComponent} from '../../../../shared/components/badge/badge.component';
@@ -45,9 +46,9 @@ export class PublicTrackerComponent implements OnInit {
   emailResults      = signal<Admission[]>([]);
 
   // ── Chargement / erreurs ──────────────────────────────────────────────────
-  isLoading    = signal(false);
-  isConfirming = signal(false);
-  error        = signal<string | null>(null);
+  isLoading      = signal(false);
+  isDeciding     = signal(false);
+  error          = signal<string | null>(null);
 
   // ── Formulaires ───────────────────────────────────────────────────────────
   searchData = {reference: '', accessCode: ''};
@@ -178,30 +179,33 @@ export class PublicTrackerComponent implements OnInit {
     else if (this.admission()) this.loadSingle(this.admission()!.reference, this.searchData.accessCode);
   }
 
-  // ── Confirmation parent (ADMITTED → VALIDATED) ───────────────────────────
+  // ── Décisions bundle (niveau famille) ────────────────────────────────────
 
-  confirmAdmission(app: Admission) {
-    this.isConfirming.set(true);
-    this.enrollment.validateAdmission(app.id).pipe(
-      finalize(() => this.isConfirming.set(false))
+  get bundleAccessCode(): string {
+    return this.bundle()?.accessCode ?? this.route.snapshot.queryParamMap.get('accessCode') ?? '';
+  }
+
+  onConfirmAdmitted() {
+    const b = this.bundle();
+    if (!b) return;
+    this.isDeciding.set(true);
+    this.enrollment.confirmAdmitted(b.id, this.bundleAccessCode).pipe(
+      finalize(() => this.isDeciding.set(false))
     ).subscribe({
-      next: (updated) => {
-        // Mettre à jour le signal local selon le mode actif
-        if (this.mode() === 'single') {
-          this.admission.set(updated);
-        } else {
-          this.selectedAdmission.set(updated);
-          // Mettre à jour aussi dans la liste du bundle
-          const current = this.bundle();
-          if (current) {
-            this.bundle.set({
-              ...current,
-              admissions: current.admissions.map(a => a.id === updated.id ? updated : a)
-            });
-          }
-        }
-      },
+      next: (updated) => this.bundle.set(updated),
       error: () => this.error.set('Erreur lors de la confirmation. Veuillez réessayer.')
+    });
+  }
+
+  onCancelAll() {
+    const b = this.bundle();
+    if (!b) return;
+    this.isDeciding.set(true);
+    this.enrollment.cancelAll(b.id, this.bundleAccessCode).pipe(
+      finalize(() => this.isDeciding.set(false))
+    ).subscribe({
+      next: (updated) => this.bundle.set(updated),
+      error: () => this.error.set('Erreur lors de l\'annulation. Veuillez réessayer.')
     });
   }
 

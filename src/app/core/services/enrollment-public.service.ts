@@ -177,11 +177,18 @@ export class EnrollmentPublicService {
       .pipe(catchError(this.handleError('Erreur lors de l\'annulation')));
   }
 
-  /** Confirmation de l'admission par le parent (ADMITTED → VALIDATED) */
-  validateAdmission(admissionId: string): Observable<Admission> {
+  /** Confirmation bundle par le parent : ADMITTED → paiement déclenché (PAYMENT_REQUIRED ou PARENT_CHOICE) */
+  confirmAdmitted(bundleId: string, accessCode: string): Observable<AdmissionBundleResponse> {
     return this.http
-      .patch<Admission>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.VALIDATE(admissionId)), {}, { headers: this.getHeaders() })
-      .pipe(catchError(this.handleError('Erreur lors de la confirmation de l\'inscription')));
+      .post<AdmissionBundleResponse>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.CONFIRM_ADMITTED(bundleId)), { accessCode }, { headers: this.getHeaders() })
+      .pipe(catchError(this.handleError('Erreur lors de la confirmation')));
+  }
+
+  /** Annulation de tous les enfants admis du bundle (PARENT_CHOICE → CLOSED) */
+  cancelAll(bundleId: string, accessCode: string): Observable<AdmissionBundleResponse> {
+    return this.http
+      .post<AdmissionBundleResponse>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.CANCEL_ALL(bundleId)), { accessCode }, { headers: this.getHeaders() })
+      .pipe(catchError(this.handleError('Erreur lors de l\'annulation')));
   }
 
   /** Réinscription élève existant */

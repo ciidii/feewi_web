@@ -101,11 +101,14 @@ export interface Admission {
 
 // --- BUNDLE (FAMILLE) ---
 
+export type BundleDecisionState = 'AWAITING_SCHOOL' | 'PAYMENT_REQUIRED' | 'PARENT_CHOICE' | 'CLOSED';
+
 export interface AdmissionBundle {
   id: string;
   reference: string;
   accessCode: string;
   status: AdmissionStatus;
+  decisionState: BundleDecisionState;
   family: FamilyPillar;
   admissions: Admission[];
   createdAt: string;

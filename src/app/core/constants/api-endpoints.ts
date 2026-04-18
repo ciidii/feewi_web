@@ -25,6 +25,8 @@ export const API_ENDPOINTS = {
       TRACK: (ref: string) => `/public/admissions/${ref}/track`,
       SUBMIT_ADMISSION: (id: string) => `/public/admissions/${id}/submit`,
       SUBMIT_BUNDLE: (bundleId: string) => `/public/admissions/bundles/${bundleId}/submit`,
+      CONFIRM_ADMITTED: (bundleId: string) => `/public/admissions/bundles/${bundleId}/confirm-admitted`,
+      CANCEL_ALL: (bundleId: string) => `/public/admissions/bundles/${bundleId}/cancel-all`,
       CANCEL: (id: string) => `/public/admissions/${id}/cancel`,
     },
     ADMIN: {
