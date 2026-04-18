@@ -12,16 +12,17 @@ import {
   Calendar,
   FileText,
   ShieldCheck,
-  Globe, RefreshCw, Phone
+  Globe, RefreshCw, Phone, GraduationCap, ChevronRight
 } from 'lucide-angular';
 import { EnrollmentPublicService } from '../../../../core/services/enrollment-public.service';
 import { finalize } from 'rxjs';
 import { PublicPortalSummary } from '../../../../core/models/enrollment';
+import { FwButtonComponent } from '../../../../shared/components/button/button.component';
 
 @Component({
   selector: 'app-public-landing',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule],
+  imports: [CommonModule, RouterModule, LucideAngularModule, FwButtonComponent],
   templateUrl: './public-landing.component.html',
   styleUrls: ['./public-landing.component.scss']
 })
@@ -79,5 +80,7 @@ export class PublicLandingComponent implements OnInit {
   readonly ShieldCheck = ShieldCheck;
   readonly Globe = Globe;
   readonly Phone = Phone;
-  protected readonly RefreshCw = RefreshCw;
+  readonly RefreshCw = RefreshCw;
+  readonly GraduationCap = GraduationCap;
+  readonly ChevronRight = ChevronRight;
 }

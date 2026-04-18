@@ -1,194 +1,164 @@
-<div class="tracker-wrapper animate-fade">
+<div class="tracker-page bg-surface-page min-h-screen">
   
-  <!-- PHASE 1 : RECHERCHE MANUELLE -->
-  @if (!application() && !isLoading()) {
-    <div class="search-container card animate-in">
-      <div class="search-icon"><lucide-icon [name]="Search" [size]="48"></lucide-icon></div>
-      <h1>Suivre mon dossier</h1>
-      <p>Saisissez les identifiants de votre demande pour consulter son avancement.</p>
-
-      <div class="search-form">
-        <div class="form-group">
-          <label>Référence du dossier</label>
-          <input type="text" [(ngModel)]="searchData.reference" placeholder="Ex: ADM-2026-XXXX" class="fw-input">
-        </div>
-        <div class="form-group">
-          <label>Code d'accès secret</label>
-          <input type="password" [(ngModel)]="searchData.accessCode" placeholder="••••" class="fw-input">
-        </div>
-        
-        <button class="btn-primary full" (click)="onSearch()" [disabled]="!searchData.reference || !searchData.accessCode">
-          Rechercher mon dossier <lucide-icon [name]="ArrowRight" [size]="18"></lucide-icon>
-        </button>
+  <!-- Header Minimal -->
+  <header class="tracker-header">
+    <div class="container">
+      <a routerLink="/enrollment/landing" class="back-link">
+        <lucide-icon [name]="ArrowLeft" [size]="16"></lucide-icon>
+        <span>Retour au portail</span>
+      </a>
+      <div class="brand">
+        <lucide-icon [name]="ShieldCheck" [size]="20" class="text-primary"></lucide-icon>
+        <span class="font-display font-black text-midnight tracking-tighter">SUIVI DE DOSSIER</span>
       </div>
-
-      @if (error()) {
-        <div class="error-box">
-          <lucide-icon [name]="Info" [size]="16"></lucide-icon>
-          <span>{{ error() }}</span>
-        </div>
-      }
     </div>
-  }
+  </header>
 
-  <!-- PHASE 2 : CHARGEMENT -->
-  @if (isLoading()) {
-    <div class="loading-state card">
-      <lucide-icon [name]="RefreshCw" [size]="32" class="animate-spin text-primary"></lucide-icon>
-      <p>Chargement de votre dossier...</p>
+  <main class="main-content container animate-fade">
+
+    <!-- ÉTAT : RECHERCHE -->
+    <div *ngIf="!application() && !isLoading()" class="search-state">
+      <div class="search-card">
+        <div class="card-head">
+          <div class="icon-wrap">
+            <lucide-icon [name]="Search" [size]="24"></lucide-icon>
+          </div>
+          <h1>Retrouver mon dossier</h1>
+          <p>Saisissez les codes fournis lors de votre inscription pour consulter l'avancement de votre demande.</p>
+        </div>
+
+        <form (ngSubmit)="onSearch()" class="search-form">
+          <div class="fw-field">
+            <label class="fw-label">Référence du dossier</label>
+            <input type="text" [(ngModel)]="searchData.reference" name="ref" 
+                   class="fw-input" placeholder="Ex: ADM-2026-XXXXX" required>
+          </div>
+
+          <div class="fw-field">
+            <label class="fw-label">Code d'accès confidentiel</label>
+            <input type="text" [(ngModel)]="searchData.accessCode" name="code" 
+                   class="fw-input font-mono tracking-widest" placeholder="••••••••" required>
+          </div>
+
+          <div *ngIf="error()" class="error-box">
+            <lucide-icon [name]="Info" [size]="16"></lucide-icon>
+            <span>{{ error() }}</span>
+          </div>
+
+          <app-fw-button type="submit" variant="primary" class="w-full" size="lg" [icon]="ArrowRight" iconPosition="right">
+            Rechercher le dossier
+          </app-fw-button>
+        </form>
+      </div>
     </div>
-  } 
 
-  <!-- PHASE 3 : AFFICHAGE DU DOSSIER -->
-  @if (application(); as app) {
-    <!-- Header : État actuel -->
-    <header class="tracker-header card">
-      <div class="header-main-info">
-        <div class="success-icon" [class]="getStatusClass(app.status)">
-          <lucide-icon [name]="app.status === 'VALIDATED' ? CheckCircle : (app.status === 'REJECTED' ? Info : Clock)" [size]="48"></lucide-icon>
-        </div>
-        <div class="header-text">
-          <h1>Bonjour, {{ app.identity.firstName || 'Candidat' }}</h1>
-          <p>Suivi de votre demande : <strong>{{ app.reference }}</strong></p>
-        </div>
-        <div class="status-badge-container">
-          <div class="status-badge" [class]="getStatusClass(app.status)">{{ getStatusLabel(app.status) }}</div>
+    <!-- ÉTAT : CHARGEMENT -->
+    <div *ngIf="isLoading()" class="loading-state">
+      <div class="spinner"></div>
+      <p>Récupération des informations...</p>
+    </div>
+
+    <!-- ÉTAT : DÉTAIL DU DOSSIER -->
+    <div *ngIf="application(); let app" class="detail-state">
+      
+      <!-- Top Card : Statut Actuel -->
+      <div class="status-banner" [class]="app.status.toLowerCase()">
+        <div class="banner-content">
+          <div class="status-info">
+            <app-fw-badge [status]="app.status" size="sm"></app-fw-badge>
+            <h2 class="reference">Dossier #{{ app.reference }}</h2>
+            <p class="student-name">{{ app.identity.firstName }} {{ app.identity.lastName }}</p>
+          </div>
+          <div class="banner-icon">
+            <lucide-icon [name]="CheckCircle" [size]="48" *ngIf="app.status === 'VALIDATED'"></lucide-icon>
+            <lucide-icon [name]="Clock" [size]="48" *ngIf="app.status !== 'VALIDATED'"></lucide-icon>
+          </div>
         </div>
       </div>
 
-      <!-- MESSAGE DYNAMIQUE DE L'ÉCOLE (CHANTIER TRACKER) -->
-      @if (app.trackerMessage) {
-        <div class="school-instruction-box animate-in">
-          <div class="instruction-header">
-            <lucide-icon [name]="MessageSquare" [size]="18"></lucide-icon>
-            <span>Note de l'établissement</span>
+      <div class="grid-layout">
+        <!-- Timeline de progression -->
+        <div class="timeline-card">
+          <h3 class="card-title">Étapes de traitement</h3>
+          <div class="timeline">
+            <div class="timeline-item" [class.done]="true">
+              <div class="t-dot"><lucide-icon [name]="Check" [size]="12"></lucide-icon></div>
+              <div class="t-content">
+                <p class="t-label">Dépôt du dossier</p>
+                <p class="t-date">Soumis par la famille</p>
+              </div>
+            </div>
+            <div class="timeline-item" [class.done]="['VERIFIED', 'TESTING', 'VALIDATED'].includes(app.status)">
+              <div class="t-dot">
+                <lucide-icon [name]="Check" [size]="12" *ngIf="['VERIFIED', 'TESTING', 'VALIDATED'].includes(app.status)"></lucide-icon>
+              </div>
+              <div class="t-content">
+                <p class="t-label">Vérification administrative</p>
+                <p class="t-date">Contrôle des pièces justificatives</p>
+              </div>
+            </div>
+            <div class="timeline-item" [class.done]="['TESTING', 'VALIDATED'].includes(app.status)">
+              <div class="t-dot">
+                <lucide-icon [name]="Check" [size]="12" *ngIf="['TESTING', 'VALIDATED'].includes(app.status)"></lucide-icon>
+              </div>
+              <div class="t-content">
+                <p class="t-label">Évaluation pédagogique</p>
+                <p class="t-date">Décision de la direction</p>
+              </div>
+            </div>
+            <div class="timeline-item" [class.done]="app.status === 'VALIDATED'">
+              <div class="t-dot">
+                <lucide-icon [name]="Sparkles" [size]="12" *ngIf="app.status === 'VALIDATED'"></lucide-icon>
+              </div>
+              <div class="t-content">
+                <p class="t-label">Admission finale</p>
+                <p class="t-date">Confirmation & Inscription</p>
+              </div>
+            </div>
           </div>
-          <p class="instruction-content">{{ app.trackerMessage }}</p>
         </div>
-      }
-    </header>
 
-    <!-- Main Content : Timeline -->
-    <main class="tracker-main">
-      <div class="tracker-section card">
-        <!-- Alerte de Rejet (si applicable) -->
-        @if (app.status === 'REJECTED') {
-          <div class="rejection-alert mb-8">
-            <lucide-icon [name]="Info" [size]="24"></lucide-icon>
-            <div class="content">
-              <h3>Dossier non retenu</h3>
-              <p>Nous avons le regret de vous informer que votre demande n'a pas été retenue pour cette année scolaire. Nous vous remercions de l'intérêt porté à notre établissement.</p>
-            </div>
-          </div>
-        }
-
-        <div class="section-title">
-          <lucide-icon [name]="Clock" [size]="20"></lucide-icon>
-          <h2>Historique du dossier</h2>
-          <button class="btn-refresh" (click)="loadApplicationData(app.reference)"><lucide-icon [name]="RefreshCw" [size]="16"></lucide-icon> Actualiser</button>
-        </div>
-
-        <div class="timeline">
-          <!-- Étape 1 : Soumission -->
-          <div class="timeline-item" [class.completed]="app.status !== 'DRAFT'">
-            <div class="timeline-dot"><lucide-icon [name]="CheckCircle" [size]="14"></lucide-icon></div>
-            <div class="timeline-content">
-              <h3>Dossier Soumis</h3>
-              <p>Votre demande a été enregistrée le {{ app.createdAt | date:'shortDate' }}.</p>
+        <!-- Infos & Documents -->
+        <div class="info-sidebar">
+          <div class="summary-card">
+            <h3 class="card-title">Résumé de l'inscription</h3>
+            <div class="summary-list">
+              <div class="s-item">
+                <span class="s-label">Niveau scolaire</span>
+                <span class="s-value">{{ app.schooling.levelId }}</span>
+              </div>
+              <div class="s-item">
+                <span class="s-label">Année académique</span>
+                <span class="s-value">{{ app.schooling.academicYearId }}</span>
+              </div>
             </div>
           </div>
 
-          <!-- Étape 2 : Vérification Administrative -->
-          <div class="timeline-item" 
-               [class.active]="app.status === 'SUBMITTED'" 
-               [class.completed]="['VERIFIED', 'TESTING', 'WAITLIST', 'VALIDATED', 'REJECTED'].includes(app.status)">
-            <div class="timeline-dot">
-              <lucide-icon *ngIf="app.status === 'SUBMITTED'" [name]="RefreshCw" [size]="12" class="animate-spin"></lucide-icon>
-              <lucide-icon *ngIf="['VERIFIED', 'TESTING', 'WAITLIST', 'VALIDATED', 'REJECTED'].includes(app.status)" [name]="CheckCircle" [size]="14"></lucide-icon>
-            </div>
-            <div class="timeline-content">
-              <h3>Vérification Administrative</h3>
-              <p>Le secrétariat valide la conformité de vos pièces justificatives.</p>
-            </div>
-          </div>
-
-          <!-- Étape 3 : Évaluation -->
-          <div class="timeline-item" 
-               [class.active]="app.status === 'VERIFIED'" 
-               [class.warning]="app.status === 'WAITLIST'"
-               [class.completed]="['TESTING', 'VALIDATED', 'REJECTED'].includes(app.status)">
-            <div class="timeline-dot">
-              <lucide-icon *ngIf="app.status === 'VERIFIED' || app.status === 'TESTING'" [name]="RefreshCw" [size]="12" class="animate-spin"></lucide-icon>
-              <lucide-icon *ngIf="app.status === 'WAITLIST'" [name]="Clock" [size]="12"></lucide-icon>
-              <lucide-icon *ngIf="['VALIDATED', 'REJECTED'].includes(app.status)" [name]="CheckCircle" [size]="14"></lucide-icon>
-            </div>
-            <div class="timeline-content">
-              <h3>Évaluation Pédagogique</h3>
-              <p *ngIf="app.status !== 'WAITLIST'">Test de niveau et entretien avec l'équipe éducative.</p>
-              <p *ngIf="app.status === 'WAITLIST'" class="font-bold">Votre dossier est actuellement sur liste d'attente.</p>
-            </div>
-          </div>
-
-          <!-- Étape 4 : Décision -->
-          <div class="timeline-item" 
-               [class.active]="app.status === 'TESTING' || app.status === 'WAITLIST'" 
-               [class.completed]="['VALIDATED', 'REJECTED'].includes(app.status)"
-               [class.failed]="app.status === 'REJECTED'">
-            <div class="timeline-dot">
-              <lucide-icon *ngIf="app.status === 'VALIDATED'" [name]="CheckCircle" [size]="14"></lucide-icon>
-              <lucide-icon *ngIf="app.status === 'REJECTED'" [name]="Info" [size]="14"></lucide-icon>
-            </div>
-            <div class="timeline-content">
-              <h3>Décision Finale</h3>
-              <p *ngIf="app.status === 'VALIDATED'">Admission confirmée. Bienvenue dans notre établissement !</p>
-              <p *ngIf="app.status === 'REJECTED'">Le processus est terminé. Dossier non retenu.</p>
-              <p *ngIf="!['VALIDATED', 'REJECTED'].includes(app.status)">Délibération de la commission d'admission.</p>
+          <div class="contact-card">
+            <div class="card-icon"><lucide-icon [name]="MessageSquare" [size]="20"></lucide-icon></div>
+            <div class="card-body">
+              <h3>Besoin d'aide ?</h3>
+              <p>Contactez notre service admission pour toute question relative à ce dossier.</p>
+              <div class="contact-actions">
+                <app-fw-button variant="secondary" size="sm" [icon]="Phone">Appeler</app-fw-button>
+                <app-fw-button variant="secondary" size="sm" [icon]="Mail">Email</app-fw-button>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Section Documents Chargés -->
-      <div class="tracker-section card mt-8">
-        <div class="section-title">
-          <lucide-icon [name]="FileText" [size]="20"></lucide-icon>
-          <h2>Documents transmis</h2>
-        </div>
-        <div class="docs-mini-list">
-          @for (doc of app.documents; track doc.code) {
-            <div class="doc-mini-item" [class.uploaded]="doc.status === 'UPLOADED'">
-              <lucide-icon [name]="FileText" [size]="16"></lucide-icon>
-              <span class="name">{{ doc.name }}</span>
-              <span class="status">{{ doc.status === 'UPLOADED' ? 'Chargé' : 'Manquant' }}</span>
-            </div>
-          }
-        </div>
+      <div class="actions-footer">
+        <app-fw-button (click)="application.set(null)" variant="ghost" [icon]="Search">Suivre un autre dossier</app-fw-button>
+        <app-fw-button (click)="loadApplicationData(app.reference)" variant="secondary" [icon]="RefreshCw">Actualiser</app-fw-button>
       </div>
 
-      <!-- Sidebar Support -->
-      <aside class="tracker-sidebar">
-        <div class="support-card card">
-          <h3>Besoin d'aide ?</h3>
-          <p>Contactez le secrétariat pour toute question sur votre dossier.</p>
-          <div class="contact-methods">
-            <div class="contact-item">
-              <lucide-icon [name]="Phone" [size]="18"></lucide-icon>
-              <span>+221 33 800 00 00</span>
-            </div>
-            <div class="contact-item">
-              <lucide-icon [name]="Mail" [size]="18"></lucide-icon>
-              <span>admissions@ecole.com</span>
-            </div>
-          </div>
-        </div>
-      </aside>
-    </main>
-  }
+    </div>
+
+  </main>
 
   <footer class="tracker-footer">
-    <button routerLink="/enrollment" class="btn-back">
-      <lucide-icon [name]="ArrowLeft" [size]="18"></lucide-icon> Retour au Hub
-    </button>
+    <p>&copy; 2026 Feewi Education • Portail d'Admission Sécurisé</p>
   </footer>
 
 </div>

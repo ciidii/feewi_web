@@ -2,20 +2,20 @@ import {Component, signal, computed, inject, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, Clock, CheckCircle, MessageSquare, Phone, Mail, FileText, Info, ArrowLeft, RefreshCw, Search, ArrowRight } from 'lucide-angular';
-import {
-  AdmissionState
-} from '../../../school-app/features/admissions/components/admission-workflow/admission-workflow.component';
+import { LucideAngularModule, Clock, CheckCircle, MessageSquare, Phone, Mail, FileText, Info, ArrowLeft, RefreshCw, Search, ArrowRight, ShieldCheck, LayoutGrid, Check, Sparkles } from 'lucide-angular';
 import { ActivatedRoute } from '@angular/router';
 import { EnrollmentPublicService } from '../../../../core/services/enrollment-public.service';
 import { AdmissionSessionService } from '../../../../core/services/admission-session.service';
 import { Admission } from '../../../../core/models/enrollment.model';
-import { finalize, firstValueFrom } from 'rxjs';
+import { finalize } from 'rxjs';
+import { FwButtonComponent } from '../../../../shared/components/button/button.component';
+import { FwBadgeComponent } from '../../../../shared/components/badge/badge.component';
+import { FwEmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 
 @Component({
   selector: 'app-public-tracker',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule, FormsModule],
+  imports: [CommonModule, RouterModule, LucideAngularModule, FormsModule, FwButtonComponent, FwBadgeComponent],
   templateUrl: './public-tracker.component.html',
   styleUrls: ['./public-tracker.component.scss']
 })
@@ -48,13 +48,9 @@ export class PublicTrackerComponent implements OnInit {
     });
   }
 
-  /**
-   * Charger les données de suivi via l'API
-   */
   loadApplicationData(reference: string) {
     const queryAccessCode = this.route.snapshot.queryParamMap.get('accessCode');
     const session = this.sessionService.getSession();
-
     const accessCode = queryAccessCode || session?.accessCode || null;
 
     if (!accessCode) {
@@ -91,27 +87,6 @@ export class PublicTrackerComponent implements OnInit {
     });
   }
 
-  getStatusLabel(status: string): string {
-    const labels: Record<string, string> = {
-      'DRAFT': 'En cours de saisie',
-      'SUBMITTED': 'Dossier déposé',
-      'VERIFIED': 'Pièces validées',
-      'TESTING': 'Évaluation en cours',
-      'WAITLIST': 'En liste d\'attente',
-      'VALIDATED': 'Admission confirmée !',
-      'REJECTED': 'Dossier non retenu',
-      'CANCELLED': 'Demande annulée'
-    };
-    return labels[status] || status;
-  }
-
-  getStatusClass(status: string): string {
-    if (status === 'VALIDATED') return 'success';
-    if (status === 'REJECTED' || status === 'CANCELLED') return 'danger';
-    if (status === 'WAITLIST' || status === 'TESTING') return 'warning';
-    return 'info';
-  }
-
   // Icônes
   readonly Clock = Clock;
   readonly CheckCircle = CheckCircle;
@@ -124,4 +99,8 @@ export class PublicTrackerComponent implements OnInit {
   readonly RefreshCw = RefreshCw;
   readonly Search = Search;
   readonly ArrowRight = ArrowRight;
+  readonly ShieldCheck = ShieldCheck;
+  readonly LayoutGrid = LayoutGrid;
+  readonly Check = Check;
+  readonly Sparkles = Sparkles;
 }
