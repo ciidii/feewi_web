@@ -35,8 +35,41 @@
   --fw-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   --fw-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 
-  /* --- TRANSITIONS --- */
-  --fw-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  /* --- SURFACES SÉMANTIQUES --- */
+  --fw-surface-page: var(--fw-ice);
+  --fw-surface-card: var(--fw-white);
+  --fw-surface-sunken: #f1f5f9;
+  --fw-surface-inverse: var(--fw-midnight);
+
+  /* --- TEXTES SÉMANTIQUES --- */
+  --fw-text-primary: var(--fw-midnight);
+  --fw-text-secondary: #475569;
+  --fw-text-tertiary: #94a3b8;
+  --fw-text-placeholder: #94a3b8;
+  --fw-text-inverse: #ffffff;
+  --fw-text-link: var(--fw-primary);
+
+  /* --- STATUTS MÉTIER --- */
+  --fw-success: #10b981;
+  --fw-success-bg: #f0fdf4;
+  --fw-success-border: #a7f3d0;
+  --fw-warning: #f59e0b;
+  --fw-warning-bg: #fffbeb;
+  --fw-warning-border: #fde68a;
+  --fw-error: #ef4444;
+  --fw-error-bg: #fef2f2;
+  --fw-error-border: #fecaca;
+  --fw-info: #3b82f6;
+  --fw-info-bg: #eff6ff;
+  --fw-info-border: #bfdbfe;
+  --fw-neutral: #64748b;
+  --fw-neutral-bg: #f8fafc;
+  --fw-neutral-border: #e2e8f0;
+
+  /* --- MOUVEMENTS --- */
+  --fw-transition-fast: 150ms ease;
+  --fw-transition: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --fw-transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* --- MAPPAGE SCSS (Optionnel pour confort) --- */

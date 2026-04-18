@@ -112,6 +112,82 @@ html { height: 100%; }
   }
 }
 
+/* --- DESIGN SYSTEM UTILITIES --- */
+
+.fw-input {
+  width: 100%;
+  height: 44px;
+  background: var(--fw-surface-sunken);
+  border: 1.5px solid var(--fw-border);
+  border-radius: var(--fw-radius-sm);
+  padding: 0 12px;
+  font-family: var(--fw-font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--fw-text-primary);
+  outline: none;
+  transition: var(--fw-transition-fast);
+
+  &::placeholder {
+    color: var(--fw-text-placeholder);
+  }
+
+  &:focus {
+    border-color: var(--fw-primary);
+    background: var(--fw-white);
+    box-shadow: 0 0 0 4px var(--fw-primary-alpha);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: var(--fw-neutral-bg);
+  }
+
+  &.error {
+    border-color: var(--fw-error);
+    background: var(--fw-error-bg);
+  }
+}
+
+.fw-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+
+  .fw-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--fw-text-secondary);
+    letter-spacing: 0.05em;
+    margin-left: 2px;
+
+    .required {
+      color: var(--fw-error);
+      margin-left: 2px;
+    }
+  }
+
+  .fw-hint {
+    font-size: 0.6875rem;
+    color: var(--fw-text-tertiary);
+    margin-top: 4px;
+  }
+
+  .fw-error {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--fw-error);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+  }
+}
+
 // Personnalisation des toasts
 .toast-container {
   .ngx-toastr {
