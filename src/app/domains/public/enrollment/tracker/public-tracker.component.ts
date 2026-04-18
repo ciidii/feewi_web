@@ -177,6 +177,11 @@ export class PublicTrackerComponent implements OnInit {
     else if (this.admission()) this.loadSingle(this.admission()!.reference, this.searchData.accessCode);
   }
 
+  hasMissingMandatoryDocs(documents: any[] | undefined): boolean {
+    if (!documents) return false;
+    return documents.some(d => d.mandatory && (d.status === 'MISSING' || d.status === 'REJECTED'));
+  }
+
   docStatusLabel(status: string): string {
     const labels: Record<string, string> = {
       MISSING: 'Manquant', UPLOADED: 'Déposé',

@@ -122,7 +122,7 @@
           </div>
           <div class="child-right">
             <app-fw-badge [status]="a.status" size="sm"></app-fw-badge>
-            <span class="missing-alert" *ngIf="a.documents?.some(d => d.mandatory && d.status === 'MISSING')">
+            <span class="missing-alert" *ngIf="hasMissingMandatoryDocs(a.documents)">
               <lucide-icon [name]="AlertTriangle" [size]="13"></lucide-icon> Docs manquants
             </span>
           </div>
@@ -191,7 +191,7 @@
   </div>
 
   <!-- Alerte docs manquants -->
-  <div class="missing-docs-alert" *ngIf="app.documents?.some(d => d.mandatory && d.status === 'MISSING')">
+  <div class="missing-docs-alert" *ngIf="hasMissingMandatoryDocs(app.documents)">
     <lucide-icon [name]="AlertTriangle" [size]="16"></lucide-icon>
     <span>Des pièces obligatoires sont manquantes. Merci de les déposer dès que possible.</span>
   </div>
