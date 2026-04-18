@@ -1,42 +1,55 @@
 /**
  * SOURCE DE VÉRITÉ UNIQUE POUR LES ENDPOINTS API
  * Centralise tous les chemins pour faciliter la maintenance et le versioning.
+ * Mis à jour pour API v8 selon ENROLLEMENT_API_ENDPOINTS.md
  */
 export const API_ENDPOINTS = {
   ENROLLMENT: {
     PUBLIC: {
+      // Config
       SUMMARY: '/public/config/summary',
-      EFFECTIVE_CONFIG: (levelId?: string) => 
-        levelId ? `/public/config/${levelId}` : '/public/config/default',
-      CREATE: '/public/applications',
-      RE_ENROLL: '/public/applications/re-enroll',
-      CANDIDATE: (id: string) => `/public/applications/${id}/candidate`,
-      GUARDIANS: (id: string) => `/public/applications/${id}/guardians`,
-      CUSTOM_FIELDS: (id: string) => `/public/applications/${id}/custom-fields`,
-      SUBSCRIPTIONS: (id: string) => `/public/applications/${id}/subscriptions`,
-      DOCUMENTS: (id: string, docCode: string) => `/public/applications/${id}/documents/${docCode}`,
-      SUBMIT: (id: string) => `/public/applications/${id}/submit`,
-      CANCEL: (id: string) => `/public/applications/${id}/cancel`,
-      TRACK: (ref: string) => `/public/applications/${ref}/track`,
+      DEFAULT_CONFIG: '/public/config/default',
+      EFFECTIVE_CONFIG: (levelId: string) => `/public/config/${levelId}`,
+      
+      // Admissons / Bundles
+      CREATE_BUNDLE: '/public/admissions/bundles',
+      GET_BUNDLE: (id: string) => `/public/admissions/bundles/${id}`,
+      ADD_CHILD: (bundleId: string) => `/public/admissions/bundles/${bundleId}/children`,
+      UPDATE_PILLAR: (id: string, pillarKey: string) => `/public/admissions/${id}/pillars/${pillarKey}`,
+      UPDATE_BUNDLE_PILLAR: (bundleId: string, pillarKey: string) => `/public/admissions/bundles/${bundleId}/pillars/${pillarKey}`,
+      RE_ENROLL: '/public/admissions/re-enroll',
+      SUBSCRIPTIONS: (id: string) => `/public/admissions/${id}/subscriptions`,
+      DOCUMENTS: (id: string, docCode: string) => `/public/admissions/${id}/documents/${docCode}`,
+      MINE: '/public/admissions/mine',
+      TRACK: (ref: string) => `/public/admissions/${ref}/track`,
+      SUBMIT_ADMISSION: (id: string) => `/public/admissions/${id}/submit`,
+      SUBMIT_BUNDLE: (bundleId: string) => `/public/admissions/bundles/${bundleId}/submit`,
+      CANCEL: (id: string) => `/public/admissions/${id}/cancel`,
     },
     ADMIN: {
-      APPLICATIONS: '/admin/applications',
-      APPLICATIONS_SEARCH: '/admin/applications/search',
-      APPLICATION_DETAILS: (id: string) => `/admin/applications/${id}/details`,
+      // Configuration
       CONFIG: '/admin/config',
       PORTAL_STATUS: '/admin/config/portal-status',
+      YEAR_OVERRIDE: (yearId: string) => `/admin/config/year-overrides/${yearId}`,
+      CYCLE_OVERRIDE: (cycleType: string) => `/admin/config/cycle-overrides/${cycleType}`,
       LEVEL_OVERRIDE: (levelId: string) => `/admin/config/level-overrides/${levelId}`,
-      RECEIVE_DOCUMENT: (appId: string, docCode: string) => 
-        `/admin/applications/${appId}/documents/${docCode}/receive`,
-      LINK_DOCUMENT: (appId: string, docCode: string) => 
-        `/admin/applications/${appId}/documents/${docCode}`,
-      VERIFY_APPLICATION: (appId: string) => `/admin/applications/${appId}/verify`,
-      SUBMIT_ASSESSMENT: (appId: string) => `/admin/applications/${appId}/assessment`,
-      UPDATE_TRACKER_MSG: (appId: string) => `/admin/applications/${appId}/tracker-message`,
+      CONFIG_RESET: '/admin/config/reset',
       
-      // API DIRECTION
-      VALIDATE_ADMISSION: (appId: string) => `/admin/direction/applications/${appId}/validate`,
-      REJECT_ADMISSION: (appId: string) => `/admin/direction/applications/${appId}/reject`,
+      // Admissions
+      ADMISSIONS: '/admin/admissions',
+      ADMISSION_DETAILS: (id: string) => `/admin/admissions/${id}/details`,
+      DIRECT_ENTRY: '/admin/admissions/direct',
+      ASSESSMENT: (id: string) => `/admin/admissions/${id}/assessment`,
+      RECEIVE_DOCUMENT: (id: string, docCode: string) => `/admin/admissions/${id}/documents/${docCode}/receive`,
+      VERIFY: (id: string) => `/admin/admissions/${id}/verify`,
+      CANCEL: (id: string) => `/admin/admissions/${id}/cancel`,
+      
+      // Direction
+      VALIDATE: (id: string) => `/admin/direction/admissions/${id}/validate`,
+      OVERRULE: (id: string) => `/admin/direction/admissions/${id}/overrule`,
+      REJECT: (id: string) => `/admin/direction/admissions/${id}/reject`,
+      WAITLIST: (id: string) => `/admin/direction/admissions/${id}/waitlist`,
+      BULK_VALIDATE: '/admin/direction/admissions/bulk-validate',
     }
   },
   

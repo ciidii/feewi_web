@@ -7,7 +7,7 @@ export const environment: Environment = {
   appName: 'Feewi',
   logLevel: 'debug',
   services: {
-    enrollment: '/api/v1',
+    enrollment: '/enrollment/api/v1',
     identity: '/api/v1',
     academic: '/api/v1/academic',
     school: '/api/v1/schools',

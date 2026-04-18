@@ -1,9 +1,10 @@
-import {HttpClient, HttpHeaders, HttpParams} from "@angular/common/http";
-import {inject, Injectable} from "@angular/core";
-import {EnvironmentService} from "./environment.service";
-import {NotificationService} from "../../shared/services/notification.service";
-import {TenantContextService} from "./tenant-context.service";
-import {catchError, Observable, throwError} from "rxjs";
+import { HttpClient, HttpHeaders, HttpParams } from "@angular/common/http";
+import { inject, Injectable } from "@angular/core";
+import { EnvironmentService } from "./environment.service";
+import { NotificationService } from "../../shared/services/notification.service";
+import { TenantContextService } from "./tenant-context.service";
+import { catchError, Observable, throwError } from "rxjs";
+import { API_ENDPOINTS } from "../constants/api-endpoints";
 import {
   Admission,
   AdmissionPageResponse,
@@ -26,7 +27,14 @@ export class EnrollmentAdminService {
   private envService = inject(EnvironmentService);
   private notificationService = inject(NotificationService);
   private tenantContext = inject(TenantContextService);
-  private readonly baseUrl = `${this.envService.getServiceUrl('enrollment')}/admin`;
+
+  private get base(): string {
+    return this.envService.getServiceUrl('enrollment');
+  }
+
+  private getUrl(path: string): string {
+    return `${this.base}${path}`;
+  }
 
   private getHeaders(): HttpHeaders {
     const tenantId = this.tenantContext.activeTenant()?.id || 'default';
@@ -44,9 +52,7 @@ export class EnrollmentAdminService {
 
   // --- GESTION DES DOSSIERS ---
 
-  /**
-   * Liste & Recherche Avancée (Paginée) - Vision V3
-   */
+  /** Liste & Recherche Paginée */
   getApplications(params: {
     q?: string,
     status?: AdmissionStatus,
@@ -65,7 +71,7 @@ export class EnrollmentAdminService {
     if (params.page !== undefined) httpParams = httpParams.set('page', params.page.toString());
     if (params.size !== undefined) httpParams = httpParams.set('size', params.size.toString());
 
-    return this.http.get<AdmissionPageResponse>(`${this.baseUrl}/admissions`, {
+    return this.http.get<AdmissionPageResponse>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.ADMISSIONS), {
       params: httpParams,
       headers: this.getHeaders()
     }).pipe(
@@ -73,173 +79,164 @@ export class EnrollmentAdminService {
     );
   }
 
-  /** Détail complet d'une admission (incluant tous les piliers) */
+  /** Détail complet d'une admission */
   getApplicationById(id: string): Observable<Admission> {
-    return this.http.get<Admission>(`${this.baseUrl}/admissions/${id}/details`, {headers: this.getHeaders()}).pipe(
+    return this.http.get<Admission>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.ADMISSION_DETAILS(id)), { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Impossible de récupérer le dossier'))
     );
   }
 
-  /**
-   * Saisie directe au guichet (Secretariat V3)
-   */
+  /** Saisie directe au guichet (Secretariat) */
   createDirectApplication(request: DirectEntryRequest): Observable<Admission> {
-    return this.http.post<Admission>(`${this.baseUrl}/admissions/direct`, request, {headers: this.getHeaders()}).pipe(
+    return this.http.post<Admission>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.DIRECT_ENTRY), request, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors de la création du dossier direct'))
+    );
+  }
+
+  /** Annuler une admission (Admin) */
+  cancelAdmission(admissionId: string): Observable<void> {
+    return this.http.post<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.CANCEL(admissionId)), null, { headers: this.getHeaders() }).pipe(
+      catchError(this.handleError('Erreur lors de l\'annulation'))
     );
   }
 
   // --- CONFIGURATION CMS DU PORTAIL ---
 
-  /**
-   * Récupérer la structure complète du formulaire (Piliers & Champs)
-   */
   getConfig(): Observable<EnrollmentConfig> {
-    return this.http.get<EnrollmentConfig>(`${this.baseUrl}/config`, {headers: this.getHeaders()}).pipe(
+    return this.http.get<EnrollmentConfig>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.CONFIG), { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Impossible de charger la configuration du portail'))
     );
   }
 
-  /**
-   * Mettre à jour l'intégralité du CMS
-   */
   updateConfig(config: EnrollmentConfig): Observable<EnrollmentConfig> {
-    return this.http.put<EnrollmentConfig>(`${this.baseUrl}/config`, config, {headers: this.getHeaders()}).pipe(
+    return this.http.put<EnrollmentConfig>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.CONFIG), config, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors de la mise à jour de la configuration'))
     );
   }
 
-  /**
-   * Réinitialiser la configuration aux standards système Feewi
-   */
   resetConfig(): Observable<void> {
-    return this.http.post<void>(`${this.baseUrl}/config/reset`, {}, {headers: this.getHeaders()}).pipe(
+    return this.http.post<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.CONFIG_RESET), {}, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors de la réinitialisation de la configuration'))
     );
   }
 
-  /** Gérer le Master Switch du portail parent */
   updatePortalStatus(active: boolean): Observable<void> {
     const params = new HttpParams().set('active', active.toString());
-    return this.http.patch<void>(`${this.baseUrl}/config/portal-status`, {}, {params, headers: this.getHeaders()}).pipe(
+    return this.http.patch<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.PORTAL_STATUS), {}, { params, headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors du changement de statut du portail'))
     );
   }
 
   updateLevelOverride(levelId: string, override: LevelOverrideConfig): Observable<void> {
-    return this.http.put<void>(`${this.baseUrl}/config/level-overrides/${levelId}`, override, {headers: this.getHeaders()}).pipe(
+    return this.http.patch<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.LEVEL_OVERRIDE(levelId)), override, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors de la personnalisation du niveau'))
     );
   }
 
   deleteLevelOverride(levelId: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/config/level-overrides/${levelId}`, {headers: this.getHeaders()}).pipe(
+    return this.http.delete<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.LEVEL_OVERRIDE(levelId)), { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors de la suppression de l\'override de niveau'))
     );
   }
 
+  getEffectiveConfig(levelId: string): Observable<LevelConfigResponse> {
+    return this.http.get<LevelConfigResponse>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.EFFECTIVE_CONFIG(levelId)), { headers: this.getHeaders() }).pipe(
+      catchError(this.handleError('Impossible de charger la configuration effective du niveau'))
+    );
+  }
+
   updateYearOverride(yearId: string, override: YearOverrideConfig): Observable<void> {
-    return this.http.put<void>(`${this.baseUrl}/config/year-overrides/${yearId}`, override, {headers: this.getHeaders()}).pipe(
+    return this.http.put<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.YEAR_OVERRIDE(yearId)), override, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors de la configuration de l\'année'))
     );
   }
 
   deleteYearOverride(yearId: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/config/year-overrides/${yearId}`, {headers: this.getHeaders()}).pipe(
+    return this.http.delete<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.YEAR_OVERRIDE(yearId)), { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors de la suppression de l\'override d\'année'))
     );
   }
 
   updateCycleOverride(cycleType: CycleType, override: CycleOverrideConfig): Observable<void> {
-    return this.http.put<void>(`${this.baseUrl}/config/cycle-overrides/${cycleType}`, override, {headers: this.getHeaders()}).pipe(
+    return this.http.put<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.CYCLE_OVERRIDE(cycleType)), override, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors de la configuration du cycle'))
     );
   }
 
   deleteCycleOverride(cycleType: CycleType): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/config/cycle-overrides/${cycleType}`, {headers: this.getHeaders()}).pipe(
+    return this.http.delete<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.CYCLE_OVERRIDE(cycleType)), { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors de la suppression de l\'override de cycle'))
     );
   }
 
-  getEffectiveConfig(levelId: string): Observable<LevelConfigResponse> {
-    const url = `${this.envService.getServiceUrl('enrollment')}/api/v1/public/config/${levelId}`;
-    return this.http.get<LevelConfigResponse>(url, {headers: this.getHeaders()}).pipe(
-      catchError(this.handleError('Impossible de charger la configuration effective du niveau'))
-    );
-  }
-
-  // --- ACTIONS OPÉRATIONNELLES (WORKFLOW) ---
+  // --- ACTIONS OPÉRATIONNELLES ---
 
   receivePhysicalDocument(admissionId: string, docCode: string): Observable<Admission> {
     return this.http.patch<Admission>(
-      `${this.baseUrl}/admissions/${admissionId}/documents/${docCode}/receive`,
+      this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.RECEIVE_DOCUMENT(admissionId, docCode)),
       {},
-      {headers: this.getHeaders()}
+      { headers: this.getHeaders() }
     ).pipe(
       catchError(this.handleError('Erreur lors de la validation du document physique'))
     );
   }
 
-  /** Lier un fichier numérisé à un dossier */
+  /** Lier un fichier numérisé à un dossier (Admin) */
   linkDocument(admissionId: string, docCode: string, fileId: string): Observable<Admission> {
     const headers = this.getHeaders().set('Content-Type', 'text/plain');
-    const url = `${this.envService.getServiceUrl('enrollment')}/public/admissions/${admissionId}/documents/${docCode}`;
-    return this.http.post<Admission>(url, fileId, {headers}).pipe(
+    return this.http.post<Admission>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.DOCUMENTS(admissionId, docCode)), fileId, { headers }).pipe(
       catchError(this.handleError('Erreur lors de la liaison du document numérisé'))
     );
   }
 
-  /** Valider la conformité administrative (Secrétariat) */
   verifyApplication(admissionId: string): Observable<Admission> {
-    return this.http.patch<Admission>(`${this.baseUrl}/admissions/${admissionId}/verify`, {}, {headers: this.getHeaders()}).pipe(
+    return this.http.patch<Admission>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.VERIFY(admissionId)), {}, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors de la vérification administrative'))
     );
   }
 
-  /** Enregistrer les résultats de l'examen de niveau */
   submitAssessment(admissionId: string, assessment: AssessmentRequest): Observable<Admission> {
     return this.http.patch<Admission>(
-      `${this.baseUrl}/admissions/${admissionId}/assessment`,
+      this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.ASSESSMENT(admissionId)),
       assessment,
-      {headers: this.getHeaders()}
+      { headers: this.getHeaders() }
     ).pipe(
       catchError(this.handleError('Erreur lors de l\'enregistrement de l\'évaluation'))
     );
   }
 
-  // --- API DIRECTION (DÉCISIONS FINALES) ---
+  // --- API DIRECTION ---
 
   validateAdmission(admissionId: string): Observable<Admission> {
-    return this.http.patch<Admission>(`${this.baseUrl}/direction/admissions/${admissionId}/validate`, {}, {headers: this.getHeaders()}).pipe(
+    return this.http.patch<Admission>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.VALIDATE(admissionId)), {}, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors de la validation finale'))
     );
   }
 
   overruleAdmission(admissionId: string): Observable<Admission> {
-    return this.http.patch<Admission>(`${this.baseUrl}/direction/admissions/${admissionId}/overrule`, {}, {headers: this.getHeaders()}).pipe(
+    return this.http.patch<Admission>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.OVERRULE(admissionId)), {}, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors de la validation avec dérogation'))
     );
   }
 
   rejectAdmission(admissionId: string, reason: string): Observable<Admission> {
     return this.http.patch<Admission>(
-      `${this.baseUrl}/direction/admissions/${admissionId}/reject`,
+      this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.REJECT(admissionId)),
       JSON.stringify(reason),
-      {headers: this.getHeaders().set('Content-Type', 'application/json')}
+      { headers: this.getHeaders().set('Content-Type', 'application/json') }
     ).pipe(
       catchError(this.handleError('Erreur lors du rejet du dossier'))
     );
   }
 
   waitlistAdmission(admissionId: string): Observable<void> {
-    return this.http.patch<void>(`${this.baseUrl}/direction/admissions/${admissionId}/waitlist`, {}, {headers: this.getHeaders()}).pipe(
+    return this.http.patch<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.WAITLIST(admissionId)), {}, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors du passage en liste d\'attente'))
     );
   }
 
   bulkValidate(admissionIds: string[]): Observable<Admission[]> {
-    return this.http.post<Admission[]>(`${this.baseUrl}/direction/admissions/bulk-validate`, admissionIds, {headers: this.getHeaders()}).pipe(
+    return this.http.post<Admission[]>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.BULK_VALIDATE), admissionIds, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors de la validation en masse'))
     );
   }

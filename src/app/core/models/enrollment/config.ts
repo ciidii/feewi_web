@@ -37,6 +37,7 @@ export interface MedicalSchemaConfig {
 
 export interface SchoolingSchemaConfig {
   enabled: boolean;
+  coreFieldControls: Record<string, CoreFieldControl>;
   customFields: FieldConfig[];
 }
 
