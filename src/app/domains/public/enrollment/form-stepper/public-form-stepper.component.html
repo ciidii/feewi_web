@@ -1,113 +1,96 @@
-<div *ngIf="config() && !portalClosed(); else loader" class="onboarding-layout animate-fade">
+<div *ngIf="config() && !portalClosed(); else loader" class="stepper-layout animate-fade">
 
-  <!-- ═══ SIDEBAR ═══════════════════════════════════════════════════════════ -->
-  <aside class="onboarding-sidebar">
-
-    <!-- École Header -->
-    <div class="sidebar-header">
-      <div class="school-logo">
-        <img *ngIf="tenantCtx.activeTenant()?.logoUrl" [src]="tenantCtx.activeTenant()?.logoUrl">
-        <lucide-icon *ngIf="!tenantCtx.activeTenant()?.logoUrl" [name]="GraduationCap" [size]="20"></lucide-icon>
-      </div>
-      <div class="school-meta">
-        <span class="school-name">{{ tenantCtx.activeTenant()?.name || 'Établissement' }}</span>
-        <span *ngIf="selectedYearLabel()" class="year-pill">{{ selectedYearLabel() }}</span>
-      </div>
-    </div>
-
-    <!-- ── Nav : phase GUARDIAN / HUB / REVIEW ───────────────────────────── -->
-    <nav *ngIf="!isChildFlow()" class="onboarding-nav">
-
-      <div class="nav-step" [class.active]="globalPhase() === 'GUARDIAN'" [class.completed]="globalPhase() !== 'GUARDIAN'">
-        <div class="step-indicator">
-          <lucide-icon *ngIf="globalPhase() === 'GUARDIAN'" [name]="Users" [size]="14"></lucide-icon>
-          <lucide-icon *ngIf="globalPhase() !== 'GUARDIAN'" [name]="CheckCircle" [size]="14"></lucide-icon>
+  <!-- 🏛️ HEADER INSTITUTIONNEL (Top Bar) -->
+  <header class="stepper-header">
+    
+    <!-- Niveau 1 : Marque & Session -->
+    <div class="header-top">
+      <div class="container">
+        <div class="brand">
+          <div class="school-logo">
+            <img *ngIf="tenantCtx.activeTenant()?.logoUrl" [src]="tenantCtx.activeTenant()?.logoUrl">
+            <lucide-icon *ngIf="!tenantCtx.activeTenant()?.logoUrl" [name]="GraduationCap" [size]="18"></lucide-icon>
+          </div>
+          <div class="school-info">
+            <span class="name">{{ tenantCtx.activeTenant()?.name || 'Établissement' }}</span>
+            <span class="year" *ngIf="selectedYearLabel()">{{ selectedYearLabel() }}</span>
+          </div>
         </div>
-        <div class="step-content">
-          <span class="step-title">Famille</span>
-          <span class="step-desc">Tuteurs & Contact</span>
-        </div>
-      </div>
 
-      <div class="nav-step" [class.active]="globalPhase() === 'HUB'" [class.completed]="globalPhase() === 'REVIEW'">
-        <div class="step-indicator">
-          <lucide-icon *ngIf="globalPhase() === 'REVIEW'" [name]="CheckCircle" [size]="14"></lucide-icon>
-          <span *ngIf="globalPhase() !== 'REVIEW'">02</span>
-        </div>
-        <div class="step-content">
-          <span class="step-title">Enfants</span>
-          <span class="step-desc">{{ admissions().length }} élève(s) ajouté(s)</span>
-          
-          <!-- Mini liste enfants -->
-          <div *ngIf="admissions().length > 0" class="mini-children">
-            <div *ngFor="let adm of admissions()" class="mini-child">
-              {{ adm.identity.firstName }}
-            </div>
+        <div class="session-info" *ngIf="bundleRef()">
+          <div class="access-badge">
+            <lucide-icon [name]="Lock" [size]="12"></lucide-icon>
+            <span class="ref">{{ bundleRef() }}</span>
+            <span class="separator"></span>
+            <span class="code">{{ accessCode() }}</span>
           </div>
         </div>
       </div>
-
-      <div class="nav-step" [class.active]="globalPhase() === 'REVIEW'">
-        <div class="step-indicator">
-          <span>03</span>
-        </div>
-        <div class="step-content">
-          <span class="step-title">Validation</span>
-          <span class="step-desc">Récapitulatif final</span>
-        </div>
-      </div>
-
-    </nav>
-
-    <!-- ── Nav : phase ENFANT (sub-steps) ───────────────────────────────── -->
-    <nav *ngIf="isChildFlow()" class="onboarding-nav child-flow">
-      <div class="child-context">
-        <div class="avatar">{{ activeAdmission()?.identity?.firstName?.charAt(0) || 'E' }}</div>
-        <div class="name">
-          <span class="label">Édition de l'élève</span>
-          <span class="value">{{ activeAdmission()?.identity?.firstName || 'Nouvel élève' }}</span>
-        </div>
-      </div>
-
-      <div *ngFor="let s of childSteps()" class="nav-step"
-           [class.active]="childPhase() === s"
-           [class.completed]="isChildStepDone(s)">
-        <div class="step-indicator">
-          <lucide-icon *ngIf="isChildStepDone(s)" [name]="CheckCircle" [size]="14"></lucide-icon>
-          <lucide-icon *ngIf="!isChildStepDone(s)" [name]="childStepIcon(s)" [size]="14"></lucide-icon>
-        </div>
-        <div class="step-content">
-          <span class="step-title">{{ childStepLabel(s) }}</span>
-        </div>
-      </div>
-
-    </nav>
-
-    <!-- Session Access -->
-    <div *ngIf="bundleRef()" class="access-card">
-      <div class="card-head">
-        <lucide-icon [name]="Lock" [size]="12"></lucide-icon>
-        Reprendre plus tard
-      </div>
-      <div class="codes">
-        <div class="code-row">
-          <span class="lab">REF</span>
-          <span class="val font-mono">{{ bundleRef() }}</span>
-        </div>
-        <div class="code-row">
-          <span class="lab">CODE</span>
-          <span class="val font-mono text-primary">{{ accessCode() }}</span>
-        </div>
-      </div>
     </div>
 
-  </aside>
+    <!-- Niveau 2 : Stepper Global -->
+    <nav class="global-nav">
+      <div class="container">
+        <!-- Step 1: Famille -->
+        <div class="nav-item" [class.active]="globalPhase() === 'GUARDIAN'" [class.done]="globalPhase() !== 'GUARDIAN'">
+          <div class="indicator">
+            <lucide-icon *ngIf="globalPhase() !== 'GUARDIAN'" [name]="CheckCircle" [size]="14"></lucide-icon>
+            <span *ngIf="globalPhase() === 'GUARDIAN'">01</span>
+          </div>
+          <span class="label">Famille</span>
+        </div>
 
-  <!-- ═══ CONTENU PRINCIPAL ════════════════════════════════════════════════ -->
-  <main class="onboarding-main">
-    <div class="main-container">
+        <div class="nav-connector" [class.active]="globalPhase() !== 'GUARDIAN'"></div>
 
-      <div class="step-viewport">
+        <!-- Step 2: Enfants -->
+        <div class="nav-item" [class.active]="globalPhase() === 'HUB'" [class.done]="globalPhase() === 'REVIEW'">
+          <div class="indicator">
+            <lucide-icon *ngIf="globalPhase() === 'REVIEW'" [name]="CheckCircle" [size]="14"></lucide-icon>
+            <span *ngIf="globalPhase() !== 'REVIEW'">02</span>
+          </div>
+          <span class="label">Enfants</span>
+          <span class="count-pill" *ngIf="admissions().length > 0">{{ admissions().length }}</span>
+        </div>
+
+        <div class="nav-connector" [class.active]="globalPhase() === 'REVIEW'"></div>
+
+        <!-- Step 3: Validation -->
+        <div class="nav-item" [class.active]="globalPhase() === 'REVIEW'">
+          <div class="indicator">03</div>
+          <span class="label">Validation</span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Barre de Contexte Enfant (uniquement lors de l'édition d'un élève) -->
+    <div class="child-context-bar" *ngIf="isChildFlow()">
+      <div class="container">
+        <div class="child-info">
+          <div class="avatar">{{ activeAdmission()?.identity?.firstName?.charAt(0) || 'E' }}</div>
+          <span class="name">Dossier de {{ activeAdmission()?.identity?.firstName || 'Nouvel élève' }}</span>
+        </div>
+        
+        <div class="child-steps">
+          <div *ngFor="let s of childSteps()" class="c-step" 
+               [class.active]="childPhase() === s"
+               [class.done]="isChildStepDone(s)"
+               [title]="childStepLabel(s)">
+            <lucide-icon [name]="childStepIcon(s)" [size]="14"></lucide-icon>
+          </div>
+        </div>
+      </div>
+      <!-- Barre de progression enfant (Mobile-ready) -->
+      <div class="progress-track">
+        <div class="progress-fill" [style.width.%]="childProgress()"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 📝 CONTENU PRINCIPAL (Centré) -->
+  <main class="stepper-main">
+    <div class="form-container">
+      
+      <div class="view-viewport">
         <!-- Phase GUARDIAN -->
         <app-step-family
           *ngIf="globalPhase() === 'GUARDIAN'"
@@ -170,10 +153,15 @@
         </app-step-review>
       </div>
 
-      <!-- ── Footers Navigation ─────────────────────────────────────────── -->
+    </div>
+  </main>
 
-      <!-- GUARDIAN footer -->
-      <footer *ngIf="globalPhase() === 'GUARDIAN'" class="onboarding-footer">
+  <!-- 🔘 ACTIONS FIXES (Bottom Bar) -->
+  <footer class="stepper-footer">
+    <div class="container">
+      
+      <!-- GUARDIAN -->
+      <ng-container *ngIf="globalPhase() === 'GUARDIAN'">
         <div class="flex-1"></div>
         <app-fw-button 
           (click)="nextGlobalStep()" 
@@ -182,18 +170,18 @@
           [icon]="ArrowRight"
           iconPosition="right"
         >
-          Continuer
+          Continuer vers les enfants
         </app-fw-button>
-      </footer>
+      </ng-container>
 
-      <!-- CHILD footer -->
-      <footer *ngIf="isChildFlow()" class="onboarding-footer">
+      <!-- CHILD FLOW -->
+      <ng-container *ngIf="isChildFlow()">
         <app-fw-button 
           (click)="prevChildStep()" 
           variant="ghost"
           [icon]="ArrowLeft"
         >
-          {{ childPhase() === 'STUDENT' ? 'Retour aux enfants' : 'Précédent' }}
+          {{ childPhase() === 'STUDENT' ? 'Quitter' : 'Précédent' }}
         </app-fw-button>
         <div class="flex-1"></div>
         <app-fw-button 
@@ -203,18 +191,18 @@
           [icon]="childPhase() === 'DOCS' ? CheckCircle : ArrowRight"
           iconPosition="right"
         >
-          {{ childPhase() === 'DOCS' ? 'Valider cet élève' : 'Étape suivante' }}
+          {{ childPhase() === 'DOCS' ? 'Valider cet élève' : 'Suivant' }}
         </app-fw-button>
-      </footer>
+      </ng-container>
 
-      <!-- REVIEW footer -->
-      <footer *ngIf="globalPhase() === 'REVIEW'" class="onboarding-footer">
+      <!-- REVIEW -->
+      <ng-container *ngIf="globalPhase() === 'REVIEW'">
         <app-fw-button 
           (click)="globalPhase.set('HUB'); childPhase.set(null)" 
           variant="ghost"
           [icon]="ArrowLeft"
         >
-          Retour
+          Retour aux enfants
         </app-fw-button>
         <div class="flex-1"></div>
         <app-fw-button 
@@ -224,21 +212,21 @@
           variant="primary"
           [icon]="Sparkles"
         >
-          Soumettre le dossier familial
+          Soumettre définitivement
         </app-fw-button>
-      </footer>
+      </ng-container>
 
     </div>
-  </main>
+  </footer>
 
 </div>
 
 <!-- Loader initial -->
 <ng-template #loader>
-  <div class="onboarding-loader bg-surface-page">
-    <div class="loader-content">
+  <div class="initial-loader">
+    <div class="loader-wrap">
       <div class="spinner"></div>
-      <p class="text-sm font-bold text-midnight mt-4 tracking-tight">Préparation de votre dossier...</p>
+      <p>Chargement de votre session...</p>
     </div>
   </div>
 </ng-template>

@@ -207,6 +207,12 @@ export class EnrollmentAdminService {
 
   // --- API DIRECTION ---
 
+  admitAdmission(admissionId: string): Observable<Admission> {
+    return this.http.patch<Admission>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.ADMIT(admissionId)), {}, { headers: this.getHeaders() }).pipe(
+      catchError(this.handleError('Erreur lors de l\'admission manuelle'))
+    );
+  }
+
   validateAdmission(admissionId: string): Observable<Admission> {
     return this.http.patch<Admission>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.VALIDATE(admissionId)), {}, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors de la validation finale'))

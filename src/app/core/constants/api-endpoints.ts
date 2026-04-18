@@ -45,6 +45,7 @@ export const API_ENDPOINTS = {
       CANCEL: (id: string) => `/admin/admissions/${id}/cancel`,
       
       // Direction
+      ADMIT: (id: string) => `/admin/direction/admissions/${id}/admit`,
       VALIDATE: (id: string) => `/admin/direction/admissions/${id}/validate`,
       OVERRULE: (id: string) => `/admin/direction/admissions/${id}/overrule`,
       REJECT: (id: string) => `/admin/direction/admissions/${id}/reject`,

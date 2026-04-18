@@ -37,14 +37,12 @@ Ce document suit l'état d'avancement du projet, les décisions architecturales 
 ### Journal de bord
 - **18/04/2026** : 
     - [x] Refonte de la section Authentification (Phase 1.1) terminée.
-    - [x] Jalon 1.2.1 : Shell & Navigation du FormStepper terminée.
-    - [x] Jalon 1.2.2 : Modernisation du Step HUB terminée.
-    - [x] Jalon 1.2.3 : Modernisation de l'étape Parent (Guardian) terminée.
-    - [x] Jalon 1.2.4 : Modernisation des étapes Enfant (Student, Medical, Services) terminée.
-    - [x] Jalon 1.2.5 : Modernisation du Moteur de Documents (Vault) terminée.
-    - [x] Jalon 1.2.6 : Modernisation de la synthèse finale (Review) terminée.
-    - [x] **Jalon 1.2.7 : Modernisation de la Landing et du Tracker.**
-        - Refonte visuelle complète de l'accueil (Hero section, cartes campagnes).
-        - Modernisation du suivi de dossier avec timeline de progression.
-        - Utilisation systématique de `FwButton`, `FwBadge` et des tokens sémantiques.
-    - [x] **Domaine Public (Phase 1) : 100% terminée.**
+    - [x] **Refonte Architecturale : Passage au Stepper Horizontal Institutionnel.**
+        - Suppression de la sidebar au profit d'un header à deux niveaux.
+        - Niveau 1 : Marque & Identification de session.
+        - Niveau 2 : Stepper global (`Famille` → `Enfants` → `Validation`).
+        - Sub-bar contextuelle pour le flux d'édition enfant avec barre de progression.
+        - Optimisation Mobile-First (Sticky Header, Footer flottant, masquage intelligent des labels).
+    - [x] Modernisation du Step HUB, Guardian, Child steps, Vault et Review terminée.
+    - [x] Modernisation de la Landing et du Tracker terminée.
+    - [x] **Domaine Public (Phase 1) : 100% terminée (V2 Institutionnelle).**

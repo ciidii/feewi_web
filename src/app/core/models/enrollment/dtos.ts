@@ -85,6 +85,7 @@ export interface ReEnrollRequest {
 export interface AssessmentRequest {
   grades: Record<string, number>;
   comments: string;
+  decision?: 'ADMITTED' | 'REJECTED' | null;
   recommendedLevelId?: string | null;
 }
 

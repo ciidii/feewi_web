@@ -79,11 +79,13 @@ export class AdmissionDetailComponent implements OnInit {
   assessmentSubjects = signal<string[]>([]);
   minPassingGrade = signal<number>(10);
 
-  // --- CALCULS RÉACTIFS (Mapping Piliers V3) ---
+  // --- CALCULS RÉACTIFS ---
   levelName = computed(() => {
     const app = this.application();
     if (!app) return '...';
-    return this.levels().find(l => l.id === app.schooling.levelId)?.name || 'Niveau inconnu';
+    return app.schooling.levelLabel
+      || this.levels().find(l => l.id === app.schooling.levelId)?.name
+      || 'Niveau inconnu';
   });
 
   filiereName = computed(() => {
