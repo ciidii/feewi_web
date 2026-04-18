@@ -1,5 +1,5 @@
 <div class="landing-page bg-surface-page min-h-screen" *ngIf="summary(); let s">
-  
+
   <!-- Modern Header -->
   <header class="header-nav">
     <div class="nav-container">
@@ -17,7 +17,7 @@
   </header>
 
   <main class="main-content">
-    
+
     <!-- Hero Section -->
     <section class="hero-section animate-fade">
       <div class="hero-badge">
@@ -29,7 +29,7 @@
       </h1>
       <p class="hero-desc" *ngIf="welcomeMessage()">{{ welcomeMessage() }}</p>
       <p class="hero-desc" *ngIf="!welcomeMessage()">Bienvenue sur notre plateforme d'inscription simplifiée. Démarrez votre dossier en quelques minutes.</p>
-      
+
       <div class="hero-actions mt-10 flex justify-center gap-4">
          <app-fw-button variant="secondary" [icon]="Search" routerLink="/enrollment/tracker">
             Reprendre une inscription
@@ -53,7 +53,7 @@
               </span>
               <h3 class="year-label">Année {{ year.label }}</h3>
             </div>
-            
+
             <div class="year-period">
               <lucide-icon [name]="Calendar" [size]="14"></lucide-icon>
               <span>{{ year.registrationStartDate | date:'dd MMM' }} — {{ year.registrationEndDate | date:'dd MMM yyyy' }}</span>
@@ -70,7 +70,7 @@
             <!-- Mode ONLINE -->
             <div *ngIf="!year.isAdminOnly" class="year-actions">
               <ng-container *ngIf="year.hasBothTypes; else singleType">
-                <app-fw-button 
+                <app-fw-button
                   variant="primary"
                   class="w-full"
                   [routerLink]="['/enrollment/form-stepper']"
@@ -78,7 +78,7 @@
                 >
                   Nouvelle Inscription
                 </app-fw-button>
-                <app-fw-button 
+                <app-fw-button
                   variant="secondary"
                   class="w-full"
                   [routerLink]="['/enrollment/form-stepper']"
@@ -88,7 +88,7 @@
                 </app-fw-button>
               </ng-container>
               <ng-template #singleType>
-                <app-fw-button 
+                <app-fw-button
                   variant="primary"
                   class="w-full"
                   [routerLink]="['/enrollment/form-stepper']"

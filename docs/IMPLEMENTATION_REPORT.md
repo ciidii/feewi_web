@@ -48,4 +48,5 @@ Ce document suit l'état d'avancement du projet, les décisions architecturales 
     - [x] **Domaine Public (Phase 1) : 100% terminée (V2 Institutionnelle).**
         - Refonte complète du tunnel d'inscription (Horizontal Stepper).
         - Système de reprise de session (Session Recovery) via Reference/Code.
+        - **Unification du Header Public** (Composant shared `FwPublicHeader`).
         - Optimisation Mobile-First & Accessibilité.

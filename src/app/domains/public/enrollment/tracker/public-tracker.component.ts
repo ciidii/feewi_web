@@ -11,15 +11,17 @@ import { finalize } from 'rxjs';
 import { FwButtonComponent } from '../../../../shared/components/button/button.component';
 import { FwBadgeComponent } from '../../../../shared/components/badge/badge.component';
 import { FwEmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { FwPublicHeaderComponent } from '../../../../shared/layout/public-header/public-header.component';
 
 @Component({
   selector: 'app-public-tracker',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule, FormsModule, FwButtonComponent, FwBadgeComponent],
+  imports: [CommonModule, RouterModule, LucideAngularModule, FormsModule, FwButtonComponent, FwBadgeComponent, FwEmptyStateComponent, FwPublicHeaderComponent],
   templateUrl: './public-tracker.component.html',
   styleUrls: ['./public-tracker.component.scss']
 })
 export class PublicTrackerComponent implements OnInit {
+
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private enrollmentService = inject(EnrollmentPublicService);

@@ -18,11 +18,12 @@ import { EnrollmentPublicService } from '../../../../core/services/enrollment-pu
 import { finalize } from 'rxjs';
 import { PublicPortalSummary } from '../../../../core/models/enrollment';
 import { FwButtonComponent } from '../../../../shared/components/button/button.component';
+import { FwPublicHeaderComponent } from '../../../../shared/layout/public-header/public-header.component';
 
 @Component({
   selector: 'app-public-landing',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule, FwButtonComponent],
+  imports: [CommonModule, RouterModule, LucideAngularModule, FwButtonComponent, FwPublicHeaderComponent],
   templateUrl: './public-landing.component.html',
   styleUrls: ['./public-landing.component.scss']
 })
