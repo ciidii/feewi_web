@@ -4,65 +4,50 @@ export interface AdmissionSession {
   bundleId: string;
   accessCode: string;
   parentName?: string;
-  currentStep?: string;
+  currentGlobalPhase?: string;
+  currentChildPhase?: string;
+  currentAdmissionId?: string;
   lastUpdated: number;
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class AdmissionSessionService {
   private readonly STORAGE_KEY = 'feewi_admission_session';
 
-  private _currentSession = signal<AdmissionSession | null>(null);
-  readonly currentSession = this._currentSession.asReadonly();
-  readonly hasActiveSession = computed(() => this._currentSession() !== null);
+  private _session = signal<AdmissionSession | null>(null);
+  readonly currentSession = this._session.asReadonly();
+  readonly hasActiveSession = computed(() => this._session() !== null);
 
-  constructor() {
-    this.loadSessionFromStorage();
+  constructor() { this.load(); }
+
+  saveSession(bundleId: string, accessCode: string, parentName?: string): void {
+    this.persist({ bundleId, accessCode, parentName, lastUpdated: Date.now() });
   }
 
-  saveSession(bundleId: string, accessCode: string, parentName?: string, currentStep?: string): void {
-    const session: AdmissionSession = {
-      bundleId,
-      accessCode,
-      parentName,
-      currentStep,
-      lastUpdated: Date.now()
-    };
-
-    try {
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(session));
-      this._currentSession.set(session);
-    } catch (e) {
-      console.error('Session write error:', e);
-    }
+  updatePhase(globalPhase: string, childPhase?: string, admissionId?: string): void {
+    const s = this._session();
+    if (!s) return;
+    this.persist({ ...s, currentGlobalPhase: globalPhase, currentChildPhase: childPhase, currentAdmissionId: admissionId, lastUpdated: Date.now() });
   }
 
-  updateStep(step: string): void {
-    const session = this._currentSession();
-    if (session) {
-      this.saveSession(session.bundleId, session.accessCode, session.parentName, step);
-    }
-  }
-
-  getSession(): AdmissionSession | null {
-    return this._currentSession();
-  }
+  getSession(): AdmissionSession | null { return this._session(); }
 
   clearSession(): void {
     localStorage.removeItem(this.STORAGE_KEY);
-    this._currentSession.set(null);
+    this._session.set(null);
   }
 
-  private loadSessionFromStorage(): void {
+  private persist(session: AdmissionSession): void {
+    try {
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(session));
+      this._session.set(session);
+    } catch (e) { console.error('Session write error:', e); }
+  }
+
+  private load(): void {
     try {
       const stored = localStorage.getItem(this.STORAGE_KEY);
-      if (stored) {
-        this._currentSession.set(JSON.parse(stored) as AdmissionSession);
-      }
-    } catch {
-      this.clearSession();
-    }
+      if (stored) this._session.set(JSON.parse(stored) as AdmissionSession);
+    } catch { this.clearSession(); }
   }
 }

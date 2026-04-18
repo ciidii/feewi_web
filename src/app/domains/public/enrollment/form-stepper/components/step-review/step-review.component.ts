@@ -1,8 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CheckCircle, FileText, HeartPulse, LayoutGrid, LucideAngularModule, User, Users } from 'lucide-angular';
-import { Admission } from '../../../../../../core/models/enrollment';
+import { CheckCircle, FileText, LayoutGrid, LucideAngularModule, User, Users } from 'lucide-angular';
+import { Admission } from '../../../../../../core/models/enrollment/entities';
 
 @Component({
   selector: 'app-step-review',
@@ -12,7 +12,7 @@ import { Admission } from '../../../../../../core/models/enrollment';
     <div>
       <div class="mb-10">
         <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Validation finale</h1>
-        <p class="text-slate-500 mt-2">Vérifiez les informations avant l'envoi au secrétariat.</p>
+        <p class="text-slate-500 mt-2">Vérifiez l'ensemble du dossier avant l'envoi au secrétariat.</p>
       </div>
 
       <div class="flex flex-col gap-4">
@@ -38,68 +38,54 @@ import { Admission } from '../../../../../../core/models/enrollment';
           </div>
         </div>
 
-        <!-- Élève -->
-        <div class="p-5 rounded-2xl border border-slate-100 bg-white">
+        <!-- Un bloc par enfant -->
+        <div *ngFor="let adm of admissions; let i = index"
+             class="p-5 rounded-2xl border border-slate-100 bg-white">
           <div class="flex items-center gap-2.5 mb-4">
             <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
               <lucide-icon [name]="User" [size]="15"></lucide-icon>
             </div>
-            <h3 class="font-bold text-slate-800 text-sm">Candidat</h3>
+            <h3 class="font-bold text-slate-800 text-sm">
+              Enfant {{ i + 1 }} — {{ adm.identity.firstName }} {{ adm.identity.lastName }}
+            </h3>
           </div>
-          <div class="grid grid-cols-2 gap-3 text-sm">
-            <div>
-              <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">Élève</p>
-              <p class="font-semibold text-slate-700">{{ identity.firstName }} {{ identity.lastName }}</p>
-            </div>
+
+          <div class="grid grid-cols-2 gap-4 text-sm">
+            <!-- Niveau -->
             <div>
               <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">Niveau visé</p>
               <span class="inline-block px-2.5 py-1 bg-indigo-50 text-indigo-700 font-bold text-xs rounded-lg">
-                {{ levelName || schooling.levelId }}
+                {{ levelName(adm) }}
               </span>
             </div>
-          </div>
-        </div>
 
-        <!-- Services souscrits -->
-        <div *ngIf="pendingServices?.length" class="p-5 rounded-2xl border border-slate-100 bg-white">
-          <div class="flex items-center gap-2.5 mb-4">
-            <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
-              <lucide-icon [name]="LayoutGrid" [size]="15"></lucide-icon>
+            <!-- Documents -->
+            <div>
+              <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">Documents</p>
+              <div class="flex flex-col gap-1">
+                <div *ngFor="let doc of adm.documents" class="flex justify-between text-xs">
+                  <span class="text-slate-600">{{ doc.name }}</span>
+                  <span class="font-bold"
+                        [class.text-emerald-600]="isDocOk(doc.status)"
+                        [class.text-red-500]="!isDocOk(doc.status)">
+                    {{ isDocOk(doc.status) ? '✓' : '—' }}
+                  </span>
+                </div>
+                <p *ngIf="!adm.documents?.length" class="text-xs text-slate-400">Aucun document requis</p>
+              </div>
             </div>
-            <h3 class="font-bold text-slate-800 text-sm">Services souscrits</h3>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <div *ngFor="let sub of pendingServices"
-                 class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl">
-              <span class="text-xs font-bold text-slate-700">{{ sub.serviceCode }}</span>
-              <span *ngIf="sub.optionCode" class="text-xs text-slate-400">· {{ sub.optionCode }}</span>
-            </div>
-          </div>
-        </div>
 
-        <!-- Documents -->
-        <div class="p-5 rounded-2xl border border-slate-100 bg-white">
-          <div class="flex items-center gap-2.5 mb-4">
-            <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <lucide-icon [name]="FileText" [size]="15"></lucide-icon>
-            </div>
-            <h3 class="font-bold text-slate-800 text-sm">Documents</h3>
-          </div>
-          <div *ngIf="admission?.documents?.length; else noDocs" class="flex flex-col gap-2">
-            <div *ngFor="let doc of admission?.documents"
-                 class="flex items-center justify-between text-xs">
-              <span class="text-slate-600 font-medium">{{ doc.name }}</span>
-              <span class="font-bold"
-                    [class.text-emerald-600]="doc.status === 'UPLOADED' || doc.status === 'RECEIVED' || doc.status === 'VERIFIED'"
-                    [class.text-red-500]="doc.status === 'MISSING'"
-                    [class.text-red-400]="doc.status === 'REJECTED'">
-                {{ docStatusText(doc.status) }}
-              </span>
+            <!-- Services -->
+            <div *ngIf="adm.subscriptions?.length" class="col-span-2">
+              <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">Services</p>
+              <div class="flex flex-wrap gap-2">
+                <span *ngFor="let sub of adm.subscriptions"
+                      class="px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700">
+                  {{ sub.serviceCode }}<span *ngIf="sub.optionCode"> · {{ sub.optionCode }}</span>
+                </span>
+              </div>
             </div>
           </div>
-          <ng-template #noDocs>
-            <p class="text-xs text-slate-400 font-medium">Aucun document requis.</p>
-          </ng-template>
         </div>
 
       </div>
@@ -108,10 +94,9 @@ import { Admission } from '../../../../../../core/models/enrollment';
       <div class="mt-8 p-6 bg-slate-900 rounded-3xl">
         <p *ngIf="legalText" class="text-sm text-white/70 leading-relaxed mb-5">{{ legalText }}</p>
         <p *ngIf="!legalText" class="text-sm text-white/70 leading-relaxed mb-5">
-          Je certifie sur l'honneur l'exactitude des informations fournies dans ce dossier d'inscription.
+          Je certifie sur l'honneur l'exactitude des informations fournies.
           Toute fausse déclaration pourra entraîner l'annulation de la candidature.
         </p>
-
         <label class="flex items-center gap-3 cursor-pointer">
           <div class="relative w-5 h-5 shrink-0">
             <input type="checkbox" [(ngModel)]="consent.checked"
@@ -122,9 +107,7 @@ import { Admission } from '../../../../../../core/models/enrollment';
               <lucide-icon *ngIf="consent.checked" [name]="CheckCircle" [size]="13" class="text-white"></lucide-icon>
             </div>
           </div>
-          <span class="text-sm font-bold text-white">
-            J'accepte les conditions et je valide mon dossier
-          </span>
+          <span class="text-sm font-bold text-white">J'accepte les conditions et je valide le dossier</span>
         </label>
       </div>
     </div>
@@ -132,21 +115,21 @@ import { Admission } from '../../../../../../core/models/enrollment';
 })
 export class StepReviewComponent {
   @Input() family: any;
-  @Input() identity: any;
-  @Input() schooling: any;
-  @Input() levelName = '';
-  @Input() admission: Admission | null = null;
+  @Input() admissions: Admission[] = [];
+  @Input() allLevels: any[] = [];
   @Input() legalText = '';
   @Input() consent: { checked: boolean } = { checked: false };
-  @Input() pendingServices: any[] = [];
 
-  docStatusText(status: string): string {
-    return ({ UPLOADED: '✓ Chargé', RECEIVED: '✓ Reçu', VERIFIED: '✓ Vérifié', REJECTED: '✕ Rejeté', MISSING: '— Manquant' } as Record<string, string>)[status] ?? status;
+  levelName(adm: Admission): string {
+    return this.allLevels.find(l => l.id === adm.schooling?.levelId)?.name ?? adm.schooling?.levelId ?? '';
+  }
+
+  isDocOk(status: string): boolean {
+    return ['UPLOADED', 'RECEIVED', 'VERIFIED'].includes(status);
   }
 
   readonly Users = Users;
   readonly User = User;
-  readonly HeartPulse = HeartPulse;
   readonly LayoutGrid = LayoutGrid;
   readonly FileText = FileText;
   readonly CheckCircle = CheckCircle;

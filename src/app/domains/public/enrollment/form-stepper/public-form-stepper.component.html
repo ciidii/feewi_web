@@ -1,66 +1,75 @@
-<div *ngIf="config() && !portalClosed(); else loader" class="flex h-screen bg-white overflow-hidden">
+<div *ngIf="config() && !portalClosed(); else loader" class="onboarding-layout">
 
   <!-- ═══ SIDEBAR ═══════════════════════════════════════════════════════════ -->
-  <aside class="w-72 shrink-0 bg-slate-900 flex flex-col p-8 overflow-y-auto">
+  <aside class="onboarding-sidebar">
 
     <!-- École -->
-    <div class="flex items-center gap-3 mb-12">
-      <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center overflow-hidden shrink-0">
-        <img *ngIf="tenantCtx.activeTenant()?.logoUrl"
-             [src]="tenantCtx.activeTenant()?.logoUrl"
-             class="w-full h-full object-contain p-1">
-        <lucide-icon *ngIf="!tenantCtx.activeTenant()?.logoUrl"
-                     [name]="GraduationCap" [size]="20" class="text-blue-600"></lucide-icon>
+    <div class="sidebar-header">
+      <div class="school-logo">
+        <img *ngIf="tenantCtx.activeTenant()?.logoUrl" [src]="tenantCtx.activeTenant()?.logoUrl">
+        <lucide-icon *ngIf="!tenantCtx.activeTenant()?.logoUrl" [name]="GraduationCap" [size]="22"></lucide-icon>
       </div>
-      <div class="min-w-0">
-        <p class="font-bold text-white text-sm truncate">{{ tenantCtx.activeTenant()?.name || 'Établissement' }}</p>
-        <p *ngIf="selectedYearLabel()" class="text-[10px] font-bold text-blue-400 uppercase tracking-wider mt-0.5">
-          {{ selectedYearLabel() }}
-        </p>
+      <div class="school-meta">
+        <span class="school-name">{{ tenantCtx.activeTenant()?.name || 'Établissement' }}</span>
+        <span *ngIf="selectedYearLabel()" class="year-pill">{{ selectedYearLabel() }}</span>
       </div>
     </div>
 
-    <!-- Nav étapes -->
-    <nav class="flex flex-col gap-5 flex-1">
-      <div *ngFor="let s of filteredSteps(); let i = index"
-           class="flex items-center gap-3 transition-opacity duration-300"
-           [class.opacity-100]="step() === s"
-           [class.opacity-35]="step() !== s && !isStepDone(i)">
+    <!-- ── Nav : phase GUARDIAN ──────────────────────────────────────────── -->
+    <nav *ngIf="!isChildFlow()" class="onboarding-nav">
 
-        <div class="w-9 h-9 rounded-xl border-2 flex items-center justify-center shrink-0 transition-all duration-300"
-             [class.bg-blue-500]="step() === s"
-             [class.border-blue-500]="step() === s"
-             [class.text-white]="step() === s || isStepDone(i)"
-             [class.bg-emerald-500]="isStepDone(i)"
-             [class.border-emerald-500]="isStepDone(i)"
-             [class.border-white]="step() !== s && !isStepDone(i)"
-             [class.border-opacity-20]="step() !== s && !isStepDone(i)"
-             [class.text-white]="step() !== s && !isStepDone(i)">
-          <lucide-icon [name]="stepIcon(s)" [size]="15"></lucide-icon>
-        </div>
-
-        <span class="text-sm font-bold transition-colors duration-300"
-              [class.text-white]="step() === s"
-              [class.text-slate-400]="step() !== s && !isStepDone(i)"
-              [class.text-emerald-400]="isStepDone(i)">
-          {{ stepLabel(s) }}
-        </span>
+      <div class="nav-step" [class.active]="globalPhase() === 'GUARDIAN'" [class.completed]="globalPhase() !== 'GUARDIAN'">
+        <div class="step-icon"><lucide-icon [name]="Users" [size]="16"></lucide-icon></div>
+        <div class="step-text"><span class="step-label">Famille</span></div>
       </div>
+
+      <div class="nav-step" [class.active]="globalPhase() === 'HUB'" [class.completed]="globalPhase() === 'REVIEW'">
+        <div class="step-icon"><lucide-icon [name]="CheckCircle" [size]="16"></lucide-icon></div>
+        <div class="step-text">
+          <span class="step-label">Enfants</span>
+          <!-- Mini liste enfants ajoutés -->
+          <div *ngIf="admissions().length > 0" class="children-list">
+            <div *ngFor="let adm of admissions()" class="child-item">
+              <span class="child-dot" [class.done]="true"></span>
+              {{ adm.identity.firstName || '—' }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-step" [class.active]="globalPhase() === 'REVIEW'">
+        <div class="step-icon"><lucide-icon [name]="CheckCircle" [size]="16"></lucide-icon></div>
+        <div class="step-text"><span class="step-label">Validation</span></div>
+      </div>
+
     </nav>
 
-    <!-- Codes d'accès (réassurance) -->
-    <div *ngIf="bundleRef()" class="mt-6 p-4 rounded-2xl border border-white/10 bg-white/5">
-      <p class="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-blue-400 mb-3">
-        <lucide-icon [name]="Lock" [size]="11"></lucide-icon> Votre accès
-      </p>
-      <div class="space-y-2">
-        <div class="flex justify-between items-center text-xs">
-          <span class="text-white/40">Référence</span>
-          <span class="font-mono font-bold text-white">{{ bundleRef() }}</span>
+    <!-- ── Nav : phase ENFANT (sub-steps) ───────────────────────────────── -->
+    <nav *ngIf="isChildFlow()" class="onboarding-nav">
+
+      <div *ngFor="let s of childSteps()" class="nav-step"
+           [class.active]="childPhase() === s"
+           [class.completed]="isChildStepDone(s)">
+        <div class="step-icon"><lucide-icon [name]="childStepIcon(s)" [size]="16"></lucide-icon></div>
+        <div class="step-text"><span class="step-label">{{ childStepLabel(s) }}</span></div>
+      </div>
+
+    </nav>
+
+    <!-- Codes d'accès -->
+    <div *ngIf="bundleRef()" class="session-recovery-box">
+      <div class="recovery-header">
+        <lucide-icon [name]="Lock" [size]="12"></lucide-icon>
+        Votre accès
+      </div>
+      <div class="recovery-codes">
+        <div class="code-item">
+          <span class="label">Référence</span>
+          <span class="value">{{ bundleRef() }}</span>
         </div>
-        <div class="flex justify-between items-center text-xs">
-          <span class="text-white/40">Code secret</span>
-          <span class="font-mono font-bold text-blue-400">{{ accessCode() }}</span>
+        <div class="code-item">
+          <span class="label">Code secret</span>
+          <span class="value secret">{{ accessCode() }}</span>
         </div>
       </div>
     </div>
@@ -68,20 +77,30 @@
   </aside>
 
   <!-- ═══ CONTENU PRINCIPAL ════════════════════════════════════════════════ -->
-  <main class="flex-1 overflow-y-auto bg-slate-50 flex justify-center py-14 px-8">
-    <div class="w-full max-w-2xl flex flex-col">
+  <main class="onboarding-main">
+    <div class="main-container">
 
-      <!-- Étape : Famille -->
+      <!-- Phase GUARDIAN -->
       <app-step-family
-        *ngIf="step() === 'GUARDIAN'"
-        [data]="store.family"
+        *ngIf="globalPhase() === 'GUARDIAN'"
+        [data]="familyStore"
         [coreFieldControls]="schema()?.family?.guardianCoreFieldControls || {}"
         [customFields]="schema()?.family?.guardianCustomFields || []">
       </app-step-family>
 
-      <!-- Étape : Élève -->
+      <!-- Phase HUB -->
+      <app-step-hub
+        *ngIf="globalPhase() === 'HUB' && !isChildFlow()"
+        [admissions]="admissions()"
+        [allLevels]="levels()"
+        (editChild)="openChildEditor($event)"
+        (addChild)="addNewChild()"
+        (submitAll)="goToReview()">
+      </app-step-hub>
+
+      <!-- Phase CHILD : Identité -->
       <app-step-identity
-        *ngIf="step() === 'STUDENT'"
+        *ngIf="isChildFlow() && childPhase() === 'STUDENT'"
         [identity]="store.identity"
         [schooling]="store.schooling"
         [coreFieldControls]="schema()?.identity?.coreFieldControls || {}"
@@ -90,75 +109,87 @@
         (onLevelChange)="onLevelChange($event)">
       </app-step-identity>
 
-      <!-- Étape : Santé -->
+      <!-- Phase CHILD : Santé -->
       <app-step-medical
-        *ngIf="step() === 'MEDICAL'"
+        *ngIf="isChildFlow() && childPhase() === 'MEDICAL'"
         [medical]="store.medical"
         [customFields]="schema()?.medical?.customFields || []">
       </app-step-medical>
 
-      <!-- Étape : Services -->
+      <!-- Phase CHILD : Services -->
       <app-step-services
-        *ngIf="step() === 'SERVICES'"
+        *ngIf="isChildFlow() && childPhase() === 'SERVICES'"
         [availableServices]="schema()?.services?.availableServices || []"
         (selectionsChange)="store.services = $event">
       </app-step-services>
 
-      <!-- Étape : Documents -->
+      <!-- Phase CHILD : Documents -->
       <app-step-vault
-        *ngIf="step() === 'DOCS'"
-        [documents]="admission()?.documents || []"
+        *ngIf="isChildFlow() && childPhase() === 'DOCS'"
+        [documents]="activeAdmission()?.documents || []"
         [uploadingDocCode]="uploadingDoc()"
         (onFileSelected)="onDocUpload($event)">
       </app-step-vault>
 
-      <!-- Étape : Validation -->
+      <!-- Phase REVIEW -->
       <app-step-review
-        *ngIf="step() === 'REVIEW'"
-        [family]="store.family"
-        [identity]="store.identity"
-        [schooling]="store.schooling"
-        [levelName]="levelName()"
-        [pendingServices]="store.services"
-        [admission]="admission()"
+        *ngIf="globalPhase() === 'REVIEW'"
+        [family]="familyStore"
+        [admissions]="admissions()"
+        [allLevels]="levels()"
         [legalText]="config()?.legalText || ''"
         [consent]="consent">
       </app-step-review>
 
-      <!-- ── Navigation ─────────────────────────────────────────────────── -->
-      <div class="flex items-center mt-12 pt-8 border-t border-slate-200">
+      <!-- ── Footer navigation ──────────────────────────────────────────── -->
 
-        <button *ngIf="step() !== 'GUARDIAN'"
-                type="button"
-                (click)="prev()"
-                class="flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-slate-800 transition-colors">
+      <!-- GUARDIAN footer -->
+      <footer *ngIf="globalPhase() === 'GUARDIAN'" class="onboarding-footer">
+        <div class="spacer"></div>
+        <button type="button" class="btn-premium-action" (click)="nextGlobalStep()" [disabled]="submitting()">
+          <lucide-icon *ngIf="submitting()" [name]="RefreshCw" [size]="18" class="animate-spin"></lucide-icon>
+          <span>Continuer</span>
+          <lucide-icon *ngIf="!submitting()" [name]="ArrowRight" [size]="18"></lucide-icon>
+        </button>
+      </footer>
+
+      <!-- CHILD footer -->
+      <footer *ngIf="isChildFlow()" class="onboarding-footer">
+        <button type="button" class="btn-ghost" (click)="prevChildStep()">
           <lucide-icon [name]="ArrowLeft" [size]="16"></lucide-icon>
-          Retour
+          {{ childPhase() === 'STUDENT' ? 'Retour aux enfants' : 'Retour' }}
         </button>
-
-        <div class="flex-1"></div>
-
-        <button type="button"
-                (click)="step() === 'REVIEW' ? submit() : next()"
-                [disabled]="submitting() || (step() === 'REVIEW' && !consent.checked)"
-                class="flex items-center gap-2.5 h-14 px-8 bg-slate-900 text-white text-sm font-bold rounded-2xl shadow-lg transition-all duration-300
-                       hover:bg-blue-600 hover:-translate-y-0.5 hover:shadow-blue-500/25
-                       disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none">
-          <lucide-icon *ngIf="submitting()" [name]="RefreshCw" [size]="16" class="animate-spin"></lucide-icon>
-          <span>{{ step() === 'REVIEW' ? 'Soumettre le dossier' : 'Continuer' }}</span>
-          <lucide-icon *ngIf="!submitting() && step() !== 'REVIEW'" [name]="ArrowRight" [size]="16"></lucide-icon>
+        <div class="spacer"></div>
+        <button type="button" class="btn-premium-action" (click)="nextChildStep()" [disabled]="submitting()">
+          <lucide-icon *ngIf="submitting()" [name]="RefreshCw" [size]="18" class="animate-spin"></lucide-icon>
+          <span>{{ childPhase() === 'DOCS' ? 'Terminer ce dossier' : 'Continuer' }}</span>
+          <lucide-icon *ngIf="!submitting() && childPhase() !== 'DOCS'" [name]="ArrowRight" [size]="18"></lucide-icon>
         </button>
+      </footer>
 
-      </div>
+      <!-- REVIEW footer -->
+      <footer *ngIf="globalPhase() === 'REVIEW'" class="onboarding-footer">
+        <button type="button" class="btn-ghost" (click)="globalPhase.set('HUB'); childPhase.set(null)">
+          <lucide-icon [name]="ArrowLeft" [size]="16"></lucide-icon> Retour
+        </button>
+        <div class="spacer"></div>
+        <button type="button" class="btn-premium-action"
+                (click)="submit()"
+                [disabled]="submitting() || !consent.checked">
+          <lucide-icon *ngIf="submitting()" [name]="RefreshCw" [size]="18" class="animate-spin"></lucide-icon>
+          <span>Soumettre le dossier</span>
+        </button>
+      </footer>
+
     </div>
   </main>
 
 </div>
 
-<!-- ═══ LOADER ══════════════════════════════════════════════════════════════ -->
+<!-- Loader initial -->
 <ng-template #loader>
-  <div class="fixed inset-0 bg-white flex flex-col items-center justify-center gap-4">
-    <lucide-icon [name]="RefreshCw" [size]="36" class="text-blue-600 animate-spin"></lucide-icon>
-    <p class="text-sm font-bold text-slate-500">Chargement du portail...</p>
+  <div class="onboarding-loader">
+    <lucide-icon [name]="RefreshCw" [size]="40" class="animate-spin"></lucide-icon>
+    <p>Chargement du portail...</p>
   </div>
 </ng-template>
