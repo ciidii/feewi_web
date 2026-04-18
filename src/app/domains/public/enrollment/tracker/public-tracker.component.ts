@@ -45,8 +45,9 @@ export class PublicTrackerComponent implements OnInit {
   emailResults      = signal<Admission[]>([]);
 
   // ── Chargement / erreurs ──────────────────────────────────────────────────
-  isLoading = signal(false);
-  error     = signal<string | null>(null);
+  isLoading    = signal(false);
+  isConfirming = signal(false);
+  error        = signal<string | null>(null);
 
   // ── Formulaires ───────────────────────────────────────────────────────────
   searchData = {reference: '', accessCode: ''};
@@ -175,6 +176,33 @@ export class PublicTrackerComponent implements OnInit {
     const accessCode = qp.get('accessCode');
     if (bundleId && accessCode) this.loadBundle(bundleId, accessCode);
     else if (this.admission()) this.loadSingle(this.admission()!.reference, this.searchData.accessCode);
+  }
+
+  // ── Confirmation parent (ADMITTED → VALIDATED) ───────────────────────────
+
+  confirmAdmission(app: Admission) {
+    this.isConfirming.set(true);
+    this.enrollment.validateAdmission(app.id).pipe(
+      finalize(() => this.isConfirming.set(false))
+    ).subscribe({
+      next: (updated) => {
+        // Mettre à jour le signal local selon le mode actif
+        if (this.mode() === 'single') {
+          this.admission.set(updated);
+        } else {
+          this.selectedAdmission.set(updated);
+          // Mettre à jour aussi dans la liste du bundle
+          const current = this.bundle();
+          if (current) {
+            this.bundle.set({
+              ...current,
+              admissions: current.admissions.map(a => a.id === updated.id ? updated : a)
+            });
+          }
+        }
+      },
+      error: () => this.error.set('Erreur lors de la confirmation. Veuillez réessayer.')
+    });
   }
 
   hasMissingMandatoryDocs(documents: any[] | undefined): boolean {

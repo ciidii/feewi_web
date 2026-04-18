@@ -175,7 +175,8 @@
         <!-- CTA ADMITTED : confirmer -->
         <div *ngIf="app.status === 'ADMITTED'" class="mt-6">
           <app-fw-button variant="primary" size="md" [icon]="CheckCircle" iconPosition="right"
-                         [routerLink]="['/enrollment/form-stepper']">
+                         [loading]="isConfirming()"
+                         (click)="confirmAdmission(app)">
             Confirmer mon inscription
           </app-fw-button>
         </div>

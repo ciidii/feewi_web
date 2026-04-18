@@ -177,6 +177,13 @@ export class EnrollmentPublicService {
       .pipe(catchError(this.handleError('Erreur lors de l\'annulation')));
   }
 
+  /** Confirmation de l'admission par le parent (ADMITTED → VALIDATED) */
+  validateAdmission(admissionId: string): Observable<Admission> {
+    return this.http
+      .patch<Admission>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.VALIDATE(admissionId)), {}, { headers: this.getHeaders() })
+      .pipe(catchError(this.handleError('Erreur lors de la confirmation de l\'inscription')));
+  }
+
   /** Réinscription élève existant */
   reEnroll(request: ReEnrollRequest): Observable<Admission> {
     return this.http
