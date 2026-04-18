@@ -1,6 +1,7 @@
 import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {finalize, forkJoin, map, of, switchMap} from 'rxjs';
+import {BadgeCheck} from 'lucide-angular';
 import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 import {Admission, AssessmentRequest, RequiredDocument} from '../../../../../core/models/enrollment.model';
 import {
@@ -225,9 +226,6 @@ export class AdmissionDetailComponent implements OnInit {
     this.evaluationGrades.update(prev => ({...prev, [subject]: value}));
   }
 
-  /**
-   * Soumission de la décision pédagogique (Direction / Commission)
-   */
   submitPedagogicalDecision() {
     const app = this.application();
     if (!app) return;
@@ -235,29 +233,33 @@ export class AdmissionDetailComponent implements OnInit {
     this.isActionLoading.set(true);
     const decision = this.pedagogicalDecision();
 
-    // 1. D'abord on enregistre les notes et commentaires (Assessment)
-    const assessmentPayload: AssessmentRequest = {
+    const payload: AssessmentRequest = {
       grades: this.evaluationGrades(),
       comments: this.evaluationComment,
+      decision: decision === 'WAITLIST' ? null : decision,
       recommendedLevelId: this.recommendedLevelId()
     };
 
-    this.enrollmentAdminService.submitAssessment(app.id, assessmentPayload).pipe(
-      switchMap(() => {
-        // 2. Ensuite on déclenche l'action de direction correspondante
-        if (decision === 'REJECTED') {
-          return this.enrollmentAdminService.rejectAdmission(app.id, this.evaluationComment || 'Refus suite à évaluation.');
-        } else if (decision === 'WAITLIST') {
-          return this.enrollmentAdminService.waitlistAdmission(app.id);
-        }
-        // Si ADMITTED, le serveur a déjà calculé le statut ADMITTED via submitAssessment
-        return of(true);
-      }),
+    this.enrollmentAdminService.submitAssessment(app.id, payload).pipe(
       finalize(() => this.isActionLoading.set(false))
     ).subscribe({
       next: () => {
         this.loadApplication(app.id);
         this.notificationService.success('Décision pédagogique enregistrée.');
+      }
+    });
+  }
+
+  admitManually() {
+    const app = this.application();
+    if (!app) return;
+    this.isActionLoading.set(true);
+    this.enrollmentAdminService.admitAdmission(app.id).pipe(
+      finalize(() => this.isActionLoading.set(false))
+    ).subscribe({
+      next: () => {
+        this.loadApplication(app.id);
+        this.notificationService.success('Candidat admis manuellement.');
       }
     });
   }

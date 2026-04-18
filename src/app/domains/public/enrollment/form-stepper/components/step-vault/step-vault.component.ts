@@ -45,13 +45,12 @@ import { FwBadgeComponent } from '../../../../../../shared/components/badge/badg
             <div class="min-w-0">
               <p class="font-bold text-midnight text-base truncate mb-1">{{ doc.name }}</p>
               <div class="flex items-center gap-3">
-                <app-fw-badge *ngIf="doc.mandatory" status="SUBMITTED" size="xs"></app-fw-badge>
-                <span class="text-[10px] font-black uppercase tracking-widest"
-                      [class.text-success]="isSuccess(doc.status)"
-                      [class.text-error]="doc.status === 'REJECTED'"
-                      [class.text-text-tertiary]="doc.status === 'MISSING'">
-                  {{ statusText(doc.status) }}
-                </span>
+                <!-- Badge Obligatoire : Uniquement si manquant ou rejeté -->
+                <app-fw-badge *ngIf="doc.mandatory && (doc.status === 'MISSING' || doc.status === 'REJECTED')" 
+                              status="REQUIRED" size="xs"></app-fw-badge>
+                
+                <!-- Badge de Statut Réel -->
+                <app-fw-badge [status]="doc.status === 'MISSING' ? 'DRAFT' : doc.status" size="xs"></app-fw-badge>
               </div>
             </div>
           </div>
@@ -68,7 +67,7 @@ import { FwBadgeComponent } from '../../../../../../shared/components/badge/badg
               size="sm"
               [icon]="Upload"
             >
-              {{ isSuccess(doc.status) ? 'Remplacer' : 'Choisir' }}
+              {{ isSuccess(doc.status) ? 'Remplacer' : 'Choisir le fichier' }}
             </app-fw-button>
           </div>
         </div>
@@ -108,14 +107,6 @@ export class StepVaultComponent {
     if (this.isSuccess(status)) return CheckCircle;
     if (status === 'REJECTED') return XCircle;
     return FileText;
-  }
-
-  statusText(status: string): string {
-    const map: Record<string, string> = {
-      UPLOADED: 'Téléchargé', RECEIVED: 'Reçu', VERIFIED: 'Vérifié',
-      REJECTED: 'Refusé', MISSING: 'Manquant'
-    };
-    return map[status] ?? status;
   }
 
   readonly Upload = Upload;

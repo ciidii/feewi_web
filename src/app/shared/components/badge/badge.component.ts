@@ -20,6 +20,7 @@ const STATUS_MAP: Record<string, BadgeConfig> = {
   SUSPENDED:  { label: 'Suspendu',       token: 'error'   },
   PLANNING:   { label: 'Planification',  token: 'info'    },
   CLOSED:     { label: 'Clôturée',       token: 'neutral' },
+  REQUIRED:   { label: 'Obligatoire',    token: 'error'   },
 };
 
 @Component({
