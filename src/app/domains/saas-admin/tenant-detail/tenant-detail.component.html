@@ -170,6 +170,61 @@
           </div>
         </div>
 
+        <!-- Carte : Portail d'Inscription -->
+        <div class="info-card" *ngIf="enrollmentPortal() as portal">
+          <div class="card-header">
+            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-widest flex items-center gap-2">
+              <div class="w-7 h-7 rounded-lg flex items-center justify-center"
+                   [ngClass]="portal.portalActive ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400'">
+                <lucide-icon [name]="portal.portalActive ? Globe : Lock" class="w-4 h-4"></lucide-icon>
+              </div>
+              Portail d'Inscription
+            </h3>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border"
+                  [ngClass]="portal.portalActive
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                    : 'bg-rose-50 text-rose-600 border-rose-200'">
+              {{ portal.portalActive ? 'Ouvert' : 'Fermé' }}
+            </span>
+          </div>
+
+          <div class="card-body space-y-3">
+            <div *ngIf="!portal.availableYears.length"
+                 class="text-xs text-slate-400 italic text-center py-2">
+              Aucune année scolaire disponible
+            </div>
+
+            <div *ngFor="let year of portal.availableYears"
+                 class="p-3 rounded-xl border border-slate-100 bg-slate-50 space-y-2">
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2 min-w-0">
+                  <lucide-icon [name]="GraduationCap" [size]="13" class="text-slate-400 shrink-0"></lucide-icon>
+                  <span class="text-[11px] font-bold text-slate-800 truncate">{{ year.label }}</span>
+                </div>
+                <span class="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase border"
+                      [ngClass]="yearStateClass(year.state)">
+                  {{ yearStateLabel(year.state) }}
+                </span>
+              </div>
+
+              <div class="flex flex-wrap gap-1.5 text-[9px] font-bold uppercase tracking-wide">
+                <span class="px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-600">
+                  {{ regModeLabel(year.registrationMode) }}
+                </span>
+                <span *ngFor="let type of year.allowedTypes"
+                      class="px-1.5 py-0.5 rounded bg-indigo-50 border border-indigo-100 text-indigo-700">
+                  {{ type === 'NEW_ENROLLMENT' ? 'Nouvelle insc.' : 'Réinscription' }}
+                </span>
+              </div>
+
+              <p *ngIf="year.welcomeMessage"
+                 class="text-[10px] text-slate-500 italic leading-tight line-clamp-2">
+                {{ year.welcomeMessage }}
+              </p>
+            </div>
+          </div>
+        </div>
+
         <!-- Carte : Journal d'Audit Rapide -->
         <div class="info-card">
           <div class="card-header">

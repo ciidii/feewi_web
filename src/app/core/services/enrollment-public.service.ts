@@ -58,6 +58,13 @@ export class EnrollmentPublicService {
       .pipe(catchError(this.handleError('Impossible de charger le portail')));
   }
 
+  getPortalSummaryForTenant(tenantId: string): Observable<PublicPortalSummary> {
+    const headers = new HttpHeaders().set('X-Tenant-Id', tenantId);
+    return this.http
+      .get<PublicPortalSummary>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.SUMMARY), { headers })
+      .pipe(catchError(this.handleError('Impossible de charger le portail')));
+  }
+
   getDefaultConfig(): Observable<DefaultConfigResponse> {
     return this.http
       .get<DefaultConfigResponse>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.DEFAULT_CONFIG), { headers: this.getHeaders() })

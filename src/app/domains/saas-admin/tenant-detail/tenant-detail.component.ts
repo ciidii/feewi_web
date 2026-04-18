@@ -7,7 +7,7 @@ import {
   Globe, Calendar, ShieldCheck, CheckCircle,
   XCircle, Edit, Trash2, Printer, MoreVertical,
   Activity, Users, CreditCard, History, ChevronRight,
-  User, ExternalLink, RefreshCw
+  User, ExternalLink, RefreshCw, Lock, GraduationCap
 } from 'lucide-angular';
 import { SchoolService } from '../../../core/services/school.service';
 import { School } from '../../../core/models/school.model';
@@ -16,6 +16,8 @@ import { AuthService } from '../../../core/services/auth.service';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog';
 import { finalize } from 'rxjs';
+import { EnrollmentPublicService } from '../../../core/services/enrollment-public.service';
+import { PublicPortalSummary } from '../../../core/models/enrollment/dtos';
 
 @Component({
   selector: 'app-tenant-detail',
@@ -31,8 +33,10 @@ export class TenantDetailComponent implements OnInit {
   private notificationService = inject(NotificationService);
   private authService = inject(AuthService);
   private dialog = inject(MatDialog);
+  private enrollmentPublicService = inject(EnrollmentPublicService);
 
   school = signal<School | null>(null);
+  enrollmentPortal = signal<PublicPortalSummary | null>(null);
   isLoading = signal(true);
   isActionLoading = signal(false);
 
@@ -75,13 +79,44 @@ export class TenantDetailComponent implements OnInit {
       next: (data) => {
         this.school.set(data);
         this.isLoading.set(false);
+        if (data.tenantId) {
+          this.loadEnrollmentPortal(data.tenantId);
+        }
       },
-      error: (err) => {
+      error: () => {
         this.notificationService.error("Impossible de charger les détails de l'établissement.");
         this.router.navigate(['/saas/tenants']);
         this.isLoading.set(false);
       }
     });
+  }
+
+  private loadEnrollmentPortal(tenantId: string): void {
+    this.enrollmentPublicService.getPortalSummaryForTenant(tenantId).subscribe({
+      next: (summary) => this.enrollmentPortal.set(summary),
+      error: () => { /* portail indisponible — carte masquée */ }
+    });
+  }
+
+  yearStateLabel(state: string): string {
+    const map: Record<string, string> = { ACTIVE: 'Active', PLANNING: 'Planification', CLOSED: 'Clôturée' };
+    return map[state] ?? state;
+  }
+
+  yearStateClass(state: string): string {
+    const map: Record<string, string> = {
+      ACTIVE:   'bg-emerald-50 text-emerald-700 border-emerald-200',
+      PLANNING: 'bg-blue-50 text-blue-700 border-blue-200',
+      CLOSED:   'bg-slate-100 text-slate-500 border-slate-200'
+    };
+    return map[state] ?? 'bg-slate-100 text-slate-500 border-slate-200';
+  }
+
+  regModeLabel(mode: string): string {
+    const map: Record<string, string> = {
+      PARENT_ONLY: 'Portail parents', ADMIN_ONLY: 'Guichet seul', BOTH: 'Mixte'
+    };
+    return map[mode] ?? mode;
   }
 
   async onImpersonate() {
@@ -141,4 +176,6 @@ export class TenantDetailComponent implements OnInit {
   }
 
   protected readonly RefreshCw = RefreshCw;
+  protected readonly Lock = Lock;
+  protected readonly GraduationCap = GraduationCap;
 }
