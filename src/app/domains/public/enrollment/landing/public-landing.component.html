@@ -52,12 +52,12 @@
             <!-- Les deux types autorisés -->
             <div *ngIf="year.hasBothTypes" class="type-buttons">
               <button class="btn-type new"
-                      [routerLink]="['/enrollment/form']"
+                      [routerLink]="['/enrollment/form-stepper']"
                       [queryParams]="{ yearId: year.id, type: 'NEW_ENROLLMENT' }">
                 Nouvelle inscription
               </button>
               <button class="btn-type re"
-                      [routerLink]="['/enrollment/form']"
+                      [routerLink]="['/enrollment/form-stepper']"
                       [queryParams]="{ yearId: year.id, type: 'RE_ENROLLMENT' }">
                 Réinscription
               </button>
@@ -66,14 +66,14 @@
             <!-- Un seul type -->
             <button *ngIf="!year.hasBothTypes && year.canNewEnrollment"
                     class="btn-start"
-                    [routerLink]="['/enrollment/form']"
+                    [routerLink]="['/enrollment/form-stepper']"
                     [queryParams]="{ yearId: year.id, type: 'NEW_ENROLLMENT' }">
               Commencer <lucide-icon [name]="ArrowRight" [size]="16"></lucide-icon>
             </button>
 
             <button *ngIf="!year.hasBothTypes && year.canReEnrollment"
                     class="btn-start re"
-                    [routerLink]="['/enrollment/form']"
+                    [routerLink]="['/enrollment/form-stepper']"
                     [queryParams]="{ yearId: year.id, type: 'RE_ENROLLMENT' }">
               Réinscription <lucide-icon [name]="ArrowRight" [size]="16"></lucide-icon>
             </button>
