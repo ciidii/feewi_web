@@ -473,8 +473,8 @@ export class PublicFormStepperComponent implements OnInit {
       finalize(() => this.submitting.set(false))
     ).subscribe(bundle => {
       this.session.clearSession();
-      this.router.navigate(['/enrollment/tracker', bundle.reference], {
-        queryParams: { accessCode: bundle.accessCode }
+      this.router.navigate(['/enrollment/tracker'], {
+        queryParams: { bundleId: bundle.id, accessCode: bundle.accessCode }
       });
     });
   }

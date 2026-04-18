@@ -1,123 +1,207 @@
 import {Component, signal, computed, inject, OnInit} from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import {CommonModule} from '@angular/common';
+import {RouterModule, Router, ActivatedRoute} from '@angular/router';
+import {FormsModule} from '@angular/forms';
 import {
   LucideAngularModule,
   Clock, CheckCircle, MessageSquare, Phone, Mail, FileText,
   Info, ArrowLeft, RefreshCw, Search, ArrowRight, ShieldCheck,
-  LayoutGrid, Check, Sparkles, XCircle, AlertTriangle
+  LayoutGrid, Check, Sparkles, XCircle, AlertTriangle, ChevronRight, Users
 } from 'lucide-angular';
-import { ActivatedRoute } from '@angular/router';
-import { EnrollmentPublicService } from '../../../../core/services/enrollment-public.service';
-import { AdmissionSessionService } from '../../../../core/services/admission-session.service';
-import { Admission, DocumentStatus } from '../../../../core/models/enrollment.model';
-import { finalize } from 'rxjs';
-import { FwButtonComponent } from '../../../../shared/components/button/button.component';
-import { FwBadgeComponent } from '../../../../shared/components/badge/badge.component';
-import { FwEmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
-import { FwPublicHeaderComponent } from '../../../../shared/layout/public-header/public-header.component';
+import {EnrollmentPublicService} from '../../../../core/services/enrollment-public.service';
+import {AdmissionSessionService} from '../../../../core/services/admission-session.service';
+import {Admission, AdmissionBundleResponse, DocumentStatus} from '../../../../core/models/enrollment.model';
+import {finalize} from 'rxjs';
+import {FwButtonComponent} from '../../../../shared/components/button/button.component';
+import {FwBadgeComponent} from '../../../../shared/components/badge/badge.component';
+import {FwPublicHeaderComponent} from '../../../../shared/layout/public-header/public-header.component';
+
+type TrackerMode = 'bundle' | 'single' | 'search';
+type SearchTab  = 'code' | 'email';
 
 @Component({
   selector: 'app-public-tracker',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule, FormsModule, FwButtonComponent, FwBadgeComponent, FwPublicHeaderComponent],
+  imports: [CommonModule, RouterModule, LucideAngularModule, FormsModule,
+            FwButtonComponent, FwBadgeComponent, FwPublicHeaderComponent],
   templateUrl: './public-tracker.component.html',
   styleUrls: ['./public-tracker.component.scss']
 })
 export class PublicTrackerComponent implements OnInit {
 
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
-  private enrollmentService = inject(EnrollmentPublicService);
-  private sessionService = inject(AdmissionSessionService);
+  private route   = inject(ActivatedRoute);
+  private router  = inject(Router);
+  private enrollment = inject(EnrollmentPublicService);
+  private session = inject(AdmissionSessionService);
 
-  application = signal<Admission | null>(null);
+  // ── Mode d'affichage ──────────────────────────────────────────────────────
+  mode      = signal<TrackerMode>('search');
+  searchTab = signal<SearchTab>('code');
+
+  // ── Données ───────────────────────────────────────────────────────────────
+  bundle            = signal<AdmissionBundleResponse | null>(null);
+  selectedAdmission = signal<Admission | null>(null);   // enfant sélectionné dans la vue bundle
+  admission         = signal<Admission | null>(null);   // mode single
+  emailResults      = signal<Admission[]>([]);
+
+  // ── Chargement / erreurs ──────────────────────────────────────────────────
   isLoading = signal(false);
-  error = signal<string | null>(null);
+  error     = signal<string | null>(null);
 
-  searchData = { reference: '', accessCode: '' };
+  // ── Formulaires ───────────────────────────────────────────────────────────
+  searchData = {reference: '', accessCode: ''};
+  emailInput = '';
 
-  // Code d'accès résolu : URL param > session > formulaire
-  resolvedAccessCode = computed(() => {
-    return this.route.snapshot.queryParamMap.get('accessCode')
-      || this.sessionService.getSession()?.accessCode
-      || this.searchData.accessCode
-      || '';
+  // ── Computed ──────────────────────────────────────────────────────────────
+  /** Liste des enfants du bundle, ou liste vide */
+  admissions = computed(() => this.bundle()?.admissions ?? []);
+
+  /** Vrai si l'enfant courant a au moins un doc obligatoire manquant */
+  hasMissingDocs = computed(() => {
+    const app = this.selectedAdmission() ?? this.admission();
+    return app?.documents?.some(d => d.mandatory && d.status === 'MISSING') ?? false;
   });
 
   ngOnInit() {
-    this.route.paramMap.subscribe(params => {
-      const id = params.get('id');
-      if (id) {
-        this.loadApplicationData(id);
+    const qp = this.route.snapshot.queryParamMap;
+    const bundleId  = qp.get('bundleId');
+    const accessCode = qp.get('accessCode');
+    const routeRef  = this.route.snapshot.paramMap.get('id');
+
+    if (bundleId && accessCode) {
+      // Cas principal : retour après soumission ou lien direct bundle
+      this.loadBundle(bundleId, accessCode);
+    } else if (routeRef) {
+      // Lien direct enfant : /tracker/ADM-2026-XXX?accessCode=...
+      const code = accessCode || this.session.getSession()?.accessCode || '';
+      if (code) this.loadSingle(routeRef, code);
+      else this.mode.set('search');
+    } else {
+      // Vérifier session active (parent qui revient)
+      const s = this.session.getSession();
+      if (s?.bundleId && s?.accessCode) {
+        this.loadBundle(s.bundleId, s.accessCode);
       } else {
-        this.isLoading.set(false);
-        this.application.set(null);
+        this.mode.set('search');
       }
-    });
+    }
   }
 
-  loadApplicationData(reference: string) {
-    const accessCode = this.resolvedAccessCode();
-    if (!accessCode) { this.isLoading.set(false); return; }
+  // ── Chargements ───────────────────────────────────────────────────────────
 
+  loadBundle(bundleId: string, accessCode: string) {
     this.isLoading.set(true);
     this.error.set(null);
-    this.enrollmentService.trackAdmission(reference, accessCode).pipe(
+    this.enrollment.getBundle(bundleId, accessCode).pipe(
       finalize(() => this.isLoading.set(false))
     ).subscribe({
-      next: (res: Admission) => this.application.set(res),
-      error: () => this.error.set('Référence ou code d\'accès incorrect. Veuillez vérifier vos informations.')
+      next: (b) => {
+        this.bundle.set(b);
+        this.mode.set('bundle');
+        // Auto-sélectionner si un seul enfant
+        if (b.admissions.length === 1) this.selectedAdmission.set(b.admissions[0]);
+      },
+      error: () => this.error.set('Dossier introuvable. Vérifiez le code d\'accès.')
     });
   }
 
-  onSearch() {
+  loadSingle(reference: string, accessCode: string) {
+    this.isLoading.set(true);
+    this.error.set(null);
+    this.enrollment.trackAdmission(reference, accessCode).pipe(
+      finalize(() => this.isLoading.set(false))
+    ).subscribe({
+      next: (a) => { this.admission.set(a); this.mode.set('single'); },
+      error: () => this.error.set('Référence ou code d\'accès incorrect.')
+    });
+  }
+
+  // ── Recherche par référence ───────────────────────────────────────────────
+
+  onSearchByCode() {
     if (!this.searchData.reference || !this.searchData.accessCode) return;
-
     this.isLoading.set(true);
     this.error.set(null);
-    this.enrollmentService.trackAdmission(this.searchData.reference, this.searchData.accessCode).pipe(
+    this.enrollment.trackAdmission(this.searchData.reference, this.searchData.accessCode).pipe(
       finalize(() => this.isLoading.set(false))
     ).subscribe({
-      next: (res: Admission) => {
-        this.application.set(res);
-        this.router.navigate(['/enrollment/tracker', res.reference], {
-          queryParams: { accessCode: this.searchData.accessCode },
-          replaceUrl: true
-        });
+      next: (a) => {
+        this.admission.set(a);
+        this.mode.set('single');
+        this.router.navigate([], { queryParams: { ref: a.reference, accessCode: this.searchData.accessCode }, replaceUrl: true });
       },
       error: () => this.error.set('Aucun dossier trouvé avec cette référence et ce code.')
     });
   }
 
-  docStatusLabel(status: DocumentStatus): string {
-    const labels: Record<DocumentStatus, string> = {
-      MISSING:  'Manquant',
-      UPLOADED: 'Déposé',
-      RECEIVED: 'Reçu',
-      VERIFIED: 'Vérifié',
-      REJECTED: 'Refusé'
+  // ── Recherche par email ───────────────────────────────────────────────────
+
+  onSearchByEmail() {
+    if (!this.emailInput.trim()) return;
+    this.isLoading.set(true);
+    this.error.set(null);
+    this.enrollment.getMyAdmissions(this.emailInput.trim()).pipe(
+      finalize(() => this.isLoading.set(false))
+    ).subscribe({
+      next: (list) => {
+        this.emailResults.set(list);
+        if (list.length === 0) this.error.set('Aucun dossier trouvé pour cet email.');
+      },
+      error: () => this.error.set('Erreur lors de la recherche.')
+    });
+  }
+
+  selectEmailResult(a: Admission) {
+    this.admission.set(a);
+    this.mode.set('single');
+    this.emailResults.set([]);
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+
+  reset() {
+    this.mode.set('search');
+    this.bundle.set(null);
+    this.admission.set(null);
+    this.selectedAdmission.set(null);
+    this.emailResults.set([]);
+    this.error.set(null);
+    this.router.navigate(['/enrollment/tracker'], { replaceUrl: true });
+  }
+
+  reload() {
+    const qp = this.route.snapshot.queryParamMap;
+    const bundleId  = qp.get('bundleId');
+    const accessCode = qp.get('accessCode');
+    if (bundleId && accessCode) this.loadBundle(bundleId, accessCode);
+    else if (this.admission()) this.loadSingle(this.admission()!.reference, this.searchData.accessCode);
+  }
+
+  docStatusLabel(status: string): string {
+    const labels: Record<string, string> = {
+      MISSING: 'Manquant', UPLOADED: 'Déposé',
+      PHYSICAL_RECEIVED: 'Reçu', RECEIVED: 'Reçu',
+      VERIFIED: 'Vérifié', REJECTED: 'Refusé'
     };
     return labels[status] ?? status;
   }
 
-  // Icônes
-  readonly Clock = Clock;
-  readonly CheckCircle = CheckCircle;
-  readonly MessageSquare = MessageSquare;
-  readonly Phone = Phone;
-  readonly Mail = Mail;
-  readonly FileText = FileText;
-  readonly Info = Info;
-  readonly ArrowLeft = ArrowLeft;
-  readonly RefreshCw = RefreshCw;
-  readonly Search = Search;
-  readonly ArrowRight = ArrowRight;
-  readonly ShieldCheck = ShieldCheck;
-  readonly LayoutGrid = LayoutGrid;
-  readonly Check = Check;
-  readonly Sparkles = Sparkles;
-  readonly XCircle = XCircle;
-  readonly AlertTriangle = AlertTriangle;
+  docStatusClass(status: string): string {
+    if (status === 'MISSING') return 'doc-missing';
+    if (status === 'REJECTED') return 'doc-rejected';
+    if (['UPLOADED'].includes(status)) return 'doc-uploaded';
+    return 'doc-ok';
+  }
+
+  // ── Icônes ────────────────────────────────────────────────────────────────
+  readonly Clock = Clock; readonly CheckCircle = CheckCircle;
+  readonly MessageSquare = MessageSquare; readonly Phone = Phone;
+  readonly Mail = Mail; readonly FileText = FileText;
+  readonly Info = Info; readonly ArrowLeft = ArrowLeft;
+  readonly RefreshCw = RefreshCw; readonly Search = Search;
+  readonly ArrowRight = ArrowRight; readonly ShieldCheck = ShieldCheck;
+  readonly LayoutGrid = LayoutGrid; readonly Check = Check;
+  readonly Sparkles = Sparkles; readonly XCircle = XCircle;
+  readonly AlertTriangle = AlertTriangle; readonly ChevronRight = ChevronRight;
+  readonly Users = Users;
 }
