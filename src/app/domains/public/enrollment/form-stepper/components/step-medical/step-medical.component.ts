@@ -1,66 +1,76 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Info, LucideAngularModule } from 'lucide-angular';
+import { HeartPulse, LucideAngularModule } from 'lucide-angular';
 import { FieldConfig } from '../../../../../../core/models/enrollment';
-
-const INPUT_CLS = 'w-full px-4 py-3 rounded-2xl border-2 border-slate-100 bg-white text-sm font-semibold text-slate-800 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition';
-const LABEL_CLS = 'block text-[11px] font-extrabold uppercase tracking-wider text-slate-400 mb-2';
 
 @Component({
   selector: 'app-step-medical',
   standalone: true,
   imports: [CommonModule, FormsModule, LucideAngularModule],
   template: `
-    <div>
+    <div class="animate-fade">
+      <!-- Header -->
       <div class="mb-10">
-        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Santé</h1>
-        <p class="text-slate-500 mt-2">Ces données sont strictement confidentielles.</p>
+        <div class="inline-flex items-center justify-center w-12 h-12 bg-primary-alpha text-primary rounded-xl mb-4">
+          <lucide-icon [name]="HeartPulse" [size]="24"></lucide-icon>
+        </div>
+        <h1 class="text-3xl font-display font-black text-midnight tracking-tight">Santé & Bien-être</h1>
+        <p class="text-sm text-text-secondary font-medium mt-2 max-w-lg">
+          Ces informations sont strictement confidentielles et ne seront accessibles qu'au personnel habilité.
+        </p>
       </div>
 
-      <div *ngIf="customFields.length > 0; else noFields" class="grid grid-cols-2 gap-6">
+      <div *ngIf="customFields.length > 0; else noFields" class="grid grid-cols-2 gap-x-8 gap-y-2">
         <ng-container *ngFor="let field of customFields">
-          <div [class.col-span-2]="field.type === 'TEXTAREA'">
-            <label class="${LABEL_CLS}">
+          <div class="fw-field" [class.col-span-2]="field.type === 'TEXTAREA'">
+            <label class="fw-label">
               {{ field.label }}
-              <span *ngIf="field.mandatory" class="text-red-400 ml-0.5">*</span>
+              <span *ngIf="field.mandatory" class="required">*</span>
             </label>
             <ng-container [ngSwitch]="field.type">
               <select *ngSwitchCase="'SELECT'"
                       [(ngModel)]="medical.customFields[field.name]"
-                      class="${INPUT_CLS}">
-                <option value="">—</option>
+                      class="fw-input">
+                <option value="">Sélectionner...</option>
                 <option *ngFor="let opt of field.options ?? []" [value]="opt">{{ opt }}</option>
               </select>
               <textarea *ngSwitchCase="'TEXTAREA'"
                         [(ngModel)]="medical.customFields[field.name]"
                         rows="3"
-                        class="${INPUT_CLS} py-3 h-auto"></textarea>
+                        class="fw-input h-auto py-3"></textarea>
               <input *ngSwitchCase="'DATE'" type="date"
                      [(ngModel)]="medical.customFields[field.name]"
-                     class="${INPUT_CLS}">
+                     class="fw-input">
               <input *ngSwitchDefault type="text"
                      [(ngModel)]="medical.customFields[field.name]"
-                     class="${INPUT_CLS}">
+                     class="fw-input">
             </ng-container>
           </div>
         </ng-container>
       </div>
 
       <ng-template #noFields>
-        <div class="flex items-center gap-4 p-6 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
-          <lucide-icon [name]="Info" [size]="20" class="text-slate-400 shrink-0"></lucide-icon>
-          <p class="text-sm font-semibold text-slate-500">
-            Aucune information médicale requise par l'établissement.
+        <div class="flex flex-col items-center justify-center p-12 bg-surface-sunken rounded-3xl border-2 border-dashed border-border text-center">
+          <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
+            <lucide-icon [name]="HeartPulse" [size]="24" class="text-text-tertiary"></lucide-icon>
+          </div>
+          <h3 class="text-sm font-bold text-midnight">Aucune donnée spécifique</h3>
+          <p class="text-xs text-text-secondary mt-1 max-w-xs">
+            L'établissement ne demande pas d'informations médicales particulières pour ce niveau.
           </p>
         </div>
       </ng-template>
     </div>
-  `
+  `,
+  styles: [`
+    .animate-fade { animation: fadeIn 0.4s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  `]
 })
 export class StepMedicalComponent {
   @Input() medical: any;
   @Input() customFields: FieldConfig[] = [];
 
-  readonly Info = Info;
+  readonly HeartPulse = HeartPulse;
 }
