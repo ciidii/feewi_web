@@ -68,6 +68,20 @@
             <app-fw-badge [status]="app.status" size="sm"></app-fw-badge>
             <h2 class="reference">Dossier #{{ app.reference }}</h2>
             <p class="student-name">{{ app.identity.firstName }} {{ app.identity.lastName }}</p>
+            
+            <!-- Resume Action for Drafts -->
+            <div *ngIf="app.status === 'DRAFT'" class="mt-6">
+              <app-fw-button 
+                variant="primary" 
+                size="md" 
+                [icon]="ArrowRight" 
+                iconPosition="right"
+                [routerLink]="['/enrollment/form-stepper']"
+                [queryParams]="{ reference: app.reference, accessCode: searchData.accessCode }"
+              >
+                Continuer l'inscription
+              </app-fw-button>
+            </div>
           </div>
           <div class="banner-icon">
             <lucide-icon [name]="CheckCircle" [size]="48" *ngIf="app.status === 'VALIDATED'"></lucide-icon>

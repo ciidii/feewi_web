@@ -46,3 +46,6 @@ Ce document suit l'état d'avancement du projet, les décisions architecturales 
     - [x] Modernisation du Step HUB, Guardian, Child steps, Vault et Review terminée.
     - [x] Modernisation de la Landing et du Tracker terminée.
     - [x] **Domaine Public (Phase 1) : 100% terminée (V2 Institutionnelle).**
+        - Refonte complète du tunnel d'inscription (Horizontal Stepper).
+        - Système de reprise de session (Session Recovery) via Reference/Code.
+        - Optimisation Mobile-First & Accessibilité.

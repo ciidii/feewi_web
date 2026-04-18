@@ -142,12 +142,20 @@ export class PublicFormStepperComponent implements OnInit {
   ngOnInit() {
     const p = this.route.snapshot.queryParamMap;
     const yearFromParam = p.get('yearId');
+    const reference = p.get('reference');
+    const accessCode = p.get('accessCode');
+
     if (yearFromParam) this.store.schooling.academicYearId = yearFromParam;
     this.admissionType.set((p.get('type') as any) ?? 'NEW_ENROLLMENT');
-    this.loadConfig();
+
+    if (reference && accessCode) {
+      this.loadConfig(reference, accessCode);
+    } else {
+      this.loadConfig();
+    }
   }
 
-  private loadConfig() {
+  private loadConfig(resumeRef?: string, resumeCode?: string) {
     this.loading.set(true);
     forkJoin({
       config:  this.enrollment.getDefaultConfig(),
@@ -166,8 +174,27 @@ export class PublicFormStepperComponent implements OnInit {
           if (active) this.store.schooling.academicYearId = active.id;
         }
 
-        this.restoreSession();
+        if (resumeRef && resumeCode) {
+          this.restoreFromParams(resumeRef, resumeCode);
+        } else {
+          this.restoreSession();
+        }
       }
+    });
+  }
+
+  private restoreFromParams(reference: string, accessCode: string) {
+    this.loading.set(true);
+    this.enrollment.getBundleByRef(reference, accessCode).pipe(
+      finalize(() => this.loading.set(false))
+    ).subscribe({
+      next: bundle => {
+        this.bundle.set(bundle);
+        this.syncFamilyStore(bundle);
+        this.globalPhase.set('HUB');
+        this.session.saveSession(bundle.id, bundle.accessCode, bundle.family.primaryGuardian.firstName);
+      },
+      error: () => this.notify.error('Référence ou code incorrect.')
     });
   }
 

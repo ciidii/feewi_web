@@ -14,6 +14,7 @@ export const API_ENDPOINTS = {
       // Admissons / Bundles
       CREATE_BUNDLE: '/public/admissions/bundles',
       GET_BUNDLE: (id: string) => `/public/admissions/bundles/${id}`,
+      GET_BUNDLE_BY_REF: (ref: string) => `/public/admissions/bundles/ref/${ref}`,
       ADD_CHILD: (bundleId: string) => `/public/admissions/bundles/${bundleId}/children`,
       UPDATE_PILLAR: (id: string, pillarKey: string) => `/public/admissions/${id}/pillars/${pillarKey}`,
       UPDATE_BUNDLE_PILLAR: (bundleId: string, pillarKey: string) => `/public/admissions/bundles/${bundleId}/pillars/${pillarKey}`,

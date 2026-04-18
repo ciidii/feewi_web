@@ -29,6 +29,12 @@
       </h1>
       <p class="hero-desc" *ngIf="welcomeMessage()">{{ welcomeMessage() }}</p>
       <p class="hero-desc" *ngIf="!welcomeMessage()">Bienvenue sur notre plateforme d'inscription simplifiée. Démarrez votre dossier en quelques minutes.</p>
+      
+      <div class="hero-actions mt-10 flex justify-center gap-4">
+         <app-fw-button variant="secondary" [icon]="Search" routerLink="/enrollment/tracker">
+            Reprendre une inscription
+         </app-fw-button>
+      </div>
     </section>
 
     <!-- Inscriptions Section -->

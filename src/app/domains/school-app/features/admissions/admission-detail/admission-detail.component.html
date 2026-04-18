@@ -9,7 +9,12 @@
       <div class="application-identity">
         <div class="ref-pill">#{{ app.reference }}</div>
         <h1>{{ app.identity.firstName }} {{ app.identity.lastName }}</h1>
-        <span class="app-type">{{ app.type === 'RE_ENROLLMENT' ? 'Réinscription' : 'Nouvelle Inscription' }}</span>
+        <div class="app-meta-row">
+          <span class="app-type">{{ app.type === 'RE_ENROLLMENT' ? 'Réinscription' : 'Nouvelle Inscription' }}</span>
+          <span class="channel-badge" [class.digital]="app.channel === 'DIGITAL'" [class.direct]="app.channel === 'DIRECT'">
+            {{ app.channel === 'DIGITAL' ? 'Portail' : 'Guichet' }}
+          </span>
+        </div>
       </div>
     </div>
 
@@ -24,6 +29,14 @@
             <lucide-icon [name]="isActionLoading() ? RefreshCw : ClipboardCheck" [size]="18"
                          [class.animate-spin]="isActionLoading()"></lucide-icon>
             <span>Vérifier conformité</span>
+          </button>
+        }
+
+        @if (app.status === 'TESTING') {
+          <button class="btn-action primary" (click)="admitManually()" [disabled]="isActionLoading()">
+            <lucide-icon [name]="isActionLoading() ? RefreshCw : BadgeCheck" [size]="18"
+                         [class.animate-spin]="isActionLoading()"></lucide-icon>
+            <span>Admettre</span>
           </button>
         }
 
@@ -204,6 +217,27 @@
           </div>
         </section>
 
+        <!-- CARTE : SERVICES SOUSCRITS -->
+        <section class="card col-span-12" *ngIf="app.subscriptions && app.subscriptions.length > 0">
+          <div class="card-header-modern">
+            <div class="icon-box text-violet-600 bg-violet-50">
+              <lucide-icon [name]="School" [size]="18"></lucide-icon>
+            </div>
+            <div class="title-meta">
+              <h2>Services parascolaires</h2>
+              <p>Services souscrits par la famille pour cet enfant.</p>
+            </div>
+          </div>
+          <div class="card-content">
+            <div class="services-chips">
+              <div *ngFor="let sub of app.subscriptions" class="service-chip">
+                <span class="service-code">{{ sub.serviceCode }}</span>
+                <span class="service-option" *ngIf="sub.optionCode">{{ sub.optionCode }}</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <!-- CARTE : ÉVALUATION -->
         <section class="card col-span-12 assessment-card"
                  *ngIf="['VERIFIED', 'TESTING', 'VALIDATED', 'REJECTED'].includes(app.status)">
@@ -354,6 +388,6 @@
 <div class="initial-loader" *ngIf="isLoading()">
   <div class="loader-content">
     <lucide-icon [name]="RefreshCw" [size]="48" class="animate-spin text-primary"></lucide-icon>
-    <p>Ouverture du dossier numérique V3...</p>
+    <p>Chargement du dossier...</p>
   </div>
 </div>

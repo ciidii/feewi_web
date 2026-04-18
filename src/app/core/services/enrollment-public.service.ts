@@ -94,6 +94,14 @@ export class EnrollmentPublicService {
       .pipe(catchError(this.handleError('Dossier introuvable')));
   }
 
+  /** Récupère un bundle via sa référence publique (session recovery) */
+  getBundleByRef(reference: string, accessCode: string): Observable<AdmissionBundleResponse> {
+    const params = new HttpParams().set('accessCode', accessCode);
+    return this.http
+      .get<AdmissionBundleResponse>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.GET_BUNDLE_BY_REF(reference)), { headers: this.getHeaders(), params })
+      .pipe(catchError(this.handleError('Dossier introuvable ou codes incorrects')));
+  }
+
   /** ÉTAPE 2 — Ajoute un enfant au bundle */
   addChild(bundleId: string, request: AddChildRequest): Observable<Admission> {
     return this.http

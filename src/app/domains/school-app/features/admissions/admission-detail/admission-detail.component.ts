@@ -526,4 +526,5 @@ export class AdmissionDetailComponent implements OnInit {
   protected readonly Info = Info;
   protected readonly Upload = Upload;
   protected readonly Trash2 = Trash2;
+  protected readonly BadgeCheck = BadgeCheck;
 }
