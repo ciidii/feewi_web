@@ -10,10 +10,12 @@ export const PUBLIC_ROUTES: Routes = [
     children: [
       {
         path: 'login',
+        title: 'auth.login.title',
         loadComponent: () => import('./auth/login/login.component').then(m => m.LoginComponent)
       },
       {
         path: 'forgot-password',
+        title: 'auth.forgot_password.title',
         loadComponent: () => import('./auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent)
       },
       // Redirection par défaut : /auth -> /auth/login
