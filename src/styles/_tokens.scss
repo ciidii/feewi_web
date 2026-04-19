@@ -29,6 +29,7 @@
   --fw-space-lg: calc(24px * var(--fw-space-multiplier));
   
   --fw-radius-md: 8px;
+  --fw-radius-full: 9999px;
   --fw-font-size-base: 0.875rem;
 
   /* ==========================================================================
@@ -45,11 +46,22 @@
   --fw-surface-page: var(--fw-raw-slate-50);
   --fw-surface-card: var(--fw-raw-white);
   --fw-surface-sunken: var(--fw-raw-slate-100);
+  --fw-surface-inverse: var(--fw-raw-slate-900);
   
   --fw-text-primary: var(--fw-raw-slate-900);
   --fw-text-secondary: #475569;
+  --fw-text-tertiary: #94a3b8;
+  --fw-text-placeholder: #94a3b8;
+  --fw-text-inverse: #ffffff;
+  --fw-text-link: var(--fw-primary);
+
   --fw-border: var(--fw-raw-slate-200);
   --fw-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+
+  /* --- MOUVEMENTS (Impératif 6) --- */
+  --fw-transition-fast: 150ms ease;
+  --fw-transition: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --fw-transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
 
   /* Statuts Métier */
   --fw-success: var(--fw-raw-green-600);

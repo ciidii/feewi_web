@@ -158,111 +158,210 @@ html { height: 100%; }
   }
 }
 
-/* --- DESIGN SYSTEM UTILITIES --- */
+/* --- AUTH LAYOUT SHELL --- */
 
-.fw-input {
-  width: 100%;
-  height: 44px;
-  background: var(--fw-surface-sunken);
-  border: 1.5px solid var(--fw-border);
-  border-radius: var(--fw-radius-md);
-  padding: 0 12px;
-  font-family: var(--fw-font-sans);
-  font-size: var(--fw-font-size-base);
-  font-weight: 500;
-  color: var(--fw-text-primary);
-  transition: var(--fw-transition-fast);
+.fw-auth-container {
+  position: fixed; /* Force le plein écran sans scroll */
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  background-color: var(--fw-surface-page);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--fw-space-xl);
+  overflow-y: auto;
+  
+  /* Background Premium avec halos */
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.05) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(15, 23, 42, 0.05) 0px, transparent 50%);
+}
 
-  &::placeholder {
-    color: var(--fw-text-placeholder);
-  }
+/* --- FLOATING AUTH CONTROLS --- */
+.fw-auth-top-bar {
+  position: absolute;
+  top: 2.5rem;
+  right: 2.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  z-index: 100;
 
-  &:focus-visible {
-    outline: 2px solid var(--fw-primary);
-    outline-offset: 2px;
-    border-color: var(--fw-primary);
-    background: var(--fw-surface-card);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    background: var(--fw-neutral-bg);
-  }
-
-  &.error {
-    border-color: var(--fw-error);
-    background: var(--fw-error-bg);
+  @media (max-width: 768px) {
+    display: none; /* On cache en haut sur mobile pour éviter l'encombrement */
   }
 }
 
-.mat-mdc-select.fw-select {
-  width: 100%;
-  height: 44px;
-  background: var(--fw-surface-sunken);
-  border: 1.5px solid var(--fw-border);
-  border-radius: var(--fw-radius-md);
-  padding: 0 12px;
+.fw-lang-picker {
+  display: flex;
+  background: var(--fw-surface-card);
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid var(--fw-border);
+  box-shadow: var(--fw-shadow-sm);
+
+  button {
+    padding: 6px 12px;
+    border: none;
+    background: transparent;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--fw-text-tertiary);
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s;
+    text-transform: uppercase;
+
+    &.active {
+      background: var(--fw-surface-inverse);
+      color: var(--fw-text-inverse);
+    }
+
+    &:hover:not(.active) {
+      color: var(--fw-primary);
+      background: var(--fw-primary-alpha);
+    }
+  }
+}
+
+/* --- DESIGN SYSTEM UTILITIES --- */
+
+.fw-input-wrapper {
   display: flex;
   align-items: center;
-  transition: var(--fw-transition-fast);
+  width: 100%;
+  height: 52px; /* Un peu plus généreux pour le confort */
+  background: var(--fw-surface-sunken);
+  border: 1.5px solid transparent;
+  border-radius: 14px;
+  transition: all var(--fw-transition-fast);
+  overflow: hidden;
 
-  .mat-mdc-select-trigger {
-    width: 100%;
+  .input-prefix, .input-suffix {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 100%;
+    color: var(--fw-text-tertiary);
+    transition: color 0.2s;
+    flex-shrink: 0;
+  }
+
+  .fw-input {
+    flex: 1;
+    height: 100%;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 16px 0 0; /* Pas de padding gauche, le prefix s'en occupe */
     font-family: var(--fw-font-sans);
-    font-size: var(--fw-font-size-base);
+    font-size: 15px;
     font-weight: 500;
     color: var(--fw-text-primary);
+    outline: none !important;
+    box-shadow: none !important;
+
+    &::placeholder {
+      color: var(--fw-text-placeholder);
+    }
+  }
+
+  &:hover {
+    background: #eef2f6;
   }
 
   &:focus-within {
-    outline: 2px solid var(--fw-primary);
-    outline-offset: 2px;
-    border-color: var(--fw-primary);
     background: var(--fw-surface-card);
+    border-color: var(--fw-primary);
+    box-shadow: 0 0 0 4px var(--fw-primary-alpha);
+    
+    .input-prefix {
+      color: var(--fw-primary);
+    }
   }
 
   &.error {
     border-color: var(--fw-error);
     background: var(--fw-error-bg);
+    &:focus-within { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1); }
+    .input-prefix { color: var(--fw-error); }
   }
 }
 
 .fw-field {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 20px;
+  gap: 10px;
+  margin-bottom: var(--fw-space-lg);
 
   .fw-label {
     display: block;
-    font-size: 0.75rem;
+    font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
     color: var(--fw-text-secondary);
-    letter-spacing: 0.05em;
-    margin-left: 2px;
+    letter-spacing: 0.1em; /* Plus d'espacement pour l'élégance */
+    margin-left: 4px;
 
     .required {
       color: var(--fw-error);
       margin-left: 2px;
     }
   }
+}
 
-  .fw-hint {
-    font-size: 0.6875rem;
-    color: var(--fw-text-tertiary);
-    margin-top: 4px;
+/* --- PREMIUM CHECKBOX --- */
+.fw-checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+
+  input[type="checkbox"] {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--fw-border);
+    border-radius: 6px;
+    background: var(--fw-surface-sunken);
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s;
+
+    &:checked {
+      background: var(--fw-primary);
+      border-color: var(--fw-primary);
+      
+      &::after {
+        content: "";
+        position: absolute;
+        left: 6px;
+        top: 2px;
+        width: 4px;
+        height: 8px;
+        border: solid white;
+        border-width: 0 2.5px 2.5px 0;
+        transform: rotate(45deg);
+      }
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--fw-primary);
+      outline-offset: 2px;
+    }
+
+    &:hover:not(:checked) {
+      border-color: var(--fw-text-tertiary);
+      background: #eef2f6;
+    }
   }
 
-  .fw-error {
-    font-size: 0.6875rem;
+  span {
+    font-size: 13px;
     font-weight: 600;
-    color: var(--fw-error);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    margin-top: 4px;
+    color: var(--fw-text-secondary);
   }
 }
 

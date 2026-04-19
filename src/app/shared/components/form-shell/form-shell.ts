@@ -1,14 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule, X, Save } from 'lucide-angular';
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, HostListener } from '@angular/core';
 import { FwButtonComponent } from '../button/button.component';
+import { A11yModule } from '@angular/cdk/a11y';
 
 export type FormShellMode = 'page' | 'dialog';
 
 @Component({
   selector: 'app-fw-form-shell',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, FwButtonComponent],
+  imports: [CommonModule, LucideAngularModule, FwButtonComponent, A11yModule],
   templateUrl: './form-shell.html',
   styleUrls: ['./form-shell.scss']
 })
@@ -43,5 +44,12 @@ export class FormShellComponent {
 
   onCancel() {
     this.cancel.emit();
+  }
+
+  @HostListener('window:keydown.escape')
+  onEscape() {
+    if (this.mode() === 'dialog') {
+      this.onCancel();
+    }
   }
 }

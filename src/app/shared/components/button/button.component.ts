@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { LucideAngularModule, Loader2 } from 'lucide-angular';
 import { Component, computed, Input } from '@angular/core';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'ghost' | 'destructive';
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'accent' | 'destructive' | 'tertiary';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 @Component({
@@ -51,15 +51,17 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      width: 100%; /* Occupe tout l'espace donné par l'hôte */
       gap: 8px;
-      font-family: var(--fw-font-sans);
-      font-weight: 700;
+      font-family: inherit;
+      font-weight: 600;
       border-radius: var(--fw-radius-md);
       border: 1.5px solid transparent;
       cursor: pointer;
       transition: var(--fw-transition-fast);
       white-space: nowrap;
       position: relative;
+      outline: none;
 
       &:disabled {
         opacity: 0.5;
@@ -68,44 +70,51 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
 
       /* Navigation Clavier (Impératif 6) */
       &:focus-visible {
-        outline: 2px solid var(--fw-primary);
+        outline: 2px solid var(--fw-interactive);
         outline-offset: 2px;
       }
 
-      // VARIANTES (Impératif 4)
+      /* --- VARIANTES --- */
       
       &.variant-primary {
+        background-color: var(--fw-surface-inverse);
+        color: var(--fw-text-inverse);
+        &:hover:not(:disabled) { background-color: #1e293b; transform: translateY(-1px); }
+      }
+
+      &.variant-accent {
         background-color: var(--fw-primary);
         color: var(--fw-text-inverse);
-        &:hover:not(:disabled) { background-color: var(--fw-primary-hover); transform: translateY(-1px); }
+        &:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
       }
 
       &.variant-secondary {
-        background-color: var(--fw-surface-inverse);
+        background-color: var(--fw-surface-sunken);
+        color: var(--fw-text-secondary);
+        border-color: var(--fw-border);
+        &:hover:not(:disabled) { background-color: var(--fw-raw-white); border-color: var(--fw-primary); color: var(--fw-text-primary); }
+      }
+
+      &.variant-ghost {
+        background-color: transparent;
+        color: var(--fw-text-secondary);
+        &:hover:not(:disabled) { background-color: var(--fw-interactive-subtle); color: var(--fw-primary); }
+      }
+
+      &.variant-danger, &.variant-destructive {
+        background-color: var(--fw-destructive);
         color: var(--fw-text-inverse);
-        &:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+        &:hover:not(:disabled) { background-color: var(--fw-destructive-hover); transform: translateY(-1px); }
       }
 
       &.variant-tertiary {
         background-color: var(--fw-surface-sunken);
         color: var(--fw-text-secondary);
         border-color: var(--fw-border);
-        &:hover:not(:disabled) { background-color: var(--fw-white); color: var(--fw-text-primary); border-color: var(--fw-primary); }
+        &:hover:not(:disabled) { background-color: var(--fw-raw-white); border-color: var(--fw-primary); color: var(--fw-text-primary); }
       }
 
-      &.variant-ghost {
-        background-color: transparent;
-        color: var(--fw-text-secondary);
-        &:hover:not(:disabled) { background-color: var(--fw-surface-sunken); color: var(--fw-primary); }
-      }
-
-      &.variant-destructive {
-        background-color: var(--fw-destructive);
-        color: var(--fw-text-inverse);
-        &:hover:not(:disabled) { background-color: var(--fw-destructive-hover); box-shadow: 0 4px 12px var(--fw-destructive-bg); }
-      }
-
-      // TAILLES (Gestion de la densité via variables CSS)
+      /* --- TAILLES (Alignées sur la grille 8pt) --- */
       &.size-sm { 
         height: 32px; 
         padding: 0 var(--fw-space-sm); 
@@ -121,12 +130,11 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
         height: 56px; 
         padding: 0 var(--fw-space-lg); 
         font-size: 1rem; 
-        border-radius: var(--fw-radius-lg); 
       }
     }
 
-    .animate-spin { animation: spin 1s linear infinite; }
-    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .animate-spin { animation: fw-spin 1s linear infinite; }
+    @keyframes fw-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   `]
 })
 export class FwButtonComponent {
@@ -149,7 +157,7 @@ export class FwButtonComponent {
     switch (this.size) {
       case 'sm': return 14;
       case 'lg': return 20;
-      default: return 18;
+      default: return 16;
     }
   });
 

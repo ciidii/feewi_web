@@ -75,8 +75,8 @@ import { TenantContextService } from '../../../core/services/tenant-context.serv
       .brand-logo {
         width: 40px;
         height: 40px;
-        background: var(--fw-midnight);
-        color: white;
+        background: var(--fw-surface-inverse);
+        color: var(--fw-text-inverse);
         border-radius: 10px;
         display: grid;
         place-items: center;
@@ -87,7 +87,7 @@ import { TenantContextService } from '../../../core/services/tenant-context.serv
       .brand-info {
         display: flex;
         flex-direction: column;
-        .brand-name { font-family: var(--fw-font-display); font-weight: 800; font-size: 0.9375rem; color: var(--fw-midnight); letter-spacing: -0.02em; line-height: 1.1; }
+        .brand-name { font-family: var(--fw-font-display); font-weight: 800; font-size: 0.9375rem; color: var(--fw-text-primary); letter-spacing: -0.02em; line-height: 1.1; }
         .brand-tagline { font-size: 10px; font-weight: 600; color: var(--fw-text-tertiary); text-transform: uppercase; letter-spacing: 0.02em; }
       }
     }

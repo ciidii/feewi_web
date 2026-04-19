@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { LucideAngularModule, AlertTriangle, CheckCircle, Info, HelpCircle } from 'lucide-angular';
 import { FwModalShellComponent } from '../modal-shell/modal-shell.component';
-import { FwButtonComponent } from '../button/button.component';
+import { FwButtonComponent, ButtonVariant } from '../button/button.component';
 
 export interface ConfirmDialogData {
   title: string;
@@ -40,8 +40,8 @@ export class ConfirmDialogComponent {
     }
   }
 
-  getButtonVariant() {
-    if (this.data.type === 'destructive') return 'destructive';
+  getButtonVariant(): ButtonVariant {
+    if (this.data.type === 'destructive') return 'danger';
     return 'primary';
   }
 

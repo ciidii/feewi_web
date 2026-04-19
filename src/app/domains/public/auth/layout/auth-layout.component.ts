@@ -6,20 +6,7 @@ import { RouterModule } from '@angular/router';
   selector: 'app-auth-layout',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  template: `
-    <div class="auth-minimal-container">
-      <router-outlet></router-outlet>
-    </div>
-  `,
-  styles: [`
-    .auth-minimal-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      background-color: #f8fafc;
-      padding: 1.5rem;
-    }
-  `]
+  template: `<router-outlet></router-outlet>`,
+  styles: [`:host { display: block; }`]
 })
 export class AuthLayoutComponent {}

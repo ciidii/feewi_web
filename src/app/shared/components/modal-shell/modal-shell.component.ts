@@ -1,13 +1,14 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule, X } from 'lucide-angular';
+import { A11yModule } from '@angular/cdk/a11y';
 
 @Component({
   selector: 'app-fw-modal-shell',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [CommonModule, LucideAngularModule, A11yModule],
   template: `
-    <div class="fw-modal-container animate-in fade-in zoom-in duration-200">
+    <div class="fw-modal-container animate-in fade-in zoom-in duration-200" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
       <!-- HEADER -->
       <header class="modal-header">
         <div class="title-zone">
@@ -122,9 +123,9 @@ import { LucideAngularModule, X } from 'lucide-angular';
     /* Scrollbar personnalisée pour la modale */
     .custom-scrollbar::-webkit-scrollbar { width: 6px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { 
-      background: var(--fw-border-strong); 
-      border-radius: 10px; 
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: var(--fw-border-strong);
+      border-radius: 10px;
     }
   `]
 })
@@ -136,4 +137,8 @@ export class FwModalShellComponent {
   @Output() close = new EventEmitter<void>();
 
   readonly XIcon = X;
+  @HostListener('window:keydown.escape')
+  onEscape() {
+    this.close.emit();
+  }
 }

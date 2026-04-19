@@ -11,13 +11,13 @@ const STATUS_MAP: Record<string, BadgeConfig> = {
   SUBMITTED:  { label: 'Soumis',         token: 'info'    },
   VERIFIED:   { label: 'Vérifié',        token: 'info'    },
   TESTING:    { label: 'En évaluation',  token: 'warning' },
-  ADMITTED:   { label: 'Admis pédago.',   token: 'success' },
-  VALIDATED:  { label: 'Inscrit',        token: 'success' },
+  ADMITTED:   { label: 'Admis',          token: 'success' },
+  VALIDATED:  { label: 'Validé',         token: 'success' },
   WAITLIST:   { label: 'Liste d\'attente',token: 'warning' },
   REJECTED:   { label: 'Rejeté',         token: 'error'   },
   CANCELLED:  { label: 'Annulé',         token: 'neutral' },
   ACTIVE:     { label: 'Actif',          token: 'success' },
-  SUSPENDED:  { label: 'Suspendu',       token: 'warning' },
+  SUSPENDED:  { label: 'Suspendu',       token: 'error'   },
   LEFT:       { label: 'Sorti',          token: 'error'   },
   ARCHIVED:   { label: 'Archivé',        token: 'neutral' },
   REQUIRED:   { label: 'Obligatoire',    token: 'error'   },
@@ -44,7 +44,7 @@ const STATUS_MAP: Record<string, BadgeConfig> = {
       gap: 6px;
       padding: 4px 10px;
       border-radius: var(--fw-radius-full);
-      font-family: var(--fw-font-sans);
+      font-family: inherit;
       font-size: 10px;
       font-weight: 800;
       text-transform: uppercase;

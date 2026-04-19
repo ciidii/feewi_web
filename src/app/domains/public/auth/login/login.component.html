@@ -1,86 +1,104 @@
-<div class="min-h-screen bg-surface-page flex items-center justify-center p-6 animate-fade">
-  <div class="w-full max-w-md bg-white p-10 rounded-3xl border border-border shadow-lg">
-    
-    <!-- Header : Logo & Titre -->
-    <div class="text-center mb-10">
-      <div class="inline-flex mb-6">
-        <img src="feewi-logo-compact.svg" alt="Feewi" class="w-14 h-14" />
-      </div>
-      <h1 class="text-2xl font-display font-black text-midnight tracking-tight">Console d'accès</h1>
-      <p class="text-sm text-text-secondary font-medium mt-2">Gérez votre établissement en toute simplicité.</p>
+<div class="fw-auth-container">
+  
+  <!-- Floating Top Bar (Langue + Quick Help) -->
+  <div class="fw-auth-top-bar">
+    <div class="fw-lang-picker">
+      <button [class.active]="translate.currentLang === 'fr'" (click)="changeLanguage('fr')">FR</button>
+      <button [class.active]="translate.currentLang === 'en'" (click)="changeLanguage('en')">EN</button>
     </div>
+  </div>
 
-    <!-- Formulaire de Connexion -->
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
+  <div class="login-card">
+    
+    <!-- Header Premium -->
+    <header class="login-header">
+      <div class="logo-box">
+        <img src="feewi-icon.svg" alt="Feewi Icon" />
+      </div>
+      <h1 class="title">{{ 'auth.login.title' | translate }}</h1>
+      <p class="subtitle">{{ 'auth.login.subtitle' | translate }}</p>
+    </header>
+
+    <!-- Formulaire -->
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
       
-      <div class="space-y-4">
+      <div class="fields-zone space-y-6">
         <!-- Email Field -->
         <div class="fw-field">
-          <label class="fw-label">Identifiant</label>
-          <div class="relative group">
-            <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-text-tertiary group-focus-within:text-primary transition-colors">
-              <lucide-icon [name]="Mail" [size]="18"></lucide-icon>
+          <label class="fw-label">{{ 'auth.login.fields.email.label' | translate }}</label>
+          <div class="fw-input-wrapper" [class.error]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+            <div class="input-prefix">
+              <lucide-icon [name]="Mail" [size]="20"></lucide-icon>
             </div>
             <input 
               type="email" 
               formControlName="email"
-              placeholder="votre@email.com"
-              class="fw-input pl-10"
-              [class.error]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+              [placeholder]="'auth.login.fields.email.placeholder' | translate"
+              class="fw-input"
             />
           </div>
         </div>
 
         <!-- Password Field -->
         <div class="fw-field">
-          <div class="flex justify-between items-center mb-1">
-            <label class="fw-label">Mot de passe</label>
-            <a routerLink="/auth/forgot-password" class="text-[10px] font-bold text-primary uppercase hover:underline tracking-tighter">Oublié ?</a>
-          </div>
-          <div class="relative group">
-            <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-text-tertiary group-focus-within:text-primary transition-colors">
-              <lucide-icon [name]="Lock" [size]="18"></lucide-icon>
+          <label class="fw-label">{{ 'auth.login.fields.password.label' | translate }}</label>
+          <div class="fw-input-wrapper" [class.error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+            <div class="input-prefix">
+              <lucide-icon [name]="Lock" [size]="20"></lucide-icon>
             </div>
             <input 
               [type]="showPassword() ? 'text' : 'password'"
               formControlName="password"
-              placeholder="••••••••"
-              class="fw-input pl-10 pr-12"
-              [class.error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+              [placeholder]="'auth.login.fields.password.placeholder' | translate"
+              class="fw-input"
             />
             <button 
               type="button"
               (click)="togglePassword()"
-              class="absolute inset-y-0 right-3 flex items-center text-text-tertiary hover:text-midnight transition-colors"
+              class="input-suffix bg-transparent border-none cursor-pointer hover:text-text-primary transition-colors"
             >
-              <lucide-icon [name]="showPassword() ? EyeOff : Eye" [size]="16"></lucide-icon>
+              <lucide-icon [name]="showPassword() ? EyeOff : Eye" [size]="18"></lucide-icon>
             </button>
+          </div>
+          <div class="field-footer">
+            <label class="fw-checkbox-wrapper">
+              <input type="checkbox" formControlName="rememberMe">
+              <span>{{ 'auth.login.fields.remember_me' | translate }}</span>
+            </label>
+            <a routerLink="/auth/forgot-password" class="forgot-link">
+              {{ 'auth.login.fields.password.forgot' | translate }}
+            </a>
           </div>
         </div>
       </div>
 
-      <!-- Error Alert -->
-      <div *ngIf="loginError()" class="bg-error-bg border border-error-border p-4 rounded-xl flex gap-3 items-center animate-shake">
-         <lucide-icon [name]="AlertCircle" [size]="18" class="text-error"></lucide-icon>
-         <p class="text-xs font-bold text-error">Accès refusé. Vos identifiants sont incorrects.</p>
-      </div>
+      <!-- Alert d'erreur -->
+      <app-fw-alert-banner *ngIf="loginError()" variant="error" class="mt-6">
+        {{ 'auth.login.errors.invalid_credentials' | translate }}
+      </app-fw-alert-banner>
 
-      <!-- Submit Button -->
-      <app-fw-button 
-        type="submit" 
-        [disabled]="loginForm.invalid"
-        [loading]="isLoading()"
-        variant="primary"
-        class="w-full"
-      >
-        Démarrer la session
-      </app-fw-button>
+      <!-- Zone d'Action Principale -->
+      <div class="form-actions">
+        <app-fw-button 
+          type="submit" 
+          [disabled]="loginForm.invalid"
+          [loading]="isLoading()"
+          variant="primary"
+          size="lg"
+        >
+          {{ 'auth.login.actions.submit' | translate }}
+        </app-fw-button>
+      </div>
     </form>
 
-    <!-- Footer -->
-    <div class="mt-12 text-center">
-      <p class="text-[10px] text-text-tertiary font-bold uppercase tracking-widest">Feewi Platform &copy; 2026</p>
-    </div>
+    <!-- Support & Footer -->
+    <footer class="login-footer">
+      <div class="support-zone">
+        <lucide-icon [name]="HelpCircle" [size]="14"></lucide-icon>
+        <a href="#" class="support-link">{{ 'auth.login.footer.support' | translate }}</a>
+      </div>
+      <p class="copyright">{{ 'auth.login.footer.copyright' | translate }}</p>
+    </footer>
 
   </div>
 </div>

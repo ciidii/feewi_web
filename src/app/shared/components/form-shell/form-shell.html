@@ -1,4 +1,4 @@
-<div class="fw-form-shell-container animate-in" [ngClass]="mode()">
+<div class="fw-form-shell-container animate-in" [ngClass]="mode()" cdkTrapFocus [cdkTrapFocusAutoCapture]="mode() === 'dialog'">
 
   <!-- HEADER -->
   <header class="form-header">

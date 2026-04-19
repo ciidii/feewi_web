@@ -1,0 +1,36 @@
+{
+  "auth": {
+    "login": {
+      "title": "Console d'accès",
+      "subtitle": "Entrez vos identifiants pour piloter votre établissement.",
+      "fields": {
+        "email": {
+          "label": "Identifiant",
+          "placeholder": "votre@email.com"
+        },
+        "password": {
+          "label": "Mot de passe",
+          "placeholder": "••••••••",
+          "forgot": "Mot de passe oublié ?"
+        },
+        "remember_me": "Rester connecté"
+      },
+      "actions": {
+        "submit": "Démarrer la session"
+      },
+      "errors": {
+        "invalid_credentials": "Identifiants incorrects. Veuillez vérifier votre saisie ou contacter le support technique."
+      },
+      "footer": {
+        "support": "Besoin d'aide ? Contacter le support",
+        "copyright": "Feewi Platform — Version 2026.4"
+      }
+    }
+  },
+  "global": {
+    "languages": {
+      "fr": "Français",
+      "en": "English"
+    }
+  }
+}
