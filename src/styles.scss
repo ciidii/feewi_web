@@ -157,11 +157,10 @@ html { height: 100%; }
     background-color: var(--fw-ice) !important;
   }
 }
-
-/* --- AUTH LAYOUT SHELL --- */
+/* --- AUTHENTIFICATION SHELL (PREMIUM) --- */
 
 .fw-auth-container {
-  position: fixed; /* Force le plein écran sans scroll */
+  position: fixed;
   inset: 0;
   width: 100vw;
   height: 100dvh;
@@ -171,14 +170,119 @@ html { height: 100%; }
   justify-content: center;
   padding: var(--fw-space-xl);
   overflow-y: auto;
-  
-  /* Background Premium avec halos */
   background-image: 
-    radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.05) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(15, 23, 42, 0.05) 0px, transparent 50%);
+    radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.04) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(15, 23, 42, 0.04) 0px, transparent 50%);
 }
 
-/* --- FLOATING AUTH CONTROLS --- */
+.login-card {
+  width: 100%;
+  max-width: 440px;
+  background-color: var(--fw-surface-card);
+  padding: 3rem 2.5rem;
+  border-radius: 32px;
+  border: 1px solid rgba(15, 23, 42, 0.05);
+  box-shadow: 
+    0 10px 15px -3px rgba(15, 23, 42, 0.08),
+    0 40px 60px -15px rgba(15, 23, 42, 0.05);
+  animation: fw-auth-entrance 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+
+  @media (max-width: 768px) {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 2rem 1.5rem;
+  }
+}
+
+.login-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 2.5rem;
+
+  .logo-box {
+    width: 64px;
+    height: 64px;
+    background: var(--fw-surface-sunken);
+    border-radius: 20px;
+    display: grid;
+    place-items: center;
+    margin-bottom: 1.5rem;
+    color: var(--fw-primary);
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border: 1px solid var(--fw-primary-alpha);
+      border-radius: 24px;
+      opacity: 0.5;
+    }
+
+    img, lucide-icon { width: 32px; height: 32px; }
+  }
+
+  .role-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    background: var(--fw-primary-alpha);
+    color: var(--fw-primary);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    border-radius: var(--fw-radius-full);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+  }
+
+  .title {
+    font-family: var(--fw-font-display);
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--fw-text-primary);
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    margin: 0 0 0.5rem;
+  }
+
+  .subtitle {
+    font-size: 0.875rem;
+    color: var(--fw-text-secondary);
+    font-weight: 500;
+    max-width: 280px;
+    line-height: 1.5;
+    margin: 0;
+  }
+}
+
+@keyframes fw-auth-entrance {
+  from { opacity: 0; transform: translateY(20px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.login-form {
+  .form-actions {
+    margin-top: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+
+    app-fw-button {
+      width: 240px; 
+
+      @media (max-width: 768px) {
+        width: 100%;
+      }
+    }
+  }
+}
+
+/* --- DESIGN SYSTEM UTILITIES --- */
+
 .fw-auth-top-bar {
   position: absolute;
   top: 2.5rem;

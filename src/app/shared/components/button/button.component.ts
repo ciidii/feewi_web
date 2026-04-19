@@ -64,8 +64,10 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
       outline: none;
 
       &:disabled {
-        opacity: 0.5;
+        opacity: 0.4;
         cursor: not-allowed;
+        pointer-events: none; /* Bloque toute interaction */
+        filter: grayscale(0.2);
       }
 
       /* Navigation Clavier (Impératif 6) */

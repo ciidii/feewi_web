@@ -2,10 +2,11 @@ import { Component, inject, signal, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { LucideAngularModule, Mail, ArrowLeft, Info, KeyRound } from 'lucide-angular';
+import { LucideAngularModule, Mail, ArrowLeft, Info } from 'lucide-angular';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { FwButtonComponent } from '../../../../shared/components/button/button.component';
+import { FwAlertBannerComponent } from '../../../../shared/components/alert-banner/alert-banner.component';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
@@ -17,6 +18,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
     RouterModule, 
     LucideAngularModule, 
     FwButtonComponent,
+    FwAlertBannerComponent,
     TranslateModule
   ],
   templateUrl: './forgot-password.component.html',
@@ -33,7 +35,6 @@ export class ForgotPasswordComponent {
   readonly Mail = Mail;
   readonly ArrowLeft = ArrowLeft;
   readonly Info = Info;
-  readonly KeyRound = KeyRound;
 
   isLoading = signal(false);
 
