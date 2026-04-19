@@ -1,38 +1,24 @@
-<div class="confirm-dialog animate-in fade-in zoom-in duration-300">
-  
-  <!-- Icon Section -->
-  <div class="dialog-header">
-    <div class="icon-wrap" [ngClass]="data.type || 'danger'">
-      <lucide-icon 
-        [name]="data.type === 'info' ? Info : (data.type === 'warning' ? AlertTriangle : Trash2)" 
-        class="w-8 h-8"
-      ></lucide-icon>
+<app-fw-modal-shell 
+  [title]="data.title" 
+  (close)="onCancel()"
+>
+  <div class="confirm-body">
+    <div class="icon-indicator" [ngClass]="data.type || 'info'">
+      <lucide-icon [name]="getIcon()" [size]="32"></lucide-icon>
     </div>
-    <button (click)="onCancel()" class="close-btn">
-      <lucide-icon [name]="X" class="w-4 h-4"></lucide-icon>
-    </button>
+    
+    <p class="confirm-message">{{ data.message }}</p>
   </div>
 
-  <!-- Content Section -->
-  <div class="dialog-body text-center">
-    <h2 class="text-xl font-bold text-slate-900 mb-2">{{ data.title }}</h2>
-    <p class="text-sm text-slate-500 leading-relaxed">{{ data.message }}</p>
-  </div>
-
-  <!-- Footer Actions -->
-  <footer class="dialog-footer">
-    <button 
-      (click)="onCancel()" 
-      class="secondary-btn"
-    >
+  <div footer-left>
+    <app-fw-button variant="ghost" (click)="onCancel()">
       {{ data.cancelLabel || 'Annuler' }}
-    </button>
-    <button 
-      (click)="onConfirm()" 
-      class="action-btn"
-      [ngClass]="data.type || 'danger'"
-    >
+    </app-fw-button>
+  </div>
+
+  <div footer-right>
+    <app-fw-button [variant]="getButtonVariant()" (click)="onConfirm()">
       {{ data.confirmLabel || 'Confirmer' }}
-    </button>
-  </footer>
-</div>
+    </app-fw-button>
+  </div>
+</app-fw-modal-shell>

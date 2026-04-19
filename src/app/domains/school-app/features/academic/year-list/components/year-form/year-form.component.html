@@ -1,4 +1,4 @@
-<app-form-shell
+<app-fw-form-shell
   title="Planifier une Rentrée"
   subtitle="Initialisez le calendrier administratif et pédagogique pour la nouvelle année."
   [icon]="Calendar"
@@ -26,7 +26,7 @@
             <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors">
               <lucide-icon [name]="Type" class="w-4.5 h-4.5"></lucide-icon>
             </div>
-            <input type="text" formControlName="label" placeholder="ex: 2025-2026" class="fw-input-field" [class.error]="isInvalid('label')"/>
+            <input type="text" formControlName="label" placeholder="ex: 2025-2026" class="fw-input" [class.error]="isInvalid('label')"/>
           </div>
         </div>
 
@@ -36,7 +36,7 @@
             <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors z-10">
               <lucide-icon [name]="Clock" class="w-4.5 h-4.5"></lucide-icon>
             </div>
-            <mat-select formControlName="systemType" class="fw-select-field">
+            <mat-select formControlName="systemType" class="fw-select">
               <mat-option value="TRIMESTER">Trimestriel (3 périodes)</mat-option>
               <mat-option value="SEMESTER">Semestriel (2 périodes)</mat-option>
               <mat-option value="ANNUAL">Annuel (1 période)</mat-option>
@@ -57,11 +57,11 @@
       <div class="grid grid-cols-2 gap-6">
         <div class="space-y-2">
           <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1 text-emerald-600">Début d'exercice</label>
-          <input type="date" formControlName="adminStartDate" class="fw-input-field" [class.error]="isInvalid('adminStartDate')"/>
+          <input type="date" formControlName="adminStartDate" class="fw-input" [class.error]="isInvalid('adminStartDate')"/>
         </div>
         <div class="space-y-2">
           <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1 text-rose-600">Fin d'exercice</label>
-          <input type="date" formControlName="adminEndDate" class="fw-input-field" [class.error]="isInvalid('adminEndDate')"/>
+          <input type="date" formControlName="adminEndDate" class="fw-input" [class.error]="isInvalid('adminEndDate')"/>
         </div>
       </div>
     </div>
@@ -77,11 +77,11 @@
       <div class="grid grid-cols-2 gap-6">
         <div class="space-y-2">
           <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Début des leçons</label>
-          <input type="date" formControlName="lessonsStartDate" class="fw-input-field"/>
+          <input type="date" formControlName="lessonsStartDate" class="fw-input"/>
         </div>
         <div class="space-y-2">
           <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Fin des leçons</label>
-          <input type="date" formControlName="lessonsEndDate" class="fw-input-field"/>
+          <input type="date" formControlName="lessonsEndDate" class="fw-input"/>
         </div>
       </div>
     </div>
@@ -94,4 +94,4 @@
     </div>
 
   </form>
-</app-form-shell>
+</app-fw-form-shell>

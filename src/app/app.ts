@@ -1,12 +1,13 @@
-import {Component, inject, signal, ViewEncapsulation} from '@angular/core';
+import { Component, inject, signal, ViewEncapsulation } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { LoaderComponent } from './shared/components/loader/loader';
-import {LoadingService} from './shared/services/loading.service';
+import { CommonModule } from '@angular/common';
+import { SplashScreenComponent } from './shared/components/loader/splash-screen.component';
+import { LoadingService } from './shared/services/loading.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, LoaderComponent],
+  imports: [CommonModule, RouterOutlet, SplashScreenComponent],
   templateUrl: './app.html',
   encapsulation: ViewEncapsulation.None
 })

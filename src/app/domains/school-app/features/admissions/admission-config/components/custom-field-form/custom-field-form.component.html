@@ -1,4 +1,4 @@
-<app-form-shell
+<app-fw-form-shell
   title="Ajouter une Question"
   subtitle="Créez un nouveau champ de saisie personnalisé pour le formulaire d'admission."
   [icon]="MessageSquare"
@@ -21,7 +21,7 @@
           type="text" 
           formControlName="label" 
           placeholder="Ex: Allergies alimentaires de l'enfant ?" 
-          class="fw-input-field"
+          class="fw-input"
           [class.error]="isInvalid('label')"
         />
       </div>
@@ -31,7 +31,7 @@
     <div class="grid grid-cols-2 gap-4">
       <div class="space-y-2">
         <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Type de réponse</label>
-        <select formControlName="type" class="fw-input-field">
+        <select formControlName="type" class="fw-input">
           <option value="TEXT">Texte court</option>
           <option value="NUMBER">Nombre</option>
           <option value="DATE">Date</option>
@@ -45,7 +45,7 @@
           type="text" 
           formControlName="placeholder" 
           placeholder="Ex: Précisez ici..." 
-          class="fw-input-field"
+          class="fw-input"
         />
       </div>
     </div>
@@ -63,4 +63,4 @@
     </div>
 
   </form>
-</app-form-shell>
+</app-fw-form-shell>

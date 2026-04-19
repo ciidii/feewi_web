@@ -11,11 +11,21 @@ import { TableRow, RowAction } from '../../../../../../../shared/models/data-lis
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ConfirmDialogComponent } from '../../../../../../../shared/components/confirm-dialog/confirm-dialog';
 import { SyllabusViewerComponent } from '../syllabus-viewer/syllabus-viewer';
+import { FwModalShellComponent } from '../../../../../../../shared/components/modal-shell/modal-shell.component';
+import { FwButtonComponent } from '../../../../../../../shared/components/button/button.component';
 
 @Component({
   selector: 'app-curriculum-manager',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, MatDialogModule, DataListComponent, ReactiveFormsModule],
+  imports: [
+    CommonModule, 
+    LucideAngularModule, 
+    MatDialogModule, 
+    DataListComponent, 
+    ReactiveFormsModule,
+    FwModalShellComponent,
+    FwButtonComponent
+  ],
   templateUrl: './curriculum-manager.html',
   styleUrls: ['./curriculum-manager.scss']
 })

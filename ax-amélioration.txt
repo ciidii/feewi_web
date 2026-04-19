@@ -1,0 +1,104 @@
+1. La grille de densité (Compact vs Comfortable)voici les 10 impératifs non-négociables à définir dans ton Design System, au-delà des simples couleurs et polices.
+
+Ces éléments répondent à la contrainte majeure de l’enterprise : gérer la complexité, la performance et l’accessibilité pour des utilisateurs experts.
+
+1. La grille de densité (Compact vs Comfortable)
+  En enterprise, les utilisateurs passent 8h/jour sur l’outil. Ils veulent voir un max de données sans scroller.
+
+                                                Impératif : Définir 2 modes (compact, confortable) avec des variables de spacing différentes.
+
+                                                Exemple : Un tableau de bord mode “compact” aura des padding de 8px, mode “confortable” 16px.
+
+                                                2. Les états des données (pas juste les états des composants)
+                                                C’est le plus important et le plus souvent oublié. Tu dois définir le comportement UI pour chaque type de contenu :
+
+                                                États vides (Empty states) : Zéro résultat, premier lancement, données effacées.
+
+                                                États de chargement : Skeleton screens (prioritaires) vs spinners.
+
+                                                États d’erreur : Erreur champ (inline), erreur globale (toast), erreur serveur (bannière).
+
+                                                États "trop de données" : Que se passe-t-il si une cellule contient 500 caractères ? Troncature avec … + tooltip.
+
+                                                3. Le système de rafraîchissement et polling
+                                                Les données enterprise changent en temps réel (stocks, tickets, logs).
+
+                                                Impératif : Définir l’UI du stale data. Ex : Un bandeau jaune “Nouvelles données disponibles - Actualiser”.
+
+                                                Règle : Ne jamais recharger toute la page sans prévenir l’utilisateur.
+
+                                                4. La matrice de priorité des actions
+                                                Dans un formulaire complexe, tu as 15 actions possibles. Il faut une hiérarchie absolue.
+
+                                                Primary (1 seule par vue) : Sauvegarder, Soumettre.
+
+                                                Secondary (plusieurs) : Dupliquer, Exporter.
+
+                                                Tertiary (textes/ghost) : Annuler, Paramètres avancés.
+
+                                                Destructive (toujours avec confirmation modale) : Supprimer, Archiver.
+
+                                                Règle d’or : Interdire les boutons “oui/non” côte à côte de même poids visuel.
+
+                                                5. Le comportement des tableaux (Data tables)
+                                                C’est le composant roi de l’enterprise. Sans specs, c’est le chaos.
+
+                                                Colonnes : Redimensionnables ? Réorganisables par drag & drop ?
+
+                                                Tri : Multi-colonnes (Shift+clic) ou simple ? Indicateur de tri asc/desc.
+
+                                                Sélection : Checkbox dans l’en-tête (tout sélectionner sur la page vs tous les résultats).
+
+                                                Pagination : Infinie vs “Charger plus” vs pages numérotées (définir seuil : au-delà de 500 lignes, passage en pagination).
+
+                                                6. Le système de focus et navigation clavier (Non-négociable)
+                                                Tes utilisateurs sont des admin sys ou des data analysts. Ils détestent la souris.
+
+                                                Impératif : :focus-visible visible (pas ce putain de outline: none).
+
+                                                Raccourcis clavier standards : Enter (valider), Esc (fermer modale), Ctrl/Cmd + S (sauvegarder), Tab (ordre logique dans les modales).
+
+                                                Focus trap : Dans une modale, le tab ne doit jamais sortir de la modale.
+
+                                                7. Les stratégies de truncation et tooltips
+                                                Sur un écran 13 pouces, une ligne de texte trop longue doit être gérée.
+
+                                                Règle : Truncation à 100% de la largeur du conteneur (pas de max-width fixe en px).
+
+                                                Tooltip : Apparaît uniquement si le texte est tronqué (détecté par JS). Ne pas mettre de tooltip sur un texte visible, ça fatigue l’utilisateur expert.
+
+                                                8. Les variables de thème pour “Dark mode” mais surtout “High contrast”
+                                                En entreprise, il y a des conditions de luminosité extrêmes (open-space, salle serveur, télétravail).
+
+                                                Impératif : Ton design system doit avoir un mode High Contrast (WCAG AAA) pour la conformité légale (Americans with Disabilities Act - ADA).
+
+                                                Bonus : Le mode “Daltonien” (simulation de couleurs) pour les graphiques (Charts).
+
+                                                9. Le système de notification (Toasts vs Banners vs Modales)
+                                                Ne pas spammer l’utilisateur.
+
+                                                Toast (snackbar) : Action non-bloquante, disparaît auto. Durée de vie : 5 secondes max. Jamais pour une erreur critique.
+
+                                                Banner (inline) : Dans la page, persistant. Pour erreur de soumission ou avertissement.
+
+                                                Modale : Bloquante. Pour destruction de données ou décision irréversible.
+
+                                                Centre de notification : Icône cloche + historique des 30 derniers events.
+
+                                                10. Le système de date / heure et fuseaux horaires (Le cauchemar)
+                                                Pour une équipe globale, c’est le premier bug.
+
+                                                Impératif : Stocker en UTC, afficher dans le fuseau du navigateur.
+
+                                                Formats absolus : 14 mars 2025 à 15:42 UTC+1 (pas de “il y a 3 minutes” pour les logs).
+
+                                                Composant Date Picker : Doit gérer les plages de dates (Date range) et les sélections rapides (“Aujourd’hui”, “Ce mois”, “Dernières 24h”).
+
+                                                Checklist de livraison (le livrable minimal)
+                                                Si tu présentes un Design System enterprise, apporte ces 3 artefacts :
+
+                                                Le Storybook avec les états loading, empty, error de chaque composant.
+
+                                                La page des tokens (CSS variables) pour le mode compact/comfortable.
+
+                                                Le guide de focus clavier (une vidéo Loom de 2 minutes montrant la navigation au clavier dans un tableau et une modale).

@@ -1,95 +1,71 @@
-<app-form-shell
+<app-fw-form-shell
   [title]="isEditMode ? 'Modifier le Niveau' : 'Ajouter un Niveau'"
-  [subtitle]="isEditMode ? 'Mise à jour des paramètres de l\'échelon pédagogique.' : 'Définissez un nouvel échelon pédagogique dans votre établissement.'"
+  [subtitle]="isEditMode ? 'Mise à jour des paramètres de l\'échelon pédagogique.' : 'Définissez un nouvel échelon pédagogique.'"
   [icon]="GraduationCap"
   statusLabel="Référentiel"
-  [saveLabel]="isEditMode ? 'Enregistrer les modifications' : 'Enregistrer le niveau'"
+  [saveLabel]="isEditMode ? 'Enregistrer' : 'Créer le niveau'"
   [isLoading]="isLoading()"
   [canSave]="levelForm.valid"
   (save)="onSave()"
   (cancel)="onCancel()"
 >
-  <form [formGroup]="levelForm" class="space-y-8">
+  <form [formGroup]="levelForm" class="space-y-6">
 
     <!-- Identification du Niveau -->
-    <div class="space-y-5">
-      <div class="flex items-center gap-3">
-        <div class="flex items-center justify-center w-8 h-8 rounded-xl bg-primary-50 text-primary-600 font-bold text-xs">01</div>
-        <span class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Paramètres de base</span>
-        <div class="flex-1 h-px bg-slate-100"></div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Nom du Niveau -->
+      <div class="fw-field">
+        <label class="fw-label">Nom du niveau <span class="required">*</span></label>
+        <input
+          type="text"
+          formControlName="name"
+          placeholder="Ex: CM2 ou 6ème"
+          class="fw-input"
+          [class.error]="isInvalid('name')"
+        />
+        <div *ngIf="isInvalid('name')" class="fw-error">
+          <lucide-icon [name]="Info" [size]="12"></lucide-icon>
+          <span>Champ obligatoire (min. 2 caractères).</span>
+        </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Nom du Niveau -->
-        <div class="space-y-2">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Nom du niveau</label>
-          <div class="relative">
-            <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400">
-              <lucide-icon [name]="Type" class="w-4 h-4"></lucide-icon>
-            </div>
-            <input
-              type="text"
-              formControlName="name"
-              placeholder="Ex: CM2 ou 6ème"
-              class="w-full h-12 bg-white border border-slate-200 rounded-xl pl-12 pr-4 text-sm font-medium focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none"
-              [class.border-rose-300]="isInvalid('name')"
-            />
-          </div>
-        </div>
-
-        <!-- Rang de progression -->
-        <div class="space-y-2">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Rang (Ordre)</label>
-          <div class="relative">
-            <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400">
-              <lucide-icon [name]="Hash" class="w-4 h-4"></lucide-icon>
-            </div>
-            <input
-              type="number"
-              formControlName="rank"
-              class="w-full h-12 bg-white border border-slate-200 rounded-xl pl-12 pr-4 text-sm font-medium focus:border-primary focus:ring-4 focus:ring-primary/5 transition-all outline-none"
-              [class.border-rose-300]="isInvalid('rank')"
-            />
-          </div>
-        </div>
+      <!-- Rang de progression -->
+      <div class="fw-field">
+        <label class="fw-label">Rang (Ordre) <span class="required">*</span></label>
+        <input
+          type="number"
+          formControlName="rank"
+          class="fw-input"
+          [class.error]="isInvalid('rank')"
+        />
+        <p class="fw-hint">Définit l'ordre de progression des élèves.</p>
       </div>
     </div>
 
     <!-- Rattachement -->
-    <div class="space-y-5">
-      <div class="flex items-center gap-3">
-        <div class="flex items-center justify-center w-8 h-8 rounded-xl bg-primary-50 text-primary-600 font-bold text-xs">02</div>
-        <span class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Cycle Éducatif</span>
-        <div class="flex-1 h-px bg-slate-100"></div>
-      </div>
-
-      <div class="space-y-2">
-        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Associer à un cycle</label>
-        <div class="relative">
-          <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 z-10">
-            <lucide-icon [name]="Layers" class="w-4 h-4"></lucide-icon>
-          </div>
-          <mat-select
-            formControlName="cycleId"
-            placeholder="Sélectionner le cycle"
-            class="fw-select-field"
-            [class.error]="isInvalid('cycleId')"
-          >
-            <mat-option *ngFor="let cycle of cycles()" [value]="cycle.id">
-              {{ cycle.customName || cycle.systemName }}
-            </mat-option>
-          </mat-select>
-        </div>
-      </div>
+    <div class="fw-field">
+      <label class="fw-label">Associer à un cycle <span class="required">*</span></label>
+      <mat-select
+        formControlName="cycleId"
+        placeholder="Sélectionner le cycle"
+        class="fw-select"
+        [class.error]="isInvalid('cycleId')"
+      >
+        <mat-option *ngFor="let cycle of cycles()" [value]="cycle.id">
+          {{ cycle.customName || cycle.systemName }}
+        </mat-option>
+      </mat-select>
+      <p class="fw-hint">Le cycle parent regroupe plusieurs niveaux logiquement.</p>
     </div>
 
-    <!-- Info Box -->
-    <div class="p-4 bg-primary-50/50 rounded-xl border border-primary-100 flex items-start gap-3">
-      <lucide-icon [name]="Info" class="w-4 h-4 text-primary-600 mt-0.5"></lucide-icon>
+    <!-- Info Box Standardisée -->
+    <div class="p-4 bg-primary-50 rounded-xl border border-primary-100 flex items-start gap-3 mt-4">
+      <lucide-icon [name]="Info" class="w-4 h-4 text-primary mt-0.5"></lucide-icon>
       <p class="text-xs text-primary-800 leading-relaxed font-medium">
         Le <span class="font-bold">rang</span> détermine l'ordre dans lequel les élèves progressent. Un élève passera du rang 1 vers le rang 2 lors du changement d'année.
       </p>
     </div>
 
   </form>
-</app-form-shell>
+</app-fw-form-shell>
+

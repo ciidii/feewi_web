@@ -1,8 +1,8 @@
 import { Component, inject, signal, ViewEncapsulation, OnInit, computed, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { LucideAngularModule, Filter, Download, UserPlus, Search, Eye, UserMinus, UserCheck, ShieldAlert, GraduationCap, History } from 'lucide-angular';
-import { firstValueFrom, Subject, debounceTime, distinctUntilChanged, takeUntil, finalize } from 'rxjs';
+import { LucideAngularModule, Filter, Download, UserPlus, Search, Eye, UserMinus, UserCheck, ShieldAlert, GraduationCap, History, Info } from 'lucide-angular';
+import { firstValueFrom, Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
@@ -12,11 +12,20 @@ import { StudentRegistryService } from '../../../../../core/services/student-reg
 import { StudentSummary, StudentStatus } from '../../../../../core/models/student.model';
 import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 import { NotificationService } from '../../../../../shared/services/notification.service';
+import { LoadingService } from '../../../../../shared/services/loading.service';
+import { FwButtonComponent } from '../../../../../shared/components/button/button.component';
+import { FwAlertBannerComponent } from '../../../../../shared/components/alert-banner/alert-banner.component';
 
 @Component({
   selector: 'app-student-list',
   standalone: true,
-  imports: [CommonModule, DataListComponent, LucideAngularModule, MatMenuModule, MatDialogModule],
+  imports: [
+    CommonModule,
+    DataListComponent,
+    LucideAngularModule,
+    MatMenuModule,
+    MatDialogModule
+  ],
   templateUrl:  './student-list.component.html',
   styleUrl: './student-list.component.scss',
   encapsulation: ViewEncapsulation.None
@@ -26,24 +35,22 @@ export class StudentListComponent implements OnInit, OnDestroy {
   private studentService = inject(StudentRegistryService);
   private dialog = inject(MatDialog);
   private notificationService = inject(NotificationService);
+  protected loadingService = inject(LoadingService);
 
   // --- ICONS ---
-  readonly Filter = Filter;
   readonly Download = Download;
   readonly UserPlus = UserPlus;
-  readonly Search = Search;
   readonly GraduationCap = GraduationCap;
+  readonly InfoIcon = Info;
 
   // --- ÉTATS ---
   activeTab = signal('Tous');
   searchQuery = signal('');
-  isLoading = signal(false);
 
   private searchSubject = new Subject<string>();
   private destroy$ = new Subject<void>();
 
   // --- DONNÉES ---
-  // On utilise directement le signal du service pour la pagination
   readonly studentPage = this.studentService.studentsPage;
 
   readonly studentRows = computed(() => {
@@ -52,11 +59,11 @@ export class StudentListComponent implements OnInit, OnDestroy {
     return page.content.map(student => this.mapToTableRow(student));
   });
 
-  // --- CONFIGURATION UI ---
+  // --- CONFIGURATION UI (Impératif 4) ---
   readonly studentActions: RowAction[] = [
-    { id: 'view', label: 'Voir le dossier', icon: Eye, type: 'primary' },
-    { id: 'suspend', label: 'Suspendre', icon: UserMinus, type: 'warning' },
-    { id: 'history', label: 'Historique', icon: History, type: 'default' }
+    { id: 'view', label: 'Dossier complet', icon: Eye, type: 'primary' },
+    { id: 'history', label: 'Logs & Historique', icon: History, type: 'default' },
+    { id: 'suspend', label: 'Suspendre', icon: UserMinus, type: 'danger' }
   ];
 
   readonly studentTabs = computed<TabItem[]>(() => {
@@ -64,15 +71,14 @@ export class StudentListComponent implements OnInit, OnDestroy {
     const total = page?.totalElements || 0;
     return [
       { label: 'Tous', icon: GraduationCap, count: total },
-      { label: 'Actifs', icon: UserCheck, count: undefined },
-      { label: 'Suspendus', icon: ShieldAlert, count: undefined }
+      { label: 'Actifs', icon: UserCheck },
+      { label: 'Suspendus', icon: ShieldAlert }
     ];
   });
 
   async ngOnInit() {
     await this.loadStudents();
 
-    // Setup search debounce
     this.searchSubject.pipe(
       debounceTime(400),
       distinctUntilChanged(),
@@ -87,21 +93,19 @@ export class StudentListComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  onSearchChange(event: Event) {
-    const query = (event.target as HTMLInputElement).value;
+  onSearch(query: string) {
     this.searchQuery.set(query);
     this.searchSubject.next(query);
   }
 
   async loadStudents(query?: string, status?: StudentStatus, page: number = 0) {
-    this.isLoading.set(true);
-    try {
-      await firstValueFrom(this.studentService.getStudents(query, status, page));
-    } catch (e) {
-      console.error('Erreur lors du chargement des élèves:', e);
-    } finally {
-      this.isLoading.set(false);
-    }
+    await this.loadingService.execute(async () => {
+      try {
+        await firstValueFrom(this.studentService.getStudents(query, status, page));
+      } catch (e) {
+        this.notificationService.error('Erreur lors du chargement des élèves.');
+      }
+    }, 'component');
   }
 
   private mapToTableRow(student: StudentSummary): TableRow {
@@ -109,33 +113,34 @@ export class StudentListComponent implements OnInit, OnDestroy {
     return {
       id: student.id,
       title: `${student.firstName} ${student.lastName.toUpperCase()}`,
-      subtitle: `Matricule : ${student.registrationNumber}`,
+      subtitle: student.registrationNumber,
       avatarLabel: initials || '??',
-      date: `Né(e) le ${new Date(student.birthDate).toLocaleDateString()}`,
+      date: student.birthDate, // Envoyé brut, le Pipe fwDate s'en chargera dans DataList
       badges: [
         { label: this.getStatusLabel(student.status), type: this.getStatusType(student.status) },
-        { label: student.gender === 'M' ? 'Masculin' : 'Féminin', type: 'default' }
-      ]
+        { label: student.gender === 'M' ? 'Garçon' : 'Fille', type: 'info' }
+      ],
+      rawData: student
     };
   }
 
   private getStatusLabel(status: StudentStatus): string {
     const labels: Record<StudentStatus, string> = {
-      'ACTIVE': 'Actif',
-      'SUSPENDED': 'Suspendu',
-      'LEFT': 'Sorti',
-      'ARCHIVED': 'Archivé'
+      'ACTIVE': 'ACTIF',
+      'SUSPENDED': 'SUSPENDU',
+      'LEFT': 'SORTI',
+      'ARCHIVED': 'ARCHIVÉ'
     };
     return labels[status] || status;
   }
 
-  private getStatusType(status: StudentStatus): 'success' | 'warning' | 'danger' | 'info' | 'primary' {
+  private getStatusType(status: StudentStatus): 'success' | 'warning' | 'danger' | 'info' | 'default' | 'primary' {
     switch (status) {
       case 'ACTIVE': return 'success';
       case 'SUSPENDED': return 'warning';
       case 'LEFT': return 'danger';
       case 'ARCHIVED': return 'info';
-      default: return 'primary';
+      default: return 'default';
     }
   }
 
@@ -149,32 +154,38 @@ export class StudentListComponent implements OnInit, OnDestroy {
 
   handleAction(event: { actionId: string, row: TableRow }) {
     if (event.actionId === 'view') {
-      this.router.navigate(['/admin/registry/students', event.row.id]);
+      this.router.navigate(['/school-app/registry/student-detail', event.row.id]);
     } else if (event.actionId === 'suspend') {
-      this.handleQuickSuspend(event.row.id.toString());
+      this.handleQuickSuspend(event.row.id.toString(), event.row.title);
     }
   }
 
-  private handleQuickSuspend(id: string) {
+  private handleQuickSuspend(id: string, name: string) {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '400px',
+      width: '440px',
       data: {
         title: 'Suspendre l\'élève',
-        message: 'L\'élève ne sera plus considéré comme actif pour cette année scolaire. Confirmer ?',
-        confirmLabel: 'Suspendre',
-        type: 'warning'
+        message: `Voulez-vous suspendre le dossier de ${name} ? Il ne figurera plus dans les listes actives pour l'année en cours.`,
+        confirmLabel: 'Confirmer la suspension',
+        type: 'destructive'
       }
     });
 
-    dialogRef.afterClosed().subscribe(confirmed => {
+    dialogRef.afterClosed().subscribe(async confirmed => {
       if (confirmed) {
-        this.isLoading.set(true);
-        this.studentService.updateStudent(id, { status: 'SUSPENDED' }).pipe(
-          finalize(() => this.isLoading.set(false))
-        ).subscribe(() => {
-          this.loadStudents(this.searchQuery());
-        });
+        await this.loadingService.execute(async () => {
+          try {
+            await firstValueFrom(this.studentService.updateStudent(id, { status: 'SUSPENDED' }));
+            this.notificationService.success('Élève suspendu avec succès.');
+            this.loadStudents(this.searchQuery());
+          } catch (e) {
+            this.notificationService.error('Échec de la suspension.');
+          }
+        }, 'global');
       }
     });
   }
+
+  protected readonly Filter = Filter;
+  protected readonly Search = Search;
 }

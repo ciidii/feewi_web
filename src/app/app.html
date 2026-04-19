@@ -1,6 +1,7 @@
-<app-loader
-  [isLoading]="loadingService.isLoading()"
-  [fullscreen]="true"
-  message="Chargement en cours..."
-></app-loader>
+<!-- Splash Screen Global (Niveau 4) -->
+<fw-splash-screen
+  *ngIf="loadingService.isLoading() && loadingService.context() === 'global'"
+  message="Connexion à Feewi..."
+></fw-splash-screen>
+
 <router-outlet></router-outlet>

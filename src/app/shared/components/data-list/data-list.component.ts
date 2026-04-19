@@ -41,10 +41,16 @@ import { ExpandableViewComponent } from './views/expandable-view/expandable-view
 import { CardsViewComponent } from './views/cards-view/cards-view';
 import {SortState, TableViewComponent} from './views/table-view/table-view';
 import { TimelineViewComponent } from './views/timeline-view/timeline-view';
+import { CardSkeletonComponent } from '../skeleton/card-skeleton.component';
+import { BlockLoaderComponent } from '../loader/block-loader.component';
+import { FwEmptyStateComponent } from '../empty-state/empty-state.component';
+import { SmartTooltipDirective } from '../../directives/smart-tooltip.directive';
+import { FwRefreshBannerComponent } from '../refresh-banner/refresh-banner.component';
 
 
 // Importer les services
 import { ViewPreferenceService } from '../../services/view-preference.service';
+import {SkeletonComponent} from '../skeleton/skeleton.component';
 
 @Component({
   selector: 'app-data-list',
@@ -59,7 +65,12 @@ import { ViewPreferenceService } from '../../services/view-preference.service';
     CardsViewComponent,
     TableViewComponent,
     TimelineViewComponent,
-    MatMenuModule
+    CardSkeletonComponent,
+    MatMenuModule,
+    SkeletonComponent,
+    BlockLoaderComponent,
+    FwEmptyStateComponent,
+    FwRefreshBannerComponent
   ],
   templateUrl: './data-list.component.html',
   styleUrls: ['./data-list.component.scss']
@@ -76,8 +87,8 @@ export class DataListComponent {
   ngOnInit() {
     // Charger la préférence de vue au démarrage ou utiliser la vue par défaut
     const savedView = this.viewPreferenceService.getPreferredView()();
-    
-    // Priorité : 
+
+    // Priorité :
     // 1. Vue sauvegardée par l'utilisateur
     // 2. Vue définie par le développeur (defaultView)
     // 3. Vue par défaut du système (expandable)
@@ -125,6 +136,9 @@ export class DataListComponent {
   /** État de chargement */
   isLoading = input<boolean>(false);
 
+  /** Données périmées (Impératif 3) */
+  isStale = input<boolean>(false);
+
   // ===========================================
   // OUTPUTS (événements vers le parent)
   // ===========================================
@@ -134,6 +148,9 @@ export class DataListComponent {
 
   /** Recherche */
   onSearch = output<string>();
+
+  /** Demande de rafraîchissement */
+  onRefresh = output<void>();
 
   /** Événement d'action dynamique */
   onAction = output<{ actionId: string, row: TableRow }>();

@@ -99,9 +99,8 @@ export class AdmissionDetailComponent implements OnInit {
     const app = this.application();
     if (!app) return false;
 
-    // Un dossier peut être validé s'il est ADMITTED ou WAITLIST (après évaluation)
-    // ou s'il est en TESTING (évaluation en cours mais Direction souhaite trancher)
-    const validStatus = ['ADMITTED', 'WAITLIST', 'TESTING'].includes(app.status);
+    // La validation finale (ADMITTED/WAITLIST → VALIDATED) est réservée à la Direction
+    const validStatus = ['ADMITTED', 'WAITLIST'].includes(app.status);
     if (!validStatus) return false;
 
     // VERROU NUMÉRIQUE : Tous les documents obligatoires doivent être traitées (UPLOADED, RECEIVED ou VERIFIED)

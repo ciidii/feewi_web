@@ -1,3 +1,39 @@
 :host {
   display: block;
 }
+
+.shell-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--fw-white);
+}
+
+.shell-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.shell-main {
+  flex: 1;
+  overflow-y: auto;
+  background-color: var(--fw-surface-page);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
+  .content-wrapper {
+    flex: 1;
+    // Note: Le padding est désormais géré au niveau des pages 
+    // ou par le PageHeader pour permettre le full-bleed.
+    max-width: 1600px;
+    width: 100%;
+    margin: 0 auto;
+  }
+}
+
+// Custom scrollbar pour le contenu principal
+.shell-main::-webkit-scrollbar { width: 6px; }
+.shell-main::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }

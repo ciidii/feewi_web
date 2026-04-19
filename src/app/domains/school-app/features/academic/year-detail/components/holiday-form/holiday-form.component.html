@@ -1,4 +1,4 @@
-<app-form-shell
+<app-fw-form-shell
   [title]="isEditMode ? 'Modifier le Congé' : 'Ajouter un Congé'"
   [subtitle]="isEditMode ? 'Rectifiez les dates de fermeture ou le libellé.' : 'Enregistrez des vacances ou un jour férié pour cet établissement.'"
   [icon]="Palmtree"
@@ -29,7 +29,7 @@
             type="text" 
             formControlName="label" 
             placeholder="Ex: Vacances de Noël" 
-            class="fw-input-field border-emerald-100 focus:border-emerald-500 focus:ring-emerald-50"
+            class="fw-input border-emerald-100 focus:border-emerald-500 focus:ring-emerald-50"
             [class.error]="isInvalid('label')"
           />
         </div>
@@ -47,11 +47,11 @@
       <div class="grid grid-cols-2 gap-6">
         <div class="space-y-2">
           <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Début</label>
-          <input type="date" formControlName="startDate" class="fw-input-field" [class.error]="isInvalid('startDate')"/>
+          <input type="date" formControlName="startDate" class="fw-input" [class.error]="isInvalid('startDate')"/>
         </div>
         <div class="space-y-2">
           <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Fin</label>
-          <input type="date" formControlName="endDate" class="fw-input-field" [class.error]="isInvalid('endDate')"/>
+          <input type="date" formControlName="endDate" class="fw-input" [class.error]="isInvalid('endDate')"/>
         </div>
       </div>
     </div>
@@ -92,4 +92,4 @@
     </div>
 
   </form>
-</app-form-shell>
+</app-fw-form-shell>

@@ -7,6 +7,7 @@ import { AcademicService } from '../../../../../../core/services/academic.servic
 import { AuthService } from '../../../../../../core/services/auth.service';
 import { NavigationStateService } from '../../../../../../core/services/navigation-state.service';
 import { NotificationService } from '../../../../../../shared/services/notification.service';
+import { LoadingService } from '../../../../../../shared/services/loading.service';
 import { Cycle, Level, Filiere, SchoolClass, AcademicYear } from '../../../../../../core/models/academic.model';
 import { DataListComponent } from '../../../../../../shared/components/data-list/data-list.component';
 import { TableRow, RowAction } from '../../../../../../shared/models/data-list.models';
@@ -15,7 +16,9 @@ import { LevelFormComponent } from '../components/level-form/level-form.componen
 import { FiliereFormComponent } from '../components/filiere-form/filiere-form.component';
 import { CurriculumManagerComponent } from '../components/curriculum-manager/curriculum-manager';
 import { ConfirmDialogComponent } from '../../../../../../shared/components/confirm-dialog/confirm-dialog';
-import {ClassFormComponent} from '../../class-list/components/class-form/class-form.component';
+import { ClassFormComponent } from '../../class-list/components/class-form/class-form.component';
+import { FwButtonComponent } from '../../../../../../shared/components/button/button.component';
+import { FwEmptyStateComponent } from '../../../../../../shared/components/empty-state/empty-state.component';
 
 export interface LevelGroup {
   level: Level;
@@ -25,7 +28,15 @@ export interface LevelGroup {
 @Component({
   selector: 'app-cycle-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule, DataListComponent, MatDialogModule],
+  imports: [
+    CommonModule, 
+    RouterModule, 
+    LucideAngularModule, 
+    DataListComponent, 
+    MatDialogModule, 
+    FwButtonComponent,
+    FwEmptyStateComponent
+  ],
   templateUrl: './cycle-detail.component.html',
   styleUrls: ['./cycle-detail.component.scss']
 })
@@ -36,6 +47,7 @@ export class CycleDetailComponent implements OnInit {
   private authService = inject(AuthService);
   private navState = inject(NavigationStateService);
   private notificationService = inject(NotificationService);
+  protected loadingService = inject(LoadingService);
   private dialog = inject(MatDialog);
 
   // Icons
@@ -57,7 +69,6 @@ export class CycleDetailComponent implements OnInit {
   classes = signal<SchoolClass[]>([]);
   filieres = signal<Filiere[]>([]);
   activeTab = signal<'pilotage' | 'filieres'>('pilotage');
-  isLoading = signal(true);
 
   // Permission de modification (Provisioning)
   readonly canEditStructure = computed(() => this.authService.hasRole('ROLE_SUPER_ADMIN'));
@@ -108,54 +119,53 @@ export class CycleDetailComponent implements OnInit {
   }
 
   async loadData(id: string) {
-    this.isLoading.set(true);
-    try {
-      // 1. CHARGEMENT DE LA STRUCTURE (Obligatoire)
-      const [allCycles, allLevels, allFilieres] = await Promise.all([
-        firstValueFrom(this.academicService.getCycles()),
-        firstValueFrom(this.academicService.getLevels()),
-        firstValueFrom(this.academicService.getFilieres())
-      ]);
-
-      const currentCycle = allCycles.find(c => String(c.id) === String(id));
-
-      if (currentCycle) {
-        this.cycle.set(currentCycle);
-        const cycleName = currentCycle.customName || currentCycle.systemName;
-        this.navState.setBreadcrumb(['Accueil', 'Structure', cycleName]);
-
-        const cycleLevels = allLevels.filter(l => {
-          const levelCycleId = l.cycleId || (l as any).cycle?.id;
-          const levelCycleCode = (l as any).cycle?.code || (l as any).cycle?.cycleCode;
-          return String(levelCycleId) === String(id) || (levelCycleCode && levelCycleCode === currentCycle.cycleCode);
-        });
-        this.levels.set(cycleLevels);
-      } else {
-        this.notificationService.error("Cycle non trouvé.");
-      }
-      this.filieres.set(allFilieres);
-
-      // 2. CHARGEMENT OPÉRATIONNEL (Résilient : ne bloque pas si échec)
+    await this.loadingService.execute(async () => {
       try {
-        const year = await firstValueFrom(this.academicService.getCurrentYear());
-        this.currentYear.set(year);
+        // 1. CHARGEMENT DE LA STRUCTURE (Obligatoire)
+        const [allCycles, allLevels, allFilieres] = await Promise.all([
+          firstValueFrom(this.academicService.getCycles()),
+          firstValueFrom(this.academicService.getLevels()),
+          firstValueFrom(this.academicService.getFilieres())
+        ]);
 
-        if (year) {
-          const yearClasses = await firstValueFrom(this.academicService.getClassesByYear(year.id));
-          this.classes.set(yearClasses);
+        const currentCycle = allCycles.find(c => String(c.id) === String(id));
+
+        if (currentCycle) {
+          this.cycle.set(currentCycle);
+          const cycleName = currentCycle.customName || currentCycle.systemName;
+          this.navState.setBreadcrumb(['Accueil', 'Structure', cycleName]);
+
+          const cycleLevels = allLevels.filter(l => {
+            const levelCycleId = l.cycleId || (l as any).cycle?.id;
+            const levelCycleCode = (l as any).cycle?.code || (l as any).cycle?.cycleCode;
+            return String(levelCycleId) === String(id) || (levelCycleCode && levelCycleCode === currentCycle.cycleCode);
+          });
+          this.levels.set(cycleLevels);
+        } else {
+          this.notificationService.error("Cycle non trouvé.");
         }
-      } catch (yearError) {
-        console.warn("[CycleDetail] Aucune année académique active trouvée. Mode structure uniquement.");
-        this.currentYear.set(null);
-        this.classes.set([]);
-      }
+        this.filieres.set(allFilieres);
 
-    } catch (error) {
-      console.error("[CycleDetail] Erreur fatale lors du chargement de la structure:", error);
-      this.notificationService.error("Impossible de charger la structure du cycle.");
-    } finally {
-      this.isLoading.set(false);
-    }
+        // 2. CHARGEMENT OPÉRATIONNEL (Résilient)
+        try {
+          const year = await firstValueFrom(this.academicService.getCurrentYear());
+          this.currentYear.set(year);
+
+          if (year) {
+            const yearClasses = await firstValueFrom(this.academicService.getClassesByYear(year.id));
+            this.classes.set(yearClasses);
+          }
+        } catch (yearError) {
+          console.warn("[CycleDetail] Aucune année académique active trouvée. Mode structure uniquement.");
+          this.currentYear.set(null);
+          this.classes.set([]);
+        }
+
+      } catch (error) {
+        console.error("[CycleDetail] Erreur fatale lors du chargement de la structure:", error);
+        this.notificationService.error("Impossible de charger la structure du cycle.");
+      }
+    }, 'component');
   }
 
   setTab(tab: 'pilotage' | 'filieres') {

@@ -1,4 +1,4 @@
-<app-form-shell
+<app-fw-form-shell
   [title]="isEditMode ? 'Modifier la Matière' : 'Nouvelle Matière'"
   [subtitle]="isEditMode ? 'Rectifiez le nom ou le code technique.' : 'Créez un nouvel enseignement dans le catalogue global de l\'école.'"
   [icon]="Tag"
@@ -23,7 +23,7 @@
             type="text"
             formControlName="name"
             placeholder="Ex: Mathématiques"
-            class="fw-input-field"
+            class="fw-input"
             [class.error]="isInvalid('name')"
           />
         </div>
@@ -40,7 +40,7 @@
             type="text"
             formControlName="code"
             placeholder="Ex: MATH"
-            class="fw-input-field uppercase"
+            class="fw-input uppercase"
             [class.error]="isInvalid('code')"
           />
         </div>
@@ -57,4 +57,4 @@
     </div>
 
   </form>
-</app-form-shell>
+</app-fw-form-shell>

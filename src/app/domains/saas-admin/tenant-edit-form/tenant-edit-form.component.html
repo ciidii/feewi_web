@@ -1,4 +1,4 @@
-<app-form-shell
+<app-fw-form-shell
   title="Modifier l'établissement"
   [subtitle]="'Tenant: ' + tenantId"
   [icon]="Building2"
@@ -16,7 +16,7 @@
           <label class="text-xs font-bold text-slate-700 ml-1">Nom officiel <span class="text-red-500">*</span></label>
           <div class="relative">
             <lucide-icon [name]="Building2" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></lucide-icon>
-            <input type="text" formControlName="name" class="fw-input-modern pl-11" [class.error]="isInvalid('name')"/>
+            <input type="text" formControlName="name" class="fw-input pl-11" [class.error]="isInvalid('name')"/>
           </div>
           <p *ngIf="isInvalid('name')" class="text-[10px] font-bold text-red-500 ml-1">{{ getErrorMessage('name') }}</p>
         </div>
@@ -26,7 +26,7 @@
           <label class="text-xs font-bold text-slate-700 ml-1">Slogan</label>
           <div class="relative">
             <lucide-icon [name]="Quote" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></lucide-icon>
-            <input type="text" formControlName="slogan" class="fw-input-modern pl-11"/>
+            <input type="text" formControlName="slogan" class="fw-input pl-11"/>
           </div>
         </div>
 
@@ -35,7 +35,7 @@
           <label class="text-xs font-bold text-slate-700 ml-1">Email <span class="text-red-500">*</span></label>
           <div class="relative">
             <lucide-icon [name]="Mail" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></lucide-icon>
-            <input type="email" formControlName="email" class="fw-input-modern pl-11" [class.error]="isInvalid('email')"/>
+            <input type="email" formControlName="email" class="fw-input pl-11" [class.error]="isInvalid('email')"/>
           </div>
         </div>
 
@@ -44,7 +44,7 @@
           <label class="text-xs font-bold text-slate-700 ml-1">Téléphone <span class="text-red-500">*</span></label>
           <div class="relative">
             <lucide-icon [name]="Phone" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></lucide-icon>
-            <input type="text" formControlName="phone" class="fw-input-modern pl-11" [class.error]="isInvalid('phone')"/>
+            <input type="text" formControlName="phone" class="fw-input pl-11" [class.error]="isInvalid('phone')"/>
           </div>
         </div>
 
@@ -53,16 +53,16 @@
           <label class="text-xs font-bold text-slate-700 ml-1">Adresse physique <span class="text-red-500">*</span></label>
           <div class="relative">
             <lucide-icon [name]="MapPin" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></lucide-icon>
-            <input type="text" formControlName="streetAddress" class="fw-input-modern pl-11" [class.error]="isInvalid('streetAddress')"/>
+            <input type="text" formControlName="streetAddress" class="fw-input pl-11" [class.error]="isInvalid('streetAddress')"/>
           </div>
         </div>
 
         <!-- Ville -->
         <div class="space-y-2">
           <label class="text-xs font-bold text-slate-700 ml-1">Ville <span class="text-red-500">*</span></label>
-          <input type="text" formControlName="city" class="fw-input-modern" [class.error]="isInvalid('city')"/>
+          <input type="text" formControlName="city" class="fw-input" [class.error]="isInvalid('city')"/>
         </div>
       </div>
     </div>
   </form>
-</app-form-shell>
+</app-fw-form-shell>

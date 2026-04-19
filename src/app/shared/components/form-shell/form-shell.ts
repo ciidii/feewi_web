@@ -1,26 +1,31 @@
 import { CommonModule } from '@angular/common';
-import { LucideAngularModule, X, Loader2, Save } from 'lucide-angular';
-import {Component, input, output} from '@angular/core';
+import { LucideAngularModule, X, Save } from 'lucide-angular';
+import { Component, input, output } from '@angular/core';
+import { FwButtonComponent } from '../button/button.component';
+
+export type FormShellMode = 'page' | 'dialog';
 
 @Component({
-  selector: 'app-form-shell',
+  selector: 'app-fw-form-shell',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [CommonModule, LucideAngularModule, FwButtonComponent],
   templateUrl: './form-shell.html',
   styleUrls: ['./form-shell.scss']
 })
 export class FormShellComponent {
-  // --- Inputs de contenu ---
+  // --- Configuration ---
+  mode = input<FormShellMode>('dialog');
   title = input.required<string>();
   subtitle = input<string>('');
   icon = input<any>();
   statusLabel = input<string>('');
 
-  // --- Inputs d'état ---
+  // --- Actions ---
   saveLabel = input<string>('Enregistrer');
   cancelLabel = input<string>('Annuler');
   isLoading = input<boolean>(false);
   canSave = input<boolean>(true);
+  showCancel = input<boolean>(true);
 
   // --- Outputs ---
   save = output<void>();
@@ -28,7 +33,6 @@ export class FormShellComponent {
 
   // Icons
   readonly X = X;
-  readonly Loader2 = Loader2;
   readonly Save = Save;
 
   onSave() {

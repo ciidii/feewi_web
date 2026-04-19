@@ -15,7 +15,7 @@ export interface FwTab {
   standalone: true,
   imports: [CommonModule, LucideAngularModule],
   template: `
-    <div class="tabs-wrapper" [class.full-width]="fullWidth">
+    <div class="tabs-wrapper" [class.full-width]="fullWidth" [class.compact]="density === 'compact'">
       <div class="tabs-container">
         <button
           *ngFor="let tab of tabs"
@@ -29,7 +29,7 @@ export interface FwTab {
           <lucide-icon
             *ngIf="tab.icon"
             [name]="tab.icon"
-            [size]="16"
+            [size]="density === 'compact' ? 14 : 16"
             class="tab-icon"
           ></lucide-icon>
 
@@ -50,25 +50,29 @@ export interface FwTab {
   styles: [`
     .tabs-wrapper {
       border-bottom: 1px solid var(--fw-border);
-      background: white;
+      background: var(--fw-surface-card);
+      transition: var(--fw-transition-fast);
       &.full-width { .tabs-container { max-width: none; } }
+      &.compact {
+        .tab-item { height: 40px; padding: 0 12px; font-size: 0.75rem; }
+      }
     }
 
     .tabs-container {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 4px;
       max-width: 1200px;
       margin: 0 auto;
-      padding: 0 16px;
+      padding: 0 var(--fw-space-md);
     }
 
     .tab-item {
-      height: 48px;
+      height: 52px;
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 0 16px;
+      padding: 0 var(--fw-space-md);
       background: transparent;
       border: none;
       color: var(--fw-text-secondary);
@@ -107,7 +111,7 @@ export interface FwTab {
         font-size: 10px;
         font-weight: 800;
         padding: 2px 6px;
-        border-radius: 20px;
+        border-radius: var(--fw-radius-full);
         background: var(--fw-surface-sunken);
         color: var(--fw-text-secondary);
       }
@@ -139,6 +143,7 @@ export class FwTabsComponent {
   @Input() tabs: FwTab[] = [];
   @Input() activeTabId!: string;
   @Input() fullWidth = false;
+  @Input() density: 'comfortable' | 'compact' = 'comfortable';
 
   @Output() tabChange = new EventEmitter<string>();
 

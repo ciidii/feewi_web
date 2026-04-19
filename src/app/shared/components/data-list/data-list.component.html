@@ -184,25 +184,43 @@
   <!-- ======================================= -->
   <!-- ZONE DE CONTENU DYNAMIQUE (selon la vue) -->
   <!-- ======================================= -->
-  <!-- ======================================= -->
-  <!-- ZONE DE CONTENU DYNAMIQUE (selon la vue) -->
-  <!-- ======================================= --<!-- VUE TABLEAU (à venir) -->
-  <div class="relative min-h-[200px]">
+  <div class="relative min-h-[400px]">
 
-    <!-- Loader Overlay -->
-    <div *ngIf="isLoading()" class="absolute inset-0 z-50 bg-white/60 backdrop-blur-[1px] flex items-center justify-center rounded-xl animate-in fade-in duration-300">
-      <div class="flex flex-col items-center gap-3">
-        <div class="relative">
-          <lucide-icon [name]="Sparkles" [size]="32" class="text-primary-600 animate-spin"></lucide-icon>
-          <div class="absolute inset-0 blur-xl bg-primary-400/20 animate-pulse"></div>
+    <!-- BANNIÈRE DE RAFRAÎCHISSEMENT (Impératif 3) -->
+    <app-fw-refresh-banner
+      [visible]="isStale()"
+      (onRefresh)="onRefresh.emit()"
+    ></app-fw-refresh-banner>
+
+    <!-- ÉTAT DE CHARGEMENT INITIAL (Skeletons) -->
+    <div *ngIf="isLoading() && data().length === 0" class="p-6">
+      <!-- Skeletons pour la vue Cards -->
+      <div *ngIf="viewMode() === 'cards'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <fw-card-skeleton *ngFor="let i of [1,2,3,4,5,6]" [density]="isFiltersOpen() ? 'compact' : 'comfortable'"></fw-card-skeleton>
+      </div>
+
+      <!-- Skeletons pour la vue Table -->
+      <div *ngIf="viewMode() === 'table' || viewMode() === 'expandable'" class="space-y-4">
+        <div *ngFor="let i of [1,2,3,4,5,6,7,8]" class="flex items-center gap-4 p-4 border border-slate-100 rounded-xl">
+          <fw-skeleton shape="rect" width="24px" height="24px"></fw-skeleton>
+          <fw-skeleton width="30%" height="16px"></fw-skeleton>
+          <fw-skeleton width="20%" height="16px"></fw-skeleton>
+          <fw-skeleton width="15%" height="16px"></fw-skeleton>
+          <fw-skeleton class="ml-auto" shape="pill" width="80px" height="24px"></fw-skeleton>
         </div>
-        <p class="text-sm font-medium text-slate-600">Mise à jour des données...</p>
       </div>
     </div>
 
+    <!-- Loader Overlay (uniquement lors du rafraîchissement de données existantes) -->
+    <fw-block-loader 
+      *ngIf="isLoading() && data().length > 0"
+      [center]="true"
+      message="Mise à jour..."
+    ></fw-block-loader>
+
     <!-- VUE EXTENSIBLE -->
     <app-expandable-view
-      *ngIf="viewMode() === 'expandable'"
+      *ngIf="viewMode() === 'expandable' && (data().length > 0 || !isLoading())"
       [data]="displayedData()"
       [selectedIds]="selectedIds()"
       [expandedIds]="expandedIds()"
@@ -253,16 +271,14 @@
     ></app-timeline-view>
 
     <!-- ÉTAT VIDE -->
-    <div *ngIf="data().length === 0" class="py-16 text-center">
-      <div class="inline-flex flex-col items-center gap-4">
-        <div class="w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center">
-          <lucide-icon [name]="Inbox" class="w-10 h-10 text-slate-300"></lucide-icon>
-        </div>
-        <div class="space-y-1">
-          <p class="text-sm font-semibold text-slate-700">Aucun élément trouvé</p>
-          <p class="text-xs text-slate-500">Essayez de modifier vos filtres</p>
-        </div>
-      </div>
+    <div *ngIf="data().length === 0 && !isLoading()" class="py-12 px-6">
+      <app-fw-empty-state
+        [icon]="Inbox"
+        title="Aucun résultat trouvé"
+        description="Nous n'avons trouvé aucun élément correspondant à vos critères de recherche ou à vos filtres actuels."
+        [density]="isFiltersOpen() ? 'compact' : 'comfortable'"
+      >
+      </app-fw-empty-state>
     </div>
   </div>
 </div>

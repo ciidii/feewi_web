@@ -1,40 +1,107 @@
-:host {
+/* ALIGNEMENT STRICT SUR LES TOKENS DU DESIGN SYSTEM */
+app-sidebar {
+  background-color: var(--fw-surface-inverse) !important;
   display: block;
 }
 
-.sidebar-link {
+.sidebar-container {
+  background-color: var(--fw-surface-inverse) !important;
+  color: var(--fw-text-inverse);
+  height: calc(100vh - 64px);
+  transition: width 250ms cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
-  align-items: center;
-  height: 44px;
-  padding: 0 16px;
-  border-radius: 8px;
-  color: #64748b;
-  transition: all 0.2s;
-  text-decoration: none;
-  border-right: 2px solid transparent;
+  flex-direction: column;
+  overflow: hidden;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
 
-  &:hover {
-    background-color: #f8fafc;
-    color: #2563eb;
-  }
+  &.is-expanded { width: 260px; }
+  &.is-collapsed { width: 72px; }
+}
 
-  &.active-link {
-    background-color: #eff6ff;
-    color: #2563eb;
-    font-weight: 700;
-    border-right-color: #2563eb;
+// --- CONSOLE SAAS ---
+.saas-badge {
+  padding: 12px;
+  .inner {
+    display: flex; align-items: center; justify-content: center;
+    height: 44px; background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px; color: #fbbf24; font-size: 10px; font-weight: 800;
   }
 }
 
-.custom-scrollbar {
-  &::-webkit-scrollbar {
-    width: 4px;
+// --- HERO ACTION (Désaturé, Institutionnel) ---
+.hero-action {
+  padding: 12px;
+  .btn-hero {
+    width: 100%; height: 48px;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--fw-text-inverse);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    display: flex; align-items: center; padding: 0 12px; gap: 12px;
+    cursor: pointer; transition: all 0.2s ease;
+    
+    .icon-wrap { color: var(--fw-primary); display: grid; place-items: center; }
+    .label { font-size: 13px; font-weight: 700; white-space: nowrap; }
   }
-  &::-webkit-scrollbar-track {
-    background: transparent;
+}
+
+// --- NAVIGATION ---
+.nav-scroll {
+  flex: 1; overflow-y: auto; overflow-x: hidden; padding: 8px;
+  &::-webkit-scrollbar { width: 0; background: transparent; }
+  
+  .nav-section-title {
+    display: block; padding: 16px 12px 8px;
+    font-size: 9px; font-weight: 800; text-transform: uppercase;
+    color: var(--fw-text-tertiary); opacity: 0.3; letter-spacing: 0.1em;
   }
-  &::-webkit-scrollbar-thumb {
-    background: #e2e8f0;
-    border-radius: 10px;
+}
+
+.sidebar-link {
+  display: flex; align-items: center; height: 40px; padding: 0 12px; gap: 12px;
+  color: rgba(255, 255, 255, 0.5); text-decoration: none;
+  font-size: 13px; font-weight: 500; border-radius: 6px;
+  transition: all 0.15s ease;
+  margin-bottom: 2px;
+
+  &:hover { background: rgba(255, 255, 255, 0.04); color: var(--fw-text-inverse); }
+  
+  &.active-link {
+    background: rgba(255, 255, 255, 0.08); color: var(--fw-text-inverse); font-weight: 700;
+    .icon-wrap { color: var(--fw-primary); }
+  }
+  .icon-wrap { width: 20px; display: grid; place-items: center; flex-shrink: 0; }
+}
+
+// --- FOOTER ---
+.sidebar-footer {
+  padding: 8px; border-top: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex; justify-content: flex-end;
+  .toggle-btn {
+    width: 32px; height: 32px; border-radius: 6px; border: none;
+    background: transparent; color: rgba(255, 255, 255, 0.2);
+    cursor: pointer; display: grid; place-items: center;
+    &:hover { background: rgba(255, 255, 255, 0.05); color: var(--fw-text-inverse); }
+  }
+}
+
+// --- ETAT RETRACTÉ STRICT (ICONES SEULES) ---
+.is-collapsed {
+  .label, .nav-section-title, .chevron-down, .brand-name {
+    display: none !important;
+  }
+  .sidebar-link, .btn-hero, .saas-badge .inner {
+    justify-content: center !important;
+    padding: 0 !important;
+  }
+  .sidebar-footer { justify-content: center; }
+  
+  .active-link .icon-wrap {
+    color: var(--fw-primary);
+    position: relative;
+    &::before {
+      content: ''; position: absolute; left: -14px; top: -10px; bottom: -10px; width: 3px;
+      background: var(--fw-primary); border-radius: 0 4px 4px 0;
+    }
   }
 }

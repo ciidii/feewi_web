@@ -1,4 +1,4 @@
-<app-form-shell
+<app-fw-form-shell
   title="Ajouter un membre"
   subtitle="Creez un nouveau compte pour un employe ou un enseignant de l'etablissement."
   [icon]="UserPlus"
@@ -30,7 +30,7 @@
               type="text" 
               formControlName="firstName" 
               placeholder="Ex: Jean" 
-              class="fw-input-field"
+              class="fw-input"
               [class.error]="isInvalid('firstName')"
             />
           </div>
@@ -47,7 +47,7 @@
               type="text" 
               formControlName="lastName" 
               placeholder="Ex: Dupont" 
-              class="fw-input-field"
+              class="fw-input"
               [class.error]="isInvalid('lastName')"
             />
           </div>
@@ -75,7 +75,7 @@
               type="email" 
               formControlName="email" 
               placeholder="jean.dupont@ecole.sn" 
-              class="fw-input-field"
+              class="fw-input"
               [class.error]="isInvalid('email')"
             />
           </div>
@@ -92,7 +92,7 @@
               type="tel" 
               formControlName="phone" 
               placeholder="+221 ..." 
-              class="fw-input-field"
+              class="fw-input"
               [class.error]="isInvalid('phone')"
             />
           </div>
@@ -117,7 +117,7 @@
             <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors z-10">
               <lucide-icon [name]="UserCog" class="w-4.5 h-4.5"></lucide-icon>
             </div>
-            <mat-select formControlName="userTypeCode" class="fw-select-field" [class.error]="isInvalid('userTypeCode')">
+            <mat-select formControlName="userTypeCode" class="fw-select" [class.error]="isInvalid('userTypeCode')">
               <mat-option *ngFor="let type of userTypes()" [value]="type.code">{{ type.name }}</mat-option>
             </mat-select>
           </div>
@@ -130,7 +130,7 @@
             <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors z-10">
               <lucide-icon [name]="Shield" class="w-4.5 h-4.5"></lucide-icon>
             </div>
-            <mat-select formControlName="roles" multiple class="fw-select-field" [class.error]="isInvalid('roles')">
+            <mat-select formControlName="roles" multiple class="fw-select" [class.error]="isInvalid('roles')">
               <mat-select-trigger>
                 <div class="flex items-center gap-2">
                   <span class="text-xs font-bold text-slate-700">{{ getSelectedRolesDisplay() }}</span>
@@ -165,4 +165,4 @@
     </div>
 
   </form>
-</app-form-shell>
+</app-fw-form-shell>

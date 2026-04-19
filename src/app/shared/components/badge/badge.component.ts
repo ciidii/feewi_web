@@ -17,10 +17,12 @@ const STATUS_MAP: Record<string, BadgeConfig> = {
   REJECTED:   { label: 'Rejeté',         token: 'error'   },
   CANCELLED:  { label: 'Annulé',         token: 'neutral' },
   ACTIVE:     { label: 'Actif',          token: 'success' },
-  SUSPENDED:  { label: 'Suspendu',       token: 'error'   },
+  SUSPENDED:  { label: 'Suspendu',       token: 'warning' },
+  LEFT:       { label: 'Sorti',          token: 'error'   },
+  ARCHIVED:   { label: 'Archivé',        token: 'neutral' },
+  REQUIRED:   { label: 'Obligatoire',    token: 'error'   },
   PLANNING:   { label: 'Planification',  token: 'info'    },
   CLOSED:     { label: 'Clôturée',       token: 'neutral' },
-  REQUIRED:   { label: 'Obligatoire',    token: 'error'   },
 };
 
 @Component({
@@ -49,42 +51,43 @@ const STATUS_MAP: Record<string, BadgeConfig> = {
       letter-spacing: 0.04em;
       border: 1px solid transparent;
       white-space: nowrap;
+      transition: var(--fw-transition-fast);
 
       &.size-xs { padding: 2px 8px; font-size: 9px; }
 
       &.token-success {
         background-color: var(--fw-success-bg);
-        color: #065f46; // Teinte sombre pour contraste sur fond clair
+        color: var(--fw-success-text);
         border-color: var(--fw-success-border);
         .dot { background-color: var(--fw-success); }
       }
 
       &.token-warning {
         background-color: var(--fw-warning-bg);
-        color: #92400e;
+        color: var(--fw-warning-text);
         border-color: var(--fw-warning-border);
         .dot { background-color: var(--fw-warning); }
       }
 
       &.token-error {
         background-color: var(--fw-error-bg);
-        color: #991b1b;
+        color: var(--fw-error-text);
         border-color: var(--fw-error-border);
         .dot { background-color: var(--fw-error); }
       }
 
       &.token-info {
         background-color: var(--fw-info-bg);
-        color: #1e40af;
+        color: var(--fw-info-text);
         border-color: var(--fw-info-border);
         .dot { background-color: var(--fw-info); }
       }
 
       &.token-neutral {
         background-color: var(--fw-neutral-bg);
-        color: #475569;
+        color: var(--fw-neutral-text);
         border-color: var(--fw-neutral-border);
-        .dot { background-color: var(--fw-neutral); }
+        .dot { background-color: var(--fw-neutral-text); }
       }
 
       .dot {

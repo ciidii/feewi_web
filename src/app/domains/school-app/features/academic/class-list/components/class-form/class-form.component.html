@@ -1,4 +1,4 @@
-<app-form-shell
+<app-fw-form-shell
   title="Ouvrir une Classe"
   subtitle="Créez une instance physique d'enseignement pour l'année scolaire en cours."
   [icon]="School"
@@ -27,7 +27,7 @@
             <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 z-10">
               <lucide-icon [name]="Layers" class="w-4 h-4"></lucide-icon>
             </div>
-            <mat-select formControlName="levelId" placeholder="Choisir le niveau" class="fw-select-field" [class.error]="isInvalid('levelId')">
+            <mat-select formControlName="levelId" placeholder="Choisir le niveau" class="fw-select" [class.error]="isInvalid('levelId')">
               <mat-option *ngFor="let level of levels()" [value]="level.id">{{ level.name }}</mat-option>
             </mat-select>
           </div>
@@ -40,7 +40,7 @@
             <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 z-10">
               <lucide-icon [name]="Tag" class="w-4 h-4"></lucide-icon>
             </div>
-            <mat-select formControlName="filiereId" placeholder="Tronc Commun" class="fw-select-field">
+            <mat-select formControlName="filiereId" placeholder="Tronc Commun" class="fw-select">
               <mat-option [value]="null">Aucune (Tronc Commun)</mat-option>
               <mat-option *ngFor="let f of filieres()" [value]="f.id">{{ f.name }} ({{ f.code }})</mat-option>
             </mat-select>
@@ -65,7 +65,7 @@
             <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors">
               <lucide-icon [name]="Type" class="w-4.5 h-4.5"></lucide-icon>
             </div>
-            <input type="text" formControlName="name" placeholder="Ex: A, B ou Bleue" class="fw-input-field" [class.error]="isInvalid('name')"/>
+            <input type="text" formControlName="name" placeholder="Ex: A, B ou Bleue" class="fw-input" [class.error]="isInvalid('name')"/>
           </div>
         </div>
 
@@ -76,7 +76,7 @@
             <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors">
               <lucide-icon [name]="Hash" class="w-4.5 h-4.5"></lucide-icon>
             </div>
-            <input type="number" formControlName="capacity" class="fw-input-field" [class.error]="isInvalid('capacity')"/>
+            <input type="number" formControlName="capacity" class="fw-input" [class.error]="isInvalid('capacity')"/>
           </div>
         </div>
       </div>
@@ -91,4 +91,4 @@
     </div>
 
   </form>
-</app-form-shell>
+</app-fw-form-shell>

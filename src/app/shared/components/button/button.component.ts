@@ -1,9 +1,8 @@
-
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule, Loader2 } from 'lucide-angular';
-import {Component, computed, Input} from '@angular/core';
+import { Component, computed, Input } from '@angular/core';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
+export type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'ghost' | 'destructive';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 @Component({
@@ -56,53 +55,74 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
       font-family: var(--fw-font-sans);
       font-weight: 700;
       border-radius: var(--fw-radius-md);
-      border: none;
+      border: 1.5px solid transparent;
       cursor: pointer;
       transition: var(--fw-transition-fast);
       white-space: nowrap;
       position: relative;
-      outline: none;
 
       &:disabled {
         opacity: 0.5;
         cursor: not-allowed;
       }
 
+      /* Navigation Clavier (Impératif 6) */
       &:focus-visible {
-        box-shadow: 0 0 0 3px var(--fw-primary-alpha);
+        outline: 2px solid var(--fw-primary);
+        outline-offset: 2px;
       }
 
-      // VARIANTES
+      // VARIANTES (Impératif 4)
+      
       &.variant-primary {
-        background-color: var(--fw-surface-inverse);
+        background-color: var(--fw-primary);
         color: var(--fw-text-inverse);
-        &:hover:not(:disabled) { background-color: #1e293b; transform: translateY(-1px); }
-        &:active:not(:disabled) { transform: translateY(0); }
+        &:hover:not(:disabled) { background-color: var(--fw-primary-hover); transform: translateY(-1px); }
       }
 
       &.variant-secondary {
+        background-color: var(--fw-surface-inverse);
+        color: var(--fw-text-inverse);
+        &:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+      }
+
+      &.variant-tertiary {
         background-color: var(--fw-surface-sunken);
         color: var(--fw-text-secondary);
-        border: 1px solid var(--fw-border);
-        &:hover:not(:disabled) { background-color: #e2e8f0; color: var(--fw-text-primary); }
+        border-color: var(--fw-border);
+        &:hover:not(:disabled) { background-color: var(--fw-white); color: var(--fw-text-primary); border-color: var(--fw-primary); }
       }
 
       &.variant-ghost {
         background-color: transparent;
         color: var(--fw-text-secondary);
-        &:hover:not(:disabled) { background-color: var(--fw-interactive-subtle); color: var(--fw-primary); }
+        &:hover:not(:disabled) { background-color: var(--fw-surface-sunken); color: var(--fw-primary); }
       }
 
-      &.variant-danger {
-        background-color: var(--fw-error);
-        color: white;
-        &:hover:not(:disabled) { background-color: #b91c1c; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); }
+      &.variant-destructive {
+        background-color: var(--fw-destructive);
+        color: var(--fw-text-inverse);
+        &:hover:not(:disabled) { background-color: var(--fw-destructive-hover); box-shadow: 0 4px 12px var(--fw-destructive-bg); }
       }
 
-      // TAILLES
-      &.size-sm { height: 32px; padding: 0 12px; font-size: 0.75rem; gap: 6px; }
-      &.size-md { height: 44px; padding: 0 20px; font-size: 0.875rem; gap: 8px; }
-      &.size-lg { height: 56px; padding: 0 28px; font-size: 1rem; gap: 10px; border-radius: var(--fw-radius-lg); }
+      // TAILLES (Gestion de la densité via variables CSS)
+      &.size-sm { 
+        height: 32px; 
+        padding: 0 var(--fw-space-sm); 
+        font-size: 0.75rem; 
+        gap: 6px; 
+      }
+      &.size-md { 
+        height: 44px; 
+        padding: 0 var(--fw-space-md); 
+        font-size: 0.875rem; 
+      }
+      &.size-lg { 
+        height: 56px; 
+        padding: 0 var(--fw-space-lg); 
+        font-size: 1rem; 
+        border-radius: var(--fw-radius-lg); 
+      }
     }
 
     .animate-spin { animation: spin 1s linear infinite; }
@@ -128,8 +148,8 @@ export class FwButtonComponent {
   iconSize = computed(() => {
     switch (this.size) {
       case 'sm': return 14;
-      case 'lg': return 18;
-      default: return 16;
+      case 'lg': return 20;
+      default: return 18;
     }
   });
 

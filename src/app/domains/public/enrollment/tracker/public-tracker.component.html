@@ -133,7 +133,7 @@
                            [loading]="isDeciding()" (click)="onConfirmAdmitted()">
               Valider les admis
             </app-fw-button>
-            <app-fw-button variant="danger" [icon]="XCircle"
+            <app-fw-button variant="destructive" [icon]="XCircle"
                            [loading]="isDeciding()" (click)="onCancelAll()">
               Tout annuler
             </app-fw-button>
@@ -166,7 +166,7 @@
           <div class="child-avatar">{{ a.identity.firstName[0] }}{{ a.identity.lastName[0] }}</div>
           <div class="child-info">
             <span class="child-name">{{ a.identity.firstName }} {{ a.identity.lastName }}</span>
-            <span class="child-level">{{ a.schooling?.levelLabel || a.schooling?.levelId }}</span>
+            <span class="child-level">{{ a.schooling.levelLabel || a.schooling.levelId }}</span>
             <span class="child-message">{{ a.trackerMessage }}</span>
           </div>
           <div class="child-right">
@@ -348,7 +348,7 @@
           </div>
           <div class="s-item">
             <span class="s-label">Niveau demandé</span>
-            <span class="s-value">{{ app.schooling?.levelLabel || app.schooling?.levelId }}</span>
+            <span class="s-value">{{ app.schooling.levelLabel || app.schooling.levelId }}</span>
           </div>
           <div class="s-item" *ngIf="app.type">
             <span class="s-label">Type</span>

@@ -4,46 +4,44 @@
   <header class="flex justify-between items-end">
     <div class="space-y-1">
       <div class="flex items-center gap-2 mb-1">
-        <span class="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold rounded-md uppercase tracking-wider">Architecture</span>
+        <span class="px-2 py-0.5 bg-primary-50 text-primary-700 text-[10px] font-bold rounded-md uppercase tracking-wider border border-primary-200">Architecture Scolaire</span>
       </div>
-      <h1 class="text-4xl font-display font-bold text-midnight tracking-tight italic uppercase">Structure Scolaire</h1>
-      <p class="text-sm text-slate-medium font-medium">Gérez vos cycles éducatifs et accédez aux configurations de programmes.</p>
+      <h1 class="text-4xl font-display font-bold text-midnight tracking-tight italic uppercase">Cycles & Niveaux</h1>
+      <p class="text-sm text-slate-500 font-medium">Définissez la structure pédagogique de votre établissement pour organiser les classes.</p>
     </div>
 
     <div class="flex gap-3">
-      <button
+      <app-fw-button
         *ngIf="canEditStructure()"
         (click)="openAddCycle()"
-        class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-[13px] font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 active:scale-95"
+        variant="primary"
+        size="md"
+        [icon]="Plus"
       >
-        <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
         Nouveau Cycle
-      </button>
+      </app-fw-button>
     </div>
   </header>
 
+  <!-- BANNER INFO (Fondation) -->
+  <app-fw-alert-banner variant="info" [dismissible]="true">
+    Les cycles permettent de regrouper les niveaux (ex: Primaire regroupe du CP au CM2). Les modifications ici impactent la structure des bulletins et les frais de scolarité.
+  </app-fw-alert-banner>
+
   <!-- HUB : UTILISATION DE DATALIST (Mode Cards) -->
-  <main class="w-full relative min-h-[400px]">
+  <main class="w-full relative">
 
-    <!-- État de chargement -->
-    <div *ngIf="isLoading()" class="absolute inset-0 z-10 bg-slate-50/80 backdrop-blur-sm flex items-center justify-center rounded-3xl">
-      <div class="flex flex-col items-center gap-3">
-        <div class="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-        <span class="text-[10px] font-bold text-primary uppercase tracking-widest animate-pulse">Initialisation...</span>
-      </div>
-    </div>
-
-    <!-- DataList en mode Cards -->
+    <!-- DataList en mode Cards avec gestion automatique des Skeletons -->
     <app-data-list
-      *ngIf="!isLoading()"
       [data]="displayCycles()"
       [total]="displayCycles().length"
       [actions]="cycleActions()"
+      [isLoading]="loadingService.isLoading() && loadingService.context() === 'component'"
       defaultView="cards"
       (onAction)="handleCycleAction($event)"
       (onRowClick)="goToCycle($event.id)"
     ></app-data-list>
 
-    <!-- État vide (géré par DataList, mais on peut personnaliser si besoin) -->
   </main>
 </div>
+

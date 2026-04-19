@@ -1,4 +1,4 @@
-<app-form-shell
+<app-fw-form-shell
   [title]="isEditMode ? 'Modifier la Période' : 'Ajouter une Période'"
   [subtitle]="isEditMode ? 'Rectifiez les dates de cours ou d\'examens.' : 'Définissez un trimestre ou semestre pour cette année scolaire.'"
   [icon]="ListTodo"
@@ -29,7 +29,7 @@
             type="text"
             formControlName="label"
             placeholder="Ex: 1er Trimestre"
-            class="fw-input-field"
+            class="fw-input"
             [class.error]="isInvalid('label')"
           />
         </div>
@@ -47,11 +47,11 @@
       <div class="grid grid-cols-2 gap-6">
         <div class="space-y-2">
           <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Début</label>
-          <input type="date" formControlName="startDate" class="fw-input-field" [class.error]="isInvalid('startDate')"/>
+          <input type="date" formControlName="startDate" class="fw-input" [class.error]="isInvalid('startDate')"/>
         </div>
         <div class="space-y-2">
           <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Fin</label>
-          <input type="date" formControlName="endDate" class="fw-input-field" [class.error]="isInvalid('endDate')"/>
+          <input type="date" formControlName="endDate" class="fw-input" [class.error]="isInvalid('endDate')"/>
         </div>
       </div>
     </div>
@@ -67,11 +67,11 @@
       <div class="grid grid-cols-2 gap-6 mb-4">
         <div class="space-y-2">
           <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Début Examens</label>
-          <input type="date" formControlName="examStartDate" class="fw-input-field"/>
+          <input type="date" formControlName="examStartDate" class="fw-input"/>
         </div>
         <div class="space-y-2">
           <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Fin Examens</label>
-          <input type="date" formControlName="examEndDate" class="fw-input-field"/>
+          <input type="date" formControlName="examEndDate" class="fw-input"/>
         </div>
       </div>
 
@@ -84,7 +84,7 @@
           <input
             type="date"
             formControlName="gradingDeadline"
-            class="fw-input-field"
+            class="fw-input"
             [class.error]="isInvalid('gradingDeadline')"
           />
         </div>
@@ -100,4 +100,4 @@
     </div>
 
   </form>
-</app-form-shell>
+</app-fw-form-shell>

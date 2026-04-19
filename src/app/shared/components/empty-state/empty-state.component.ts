@@ -1,68 +1,80 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LucideAngularModule } from 'lucide-angular';
-import {FwButtonComponent} from '../button/button.component';
+import { LucideAngularModule, Inbox } from 'lucide-angular';
+import { FwButtonComponent } from '../button/button.component';
 
 @Component({
   selector: 'app-fw-empty-state',
   standalone: true,
   imports: [CommonModule, LucideAngularModule, FwButtonComponent],
   template: `
-    <div class="empty-state animate-fade">
-      <div class="icon-container" *ngIf="icon">
-        <lucide-icon [name]="icon" [size]="48"></lucide-icon>
+    <div class="fw-empty-state animate-fade" [class.compact]="density === 'compact'">
+      <!-- Icon Container -->
+      <div class="icon-box" *ngIf="icon">
+        <lucide-icon [name]="icon" [size]="density === 'compact' ? 32 : 48"></lucide-icon>
       </div>
 
-      <div class="text-content">
-        <h3 class="title">{{ title }}</h3>
-        <p class="description" *ngIf="description">{{ description }}</p>
+      <!-- Text Content -->
+      <div class="text-zone">
+        <h3 class="state-title">{{ title }}</h3>
+        <p class="state-desc" *ngIf="description">{{ description }}</p>
       </div>
 
-      <div class="actions" *ngIf="ctaLabel">
-        <app-fw-button (click)="ctaClick.emit()" variant="primary">
+      <!-- Actions -->
+      <div class="action-zone" *ngIf="ctaLabel">
+        <app-fw-button (click)="ctaClick.emit()" variant="primary" [size]="density === 'compact' ? 'sm' : 'md'">
           {{ ctaLabel }}
         </app-fw-button>
       </div>
     </div>
   `,
   styles: [`
-    .empty-state {
+    .fw-empty-state {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 4rem 2rem;
+      padding: calc(var(--fw-space-xl) * 2) var(--fw-space-lg);
       text-align: center;
-      background: white;
-      border-radius: var(--fw-radius-xl);
+      background: var(--fw-surface-card);
       border: 2px dashed var(--fw-border);
+      border-radius: var(--fw-radius-lg);
+      transition: var(--fw-transition);
+
+      &.compact {
+        padding: var(--fw-space-xl) var(--fw-space-md);
+        border-radius: var(--fw-radius-md);
+        
+        .icon-box { margin-bottom: 1rem; width: 56px; height: 56px; }
+        .state-title { font-size: 1rem; }
+        .text-zone { margin-bottom: 1rem; }
+      }
     }
 
-    .icon-container {
+    .icon-box {
       width: 80px;
       height: 80px;
       border-radius: var(--fw-radius-xl);
       background: var(--fw-surface-sunken);
-      color: var(--fw-slate-medium);
+      color: var(--fw-text-tertiary);
       display: grid;
       place-items: center;
       margin-bottom: 1.5rem;
-      opacity: 0.5;
     }
 
-    .text-content {
-      max-width: 400px;
+    .text-zone {
+      max-width: 440px;
       margin-bottom: 2rem;
 
-      .title {
+      .state-title {
         font-family: var(--fw-font-display);
         font-size: 1.25rem;
         font-weight: 800;
-        color: var(--fw-midnight);
+        color: var(--fw-text-primary);
         margin: 0 0 0.5rem 0;
       }
 
-      .description {
+      .state-desc {
         font-size: 0.875rem;
         color: var(--fw-text-secondary);
         line-height: 1.6;
@@ -71,20 +83,21 @@ import {FwButtonComponent} from '../button/button.component';
     }
 
     .animate-fade {
-      animation: fadeIn 0.4s ease-out;
+      animation: fw-fade-up 0.4s ease-out;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
+    @keyframes fw-fade-up {
+      from { opacity: 0; transform: translateY(12px); }
       to { opacity: 1; transform: translateY(0); }
     }
   `]
 })
 export class FwEmptyStateComponent {
-  @Input() icon?: any;
-  @Input() title!: string;
+  @Input() icon: any = Inbox;
+  @Input() title: string = 'Aucune donnée';
   @Input() description?: string;
   @Input() ctaLabel?: string;
+  @Input() density: 'comfortable' | 'compact' = 'comfortable';
 
   @Output() ctaClick = new EventEmitter<void>();
 }

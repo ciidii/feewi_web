@@ -1,6 +1,5 @@
 @reference "../../../../../../tailwind.css";
 
-
 :host {
   display: block;
   height: 100%;
@@ -14,29 +13,25 @@
 
 // Style spécifique pour les cartes de cycles
 .cycle-card {
-  @apply bg-white rounded-[2rem] p-8 border border-slate-200 shadow-sm transition-all duration-300;
+  @apply bg-surface rounded-xl p-8 border border-border shadow-sm transition-all duration-300;
 
   &:hover {
-    @apply shadow-2xl border-primary-200 -translate-y-1;
+    @apply shadow-lg border-primary -translate-y-1;
 
     .cycle-icon-box {
-      @apply bg-primary text-white;
+      background-color: var(--fw-primary);
+      color: var(--fw-text-inverse);
     }
   }
 }
 
 .cycle-icon-box {
-  @apply w-16 h-16 bg-primary-50 rounded-2xl flex items-center justify-center text-primary-600 transition-colors shadow-inner;
+  @apply w-16 h-16 rounded-2xl flex items-center justify-center transition-colors;
+  background-color: var(--fw-primary-alpha);
+  color: var(--fw-primary);
 }
 
-// Skeletons
+// Skeletons - Utilisation de notre utilitaire global
 .skeleton-pulse {
-  background: linear-gradient(90deg, #f1f5f9 25%, #f8fafc 50%, #f1f5f9 75%);
-  background-size: 200% 100%;
-  animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  @apply animate-shimmer bg-surface-sunken;
 }

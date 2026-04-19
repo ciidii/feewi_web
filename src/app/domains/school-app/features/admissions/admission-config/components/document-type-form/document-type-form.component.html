@@ -1,4 +1,4 @@
-<app-form-shell
+<app-fw-form-shell
   title="Ajouter un Document"
   subtitle="Définissez un nouveau type de pièce jointe exigé pour le dossier."
   [icon]="FileText"
@@ -21,7 +21,7 @@
           type="text" 
           formControlName="name" 
           placeholder="Ex: Certificat de scolarité" 
-          class="fw-input-field"
+          class="fw-input"
           [class.error]="isInvalid('name')"
         />
       </div>
@@ -41,4 +41,4 @@
     </div>
 
   </form>
-</app-form-shell>
+</app-fw-form-shell>

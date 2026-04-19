@@ -48,5 +48,23 @@ Ce document suit l'état d'avancement du projet, les décisions architecturales 
     - [x] **Domaine Public (Phase 1) : 100% terminée (V2 Institutionnelle).**
         - Refonte complète du tunnel d'inscription (Horizontal Stepper).
         - Système de reprise de session (Session Recovery) via Reference/Code.
-        - **Unification du Header Public** (Composant shared `FwPublicHeader`).
+        - Unification du Header Public (Composant shared `FwPublicHeader`).
         - Optimisation Mobile-First & Accessibilité.
+
+---
+
+## 🏛️ Phase 2 : School App Domain (Administration)
+*En cours*
+
+### Objectifs
+- Unifier le cadre de travail (Shell, Sidebar, Headers).
+- Moderniser les listes de données (Admissions, Élèves).
+- Refondre la fiche Admission 360 (Tabs, Documents, Évaluation).
+
+### Journal de bord
+- **18/04/2026** : 
+    - [x] **Jalon 2.1 : Refonte du Shell & Navigation.**
+        - Modernisation de la Sidebar (Thème Midnight).
+        - Refonte du Header Global (Omnisearch, Profil).
+        - Création du composant partagé `FwPageHeader`.
+    - [ ] Jalon 2.2 : Modernisation de la liste des Admissions.

@@ -40,7 +40,7 @@
           </button>
         }
 
-        @if (['ADMITTED', 'WAITLIST', 'TESTING'].includes(app.status)) {
+        @if (['ADMITTED', 'WAITLIST'].includes(app.status)) {
           <button *ngIf="isReadyForFinalValidation()" class="btn-action success" (click)="validateFinal()" [disabled]="isActionLoading()">
             <lucide-icon [name]="isActionLoading() ? RefreshCw : GraduationCap" [size]="18"
                          [class.animate-spin]="isActionLoading()"></lucide-icon>

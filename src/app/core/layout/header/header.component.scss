@@ -1,3 +1,126 @@
 :host {
   display: block;
+  width: 100%;
+}
+
+.global-header {
+  height: 64px;
+  background: white;
+  border-bottom: 1px solid var(--fw-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+// --- LOGO & TENANT ---
+.brand-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 240px;
+
+  .logo-wrap {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    overflow: hidden;
+    img { width: 100%; height: 100%; object-fit: contain; }
+  }
+
+  .tenant-info {
+    display: flex;
+    flex-direction: column;
+    .name { font-family: var(--fw-font-display); font-weight: 800; font-size: 0.8125rem; color: var(--fw-midnight); line-height: 1.1; }
+    .meta { font-size: 9px; font-weight: 700; color: var(--fw-text-tertiary); text-transform: uppercase; letter-spacing: 0.02em; }
+  }
+}
+
+// --- OMNISEARCH ---
+.search-section {
+  flex: 1;
+  max-width: 600px;
+  padding: 0 24px;
+
+  .search-input-wrap {
+    position: relative;
+    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--fw-text-tertiary); pointer-events: none; transition: color 0.2s ease; }
+    .fw-input { padding-left: 36px; height: 38px; background: var(--fw-surface-sunken); border-color: transparent; }
+    input:focus + .search-icon { color: var(--fw-primary); }
+  }
+}
+
+// --- ACTIONS ---
+.actions-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .year-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 34px;
+    padding: 0 12px;
+    background: var(--fw-surface-sunken);
+    border: 1px solid var(--fw-border);
+    border-radius: var(--fw-radius-full);
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--fw-midnight);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    &:hover { background: white; border-color: var(--fw-primary); color: var(--fw-primary); }
+  }
+
+  .icon-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--fw-text-secondary);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    &:hover { background: var(--fw-surface-sunken); color: var(--fw-midnight); }
+    &.danger:hover { background: var(--fw-error-bg); color: var(--fw-error); }
+  }
+
+  .v-divider { width: 1px; height: 20px; background: var(--fw-border); margin: 0 4px; }
+
+  .user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 4px 4px 12px;
+    border-radius: var(--fw-radius-full);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+
+    &:hover { background: var(--fw-surface-sunken); border-color: var(--fw-border); }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      .name { font-size: 0.75rem; font-weight: 800; color: var(--fw-midnight); line-height: 1; }
+      .role { font-size: 9px; font-weight: 700; color: var(--fw-primary); text-transform: uppercase; }
+    }
+
+    .avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--fw-midnight);
+      color: white;
+      display: grid;
+      place-items: center;
+    }
+  }
 }

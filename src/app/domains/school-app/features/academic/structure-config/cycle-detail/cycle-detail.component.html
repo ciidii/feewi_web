@@ -13,14 +13,15 @@
 
       <div class="flex gap-3">
         <!-- Action Super Admin -->
-        <button
+        <app-fw-button
           *ngIf="canEditStructure() && activeTab() === 'pilotage'"
           (click)="openEditLevel({id: '', name: '', rank: 0, cycleId: cycleId() || ''})"
-          class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-[13px] font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 active:scale-95"
+          variant="primary"
+          size="md"
+          [icon]="Plus"
         >
-          <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
           Ajouter un niveau
-        </button>
+        </app-fw-button>
       </div>
     </div>
 
@@ -87,13 +88,18 @@
   <!-- CONTENU DYNAMIQUE -->
   <main class="relative min-h-[400px]">
 
-    <!-- Loader Global -->
-    <div *ngIf="isLoading()" class="absolute inset-0 z-10 bg-slate-50/80 backdrop-blur-sm flex items-center justify-center rounded-3xl">
-      <div class="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-    </div>
-
     <!-- VUE PILOTAGE (Sections Niveaux > Classes) -->
-    <div *ngIf="activeTab() === 'pilotage' && !isLoading()" class="space-y-6 animate-in slide-in-from-bottom duration-500">
+    <div *ngIf="activeTab() === 'pilotage' && !loadingService.isLoading()" class="space-y-6 animate-in slide-in-from-bottom duration-500">
+
+      <!-- Skeleton loading initial -->
+      <div *ngIf="loadingService.isLoading() && levelGroups().length === 0" class="space-y-6">
+        <div *ngFor="let i of [1,2]" class="bg-white rounded-[2rem] border border-slate-100 p-8 space-y-6 animate-pulse">
+          <div class="h-8 bg-slate-100 rounded-lg w-1/4"></div>
+          <div class="grid grid-cols-6 gap-4">
+            <div *ngFor="let j of [1,2,3]" class="h-24 bg-slate-50 rounded-2xl"></div>
+          </div>
+        </div>
+      </div>
 
       <div *ngFor="let group of levelGroups()" class="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
         <!-- Header du Niveau -->
@@ -109,21 +115,23 @@
           </div>
 
           <div class="flex items-center gap-2">
-            <button
+            <app-fw-button
               (click)="openCurriculumManager(group.level)"
-              class="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 rounded-xl text-xs font-bold hover:bg-emerald-100 transition-colors"
+              variant="tertiary"
+              size="sm"
+              [icon]="ListChecks"
             >
-              <lucide-icon [name]="ListChecks" class="w-3.5 h-3.5"></lucide-icon>
               Programme
-            </button>
-            <button
+            </app-fw-button>
+            
+            <app-fw-button
               *ngIf="canEditStructure()"
               (click)="openEditLevel(group.level)"
-              class="p-2 text-slate-400 hover:text-primary transition-colors"
+              variant="ghost"
+              size="sm"
+              [icon]="Edit"
               title="Paramètres du niveau"
-            >
-              <lucide-icon [name]="Edit" class="w-4 h-4"></lucide-icon>
-            </button>
+            ></app-fw-button>
           </div>
         </div>
 
@@ -142,7 +150,7 @@
                   <span class="block text-[10px] font-medium text-slate-400 group-hover/cls:text-primary-100 transition-colors">{{ cls.capacity }} places</span>
                 </div>
                 
-                <!-- Indicateur d'assignation (V4) -->
+                <!-- Indicateur d'assignation -->
                 <div class="flex items-center gap-1.5 pt-1 border-t border-slate-200/50 group-hover/cls:border-white/20">
                   <div class="w-1.5 h-1.5 rounded-full" 
                        [ngClass]="cls.assignedTeachings === cls.totalTeachings ? 'bg-emerald-500 group-hover/cls:bg-white' : 'bg-amber-400 group-hover/cls:bg-amber-200'">
@@ -152,7 +160,6 @@
                   </span>
                 </div>
               </div>
-              <!-- Déco -->
               <lucide-icon [name]="Users" class="absolute -right-2 -bottom-2 w-12 h-12 text-slate-200/50 group-hover/cls:text-white/10 transition-colors"></lucide-icon>
             </div>
 
@@ -165,30 +172,32 @@
               <span class="text-[10px] font-bold text-slate-400 group-hover/add:text-primary transition-colors uppercase">Ouvrir</span>
             </button>
           </div>
-
-          <!-- État vide pour les classes -->
-          <div *ngIf="group.classes.length === 0" class="flex items-center gap-3 py-2">
-            <span class="text-xs text-slate-400 italic">Aucune classe n'est encore configurée pour ce niveau.</span>
-          </div>
         </div>
       </div>
 
       <!-- État vide (Niveaux) -->
-      <div *ngIf="levelGroups().length === 0" class="py-24 text-center border-2 border-dashed border-slate-200 rounded-[3rem]">
-        <lucide-icon [name]="GraduationCap" class="w-12 h-12 text-slate-200 mx-auto mb-4"></lucide-icon>
-        <h3 class="text-lg font-bold text-slate-400 italic">Aucun niveau défini.</h3>
+      <div *ngIf="levelGroups().length === 0 && !loadingService.isLoading()" class="py-12">
+        <app-fw-empty-state
+          [icon]="GraduationCap"
+          title="Aucun niveau défini"
+          description="Commencez par ajouter les niveaux pédagogiques de ce cycle (ex: 6ème, 5ème...)."
+          ctaLabel="Ajouter mon premier niveau"
+          (ctaClick)="openEditLevel({id: '', name: '', rank: 1, cycleId: cycleId() || ''})"
+        ></app-fw-empty-state>
       </div>
     </div>
 
     <!-- VUE FILIÈRES (DataList Classique) -->
-    <div *ngIf="activeTab() === 'filieres' && !isLoading()" class="animate-in fade-in slide-in-from-right duration-300">
+    <div *ngIf="activeTab() === 'filieres' && !loadingService.isLoading()" class="animate-in fade-in slide-in-from-right duration-300">
       <app-data-list
         [data]="displayFilieres()"
         [total]="displayFilieres().length"
         [actions]="filiereActions"
+        [isLoading]="loadingService.isLoading()"
         (onAction)="handleFiliereAction($event)"
       ></app-data-list>
     </div>
 
   </main>
 </div>
+

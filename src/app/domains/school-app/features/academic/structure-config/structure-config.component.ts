@@ -2,21 +2,31 @@ import { Component, inject, OnInit, signal, computed, ViewEncapsulation } from '
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { LucideAngularModule, Plus, Layers, Edit, Trash2, ArrowRight } from 'lucide-angular';
+import { LucideAngularModule, Plus, Layers, Edit, Trash2, ArrowRight, Info } from 'lucide-angular';
 import { AcademicService } from '../../../../../core/services/academic.service';
 import { AuthService } from '../../../../../core/services/auth.service';
 import { NotificationService } from '../../../../../shared/services/notification.service';
+import { LoadingService } from '../../../../../shared/services/loading.service';
 import { Cycle } from '../../../../../core/models/academic.model';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { DataListComponent } from '../../../../../shared/components/data-list/data-list.component';
 import { TableRow, RowAction } from '../../../../../shared/models/data-list.models';
 import { CycleFormComponent } from './components/cycle-form/cycle-form.component';
 import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
+import { FwButtonComponent } from '../../../../../shared/components/button/button.component';
+import { FwAlertBannerComponent } from '../../../../../shared/components/alert-banner/alert-banner.component';
 
 @Component({
   selector: 'app-structure-config',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, MatDialogModule, DataListComponent],
+  imports: [
+    CommonModule, 
+    LucideAngularModule, 
+    MatDialogModule, 
+    DataListComponent, 
+    FwButtonComponent,
+    FwAlertBannerComponent
+  ],
   templateUrl: './structure-config.component.html',
   styleUrls: ['./structure-config.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -25,6 +35,7 @@ export class StructureConfigComponent implements OnInit {
   private academicService = inject(AcademicService);
   private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
+  protected loadingService = inject(LoadingService);
   private dialog = inject(MatDialog);
   private router = inject(Router);
 
@@ -34,10 +45,10 @@ export class StructureConfigComponent implements OnInit {
   readonly Edit = Edit;
   readonly Trash2 = Trash2;
   readonly ArrowRight = ArrowRight;
+  readonly InfoIcon = Info;
 
   // États
   cycles = signal<Cycle[]>([]);
-  isLoading = signal(true);
 
   // Autorisations (Provisioning)
   readonly canEditStructure = computed(() => this.authService.hasRole('ROLE_SUPER_ADMIN'));
@@ -78,16 +89,15 @@ export class StructureConfigComponent implements OnInit {
   }
 
   async loadData() {
-    this.isLoading.set(true);
-    try {
-      const cyclesData = await firstValueFrom(this.academicService.getCycles());
-      // On fait confiance à l'API pour les cycles activés (Tenant-scoped)
-      this.cycles.set(cyclesData.sort((a, b) => a.rank - b.rank));
-    } catch (error) {
-      this.notificationService.error("Erreur lors du chargement de la structure.");
-    } finally {
-      this.isLoading.set(false);
-    }
+    // Utilisation de notre utilitaire de chargement de fondation
+    await this.loadingService.execute(async () => {
+      try {
+        const cyclesData = await firstValueFrom(this.academicService.getCycles());
+        this.cycles.set(cyclesData.sort((a, b) => a.rank - b.rank));
+      } catch (error) {
+        this.notificationService.error("Erreur lors du chargement de la structure.");
+      }
+    }, 'component');
   }
 
   handleCycleAction(event: { actionId: string, row: TableRow }) {
@@ -139,20 +149,23 @@ export class StructureConfigComponent implements OnInit {
         title: 'Supprimer le cycle ?',
         message: `Voulez-vous supprimer le cycle "${cycleName}" ? Tous les niveaux rattachés à ce cycle seront impactés.`,
         confirmLabel: 'Oui, supprimer le cycle',
-        type: 'danger'
+        type: 'destructive'
       }
     });
 
     dialogRef.afterClosed().subscribe(async (confirmed) => {
       if (confirmed) {
-        try {
-          await firstValueFrom(this.academicService.deleteCycle(cycle.id));
-          this.notificationService.success('Cycle supprimé avec succès.');
-          this.loadData();
-        } catch (error) {
-          this.notificationService.error('Erreur lors de la suppression.');
-        }
+        await this.loadingService.execute(async () => {
+          try {
+            await firstValueFrom(this.academicService.deleteCycle(cycle.id));
+            this.notificationService.success('Cycle supprimé avec succès.');
+            this.loadData();
+          } catch (error) {
+            this.notificationService.error('Erreur lors de la suppression.');
+          }
+        }, 'global');
       }
     });
   }
 }
+

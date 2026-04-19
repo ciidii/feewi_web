@@ -1,5 +1,5 @@
-<div class="overflow-x-auto">
-  <table class="w-full border-collapse">
+<div class="overflow-x-auto custom-scrollbar">
+  <table class="w-full border-collapse table-fixed">
     <!-- EN-TÊTE DU TABLEAU -->
     <thead class="bg-slate-50/80 border-b border-slate-200">
     <tr>
@@ -16,12 +16,13 @@
         </div>
       </th>
 
-      <!-- Colonnes de données -->
-      <th class="px-4 py-3 text-left cursor-pointer group"
-          (click)="handleSort('title')"
+      <!-- Colonnes de données redimensionnables -->
+      <th class="px-4 py-3 text-left cursor-pointer group/header relative"
+          [style.width.px]="columnWidths['title']"
           (mouseenter)="hoveredColumn = 'title'"
           (mouseleave)="hoveredColumn = null">
-        <div class="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+        <div class="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider"
+             (click)="handleSort('title')">
           <span>Élément</span>
           <lucide-icon
             [name]="getSortIcon('title')"
@@ -30,13 +31,15 @@
             [class.opacity-30]="sortState.column !== 'title' && hoveredColumn !== 'title'"
           ></lucide-icon>
         </div>
+        <div class="column-resizer" (mousedown)="startResizing($event, 'title')"></div>
       </th>
 
-      <th class="px-4 py-3 text-left cursor-pointer group"
-          (click)="handleSort('subtitle')"
+      <th class="px-4 py-3 text-left cursor-pointer group/header relative"
+          [style.width.px]="columnWidths['subtitle']"
           (mouseenter)="hoveredColumn = 'subtitle'"
           (mouseleave)="hoveredColumn = null">
-        <div class="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+        <div class="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider"
+             (click)="handleSort('subtitle')">
           <span>Sous-titre</span>
           <lucide-icon
             [name]="getSortIcon('subtitle')"
@@ -45,17 +48,19 @@
             [class.opacity-30]="sortState.column !== 'subtitle' && hoveredColumn !== 'subtitle'"
           ></lucide-icon>
         </div>
+        <div class="column-resizer" (mousedown)="startResizing($event, 'subtitle')"></div>
       </th>
 
-      <th class="px-4 py-3 text-left">
+      <th class="px-4 py-3 text-left w-32">
         <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Statut</span>
       </th>
 
-      <th class="px-4 py-3 text-left cursor-pointer group"
-          (click)="handleSort('date')"
+      <th class="px-4 py-3 text-left cursor-pointer group/header relative"
+          [style.width.px]="columnWidths['date']"
           (mouseenter)="hoveredColumn = 'date'"
           (mouseleave)="hoveredColumn = null">
-        <div class="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+        <div class="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider"
+             (click)="handleSort('date')">
           <span>Date</span>
           <lucide-icon
             [name]="getSortIcon('date')"
@@ -64,6 +69,7 @@
             [class.opacity-30]="sortState.column !== 'date' && hoveredColumn !== 'date'"
           ></lucide-icon>
         </div>
+        <div class="column-resizer" (mousedown)="startResizing($event, 'date')"></div>
       </th>
 
       <th class="w-24 px-4 py-3 text-right">
@@ -91,21 +97,21 @@
     </td>
 
     <!-- Titre avec avatar -->
-    <td class="px-4 py-3">
+    <td class="px-4 py-3 overflow-hidden">
       <div class="flex items-center gap-3">
-        <div class="avatar">
+        <div class="avatar flex-shrink-0">
           <img *ngIf="row.avatarUrl" [src]="row.avatarUrl" [alt]="row.title" class="avatar-img" />
           <span *ngIf="!row.avatarUrl" class="avatar-fallback">
                 {{ row.avatarLabel || row.title.charAt(0) || '?' }}
               </span>
         </div>
-        <span class="font-medium text-slate-900">{{ row.title }}</span>
+        <span class="font-medium text-slate-900 fw-truncate" [fwSmartTooltip]="row.title">{{ row.title }}</span>
       </div>
     </td>
 
     <!-- Sous-titre -->
-    <td class="px-4 py-3 text-slate-600">
-      {{ row.subtitle || '—' }}
+    <td class="px-4 py-3 text-slate-600 overflow-hidden">
+      <span class="fw-truncate block" [fwSmartTooltip]="row.subtitle || ''">{{ row.subtitle || '—' }}</span>
     </td>
 
     <!-- Badges -->
@@ -126,7 +132,7 @@
 
     <!-- Date -->
     <td class="px-4 py-3 text-slate-600">
-      {{ formatDate(row.date) }}
+      {{ row.date | fwDate }}
     </td>
 
     <!-- Actions Dynamiques -->
@@ -145,7 +151,7 @@
           </button>
         </ng-container>
 
-        <!-- Menu "Plus" optionnel (si trop d'actions) -->
+        <!-- Menu \"Plus\" optionnel (si trop d'actions) -->
         <button *ngIf="actions().length > 4" class="table-action more" title="Plus d'options">
           <lucide-icon [name]="MoreHorizontal" class="w-4 h-4"></lucide-icon>
         </button>

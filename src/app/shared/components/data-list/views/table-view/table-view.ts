@@ -15,6 +15,8 @@ import {
   Table
 } from 'lucide-angular';
 import {RowAction, TableRow} from '../../../../models/data-list.models';
+import { SmartTooltipDirective } from '../../../../directives/smart-tooltip.directive';
+import { FwDatePipe } from '../../../../pipes/fw-date.pipe';
 
 
 export type SortDirection = 'asc' | 'desc' | null;
@@ -29,7 +31,9 @@ export interface SortState {
   imports: [
     CommonModule,
     MatCheckboxModule,
-    LucideAngularModule
+    LucideAngularModule,
+    SmartTooltipDirective,
+    FwDatePipe
   ],
   templateUrl: './table-view.html',
   styleUrls: ['./table-view.scss']
@@ -83,9 +87,59 @@ export class TableViewComponent {
   /** Colonne survolée */
   hoveredColumn: string | null = null;
 
+  /** Largeurs des colonnes */
+  columnWidths: Record<string, number> = {};
+
+  /** État du redimensionnement */
+  private resizing = {
+    active: false,
+    column: '',
+    startX: 0,
+    startWidth: 0
+  };
+
   // ===========================================
   // MÉTHODES
   // ===========================================
+
+  /** Démarrer le redimensionnement */
+  startResizing(event: MouseEvent, column: string): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const header = (event.target as HTMLElement).parentElement;
+    if (!header) return;
+
+    this.resizing = {
+      active: true,
+      column,
+      startX: event.pageX,
+      startWidth: header.offsetWidth
+    };
+
+    document.addEventListener('mousemove', this.onMouseMove);
+    document.addEventListener('mouseup', this.onMouseUp);
+    document.body.style.cursor = 'col-resize';
+  }
+
+  private onMouseMove = (event: MouseEvent): void => {
+    if (!this.resizing.active) return;
+
+    const diff = event.pageX - this.resizing.startX;
+    const newWidth = Math.max(80, this.resizing.startWidth + diff);
+    
+    this.columnWidths = {
+      ...this.columnWidths,
+      [this.resizing.column]: newWidth
+    };
+  };
+
+  private onMouseUp = (): void => {
+    this.resizing.active = false;
+    document.removeEventListener('mousemove', this.onMouseMove);
+    document.removeEventListener('mouseup', this.onMouseUp);
+    document.body.style.cursor = 'default';
+  };
 
   /** Vérifier si une ligne est sélectionnée */
   isSelected(id: string | number): boolean {
@@ -126,12 +180,6 @@ export class TableViewComponent {
       return ArrowUpDown;
     }
     return this.sortState.direction === 'asc' ? ArrowUp : ArrowDown;
-  }
-
-  /** Formater la date */
-  formatDate(date?: string): string {
-    if (!date) return '—';
-    return date;
   }
 
   /** Obtenir la classe CSS d'une action */
