@@ -25,6 +25,30 @@
         "support": "Need help? Contact support",
         "copyright": "Feewi Platform — Version 2026.4"
       }
+    },
+    "forgot_password": {
+      "title": "Forgot Password",
+      "subtitle": "We will send you a recovery code by email.",
+      "info_alert": "Make sure you have access to your mailbox to retrieve the 6-digit OTP code.",
+      "fields": {
+        "email": {
+          "label": "Email Address",
+          "placeholder": "your@email.com",
+          "errors": {
+            "required": "This field is required",
+            "email": "Invalid email format"
+          }
+        }
+      },
+      "actions": {
+        "submit": "Send Code",
+        "back_to_login": "Back to login"
+      },
+      "notifications": {
+        "success_title": "Verification",
+        "success_message": "OTP code sent by email.",
+        "error_title": "Request failed"
+      }
     }
   },
   "global": {
