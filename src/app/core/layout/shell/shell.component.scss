@@ -6,6 +6,7 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
+  width: 100vw;
   overflow: hidden;
   background-color: var(--fw-white);
 }
@@ -14,6 +15,7 @@
   flex: 1;
   display: flex;
   overflow: hidden;
+  position: relative; /* Base pour le positionnement absolu des loaders si besoin */
 }
 
 .shell-main {
@@ -23,14 +25,15 @@
   position: relative;
   display: flex;
   flex-direction: column;
+  min-width: 0; /* Important pour flex-box + overflow horizontal */
 
   .content-wrapper {
     flex: 1;
-    // Note: Le padding est désormais géré au niveau des pages 
-    // ou par le PageHeader pour permettre le full-bleed.
     max-width: 1600px;
     width: 100%;
     margin: 0 auto;
+    /* Emp├¬che les recalculs de layout de se propager vers le haut */
+    contain: layout; 
   }
 }
 

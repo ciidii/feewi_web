@@ -67,7 +67,6 @@ import {SkeletonComponent} from '../skeleton/skeleton.component';
     TimelineViewComponent,
     CardSkeletonComponent,
     MatMenuModule,
-    SkeletonComponent,
     BlockLoaderComponent,
     FwEmptyStateComponent,
     FwRefreshBannerComponent

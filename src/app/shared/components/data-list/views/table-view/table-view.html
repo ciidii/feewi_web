@@ -80,6 +80,23 @@
 
     <!-- CORPS DU TABLEAU -->
     <tbody class="divide-y divide-slate-100">
+    <!-- SKELETONS (SI CHARGEMENT) -->
+    <ng-container *ngIf="isLoading() && data().length === 0">
+      <tr *ngFor="let i of [1,2,3,4,5]" class="animate-pulse">
+        <td class="w-16 px-4 py-3"><fw-skeleton shape="rect" width="18px" height="18px" radius="4px"></fw-skeleton></td>
+        <td class="px-4 py-3">
+          <div class="flex items-center gap-3">
+            <fw-skeleton shape="rect" width="32px" height="32px" radius="8px"></fw-skeleton>
+            <fw-skeleton width="120px" height="14px"></fw-skeleton>
+          </div>
+        </td>
+        <td class="px-4 py-3"><fw-skeleton width="180px" height="12px"></fw-skeleton></td>
+        <td class="px-4 py-3"><fw-skeleton shape="pill" width="60px" height="20px"></fw-skeleton></td>
+        <td class="px-4 py-3"><fw-skeleton width="80px" height="12px"></fw-skeleton></td>
+        <td class="px-4 py-3 text-right"><fw-skeleton width="24px" height="24px" class="ml-auto"></fw-skeleton></td>
+      </tr>
+    </ng-container>
+
     <tr *ngFor="let row of data()"
         class="group hover:bg-slate-50/80 transition-colors cursor-pointer"
         [class.bg-primary-50/20]="isSelected(row.id)"

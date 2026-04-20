@@ -7,15 +7,15 @@ app-sidebar {
 .sidebar-container {
   background-color: var(--fw-surface-inverse) !important;
   color: var(--fw-text-inverse);
-  height: calc(100vh - 64px);
-  transition: width 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  height: calc(100vh - var(--fw-header-height));
+  transition: width var(--fw-transition);
   display: flex;
   flex-direction: column;
   overflow: hidden;
   border-right: 1px solid rgba(255, 255, 255, 0.05);
 
-  &.is-expanded { width: 260px; }
-  &.is-collapsed { width: 72px; }
+  &.is-expanded { width: var(--fw-sidebar-expanded); }
+  &.is-collapsed { width: var(--fw-sidebar-collapsed); }
 }
 
 // --- CONSOLE SAAS ---

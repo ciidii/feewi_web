@@ -7,41 +7,108 @@ import { SkeletonComponent } from './skeleton.component';
   standalone: true,
   imports: [CommonModule, SkeletonComponent],
   template: `
-    <div class="card-skeleton-container" [ngClass]="{'compact': density === 'compact'}">
-      <!-- Header with avatar and name -->
-      <div class="flex items-center gap-3 mb-4">
-        <fw-skeleton shape="circle" width="40px" height="40px"></fw-skeleton>
-        <div class="flex-1 space-y-2">
-          <fw-skeleton width="60%" height="14px"></fw-skeleton>
-          <fw-skeleton width="40%" height="10px"></fw-skeleton>
+    <div class="feewi-card-skeleton" [ngClass]="{'compact': density === 'compact'}">
+      <!-- Header Glass Mockup -->
+      <div class="card-glass-header-mock"></div>
+
+      <!-- Avatar Squircle Mockup -->
+      <div class="squircle-mock">
+        <fw-skeleton radius="16px" width="52px" height="52px"></fw-skeleton>
+      </div>
+
+      <!-- Body -->
+      <div class="card-body-mock">
+        <div class="title-section-mock">
+          <fw-skeleton width="70%" height="16px" class="mb-2"></fw-skeleton>
+          <fw-skeleton width="90%" height="12px"></fw-skeleton>
+        </div>
+
+        <div class="badge-container-mock">
+          <fw-skeleton shape="pill" width="60px" height="18px"></fw-skeleton>
+          <fw-skeleton shape="pill" width="80px" height="18px"></fw-skeleton>
+        </div>
+
+        <div class="metadata-grid-mock">
+          <div class="meta-item-mock" *ngFor="let i of [1,2,3,4]">
+            <fw-skeleton shape="circle" width="14px" height="14px"></fw-skeleton>
+            <fw-skeleton width="60%" height="10px"></fw-skeleton>
+          </div>
         </div>
       </div>
 
-      <!-- Body lines -->
-      <div class="space-y-3">
-        <fw-skeleton width="100%" height="12px"></fw-skeleton>
-        <fw-skeleton width="90%" height="12px"></fw-skeleton>
-        <fw-skeleton width="75%" height="12px"></fw-skeleton>
-      </div>
-
-      <!-- Footer action -->
-      <div class="mt-6 flex justify-end">
-        <fw-skeleton shape="pill" width="80px" height="32px"></fw-skeleton>
+      <!-- Footer -->
+      <div class="card-footer-mock">
+        <fw-skeleton width="40px" height="10px"></fw-skeleton>
+        <div class="flex gap-2">
+          <fw-skeleton shape="rect" radius="8px" width="28px" height="28px"></fw-skeleton>
+          <fw-skeleton shape="rect" radius="8px" width="28px" height="28px"></fw-skeleton>
+        </div>
       </div>
     </div>
   `,
   styles: [`
-    .card-skeleton-container {
-      padding: var(--fw-space-lg);
-      background: var(--fw-surface-card);
+    .feewi-card-skeleton {
+      background: white;
+      border-radius: 20px;
       border: 1px solid var(--fw-border);
-      border-radius: var(--fw-radius-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
     }
 
-    .card-skeleton-container.compact {
-      padding: var(--fw-space-md);
-      border-radius: var(--fw-radius-md);
+    .card-glass-header-mock {
+      height: 40px;
+      background: var(--fw-surface-sunken);
+      opacity: 0.5;
     }
+
+    .squircle-mock {
+      margin-top: -26px;
+      margin-left: 16px;
+      z-index: 2;
+    }
+
+    .card-body-mock {
+      padding: 1rem 1.25rem;
+      flex: 1;
+    }
+
+    .title-section-mock {
+      margin-bottom: 0.75rem;
+    }
+
+    .badge-container-mock {
+      display: flex;
+      gap: 0.375rem;
+      margin-bottom: 1rem;
+    }
+
+    .metadata-grid-mock {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--fw-surface-sunken);
+    }
+
+    .meta-item-mock {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      height: 1.25rem;
+    }
+
+    .card-footer-mock {
+      padding: 0.625rem 1.25rem;
+      background: var(--fw-surface-sunken);
+      border-top: 1px solid var(--fw-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .mb-2 { margin-bottom: 0.5rem; }
   `]
 })
 export class CardSkeletonComponent {

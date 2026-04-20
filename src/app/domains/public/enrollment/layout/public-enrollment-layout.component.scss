@@ -21,7 +21,7 @@ $font-sans: "Inter", sans-serif;
 }
 
 .public-header {
-  height: 80px;
+  height: var(--fw-header-height);
   background: #ffffff;
   border-bottom: 1.5px solid $border;
   display: flex;

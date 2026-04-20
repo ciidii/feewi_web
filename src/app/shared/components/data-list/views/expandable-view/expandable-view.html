@@ -1,8 +1,38 @@
 <div class="divide-y divide-slate-100">
+
+  <!-- SKELETONS (SI CHARGEMENT) -->
+  <ng-container *ngIf="isLoading() && data().length === 0">
+    <div *ngFor="let i of [1,2,3,4,5]" class="flex items-center px-6 py-4 animate-pulse bg-white">
+      <div class="flex items-center gap-4 w-20">
+        <fw-skeleton shape="rect" width="18px" height="18px" radius="4px"></fw-skeleton>
+        <fw-skeleton shape="rect" width="16px" height="16px" radius="4px"></fw-skeleton>
+      </div>
+      <div class="flex-1 grid grid-cols-12 gap-4 items-center">
+        <div class="col-span-5 flex items-center gap-3">
+          <fw-skeleton shape="rect" width="32px" height="32px" radius="8px"></fw-skeleton>
+          <div class="flex flex-col gap-1 w-full">
+            <fw-skeleton width="60%" height="14px"></fw-skeleton>
+            <fw-skeleton width="40%" height="10px"></fw-skeleton>
+          </div>
+        </div>
+        <div class="col-span-3">
+          <fw-skeleton shape="pill" width="60px" height="20px"></fw-skeleton>
+        </div>
+        <div class="col-span-2">
+          <fw-skeleton width="80px" height="12px"></fw-skeleton>
+        </div>
+        <div class="col-span-2 flex justify-end gap-2">
+          <fw-skeleton shape="circle" width="32px" height="32px"></fw-skeleton>
+          <fw-skeleton shape="circle" width="32px" height="32px"></fw-skeleton>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
   <div
     *ngFor="let row of data()"
     class="group"
-    [class.bg-primary-50/20]="isSelected(row.id)"
+    [class.bg-primary-50]="isSelected(row.id)"
   >
   <!-- Ligne principale -->
   <div

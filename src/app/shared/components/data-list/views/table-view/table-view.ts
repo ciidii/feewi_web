@@ -17,6 +17,7 @@ import {
 import {RowAction, TableRow} from '../../../../models/data-list.models';
 import { SmartTooltipDirective } from '../../../../directives/smart-tooltip.directive';
 import { FwDatePipe } from '../../../../pipes/fw-date.pipe';
+import { SkeletonComponent } from '../../../../components/skeleton/skeleton.component';
 
 
 export type SortDirection = 'asc' | 'desc' | null;
@@ -33,7 +34,8 @@ export interface SortState {
     MatCheckboxModule,
     LucideAngularModule,
     SmartTooltipDirective,
-    FwDatePipe
+    FwDatePipe,
+    SkeletonComponent
   ],
   templateUrl: './table-view.html',
   styleUrls: ['./table-view.scss']
@@ -43,8 +45,11 @@ export class TableViewComponent {
   // INPUTS
   // ===========================================
 
-  /** Les données à afficher */
+  /** Les donn├®es ├á afficher */
   data = input<TableRow[]>([]);
+
+  /** ├ëtat de chargement */
+  isLoading = input<boolean>(false);
 
   /** IDs des éléments sélectionnés */
   selectedIds = input<Set<string | number>>(new Set());

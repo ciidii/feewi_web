@@ -194,21 +194,13 @@
 
     <!-- ÉTAT DE CHARGEMENT INITIAL (Skeletons) -->
     <div *ngIf="isLoading() && data().length === 0" class="p-6">
-      <!-- Skeletons pour la vue Cards -->
+      <!-- Skeletons pour la vue Cards (isolés car pas d'en-tête fixe) -->
       <div *ngIf="viewMode() === 'cards'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <fw-card-skeleton *ngFor="let i of [1,2,3,4,5,6]" [density]="isFiltersOpen() ? 'compact' : 'comfortable'"></fw-card-skeleton>
       </div>
 
-      <!-- Skeletons pour la vue Table -->
-      <div *ngIf="viewMode() === 'table' || viewMode() === 'expandable'" class="space-y-4">
-        <div *ngFor="let i of [1,2,3,4,5,6,7,8]" class="flex items-center gap-4 p-4 border border-slate-100 rounded-xl">
-          <fw-skeleton shape="rect" width="24px" height="24px"></fw-skeleton>
-          <fw-skeleton width="30%" height="16px"></fw-skeleton>
-          <fw-skeleton width="20%" height="16px"></fw-skeleton>
-          <fw-skeleton width="15%" height="16px"></fw-skeleton>
-          <fw-skeleton class="ml-auto" shape="pill" width="80px" height="24px"></fw-skeleton>
-        </div>
-      </div>
+      <!-- Note: Pour Table et Expandable, le skeleton est désormais géré à l'intérieur des composants de vue
+           pour préserver le positionnement des colonnes et l'en-tête. -->
     </div>
 
     <!-- Loader Overlay (uniquement lors du rafraîchissement de données existantes) -->
@@ -220,8 +212,9 @@
 
     <!-- VUE EXTENSIBLE -->
     <app-expandable-view
-      *ngIf="viewMode() === 'expandable' && (data().length > 0 || !isLoading())"
+      *ngIf="viewMode() === 'expandable'"
       [data]="displayedData()"
+      [isLoading]="isLoading()"
       [selectedIds]="selectedIds()"
       [expandedIds]="expandedIds()"
       [getBadgeClass]="getBadgeClass"
@@ -234,7 +227,7 @@
 
     <!-- VUE CARTES -->
     <app-cards-view
-      *ngIf="viewMode() === 'cards'"
+      *ngIf="viewMode() === 'cards' && (data().length > 0 || !isLoading())"
       [data]="displayedData()"
       [selectedIds]="selectedIds()"
       [getBadgeClass]="getBadgeClass"
@@ -248,6 +241,7 @@
     <app-table-view
       *ngIf="viewMode() === 'table'"
       [data]="displayedData()"
+      [isLoading]="isLoading()"
       [selectedIds]="selectedIds()"
       [getBadgeClass]="getBadgeClass"
       [actions]="actions()"

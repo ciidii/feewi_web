@@ -87,6 +87,14 @@
   --fw-neutral-bg: var(--fw-raw-slate-100);
   --fw-neutral-text: var(--fw-raw-slate-600);
   --fw-neutral-border: var(--fw-raw-slate-200);
+
+  /* ==========================================================================
+     LAYOUT DIMENSIONS (Z├®ro Layout Shift)
+     ========================================================================== */
+  --fw-header-height: 64px;
+  --fw-rail-width: 64px;
+  --fw-sidebar-expanded: 260px;
+  --fw-sidebar-collapsed: 72px;
 }
 
 /* Animation Shimmer Globale */

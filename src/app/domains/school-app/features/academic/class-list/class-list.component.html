@@ -25,18 +25,11 @@
 
   <!-- LISTE DES CLASSES (CARDS VIEW PAR DÉFAUT) -->
   <div class="relative min-h-[400px]">
-    <!-- Loader local -->
-    <div *ngIf="isLoading()" class="absolute inset-0 z-10 bg-white/50 backdrop-blur-[1px] flex items-center justify-center rounded-2xl border border-slate-100">
-      <div class="flex flex-col items-center gap-3">
-        <div class="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-        <span class="text-[10px] font-bold text-primary uppercase tracking-widest animate-pulse">Chargement des instances...</span>
-      </div>
-    </div>
-
     <app-data-list
       [data]="displayClasses()"
       [total]="displayClasses().length"
       [actions]="classActions"
+      [isLoading]="isLoading()"
       (onAction)="handleClassAction($event)"
     ></app-data-list>
   </div>

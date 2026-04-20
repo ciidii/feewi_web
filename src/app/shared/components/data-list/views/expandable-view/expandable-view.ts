@@ -1,19 +1,20 @@
-import { Component, input, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import {Component, input, output} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {MatCheckboxModule} from '@angular/material/checkbox';
 
 // Importer les icônes nécessaires
 import {
-  LucideAngularModule,
+  CheckCircle,
   ChevronDown,
   ChevronRight,
-  Eye,
-  CheckCircle,
-  Printer,
   Download,
-  Mail
+  Eye,
+  LucideAngularModule,
+  Mail,
+  Printer
 } from 'lucide-angular';
 import {RowAction, TableRow} from '../../../../models/data-list.models';
+import {SkeletonComponent} from '../../../skeleton/skeleton.component';
 
 @Component({
   selector: 'app-expandable-view',
@@ -21,7 +22,8 @@ import {RowAction, TableRow} from '../../../../models/data-list.models';
   imports: [
     CommonModule,
     MatCheckboxModule,
-    LucideAngularModule
+    LucideAngularModule,
+    SkeletonComponent
   ],
   templateUrl: './expandable-view.html',
   styleUrls: ['./expandable-view.scss']
@@ -31,8 +33,11 @@ export class ExpandableViewComponent {
   // INPUTS
   // ===========================================
 
-  /** Les données à afficher */
+  /** Les donn├®es ├á afficher */
   data = input<TableRow[]>([]);
+
+  /** ├ëtat de chargement */
+  isLoading = input<boolean>(false);
 
   /** IDs des éléments sélectionnés */
   selectedIds = input<Set<string | number>>(new Set());
@@ -80,13 +85,13 @@ export class ExpandableViewComponent {
   getDisplayableMetadata(row: TableRow): { key: string, value: any }[] {
     const meta = row.metadata || {};
     const raw = row.rawData || {};
-    
+
     // Fusionner les deux sources (priorité aux metadata)
-    const combined = { ...raw, ...meta };
-    
+    const combined = {...raw, ...meta};
+
     // Liste des clés à ignorer (déjà affichées ou techniques)
     const blackList = ['id', 'title', 'subtitle', 'avatarUrl', 'avatarLabel', 'date', 'badges', 'isSelf', 'rawData', 'permissions'];
-    
+
     return Object.entries(combined)
       .filter(([key]) => !blackList.includes(key) && typeof combined[key as keyof typeof combined] !== 'object')
       .map(([key, value]) => ({
@@ -107,11 +112,16 @@ export class ExpandableViewComponent {
   /** Obtenir la classe CSS d'une action */
   getActionClass(action: RowAction): string {
     switch (action.type) {
-      case 'primary': return 'text-primary-600 hover:bg-primary-50';
-      case 'danger': return 'text-rose-600 hover:bg-rose-50';
-      case 'success': return 'text-emerald-600 hover:bg-emerald-50';
-      case 'warning': return 'text-amber-600 hover:bg-amber-50';
-      default: return 'text-slate-600 hover:bg-slate-100';
+      case 'primary':
+        return 'text-primary-600 hover:bg-primary-50';
+      case 'danger':
+        return 'text-rose-600 hover:bg-rose-50';
+      case 'success':
+        return 'text-emerald-600 hover:bg-emerald-50';
+      case 'warning':
+        return 'text-amber-600 hover:bg-amber-50';
+      default:
+        return 'text-slate-600 hover:bg-slate-100';
     }
   }
 
