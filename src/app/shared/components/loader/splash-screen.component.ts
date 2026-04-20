@@ -8,11 +8,10 @@ import { CommonModule } from '@angular/common';
   template: `
     <div class="splash-overlay" [class.fade-out]="fadeOut">
       <div class="splash-content">
-        <div class="logo-container">
-          <div class="pulse-ring"></div>
-          <img src="public/feewi-logo-electric.svg" alt="Feewi" class="logo">
+        <div class="logo-wrapper">
+          <img src="feewi-icon.svg" alt="Feewi" class="logo-icon">
         </div>
-        
+
         <div class="status-zone">
           <p class="status-text">{{ message }}</p>
           <div class="progress-track">
@@ -31,8 +30,8 @@ import { CommonModule } from '@angular/common';
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: opacity 0.4s ease-out;
-      
+      transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+
       &.fade-out { opacity: 0; pointer-events: none; }
     }
 
@@ -40,47 +39,40 @@ import { CommonModule } from '@angular/common';
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 2.5rem;
+      gap: 3rem;
     }
 
-    .logo-container {
-      position: relative;
-      width: 96px;
-      height: 96px;
+    .logo-wrapper {
+      width: 100px;
+      height: 100px;
       display: flex;
       align-items: center;
       justify-content: center;
+      position: relative;
     }
 
-    .logo {
+    .logo-icon {
       width: 100%;
       height: auto;
-      z-index: 2;
-    }
-
-    .pulse-ring {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      background: var(--fw-primary);
-      opacity: 0.15;
-      animation: fw-pulse 2.5s infinite ease-out;
+      /* Animation de respiration et flottement Premium */
+      animation: fw-logo-float 3s infinite ease-in-out;
+      will-change: transform, filter;
     }
 
     .status-zone {
       text-align: center;
-      width: 240px;
+      width: 220px;
     }
 
     .status-text {
       font-family: var(--fw-font-display);
-      font-size: 0.6875rem;
+      font-size: 10px;
       font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.15em;
+      letter-spacing: 0.2em;
       color: var(--fw-text-tertiary);
-      margin-bottom: 1rem;
+      margin-bottom: 1.25rem;
+      opacity: 0.8;
     }
 
     .progress-track {
@@ -96,12 +88,22 @@ import { CommonModule } from '@angular/common';
       height: 100%;
       background: var(--fw-primary);
       transform-origin: left;
-      animation: fw-progress-indet 1.8s infinite cubic-bezier(0.65, 0.815, 0.735, 0.395);
+      animation: fw-progress-indet 1.5s infinite cubic-bezier(0.65, 0.815, 0.735, 0.395);
     }
 
-    @keyframes fw-pulse {
-      0% { transform: scale(0.8); opacity: 0.5; }
-      100% { transform: scale(2.2); opacity: 0; }
+    @keyframes fw-logo-float {
+      0% { 
+        transform: translateY(0) scale(1); 
+        filter: drop-shadow(0 5px 15px rgba(0, 82, 255, 0.1));
+      }
+      50% { 
+        transform: translateY(-6px) scale(1.02); 
+        filter: drop-shadow(0 20px 25px rgba(0, 82, 255, 0.2));
+      }
+      100% { 
+        transform: translateY(0) scale(1); 
+        filter: drop-shadow(0 5px 15px rgba(0, 82, 255, 0.1));
+      }
     }
 
     @keyframes fw-progress-indet {
@@ -112,6 +114,6 @@ import { CommonModule } from '@angular/common';
   `]
 })
 export class SplashScreenComponent {
-  @Input() message: string = 'Initialisation';
+  @Input() message: string = 'Connexion à Feewi';
   @Input() fadeOut: boolean = false;
 }

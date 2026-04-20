@@ -4,6 +4,7 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angu
 import { Router, RouterModule } from '@angular/router';
 import { LucideAngularModule, Lock, Mail, Loader2, Eye, EyeOff, AlertCircle, HelpCircle } from 'lucide-angular';
 import { AuthService } from '../../../../core/services/auth.service';
+import { LoadingService } from '../../../../shared/services/loading.service';
 import { FwButtonComponent } from '../../../../shared/components/button/button.component';
 import { FwAlertBannerComponent } from '../../../../shared/components/alert-banner/alert-banner.component';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -28,6 +29,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 export class LoginComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
+  private loadingService = inject(LoadingService);
   private router = inject(Router);
   public translate = inject(TranslateService);
 
@@ -69,6 +71,8 @@ export class LoginComponent {
     this.authService.login(email!, password!).subscribe({
       next: (success) => {
         if (success) {
+          // D├®clenche le Splash Screen Global pour une transition "Premium"
+          this.loadingService.start('global');
           this.router.navigate(['/admin/dashboard']);
         } else {
           this.loginError.set(true);
