@@ -1,4 +1,4 @@
-import { Component, inject, signal, ViewEncapsulation } from '@angular/core';
+import {Component, computed, inject, signal, ViewEncapsulation} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -27,10 +27,10 @@ function passwordMatchValidator(control: AbstractControl): ValidationErrors | nu
   selector: 'app-reset-password',
   standalone: true,
   imports: [
-    CommonModule, 
-    ReactiveFormsModule, 
-    RouterModule, 
-    LucideAngularModule, 
+    CommonModule,
+    ReactiveFormsModule,
+    RouterModule,
+    LucideAngularModule,
     FwButtonComponent,
     TranslateModule
   ],
@@ -56,15 +56,17 @@ export class ResetPasswordComponent {
   isLoading = signal(false);
   showPassword = signal(false);
 
-  resetForm = this.fb.group(
-    {
-      email: ['', [Validators.required, Validators.email]],
-      code: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]],
-      newPassword: ['', [Validators.required, Validators.minLength(8)]],
-      confirmPassword: ['', [Validators.required]]
-    },
-    { validators: passwordMatchValidator }
-  );
+  // D├®tecte si le code OTP est rempli (6 chiffres)
+  isOtpComplete = computed(() => {
+    const code = this.resetForm.get('code')?.value;
+    return code && /^\d{6}$/.test(code);
+  });
+
+  resetForm = this.fb.group({
+    email: ['', [Validators.required, Validators.email]],
+    code: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]],
+    newPassword: ['', [Validators.required, Validators.minLength(8)]]
+  });
 
   constructor() {
     const emailFromQuery = this.route.snapshot.queryParamMap.get('email');
@@ -119,7 +121,7 @@ export class ResetPasswordComponent {
     }).subscribe({
       next: () => {
         this.notificationService.success(
-          this.translate.instant('auth.reset_password.notifications.success_message'), 
+          this.translate.instant('auth.reset_password.notifications.success_message'),
           this.translate.instant('auth.reset_password.notifications.success_title')
         );
         this.router.navigate(['/auth/login']);
