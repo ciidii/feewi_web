@@ -1,4 +1,4 @@
-import { Component, Input, computed } from '@angular/core';
+import { Component, Input, computed, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export interface BadgeConfig {
@@ -30,73 +30,13 @@ const STATUS_MAP: Record<string, BadgeConfig> = {
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div [class]="classes()" [title]="status">
+    <div [class]="classes()" [title]="status" class="fw-badge">
       <span class="dot" *ngIf="dot"></span>
       <span class="label" *ngIf="!dot">{{ config().label }}</span>
     </div>
   `,
-  styles: [`
-    :host { display: inline-block; }
-
-    div {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: var(--fw-radius-full);
-      font-family: inherit;
-      font-size: 10px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      border: 1px solid transparent;
-      white-space: nowrap;
-      transition: var(--fw-transition-fast);
-
-      &.size-xs { padding: 2px 8px; font-size: 9px; }
-
-      &.token-success {
-        background-color: var(--fw-success-bg);
-        color: var(--fw-success-text);
-        border-color: var(--fw-success-border);
-        .dot { background-color: var(--fw-success); }
-      }
-
-      &.token-warning {
-        background-color: var(--fw-warning-bg);
-        color: var(--fw-warning-text);
-        border-color: var(--fw-warning-border);
-        .dot { background-color: var(--fw-warning); }
-      }
-
-      &.token-error {
-        background-color: var(--fw-error-bg);
-        color: var(--fw-error-text);
-        border-color: var(--fw-error-border);
-        .dot { background-color: var(--fw-error); }
-      }
-
-      &.token-info {
-        background-color: var(--fw-info-bg);
-        color: var(--fw-info-text);
-        border-color: var(--fw-info-border);
-        .dot { background-color: var(--fw-info); }
-      }
-
-      &.token-neutral {
-        background-color: var(--fw-neutral-bg);
-        color: var(--fw-neutral-text);
-        border-color: var(--fw-neutral-border);
-        .dot { background-color: var(--fw-neutral-text); }
-      }
-
-      .dot {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-      }
-    }
-  `]
+  styleUrl: './badge.component.scss',
+  encapsulation: ViewEncapsulation.None
 })
 export class FwBadgeComponent {
   @Input() status!: string;

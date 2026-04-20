@@ -1,0 +1,73 @@
+:host {
+  display: inline-block;
+}
+
+.fw-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 9999px; /* Pill style institutionnel */
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+
+  &.size-xs {
+    padding: 2px 8px;
+    font-size: 9px;
+  }
+
+  &.token-success {
+    background-color: var(--fw-success-bg);
+    color: var(--fw-success-text);
+    border-color: var(--fw-success-border);
+    .dot { background-color: var(--fw-success); }
+  }
+
+  &.token-warning {
+    background-color: var(--fw-warning-bg);
+    color: var(--fw-warning-text);
+    border-color: var(--fw-warning-border);
+    .dot { background-color: var(--fw-warning); }
+  }
+
+  &.token-error {
+    background-color: var(--fw-error-bg);
+    color: var(--fw-error-text);
+    border-color: var(--fw-error-border);
+    .dot { background-color: var(--fw-error); }
+  }
+
+  &.token-info {
+    background-color: var(--fw-info-bg);
+    color: var(--fw-info-text);
+    border-color: var(--fw-info-border);
+    .dot { background-color: var(--fw-info); }
+  }
+
+  &.token-neutral {
+    background-color: var(--fw-neutral-bg);
+    color: var(--fw-neutral-text);
+    border-color: var(--fw-neutral-border);
+    .dot { background-color: var(--fw-neutral-text); }
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+  }
+
+  &.is-dot {
+    padding: 4px;
+    width: 20px;
+    height: 20px;
+    justify-content: center;
+  }
+}

@@ -1,0 +1,90 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.page-header {
+  height: 96px; /* Plus compact */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  background: transparent; /* Flotte sur Slate 50 */
+  border: none;
+  font-family: var(--fw-font-sans);
+  transition: all 0.3s ease;
+
+  &.compact {
+    height: 64px;
+    .icon-container { width: 36px; height: 36px; border-radius: 8px; }
+    .page-title { font-size: 1.125rem; }
+    .page-desc { display: none; }
+  }
+}
+
+.header-main {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.icon-container {
+  width: 48px;
+  height: 48px;
+  background: white;
+  color: var(--fw-primary);
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s;
+}
+
+.titles {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+
+  .page-title {
+    font-family: var(--fw-font-display);
+    font-size: 1.375rem;
+    font-weight: 850;
+    color: var(--fw-midnight);
+    letter-spacing: -0.01em;
+    margin: 0;
+    line-height: 1.1;
+  }
+
+  .page-desc {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--fw-text-tertiary);
+    margin: 4px 0 0 0;
+  }
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+@keyframes fade {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade {
+  animation: fade 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (max-width: 768px) {
+  .page-header { 
+    padding: 1.5rem; 
+    height: auto; 
+    flex-direction: column; 
+    align-items: flex-start; 
+    gap: 1rem; 
+  }
+  .header-actions { width: 100%; justify-content: flex-end; }
+}
