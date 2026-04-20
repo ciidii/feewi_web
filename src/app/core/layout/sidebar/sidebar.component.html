@@ -4,6 +4,17 @@
   [class.is-collapsed]="!navService.isSidebarExpanded()"
 >
 
+  <!-- SIDEBAR HEADER (CONTROLS) -->
+  <header class="sidebar-header">
+    <div class="service-context" *ngIf="navService.isSidebarExpanded()">
+      <span class="service-label">{{ getActiveServiceLabel() }}</span>
+    </div>
+
+    <button class="toggle-btn" (click)="navService.toggleSidebar()" title="Basculer la sidebar">
+      <lucide-icon [name]="navService.isSidebarExpanded() ? ChevronLeft : ChevronRight" [size]="14"></lucide-icon>
+    </button>
+  </header>
+
   <!-- === CONSOLE SAAS === -->
   <ng-container *ngIf="auth.currentUser()?.roles?.includes('ROLE_SUPER_ADMIN')">
     <div class="saas-badge">
@@ -26,7 +37,6 @@
 
   <!-- === SCHOOL APP NAVIGATION === -->
   <ng-container *ngIf="!auth.currentUser()?.roles?.includes('ROLE_SUPER_ADMIN')">
-
     <nav class="nav-scroll">
       <!-- DASHBOARD -->
       <ng-container *ngIf="navService.activeService() === 'dashboard'">
@@ -84,15 +94,7 @@
           <span class="label">{{ item.label }}</span>
         </a>
       </ng-container>
-
     </nav>
   </ng-container>
-
-  <!-- FOOTER TOGGLE -->
-  <footer class="sidebar-footer">
-    <button class="toggle-btn" (click)="navService.toggleSidebar()">
-      <lucide-icon [name]="navService.isSidebarExpanded() ? ChevronLeft : ChevronRight" [size]="14"></lucide-icon>
-    </button>
-  </footer>
 
 </aside>

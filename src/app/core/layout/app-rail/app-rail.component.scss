@@ -1,18 +1,19 @@
 .feewi-app-rail {
-  width: var(--fw-rail-width);
+  width: var(--fw-rail-width); /* Fixe ├á 64px pour le layout */
   height: 100vh;
-  background: var(--fw-raw-slate-50); /* Niveau 0 : Ancrage structurel */
+  background: var(--fw-raw-slate-50);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
   flex-shrink: 0;
   transition: width var(--fw-transition);
   user-select: none;
   position: relative;
+  z-index: 2000; /* Toujours au-dessus de la sidebar quand il s'├®tend */
 
   &.is-expanded {
     width: 220px;
-    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.02);
+    box-shadow: 15px 0 40px rgba(0, 0, 0, 0.1);
+    background: white; /* On passe en blanc quand il s'├®tend pour plus de contraste */
   }
 }
 

@@ -63,5 +63,10 @@ export class AppRailComponent {
   // Méthode existante
   onSelectService(serviceName: string) {
     this.navService.setActiveService(serviceName);
+    
+    // Auto-collapse si le rail était étendu
+    if (this.navService.isRailExpanded()) {
+      this.toggleRailExpanded();
+    }
   }
 }

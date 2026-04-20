@@ -83,4 +83,18 @@ export class SidebarComponent {
     { label: 'Statistiques Globales', icon: BarChart3, route: '/saas/stats' },
     { label: 'Audit Système', icon: FileText, route: '/saas/audit' },
   ];
+
+  getActiveServiceLabel(): string {
+    const service = this.navService.activeService();
+    switch (service) {
+      case 'dashboard': return 'Tableau de bord';
+      case 'enrollment': return 'Inscriptions';
+      case 'registry': return 'Registre élèves';
+      case 'academic': return 'Structure Acad.';
+      case 'identity': return 'Sécurité & Staff';
+      case 'saas': return 'Système SaaS';
+      case 'settings': return 'Réglages';
+      default: return 'Administration';
+    }
+  }
 }
