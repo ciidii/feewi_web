@@ -1,93 +1,121 @@
-/* ALIGNEMENT STRICT SUR LES TOKENS DU DESIGN SYSTEM */
+/* 
+  FEWII SIDEBAR - AIRY INSTITUTIONAL
+  Harmonisation avec le Rail et les pages publiques (Auth).
+*/
+
 app-sidebar {
-  background-color: var(--fw-surface-inverse) !important;
   display: block;
+  height: 100%;
+  background-color: var(--fw-surface-page);
+  flex-shrink: 0;
 }
 
 .sidebar-container {
-  background-color: var(--fw-surface-inverse) !important;
-  color: var(--fw-text-inverse);
+  background-color: var(--fw-surface-page);
+  color: var(--fw-text-primary);
   height: calc(100vh - var(--fw-header-height));
   transition: width var(--fw-transition);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  border-right: 1px solid var(--fw-border);
 
   &.is-expanded { width: var(--fw-sidebar-expanded); }
   &.is-collapsed { width: var(--fw-sidebar-collapsed); }
 }
 
-// --- CONSOLE SAAS ---
+// --- SAAS BADGE (Minimaliste) ---
 .saas-badge {
-  padding: 12px;
+  padding: 1.5rem 1rem 0.5rem;
   .inner {
-    display: flex; align-items: center; justify-content: center;
-    height: 44px; background: rgba(255, 255, 255, 0.03);
-    border-radius: 8px; color: #fbbf24; font-size: 10px; font-weight: 800;
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.75rem 1rem; background: #fffbeb;
+    border: 1px solid #fef3c7; border-radius: 12px;
+    color: #d97706; font-size: 11px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.05em;
   }
 }
 
-// --- HERO ACTION (Désaturé, Institutionnel) ---
+// --- HERO ACTION (Style Bouton Premium) ---
 .hero-action {
-  padding: 12px;
+  padding: 1.5rem 1rem;
   .btn-hero {
     width: 100%; height: 48px;
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--fw-text-inverse);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    display: flex; align-items: center; padding: 0 12px; gap: 12px;
-    cursor: pointer; transition: all 0.2s ease;
+    background: var(--fw-midnight);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    display: flex; align-items: center; padding: 0 1rem; gap: 0.75rem;
+    cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
     
     .icon-wrap { color: var(--fw-primary); display: grid; place-items: center; }
     .label { font-size: 13px; font-weight: 700; white-space: nowrap; }
+    .chevron-down { transition: transform 0.2s; }
+
+    &:hover {
+      transform: translateY(-2px);
+      background: #1e293b;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.2);
+    }
   }
 }
 
 // --- NAVIGATION ---
 .nav-scroll {
-  flex: 1; overflow-y: auto; overflow-x: hidden; padding: 8px;
+  flex: 1; overflow-y: auto; overflow-x: hidden; padding: 0.5rem;
   &::-webkit-scrollbar { width: 0; background: transparent; }
   
+  // Titre de section inspir├® du "Role Badge"
   .nav-section-title {
-    display: block; padding: 16px 12px 8px;
-    font-size: 9px; font-weight: 800; text-transform: uppercase;
-    color: var(--fw-text-tertiary); opacity: 0.3; letter-spacing: 0.1em;
+    display: block; padding: 1.5rem 1rem 0.75rem;
+    font-size: 10px; font-weight: 800; text-transform: uppercase;
+    color: var(--fw-primary); opacity: 0.7; letter-spacing: 0.15em;
   }
 }
 
 .sidebar-link {
-  display: flex; align-items: center; height: 40px; padding: 0 12px; gap: 12px;
-  color: rgba(255, 255, 255, 0.5); text-decoration: none;
-  font-size: 13px; font-weight: 500; border-radius: 6px;
-  transition: all 0.15s ease;
+  display: flex; align-items: center; height: 40px; padding: 0 0.75rem; gap: 0.75rem;
+  color: var(--fw-text-secondary); text-decoration: none;
+  font-size: 13px; font-weight: 600; border-radius: 10px;
+  transition: all 0.2s ease;
   margin-bottom: 2px;
 
-  &:hover { background: rgba(255, 255, 255, 0.04); color: var(--fw-text-inverse); }
+  &:hover { 
+    background: var(--fw-surface-sunken); 
+    color: var(--fw-text-primary); 
+  }
   
   &.active-link {
-    background: rgba(255, 255, 255, 0.08); color: var(--fw-text-inverse); font-weight: 700;
+    background: var(--fw-primary-alpha); 
+    color: var(--fw-primary); 
+    font-weight: 700;
+    
     .icon-wrap { color: var(--fw-primary); }
   }
-  .icon-wrap { width: 20px; display: grid; place-items: center; flex-shrink: 0; }
+  
+  .icon-wrap { 
+    width: 20px; display: grid; place-items: center; flex-shrink: 0; 
+    opacity: 0.7;
+  }
 }
 
 // --- FOOTER ---
 .sidebar-footer {
-  padding: 8px; border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 0.75rem; border-top: 1px solid var(--fw-border);
   display: flex; justify-content: flex-end;
   .toggle-btn {
-    width: 32px; height: 32px; border-radius: 6px; border: none;
-    background: transparent; color: rgba(255, 255, 255, 0.2);
+    width: 32px; height: 32px; border-radius: 8px; border: none;
+    background: transparent; color: var(--fw-text-tertiary);
     cursor: pointer; display: grid; place-items: center;
-    &:hover { background: rgba(255, 255, 255, 0.05); color: var(--fw-text-inverse); }
+    transition: all 0.2s;
+    &:hover { background: var(--fw-surface-sunken); color: var(--fw-primary); }
   }
 }
 
-// --- ETAT RETRACTÉ STRICT (ICONES SEULES) ---
+// --- ETAT RETRACT├ë STRICT ---
 .is-collapsed {
-  .label, .nav-section-title, .chevron-down, .brand-name {
+  .label, .nav-section-title, .chevron-down, .saas-badge .label {
     display: none !important;
   }
   .sidebar-link, .btn-hero, .saas-badge .inner {
@@ -96,11 +124,11 @@ app-sidebar {
   }
   .sidebar-footer { justify-content: center; }
   
-  .active-link .icon-wrap {
-    color: var(--fw-primary);
+  .active-link {
+    background: var(--fw-primary-alpha);
     position: relative;
-    &::before {
-      content: ''; position: absolute; left: -14px; top: -10px; bottom: -10px; width: 3px;
+    &::after {
+      content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px;
       background: var(--fw-primary); border-radius: 0 4px 4px 0;
     }
   }

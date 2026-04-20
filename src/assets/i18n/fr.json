@@ -86,6 +86,9 @@
     }
   },
   "global": {
+    "navigation": {
+      "rail_header": "Navigation"
+    },
     "languages": {
       "fr": "Français",
       "en": "English"

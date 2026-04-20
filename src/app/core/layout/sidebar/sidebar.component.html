@@ -5,11 +5,11 @@
 >
 
   <!-- === CONSOLE SAAS === -->
-  <ng-container *ngIf="auth.hasRole('ROLE_SUPER_ADMIN')">
+  <ng-container *ngIf="auth.currentUser()?.roles?.includes('ROLE_SUPER_ADMIN')">
     <div class="saas-badge">
       <div class="inner">
         <lucide-icon [name]="ShieldCheck" [size]="20"></lucide-icon>
-        <span class="label">Console SaaS</span>
+        <span class="label">Console Système</span>
       </div>
     </div>
 
@@ -25,12 +25,12 @@
   </ng-container>
 
   <!-- === SCHOOL APP NAVIGATION === -->
-  <ng-container *ngIf="!auth.hasRole('ROLE_SUPER_ADMIN')">
+  <ng-container *ngIf="!auth.currentUser()?.roles?.includes('ROLE_SUPER_ADMIN')">
     
-    <!-- Hero Action -->
+    <!-- Hero Action (Premium Action) -->
     <div *ngIf="['dashboard', 'enrollment'].includes(navService.activeService())" class="hero-action">
       <button class="btn-hero" [matMenuTriggerFor]="sidebarEnrollMenu">
-        <div class="icon-wrap"><lucide-icon [name]="Plus" [size]="18" strokeWidth="3"></lucide-icon></div>
+        <div class="icon-wrap"><lucide-icon [name]="Plus" [size]="18"></lucide-icon></div>
         <span class="label">Nouvelle Inscription</span>
         <lucide-icon [name]="ChevronDown" [size]="14" class="ml-auto opacity-50 chevron-down"></lucide-icon>
       </button>
@@ -40,7 +40,7 @@
           <lucide-icon [name]="UserPlus" [size]="16" class="mr-3"></lucide-icon>
           <span>Nouveau candidat</span>
         </button>
-        <button mat-menu-item routerLink="/admissions/re-enroll">
+        <button mat-menu-item routerLink="/admin/admissions/re-enrollment">
           <lucide-icon [name]="UserCheck" [size]="16" class="mr-3"></lucide-icon>
           <span>Réinscription élève</span>
         </button>
@@ -51,8 +51,8 @@
       
       <!-- DASHBOARD -->
       <ng-container *ngIf="navService.activeService() === 'dashboard'">
-        <span class="nav-section-title">Analyse</span>
-        <a routerLink="/dashboard" routerLinkActive="active-link" class="sidebar-link">
+        <span class="nav-section-title">Analyse Pilotage</span>
+        <a routerLink="/admin/dashboard" routerLinkActive="active-link" class="sidebar-link">
           <div class="icon-wrap"><lucide-icon [name]="BarChart3" [size]="18"></lucide-icon></div>
           <span class="label">Vue d'ensemble</span>
         </a>
