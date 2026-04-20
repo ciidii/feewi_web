@@ -5,51 +5,88 @@
 
 .global-header {
   height: var(--fw-header-height);
-  background: white;
-  border-bottom: 1px solid var(--fw-border);
+  background: var(--fw-raw-slate-50); /* Harmonisation avec la Sidebar */
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  padding: 0 1.5rem;
+  position: relative;
+  z-index: 50;
+  
+  /* Ombre subtile pour l'├®l├®vation */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03), 
+              0 1px 0 rgba(0, 0, 0, 0.05); /* Ligne de base ultra-fine */
 }
 
-// --- LOGO & TENANT ---
-.brand-section {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 240px;
-
-  .logo-wrap {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    overflow: hidden;
-    img { width: 100%; height: 100%; object-fit: contain; }
-  }
-
-  .tenant-info {
-    display: flex;
-    flex-direction: column;
-    .name { font-family: var(--fw-font-display); font-weight: 800; font-size: 0.8125rem; color: var(--fw-midnight); line-height: 1.1; }
-    .meta { font-size: 9px; font-weight: 700; color: var(--fw-text-tertiary); text-transform: uppercase; letter-spacing: 0.02em; }
-  }
+// --- LEFT ---
+.header-left {
+  width: 200px; /* Réserve d'espace pour la symétrie */
 }
 
-// --- OMNISEARCH ---
+// --- OMNISEARCH (La Barre "Linear") ---
 .search-section {
   flex: 1;
-  max-width: 600px;
-  padding: 0 24px;
+  display: flex;
+  justify-content: center;
 
   .search-input-wrap {
     position: relative;
-    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--fw-text-tertiary); pointer-events: none; transition: color 0.2s ease; }
-    .fw-input { padding-left: 36px; height: 38px; background: var(--fw-surface-sunken); border-color: transparent; }
-    input:focus + .search-icon { color: var(--fw-primary); }
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    align-items: center;
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      color: var(--fw-text-tertiary);
+      pointer-events: none;
+    }
+
+    .fw-search-input {
+      width: 100%;
+      height: 36px;
+      background: var(--fw-raw-slate-50);
+      border: 1px solid transparent;
+      border-radius: 10px;
+      padding: 0 45px 0 36px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--fw-text-primary);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+      &::placeholder { color: var(--fw-text-tertiary); font-weight: 400; }
+
+      &:focus {
+        background: white;
+        border-color: var(--fw-primary);
+        box-shadow: 0 0 0 3px var(--fw-primary-alpha);
+        outline: none;
+      }
+    }
+
+    .search-kbd {
+      position: absolute;
+      right: 10px;
+      display: flex;
+      gap: 2px;
+      pointer-events: none;
+      
+      kbd {
+        min-width: 18px;
+        height: 18px;
+        background: white;
+        border: 1px solid var(--fw-border);
+        border-radius: 4px;
+        font-family: sans-serif;
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--fw-text-tertiary);
+        display: grid;
+        place-items: center;
+        box-shadow: 0 1px 0 rgba(0,0,0,0.05);
+      }
+    }
   }
 }
 
@@ -57,70 +94,114 @@
 .actions-section {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
 
-  .year-pill {
+  .year-selector {
+    height: 32px;
+    padding: 0 12px;
+    background: white;
+    border: 1px solid var(--fw-border);
+    border-radius: 8px;
     display: flex;
     align-items: center;
     gap: 8px;
-    height: 34px;
-    padding: 0 12px;
-    background: var(--fw-surface-sunken);
-    border: 1px solid var(--fw-border);
-    border-radius: var(--fw-radius-full);
-    font-size: 11px;
-    font-weight: 800;
-    color: var(--fw-midnight);
     cursor: pointer;
-    transition: all 0.2s ease;
-    &:hover { background: white; border-color: var(--fw-primary); color: var(--fw-primary); }
+    transition: all 0.2s;
+
+    .label { font-size: 11px; font-weight: 700; color: var(--fw-text-primary); }
+
+    &:hover {
+      border-color: var(--fw-primary);
+      background: var(--fw-primary-alpha);
+    }
   }
 
-  .icon-btn {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
+  .header-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
     border: none;
     background: transparent;
     color: var(--fw-text-secondary);
     display: grid;
     place-items: center;
     cursor: pointer;
-    transition: all 0.2s ease;
-    &:hover { background: var(--fw-surface-sunken); color: var(--fw-midnight); }
-    &.danger:hover { background: var(--fw-error-bg); color: var(--fw-error); }
-  }
+    transition: all 0.2s;
+    position: relative;
 
-  .v-divider { width: 1px; height: 20px; background: var(--fw-border); margin: 0 4px; }
-
-  .user-profile {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 4px 4px 4px 12px;
-    border-radius: var(--fw-radius-full);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: 1px solid transparent;
-
-    &:hover { background: var(--fw-surface-sunken); border-color: var(--fw-border); }
-
-    .user-info {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      .name { font-size: 0.75rem; font-weight: 800; color: var(--fw-midnight); line-height: 1; }
-      .role { font-size: 9px; font-weight: 700; color: var(--fw-primary); text-transform: uppercase; }
+    &:hover {
+      background: var(--fw-raw-slate-100);
+      color: var(--fw-text-primary);
     }
 
-    .avatar {
-      width: 30px;
-      height: 30px;
+    &.logout-btn:hover {
+      background: var(--fw-error-bg);
+      color: var(--fw-error);
+    }
+
+    .notification-dot {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 6px;
+      height: 6px;
+      background: var(--fw-primary);
+      border: 1.5px solid white;
       border-radius: 50%;
-      background: var(--fw-midnight);
+    }
+  }
+
+  .v-divider {
+    width: 1px;
+    height: 16px;
+    background: var(--fw-border);
+    margin: 0 4px;
+  }
+
+  // --- PROFILE TRIGGER ---
+  .profile-trigger {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 3px 10px 3px 3px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      background: var(--fw-raw-slate-100);
+    }
+
+    .avatar-box {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      background: var(--fw-raw-slate-900);
       color: white;
       display: grid;
       place-items: center;
     }
+
+    .user-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--fw-text-primary);
+    }
   }
+}
+
+// Custom Menu Styles (Utility)
+.menu-header {
+  padding: 0.5rem 1rem 0.25rem;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--fw-text-tertiary);
+  letter-spacing: 0.1em;
+}
+
+.menu-divider {
+  height: 1px;
+  background: var(--fw-raw-slate-100);
+  margin: 0.25rem 0;
 }

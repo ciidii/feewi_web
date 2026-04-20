@@ -1,96 +1,60 @@
 <header class="global-header">
   
-  <!-- Left: Brand -->
-  <div class="brand-section">
-    <div class="logo-wrap">
-      <img src="feewi-icon.svg" alt="Feewi">
-    </div>
-    <div class="tenant-info">
-      <span class="name">
-        {{ contextService.isSaasDomain() ? 'Feewi Admin' : (tenantService.activeTenant()?.name || 'Administration') }}
-      </span>
-      <span class="meta" *ngIf="contextService.isSaasDomain()">Console SaaS</span>
-      <span class="meta" *ngIf="!contextService.isSaasDomain()">
-        Tenant: {{ auth.currentUser()?.tenantId || '---' }}
-      </span>
-    </div>
+  <!-- Left: Service Context (Optional - Can be used for page titles or left empty for zen) -->
+  <div class="header-left">
+    <!-- Vide pour l'instant pour laisser respirer la Sidebar -->
   </div>
 
-  <!-- Center: Omnisearch -->
+  <!-- Center: Omnisearch (La pi├¿ce ma├«tresse) -->
   <div class="search-section">
     <div class="search-input-wrap">
-      <lucide-icon [name]="Search" [size]="16" class="search-icon"></lucide-icon>
+      <lucide-icon [name]="Search" [size]="14" class="search-icon"></lucide-icon>
       <input 
         type="text" 
-        class="fw-input" 
-        [placeholder]="contextService.isSaasDomain() ? 'Rechercher un tenant...' : 'Rechercher élève, dossier, staff...'"
+        class="fw-search-input" 
+        [placeholder]="contextService.isSaasDomain() ? 'Rechercher un établissement...' : 'Rechercher élève, dossier, staff...'"
       />
+      <div class="search-kbd">
+        <kbd>⌘</kbd><kbd>K</kbd>
+      </div>
     </div>
   </div>
 
-  <!-- Right: Actions -->
+  <!-- Right: Global Actions -->
   <div class="actions-section">
     
-    <!-- Year Selector -->
-    <button *ngIf="!contextService.isSaasDomain()" class="year-pill">
-      <lucide-icon [name]="CalendarDays" [size]="14" class="text-primary"></lucide-icon>
-      <span>2024 - 2025</span>
-      <lucide-icon [name]="ChevronDown" [size]="12"></lucide-icon>
+    <!-- Year Selector (Premium Pill) -->
+    <button *ngIf="!contextService.isSaasDomain()" class="year-selector">
+      <span class="label">2024 - 2025</span>
+      <lucide-icon [name]="ChevronDown" [size]="12" class="opacity-50"></lucide-icon>
     </button>
 
     <div class="v-divider" *ngIf="!contextService.isSaasDomain()"></div>
 
-    <!-- UI Preferences (Theme & Density) -->
-    <button class="icon-btn" [matMenuTriggerFor]="uiMenu" title="Réglages d'affichage">
-      <lucide-icon [name]="Settings" [size]="18"></lucide-icon>
+    <!-- Test Loader -->
+    <button class="header-btn" (click)="testLoader()" title="Tester le Loader">
+      <lucide-icon [name]="Search" [size]="16" class="animate-pulse text-primary"></lucide-icon>
     </button>
 
-    <mat-menu #uiMenu="matMenu" class="feewi-mat-menu">
-      <div class="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">Apparence</div>
-      
-      <button mat-menu-item (click)="uiService.setTheme('light')">
-        <lucide-icon [name]="Sun" class="w-4 h-4 mr-2" [class.text-primary]="uiService.theme() === 'light'"></lucide-icon>
-        <span>Mode Clair</span>
-      </button>
-      <button mat-menu-item (click)="uiService.setTheme('dark')">
-        <lucide-icon [name]="Moon" class="w-4 h-4 mr-2" [class.text-primary]="uiService.theme() === 'dark'"></lucide-icon>
-        <span>Mode Sombre</span>
-      </button>
-      <button mat-menu-item (click)="uiService.setTheme('high-contrast')">
-        <lucide-icon [name]="Monitor" class="w-4 h-4 mr-2" [class.text-primary]="uiService.theme() === 'high-contrast'"></lucide-icon>
-        <span>Contraste Élevé</span>
-      </button>
-
-      <div class="h-px bg-slate-100 my-1"></div>
-      <div class="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">Densité</div>
-
-      <button mat-menu-item (click)="uiService.toggleDensity()">
-        <lucide-icon [name]="uiService.density() === 'compact' ? Minimize : Maximize" class="w-4 h-4 mr-2 text-primary"></lucide-icon>
-        <span>Mode {{ uiService.density() === 'compact' ? 'Confortable' : 'Compact' }}</span>
-      </button>
-    </mat-menu>
-
     <!-- Notifications -->
-    <button class="icon-btn" title="Notifications">
-      <lucide-icon [name]="Bell" [size]="18"></lucide-icon>
+    <button class="header-btn" title="Notifications">
+      <lucide-icon [name]="Bell" [size]="16"></lucide-icon>
+      <span class="notification-dot"></span>
     </button>
 
     <div class="v-divider"></div>
 
-    <!-- Profile -->
-    <div class="user-profile" (click)="openProfileDialog()">
-      <div class="user-info hidden md:flex">
-        <span class="name">{{ auth.currentUser()?.firstName }} {{ auth.currentUser()?.lastName }}</span>
-        <span class="role">{{ auth.currentUser()?.roles?.[0]?.replace('ROLE_', '') }}</span>
-      </div>
-      <div class="avatar">
+    <!-- Profile (Elite Style) -->
+    <div class="profile-trigger" (click)="openProfileDialog()">
+      <div class="avatar-box">
         <lucide-icon [name]="User" [size]="14"></lucide-icon>
       </div>
+      <span class="user-name hidden lg:block">{{ auth.currentUser()?.firstName }}</span>
     </div>
 
     <!-- Logout -->
-    <button class="icon-btn danger" (click)="auth.logout()" title="Déconnexion">
-      <lucide-icon [name]="LogOut" [size]="18"></lucide-icon>
+    <button class="header-btn logout-btn" (click)="auth.logout()" title="Déconnexion">
+      <lucide-icon [name]="LogOut" [size]="16"></lucide-icon>
     </button>
   </div>
 

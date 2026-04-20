@@ -49,7 +49,7 @@ import { SkeletonComponent } from './skeleton.component';
   styles: [`
     .feewi-card-skeleton {
       background: white;
-      border-radius: 20px;
+      border-radius: 12px; /* Standardis├® 12px */
       border: 1px solid var(--fw-border);
       overflow: hidden;
       display: flex;
@@ -58,14 +58,14 @@ import { SkeletonComponent } from './skeleton.component';
     }
 
     .card-glass-header-mock {
-      height: 40px;
-      background: var(--fw-surface-sunken);
-      opacity: 0.5;
+      height: 48px;
+      background: var(--fw-raw-slate-50);
+      border-bottom: 1px solid var(--fw-border);
     }
 
     .squircle-mock {
-      margin-top: -26px;
-      margin-left: 16px;
+      margin-top: -24px;
+      margin-left: 1.25rem;
       z-index: 2;
     }
 

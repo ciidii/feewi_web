@@ -1,19 +1,19 @@
 .feewi-app-rail {
-  width: var(--fw-rail-width); /* Fixe ├á 64px pour le layout */
+  width: var(--fw-rail-width);
   height: 100vh;
-  background: var(--fw-raw-slate-50);
+  background: var(--fw-raw-slate-100); /* Ancrage Doux */
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
   transition: width var(--fw-transition);
   user-select: none;
   position: relative;
-  z-index: 2000; /* Toujours au-dessus de la sidebar quand il s'├®tend */
+  z-index: 2000;
 
   &.is-expanded {
     width: 220px;
-    box-shadow: 15px 0 40px rgba(0, 0, 0, 0.1);
-    background: white; /* On passe en blanc quand il s'├®tend pour plus de contraste */
+    box-shadow: 15px 0 40px rgba(0, 0, 0, 0.05);
+    background: var(--fw-raw-slate-100);
   }
 }
 
@@ -119,9 +119,10 @@
   }
 
   &:hover, &.active {
-    background: var(--fw-primary-alpha);
+    background: white; /* Le bouton actif "pop" en blanc sur le fond gris */
     color: var(--fw-primary) !important;
     .rail-label { color: var(--fw-primary); font-weight: 700; }
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   }
 }
 
@@ -192,7 +193,14 @@
   }
 }
 
+.settings-trigger {
+  border: none;
+  cursor: pointer;
+  background: transparent;
+}
+
 @keyframes fadeIn {
+
   from { opacity: 0; transform: translateX(-5px); }
   to { opacity: 1; transform: translateX(0); }
 }

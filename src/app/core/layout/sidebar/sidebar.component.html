@@ -102,6 +102,35 @@
           <span class="label">{{ item.label }}</span>
         </a>
       </ng-container>
+
+      <!-- SETTINGS (SYSTEM) -->
+      <ng-container *ngIf="navService.activeService() === 'settings'">
+        <span class="nav-section-title">Apparence</span>
+        
+        <button (click)="uiService.setTheme('light')" class="sidebar-link" [class.active-link]="uiService.theme() === 'light'" [attr.data-label]="'Mode Clair'">
+          <div class="icon-wrap"><lucide-icon [name]="Sun" [size]="16"></lucide-icon></div>
+          <span class="label">Mode Clair</span>
+        </button>
+        
+        <button (click)="uiService.setTheme('dark')" class="sidebar-link" [class.active-link]="uiService.theme() === 'dark'" [attr.data-label]="'Mode Sombre'">
+          <div class="icon-wrap"><lucide-icon [name]="Moon" [size]="16"></lucide-icon></div>
+          <span class="label">Mode Sombre</span>
+        </button>
+
+        <span class="nav-section-title">Affichage</span>
+        
+        <button (click)="uiService.toggleDensity()" class="sidebar-link" [attr.data-label]="'Changer Densité'">
+          <div class="icon-wrap"><lucide-icon [name]="uiService.density() === 'compact' ? Minimize : Maximize" [size]="16"></lucide-icon></div>
+          <span class="label">{{ uiService.density() === 'compact' ? 'Mode Confortable' : 'Mode Compact' }}</span>
+        </button>
+
+        <span class="nav-section-title">Localisation</span>
+        
+        <a class="sidebar-link" [attr.data-label]="'Langue'">
+          <div class="icon-wrap"><lucide-icon [name]="Globe" [size]="16"></lucide-icon></div>
+          <span class="label">Français (Bêta)</span>
+        </a>
+      </ng-container>
     </nav>
   </ng-container>
 

@@ -15,12 +15,12 @@ import { CommonModule } from '@angular/common';
   styles: [`
     :host {
       display: block;
-      position: fixed;
+      position: absolute; /* Confin├® au parent shell-main */
       top: 0;
       left: 0;
       right: 0;
       height: 3px;
-      z-index: 9999;
+      z-index: 1000;
       pointer-events: none;
     }
 

@@ -47,6 +47,7 @@
   --fw-surface-card: var(--fw-raw-white);
   --fw-surface-sunken: var(--fw-raw-slate-100);
   --fw-surface-inverse: var(--fw-raw-slate-900);
+  --fw-midnight: var(--fw-raw-slate-900); /* Ajout du token manquant */
   
   --fw-text-primary: var(--fw-raw-slate-900);
   --fw-text-secondary: #475569;
@@ -87,6 +88,15 @@
   --fw-neutral-bg: var(--fw-raw-slate-100);
   --fw-neutral-text: var(--fw-raw-slate-600);
   --fw-neutral-border: var(--fw-raw-slate-200);
+
+  /* --- SKELETONS (Mode Clair) --- */
+  --fw-skeleton-bg: var(--fw-raw-slate-100);
+  --fw-skeleton-shimmer: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
 
   /* ==========================================================================
      LAYOUT DIMENSIONS (Z├®ro Layout Shift)

@@ -95,16 +95,15 @@
   </div>
 
   <div class="mt-auto">
-    <!-- Settings -->
+    <!-- Settings Service -->
     <a
       (click)="onSelectService('settings')"
-      class="rail-link"
+      class="rail-link settings-trigger"
       [class.active]="navService.activeService() === 'settings'"
       [attr.data-label]="'Réglages'"
     >
       <lucide-icon [name]="Settings" [size]="18"></lucide-icon>
       <span class="rail-label">Réglages</span>
     </a>
-
   </div>
 </nav>

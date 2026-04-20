@@ -1,5 +1,5 @@
 <div class="fw-auth-container">
-  
+
   <!-- Floating Top Bar (Langue + Quick Help) -->
   <div class="fw-auth-top-bar">
     <div class="fw-lang-picker">
@@ -9,7 +9,7 @@
   </div>
 
   <div class="login-card">
-    
+
     <!-- Header Premium -->
     <header class="login-header">
       <div class="logo-box">
@@ -21,7 +21,7 @@
 
     <!-- Formulaire -->
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-      
+
       <div class="fields-zone space-y-6">
         <!-- Email Field -->
         <div class="fw-field">
@@ -30,8 +30,8 @@
             <div class="input-prefix">
               <lucide-icon [name]="Mail" [size]="20"></lucide-icon>
             </div>
-            <input 
-              type="email" 
+            <input
+              type="email"
               formControlName="email"
               [placeholder]="'auth.login.fields.email.placeholder' | translate"
               class="fw-input"
@@ -46,18 +46,18 @@
             <div class="input-prefix">
               <lucide-icon [name]="Lock" [size]="20"></lucide-icon>
             </div>
-            <input 
+            <input
               [type]="showPassword() ? 'text' : 'password'"
               formControlName="password"
               [placeholder]="'auth.login.fields.password.placeholder' | translate"
               class="fw-input"
             />
-            <button 
+            <button
               type="button"
               (click)="togglePassword()"
               class="input-suffix bg-transparent border-none cursor-pointer hover:text-text-primary transition-colors"
             >
-              <lucide-icon [name]="showPassword() ? EyeOff : Eye" [size]="18"></lucide-icon>
+              <lucide-icon [size]="18"></lucide-icon>
             </button>
           </div>
           <div class="field-footer">
@@ -79,8 +79,8 @@
 
       <!-- Zone d'Action Principale -->
       <div class="form-actions">
-        <app-fw-button 
-          type="submit" 
+        <app-fw-button
+          type="submit"
           [disabled]="loginForm.invalid"
           [loading]="isLoading()"
           variant="primary"

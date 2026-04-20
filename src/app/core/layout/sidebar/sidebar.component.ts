@@ -22,8 +22,10 @@ import {
   Layers,
   UserPlus,
   UserCheck,
-  ChevronDown
+  ChevronDown, Maximize, Minimize, Sun, Moon
 } from 'lucide-angular';
+
+import { UiPreferenceService } from '../../../shared/services/ui-preference.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -36,8 +38,9 @@ import {
 export class SidebarComponent {
   navService = inject(NavigationStateService);
   auth = inject(AuthService);
+  uiService = inject(UiPreferenceService);
 
-  // Icônes pour le template
+  // Ic├┤nes pour le template
   readonly Plus = Plus;
   readonly UserPlus = UserPlus;
   readonly UserCheck = UserCheck;
@@ -47,6 +50,11 @@ export class SidebarComponent {
   readonly ShieldCheck = ShieldCheck;
   readonly BarChart3 = BarChart3;
   readonly Users = Users;
+  readonly Sun = Sun;
+  readonly Moon = Moon;
+  readonly Maximize = Maximize;
+  readonly Minimize = Minimize;
+  readonly Globe = Globe;
 
   // --- 1. ENROLLMENT SERVICE ---
   enrollmentItems = [

@@ -3,18 +3,20 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import {
   LucideAngularModule, Home, Settings, Briefcase, GraduationCap, LayoutGrid, ShieldCheck, ArrowLeftRight, BarChart3,
-  Shield, Building2, School, Users, PanelLeftClose, PanelLeftOpen
+  Shield, Building2, School, Users, PanelLeftClose, PanelLeftOpen, Sun, Moon, Monitor, Maximize, Minimize
 } from 'lucide-angular';
 import { AuthService } from '../../services/auth.service';
 import { NavigationContextService } from '../../services/navigation-context.service';
 import { NavigationStateService } from '../../services/navigation-state.service';
 import { TenantContextService } from '../../services/tenant-context.service';
+import { UiPreferenceService } from '../../../shared/services/ui-preference.service';
 import { TranslateModule } from '@ngx-translate/core';
+import { MatMenuModule } from '@angular/material/menu';
 
 @Component({
   selector: 'app-rail',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, RouterModule, TranslateModule],
+  imports: [CommonModule, LucideAngularModule, RouterModule, TranslateModule, MatMenuModule],
   templateUrl: './app-rail.component.html',
   styleUrl: './app-rail.component.scss',
   encapsulation: ViewEncapsulation.None
@@ -24,8 +26,9 @@ export class AppRailComponent {
   tenantService = inject(TenantContextService);
   contextService = inject(NavigationContextService);
   navService = inject(NavigationStateService);
+  uiService = inject(UiPreferenceService);
 
-  // Icônes existantes
+  // Ic├┤nes
   readonly Home = Home;
   readonly Settings = Settings;
   readonly Briefcase = Briefcase;
@@ -34,6 +37,11 @@ export class AppRailComponent {
   readonly ShieldCheck = ShieldCheck;
   readonly ArrowLeftRight = ArrowLeftRight;
   readonly BarChart3 = BarChart3;
+  readonly Sun = Sun;
+  readonly Moon = Moon;
+  readonly Monitor = Monitor;
+  readonly Maximize = Maximize;
+  readonly Minimize = Minimize;
   protected readonly Shield = Shield;
   protected readonly Building2 = Building2;
   protected readonly School = School;
