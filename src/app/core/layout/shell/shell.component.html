@@ -3,23 +3,21 @@
   <!-- Loader de Page (Style YouTube) -->
   <fw-page-progress *ngIf="loadingService.isLoading() && loadingService.context() === 'page'"></fw-page-progress>
 
-  <!-- Rail de Navigation (D├®sormais Full Height) -->
+  <!-- Rail de Navigation (Full Height) -->
   <app-rail></app-rail>
 
+  <!-- Sidebar du Module (D├®sormais Full Height) -->
+  <app-sidebar></app-sidebar>
+
   <div class="shell-container">
-    <!-- Header Sup├®rieur (Global Services) -->
+    <!-- Header Sup├®rieur (Commence APR├êS la Sidebar) -->
     <app-header></app-header>
 
-    <div class="shell-body">
-      <!-- Sidebar du Module (Collapsible) -->
-      <app-sidebar></app-sidebar>
-
-      <!-- Zone de Contenu Principale -->
-      <main class="shell-main relative">
-        <div class="content-wrapper">
-          <router-outlet></router-outlet>
-        </div>
-      </main>
-    </div>
+    <!-- Zone de Contenu Principale -->
+    <main class="shell-main relative">
+      <div class="content-wrapper">
+        <router-outlet></router-outlet>
+      </div>
+    </main>
   </div>
 </div>

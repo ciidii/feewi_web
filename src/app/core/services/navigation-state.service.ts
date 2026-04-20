@@ -4,22 +4,32 @@ import { Injectable, signal, computed } from '@angular/core';
   providedIn: 'root',
 })
 export class NavigationStateService {
-  // Signal de l'état de la sidebar (true = étendue, false = réduite)
+  // Signal de l'├®tat de la sidebar (true = ├®tendue, false = r├®duite)
   private _isSidebarExpanded = signal<boolean>(true);
+  private _isRailExpanded = signal<boolean>(false);
 
   // Exposition du signal en lecture seule
   readonly isSidebarExpanded = this._isSidebarExpanded.asReadonly();
+  readonly isRailExpanded = this._isRailExpanded.asReadonly();
 
   // Signal pour le fil d'ariane (Breadcrumb)
   private _breadcrumb = signal<string[]>(['Accueil']);
   readonly breadcrumb = this._breadcrumb.asReadonly();
 
-  // Signal pour le service actif (Microservice sélectionné)
+  // Signal pour le service actif (Microservice s├®lectionn├®)
   private _activeService = signal<string>('dashboard');
   readonly activeService = this._activeService.asReadonly();
 
   toggleSidebar(): void {
     this._isSidebarExpanded.update((v) => !v);
+  }
+
+  toggleRail(): void {
+    this._isRailExpanded.update((v) => !v);
+  }
+
+  setRailExpanded(state: boolean): void {
+    this._isRailExpanded.set(state);
   }
 
   setActiveService(service: string): void {

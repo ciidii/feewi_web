@@ -27,28 +27,7 @@
   <!-- === SCHOOL APP NAVIGATION === -->
   <ng-container *ngIf="!auth.currentUser()?.roles?.includes('ROLE_SUPER_ADMIN')">
 
-    <!-- Hero Action (Premium Action) -->
-    <div *ngIf="['dashboard', 'enrollment'].includes(navService.activeService())" class="hero-action">
-      <button class="btn-hero" [matMenuTriggerFor]="sidebarEnrollMenu">
-        <div class="icon-wrap"><lucide-icon [name]="Plus" [size]="16"></lucide-icon></div>
-        <span class="label">Nouvelle Inscription</span>
-        <lucide-icon [name]="ChevronDown" [size]="14" class="ml-auto opacity-50 chevron-down"></lucide-icon>
-      </button>
-
-      <mat-menu #sidebarEnrollMenu="matMenu" class="feewi-mat-menu">
-        <button mat-menu-item routerLink="/admin/admissions/direct">
-          <lucide-icon [name]="UserPlus" [size]="16" class="mr-3"></lucide-icon>
-          <span>Nouveau candidat</span>
-        </button>
-        <button mat-menu-item routerLink="/admin/admissions/re-enrollment">
-          <lucide-icon [name]="UserCheck" [size]="16" class="mr-3"></lucide-icon>
-          <span>Réinscription élève</span>
-        </button>
-      </mat-menu>
-    </div>
-
     <nav class="nav-scroll">
-
       <!-- DASHBOARD -->
       <ng-container *ngIf="navService.activeService() === 'dashboard'">
         <span class="nav-section-title">Analyse Pilotage</span>

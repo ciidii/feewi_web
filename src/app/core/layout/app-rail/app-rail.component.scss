@@ -1,8 +1,7 @@
 .feewi-app-rail {
   width: var(--fw-rail-width);
   height: 100vh;
-  background: white;
-  border-right: 1px solid var(--fw-border);
+  background: var(--fw-raw-slate-50); /* Niveau 0 : Ancrage structurel */
   display: flex;
   flex-direction: column;
   overflow: hidden;

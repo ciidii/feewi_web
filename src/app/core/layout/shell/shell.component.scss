@@ -4,57 +4,44 @@
 
 .shell-layout {
   display: flex;
-  flex-direction: row; /* Horizontal : Rail ├á gauche */
+  flex-direction: row; /* Rail -> Sidebar -> Container */
   height: 100vh;
   width: 100vw;
   overflow: hidden;
-  background-color: var(--fw-white);
+  background-color: var(--fw-raw-white);
+}
+
+app-rail, app-sidebar {
+  flex-shrink: 0;
+  height: 100%;
 }
 
 .shell-container {
   flex: 1;
   display: flex;
-  flex-direction: column; /* Vertical : Header en haut, Body dessous */
+  flex-direction: column; /* Header -> Main */
   min-width: 0;
   height: 100%;
-}
-
-.shell-body {
-  flex: 1;
-  display: flex;
-  overflow: hidden;
-  position: relative;
-}
-
-app-rail {
-  flex-shrink: 0;
-  height: 100%;
-}
-
-app-sidebar {
-  flex-shrink: 0;
-  height: 100%;
+  background-color: var(--fw-raw-slate-50);
 }
 
 .shell-main {
   flex: 1;
   overflow-y: auto;
-  background-color: var(--fw-surface-page);
   position: relative;
   display: flex;
   flex-direction: column;
-  min-width: 0; /* Important pour flex-box + overflow horizontal */
+  min-width: 0;
 
   .content-wrapper {
     flex: 1;
     max-width: 1600px;
     width: 100%;
     margin: 0 auto;
-    /* Emp├¬che les recalculs de layout de se propager vers le haut */
     contain: layout; 
   }
 }
 
-// Custom scrollbar pour le contenu principal
+// Custom scrollbar
 .shell-main::-webkit-scrollbar { width: 6px; }
 .shell-main::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
