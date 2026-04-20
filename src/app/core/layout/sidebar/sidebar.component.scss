@@ -136,4 +136,25 @@ app-sidebar {
   .active-link {
     background: var(--fw-primary-alpha);
   }
+
+  // Tooltip de pr├®cision pour le mode r├®tract├®
+  .sidebar-link:hover::after {
+    content: attr(data-label);
+    position: fixed;
+    left: 136px; /* Rail (64px) + Sidebar collapsed (72px) */
+    background: #0f172a;
+    color: white;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 
+                0 0 0 1px rgba(255, 255, 255, 0.1);
+    pointer-events: none;
+    z-index: 1000;
+    animation: tooltipFadeIn 0.2s ease;
+  }
 }

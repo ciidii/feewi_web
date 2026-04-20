@@ -28,6 +28,7 @@
       <a *ngFor="let item of saasItems"
          [routerLink]="item.route"
          routerLinkActive="active-link"
+         [attr.data-label]="item.label"
          class="sidebar-link">
         <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
         <span class="label">{{ item.label }}</span>
@@ -41,7 +42,10 @@
       <!-- DASHBOARD -->
       <ng-container *ngIf="navService.activeService() === 'dashboard'">
         <span class="nav-section-title">Analyse Pilotage</span>
-        <a routerLink="/admin/dashboard" routerLinkActive="active-link" class="sidebar-link">
+        <a routerLink="/admin/dashboard" 
+           routerLinkActive="active-link" 
+           class="sidebar-link" 
+           [attr.data-label]="'Vue d\'ensemble'">
           <div class="icon-wrap"><lucide-icon [name]="BarChart3" [size]="16"></lucide-icon></div>
           <span class="label">Vue d'ensemble</span>
         </a>
@@ -53,7 +57,8 @@
         <a *ngFor="let item of enrollmentItems"
            [routerLink]="item.route"
            routerLinkActive="active-link"
-           class="sidebar-link">
+           class="sidebar-link" 
+           [attr.data-label]="item.label">
           <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
           <span class="label">{{ item.label }}</span>
         </a>
@@ -65,7 +70,8 @@
         <a *ngFor="let item of registryItems"
            [routerLink]="item.route"
            routerLinkActive="active-link"
-           class="sidebar-link">
+           class="sidebar-link" 
+           [attr.data-label]="item.label">
           <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
           <span class="label">{{ item.label }}</span>
         </a>
@@ -77,7 +83,8 @@
         <a *ngFor="let item of academicItems"
            [routerLink]="item.route"
            routerLinkActive="active-link"
-           class="sidebar-link">
+           class="sidebar-link" 
+           [attr.data-label]="item.label">
           <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
           <span class="label">{{ item.label }}</span>
         </a>
@@ -89,7 +96,8 @@
         <a *ngFor="let item of identityItems"
            [routerLink]="item.route"
            routerLinkActive="active-link"
-           class="sidebar-link">
+           class="sidebar-link" 
+           [attr.data-label]="item.label">
           <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
           <span class="label">{{ item.label }}</span>
         </a>
