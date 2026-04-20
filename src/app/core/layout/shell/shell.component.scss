@@ -4,18 +4,36 @@
 
 .shell-layout {
   display: flex;
-  flex-direction: column;
+  flex-direction: row; /* Horizontal : Rail ├á gauche */
   height: 100vh;
   width: 100vw;
   overflow: hidden;
   background-color: var(--fw-white);
 }
 
+.shell-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column; /* Vertical : Header en haut, Body dessous */
+  min-width: 0;
+  height: 100%;
+}
+
 .shell-body {
   flex: 1;
   display: flex;
   overflow: hidden;
-  position: relative; /* Base pour le positionnement absolu des loaders si besoin */
+  position: relative;
+}
+
+app-rail {
+  flex-shrink: 0;
+  height: 100%;
+}
+
+app-sidebar {
+  flex-shrink: 0;
+  height: 100%;
 }
 
 .shell-main {

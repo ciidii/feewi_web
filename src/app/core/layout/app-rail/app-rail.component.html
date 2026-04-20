@@ -1,10 +1,23 @@
 <nav class="feewi-app-rail" [class.is-expanded]="isRailExpanded()">
-  <!-- Toggle EN HAUT -->
+  <!-- HEADER INSTITUTIONNEL (LOGO + ECOLE) -->
   <div class="rail-header">
-    <button class="rail-toggle" (click)="toggleRailExpanded()" [title]="'global.navigation.rail_header' | translate">
-      <lucide-icon [name]="isRailExpanded() ? PanelLeftClose : PanelLeftOpen"></lucide-icon>
-      <span class="rail-header-label" *ngIf="isRailExpanded()">{{ 'global.navigation.rail_header' | translate }}</span>
-    </button>
+    <div class="brand-box" [class.saas-mode]="contextService.isSaasDomain()">
+
+      <!-- Logo fixe (Trigger de toggle) -->
+      <div class="logo-wrap" (click)="toggleRailExpanded()" title="Basculer la navigation">
+        <img src="feewi-icon.svg" alt="Feewi">
+      </div>
+
+      <div class="school-identity" *ngIf="isRailExpanded()">
+        <span class="school-name">
+          {{ contextService.isSaasDomain() ? 'Feewi Admin' : (tenantService.activeTenant()?.name || 'Administration') }}
+        </span>
+      </div>
+
+      <button *ngIf="isRailExpanded()" class="btn-rail-close" (click)="toggleRailExpanded()">
+        <lucide-icon [name]="PanelLeftClose" [size]="18"></lucide-icon>
+      </button>
+    </div>
   </div>
 
   <div class="rail-items-wrapper">
@@ -31,7 +44,7 @@
         [class.active]="navService.activeService() === 'dashboard'"
         [attr.data-label]="'Accueil'"
       >
-        <lucide-icon [name]="Home"></lucide-icon>
+        <lucide-icon [name]="Home" [size]="18"></lucide-icon>
         <span class="rail-label">Accueil</span>
       </a>
 
@@ -42,7 +55,7 @@
         [class.active]="navService.activeService() === 'enrollment'"
         [attr.data-label]="'Inscriptions'"
       >
-        <lucide-icon [name]="Briefcase"></lucide-icon>
+        <lucide-icon [name]="Briefcase" [size]="18"></lucide-icon>
         <span class="rail-label">Inscriptions</span>
       </a>
 
@@ -53,7 +66,7 @@
         [class.active]="navService.activeService() === 'registry'"
         [attr.data-label]="'Registre'"
       >
-        <lucide-icon [name]="Users"></lucide-icon>
+        <lucide-icon [name]="Users" [size]="18"></lucide-icon>
         <span class="rail-label">Registre</span>
       </a>
 
@@ -64,8 +77,8 @@
         [class.active]="navService.activeService() === 'academic'"
         [attr.data-label]="'Académique'"
       >
-        <lucide-icon [name]="School"></lucide-icon>
-        <span class="rail-label">Académique</span>
+        <lucide-icon [name]="School" [size]="18"></lucide-icon>
+        <span class="rail-label" >Académique</span>
       </a>
 
       <a
@@ -75,13 +88,12 @@
         [class.active]="navService.activeService() === 'identity'"
         [attr.data-label]="'Sécurité'"
       >
-        <lucide-icon [name]="ShieldCheck"></lucide-icon>
+        <lucide-icon [name]="ShieldCheck" [size]="18"></lucide-icon>
         <span class="rail-label">Sécurité</span>
       </a>
     </ng-container>
   </div>
 
-  <!-- Bottom avec toggle -->
   <div class="mt-auto">
     <!-- Settings -->
     <a
@@ -90,7 +102,7 @@
       [class.active]="navService.activeService() === 'settings'"
       [attr.data-label]="'Réglages'"
     >
-      <lucide-icon [name]="Settings"></lucide-icon>
+      <lucide-icon [name]="Settings" [size]="18"></lucide-icon>
       <span class="rail-label">Réglages</span>
     </a>
 

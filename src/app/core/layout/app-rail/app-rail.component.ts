@@ -8,6 +8,7 @@ import {
 import { AuthService } from '../../services/auth.service';
 import { NavigationContextService } from '../../services/navigation-context.service';
 import { NavigationStateService } from '../../services/navigation-state.service';
+import { TenantContextService } from '../../services/tenant-context.service';
 import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
@@ -20,6 +21,7 @@ import { TranslateModule } from '@ngx-translate/core';
 })
 export class AppRailComponent {
   auth = inject(AuthService);
+  tenantService = inject(TenantContextService);
   contextService = inject(NavigationContextService);
   navService = inject(NavigationStateService);
 
