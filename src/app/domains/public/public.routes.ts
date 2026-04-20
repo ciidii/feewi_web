@@ -1,6 +1,6 @@
-import { Routes } from '@angular/router';
-import { PublicEnrollmentLayoutComponent } from './enrollment/layout/public-enrollment-layout.component';
-import { AuthLayoutComponent } from './auth/layout/auth-layout.component';
+import {Routes} from '@angular/router';
+import {PublicEnrollmentLayoutComponent} from './enrollment/layout/public-enrollment-layout.component';
+import {AuthLayoutComponent} from './auth/layout/auth-layout.component';
 
 export const PUBLIC_ROUTES: Routes = [
   // 1. Flux Authentification (Enveloppé dans AuthLayout)
@@ -18,7 +18,13 @@ export const PUBLIC_ROUTES: Routes = [
         title: 'auth.forgot_password.title',
         loadComponent: () => import('./auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent)
       },
-      // Redirection par défaut : /auth -> /auth/login
+      {
+        path: 'reset-password',
+        title: 'auth.reset_password.title',
+        loadComponent: () => import('./auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent)
+      },
+      // Redirection par d├®faut : /auth -> /auth/login
+
       {
         path: '',
         redirectTo: 'login',

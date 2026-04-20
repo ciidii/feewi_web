@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -6,14 +6,15 @@ import {
   LucideAngularModule,
   ArrowLeft,
   KeyRound,
-  Mail,
   ShieldCheck,
   Lock,
-  RefreshCcw
+  Eye,
+  EyeOff
 } from 'lucide-angular';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../shared/services/notification.service';
 import { FwButtonComponent } from '../../../../shared/components/button/button.component';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 function passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
   const password = control.get('newPassword')?.value;
@@ -25,9 +26,17 @@ function passwordMatchValidator(control: AbstractControl): ValidationErrors | nu
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, LucideAngularModule, FwButtonComponent],
+  imports: [
+    CommonModule, 
+    ReactiveFormsModule, 
+    RouterModule, 
+    LucideAngularModule, 
+    FwButtonComponent,
+    TranslateModule
+  ],
   templateUrl: './reset-password.component.html',
-  styleUrl: './reset-password.component.scss'
+  styleUrl: './reset-password.component.scss',
+  encapsulation: ViewEncapsulation.None
 })
 export class ResetPasswordComponent {
   private fb = inject(FormBuilder);
@@ -35,15 +44,17 @@ export class ResetPasswordComponent {
   private router = inject(Router);
   private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
+  public translate = inject(TranslateService);
 
   readonly ArrowLeft = ArrowLeft;
   readonly KeyRound = KeyRound;
-  readonly Mail = Mail;
   readonly ShieldCheck = ShieldCheck;
   readonly Lock = Lock;
-  readonly RefreshCcw = RefreshCcw;
+  readonly Eye = Eye;
+  readonly EyeOff = EyeOff;
 
   isLoading = signal(false);
+  showPassword = signal(false);
 
   resetForm = this.fb.group(
     {
@@ -62,6 +73,15 @@ export class ResetPasswordComponent {
     }
   }
 
+  changeLanguage(lang: string) {
+    this.translate.use(lang);
+    localStorage.setItem('feewi_lang', lang);
+  }
+
+  togglePassword() {
+    this.showPassword.update(v => !v);
+  }
+
   isInvalid(controlName: string): boolean {
     const control = this.resetForm.get(controlName);
     return !!(control && control.invalid && (control.dirty || control.touched));
@@ -69,10 +89,12 @@ export class ResetPasswordComponent {
 
   getErrorMessage(controlName: string): string {
     const control = this.resetForm.get(controlName);
-    if (control?.hasError('required')) return 'Ce champ est obligatoire';
-    if (control?.hasError('email')) return 'Format email invalide';
-    if (control?.hasError('pattern')) return 'Le code doit contenir 6 chiffres';
-    if (control?.hasError('minlength')) return 'Le mot de passe doit contenir au moins 8 caractères';
+    if (control?.hasError('required')) {
+      return controlName === 'code' ? 'auth.reset_password.fields.errors.otp_required' : 'auth.forgot_password.fields.email.errors.required';
+    }
+    if (control?.hasError('email')) return 'auth.forgot_password.fields.email.errors.email';
+    if (control?.hasError('pattern')) return 'auth.reset_password.fields.errors.otp_required';
+    if (control?.hasError('minlength')) return 'auth.reset_password.fields.errors.password_too_short';
     return 'Champ invalide';
   }
 
@@ -84,7 +106,6 @@ export class ResetPasswordComponent {
   onSubmit() {
     if (this.resetForm.invalid) {
       this.resetForm.markAllAsTouched();
-      this.notificationService.warning('Vérifiez les champs du formulaire.', 'Formulaire incomplet');
       return;
     }
 
@@ -97,12 +118,15 @@ export class ResetPasswordComponent {
       newPassword: newPassword!
     }).subscribe({
       next: () => {
-        this.notificationService.success('Mot de passe réinitialisé avec succès.', 'Opération terminée');
+        this.notificationService.success(
+          this.translate.instant('auth.reset_password.notifications.success_message'), 
+          this.translate.instant('auth.reset_password.notifications.success_title')
+        );
         this.router.navigate(['/auth/login']);
       },
       error: (err: any) => {
-        const message = err?.error?.message || err?.message || 'Impossible de réinitialiser le mot de passe.';
-        this.notificationService.error(message, 'Échec de réinitialisation');
+        const message = err?.error?.message || err?.message || this.translate.instant('auth.reset_password.notifications.error_title');
+        this.notificationService.error(message, this.translate.instant('auth.reset_password.notifications.error_title'));
         this.isLoading.set(false);
       },
       complete: () => {
