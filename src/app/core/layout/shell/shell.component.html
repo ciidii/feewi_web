@@ -1,5 +1,8 @@
 <div class="shell-layout selection:bg-primary selection:text-white antialiased">
   
+  <!-- Loader de Page (Style YouTube) -->
+  <fw-page-progress *ngIf="loadingService.isLoading() && loadingService.context() === 'page'"></fw-page-progress>
+
   <!-- Rail de Navigation (D├®sormais Full Height) -->
   <app-rail></app-rail>
 
@@ -13,9 +16,6 @@
 
       <!-- Zone de Contenu Principale -->
       <main class="shell-main relative">
-        <!-- Page Loader (Niveau 3) : Uniquement en contexte 'page' -->
-        <fw-page-progress *ngIf="loadingService.isLoading() && loadingService.context() === 'page'"></fw-page-progress>
-        
         <div class="content-wrapper">
           <router-outlet></router-outlet>
         </div>

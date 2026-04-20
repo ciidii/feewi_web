@@ -1,6 +1,6 @@
-<aside 
-  class="sidebar-container" 
-  [class.is-expanded]="navService.isSidebarExpanded()" 
+<aside
+  class="sidebar-container"
+  [class.is-expanded]="navService.isSidebarExpanded()"
   [class.is-collapsed]="!navService.isSidebarExpanded()"
 >
 
@@ -14,11 +14,11 @@
     </div>
 
     <nav class="nav-scroll">
-      <a *ngFor="let item of saasItems" 
-         [routerLink]="item.route" 
-         routerLinkActive="active-link" 
+      <a *ngFor="let item of saasItems"
+         [routerLink]="item.route"
+         routerLinkActive="active-link"
          class="sidebar-link">
-        <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="18"></lucide-icon></div>
+        <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
         <span class="label">{{ item.label }}</span>
       </a>
     </nav>
@@ -26,11 +26,11 @@
 
   <!-- === SCHOOL APP NAVIGATION === -->
   <ng-container *ngIf="!auth.currentUser()?.roles?.includes('ROLE_SUPER_ADMIN')">
-    
+
     <!-- Hero Action (Premium Action) -->
     <div *ngIf="['dashboard', 'enrollment'].includes(navService.activeService())" class="hero-action">
       <button class="btn-hero" [matMenuTriggerFor]="sidebarEnrollMenu">
-        <div class="icon-wrap"><lucide-icon [name]="Plus" [size]="18"></lucide-icon></div>
+        <div class="icon-wrap"><lucide-icon [name]="Plus" [size]="16"></lucide-icon></div>
         <span class="label">Nouvelle Inscription</span>
         <lucide-icon [name]="ChevronDown" [size]="14" class="ml-auto opacity-50 chevron-down"></lucide-icon>
       </button>
@@ -48,12 +48,12 @@
     </div>
 
     <nav class="nav-scroll">
-      
+
       <!-- DASHBOARD -->
       <ng-container *ngIf="navService.activeService() === 'dashboard'">
         <span class="nav-section-title">Analyse Pilotage</span>
         <a routerLink="/admin/dashboard" routerLinkActive="active-link" class="sidebar-link">
-          <div class="icon-wrap"><lucide-icon [name]="BarChart3" [size]="18"></lucide-icon></div>
+          <div class="icon-wrap"><lucide-icon [name]="BarChart3" [size]="16"></lucide-icon></div>
           <span class="label">Vue d'ensemble</span>
         </a>
       </ng-container>
@@ -61,11 +61,11 @@
       <!-- ENROLLMENT -->
       <ng-container *ngIf="navService.activeService() === 'enrollment'">
         <span class="nav-section-title">Inscriptions</span>
-        <a *ngFor="let item of enrollmentItems" 
-           [routerLink]="item.route" 
-           routerLinkActive="active-link" 
+        <a *ngFor="let item of enrollmentItems"
+           [routerLink]="item.route"
+           routerLinkActive="active-link"
            class="sidebar-link">
-          <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="18"></lucide-icon></div>
+          <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
           <span class="label">{{ item.label }}</span>
         </a>
       </ng-container>
@@ -73,11 +73,11 @@
       <!-- REGISTRY -->
       <ng-container *ngIf="navService.activeService() === 'registry'">
         <span class="nav-section-title">Registre Élèves</span>
-        <a *ngFor="let item of registryItems" 
-           [routerLink]="item.route" 
-           routerLinkActive="active-link" 
+        <a *ngFor="let item of registryItems"
+           [routerLink]="item.route"
+           routerLinkActive="active-link"
            class="sidebar-link">
-          <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="18"></lucide-icon></div>
+          <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
           <span class="label">{{ item.label }}</span>
         </a>
       </ng-container>
@@ -85,11 +85,11 @@
       <!-- ACADEMIC -->
       <ng-container *ngIf="navService.activeService() === 'academic'">
         <span class="nav-section-title">Pilotage</span>
-        <a *ngFor="let item of academicItems" 
-           [routerLink]="item.route" 
-           routerLinkActive="active-link" 
+        <a *ngFor="let item of academicItems"
+           [routerLink]="item.route"
+           routerLinkActive="active-link"
            class="sidebar-link">
-          <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="18"></lucide-icon></div>
+          <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
           <span class="label">{{ item.label }}</span>
         </a>
       </ng-container>
@@ -97,11 +97,11 @@
       <!-- IDENTITY -->
       <ng-container *ngIf="navService.activeService() === 'identity'">
         <span class="nav-section-title">Sécurité & Staff</span>
-        <a *ngFor="let item of identityItems" 
-           [routerLink]="item.route" 
-           routerLinkActive="active-link" 
+        <a *ngFor="let item of identityItems"
+           [routerLink]="item.route"
+           routerLinkActive="active-link"
            class="sidebar-link">
-          <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="18"></lucide-icon></div>
+          <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
           <span class="label">{{ item.label }}</span>
         </a>
       </ng-container>
