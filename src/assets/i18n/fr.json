@@ -27,9 +27,10 @@
       }
     },
     "forgot_password": {
+      "role": "SÉCURITÉ DU COMPTE",
       "title": "Mot de passe oublié",
-      "subtitle": "Nous vous enverrons un code de récupération par email.",
-      "info_alert": "Assurez-vous d'avoir accès à votre boîte mail pour récupérer le code OTP à 6 chiffres.",
+      "subtitle": "Saisissez votre email pour recevoir un code de vérification à 6 chiffres.",
+      "info_alert": "Si vous ne recevez pas l'email d'ici 2 minutes, vérifiez votre dossier de courriers indésirables (spams).",
       "fields": {
         "email": {
           "label": "Adresse Email",
@@ -48,6 +49,39 @@
         "success_title": "Vérification",
         "success_message": "Code OTP envoyé par email.",
         "error_title": "Échec de la demande"
+      }
+    },
+    "reset_password": {
+      "role": "SÉCURITÉ DU COMPTE",
+      "title": "Nouveau mot de passe",
+      "subtitle": "Saisissez le code reçu par email et votre nouveau mot de passe.",
+      "fields": {
+        "otp": {
+          "label": "Code de vérification",
+          "placeholder": "000000"
+        },
+        "password": {
+          "label": "Nouveau mot de passe",
+          "placeholder": "••••••••"
+        },
+        "confirm_password": {
+          "label": "Confirmer le mot de passe",
+          "placeholder": "••••••••"
+        },
+        "errors": {
+          "mismatch": "Les mots de passe ne correspondent pas",
+          "otp_required": "Le code est obligatoire",
+          "password_too_short": "Minimum 8 caractères"
+        }
+      },
+      "actions": {
+        "submit": "Réinitialiser",
+        "back_to_login": "Retour à la connexion"
+      },
+      "notifications": {
+        "success_title": "Succès",
+        "success_message": "Votre mot de passe a été mis à jour avec succès.",
+        "error_title": "Erreur de mise à jour"
       }
     }
   },

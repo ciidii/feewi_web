@@ -27,9 +27,10 @@
       }
     },
     "forgot_password": {
+      "role": "ACCOUNT SECURITY",
       "title": "Forgot Password",
-      "subtitle": "We will send you a recovery code by email.",
-      "info_alert": "Make sure you have access to your mailbox to retrieve the 6-digit OTP code.",
+      "subtitle": "Enter your email to receive a 6-digit verification code.",
+      "info_alert": "If you don't receive the email within 2 minutes, please check your spam folder.",
       "fields": {
         "email": {
           "label": "Email Address",
@@ -48,6 +49,39 @@
         "success_title": "Verification",
         "success_message": "OTP code sent by email.",
         "error_title": "Request failed"
+      }
+    },
+    "reset_password": {
+      "role": "ACCOUNT SECURITY",
+      "title": "New Password",
+      "subtitle": "Enter the code received by email and your new password.",
+      "fields": {
+        "otp": {
+          "label": "Verification Code",
+          "placeholder": "000000"
+        },
+        "password": {
+          "label": "New Password",
+          "placeholder": "••••••••"
+        },
+        "confirm_password": {
+          "label": "Confirm Password",
+          "placeholder": "••••••••"
+        },
+        "errors": {
+          "mismatch": "Passwords do not match",
+          "otp_required": "Code is required",
+          "password_too_short": "Minimum 8 characters"
+        }
+      },
+      "actions": {
+        "submit": "Reset Password",
+        "back_to_login": "Back to login"
+      },
+      "notifications": {
+        "success_title": "Success",
+        "success_message": "Your password has been successfully updated.",
+        "error_title": "Update error"
       }
     }
   },
