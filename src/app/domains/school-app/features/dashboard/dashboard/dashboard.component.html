@@ -1,19 +1,20 @@
 <div class="space-y-8 animate-in fade-in duration-700">
-  <!-- Page Header -->
-  <div class="flex flex-col gap-1">
-    <h1 class="text-3xl font-display font-bold text-midnight tracking-tight">Tableau de bord global</h1>
-    <p class="text-sm text-slate-medium font-medium">Console de pilotage de l'établissement • Année 2024-2025</p>
-  </div>
+  <!-- Page Header Standardisé -->
+  <app-fw-page-header
+    title="Tableau de bord global"
+    description="Console de pilotage de l'établissement • Année 2024-2025"
+    [icon]="LayoutDashboard">
+  </app-fw-page-header>
 
   <!-- Stats Grid -->
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-    <!-- Card: Total Students -->
+    <!-- Card: Total Élèves -->
     <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hover:shadow-md transition-all group">
       <div class="flex justify-between items-start mb-4">
-        <div class="p-2.5 bg-blue-50 rounded-xl text-primary group-hover:scale-110 transition-transform">
+        <div class="p-2.5 bg-blue-50 text-blue-600 rounded-xl group-hover:scale-110 transition-transform">
           <lucide-icon [name]="Users" class="w-6 h-6"></lucide-icon>
         </div>
-        <span class="text-[10px] font-bold uppercase tracking-widest text-green-600 bg-green-50 px-2 py-1 rounded-full">+12.5%</span>
+        <app-fw-badge labelOverride="+12.5%" tokenOverride="success" size="xs"></app-fw-badge>
       </div>
       <h3 class="text-xs font-bold uppercase tracking-wider text-slate-medium mb-1">Total Élèves</h3>
       <div class="text-3xl font-display font-bold text-midnight">1,248</div>
@@ -22,34 +23,34 @@
     <!-- Card: Admissions -->
     <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hover:shadow-md transition-all group">
       <div class="flex justify-between items-start mb-4">
-        <div class="p-2.5 bg-amber-50 rounded-xl text-amber-600 group-hover:scale-110 transition-transform">
+        <div class="p-2.5 bg-amber-50 text-amber-600 rounded-xl group-hover:scale-110 transition-transform">
           <lucide-icon [name]="Activity" class="w-6 h-6"></lucide-icon>
         </div>
-        <span class="text-[10px] font-bold uppercase tracking-widest text-amber-600 bg-amber-50 px-2 py-1 rounded-full">En cours</span>
+        <app-fw-badge labelOverride="En cours" tokenOverride="warning" size="xs"></app-fw-badge>
       </div>
       <h3 class="text-xs font-bold uppercase tracking-wider text-slate-medium mb-1">Admissions</h3>
       <div class="text-3xl font-display font-bold text-midnight">42</div>
     </div>
 
-    <!-- Card: Attendance -->
+    <!-- Card: Taux Présence -->
     <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hover:shadow-md transition-all group">
       <div class="flex justify-between items-start mb-4">
-        <div class="p-2.5 bg-emerald-50 rounded-xl text-emerald-600 group-hover:scale-110 transition-transform">
+        <div class="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl group-hover:scale-110 transition-transform">
           <lucide-icon [name]="GraduationCap" class="w-6 h-6"></lucide-icon>
         </div>
-        <span class="text-[10px] font-bold uppercase tracking-widest text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">Optimal</span>
+        <app-fw-badge labelOverride="Optimal" tokenOverride="success" size="xs"></app-fw-badge>
       </div>
       <h3 class="text-xs font-bold uppercase tracking-wider text-slate-medium mb-1">Taux Présence</h3>
       <div class="text-3xl font-display font-bold text-midnight">96.4%</div>
     </div>
 
-    <!-- Card: Trending -->
+    <!-- Card: Performance -->
     <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hover:shadow-md transition-all group">
       <div class="flex justify-between items-start mb-4">
-        <div class="p-2.5 bg-slate-50 rounded-xl text-slate-600 group-hover:scale-110 transition-transform">
+        <div class="p-2.5 bg-slate-50 text-slate-600 rounded-xl group-hover:scale-110 transition-transform">
           <lucide-icon [name]="TrendingUp" class="w-6 h-6"></lucide-icon>
         </div>
-        <span class="text-[10px] font-bold uppercase tracking-widest text-slate-medium bg-slate-50 px-2 py-1 rounded-full">Stabile</span>
+        <app-fw-badge labelOverride="Stable" tokenOverride="neutral" size="xs"></app-fw-badge>
       </div>
       <h3 class="text-xs font-bold uppercase tracking-wider text-slate-medium mb-1">Performance</h3>
       <div class="text-3xl font-display font-bold text-midnight">A+</div>

@@ -1,7 +1,7 @@
 .feewi-app-rail {
   width: var(--fw-rail-width);
   height: 100vh;
-  background: var(--fw-raw-slate-100); /* Ancrage Doux */
+  background: var(--fw-raw-slate-100);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
@@ -17,6 +17,7 @@
   }
 }
 
+/* HEADER */
 .rail-header {
   height: var(--fw-header-height);
   display: flex;
@@ -34,56 +35,33 @@
   padding: 0 4px;
   transition: all 0.3s ease;
 
-  &.collapsed-mode {
-    justify-content: center;
-    padding: 0;
-  }
-
   .logo-wrap {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    background: var(--fw-midnight);
-    display: grid;
-    place-items: center;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: background 0.2s;
-    &:hover { background: var(--fw-primary); }
+    width: 36px; height: 36px; border-radius: 10px;
+    background: var(--fw-midnight); display: grid; place-items: center;
+    cursor: pointer; flex-shrink: 0; transition: all 0.2s;
+    &:hover { background: var(--fw-primary); transform: translateY(-1px); }
     img { width: 20px; height: 20px; }
   }
 
   .school-identity {
     flex: 1; min-width: 0; display: flex; flex-direction: column;
     .school-name {
-      font-family: var(--fw-font-display); font-size: 0.8125rem; font-weight: 800;
-      color: var(--fw-primary); /* Harmonisation Blue Primary */
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      font-family: var(--fw-font-display); font-size: 0.8125rem; font-weight: 850;
+      color: var(--fw-midnight); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
   }
 
   .btn-rail-close {
-    width: 32px; height: 32px; border-radius: 8px; border: none;
-    background: transparent; color: var(--fw-text-tertiary);
-    cursor: pointer; display: grid; place-items: center;
-    transition: all 0.2s;
-    &:hover { background: var(--fw-primary-alpha); color: var(--fw-primary); }
-  }
-
-  /* === HARMONISATION MODE SAAS === */
-  &.saas-mode {
-    .logo-wrap:hover { background: #d97706; }
-    .school-name { color: #d97706; }
-    .btn-rail-close:hover {
-      background: #fffbeb;
-      color: #d97706;
-    }
+    width: 32px; height: 32px; border-radius: 8px; border: none; background: transparent;
+    color: var(--fw-text-tertiary); cursor: pointer; display: grid; place-items: center;
+    &:hover { background: white; color: var(--fw-primary); box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
   }
 }
 
+/* ITEMS */
 .rail-items-wrapper {
   flex: 1;
-  padding: 0.75rem 0.5rem;
+  padding: 1rem 0.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -100,107 +78,106 @@
   outline: none;
   position: relative;
 
-  lucide-icon {
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
-    stroke-width: 1.5;
-  }
+  lucide-icon { width: 18px; height: 18px; flex-shrink: 0; stroke-width: 1.5; }
 
   .rail-label {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--fw-text-secondary);
-    opacity: 0;
-    width: 0;
-    overflow: hidden;
-    margin-left: 0;
-    transition: opacity 0.2s;
+    font-size: 13px; font-weight: 600; color: var(--fw-text-secondary);
+    opacity: 0; width: 0; overflow: hidden; margin-left: 0; transition: opacity 0.2s;
   }
 
   &:hover, &.active {
-    background: white; /* Le bouton actif "pop" en blanc sur le fond gris */
-    color: var(--fw-primary) !important;
+    background: white; color: var(--fw-primary) !important;
     .rail-label { color: var(--fw-primary); font-weight: 700; }
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   }
 }
 
-// ├ëTAT EXPANS├ë
-.feewi-app-rail.is-expanded {
-  .rail-link {
-    height: 40px;
-    padding: 0 12px;
-    margin: 0 4px;
-    border-radius: 10px;
-    gap: 12px;
-    justify-content: flex-start;
+/* FOOTER & SESSION */
+.rail-footer {
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  border-top: 1px solid rgba(0,0,0,0.03);
+}
 
-    .rail-label {
-      opacity: 1;
-      width: auto;
+.user-session-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px;
+  background: rgba(0,0,0,0.02);
+  border-radius: 12px;
+  transition: all 0.2s;
+
+  &.is-expanded {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px;
+  }
+
+  .profile-trigger {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 0;
+
+    &:hover { background: white; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+
+    .avatar-squircle {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: var(--fw-midnight); color: white;
+      display: grid; place-items: center; flex-shrink: 0;
+    }
+
+    .user-info {
+      display: flex; flex-direction: column; min-width: 0;
+      .name { font-size: 12px; font-weight: 800; color: var(--fw-midnight); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .role { font-size: 9px; font-weight: 700; color: var(--fw-primary); text-transform: uppercase; }
     }
   }
+
+  .logout-btn {
+    width: 32px; height: 32px; border-radius: 8px; border: none; background: transparent;
+    color: var(--fw-text-tertiary); cursor: pointer; display: grid; place-items: center;
+    transition: all 0.2s;
+    &:hover { background: var(--fw-error-bg); color: var(--fw-error); }
+  }
 }
 
-// ├ëTAT R├ëTRACT├ë (Centrage Absolu)
-.feewi-app-rail:not(.is-expanded) {
+/* ├ëTAT EXPANS├ë LOGIQUE */
+.feewi-app-rail.is-expanded {
   .rail-link {
-    width: 40px;
-    height: 40px;
-    margin: 0 auto;
-    border-radius: 12px;
-    justify-content: center;
-    padding: 0;
-
-    .rail-label { display: none; }
+    height: 40px; padding: 0 12px; margin: 0 4px; border-radius: 10px; gap: 12px; justify-content: flex-start;
+    .rail-label { opacity: 1; width: auto; }
   }
 }
 
-// Tooltip CSS stable et ultra-lisible
-.feewi-app-rail:not(.is-expanded) .rail-link:hover::after {
+/* ├ëTAT R├ëTRACT├ë LOGIQUE */
+.feewi-app-rail:not(.is-expanded) {
+  .rail-link { width: 40px; height: 40px; margin: 0 auto; border-radius: 12px; justify-content: center; padding: 0; .rail-label { display: none; } }
+  .user-session-box { 
+    align-items: center; 
+    gap: 0.5rem;
+    .logout-btn { display: grid; } /* Assurer l'affichage */
+  }
+}
+
+/* TOOLTIPS */
+.feewi-app-rail:not(.is-expanded) .rail-link:hover::after,
+.feewi-app-rail:not(.is-expanded) .profile-trigger:hover::after,
+.feewi-app-rail:not(.is-expanded) .logout-btn:hover::after {
   content: attr(data-label);
-  position: fixed;
-  left: 60px; /* Aligné sur le bord du rail */
-  background: #0f172a; /* Midnight profond pour le contraste */
-  color: white;
-  border-radius: 6px;
-  padding: 6px 12px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  white-space: nowrap;
-  
-  /* Ombre port├®e Premium pour le d├®tachement visuel */
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 
-              0 0 0 1px rgba(255, 255, 255, 0.1); /* Bordure interne fine */
-  
-  pointer-events: none;
-  z-index: 1000; /* Toujours au-dessus de la sidebar */
-  animation: tooltipFadeIn 0.2s ease;
+  position: fixed; left: 60px; background: #0f172a; color: white;
+  border-radius: 6px; padding: 6px 12px; font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); z-index: 1000; animation: tooltipFadeIn 0.2s ease;
 }
 
-@keyframes tooltipFadeIn {
-  from { opacity: 0; transform: translateX(-5px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
-.saas-link {
-  &:hover, &.active {
-    background: #fffbeb !important;
-    color: #d97706 !important;
-  }
-}
-
-.settings-trigger {
-  border: none;
-  cursor: pointer;
-  background: transparent;
-}
-
-@keyframes fadeIn {
-
-  from { opacity: 0; transform: translateX(-5px); }
-  to { opacity: 1; transform: translateX(0); }
-}
+@keyframes tooltipFadeIn { from { opacity: 0; transform: translateX(-5px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes fadeIn { from { opacity: 0; transform: translateX(-5px); } to { opacity: 1; transform: translateX(0); } }

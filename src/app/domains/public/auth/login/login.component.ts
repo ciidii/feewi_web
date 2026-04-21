@@ -71,9 +71,9 @@ export class LoginComponent {
     this.authService.login(email!, password!).subscribe({
       next: (success) => {
         if (success) {
-          // D├®clenche le Splash Screen Global pour une transition "Premium"
+          // Déclenche le Splash Screen Global pour une transition "Premium"
           this.loadingService.start('global');
-          this.router.navigate(['/admin/dashboard']);
+          this.router.navigate(['/admin/home']);
         } else {
           this.loginError.set(true);
           this.isLoading.set(false);

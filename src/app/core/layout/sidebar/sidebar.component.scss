@@ -132,6 +132,46 @@ app-sidebar {
   }
 }
 
+// --- PROFILE CARD (IN SIDEBAR) ---
+.sidebar-profile-card {
+  margin: 0 0.5rem 0.5rem;
+  padding: 0.75rem;
+  background: white;
+  border: 1px solid var(--fw-border);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+
+  .avatar-box {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--fw-midnight);
+    color: white;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+
+  .info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    .name { font-size: 12px; font-weight: 850; color: var(--fw-midnight); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .role { font-size: 9px; font-weight: 700; color: var(--fw-primary); text-transform: uppercase; margin-top: 1px; }
+  }
+}
+
+.logout-item {
+  &:hover {
+    background: var(--fw-error-bg) !important;
+    color: var(--fw-error) !important;
+    .icon-wrap { color: var(--fw-error) !important; opacity: 1; }
+  }
+}
+
 // --- ├ëTAT R├ëTRACT├ë (Z├ëN) ---
 .is-collapsed {
   .label, .nav-section-title, .saas-badge .label {

@@ -2,6 +2,11 @@ import { Routes } from '@angular/router';
 
 export const SCHOOL_APP_ROUTES: Routes = [
   {
+    path: 'home',
+    title: 'Console de Pilotage',
+    loadComponent: () => import('./features/dashboard/home/home.component').then(m => m.HomeComponent)
+  },
+  {
     path: 'dashboard',
     title: 'Tableau de bord',
     loadComponent: () => import('./features/dashboard/dashboard/dashboard.component').then(m => m.DashboardComponent)
@@ -123,7 +128,7 @@ export const SCHOOL_APP_ROUTES: Routes = [
   },
   {
     path: '',
-    redirectTo: 'dashboard',
+    redirectTo: 'home',
     pathMatch: 'full'
   }
 ];

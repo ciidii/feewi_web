@@ -1,19 +1,15 @@
 <nav class="feewi-app-rail" [class.is-expanded]="isRailExpanded()">
-  <!-- HEADER INSTITUTIONNEL (LOGO + ECOLE) -->
+  <!-- HEADER INSTITUTIONNEL -->
   <div class="rail-header">
     <div class="brand-box" [class.saas-mode]="contextService.isSaasDomain()">
-
-      <!-- Logo fixe (Trigger de toggle) -->
       <div class="logo-wrap" (click)="toggleRailExpanded()" title="Basculer la navigation">
         <img src="feewi-icon.svg" alt="Feewi">
       </div>
-
       <div class="school-identity" *ngIf="isRailExpanded()">
         <span class="school-name">
           {{ contextService.isSaasDomain() ? 'Feewi Admin' : (tenantService.activeTenant()?.name || 'Administration') }}
         </span>
       </div>
-
       <button *ngIf="isRailExpanded()" class="btn-rail-close" (click)="toggleRailExpanded()">
         <lucide-icon [name]="PanelLeftClose" [size]="18"></lucide-icon>
       </button>
@@ -23,13 +19,7 @@
   <div class="rail-items-wrapper">
     <!-- SAAS ADMIN -->
     <ng-container *ngIf="auth.currentUser()?.roles?.includes('ROLE_SUPER_ADMIN')">
-      <a
-        (click)="onSelectService('saas')"
-        routerLink="/saas/tenants"
-        class="rail-link group saas-link"
-        [class.active]="navService.activeService() === 'saas'"
-        [attr.data-label]="'SaaS System'"
-      >
+      <a (click)="onSelectService('saas')" routerLink="/saas/tenants" class="rail-link group saas-link" [class.active]="navService.activeService() === 'saas'" [attr.data-label]="'SaaS System'">
         <lucide-icon [name]="Building2"></lucide-icon>
         <span class="rail-label">SaaS System</span>
       </a>
@@ -37,73 +27,37 @@
 
     <!-- SCHOOL APP -->
     <ng-container *ngIf="!auth.currentUser()?.roles?.includes('ROLE_SUPER_ADMIN')">
-      <a
-        (click)="onSelectService('dashboard')"
-        routerLink="/admin/dashboard"
-        class="rail-link"
-        [class.active]="navService.activeService() === 'dashboard'"
-        [attr.data-label]="'Accueil'"
-      >
+      <a (click)="onSelectService('dashboard')" routerLink="/admin/home" class="rail-link" [class.active]="navService.activeService() === 'dashboard'" [attr.data-label]="'Accueil'">
         <lucide-icon [name]="Home" [size]="18"></lucide-icon>
         <span class="rail-label">Accueil</span>
       </a>
-
-      <a
-        (click)="onSelectService('enrollment')"
-        routerLink="/admin/admissions"
-        class="rail-link"
-        [class.active]="navService.activeService() === 'enrollment'"
-        [attr.data-label]="'Inscriptions'"
-      >
+      <a (click)="onSelectService('enrollment')" routerLink="/admin/admissions" class="rail-link" [class.active]="navService.activeService() === 'enrollment'" [attr.data-label]="'Inscriptions'">
         <lucide-icon [name]="Briefcase" [size]="18"></lucide-icon>
         <span class="rail-label">Inscriptions</span>
       </a>
-
-      <a
-        (click)="onSelectService('registry')"
-        routerLink="/admin/registry/students"
-        class="rail-link"
-        [class.active]="navService.activeService() === 'registry'"
-        [attr.data-label]="'Registre'"
-      >
+      <a (click)="onSelectService('registry')" routerLink="/admin/registry/students" class="rail-link" [class.active]="navService.activeService() === 'registry'" [attr.data-label]="'Registre'">
         <lucide-icon [name]="Users" [size]="18"></lucide-icon>
         <span class="rail-label">Registre</span>
       </a>
-
-      <a
-        (click)="onSelectService('academic')"
-        routerLink="/admin/classes"
-        class="rail-link"
-        [class.active]="navService.activeService() === 'academic'"
-        [attr.data-label]="'Académique'"
-      >
+      <a (click)="onSelectService('academic')" routerLink="/admin/classes" class="rail-link" [class.active]="navService.activeService() === 'academic'" [attr.data-label]="'Académique'">
         <lucide-icon [name]="School" [size]="18"></lucide-icon>
-        <span class="rail-label" >Académique</span>
+        <span class="rail-label">Académique</span>
       </a>
-
-      <a
-        (click)="onSelectService('identity')"
-        routerLink="/admin/identity/staff"
-        class="rail-link"
-        [class.active]="navService.activeService() === 'identity'"
-        [attr.data-label]="'Sécurité'"
-      >
+      <a (click)="onSelectService('identity')" routerLink="/admin/identity/staff" class="rail-link" [class.active]="navService.activeService() === 'identity'" [attr.data-label]="'Sécurité'">
         <lucide-icon [name]="ShieldCheck" [size]="18"></lucide-icon>
         <span class="rail-label">Sécurité</span>
       </a>
     </ng-container>
   </div>
 
-  <div class="mt-auto">
-    <!-- Settings Service -->
-    <a
-      (click)="onSelectService('settings')"
-      class="rail-link settings-trigger"
-      [class.active]="navService.activeService() === 'settings'"
-      [attr.data-label]="'Réglages'"
-    >
+  <div class="rail-footer">
+    <!-- Settings & Profile Trigger -->
+    <a (click)="onSelectService('settings')" 
+       class="rail-link settings-trigger" 
+       [class.active]="navService.activeService() === 'settings'" 
+       [attr.data-label]="'Mon Profil & Réglages'">
       <lucide-icon [name]="Settings" [size]="18"></lucide-icon>
-      <span class="rail-label">Réglages</span>
+      <span class="rail-label">Profil & Réglages</span>
     </a>
   </div>
 </nav>

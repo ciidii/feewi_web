@@ -1,11 +1,10 @@
 <header class="global-header">
   
-  <!-- Left: Service Context (Optional - Can be used for page titles or left empty for zen) -->
   <div class="header-left">
-    <!-- Vide pour l'instant pour laisser respirer la Sidebar -->
+    <!-- Espace r├®serv├® pour l'├®quilibre visuel -->
   </div>
 
-  <!-- Center: Omnisearch (La pi├¿ce ma├«tresse) -->
+  <!-- Center: Omnisearch -->
   <div class="search-section">
     <div class="search-input-wrap">
       <lucide-icon [name]="Search" [size]="14" class="search-icon"></lucide-icon>
@@ -20,41 +19,26 @@
     </div>
   </div>
 
-  <!-- Right: Global Actions -->
+  <!-- Right: Notifications & Quick Actions -->
   <div class="actions-section">
     
-    <!-- Year Selector (Premium Pill) -->
-    <button *ngIf="!contextService.isSaasDomain()" class="year-selector">
+    <!-- Year Selector -->
+    <button *ngIf="!contextService.isSaasDomain()" class="year-selector" title="Changer d'année scolaire">
       <span class="label">2024 - 2025</span>
       <lucide-icon [name]="ChevronDown" [size]="12" class="opacity-50"></lucide-icon>
     </button>
 
-    <div class="v-divider" *ngIf="!contextService.isSaasDomain()"></div>
-
     <!-- Test Loader -->
     <button class="header-btn" (click)="testLoader()" title="Tester le Loader">
-      <lucide-icon [name]="Search" [size]="16" class="animate-pulse text-primary"></lucide-icon>
-    </button>
-
-    <!-- Notifications -->
-    <button class="header-btn" title="Notifications">
-      <lucide-icon [name]="Bell" [size]="16"></lucide-icon>
-      <span class="notification-dot"></span>
+      <lucide-icon [name]="Search" [size]="16" class="text-primary/50"></lucide-icon>
     </button>
 
     <div class="v-divider"></div>
 
-    <!-- Profile (Elite Style) -->
-    <div class="profile-trigger" (click)="openProfileDialog()">
-      <div class="avatar-box">
-        <lucide-icon [name]="User" [size]="14"></lucide-icon>
-      </div>
-      <span class="user-name hidden lg:block">{{ auth.currentUser()?.firstName }}</span>
-    </div>
-
-    <!-- Logout -->
-    <button class="header-btn logout-btn" (click)="auth.logout()" title="Déconnexion">
-      <lucide-icon [name]="LogOut" [size]="16"></lucide-icon>
+    <!-- Notifications -->
+    <button class="header-btn notification-trigger" title="Centre de notifications">
+      <lucide-icon [name]="Bell" [size]="16"></lucide-icon>
+      <span class="notification-pulse"></span>
     </button>
   </div>
 

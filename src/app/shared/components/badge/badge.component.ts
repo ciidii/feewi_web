@@ -30,7 +30,7 @@ const STATUS_MAP: Record<string, BadgeConfig> = {
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div [class]="classes()" [title]="status" class="fw-badge">
+    <div [class]="classes()" [title]="status || labelOverride || ''" class="fw-badge">
       <span class="dot" *ngIf="dot"></span>
       <span class="label" *ngIf="!dot">{{ config().label }}</span>
     </div>
@@ -39,16 +39,22 @@ const STATUS_MAP: Record<string, BadgeConfig> = {
   encapsulation: ViewEncapsulation.None
 })
 export class FwBadgeComponent {
-  @Input() status!: string;
+  @Input() status?: string;
+  @Input() labelOverride?: string;
+  @Input() tokenOverride?: 'success' | 'warning' | 'error' | 'info' | 'neutral';
   @Input() size: 'xs' | 'sm' = 'sm';
   @Input() dot = false;
 
   config = computed(() => {
-    return STATUS_MAP[this.status] || { label: this.status, token: 'neutral' };
+    if (this.labelOverride) {
+      return { label: this.labelOverride, token: this.tokenOverride || 'neutral' };
+    }
+    return STATUS_MAP[this.status || ''] || { label: this.status || '', token: 'neutral' };
   });
 
   classes = computed(() => {
     const c = this.config();
-    return `token-${c.token} size-${this.size} ${this.dot ? 'is-dot' : ''}`;
+    const token = this.tokenOverride || c.token;
+    return `token-${token} size-${this.size} ${this.dot ? 'is-dot' : ''}`;
   });
 }

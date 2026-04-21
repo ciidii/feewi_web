@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import {
   LucideAngularModule, Home, Settings, Briefcase, GraduationCap, LayoutGrid, ShieldCheck, ArrowLeftRight, BarChart3,
-  Shield, Building2, School, Users, PanelLeftClose, PanelLeftOpen, Sun, Moon, Monitor, Maximize, Minimize
+  Shield, Building2, School, Users, PanelLeftClose, PanelLeftOpen, Sun, Moon, Monitor, Maximize, Minimize, LogOut
 } from 'lucide-angular';
 import { AuthService } from '../../services/auth.service';
 import { NavigationContextService } from '../../services/navigation-context.service';
@@ -31,6 +31,8 @@ export class AppRailComponent {
   // Ic├┤nes
   readonly Home = Home;
   readonly Settings = Settings;
+  readonly User = Users;
+  readonly LogOut = LogOut;
   readonly Briefcase = Briefcase;
   readonly GraduationCap = GraduationCap;
   readonly LayoutGrid = LayoutGrid;
@@ -71,10 +73,14 @@ export class AppRailComponent {
   // Méthode existante
   onSelectService(serviceName: string) {
     this.navService.setActiveService(serviceName);
-    
+
     // Auto-collapse si le rail était étendu
     if (this.navService.isRailExpanded()) {
       this.toggleRailExpanded();
     }
+  }
+
+  openProfileDialog() {
+    console.log('Open profile from Rail');
   }
 }

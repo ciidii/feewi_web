@@ -41,13 +41,22 @@
     <nav class="nav-scroll">
       <!-- DASHBOARD -->
       <ng-container *ngIf="navService.activeService() === 'dashboard'">
+        <span class="nav-section-title">Navigation Rapide</span>
+        <a routerLink="/admin/home"
+           routerLinkActive="active-link"
+           class="sidebar-link"
+           [attr.data-label]="'Console de Pilotage'">
+          <div class="icon-wrap"><lucide-icon [name]="LayoutGrid" [size]="16"></lucide-icon></div>
+          <span class="label">Console de Pilotage</span>
+        </a>
+
         <span class="nav-section-title">Analyse Pilotage</span>
-        <a routerLink="/admin/dashboard" 
-           routerLinkActive="active-link" 
-           class="sidebar-link" 
-           [attr.data-label]="'Vue d\'ensemble'">
+        <a routerLink="/admin/dashboard"
+           routerLinkActive="active-link"
+           class="sidebar-link"
+           [attr.data-label]="'Analyses & Stats'">
           <div class="icon-wrap"><lucide-icon [name]="BarChart3" [size]="16"></lucide-icon></div>
-          <span class="label">Vue d'ensemble</span>
+          <span class="label">Analyses & Stats</span>
         </a>
       </ng-container>
 
@@ -57,7 +66,7 @@
         <a *ngFor="let item of enrollmentItems"
            [routerLink]="item.route"
            routerLinkActive="active-link"
-           class="sidebar-link" 
+           class="sidebar-link"
            [attr.data-label]="item.label">
           <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
           <span class="label">{{ item.label }}</span>
@@ -70,7 +79,7 @@
         <a *ngFor="let item of registryItems"
            [routerLink]="item.route"
            routerLinkActive="active-link"
-           class="sidebar-link" 
+           class="sidebar-link"
            [attr.data-label]="item.label">
           <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
           <span class="label">{{ item.label }}</span>
@@ -83,7 +92,7 @@
         <a *ngFor="let item of academicItems"
            [routerLink]="item.route"
            routerLinkActive="active-link"
-           class="sidebar-link" 
+           class="sidebar-link"
            [attr.data-label]="item.label">
           <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
           <span class="label">{{ item.label }}</span>
@@ -96,7 +105,7 @@
         <a *ngFor="let item of identityItems"
            [routerLink]="item.route"
            routerLinkActive="active-link"
-           class="sidebar-link" 
+           class="sidebar-link"
            [attr.data-label]="item.label">
           <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
           <span class="label">{{ item.label }}</span>
@@ -106,30 +115,48 @@
       <!-- SETTINGS (SYSTEM) -->
       <ng-container *ngIf="navService.activeService() === 'settings'">
         <span class="nav-section-title">Apparence</span>
-        
+
         <button (click)="uiService.setTheme('light')" class="sidebar-link" [class.active-link]="uiService.theme() === 'light'" [attr.data-label]="'Mode Clair'">
           <div class="icon-wrap"><lucide-icon [name]="Sun" [size]="16"></lucide-icon></div>
           <span class="label">Mode Clair</span>
         </button>
-        
+
         <button (click)="uiService.setTheme('dark')" class="sidebar-link" [class.active-link]="uiService.theme() === 'dark'" [attr.data-label]="'Mode Sombre'">
           <div class="icon-wrap"><lucide-icon [name]="Moon" [size]="16"></lucide-icon></div>
           <span class="label">Mode Sombre</span>
         </button>
 
         <span class="nav-section-title">Affichage</span>
-        
+
         <button (click)="uiService.toggleDensity()" class="sidebar-link" [attr.data-label]="'Changer Densité'">
           <div class="icon-wrap"><lucide-icon [name]="uiService.density() === 'compact' ? Minimize : Maximize" [size]="16"></lucide-icon></div>
           <span class="label">{{ uiService.density() === 'compact' ? 'Mode Confortable' : 'Mode Compact' }}</span>
         </button>
 
         <span class="nav-section-title">Localisation</span>
-        
+
         <a class="sidebar-link" [attr.data-label]="'Langue'">
           <div class="icon-wrap"><lucide-icon [name]="Globe" [size]="16"></lucide-icon></div>
           <span class="label">Français (Bêta)</span>
         </a>
+
+        <!-- SESSION (Affiné) -->
+        <span class="nav-section-title mt-4">Ma Session</span>
+
+        <div class="sidebar-profile-card">
+          <div class="avatar-box">
+            <lucide-icon [name]="User" [size]="14"></lucide-icon>
+          </div>
+          <div class="info">
+            <span class="name">{{ auth.currentUser()?.firstName }} {{ auth.currentUser()?.lastName }}</span>
+            <span class="role">{{ auth.currentUser()?.roles?.[0]?.replace('ROLE_', '') }}</span>
+          </div>
+        </div>
+
+        <button (click)="auth.logout()" class="sidebar-link logout-item" [attr.data-label]="'Déconnexion'">
+          <div class="icon-wrap"><lucide-icon [name]="LogOut" [size]="16"></lucide-icon></div>
+          <span class="label">Déconnexion</span>
+        </button>
       </ng-container>
     </nav>
   </ng-container>

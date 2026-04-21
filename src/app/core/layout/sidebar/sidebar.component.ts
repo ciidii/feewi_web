@@ -22,7 +22,7 @@ import {
   Layers,
   UserPlus,
   UserCheck,
-  ChevronDown, Maximize, Minimize, Sun, Moon
+  ChevronDown, Maximize, Minimize, Sun, Moon, User, LogOut, LayoutGrid
 } from 'lucide-angular';
 
 import { UiPreferenceService } from '../../../shared/services/ui-preference.service';
@@ -105,4 +105,8 @@ export class SidebarComponent {
       default: return 'Administration';
     }
   }
+
+  protected readonly User = User;
+  protected readonly LogOut = LogOut;
+  protected readonly LayoutGrid = LayoutGrid;
 }
