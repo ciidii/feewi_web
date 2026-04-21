@@ -1,24 +1,36 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule, Router } from '@angular/router';
-import { LucideAngularModule, ArrowLeft, Layers, Plus, ListChecks, Edit, Trash2, GraduationCap, Users, Tag } from 'lucide-angular';
-import { firstValueFrom } from 'rxjs';
-import { AcademicService } from '../../../../../../core/services/academic.service';
-import { AuthService } from '../../../../../../core/services/auth.service';
-import { NavigationStateService } from '../../../../../../core/services/navigation-state.service';
-import { NotificationService } from '../../../../../../shared/services/notification.service';
-import { LoadingService } from '../../../../../../shared/services/loading.service';
-import { Cycle, Level, Filiere, SchoolClass, AcademicYear } from '../../../../../../core/models/academic.model';
-import { DataListComponent } from '../../../../../../shared/components/data-list/data-list.component';
-import { TableRow, RowAction } from '../../../../../../shared/models/data-list.models';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { LevelFormComponent } from '../components/level-form/level-form.component';
-import { FiliereFormComponent } from '../components/filiere-form/filiere-form.component';
-import { CurriculumManagerComponent } from '../components/curriculum-manager/curriculum-manager';
-import { ConfirmDialogComponent } from '../../../../../../shared/components/confirm-dialog/confirm-dialog';
-import { ClassFormComponent } from '../../class-list/components/class-form/class-form.component';
-import { FwButtonComponent } from '../../../../../../shared/components/button/button.component';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ActivatedRoute, Router, RouterModule} from '@angular/router';
+import {
+  ArrowLeft,
+  Edit,
+  GraduationCap,
+  Layers,
+  ListChecks,
+  LucideAngularModule,
+  Plus,
+  Tag,
+  Trash2,
+  Users
+} from 'lucide-angular';
+import {firstValueFrom} from 'rxjs';
+import {AcademicService} from '../../../../../../core/services/academic.service';
+import {AuthService} from '../../../../../../core/services/auth.service';
+import {NavigationStateService} from '../../../../../../core/services/navigation-state.service';
+import {NotificationService} from '../../../../../../shared/services/notification.service';
+import {LoadingService} from '../../../../../../shared/services/loading.service';
+import {AcademicYear, Cycle, Filiere, Level, SchoolClass} from '../../../../../../core/models/academic.model';
+import {DataListComponent} from '../../../../../../shared/components/data-list/data-list.component';
+import {RowAction, TableRow} from '../../../../../../shared/models/data-list.models';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import {LevelFormComponent} from '../components/level-form/level-form.component';
+import {FiliereFormComponent} from '../components/filiere-form/filiere-form.component';
+import {CurriculumManagerComponent} from '../components/curriculum-manager/curriculum-manager';
+import {ClassFormComponent} from '../../class-list/components/class-form/class-form.component';
+import {FwButtonComponent} from '../../../../../../shared/components/button/button.component';
 import { FwEmptyStateComponent } from '../../../../../../shared/components/empty-state/empty-state.component';
+import { FwPageShellComponent } from '../../../../../../shared/components/page-shell/page-shell.component';
+import { FwTab } from '../../../../../../shared/components/tabs/tabs.component';
 
 export interface LevelGroup {
   level: Level;
@@ -29,13 +41,14 @@ export interface LevelGroup {
   selector: 'app-cycle-detail',
   standalone: true,
   imports: [
-    CommonModule, 
-    RouterModule, 
-    LucideAngularModule, 
-    DataListComponent, 
-    MatDialogModule, 
+    CommonModule,
+    RouterModule,
+    LucideAngularModule,
+    DataListComponent,
+    MatDialogModule,
     FwButtonComponent,
-    FwEmptyStateComponent
+    FwEmptyStateComponent,
+    FwPageShellComponent
   ],
   templateUrl: './cycle-detail.component.html',
   styleUrls: ['./cycle-detail.component.scss']
@@ -68,7 +81,18 @@ export class CycleDetailComponent implements OnInit {
   levels = signal<Level[]>([]);
   classes = signal<SchoolClass[]>([]);
   filieres = signal<Filiere[]>([]);
-  activeTab = signal<'pilotage' | 'filieres'>('pilotage');
+  activeTab = signal('pilotage');
+
+  // Configuration des Onglets
+  readonly cycleTabs = computed<FwTab[]>(() => {
+    const tabs: FwTab[] = [
+      { id: 'pilotage', label: 'Pilotage & Classes', icon: GraduationCap }
+    ];
+    if (this.hasFilieres()) {
+      tabs.push({ id: 'filieres', label: 'Séries & Filières', icon: Tag });
+    }
+    return tabs;
+  });
 
   // Permission de modification (Provisioning)
   readonly canEditStructure = computed(() => this.authService.hasRole('ROLE_SUPER_ADMIN'));
@@ -81,8 +105,8 @@ export class CycleDetailComponent implements OnInit {
 
   // Actions pour les filières
   readonly filiereActions: RowAction[] = [
-    { id: 'edit', label: 'Modifier', icon: Edit, type: 'primary' },
-    { id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger' }
+    {id: 'edit', label: 'Modifier', icon: Edit, type: 'primary'},
+    {id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger'}
   ];
 
   // Groupement des classes par niveau pour la vue "Pilotage"
@@ -103,7 +127,7 @@ export class CycleDetailComponent implements OnInit {
       title: f.name,
       subtitle: `Code série : ${f.code}`,
       avatarLabel: f.code.substring(0, 2).toUpperCase(),
-      badges: [{ label: 'SÉRIE', type: 'info' }],
+      badges: [{label: 'SÉRIE', type: 'info'}],
       rawData: f
     }));
   });
@@ -179,7 +203,7 @@ export class CycleDetailComponent implements OnInit {
       width: '1000px',
       maxWidth: '95vw',
       panelClass: 'feewi-dialog-panel',
-      data: { level }
+      data: {level}
     });
   }
 
@@ -188,7 +212,7 @@ export class CycleDetailComponent implements OnInit {
       width: '500px',
       maxWidth: '95vw',
       panelClass: 'feewi-dialog-panel',
-      data: { level }
+      data: {level}
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -216,7 +240,7 @@ export class CycleDetailComponent implements OnInit {
   }
 
   goToClassDetails(cls: SchoolClass) {
-    this.router.navigate(['/school-app/academic/classes'], { queryParams: { classId: cls.id } });
+    this.router.navigate(['/admin/academic/classes'], {queryParams: {classId: cls.id}});
   }
 
   // --- GESTION DES FILIÈRES ---

@@ -66,9 +66,9 @@ export class LoginComponent {
     this.isLoading.set(true);
     this.loginError.set(false);
 
-    const { email, password } = this.loginForm.value;
-    
-    this.authService.login(email!, password!).subscribe({
+    const { email, password, rememberMe } = this.loginForm.value;
+
+    this.authService.login(email!, password!, rememberMe ?? false).subscribe({
       next: (success) => {
         if (success) {
           // Déclenche le Splash Screen Global pour une transition "Premium"

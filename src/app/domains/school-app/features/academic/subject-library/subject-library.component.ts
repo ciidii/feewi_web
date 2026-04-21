@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+    import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule, BookOpen, Plus, Tag, Edit, Trash2, Search, Info } from 'lucide-angular';
 import { firstValueFrom } from 'rxjs';
@@ -11,10 +11,18 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { SubjectFormComponent } from '../structure-config/components/subject-form/subject-form.component';
 import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 
+import { FwPageShellComponent } from '../../../../../shared/components/page-shell/page-shell.component';
+
 @Component({
   selector: 'app-subject-library',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, DataListComponent, MatDialogModule],
+  imports: [
+    CommonModule,
+    LucideAngularModule,
+    DataListComponent,
+    MatDialogModule,
+    FwPageShellComponent
+  ],
   templateUrl: './subject-library.component.html',
   styleUrls: ['./subject-library.component.scss']
 })
@@ -54,9 +62,9 @@ export class SubjectLibraryComponent implements OnInit {
         subtitle: `Code technique : ${s.code}`,
         avatarLabel: s.code.substring(0, 2).toUpperCase(),
         badges: [
-          { 
-            label: s.isProvisioned ? 'NATIONAL' : 'ÉTABLISSEMENT', 
-            type: s.isProvisioned ? 'success' : 'info' 
+          {
+            label: s.isProvisioned ? 'NATIONAL' : 'ÉTABLISSEMENT',
+            type: s.isProvisioned ? 'success' : 'info'
           }
         ],
         rawData: s

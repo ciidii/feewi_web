@@ -1,28 +1,22 @@
-<div class="space-y-8 animate-in fade-in duration-500">
-  
-  <!-- HEADER -->
-  <header class="flex justify-between items-end">
-    <div class="space-y-1">
-      <h1 class="text-3xl font-display font-bold text-midnight tracking-tight italic uppercase">Calendrier Académique</h1>
-      <p class="text-sm text-slate-medium font-medium flex items-center gap-2">
-        <lucide-icon [name]="Calendar" class="w-4 h-4 text-primary"></lucide-icon>
-        Gestion des années scolaires et des cycles de vie de l'établissement.
-      </p>
-    </div>
-
-    <div class="flex gap-3">
-      <button 
-        (click)="openAddYearForm()"
-        class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-[13px] font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 active:scale-95"
-      >
-        <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
-        Préparer une rentrée
-      </button>
-    </div>
-  </header>
+<app-fw-page-shell
+  title="Calendrier Académique"
+  description="Gestion des années scolaires et des cycles de vie de l'établissement."
+  [icon]="Calendar"
+  density="compact"
+>
+  <!-- ACTIONS -->
+  <div actions>
+    <button 
+      (click)="openAddYearForm()"
+      class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-[13px] font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 active:scale-95"
+    >
+      <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
+      Préparer une rentrée
+    </button>
+  </div>
 
   <!-- LISTE DES ANNÉES -->
-  <div class="relative min-h-[400px]">
+  <div class="relative min-h-[400px] animate-in fade-in duration-500">
     <app-data-list
       [data]="displayYears()"
       [tabs]="tabs"
@@ -36,4 +30,4 @@
     ></app-data-list>
   </div>
 
-</div>
+</app-fw-page-shell>

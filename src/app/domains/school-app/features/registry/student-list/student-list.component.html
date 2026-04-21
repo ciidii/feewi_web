@@ -1,53 +1,57 @@
-<div class="student-list-container">
-  <!-- En-tête de section -->
-  <div class="flex items-center justify-between mb-8">
-    <div>
-      <h1 class="text-2xl font-display font-bold text-slate-900">Répertoire des Élèves</h1>
-      <p class="text-slate-500">Gérez le référentiel central des élèves inscrits dans l'établissement.</p>
-    </div>
-
-    <div class="flex items-center gap-3">
-      <button
-        class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
-        <lucide-icon [name]="Download" class="w-4 h-4"></lucide-icon>
-        Exporter
-      </button>
-      <button
-        class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-sm transition-colors">
-        <lucide-icon [name]="UserPlus" class="w-4 h-4"></lucide-icon>
-        Inscrire un élève
-      </button>
-    </div>
+<app-fw-page-shell
+  title="Répertoire des Élèves"
+  description="Gérez le référentiel central des élèves inscrits dans l'établissement."
+  [icon]="Users"
+  density="compact"
+>
+  <!-- ACTIONS -->
+  <div actions class="flex items-center gap-3">
+    <button
+      class="flex items-center gap-2 px-4 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all active:scale-95">
+      <lucide-icon [name]="Download" class="w-4 h-4"></lucide-icon>
+      Exporter
+    </button>
+    <button
+      class="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-primary rounded-xl hover:bg-primary-hover shadow-lg shadow-primary-alpha transition-all active:scale-95">
+      <lucide-icon [name]="UserPlus" class="w-4 h-4"></lucide-icon>
+      Inscrire un élève
+    </button>
   </div>
 
-  <!-- Barre d'outils (Recherche & Filtres) -->
-  <div class="flex items-center justify-between gap-4 mb-6">
-    <div class="relative flex-1 max-w-md">
-      <lucide-icon [name]="Search"
-                   class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></lucide-icon>
-      <input
-        type="text"
-        placeholder="Rechercher par nom, prénom ou matricule..."
-        class="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-        #searchInput
-        (input)="onSearch(searchInput.value)"
-      >
+  <!-- CONTENU -->
+  <div class="space-y-6 animate-in fade-in duration-500">
+    
+    <!-- Barre d'outils (Recherche & Filtres) -->
+    <div class="flex items-center justify-between gap-4">
+      <div class="relative flex-1 max-w-md">
+        <lucide-icon [name]="Search"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></lucide-icon>
+        <input
+          type="text"
+          placeholder="Rechercher par nom, prénom ou matricule..."
+          class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-alpha focus:border-primary transition-all"
+          #searchInput
+          (input)="onSearch(searchInput.value)"
+        >
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button class="p-2.5 text-slate-500 hover:bg-white border border-transparent hover:border-slate-200 rounded-xl transition-all" title="Filtres avancés">
+          <lucide-icon [name]="Filter" class="w-5 h-5"></lucide-icon>
+        </button>
+      </div>
     </div>
 
-    <div class="flex items-center gap-2">
-      <button class="p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors" title="Filtres avancés">
-        <lucide-icon [name]="Filter" class="w-5 h-5"></lucide-icon>
-      </button>
-    </div>
+    <!-- Liste des données -->
+    <app-data-list
+      [data]="studentRows()"
+      [actions]="studentActions"
+      [tabs]="studentTabs()"
+      [isLoading]="loadingService.isLoading()"
+      (onTabChange)="onTabChange($event)"
+      (onAction)="handleAction($event)"
+    ></app-data-list>
+
   </div>
 
-  <!-- Liste des données -->
-  <app-data-list
-    [data]="studentRows()"
-    [actions]="studentActions"
-    [tabs]="studentTabs()"
-    [isLoading]="loadingService.isLoading()"
-    (onTabChange)="onTabChange($event)"
-    (onAction)="handleAction($event)"
-  ></app-data-list>
-</div>
+</app-fw-page-shell>

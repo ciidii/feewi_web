@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LucideAngularModule, Calendar, Plus, Play, Archive, CheckCircle, Clock, Eye, CalendarSearch } from 'lucide-angular';
+import { LucideAngularModule, Calendar, Plus, Play, Archive, CheckCircle, Clock, CalendarSearch } from 'lucide-angular';
 import { DataListComponent } from '../../../../../shared/components/data-list/data-list.component';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AcademicService } from '../../../../../core/services/academic.service';
@@ -11,11 +11,18 @@ import { YearFormComponent } from './components/year-form/year-form.component';
 import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
+import { FwPageShellComponent } from '../../../../../shared/components/page-shell/page-shell.component';
 
 @Component({
   selector: 'app-year-list',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, DataListComponent, MatDialogModule],
+  imports: [
+    CommonModule, 
+    LucideAngularModule, 
+    DataListComponent, 
+    MatDialogModule,
+    FwPageShellComponent
+  ],
   templateUrl: './year-list.component.html',
   styleUrls: ['./year-list.component.scss']
 })
@@ -31,23 +38,23 @@ export class YearListComponent implements OnInit {
 
   // Actions dynamiques basées sur le statut de l'année
   readonly yearActions: RowAction[] = [
-    { 
-      id: 'view', 
-      label: 'Calendrier détaillé', 
-      icon: CalendarSearch, 
-      type: 'primary' 
+    {
+      id: 'view',
+      label: 'Calendrier détaillé',
+      icon: CalendarSearch,
+      type: 'primary'
     },
-    { 
-      id: 'activate', 
-      label: 'Activer l\'année', 
-      icon: Play, 
+    {
+      id: 'activate',
+      label: 'Activer l\'année',
+      icon: Play,
       type: 'success',
       hideIf: (row) => row.metadata?.['status'] !== 'PLANNING'
     },
-    { 
-      id: 'archive', 
-      label: 'Archiver', 
-      icon: Archive, 
+    {
+      id: 'archive',
+      label: 'Archiver',
+      icon: Archive,
       type: 'warning',
       hideIf: (row) => row.metadata?.['status'] !== 'ACTIVE'
     }
@@ -116,7 +123,7 @@ export class YearListComponent implements OnInit {
   handleAction(event: { actionId: string, row: TableRow }) {
     switch (event.actionId) {
       case 'view':
-        this.router.navigate(['/academic/years', event.row.id]);
+        this.router.navigate(['/admin/academic/years', event.row.id]);
         break;
       case 'activate':
         this.confirmActivation(event.row);

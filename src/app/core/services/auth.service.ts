@@ -54,12 +54,30 @@ export class AuthService {
   readonly currentUser = this._currentUser.asReadonly();
   readonly isAuthenticated = computed(() => this._currentUser() !== null);
 
-  login(email: string, password: string): Observable<boolean> {
+  private readonly TOKEN_KEY = 'access_token';
+
+  getToken(): string | null {
+    return localStorage.getItem(this.TOKEN_KEY) ?? sessionStorage.getItem(this.TOKEN_KEY);
+  }
+
+  private storeToken(token: string, rememberMe: boolean): void {
+    if (rememberMe) {
+      localStorage.setItem(this.TOKEN_KEY, token);
+    } else {
+      sessionStorage.setItem(this.TOKEN_KEY, token);
+    }
+  }
+
+  private clearToken(): void {
+    localStorage.removeItem(this.TOKEN_KEY);
+    sessionStorage.removeItem(this.TOKEN_KEY);
+  }
+
+  login(email: string, password: string, rememberMe = false): Observable<boolean> {
     console.log('[AuthService] Attempting login for:', email);
     return this.http.post<LoginResponse>(`${this.API_URL}/auth/login`, {email, password}).pipe(
-      tap(response => localStorage.setItem('access_token', response.access_token)),
+      tap(response => this.storeToken(response.access_token, rememberMe)),
       map(() => {
-        // Déclenche la récupération du profil en arrière-plan (réactif)
         this.fetchProfile().subscribe();
         return true;
       }),
@@ -82,7 +100,7 @@ export class AuthService {
   impersonate(userId: string): Observable<boolean> {
     console.log('[AuthService] Attempting impersonation for:', userId);
     return this.http.post<LoginResponse>(`${this.API_URL}/auth/impersonate/${userId}`, {}).pipe(
-      tap(response => localStorage.setItem('access_token', response.access_token)),
+      tap(response => this.storeToken(response.access_token, true)),
       map(() => {
         this.fetchProfile().subscribe();
         this.router.navigate(['/admin/dashboard']);
@@ -143,7 +161,7 @@ export class AuthService {
   logout(): void {
     console.log('[AuthService] Logging out...');
     this._currentUser.set(null);
-    localStorage.removeItem('access_token');
+    this.clearToken();
     this.router.navigate(['/auth/login']);
   }
 
@@ -164,7 +182,7 @@ export class AuthService {
   }
 
   checkSession(): Observable<boolean> {
-    const token = localStorage.getItem('access_token');
+    const token = this.getToken();
     if (!token) {
       this._isReady.set(true);
       return of(false);
@@ -176,8 +194,7 @@ export class AuthService {
         return profile !== null;
       }),
       catchError(() => {
-        // En cas d'erreur (ex: 401), on nettoie juste le token sans faire de bruit
-        localStorage.removeItem('access_token');
+        this.clearToken();
         this._currentUser.set(null);
         this._isReady.set(true);
         return of(false);

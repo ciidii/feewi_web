@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import {
   LucideAngularModule,
-  ArrowLeft, Calendar, Clock,
+  Calendar, Clock,
   CheckCircle, Plus, LayoutDashboard,
   ListTodo, Palmtree, ChevronRight,
-  MoreVertical, Edit, Trash2, Printer, Play, Archive, RotateCcw, XCircle
+  MoreVertical, Edit, Trash2, Printer, Play, Archive, RotateCcw, XCircle, ArrowLeft
 } from 'lucide-angular';
 import { PeriodFormComponent } from './components/period-form/period-form.component';
 import { HolidayFormComponent } from './components/holiday-form/holiday-form.component';
@@ -18,6 +18,9 @@ import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {DataListComponent} from '../../../../../shared/components/data-list/data-list.component';
 import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 import { firstValueFrom } from 'rxjs';
+import { FwPageShellComponent } from '../../../../../shared/components/page-shell/page-shell.component';
+import { FwTab } from '../../../../../shared/components/tabs/tabs.component';
+import { FwBadgeComponent } from '../../../../../shared/components/badge/badge.component';
 
 export interface TimelineEvent {
   id: string;
@@ -32,7 +35,15 @@ export interface TimelineEvent {
 @Component({
   selector: 'app-year-detail',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, RouterModule, MatDialogModule, DataListComponent],
+  imports: [
+    CommonModule,
+    LucideAngularModule,
+    RouterModule,
+    MatDialogModule,
+    DataListComponent,
+    FwPageShellComponent,
+    FwBadgeComponent
+  ],
   templateUrl: './year-detail.component.html',
   styleUrls: ['./year-detail.component.scss']
 })
@@ -47,7 +58,14 @@ export class YearDetailComponent implements OnInit {
   periods = signal<Period[]>([]);
   holidays = signal<Holiday[]>([]);
   isLoading = signal(true);
-  activeTab = signal('timeline');
+  activeTabId = signal('timeline');
+
+  // Configuration des Onglets
+  readonly yearTabs: FwTab[] = [
+    { id: 'timeline', label: 'Vue Chronologique', icon: LayoutDashboard },
+    { id: 'periods', label: 'Découpage Pédagogique', icon: ListTodo },
+    { id: 'holidays', label: 'Congés & Vacances', icon: Palmtree }
+  ];
 
   // Actions pour les périodes
   readonly periodActions: RowAction[] = [
@@ -363,7 +381,7 @@ export class YearDetailComponent implements OnInit {
   }
 
   setTab(tab: string) {
-    this.activeTab.set(tab);
+    this.activeTabId.set(tab);
   }
 
   formatDate(date?: string): string {
@@ -380,15 +398,5 @@ export class YearDetailComponent implements OnInit {
       day: 'numeric',
       month: 'short'
     });
-  }
-
-  getBadgeType(status?: string): string {
-    switch (status) {
-      case 'ACTIVE': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-      case 'PLANNING': return 'bg-amber-50 text-amber-700 border-amber-200';
-      case 'CLOSING': return 'bg-blue-50 text-blue-700 border-blue-200';
-      case 'ARCHIVED': return 'bg-slate-100 text-slate-600 border-slate-300';
-      default: return 'bg-slate-50 text-slate-600 border-slate-200';
-    }
   }
 }

@@ -1,30 +1,23 @@
-<div class="space-y-8 animate-in fade-in duration-500">
-  
-  <!-- HEADER OPERAIONNEL -->
-  <header class="flex justify-between items-end">
-    <div class="space-y-1">
-      <div class="flex items-center gap-2 text-primary-600 mb-1">
-        <lucide-icon [name]="School" class="w-4 h-4"></lucide-icon>
-        <span class="text-[10px] font-bold uppercase tracking-[0.2em]">Année Active : {{ currentYear()?.label || 'Chargement...' }}</span>
-      </div>
-      <h1 class="text-3xl font-display font-bold text-midnight tracking-tight uppercase italic">Gestion des Classes</h1>
-      <p class="text-sm text-slate-medium font-medium">Configurez les instances physiques de classes pour l'année scolaire en cours.</p>
-    </div>
+<app-fw-page-shell
+  title="Gestion des Classes"
+  [description]="'Année Active : ' + (currentYear()?.label || '...') + ' • Configurez les instances physiques de classes.'"
+  [icon]="School"
+  density="compact"
+>
+  <!-- ACTIONS -->
+  <div actions>
+    <button 
+      (click)="openAddClassForm()"
+      [disabled]="isLoading()"
+      class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-[13px] font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 active:scale-95 disabled:opacity-50"
+    >
+      <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
+      Ouvrir une classe
+    </button>
+  </div>
 
-    <div class="flex gap-3">
-      <button 
-        (click)="openAddClassForm()"
-        [disabled]="isLoading()"
-        class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-[13px] font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 active:scale-95 disabled:opacity-50"
-      >
-        <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
-        Ouvrir une classe
-      </button>
-    </div>
-  </header>
-
-  <!-- LISTE DES CLASSES (CARDS VIEW PAR DÉFAUT) -->
-  <div class="relative min-h-[400px]">
+  <!-- LISTE DES CLASSES -->
+  <div class="relative min-h-[400px] animate-in fade-in duration-500">
     <app-data-list
       [data]="displayClasses()"
       [total]="displayClasses().length"
@@ -34,4 +27,4 @@
     ></app-data-list>
   </div>
 
-</div>
+</app-fw-page-shell>

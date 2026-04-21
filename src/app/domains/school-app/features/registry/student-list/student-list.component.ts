@@ -1,7 +1,7 @@
 import { Component, inject, signal, ViewEncapsulation, OnInit, computed, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { LucideAngularModule, Filter, Download, UserPlus, Search, Eye, UserMinus, UserCheck, ShieldAlert, GraduationCap, History, Info } from 'lucide-angular';
+import { LucideAngularModule, Filter, Download, UserPlus, Search, Eye, UserMinus, UserCheck, ShieldAlert, GraduationCap, History, Info, Users } from 'lucide-angular';
 import { firstValueFrom, Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -13,8 +13,7 @@ import { StudentSummary, StudentStatus } from '../../../../../core/models/studen
 import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 import { NotificationService } from '../../../../../shared/services/notification.service';
 import { LoadingService } from '../../../../../shared/services/loading.service';
-import { FwButtonComponent } from '../../../../../shared/components/button/button.component';
-import { FwAlertBannerComponent } from '../../../../../shared/components/alert-banner/alert-banner.component';
+import { FwPageShellComponent } from '../../../../../shared/components/page-shell/page-shell.component';
 
 @Component({
   selector: 'app-student-list',
@@ -24,7 +23,8 @@ import { FwAlertBannerComponent } from '../../../../../shared/components/alert-b
     DataListComponent,
     LucideAngularModule,
     MatMenuModule,
-    MatDialogModule
+    MatDialogModule,
+    FwPageShellComponent
   ],
   templateUrl:  './student-list.component.html',
   styleUrl: './student-list.component.scss',
@@ -42,6 +42,7 @@ export class StudentListComponent implements OnInit, OnDestroy {
   readonly UserPlus = UserPlus;
   readonly GraduationCap = GraduationCap;
   readonly InfoIcon = Info;
+  readonly Users = Users;
 
   // --- ÉTATS ---
   activeTab = signal('Tous');
@@ -154,7 +155,7 @@ export class StudentListComponent implements OnInit, OnDestroy {
 
   handleAction(event: { actionId: string, row: TableRow }) {
     if (event.actionId === 'view') {
-      this.router.navigate(['/school-app/registry/student-detail', event.row.id]);
+      this.router.navigate(['/admin/registry/students', event.row.id]);
     } else if (event.actionId === 'suspend') {
       this.handleQuickSuspend(event.row.id.toString(), event.row.title);
     }

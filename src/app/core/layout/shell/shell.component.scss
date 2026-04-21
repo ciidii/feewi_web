@@ -33,16 +33,23 @@ app-rail, app-sidebar {
   flex-direction: column;
   min-width: 0;
   background-color: var(--fw-raw-white); /* Zone de travail */
+  padding: 16px;
 
   .content-wrapper {
     flex: 1;
     max-width: 1600px;
     width: 100%;
     margin: 0 auto;
-    contain: layout; 
+    contain: layout;
   }
 }
 
 // Custom scrollbar
-.shell-main::-webkit-scrollbar { width: 6px; }
-.shell-main::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+.shell-main::-webkit-scrollbar {
+  width: 6px;
+}
+
+.shell-main::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}

@@ -10,8 +10,6 @@ import {
   Phone, 
   MapPin, 
   Calendar, 
-  ShieldAlert, 
-  UserCheck, 
   History, 
   Edit, 
   Printer, 
@@ -19,7 +17,8 @@ import {
   AlertCircle,
   Stethoscope,
   Users,
-  RefreshCw
+  RefreshCw,
+  PhoneCall
 } from 'lucide-angular';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
@@ -29,11 +28,20 @@ import { AcademicService } from '../../../../../core/services/academic.service';
 import { Level } from '../../../../../core/models/academic.model';
 import { NotificationService } from '../../../../../shared/services/notification.service';
 import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
+import { FwPageShellComponent } from '../../../../../shared/components/page-shell/page-shell.component';
+import { FwBadgeComponent } from '../../../../../shared/components/badge/badge.component';
 
 @Component({
   selector: 'app-student-detail',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, RouterModule, MatDialogModule],
+  imports: [
+    CommonModule, 
+    LucideAngularModule, 
+    RouterModule, 
+    MatDialogModule,
+    FwPageShellComponent,
+    FwBadgeComponent
+  ],
   templateUrl: './student-detail.component.html',
   styleUrl: './student-detail.component.scss'
 })

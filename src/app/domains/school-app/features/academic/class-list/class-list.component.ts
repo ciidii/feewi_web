@@ -10,11 +10,18 @@ import {AcademicService} from '../../../../../core/services/academic.service';
 import {NotificationService} from '../../../../../shared/services/notification.service';
 import {AcademicYear, Level, SchoolClass} from '../../../../../core/models/academic.model';
 import {RowAction, TableRow} from '../../../../../shared/models/data-list.models';
+import { FwPageShellComponent } from '../../../../../shared/components/page-shell/page-shell.component';
 
 @Component({
   selector: 'app-class-list',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, DataListComponent, MatDialogModule],
+  imports: [
+    CommonModule, 
+    LucideAngularModule, 
+    DataListComponent, 
+    MatDialogModule,
+    FwPageShellComponent
+  ],
   templateUrl: './class-list.component.html',
   styleUrls: ['./class-list.component.scss']
 })

@@ -1,20 +1,21 @@
-import { Component, inject, OnInit, signal, computed, ViewEncapsulation } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
-import { LucideAngularModule, Plus, Layers, Edit, Trash2, ArrowRight, Info } from 'lucide-angular';
-import { AcademicService } from '../../../../../core/services/academic.service';
-import { AuthService } from '../../../../../core/services/auth.service';
-import { NotificationService } from '../../../../../shared/services/notification.service';
-import { LoadingService } from '../../../../../shared/services/loading.service';
-import { Cycle } from '../../../../../core/models/academic.model';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { DataListComponent } from '../../../../../shared/components/data-list/data-list.component';
-import { TableRow, RowAction } from '../../../../../shared/models/data-list.models';
-import { CycleFormComponent } from './components/cycle-form/cycle-form.component';
-import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
-import { FwButtonComponent } from '../../../../../shared/components/button/button.component';
+import {Component, computed, inject, OnInit, signal, ViewEncapsulation} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Router} from '@angular/router';
+import {firstValueFrom} from 'rxjs';
+import {ArrowRight, Edit, Info, Layers, LucideAngularModule, Plus, Trash2} from 'lucide-angular';
+import {AcademicService} from '../../../../../core/services/academic.service';
+import {AuthService} from '../../../../../core/services/auth.service';
+import {NotificationService} from '../../../../../shared/services/notification.service';
+import {LoadingService} from '../../../../../shared/services/loading.service';
+import {Cycle} from '../../../../../core/models/academic.model';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import {DataListComponent} from '../../../../../shared/components/data-list/data-list.component';
+import {RowAction, TableRow} from '../../../../../shared/models/data-list.models';
+import {CycleFormComponent} from './components/cycle-form/cycle-form.component';
+import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
+import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
 import { FwAlertBannerComponent } from '../../../../../shared/components/alert-banner/alert-banner.component';
+import { FwPageShellComponent } from '../../../../../shared/components/page-shell/page-shell.component';
 
 @Component({
   selector: 'app-structure-config',
@@ -25,7 +26,8 @@ import { FwAlertBannerComponent } from '../../../../../shared/components/alert-b
     MatDialogModule, 
     DataListComponent, 
     FwButtonComponent,
-    FwAlertBannerComponent
+    FwAlertBannerComponent,
+    FwPageShellComponent
   ],
   templateUrl: './structure-config.component.html',
   styleUrls: ['./structure-config.component.scss'],
@@ -56,11 +58,11 @@ export class StructureConfigComponent implements OnInit {
   // Actions pour les cycles
   readonly cycleActions = computed<RowAction[]>(() => {
     const actions: RowAction[] = [
-      { id: 'open', label: 'Gérer le cycle', icon: ArrowRight, type: 'primary' }
+      {id: 'open', label: 'Gérer le cycle', icon: ArrowRight, type: 'primary'}
     ];
     if (this.canEditStructure()) {
-      actions.push({ id: 'edit', label: 'Personnaliser', icon: Edit, type: 'primary' });
-      actions.push({ id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger' });
+      actions.push({id: 'edit', label: 'Personnaliser', icon: Edit, type: 'primary'});
+      actions.push({id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger'});
     }
     return actions;
   });
@@ -73,8 +75,8 @@ export class StructureConfigComponent implements OnInit {
       subtitle: `Code Système : ${c.cycleCode}`,
       avatarLabel: c.cycleCode.substring(0, 2).toUpperCase(),
       badges: [
-        { label: 'ACTIF', type: 'success' },
-        { label: `RANG ${c.rank}`, type: 'info' }
+        {label: 'ACTIF', type: 'success'},
+        {label: `RANG ${c.rank}`, type: 'info'}
       ],
       metadata: {
         domain: 'Éducation',
@@ -113,7 +115,7 @@ export class StructureConfigComponent implements OnInit {
 
   // Navigation vers le Cockpit du Cycle (Drill-down)
   goToCycle(id: string | number) {
-    this.router.navigate(['/classes/cycles', id.toString()]);
+    this.router.navigate(['/admin/classes/cycles', id.toString()]);
   }
 
   // --- ACTIONS CYCLES (Super Admin uniquement) ---
@@ -133,7 +135,7 @@ export class StructureConfigComponent implements OnInit {
     const dialogRef = this.dialog.open(CycleFormComponent, {
       width: '480px',
       panelClass: 'feewi-dialog-panel',
-      data: { cycle }
+      data: {cycle}
     });
 
     dialogRef.afterClosed().subscribe(result => {
