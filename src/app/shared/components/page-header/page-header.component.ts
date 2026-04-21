@@ -1,15 +1,21 @@
 import { Component, Input, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LucideAngularModule } from 'lucide-angular';
+import { LucideAngularModule, ArrowLeft } from 'lucide-angular';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-fw-page-header',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [CommonModule, LucideAngularModule, RouterModule],
   template: `
     <div class="page-header animate-fade" [class.compact]="density === 'compact'">
       <div class="header-main">
-        <!-- Ic├┤ne de Page -->
+        <!-- Bouton Retour -->
+        <a *ngIf="backLink" [routerLink]="backLink" class="btn-back" title="Retour">
+          <lucide-icon [name]="ArrowLeft" [size]="18"></lucide-icon>
+        </a>
+
+        <!-- Icône de Page -->
         <div class="icon-container" *ngIf="icon">
           <lucide-icon [name]="icon" [size]="density === 'compact' ? 18 : 22"></lucide-icon>
         </div>
@@ -34,5 +40,8 @@ export class FwPageHeaderComponent {
   @Input() icon?: any;
   @Input() title!: string;
   @Input() description?: string;
+  @Input() backLink?: string | any[];
   @Input() density: 'comfortable' | 'compact' = 'comfortable';
+
+  readonly ArrowLeft = ArrowLeft;
 }

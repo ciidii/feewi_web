@@ -6,20 +6,29 @@
   --fw-raw-slate-50: #f8fafc;
   --fw-raw-slate-100: #f1f5f9;
   --fw-raw-slate-200: #e2e8f0;
+  --fw-raw-slate-400: #94a3b8;
+  --fw-raw-slate-600: #475569;
   --fw-raw-slate-800: #1e293b;
   --fw-raw-slate-900: #0f172a;
   --fw-raw-slate-950: #020617;
   --fw-raw-white: #ffffff;
 
   /* Statuts & Actions */
-  --fw-raw-red-600: #dc2626;   /* Destructive Primary */
+  --fw-raw-red-600: #dc2626;
   --fw-raw-red-700: #b91c1c;
   --fw-raw-red-50: #fef2f2;
   --fw-raw-green-600: #16a34a;
   --fw-raw-amber-600: #d97706;
 
   /* ==========================================================================
-     2. GÉOMÉTRIE DYNAMIQUE (DENSITÉ)
+     2. TYPOGRAPHIE
+     ========================================================================== */
+  --fw-font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --fw-font-display: 'Lexend', system-ui, sans-serif;
+  --fw-font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* ==========================================================================
+     3. GÉOMÉTRIE DYNAMIQUE (DENSITÉ)
      ========================================================================== */
   /* Valeurs par défaut : Comfortable */
   --fw-space-multiplier: 1;
@@ -27,14 +36,32 @@
   --fw-space-sm: calc(8px * var(--fw-space-multiplier));
   --fw-space-md: calc(16px * var(--fw-space-multiplier));
   --fw-space-lg: calc(24px * var(--fw-space-multiplier));
-  
+  --fw-space-xl: calc(32px * var(--fw-space-multiplier));
+  --fw-space-2xl: calc(40px * var(--fw-space-multiplier));
+  --fw-space-3xl: calc(48px * var(--fw-space-multiplier));
+  --fw-space-4xl: calc(64px * var(--fw-space-multiplier));
+
+  --fw-radius-sm: 4px;
   --fw-radius-md: 8px;
+  --fw-radius-lg: 16px;
+  --fw-radius-xl: 24px;
   --fw-radius-full: 9999px;
   --fw-font-size-base: 0.875rem;
 
   /* ==========================================================================
-     3. THÈME CLAIR (Valeurs Sémantiques)
+     4. THÈME CLAIR (Valeurs Sémantiques)
      ========================================================================== */
+
+  /* Aliases legacy (utilisés dans styles.scss) */
+  --fw-ice: var(--fw-raw-slate-50);
+  --fw-white: var(--fw-raw-white);
+
+  /* Ombres — Système d'élévation 4 niveaux */
+  --fw-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --fw-shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -1px rgba(15, 23, 42, 0.04);
+  --fw-shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.10), 0 4px 6px -2px rgba(15, 23, 42, 0.05);
+  --fw-shadow-xl: 0 20px 25px -5px rgba(15, 23, 42, 0.10), 0 10px 10px -5px rgba(15, 23, 42, 0.04);
+
   --fw-primary: var(--fw-raw-blue-600);
   --fw-primary-alpha: rgba(37, 99, 235, 0.1);
   

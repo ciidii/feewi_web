@@ -56,8 +56,9 @@
               type="button"
               (click)="togglePassword()"
               class="input-suffix bg-transparent border-none cursor-pointer hover:text-text-primary transition-colors"
+              [attr.aria-label]="showPassword() ? ('auth.login.fields.password.hide' | translate) : ('auth.login.fields.password.show' | translate)"
             >
-              <lucide-icon [size]="18"></lucide-icon>
+              <lucide-icon [name]="showPassword() ? EyeOff : Eye" [size]="18"></lucide-icon>
             </button>
           </div>
           <div class="field-footer">

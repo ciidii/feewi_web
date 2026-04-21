@@ -263,6 +263,10 @@ html { height: 100%; }
   to { opacity: 1; transform: translateY(0); }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .login-card { animation: none; }
+}
+
 .login-form {
   .form-actions {
     margin-top: 2.5rem;

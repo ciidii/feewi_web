@@ -4,21 +4,24 @@
 }
 
 .page-header {
-  height: 96px; /* Plus compact */
+  height: 96px; 
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 2rem;
-  background: transparent; /* Flotte sur Slate 50 */
+  background: transparent;
   border: none;
   font-family: var(--fw-font-sans);
   transition: all 0.3s ease;
 
   &.compact {
-    height: 64px;
+    height: 72px;
+    background: white;
+    border-bottom: 1px solid var(--fw-border-subtle);
     .icon-container { width: 36px; height: 36px; border-radius: 8px; }
     .page-title { font-size: 1.125rem; }
     .page-desc { display: none; }
+    .btn-back { width: 36px; height: 36px; border-radius: 8px; }
   }
 }
 
@@ -26,6 +29,27 @@
   display: flex;
   align-items: center;
   gap: 1.25rem;
+}
+
+.btn-back {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: var(--fw-text-secondary);
+  background: white;
+  border: 1px solid var(--fw-border);
+  transition: all var(--fw-transition);
+  box-shadow: var(--fw-shadow-sm);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--fw-primary);
+    border-color: var(--fw-primary);
+    transform: translateX(-4px);
+    box-shadow: var(--fw-shadow-md);
+  }
 }
 
 .icon-container {
