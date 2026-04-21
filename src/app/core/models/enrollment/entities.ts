@@ -91,6 +91,7 @@ export interface Admission {
   subscriptions?: ServiceSubscription[];
   assessment?: Assessment | null;
   trackerMessage: string;
+  admissionDeadline?: string;
   /** Résolu depuis le bundle par l'endpoint admin /details */
   primaryGuardian?: Guardian;
 

@@ -342,19 +342,30 @@
   background: white;
   margin-bottom: 28px;
 
+  // AWAITING_SCHOOL
+  &.ds-awaiting {
+    border-color: var(--fw-border);
+    background: var(--fw-surface-sunken);
+    .dp-icon { color: var(--fw-text-secondary); }
+  }
+
+  // PAYMENT_REQUIRED
   &.ds-payment_required {
     border-color: var(--fw-success);
     background: var(--fw-success-bg);
-    .dp-icon { color: var(--fw-success); }
-    .dp-title { color: var(--fw-success); }
+    .dp-icon { color: var(--fw-success); background: rgba(255,255,255,0.8); }
+    .dp-title { color: #15803d; }
   }
 
+  // PARENT_CHOICE — layout vertical complet
   &.ds-parent_choice {
     border-color: var(--fw-warning);
     background: var(--fw-warning-bg);
-    .dp-icon { color: var(--fw-warning); }
+    align-items: flex-start;
+    .dp-icon { color: var(--fw-warning); background: rgba(255,255,255,0.8); }
   }
 
+  // CLOSED
   &.ds-closed {
     border-color: var(--fw-border);
     background: var(--fw-surface-sunken);
@@ -387,12 +398,83 @@
       color: var(--fw-text-secondary);
       line-height: 1.5;
     }
+
+    .dp-deadline {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #15803d;
+      background: rgba(255,255,255,0.7);
+      border-radius: 6px;
+      padding: 4px 8px;
+    }
   }
 
   .dp-actions {
     display: flex;
     gap: 10px;
     flex-shrink: 0;
+  }
+
+  // Layout pleine largeur (PARENT_CHOICE)
+  .dp-full-width {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    .dp-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+  }
+
+  .dp-recap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    background: rgba(255,255,255,0.6);
+    border-radius: var(--fw-radius-lg);
+    padding: 16px;
+
+    .dp-recap-col {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      .dp-recap-label {
+        font-size: 0.6875rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 4px;
+      }
+
+      &.admitted .dp-recap-label { color: #15803d; }
+      &.rejected .dp-recap-label { color: #dc2626; }
+    }
+
+    .dp-recap-child {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+
+      &.admitted-row { color: #15803d; }
+      &.rejected-row { color: #dc2626; }
+    }
+  }
+
+  .dp-actions-full {
+    display: flex;
+    gap: 12px;
+    padding-top: 4px;
+    border-top: 1px solid rgba(0,0,0,0.06);
   }
 }
 

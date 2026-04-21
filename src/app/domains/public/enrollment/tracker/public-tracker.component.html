@@ -103,52 +103,97 @@
       </div>
 
       <!-- ── Panel décision (piloté par decisionState) ── -->
-      <div *ngIf="!selectedAdmission()" class="decision-panel"
-           [class]="'ds-' + bundle()?.decisionState?.toLowerCase()">
 
-        <!-- PAYMENT_REQUIRED : tous admis, paiement attendu -->
-        <ng-container *ngIf="bundle()?.decisionState === 'PAYMENT_REQUIRED'">
-          <div class="dp-icon"><lucide-icon [name]="Sparkles" [size]="24"></lucide-icon></div>
-          <div class="dp-body">
-            <p class="dp-title">Tous vos enfants ont été admis !</p>
-            <p class="dp-sub">Confirmez pour finaliser leur inscription et procéder au paiement des frais.</p>
-          </div>
-          <div class="dp-actions">
-            <app-fw-button variant="primary" [icon]="CheckCircle" iconPosition="right"
-                           [loading]="isDeciding()" (click)="onConfirmAdmitted()">
-              Confirmer et payer
-            </app-fw-button>
-          </div>
-        </ng-container>
+      <!-- AWAITING_SCHOOL : école traite encore -->
+      <div *ngIf="!selectedAdmission() && bundle()?.decisionState === 'AWAITING_SCHOOL'"
+           class="decision-panel ds-awaiting">
+        <div class="dp-icon">
+          <lucide-icon [name]="Clock" [size]="24"></lucide-icon>
+        </div>
+        <div class="dp-body">
+          <p class="dp-title">Traitement en cours</p>
+          <p class="dp-sub">L'école examine les dossiers de vos enfants. Vous serez notifié dès qu'une décision est prise.</p>
+        </div>
+        <div class="dp-actions">
+          <app-fw-button variant="ghost" [icon]="RefreshCw" (click)="reload()">Actualiser</app-fw-button>
+        </div>
+      </div>
 
-        <!-- PARENT_CHOICE : mix admis / refusés -->
-        <ng-container *ngIf="bundle()?.decisionState === 'PARENT_CHOICE'">
-          <div class="dp-icon dp-warning"><lucide-icon [name]="AlertTriangle" [size]="24"></lucide-icon></div>
-          <div class="dp-body">
-            <p class="dp-title">Décision requise</p>
-            <p class="dp-sub">Certains dossiers ont été admis, d'autres refusés. Choisissez de valider les admis ou d'annuler l'ensemble.</p>
+      <!-- PAYMENT_REQUIRED : tous admis, paiement attendu -->
+      <div *ngIf="!selectedAdmission() && bundle()?.decisionState === 'PAYMENT_REQUIRED'"
+           class="decision-panel ds-payment_required">
+        <div class="dp-icon"><lucide-icon [name]="Sparkles" [size]="24"></lucide-icon></div>
+        <div class="dp-body">
+          <p class="dp-title">Tous vos enfants ont été admis !</p>
+          <p class="dp-sub">Confirmez pour déclencher le processus de paiement des frais d'inscription.</p>
+          <div class="dp-deadline" *ngIf="admissions()[0]?.admissionDeadline">
+            <lucide-icon [name]="Clock" [size]="13"></lucide-icon>
+            <span>Offre valable jusqu'au {{ admissions()[0].admissionDeadline | date:'dd MMMM yyyy' }}</span>
           </div>
-          <div class="dp-actions">
+        </div>
+        <div class="dp-actions">
+          <app-fw-button variant="primary" [icon]="CheckCircle" iconPosition="right"
+                         [loading]="isDeciding()" (click)="onConfirmAdmitted()">
+            Procéder au paiement
+          </app-fw-button>
+        </div>
+      </div>
+
+      <!-- PARENT_CHOICE : mix admis / refusés — récap + avertissement -->
+      <div *ngIf="!selectedAdmission() && bundle()?.decisionState === 'PARENT_CHOICE'"
+           class="decision-panel ds-parent_choice">
+        <div class="dp-full-width">
+          <div class="dp-header">
+            <div class="dp-icon"><lucide-icon [name]="AlertTriangle" [size]="24"></lucide-icon></div>
+            <div class="dp-body">
+              <p class="dp-title">Décision requise — choix irréversible</p>
+              <p class="dp-sub">Certains dossiers ont été admis, d'autres refusés par l'école. Votre choix s'applique à l'ensemble du dossier famille.</p>
+            </div>
+          </div>
+
+          <!-- Récap enfants -->
+          <div class="dp-recap">
+            <div class="dp-recap-col admitted">
+              <p class="dp-recap-label">Seront validés</p>
+              <ng-container *ngFor="let a of admissions()">
+                <div class="dp-recap-child admitted-row" *ngIf="a.status === 'ADMITTED'">
+                  <lucide-icon [name]="Check" [size]="13"></lucide-icon>
+                  <span>{{ a.identity.firstName }} {{ a.identity.lastName }}</span>
+                </div>
+              </ng-container>
+            </div>
+            <div class="dp-recap-col rejected">
+              <p class="dp-recap-label">Resteront refusés</p>
+              <ng-container *ngFor="let a of admissions()">
+                <div class="dp-recap-child rejected-row" *ngIf="a.status === 'REJECTED'">
+                  <lucide-icon [name]="XCircle" [size]="13"></lucide-icon>
+                  <span>{{ a.identity.firstName }} {{ a.identity.lastName }}</span>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+
+          <div class="dp-actions dp-actions-full">
             <app-fw-button variant="primary" [icon]="CheckCircle" iconPosition="right"
                            [loading]="isDeciding()" (click)="onConfirmAdmitted()">
               Valider les admis
             </app-fw-button>
-            <app-fw-button variant="destructive" [icon]="XCircle"
+            <app-fw-button variant="danger" [icon]="XCircle"
                            [loading]="isDeciding()" (click)="onCancelAll()">
               Tout annuler
             </app-fw-button>
           </div>
-        </ng-container>
+        </div>
+      </div>
 
-        <!-- CLOSED : état final -->
-        <ng-container *ngIf="bundle()?.decisionState === 'CLOSED'">
-          <div class="dp-icon dp-closed"><lucide-icon [name]="CheckCircle" [size]="24"></lucide-icon></div>
-          <div class="dp-body">
-            <p class="dp-title">Dossier clôturé</p>
-            <p class="dp-sub">Toutes les inscriptions ont été traitées. Aucune action supplémentaire n'est requise.</p>
-          </div>
-        </ng-container>
-
+      <!-- CLOSED : état final -->
+      <div *ngIf="!selectedAdmission() && bundle()?.decisionState === 'CLOSED'"
+           class="decision-panel ds-closed">
+        <div class="dp-icon"><lucide-icon [name]="CheckCircle" [size]="24"></lucide-icon></div>
+        <div class="dp-body">
+          <p class="dp-title">Dossier clôturé</p>
+          <p class="dp-sub">Toutes les inscriptions ont été traitées. Aucune action supplémentaire n'est requise.</p>
+        </div>
       </div>
 
       <!-- Vue détail d'un enfant sélectionné OU liste -->
