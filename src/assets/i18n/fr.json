@@ -93,5 +93,43 @@
       "fr": "Français",
       "en": "English"
     }
+  },
+  "admissions": {
+    "dashboard": {
+      "header": {
+        "title": "Pilotage des Admissions",
+        "description": "Interface décisionnelle et suivi opérationnel du recrutement."
+      },
+      "kpi": {
+        "total": {
+          "label": "Candidatures",
+          "hint": "Dossiers ouverts"
+        },
+        "conversion": {
+          "label": "Taux d'Admission",
+          "hint": "Candidats retenus"
+        },
+        "new": {
+          "label": "Mix Acquisition",
+          "hint": "Nouveaux vs Réinscriptions"
+        },
+        "saturation": {
+          "label": "Places Disponibles",
+          "hint": "Niveaux à saturation"
+        }
+      },
+      "actions": {
+        "title": "File d'attente opérationnelle",
+        "subtitle": "Tâches administratives prioritaires du secrétariat.",
+        "verify": "Vérifications",
+        "evaluate": "Évaluations",
+        "incomplete": "Dossiers à relancer",
+        "decision": "Décisions Direction"
+      },
+      "analysis": {
+        "pipeline_title": "Pipeline de Conversion",
+        "capacity_title": "Taux d'Occupation par Niveau"
+      }
+    }
   }
 }

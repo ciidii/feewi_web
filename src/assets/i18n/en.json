@@ -93,5 +93,43 @@
       "fr": "French",
       "en": "English"
     }
+  },
+  "admissions": {
+    "dashboard": {
+      "header": {
+        "title": "Admissions Management",
+        "description": "Strategic decision-making and operational recruitment tracking."
+      },
+      "kpi": {
+        "total": {
+          "label": "Applications",
+          "hint": "Open dossiers"
+        },
+        "conversion": {
+          "label": "Admission Rate",
+          "hint": "Accepted candidates"
+        },
+        "new": {
+          "label": "Acquisition Mix",
+          "hint": "New vs Re-enrollments"
+        },
+        "saturation": {
+          "label": "Available Slots",
+          "hint": "Saturated levels"
+        }
+      },
+      "actions": {
+        "title": "Operational Queue",
+        "subtitle": "Priority administrative tasks for the secretariat.",
+        "verify": "Verifications",
+        "evaluate": "Assessments",
+        "incomplete": "Dossiers to follow-up",
+        "decision": "Management Decisions"
+      },
+      "analysis": {
+        "pipeline_title": "Conversion Pipeline",
+        "capacity_title": "Occupancy Rate by Level"
+      }
+    }
   }
 }
