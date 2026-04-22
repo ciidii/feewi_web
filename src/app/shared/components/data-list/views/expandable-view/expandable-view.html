@@ -96,43 +96,63 @@
       </div>
     </div>
 
-    <!-- Zone dépliée (Détails) -->
+    <!-- Zone dépliée (Fiche de Synthèse) -->
     <div *ngIf="isExpanded(row.id)" class="expand-details-area">
       <div class="details-grid">
-        <!-- Colonne Info -->
+        <!-- Colonne Info : La fiche de synthèse -->
         <div class="info-column">
-          <h4 class="details-title">Fiche Détails</h4>
-          
-          <div class="details-content space-y-6">
-            <!-- Badges secondaires -->
-            <div *ngIf="row.badges && row.badges.length > 1" class="flex flex-wrap gap-2">
-              <app-fw-badge 
-                *ngFor="let badge of row.badges.slice(1)" 
-                [status]="badge.label" 
-                [tokenOverride]="$any(badge.type)" 
-                size="xs">
-              </app-fw-badge>
-            </div>
+          <div class="summary-sheet">
+            <div class="metadata-groups">
+              <!-- Groupe 1 : Profil & Scolarité -->
+              <div class="meta-group">
+                <h5 class="group-title">Scolarité & Origine</h5>
+                <div class="meta-items-list">
+                  <div class="meta-item-academic">
+                    <span class="m-label">Niveau visé</span>
+                    <span class="m-val highlight">{{ row.metadata?.['Niveau'] || '—' }}</span>
+                  </div>
+                  <div class="meta-item-academic">
+                    <span class="m-label">Type d'admission</span>
+                    <span class="m-val">{{ row.metadata?.['Type'] || '—' }}</span>
+                  </div>
+                  <div class="meta-item-academic">
+                    <span class="m-label">École d'origine</span>
+                    <span class="m-val">{{ row.metadata?.['Origine'] || '—' }}</span>
+                  </div>
+                </div>
+              </div>
 
-            <!-- Metadata dynamique -->
-            <div *ngIf="getDisplayableMetadata(row).length > 0" class="metadata-grid">
-              <div *ngFor="let item of getDisplayableMetadata(row)" class="metadata-item">
-                <span class="meta-label">{{ item.key }}</span>
-                <span class="meta-value">{{ item.value || '—' }}</span>
+              <!-- Groupe 2 : Contact & Suivi -->
+              <div class="meta-group">
+                <h5 class="group-title">Responsable & Contact</h5>
+                <div class="meta-items-list">
+                  <div class="meta-item-academic">
+                    <span class="m-label">Tuteur légal</span>
+                    <span class="m-val font-bold text-midnight">{{ row.metadata?.['Responsable'] || '—' }}</span>
+                  </div>
+                  <div class="meta-item-academic">
+                    <span class="m-label">Coordonnées</span>
+                    <span class="m-val text-primary">{{ row.metadata?.['Contact'] || '—' }}</span>
+                  </div>
+                  <div class="meta-item-academic">
+                    <span class="m-label">Dossier numérique</span>
+                    <span class="m-val">{{ row.metadata?.['Documents'] || '—' }}</span>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <!-- Données brutes (DEBUG) -->
+            <!-- Données brutes techniques (Optionnel) -->
             <details *ngIf="row.rawData" class="debug-details">
-              <summary>Données système (JSON)</summary>
+              <summary>Identifiants système & Métadonnées brutes</summary>
               <pre>{{ row.rawData | json }}</pre>
             </details>
           </div>
         </div>
 
-        <!-- Colonne Actions -->
+        <!-- Colonne Actions : Opérations directes -->
         <div class="actions-column">
-          <h4 class="details-title">Opérations</h4>
+          <h4 class="details-title">Actions rapides</h4>
           <div class="flex flex-col gap-2">
             <ng-container *ngFor="let action of actions()">
               <app-fw-button

@@ -343,17 +343,17 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
       avatarLabel: initials || '??',
       date: new Date(app.createdAt).toLocaleDateString(),
       metadata: {
-        'Type': app.type === 'RE_ENROLLMENT' ? 'Réinscription' : 'Nouvelle Admission',
+        'Responsable': `${app.primaryGuardian?.firstName} ${app.primaryGuardian?.lastName} (${app.primaryGuardian?.relation})`,
+        'Contact': `${app.primaryGuardian?.phone} • ${app.primaryGuardian?.email}`,
+        'Provenance': app.channel === 'DIGITAL' ? '💻 Portail Parent' : '🏢 Saisie Guichet',
         'Niveau': app.schooling?.levelLabel || '—',
-        'Canal': app.channel === 'DIGITAL' ? '💻 Portail' : '🏢 Guichet',
-        'École d\'origine': app.schooling?.customFields?.['previousSchool'] || '—'
+        'Filière': app.schooling?.filiereId ? 'Standard' : 'Tronc commun',
+        'Origine': app.schooling?.customFields?.['previousSchool'] || 'Non renseignée',
+        'Documents': `${app.documents.filter(d => ['UPLOADED', 'RECEIVED', 'VERIFIED'].includes(d.status)).length} fournis sur ${app.documents.length}`
       },
       badges: [
-        {label: this.getStatusLabel(app.status), type: this.getStatusType(app.status)},
-        {
-          label: `${app.documents.filter(d => ['UPLOADED', 'RECEIVED', 'VERIFIED'].includes(d.status)).length}/${app.documents.length} docs`,
-          type: 'info'
-        }
+        { label: this.getStatusLabel(app.status), type: this.getStatusType(app.status) },
+        { label: app.type === 'RE_ENROLLMENT' ? 'Réinscription' : 'Nouveau', type: 'info' }
       ]
     };
   }
