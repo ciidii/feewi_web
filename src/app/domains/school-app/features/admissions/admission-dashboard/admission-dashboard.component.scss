@@ -1,164 +1,228 @@
 @use '../../../../../../styles/tokens' as *;
 
-:host { display: block; height: 100%; }
+:host { 
+  display: block; 
+  height: 100%; 
+  background-color: var(--fw-ice);
+}
 
-/* COUCHE 1 : KPI ZEN */
-.kpi-card-zen {
+/* ==========================================================================
+   1. LAYOUT : ACADEMIC HORIZONTAL ROWS (Aligning Heights)
+   ========================================================================== */
+.academic-row {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 1.5rem;
+  align-items: stretch; // Force same height for both columns in a row
+
+  @media (max-width: 1200px) {
+    grid-template-columns: 1fr;
+    .side-col { height: auto !important; }
+  }
+}
+
+/* ==========================================================================
+   2. TOP STATS BAR (COMPACT & ANALYTICAL)
+   ========================================================================== */
+.stats-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+
+  @media (max-width: 1024px) { grid-template-columns: repeat(2, 1fr); }
+}
+
+.stat-metric-card {
   background: white;
-  border-radius: 24px;
-  padding: 1.5rem;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: var(--fw-shadow-sm);
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  box-shadow: 0 4px 15px -4px rgba(0, 0, 0, 0.04);
-  transition: all var(--fw-transition);
-  border: none;
+  align-items: center;
 
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.08);
+  .metric-info {
+    .label { font-size: 10px; font-weight: 850; text-transform: uppercase; color: var(--fw-text-tertiary); letter-spacing: 0.08em; }
+    .value-wrap { 
+      display: flex; align-items: baseline; gap: 0.5rem; margin-top: 0.25rem;
+      .value { font-size: 1.75rem; font-weight: 900; color: var(--fw-midnight); font-family: var(--fw-font-display); }
+      .trend { font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; 
+        &.up { color: var(--fw-success); background: var(--fw-success-bg); }
+        &.down { color: var(--fw-error); background: var(--fw-error-bg); }
+      }
+    }
+    .sub-data { font-size: 11px; color: var(--fw-text-tertiary); font-weight: 600; margin-top: 0.25rem; }
   }
 
-  &.is-alert {
-    background: var(--fw-error-bg);
-    .label { color: var(--fw-error); }
+  .metric-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: grid; place-items: center;
+    background: var(--fw-surface-sunken); color: var(--fw-text-secondary);
+    lucide-icon { width: 18px; height: 18px; }
+  }
+}
+
+/* ==========================================================================
+   3. OPERATIONAL BLOCKS (WORK ZONE)
+   ========================================================================== */
+.work-section {
+  background: white;
+  border-radius: 16px;
+  box-shadow: var(--fw-shadow-sm);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  .section-header {
+    padding: 1rem 1.5rem;
+    background: white;
+    border-bottom: 1px solid var(--fw-surface-sunken);
+    display: flex; justify-content: space-between; align-items: center;
+    
+    h3 { font-size: 0.75rem; font-weight: 850; color: var(--fw-text-tertiary); text-transform: uppercase; letter-spacing: 0.1em; margin: 0; }
   }
 
-  .card-info {
+  .section-body { padding: 0; flex: 1; display: flex; flex-direction: column; }
+}
+
+/* COMPACT DATA TABLE */
+.compact-action-table {
+  width: 100%;
+  border-collapse: collapse;
+  flex: 1;
+  
+  tr { 
+    border-bottom: 1px solid var(--fw-surface-sunken); 
+    &:last-child { border-bottom: none; }
+    &:hover { background: var(--fw-surface-sunken); }
+  }
+
+  td { padding: 1rem 1.5rem; }
+
+  .action-cell {
+    display: flex; align-items: center; gap: 1rem;
+    .icon-box { width: 36px; height: 36px; border-radius: 8px; display: grid; place-items: center; }
+    .label-wrap {
+      display: flex; flex-direction: column;
+      strong { font-size: 0.875rem; font-weight: 800; color: var(--fw-midnight); }
+      span { font-size: 0.75rem; font-weight: 600; color: var(--fw-text-tertiary); }
+    }
+  }
+
+  .count-cell { text-align: right; font-size: 1.125rem; font-weight: 850; color: var(--fw-midnight); font-family: var(--fw-font-mono); }
+}
+
+/* 🚀 PIPELINE REFINEMENT */
+.pipeline-ribbon {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  padding: 1.5rem;
+  background: var(--fw-surface-sunken);
+  margin: 1.5rem;
+  border-radius: 12px;
+
+  .step {
+    flex: 1;
+    background: white;
+    padding: 0.875rem;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    position: relative;
+    
+    &:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+    &:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
 
-    .label { font-size: 0.75rem; font-weight: 850; text-transform: uppercase; color: var(--fw-text-tertiary); letter-spacing: 0.05em; }
-    .value { font-size: 2.25rem; font-weight: 850; color: var(--fw-midnight); line-height: 1; margin: 0.25rem 0; }
-    .hint { font-size: 0.75rem; font-weight: 600; color: var(--fw-text-tertiary); }
+    &.active {
+      background: var(--fw-midnight);
+      .label { color: rgba(255,255,255,0.6); }
+      .val { color: white; }
+    }
+
+    .label { font-size: 9px; font-weight: 850; text-transform: uppercase; color: var(--fw-text-tertiary); margin-bottom: 0.25rem; }
+    .val { font-size: 1.125rem; font-weight: 900; color: var(--fw-midnight); }
+    
+    &:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      right: -10px; top: 50%;
+      transform: translateY(-50%);
+      border-top: 10px solid transparent;
+      border-bottom: 10px solid transparent;
+      border-left: 10px solid white;
+      z-index: 2;
+    }
+    
+    &.active:not(:last-child)::after { border-left-color: var(--fw-midnight); }
   }
 
-  .card-icon {
-    width: 44px; height: 44px; border-radius: 12px;
+  .conversion-bridge {
+    width: 30px;
     display: grid; place-items: center;
-    lucide-icon { width: 20px; height: 20px; }
-  }
-
-  .progress-wrap {
-    height: 4px; background: var(--fw-surface-sunken); border-radius: 10px; width: 80px; margin-top: 0.5rem; overflow: hidden;
-    .bar { height: 100%; background: var(--fw-success); border-radius: 10px; }
+    font-size: 10px; font-weight: 850; color: var(--fw-text-tertiary);
+    background: rgba(0,0,0,0.03);
+    margin: 0 -2px;
+    z-index: 1;
   }
 }
 
-/* COUCHE 2 : ACTION DOCK */
-.action-dock {
+/* ==========================================================================
+   4. MONITORING BLOCKS (SIDEBAR ZONE)
+   ========================================================================== */
+.monitoring-card {
   background: white;
-  border-radius: 32px;
-  padding: 2rem;
-  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.04);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: var(--fw-shadow-sm);
+  display: flex;
+  flex-direction: column;
 
-  .dock-header {
-    margin-bottom: 2rem;
-    .dock-title { font-size: 1.125rem; font-weight: 850; color: var(--fw-midnight); margin: 0; }
-    .dock-sub { font-size: 0.8125rem; color: var(--fw-text-tertiary); font-weight: 600; }
+  .card-title { font-size: 0.75rem; font-weight: 850; text-transform: uppercase; color: var(--fw-text-tertiary); letter-spacing: 0.1em; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.625rem; }
+}
+
+.level-filling-item {
+  .info { display: flex; justify-content: space-between; margin-bottom: 0.5rem; 
+    .name { font-size: 0.8125rem; font-weight: 700; color: var(--fw-midnight); }
+    .pct { font-size: 11px; font-weight: 850; color: var(--fw-text-secondary); }
   }
-
-  .dock-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1.25rem;
+  .track { height: 8px; background: var(--fw-surface-sunken); border-radius: 4px; overflow: hidden;
+    .fill { height: 100%; border-radius: 4px; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); background: var(--fw-midnight); 
+      &.warning { background: var(--fw-warning); }
+      &.danger { background: var(--fw-error); }
+    }
   }
 }
 
-.smart-action-btn {
+.more-levels-btn {
+  margin-top: 1rem;
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--fw-surface-sunken);
+  border: 1px dashed var(--fw-border-subtle);
+  border-radius: 10px;
   display: flex;
   align-items: center;
-  gap: 1.25rem;
-  padding: 1rem 1.25rem;
-  background: var(--fw-surface-sunken);
-  border-radius: 20px;
-  border: none;
+  justify-content: center;
+  gap: 0.5rem;
   cursor: pointer;
-  transition: all var(--fw-transition);
-  position: relative;
-  text-align: left;
+  transition: all 0.2s;
+
+  span { font-size: 11px; font-weight: 850; color: var(--fw-text-secondary); text-transform: uppercase; }
+  lucide-icon { color: var(--fw-text-tertiary); }
 
   &:hover {
     background: white;
-    box-shadow: var(--fw-shadow-md);
-    transform: translateY(-2px);
-    .action-icon-wrap { transform: scale(1.1); }
-  }
-
-  &.highlight {
-    background: var(--fw-primary-alpha);
-    .action-text span { color: var(--fw-primary); }
-  }
-
-  .action-icon-wrap {
-    width: 44px; height: 44px; border-radius: 12px;
-    display: grid; place-items: center;
-    transition: transform 0.2s;
-    lucide-icon { width: 20px; height: 20px; }
-  }
-
-  .action-text {
-    display: flex; flex-direction: column;
-    strong { font-size: 1.125rem; font-weight: 850; color: var(--fw-midnight); line-height: 1.1; }
-    span { font-size: 0.8125rem; font-weight: 700; color: var(--fw-text-secondary); }
-  }
-
-  .action-badge {
-    position: absolute; top: -8px; right: -8px;
-    background: var(--fw-primary); color: white;
-    padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 850;
-    box-shadow: 0 4px 10px var(--fw-primary-alpha);
+    border-color: var(--fw-primary);
+    box-shadow: var(--fw-shadow-sm);
+    span { color: var(--fw-primary); }
   }
 }
 
-/* COUCHE 3 : ANALYSIS CARDS */
-.analysis-card {
-  background: white;
-  border-radius: 32px;
-  box-shadow: 0 4px 15px -4px rgba(0, 0, 0, 0.04);
-  height: 100%;
-  display: flex; flex-direction: column;
-
-  .card-header {
-    padding: 2rem;
-    border-bottom: 1px solid var(--fw-surface-sunken);
-    h3 { font-size: 1rem; font-weight: 850; color: var(--fw-midnight); margin: 0; text-transform: uppercase; letter-spacing: 0.02em; }
-  }
-
-  .card-body { padding: 2.5rem; flex: 1; }
-}
-
-/* FUNNEL */
-.funnel-container { display: flex; flex-direction: column; gap: 1.5rem; }
-.funnel-row {
-  display: grid; grid-template-columns: 140px 1fr 40px; align-items: center; gap: 1.5rem;
-  .label-box { font-size: 0.875rem; font-weight: 750; color: var(--fw-text-secondary); }
-  .value-box { font-size: 0.9375rem; font-weight: 850; color: var(--fw-midnight); text-align: right; }
-  .bar-box { height: 12px; background: var(--fw-surface-sunken); border-radius: 10px; overflow: hidden; .bar { height: 100%; border-radius: 10px; transition: width 1s cubic-bezier(0.16, 1, 0.3, 1); } }
-}
-
-/* LEVELS FILLING */
-.levels-filling-stack { display: flex; flex-direction: column; gap: 1.75rem; }
-.level-fill-row {
-  .info {
-    display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 0.625rem;
-    .name { font-size: 0.9375rem; font-weight: 750; color: var(--fw-text-secondary); }
-    .meta { font-size: 0.75rem; font-weight: 850; color: var(--fw-text-tertiary); text-transform: uppercase; }
-  }
-  .track { height: 6px; background: var(--fw-surface-sunken); border-radius: 10px; .fill { height: 100%; background: var(--fw-midnight); border-radius: 10px; transition: width 1s; &.saturated { background: var(--fw-error); } } }
-}
-
-/* UI UTILS */
-.period-pill {
+/* ==========================================================================
+   5. UI UTILS
+   ========================================================================== */
+.campaign-selector {
   display: flex; align-items: center; gap: 0.5rem;
-  padding: 0.5rem 1rem; background: var(--fw-surface-sunken);
-  border-radius: 100px; font-size: 0.75rem; font-weight: 850;
-  color: var(--fw-text-tertiary); text-transform: uppercase; letter-spacing: 0.05em;
-}
-
-.initial-loader {
-  position: fixed; inset: 0; background: white; z-index: 1000;
-  display: flex; align-items: center; justify-content: center;
-  .loader-content { text-align: center; p { margin-top: 1.5rem; font-weight: 850; color: var(--fw-primary); text-transform: uppercase; } }
+  padding: 0.4rem 0.875rem; background: var(--fw-midnight); color: white;
+  border-radius: 8px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase;
 }

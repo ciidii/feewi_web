@@ -2,220 +2,182 @@
   [title]="'admissions.dashboard.header.title' | translate"
   [description]="'admissions.dashboard.header.description' | translate"
   [icon]="LayoutDashboard"
-  density="comfortable"
+  density="compact"
 >
-  <!-- ACTIONS : Sélecteur de campagne -->
+  <!-- ACTIONS : Header unifié -->
   <div actions class="flex items-center gap-3">
-    <div class="period-pill">
+    <div class="campaign-selector">
       <lucide-icon [name]="Clock" class="w-3.5 h-3.5"></lucide-icon>
       <span>Session 2026/2027</span>
     </div>
+    <app-fw-button variant="primary" size="sm" [icon]="Plus" routerLink="/admin/admissions/direct">
+      Nouvelle Inscription
+    </app-fw-button>
   </div>
 
-  <!-- CONTENU : Les 3 Couches de Pilotage -->
-  <div class="space-y-12 animate-in fade-in slide-in-from-bottom-2 duration-700">
+  <!-- DASHBOARD BODY -->
+  <div class="animate-in fade-in duration-700 space-y-6" *ngIf="!isLoading(); else skeletons">
     
-    <!-- COUCHE 1 : BANDEAU DE SANTÉ (KPI ZEN) -->
-    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <!-- Total -->
-      <div class="kpi-card-zen">
-        <div class="card-info">
-          <span class="label">{{ 'admissions.dashboard.kpi.total.label' | translate }}</span>
-          <h3 class="value">{{ totalApps() }}</h3>
-          <span class="hint">{{ 'admissions.dashboard.kpi.total.hint' | translate }}</span>
-        </div>
-        <div class="card-icon bg-primary-alpha text-primary">
-          <lucide-icon [name]="FileText"></lucide-icon>
-        </div>
-      </div>
-
-      <!-- Conversion -->
-      <div class="kpi-card-zen">
-        <div class="card-info">
-          <span class="label">{{ 'admissions.dashboard.kpi.conversion.label' | translate }}</span>
-          <h3 class="value">{{ conversionRate() }}%</h3>
-          <div class="progress-wrap">
-            <div class="bar" [style.width.%]="conversionRate()"></div>
+    <!-- COUCHE 1 : TOP METRICS (STRIP) -->
+    <section class="stats-strip">
+      <div class="stat-metric-card">
+        <div class="metric-info">
+          <span class="label">Dossiers Ouverts</span>
+          <div class="value-wrap">
+            <span class="value">{{ totalApps() }}</span>
+            <span class="trend up">+12%</span>
           </div>
+          <p class="sub-data">85% numériques • 15% guichet</p>
         </div>
-        <div class="card-icon bg-emerald-50 text-emerald-600">
-          <lucide-icon [name]="Activity"></lucide-icon>
-        </div>
+        <div class="metric-icon"><lucide-icon [name]="FileText"></lucide-icon></div>
       </div>
 
-      <!-- Nouveaux -->
-      <div class="kpi-card-zen">
-        <div class="card-info">
-          <span class="label">{{ 'admissions.dashboard.kpi.new.label' | translate }}</span>
-          <h3 class="value">{{ newAppsCount() }}</h3>
-          <span class="hint">{{ Math.round((newAppsCount() / totalApps()) * 100) || 0 }}% {{ 'admissions.dashboard.kpi.new.hint' | translate }}</span>
+      <div class="stat-metric-card">
+        <div class="metric-info">
+          <span class="label">Taux d'Admission</span>
+          <div class="value-wrap">
+            <span class="value">{{ conversionRate() }}%</span>
+          </div>
+          <p class="sub-data">Cible institutionnelle : 65%</p>
         </div>
-        <div class="card-icon bg-amber-50 text-amber-600">
-          <lucide-icon [name]="TrendingUp"></lucide-icon>
-        </div>
+        <div class="metric-icon"><lucide-icon [name]="Activity"></lucide-icon></div>
       </div>
 
-      <!-- Saturation -->
-      <div class="kpi-card-zen" [class.is-alert]="saturatedCount() > 0">
-        <div class="card-info">
-          <span class="label">{{ 'admissions.dashboard.kpi.saturation.label' | translate }}</span>
-          <h3 class="value">{{ saturatedCount() }}</h3>
-          <span class="hint">{{ 'admissions.dashboard.kpi.saturation.hint' | translate }}</span>
+      <div class="stat-metric-card">
+        <div class="metric-info">
+          <span class="label">Mix Acquisition</span>
+          <div class="value-wrap">
+            <span class="value">{{ newAppsCount() }}</span>
+            <span class="trend">Nouveaux</span>
+          </div>
+          <p class="sub-data">{{ reEnrollCount() }} réinscriptions</p>
         </div>
-        <div class="card-icon" [ngClass]="saturatedCount() > 0 ? 'bg-rose-50 text-rose-600 animate-pulse' : 'bg-slate-50 text-slate-400'">
+        <div class="metric-icon"><lucide-icon [name]="TrendingUp"></lucide-icon></div>
+      </div>
+
+      <div class="stat-metric-card">
+        <div class="metric-info">
+          <span class="label">Alerte Saturation</span>
+          <div class="value-wrap">
+            <span class="value" [class.text-rose-600]="saturatedCount() > 0">{{ saturatedCount() }}</span>
+          </div>
+          <p class="sub-data">Niveaux critiques (>90%)</p>
+        </div>
+        <div class="metric-icon" [class.text-rose-600]="saturatedCount() > 0">
           <lucide-icon [name]="AlertTriangle"></lucide-icon>
         </div>
       </div>
     </section>
 
-    <!-- COUCHE 2 : ACTIONS PRIORITAIRES (SMART ACTIONS) -->
-    <section class="action-dock">
-      <div class="dock-header">
-        <h2 class="dock-title">{{ 'admissions.dashboard.actions.title' | translate }}</h2>
-        <span class="dock-sub">{{ 'admissions.dashboard.actions.subtitle' | translate }}</span>
-      </div>
+    <!-- GRID : RANGÉE 1 (OPÉRATIONNEL & CAPACITÉ) -->
+    <div class="academic-row">
+      <!-- File d'attente prioritaire -->
+      <section class="work-section main-col">
+        <header class="section-header">
+          <h3>Actions Prioritaires</h3>
+          <app-fw-button variant="tertiary" size="sm" [icon]="ArrowRight" routerLink="/admin/admissions/list">Liste complète</app-fw-button>
+        </header>
+        <div class="section-body">
+          <table class="compact-action-table">
+            <tbody>
+              <tr [routerLink]="['/admin/admissions/list']" [queryParams]="{status: 'SUBMITTED'}" class="cursor-pointer">
+                <td class="action-cell">
+                  <div class="icon-box bg-blue-50 text-blue-600"><lucide-icon [name]="ClipboardCheck"></lucide-icon></div>
+                  <div class="label-wrap"><strong>Vérification administrative</strong><span>Dossiers en attente de relecture</span></div>
+                </td>
+                <td class="count-cell">{{ pendingVerification() }}</td>
+              </tr>
+              <tr [routerLink]="['/admin/admissions/list']" [queryParams]="{status: 'VERIFIED'}" class="cursor-pointer">
+                <td class="action-cell">
+                  <div class="icon-box bg-amber-50 text-amber-600"><lucide-icon [name]="GraduationCap"></lucide-icon></div>
+                  <div class="label-wrap"><strong>Planification évaluations</strong><span>Tests et entretiens à organiser</span></div>
+                </td>
+                <td class="count-cell">{{ pendingEvaluation() }}</td>
+              </tr>
+              <tr [routerLink]="['/admin/admissions/list']" [queryParams]="{incomplete: true}" class="cursor-pointer">
+                <td class="action-cell">
+                  <div class="icon-box bg-rose-50 text-rose-600"><lucide-icon [name]="XCircle"></lucide-icon></div>
+                  <div class="label-wrap"><strong>Relances documents</strong><span>Pièces manquantes ou rejetées</span></div>
+                </td>
+                <td class="count-cell">{{ incompleteDossiers() }}</td>
+              </tr>
+              <tr [routerLink]="['/admin/admissions/list']" [queryParams]="{status: 'ADMITTED'}" class="cursor-pointer">
+                <td class="action-cell">
+                  <div class="icon-box bg-primary text-white"><lucide-icon [name]="ShieldCheck"></lucide-icon></div>
+                  <div class="label-wrap"><strong>Validation Direction</strong><span>Dossiers prêts pour décision finale</span></div>
+                </td>
+                <td class="count-cell text-primary font-black">{{ pendingDecision() }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
 
-      <div class="dock-grid">
-        <!-- À Vérifier -->
-        <button class="smart-action-btn" [routerLink]="['/admin/admissions/list']" [queryParams]="{status: 'SUBMITTED'}">
-          <div class="action-icon-wrap bg-blue-50 text-blue-600">
-            <lucide-icon [name]="ClipboardCheck"></lucide-icon>
-          </div>
-          <div class="action-text">
-            <strong>{{ pendingVerification() }}</strong>
-            <span>{{ 'admissions.dashboard.actions.verify' | translate }}</span>
-          </div>
-          <div class="action-badge" *ngIf="pendingVerification() > 0">{{ pendingVerification() }}</div>
-        </button>
-
-        <!-- À Évaluer -->
-        <button class="smart-action-btn" [routerLink]="['/admin/admissions/list']" [queryParams]="{status: 'VERIFIED'}">
-          <div class="action-icon-wrap bg-amber-50 text-amber-600">
-            <lucide-icon [name]="GraduationCap"></lucide-icon>
-          </div>
-          <div class="action-text">
-            <strong>{{ pendingEvaluation() }}</strong>
-            <span>{{ 'admissions.dashboard.actions.evaluate' | translate }}</span>
-          </div>
-        </button>
-
-        <!-- Incomplets -->
-        <button class="smart-action-btn" [routerLink]="['/admin/admissions/list']" [queryParams]="{incomplete: true}">
-          <div class="action-icon-wrap bg-rose-50 text-rose-600">
-            <lucide-icon [name]="XCircle"></lucide-icon>
-          </div>
-          <div class="action-text">
-            <strong>{{ incompleteDossiers() }}</strong>
-            <span>{{ 'admissions.dashboard.actions.incomplete' | translate }}</span>
-          </div>
-        </button>
-
-        <!-- À Valider (Direction) -->
-        <button class="smart-action-btn highlight" [routerLink]="['/admin/admissions/list']" [queryParams]="{status: 'ADMITTED'}">
-          <div class="action-icon-wrap bg-primary text-white">
-            <lucide-icon [name]="ShieldCheck"></lucide-icon>
-          </div>
-          <div class="action-text">
-            <strong>{{ pendingDecision() }}</strong>
-            <span>{{ 'admissions.dashboard.actions.decision' | translate }}</span>
-          </div>
-        </button>
-      </div>
-    </section>
-
-    <!-- COUCHE 3 : ANALYSES DE FLUX -->
-    <section class="grid grid-cols-12 gap-8">
-      
-      <!-- Entonnoir (Goulots d'étranglement) -->
-      <div class="col-span-12 lg:col-span-7">
-        <div class="analysis-card">
-          <header class="card-header">
-            <div class="flex items-center gap-3">
-              <lucide-icon [name]="Layers" class="w-5 h-5 text-primary"></lucide-icon>
-              <h3>{{ 'admissions.dashboard.analysis.pipeline_title' | translate }}</h3>
-            </div>
-          </header>
-          <div class="card-body">
-            <div class="funnel-container">
-              <!-- Step: Soumis -->
-              <div class="funnel-row">
-                <div class="label-box">Soumis</div>
-                <div class="bar-box">
-                  <div class="bar bg-slate-200" [style.width.%]="(statusStats().submitted / totalApps()) * 100"></div>
-                </div>
-                <div class="value-box">{{ statusStats().submitted }}</div>
-              </div>
-              <!-- Step: Vérifiés -->
-              <div class="funnel-row">
-                <div class="label-box">Vérifiés</div>
-                <div class="bar-box">
-                  <div class="bar bg-blue-400" [style.width.%]="(statusStats().verified / totalApps()) * 100"></div>
-                </div>
-                <div class="value-box">{{ statusStats().verified }}</div>
-              </div>
-              <!-- Step: Évaluation -->
-              <div class="funnel-row">
-                <div class="label-box">En Évaluation</div>
-                <div class="bar-box">
-                  <div class="bar bg-amber-400" [style.width.%]="(statusStats().testing / totalApps()) * 100"></div>
-                </div>
-                <div class="value-box">{{ statusStats().testing }}</div>
-              </div>
-              <!-- Step: Validés -->
-              <div class="funnel-row">
-                <div class="label-box">Admis</div>
-                <div class="bar-box">
-                  <div class="bar bg-emerald-500" [style.width.%]="(statusStats().validated / totalApps()) * 100"></div>
-                </div>
-                <div class="value-box">{{ statusStats().validated }}</div>
-              </div>
-            </div>
+      <!-- Taux d'Occupation (Aligné en hauteur) -->
+      <section class="monitoring-card side-col h-full flex flex-col">
+        <h3 class="card-title"><lucide-icon [name]="School" class="w-4 h-4"></lucide-icon> Taux d'Occupation</h3>
+        
+        <div class="flex-1 space-y-5">
+          <div *ngFor="let lvl of levelStats().slice(0, 4)" class="level-filling-item">
+            <div class="info"><span class="name">{{ lvl.name }}</span><span class="pct">{{ lvl.occupancyRate }}%</span></div>
+            <div class="track"><div class="fill" [class.warning]="lvl.occupancyRate >= 75 && lvl.occupancyRate < 90" [class.danger]="lvl.occupancyRate >= 90" [style.width.%]="lvl.occupancyRate"></div></div>
           </div>
         </div>
-      </div>
 
-      <!-- Capacité par Niveau -->
-      <div class="col-span-12 lg:col-span-5">
-        <div class="analysis-card">
-          <header class="card-header">
-            <div class="flex items-center gap-3">
-              <lucide-icon [name]="School" class="w-5 h-5 text-midnight"></lucide-icon>
-              <h3>{{ 'admissions.dashboard.analysis.capacity_title' | translate }}</h3>
-            </div>
-          </header>
-          <div class="card-body">
-            <div class="levels-filling-stack">
-              <div *ngFor="let lvl of levelStats().slice(0, 6)" class="level-fill-row">
-                <div class="info">
-                  <span class="name">{{ lvl.name }}</span>
-                  <span class="meta" [class.text-rose-600]="lvl.isSaturated">
-                    {{ lvl.validated }}/{{ lvl.capacity || '∞' }}
-                  </span>
-                </div>
-                <div class="track">
-                  <div class="fill" 
-                       [class.saturated]="lvl.isSaturated"
-                       [style.width.%]="lvl.occupancyRate"></div>
-                </div>
-              </div>
-              <div *ngIf="levelStats().length === 0" class="empty-state">
-                Aucun niveau configuré.
-              </div>
-            </div>
+        <!-- Bouton de dépassement (The "+ Plus" lever) -->
+        <button *ngIf="levelStats().length > 4" class="more-levels-btn" (click)="openCapacityReport()">
+          <lucide-icon [name]="Plus" [size]="12"></lucide-icon>
+          <span>{{ levelStats().length - 4 }} autres niveaux...</span>
+        </button>
+      </section>
+    </div>
+
+    <!-- GRID : RANGÉE 2 (PIPELINE & JALONS) -->
+    <div class="academic-row">
+      <!-- Pipeline Linéaire -->
+      <section class="work-section main-col">
+        <header class="section-header"><h3>Flux de Conversion (Conversion Pipeline)</h3></header>
+        <div class="section-body">
+          <div class="pipeline-ribbon">
+            <div class="step"><span class="label">Soumis</span><span class="val">{{ statusStats().submitted }}</span></div>
+            <div class="conversion-bridge">→</div>
+            <div class="step active"><span class="label">Vérifiés</span><span class="val">{{ statusStats().verified }}</span></div>
+            <div class="conversion-bridge">→</div>
+            <div class="step"><span class="label">Évaluation</span><span class="val">{{ statusStats().testing }}</span></div>
+            <div class="conversion-bridge">→</div>
+            <div class="step"><span class="label">Admis</span><span class="val">{{ statusStats().validated }}</span></div>
+          </div>
+          <div class="px-8 pb-6 flex justify-between items-center text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+            <span>Collecte</span><span>Revue</span><span>Test</span><span>Admis</span>
           </div>
         </div>
-      </div>
+      </section>
 
-    </section>
+      <!-- Jalons -->
+      <section class="monitoring-card side-col">
+        <h3 class="card-title"><lucide-icon [name]="Clock" class="w-4 h-4"></lucide-icon> Prochains Jalons</h3>
+        <div class="space-y-4">
+          <div class="flex gap-4 items-start p-3 bg-slate-50 rounded-xl">
+            <div class="font-bold text-primary text-xs uppercase leading-tight">24<br>AVR</div>
+            <div><p class="text-xs font-bold text-midnight">Commission #4</p><p class="text-[10px] text-slate-400">Salle A • 14:00</p></div>
+          </div>
+          <div class="flex gap-4 items-start p-3 bg-slate-50 rounded-xl">
+            <div class="font-bold text-slate-400 text-xs uppercase leading-tight">30<br>AVR</div>
+            <div><p class="text-xs font-bold text-midnight">Clôture Inscriptions</p><p class="text-[10px] text-slate-400">Portail public</p></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
   </div>
 </app-fw-page-shell>
 
 <ng-template #skeletons>
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-    <div *ngFor="let i of [1,2,3,4]" class="h-32 bg-white rounded-3xl animate-pulse shadow-sm"></div>
+  <div class="stats-strip animate-pulse">
+    <div *ngFor="let i of [1,2,3,4]" class="h-24 bg-white rounded-xl"></div>
   </div>
-  <div class="grid grid-cols-12 gap-8 mt-8">
-    <div class="col-span-12 lg:col-span-7 h-96 bg-white rounded-[2rem] animate-pulse shadow-sm"></div>
-    <div class="col-span-12 lg:col-span-5 h-96 bg-white rounded-[2rem] animate-pulse shadow-sm"></div>
+  <div class="grid grid-cols-12 gap-8 mt-8 animate-pulse">
+    <div class="col-span-8 h-96 bg-white rounded-2xl"></div>
+    <div class="col-span-4 h-96 bg-white rounded-2xl"></div>
   </div>
 </ng-template>
