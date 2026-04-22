@@ -1,0 +1,64 @@
+@use '../../../../../../../../styles/tokens' as *;
+
+.filter-modal-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.academic-filter-block {
+  .block-header {
+    display: flex; align-items: center; gap: 0.625rem;
+    font-size: 10px; font-weight: 850; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--fw-text-tertiary); margin-bottom: 0.875rem;
+    lucide-icon { color: var(--fw-primary); }
+  }
+}
+
+.date-range-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;
+}
+
+.fields-stack-dense {
+  display: flex; flex-direction: column; gap: 0.75rem;
+}
+
+.field-item {
+  label { display: block; font-size: 9px; font-weight: 800; color: var(--fw-text-secondary); text-transform: uppercase; margin-bottom: 4px; }
+  input, select {
+    width: 100%; height: 38px; background: var(--fw-surface-sunken); border: 1.5px solid transparent; border-radius: 8px;
+    padding: 0 0.75rem; font-size: 0.8125rem; font-weight: 600; color: var(--fw-midnight); outline: none;
+    transition: all 0.2s;
+    &:focus { border-color: var(--fw-primary); background: white; box-shadow: 0 0 0 3px var(--fw-primary-alpha); }
+  }
+}
+
+.provenance-selector-grid {
+  display: grid; grid-template-columns: 1fr; gap: 0.5rem;
+}
+
+.choice-pill {
+  display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1rem; background: var(--fw-surface-sunken); border-radius: 10px;
+  border: 1.5px solid transparent; width: 100%; text-align: left; cursor: pointer; transition: all 0.2s;
+
+  .text-wrap {
+    display: flex; flex-direction: column;
+    strong { font-size: 0.8125rem; font-weight: 800; color: var(--fw-midnight); line-height: 1.1; }
+    span { font-size: 10px; font-weight: 500; color: var(--fw-text-tertiary); }
+  }
+
+  lucide-icon { color: var(--fw-text-tertiary); transition: all 0.2s; }
+
+  &.active {
+    background: white; border-color: var(--fw-primary); box-shadow: var(--fw-shadow-md);
+    strong { color: var(--fw-primary); }
+    lucide-icon { color: var(--fw-primary); transform: scale(1.1); }
+  }
+
+  &:hover:not(.active) { background: var(--fw-border-subtle); }
+}
+
+.btn-clear-modal {
+  font-size: 10px; font-weight: 850; color: var(--fw-text-tertiary); background: transparent; border: none;
+  cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em;
+  &:hover { color: var(--fw-error); text-decoration: underline; }
+}

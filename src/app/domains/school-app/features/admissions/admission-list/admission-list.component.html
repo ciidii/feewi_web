@@ -1,102 +1,61 @@
-<div class="feewi-page-container">
-  
-  <!-- Header de Page Hiérarchisé -->
-  <header class="feewi-page-header">
-    <!-- NIVEAU 1 : CONTEXTE & ACTION PRIMAIRE -->
-    <div class="header-top">
-      <div class="header-left">
-        <h1 class="page-title">Gestion des Admissions</h1>
-        <p class="page-subtitle">Suivez et validez les dossiers d'inscription des nouveaux élèves.</p>
-      </div>
-      
-      <div class="header-primary-actions">
-        <button class="btn-action primary" routerLink="/admin/admissions/direct">
-          <lucide-icon [name]="UserPlus" [size]="18"></lucide-icon>
-          <span>Saisie au guichet</span>
-        </button>
-      </div>
+<app-fw-page-shell
+  title="Admissions"
+  [description]="totalElements() + ' dossiers enregistrés'"
+  [icon]="Layers"
+  density="compact"
+>
+  <!-- BARRE DE COMMANDE UNIFIÉE (Composant Partagé) -->
+  <app-fw-list-command-bar
+    [searchQuery]="searchQuery()"
+    [searchPlaceholder]="'Rechercher un candidat...'"
+    [totalElements]="totalElements()"
+    [pageSize]="pageSize()"
+    [pageSizeOptions]="pageSizeOptions"
+    [activeFilters]="activeFilterChips()"
+    (searchChange)="searchQuery.set($event); onFilterChange()"
+    (clearSearch)="searchQuery.set(''); onFilterChange()"
+    (pageSizeChange)="onPageSizeChange($event)"
+    (removeFilter)="removeFilter($event)"
+    (clearAllFilters)="clearAllFilters()"
+  >
+    <!-- ACTIONS PRIMAIRES -->
+    <div primary-actions class="action-group-integrated">
+      <app-fw-button variant="tertiary" size="sm" [icon]="Download" title="Exporter"></app-fw-button>
+      <app-fw-button variant="tertiary" size="sm" [icon]="RefreshCw" [loading]="isLoading()" (click)="loadAdmissions()" title="Actualiser"></app-fw-button>
+      <div class="divider-v"></div>
+      <app-fw-button variant="primary" size="sm" [icon]="UserPlus" routerLink="/admin/admissions/direct">
+        Nouveau Dossier
+      </app-fw-button>
     </div>
 
-    <!-- NIVEAU 2 : CENTRE DE CONTRÔLE (RECHERCHE & FILTRAGE) -->
-    <div class="header-bottom">
-      <!-- Zone Gauche : Recherche (Agrandie) -->
-      <div class="search-section">
-        <div class="search-field group">
-          <lucide-icon [name]="Search" [size]="18"></lucide-icon>
-          <input 
-            type="text" 
-            [ngModel]="searchQuery()" 
-            (input)="onSearchChange($event)" 
-            placeholder="Rechercher un candidat par nom, référence ou téléphone..."
-          />
-          <button *ngIf="searchQuery()" (click)="searchQuery.set(''); onFilterChange()" class="p-1 hover:bg-slate-100 rounded-full text-slate-400">
-             <lucide-icon [name]="X" [size]="14"></lucide-icon>
-          </button>
-        </div>
-      </div>
+    <!-- FILTRES RAPIDES -->
+    <div quick-filters class="quick-filters-integrated">
+      <button class="filter-pill-toggle" [class.active]="incompleteOnly()" (click)="incompleteOnly.set(!incompleteOnly()); onFilterChange()">
+        <lucide-icon [name]="XCircle" [size]="14"></lucide-icon>
+        <span>Incomplets</span>
+      </button>
 
-      <!-- Zone Droite : Filtres & Actions -->
-      <div class="filter-section">
-        <div class="flex items-center gap-1">
-          <select class="fw-header-select" [(ngModel)]="selectedYear" (change)="onFilterChange()">
-            <option value="">Année scolaire</option>
-            <option *ngFor="let year of years()" [value]="year.id">{{ year.label }}</option>
-          </select>
+      <div class="divider-v small"></div>
 
-          <select class="fw-header-select" [(ngModel)]="selectedLevel" (change)="onFilterChange()">
-            <option value="">Tous les niveaux</option>
-            <option *ngFor="let level of levels()" [value]="level.id">{{ level.name }}</option>
-          </select>
+      <select class="academic-select-ghost" [(ngModel)]="selectedYear" (change)="onFilterChange()">
+        <option value="">Toutes les années</option>
+        <option *ngFor="let year of years()" [value]="year.id">{{ year.label }}</option>
+      </select>
 
-          <!-- Bouton "Plus de filtres" -->
-          <button class="btn-more-filters" (click)="isFilterDrawerOpen.set(true)" title="Plus de critères de filtrage">
-            <lucide-icon [name]="Filter" [size]="16"></lucide-icon>
-            <span>Plus de filtres</span>
-          </button>
-        </div>
+      <select class="academic-select-ghost" [(ngModel)]="selectedLevel" (change)="onFilterChange()">
+        <option value="">Tous les niveaux</option>
+        <option *ngFor="let level of levels()" [value]="level.id">{{ level.name }}</option>
+      </select>
 
-        <div class="control-divider"></div>
-
-        <div class="header-secondary-actions">
-          <button class="btn-util" (click)="loadAdmissions()" [disabled]="isLoading()" title="Actualiser la liste">
-            <lucide-icon [name]="RefreshCw" [size]="18" [class.animate-spin]="isLoading()"></lucide-icon>
-          </button>
-
-          <button class="btn-util" title="Exporter en Excel/PDF">
-            <lucide-icon [name]="Download" [size]="18"></lucide-icon>
-          </button>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <!-- BARRE DE FILTRES ACTIFS (CHIPS) -->
-  <div class="active-filters-bar" *ngIf="activeFilterChips().length > 0">
-    <div class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-      <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-2 flex items-center gap-1">
-        <lucide-icon [name]="Filter" class="w-3 h-3"></lucide-icon>
-        <span>Actifs:</span>
-      </div>
-      
-      <div *ngFor="let chip of activeFilterChips()" class="filter-chip animate-in zoom-in duration-200">
-        <span class="chip-label">{{ chip.label }}:</span>
-        <span class="chip-value">{{ chip.value }}</span>
-        <button (click)="removeFilter(chip.key)" class="chip-remove">
-          <lucide-icon [name]="X" class="w-3 h-3"></lucide-icon>
-        </button>
-      </div>
-
-      <button *ngIf="activeFilterChips().length > 1" 
-              (click)="clearAllFilters()" 
-              class="text-[10px] font-bold text-primary hover:underline ml-2">
-        Effacer tout
+      <button class="more-filters-trigger" (click)="openFilterModal()" [class.has-active]="selectedChannel() || selectedStartDate()">
+        <lucide-icon [name]="Filter" [size]="14"></lucide-icon>
+        <span>Avancé</span>
       </button>
     </div>
-  </div>
+  </app-fw-list-command-bar>
 
-  <!-- Liste -->
-  <div class="page-content">
-    
+  <!-- LISTE DES DONNÉES -->
+  <div class="list-container-integrated animate-in fade-in duration-700">
     <app-data-list
       [data]="admissionRows()"
       [tabs]="admissionTabs()"
@@ -108,6 +67,7 @@
       [totalPages]="totalPages()"
       [showSearch]="false"
       [showFilterButton]="false"
+      [cardMode]="false"
       defaultView="table"
       (onTabChange)="onTabChange($event)"
       (onPageChange)="onPageChange($event)"
@@ -115,80 +75,6 @@
       (onRowClick)="handleAction({ actionId: 'view', row: $event })"
     >
     </app-data-list>
-
   </div>
 
-  <!-- PANNEAU LATÉRAL DE FILTRES (DRAWER) -->
-  <div class="filter-drawer-overlay" *ngIf="isFilterDrawerOpen()" (click)="isFilterDrawerOpen.set(false)"></div>
-  
-  <div class="filter-drawer" [class.open]="isFilterDrawerOpen()">
-    <div class="drawer-header">
-      <div class="flex items-center gap-3">
-        <div class="p-2 bg-primary-50 rounded-lg text-primary">
-          <lucide-icon [name]="Filter" class="w-5 h-5"></lucide-icon>
-        </div>
-        <div>
-          <h2 class="text-lg font-bold text-midnight">Filtres avancés</h2>
-          <p class="text-xs text-slate-400 font-medium">Affinez votre recherche de candidats</p>
-        </div>
-      </div>
-      <button (click)="isFilterDrawerOpen.set(false)" class="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400">
-        <lucide-icon [name]="X" class="w-5 h-5"></lucide-icon>
-      </button>
-    </div>
-
-    <div class="drawer-body">
-      <!-- Section : Informations Scolaires -->
-      <div class="filter-section-group">
-        <h3 class="group-title">Informations Scolaires</h3>
-        
-        <div class="form-field mb-4">
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Année académique</label>
-          <select [(ngModel)]="selectedYear" (change)="onFilterChange()" class="fw-drawer-select w-full p-2 border border-slate-200 rounded-lg">
-            <option value="">Sélectionner une année</option>
-            <option *ngFor="let year of years()" [value]="year.id">{{ year.label }}</option>
-          </select>
-        </div>
-
-        <div class="form-field">
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Niveau scolaire</label>
-          <select [(ngModel)]="selectedLevel" (change)="onFilterChange()" class="fw-drawer-select w-full p-2 border border-slate-200 rounded-lg">
-            <option value="">Tous les niveaux</option>
-            <option *ngFor="let level of levels()" [value]="level.id">{{ level.name }}</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Section : Canal & Source -->
-      <div class="filter-section-group mt-6">
-        <h3 class="group-title text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Origine du Dossier</h3>
-        <div class="grid grid-cols-1 gap-2">
-          <button 
-            *ngFor="let ch of [{id: 'DIGITAL', l: 'Portail Public', i: '💻'}, {id: 'DIRECT', l: 'Saisie Guichet', i: '🏢'}]"
-            (click)="selectedChannel.set(ch.id); onFilterChange()"
-            class="channel-option flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:border-primary transition-all text-left"
-            [class.active]="selectedChannel() === ch.id"
-          >
-            <div class="flex items-center gap-3">
-              <span class="text-xl">{{ ch.i }}</span>
-              <span class="text-sm font-semibold text-slate-700">{{ ch.l }}</span>
-            </div>
-            <div class="check text-primary" *ngIf="selectedChannel() === ch.id">
-              <lucide-icon [name]="CheckCircle" class="w-4 h-4"></lucide-icon>
-            </div>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div class="drawer-footer flex items-center justify-between p-6 border-t border-slate-100 mt-auto">
-      <button class="text-sm font-bold text-slate-400 hover:text-red-500 transition-colors" (click)="selectedYear.set(''); selectedLevel.set(''); selectedChannel.set(''); onFilterChange(); isFilterDrawerOpen.set(false)">
-        Réinitialiser
-      </button>
-      <button class="bg-primary text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary-alpha hover:bg-primary-hover transition-all" (click)="isFilterDrawerOpen.set(false)">
-        Appliquer
-      </button>
-    </div>
-  </div>
-
-</div>
+</app-fw-page-shell>

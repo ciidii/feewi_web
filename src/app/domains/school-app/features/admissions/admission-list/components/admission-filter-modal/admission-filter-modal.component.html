@@ -1,0 +1,89 @@
+<app-fw-modal-shell 
+  title="Centre de Configuration des Filtres" 
+  subtitle="Affinez l'affichage de votre répertoire d'admissions."
+  (close)="onCancel()"
+>
+  <div class="filter-modal-body">
+    
+    <!-- BLOC 1 : PÉRIODE (STYLE REPORT) -->
+    <section class="academic-filter-block">
+      <header class="block-header">
+        <lucide-icon [name]="CalendarIcon" [size]="14"></lucide-icon>
+        <span>Période de Soumission</span>
+      </header>
+      <div class="date-range-grid">
+        <div class="field-item">
+          <label>Du</label>
+          <input type="date" [(ngModel)]="form.start" />
+        </div>
+        <div class="field-item">
+          <label>Au</label>
+          <input type="date" [(ngModel)]="form.end" />
+        </div>
+      </div>
+    </section>
+
+    <!-- BLOC 2 : PARAMÈTRES SCOLAIRES -->
+    <section class="academic-filter-block mt-6">
+      <header class="block-header">
+        <lucide-icon [name]="SchoolIcon" [size]="14"></lucide-icon>
+        <span>Ciblage Institutionnel</span>
+      </header>
+      <div class="fields-stack-dense">
+        <div class="field-item">
+          <label>Session Académique</label>
+          <select [(ngModel)]="form.year">
+            <option value="">Toutes les années disponibles</option>
+            <option *ngFor="let y of data.years" [value]="y.id">{{ y.label }}</option>
+          </select>
+        </div>
+        <div class="field-item">
+          <label>Niveau d'Enseignement</label>
+          <select [(ngModel)]="form.level">
+            <option value="">Tous les niveaux</option>
+            <option *ngFor="let l of data.levels" [value]="l.id">{{ l.name }}</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- BLOC 3 : PROVENANCE (PILLS) -->
+    <section class="academic-filter-block mt-6">
+      <header class="block-header">
+        <lucide-icon [name]="FilterIcon" [size]="14"></lucide-icon>
+        <span>Origine du Candidat</span>
+      </header>
+      <div class="provenance-selector-grid">
+        <button 
+          (click)="form.channel = 'DIGITAL'"
+          class="choice-pill" [class.active]="form.channel === 'DIGITAL'">
+          <lucide-icon [name]="ClockIcon" [size]="16"></lucide-icon>
+          <div class="text-wrap">
+            <strong>Portail Parent</strong>
+            <span>Inscription en ligne</span>
+          </div>
+        </button>
+        <button 
+          (click)="form.channel = 'DIRECT'"
+          class="choice-pill" [class.active]="form.channel === 'DIRECT'">
+          <lucide-icon [name]="UserCheckIcon" [size]="16"></lucide-icon>
+          <div class="text-wrap">
+            <strong>Guichet Interne</strong>
+            <span>Saisie secrétariat</span>
+          </div>
+        </button>
+      </div>
+    </section>
+
+  </div>
+
+  <div footer-left>
+    <button class="btn-clear-modal" (click)="onReset()">Réinitialiser</button>
+  </div>
+
+  <div footer-right>
+    <app-fw-button variant="primary" size="md" (click)="onApply()">
+      Appliquer les filtres
+    </app-fw-button>
+  </div>
+</app-fw-modal-shell>

@@ -1,0 +1,49 @@
+<div class="unified-command-bar">
+  <!-- LIGNE 1 : RECHERCHE & ACTIONS PRIMAIRES -->
+  <div class="command-row primary-row">
+    <div class="search-box-academic">
+      <lucide-icon [name]="SearchIcon" [size]="16"></lucide-icon>
+      <input 
+        type="text" 
+        [ngModel]="searchQuery" 
+        (input)="onSearchInput($event)" 
+        [placeholder]="searchPlaceholder"
+      />
+      <button *ngIf="searchQuery" (click)="clearSearch.emit()" class="clear-btn">
+        <lucide-icon [name]="XIcon" [size]="12"></lucide-icon>
+      </button>
+    </div>
+
+    <div class="action-group-integrated">
+      <ng-content select="[primary-actions]"></ng-content>
+    </div>
+  </div>
+
+  <!-- LIGNE 2 : FILTRES RAPIDES & ÉTAT -->
+  <div class="command-row filter-row">
+    <div class="quick-filters-integrated">
+      <ng-content select="[quick-filters]"></ng-content>
+    </div>
+
+    <div class="pagination-controls-integrated">
+      <span class="results-text" *ngIf="totalElements > 0">
+        <strong>{{ totalElements }}</strong> résultats
+      </span>
+      <select class="page-size-select" [ngModel]="pageSize" (ngModelChange)="pageSizeChange.emit($event)">
+        <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }} / page</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- LIGNE 3 : CHIPS DE FILTRES ACTIFS -->
+  <div class="active-chips-row" *ngIf="activeFilters.length > 0">
+    <div *ngFor="let chip of activeFilters" class="academic-tag">
+      <span class="t-label">{{ chip.label }} :</span>
+      <span class="t-val">{{ chip.value }}</span>
+      <button (click)="removeFilter.emit(chip.key)">
+        <lucide-icon [name]="XIcon" [size]="10"></lucide-icon>
+      </button>
+    </div>
+    <button class="btn-clear-all" (click)="clearAllFilters.emit()">Tout effacer</button>
+  </div>
+</div>

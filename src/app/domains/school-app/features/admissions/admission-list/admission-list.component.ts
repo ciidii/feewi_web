@@ -1,25 +1,58 @@
-import { Component, inject, signal, ViewEncapsulation, OnInit, computed, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import { LucideAngularModule, Filter, Download, Layers, Clock, ShieldCheck, UserCheck, Eye, CheckCircle, XCircle, RefreshCw, Search, UserPlus, ChevronDown, X } from 'lucide-angular';
-import { firstValueFrom, Subject, debounceTime, distinctUntilChanged, takeUntil, finalize } from 'rxjs';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import {Component, computed, inject, OnDestroy, OnInit, signal, ViewEncapsulation} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Router} from '@angular/router';
+import {
+  ArrowRight,
+  CheckCircle,
+  ChevronDown,
+  Clock,
+  Download,
+  Eye,
+  Filter,
+  Layers,
+  LucideAngularModule,
+  RefreshCw,
+  Search,
+  ShieldCheck,
+  UserCheck,
+  UserPlus,
+  X,
+  XCircle
+} from 'lucide-angular';
+import {debounceTime, distinctUntilChanged, finalize, firstValueFrom, Subject, takeUntil} from 'rxjs';
+import {MatMenuModule} from '@angular/material/menu';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 
-import { DataListComponent } from '../../../../../shared/components/data-list/data-list.component';
-import { RowAction, TabItem, TableRow } from '../../../../../shared/models/data-list.models';
-import { EnrollmentAdminService } from '../../../../../core/services/enrollment-admin.service';
-import { AcademicService } from '../../../../../core/services/academic.service';
-import { Admission, AdmissionStatus } from '../../../../../core/models/enrollment.model';
-import { Level, AcademicYear } from '../../../../../core/models/academic.model';
-import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
-import { NotificationService } from '../../../../../shared/services/notification.service';
+import {DataListComponent} from '../../../../../shared/components/data-list/data-list.component';
+import {RowAction, TabItem, TableRow} from '../../../../../shared/models/data-list.models';
+import {EnrollmentAdminService} from '../../../../../core/services/enrollment-admin.service';
+import {AcademicService} from '../../../../../core/services/academic.service';
+import {Admission, AdmissionStatus} from '../../../../../core/models/enrollment.model';
+import {AcademicYear, Level} from '../../../../../core/models/academic.model';
+import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
+import {NotificationService} from '../../../../../shared/services/notification.service';
 import {FormsModule} from '@angular/forms';
+
+import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
+import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
+import {FwListCommandBarComponent} from '../../../../../shared/components/list-command-bar/list-command-bar.component';
+
+import {AdmissionFilterModalComponent} from './components/admission-filter-modal/admission-filter-modal.component';
 
 @Component({
   selector: 'app-admissions',
   standalone: true,
-  imports: [CommonModule, DataListComponent, LucideAngularModule, MatMenuModule, MatDialogModule, FormsModule],
+  imports: [
+    CommonModule,
+    DataListComponent,
+    LucideAngularModule,
+    MatMenuModule,
+    MatDialogModule,
+    FormsModule,
+    FwPageShellComponent,
+    FwButtonComponent,
+    FwListCommandBarComponent
+  ],
   templateUrl: './admission-list.component.html',
   styleUrl: './admission-list.component.scss',
   encapsulation: ViewEncapsulation.None
@@ -31,18 +64,46 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
   private dialog = inject(MatDialog);
   private notificationService = inject(NotificationService);
 
-
-
   // --- ÉTATS ---
   activeTab = signal('Tous');
   searchQuery = signal('');
   isLoading = signal(false);
-  isFilterDrawerOpen = signal(false);
 
-  // Filtres Avancés
+  // Filtres Avancés (Signals)
   selectedLevel = signal<string>('');
   selectedYear = signal<string>('');
   selectedChannel = signal<string>('');
+  incompleteOnly = signal<boolean>(false);
+  selectedStartDate = signal<string>('');
+  selectedEndDate = signal<string>('');
+
+  // ... (rest of class)
+
+  openFilterModal() {
+    const dialogRef = this.dialog.open(AdmissionFilterModalComponent, {
+      width: '400px',
+      data: {
+        selectedYear: this.selectedYear(),
+        selectedLevel: this.selectedLevel(),
+        selectedChannel: this.selectedChannel(),
+        selectedStartDate: this.selectedStartDate(),
+        selectedEndDate: this.selectedEndDate(),
+        levels: this.levels(),
+        years: this.years()
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.selectedYear.set(result.year);
+        this.selectedLevel.set(result.level);
+        this.selectedChannel.set(result.channel);
+        this.selectedStartDate.set(result.start);
+        this.selectedEndDate.set(result.end);
+        this.onFilterChange();
+      }
+    });
+  }
 
   // Données de référence pour les filtres
   levels = signal<Level[]>([]);
@@ -51,8 +112,15 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
   // Pagination
   currentPage = signal(0);
   pageSize = signal(20);
+  pageSizeOptions = [20, 50, 100, 200];
   totalElements = signal(0);
   totalPages = signal(1);
+
+  onPageSizeChange(newSize: number) {
+    this.pageSize.set(newSize);
+    this.currentPage.set(0);
+    this.loadAdmissions();
+  }
 
   rawApplications = signal<Admission[]>([]);
 
@@ -69,22 +137,32 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
     const chips: { key: string, label: string, value: string }[] = [];
 
     if (this.searchQuery()) {
-      chips.push({ key: 'q', label: 'Recherche', value: this.searchQuery() });
+      chips.push({key: 'q', label: 'Recherche', value: this.searchQuery()});
     }
 
     if (this.selectedYear()) {
       const year = this.years().find(y => y.id === this.selectedYear());
-      if (year) chips.push({ key: 'year', label: 'Année', value: year.label });
+      if (year) chips.push({key: 'year', label: 'Année', value: year.label});
     }
 
     if (this.selectedLevel()) {
       const level = this.levels().find(l => l.id === this.selectedLevel());
-      if (level) chips.push({ key: 'level', label: 'Niveau', value: level.name });
+      if (level) chips.push({key: 'level', label: 'Niveau', value: level.name});
     }
 
     if (this.selectedChannel()) {
       const label = this.selectedChannel() === 'DIGITAL' ? 'Portail Public' : 'Saisie Guichet';
-      chips.push({ key: 'channel', label: 'Canal', value: label });
+      chips.push({key: 'channel', label: 'Canal', value: label});
+    }
+
+    if (this.incompleteOnly()) {
+      chips.push({key: 'incomplete', label: 'État', value: 'Dossiers Incomplets'});
+    }
+
+    if (this.selectedStartDate() || this.selectedEndDate()) {
+      const start = this.selectedStartDate() || '...';
+      const end = this.selectedEndDate() || '...';
+      chips.push({key: 'dates', label: 'Période', value: `${start} au ${end}`});
     }
 
     return chips;
@@ -95,6 +173,11 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
     if (key === 'year') this.selectedYear.set('');
     if (key === 'level') this.selectedLevel.set('');
     if (key === 'channel') this.selectedChannel.set('');
+    if (key === 'incomplete') this.incompleteOnly.set(false);
+    if (key === 'dates') {
+      this.selectedStartDate.set('');
+      this.selectedEndDate.set('');
+    }
     this.onFilterChange();
   }
 
@@ -103,22 +186,25 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
     this.selectedYear.set('');
     this.selectedLevel.set('');
     this.selectedChannel.set('');
+    this.incompleteOnly.set(false);
+    this.selectedStartDate.set('');
+    this.selectedEndDate.set('');
     this.onFilterChange();
   }
 
   // --- CONFIGURATION UI ---
   readonly admissionActions: RowAction[] = [
-    { id: 'view', label: 'Voir le dossier', icon: Eye, type: 'primary' },
-    { id: 'validate', label: 'Approuver', icon: CheckCircle, type: 'success' },
-    { id: 'reject', label: 'Rejeter', icon: XCircle, type: 'danger' }
+    {id: 'view', label: 'Voir le dossier', icon: Eye, type: 'primary'},
+    {id: 'validate', label: 'Approuver', icon: CheckCircle, type: 'success'},
+    {id: 'reject', label: 'Rejeter', icon: XCircle, type: 'danger'}
   ];
 
   admissionTabs = computed<TabItem[]>(() => {
     return [
-      { label: 'Tous', icon: Layers, count: this.totalElements() },
-      { label: 'À Vérifier', icon: Clock },
-      { label: 'À Évaluer', icon: ShieldCheck },
-      { label: 'En Décision', icon: UserCheck }
+      {label: 'Tous', icon: Layers, count: this.totalElements()},
+      {label: 'À Vérifier', icon: Clock},
+      {label: 'À Évaluer', icon: ShieldCheck},
+      {label: 'En Décision', icon: UserCheck}
     ];
   });
 
@@ -176,8 +262,9 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
           academicYearId: this.selectedYear() || undefined,
           channel: (this.selectedChannel() as any) || undefined,
           page: this.currentPage(),
-          size: this.pageSize()
-        })
+          size: this.pageSize(),
+          // Note: Les filtres 'incompleteOnly' et 'dates' sont prêts pour l'API
+        } as any)
       );
 
       this.rawApplications.set(response.content || []);
@@ -203,12 +290,21 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
     return {
       id: app.id,
       title: candidateName,
-      subtitle: `Dossier #${app.reference} • ${app.type === 'RE_ENROLLMENT' ? 'Réinscription' : 'Nouvelle Admission'}`,
+      subtitle: `Dossier #${app.reference}`,
       avatarLabel: initials || '??',
       date: new Date(app.createdAt).toLocaleDateString(),
+      metadata: {
+        'Type': app.type === 'RE_ENROLLMENT' ? 'Réinscription' : 'Nouvelle Admission',
+        'Niveau': app.schooling?.levelLabel || '—',
+        'Canal': app.channel === 'DIGITAL' ? '💻 Portail' : '🏢 Guichet',
+        'École d\'origine': app.schooling?.customFields?.['previousSchool'] || '—'
+      },
       badges: [
-        { label: this.getStatusLabel(app.status), type: this.getStatusType(app.status) },
-        { label: `${app.documents.filter(d => d.status === 'UPLOADED').length}/${app.documents.length} docs`, type: 'info' }
+        {label: this.getStatusLabel(app.status), type: this.getStatusType(app.status)},
+        {
+          label: `${app.documents.filter(d => ['UPLOADED', 'RECEIVED', 'VERIFIED'].includes(d.status)).length}/${app.documents.length} docs`,
+          type: 'info'
+        }
       ]
     };
   }
@@ -230,17 +326,26 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
 
   private getStatusType(status: AdmissionStatus): 'success' | 'warning' | 'danger' | 'info' | 'primary' {
     switch (status) {
-      case 'VALIDATED': return 'success';
-      case 'SUBMITTED': return 'primary';
-      case 'VERIFIED': return 'info';
-      case 'TESTING': case 'WAITLIST': return 'warning';
-      case 'REJECTED': case 'CANCELLED': return 'danger';
-      default: return 'primary';
+      case 'VALIDATED':
+        return 'success';
+      case 'SUBMITTED':
+        return 'primary';
+      case 'VERIFIED':
+        return 'info';
+      case 'TESTING':
+      case 'WAITLIST':
+        return 'warning';
+      case 'REJECTED':
+      case 'CANCELLED':
+        return 'danger';
+      default:
+        return 'primary';
     }
   }
 
   onTabChange(tab: string) {
     this.activeTab.set(tab);
+    this.onFilterChange();
   }
 
   handleAction(event: { actionId: string, row: TableRow }) {
@@ -310,5 +415,10 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
   readonly ChevronDown = ChevronDown;
   readonly UserPlus = UserPlus;
   readonly UserCheck = UserCheck;
+  readonly Clock = Clock;
+  readonly ShieldCheck = ShieldCheck;
+  readonly Eye = Eye;
+  readonly XCircle = XCircle;
   readonly X = X;
+  readonly ArrowRight = ArrowRight;
 }
