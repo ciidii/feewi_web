@@ -25,10 +25,20 @@ import { AcademicService } from '../../../../../core/services/academic.service';
 import { User as StudentUser } from '../../../../../core/models/user.model';
 import {Filiere, Level} from '../../../../../core/models/academic.model';
 
+import { FwPageShellComponent } from '../../../../../shared/components/page-shell/page-shell.component';
+import { FwButtonComponent } from '../../../../../shared/components/button/button.component';
+
 @Component({
   selector: 'app-secretary-re-enrollment',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, RouterModule],
+  imports: [
+    CommonModule, 
+    FormsModule, 
+    LucideAngularModule, 
+    RouterModule,
+    FwPageShellComponent,
+    FwButtonComponent
+  ],
   templateUrl: './re-enrollment.component.html',
   styleUrls: ['./re-enrollment.component.scss']
 })

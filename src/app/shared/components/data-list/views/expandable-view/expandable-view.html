@@ -87,7 +87,7 @@
               (click)="onAction.emit({ actionId: action.id, row: row })"
               [disabled]="!!(action.disableIf && action.disableIf(row))"
               [variant]="'tertiary'"
-              [size]="'sm'"
+              size="sm"
               [icon]="action.icon"
               [title]="action.label"
             ></app-fw-button>
@@ -140,7 +140,7 @@
                 (click)="onAction.emit({ actionId: action.id, row: row })"
                 [disabled]="!!(action.disableIf && action.disableIf(row))"
                 [variant]="$any(action.type === 'danger' ? 'danger' : 'tertiary')"
-                [size]="'sm'"
+                size="sm"
                 class="w-full"
                 [icon]="action.icon"
               >

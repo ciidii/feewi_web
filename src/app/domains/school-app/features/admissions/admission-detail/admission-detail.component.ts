@@ -1,9 +1,9 @@
-import {Component, computed, inject, OnInit, signal} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {finalize, forkJoin, map, of, switchMap} from 'rxjs';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { finalize, forkJoin, map, of, switchMap } from 'rxjs';
 import {
+  LucideAngularModule,
   ArrowLeft,
-  BadgeCheck,
   CheckCircle,
   ChevronLeft,
   ChevronRight,
@@ -13,12 +13,10 @@ import {
   FileImage,
   FileSpreadsheet,
   FileText,
-  Globe,
   GraduationCap,
   HeartPulse,
   History as HistoryIcon,
   Info,
-  LucideAngularModule,
   Mail,
   MapPin,
   Phone,
@@ -32,23 +30,25 @@ import {
   Upload,
   User,
   Users,
-  XCircle
+  XCircle,
+  BadgeCheck,
+  Globe
 } from 'lucide-angular';
-import {ActivatedRoute, RouterModule} from '@angular/router';
-import {EnrollmentAdminService} from '../../../../../core/services/enrollment-admin.service';
-import {DocumentEngineService} from '../../../../../core/services/document-engine.service';
-import {AcademicService} from '../../../../../core/services/academic.service';
-import {MatDialog, MatDialogModule} from '@angular/material/dialog';
-import {NotificationService} from '../../../../../shared/services/notification.service';
-import {AcademicYear, Filiere, Level} from '../../../../../core/models/academic.model';
-import {AdmissionWorkflowComponent} from '../components/admission-workflow/admission-workflow.component';
-import {FormsModule} from '@angular/forms';
-import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
-import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
-import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
-import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.component';
-import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
-import {Admission, AssessmentRequest, RequiredDocument} from '../../../../../core/models/enrollment.model';
+import { ActivatedRoute, RouterModule } from '@angular/router';
+import { EnrollmentAdminService } from '../../../../../core/services/enrollment-admin.service';
+import { DocumentEngineService } from '../../../../../core/services/document-engine.service';
+import { AcademicService } from '../../../../../core/services/academic.service';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { NotificationService } from '../../../../../shared/services/notification.service';
+import { AcademicYear, Filiere, Level } from '../../../../../core/models/academic.model';
+import { AdmissionWorkflowComponent } from '../components/admission-workflow/admission-workflow.component';
+import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { FwPageShellComponent } from '../../../../../shared/components/page-shell/page-shell.component';
+import { FwButtonComponent } from '../../../../../shared/components/button/button.component';
+import { FwBadgeComponent } from '../../../../../shared/components/badge/badge.component';
+import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
+import { Admission, AssessmentRequest, RequiredDocument } from '../../../../../core/models/enrollment.model';
 
 @Component({
   selector: 'app-admission-detail',
