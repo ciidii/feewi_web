@@ -1,145 +1,158 @@
-<div class="admission-dashboard-page" *ngIf="!isLoading(); else loadingView">
-  
-  <header class="page-header">
-    <div class="header-left">
-      <div class="icon-badge bg-primary-50 text-primary-600">
-        <lucide-icon [name]="LayoutDashboard" [size]="24"></lucide-icon>
-      </div>
-      <div class="title-meta">
-        <h1 class="text-2xl font-bold text-slate-900">Tableau de Bord Admissions</h1>
-        <p class="text-sm text-slate-500">Aperçu stratégique du recrutement en temps réel.</p>
-      </div>
+<app-fw-page-shell
+  *ngIf="!isLoading(); else loadingView"
+  title="Tableau de Bord Admissions"
+  description="Aperçu stratégique du recrutement en temps réel pour l'établissement."
+  [icon]="LayoutDashboard"
+  density="compact"
+>
+  <!-- ACTIONS -->
+  <div actions class="flex items-center gap-3">
+    <div class="period-selector-pill">
+      <lucide-icon [name]="Clock" [size]="14"></lucide-icon>
+      <span>Campagne 2026/2027</span>
     </div>
-    <div class="header-right">
-      <div class="period-selector">
-        <lucide-icon [name]="Clock" [size]="16"></lucide-icon>
-        <span>Campagne 2026/2027</span>
-      </div>
-    </div>
-  </header>
+  </div>
 
-  <main class="dashboard-content grid grid-cols-12 gap-6 p-8">
+  <!-- DASHBOARD CONTENT -->
+  <div class="dashboard-grid animate-in slide-in-from-bottom-2 duration-700">
     
-    <!-- LIGNE 1 : KPI CARDS -->
-    <div class="col-span-12 md:col-span-3">
-      <div class="kpi-card total">
-        <div class="card-body">
-          <div class="meta">Total Dossiers</div>
-          <div class="value">{{ totalApps() }}</div>
-          <div class="sub">Inscrits via portail et guichet</div>
+    <!-- LIGNE 1 : KPI CARDS (Zen style) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="kpi-card-premium">
+        <div class="card-content">
+          <p class="card-label">Total Dossiers</p>
+          <div class="flex items-baseline gap-2">
+            <span class="card-value">{{ totalApps() }}</span>
+            <span class="card-trend success">+5%</span>
+          </div>
+          <p class="card-hint">Soumissions enregistrées</p>
         </div>
-        <div class="card-icon"><lucide-icon [name]="FileText"></lucide-icon></div>
+        <div class="card-icon-box info">
+          <lucide-icon [name]="FileText"></lucide-icon>
+        </div>
       </div>
-    </div>
 
-    <div class="col-span-12 md:col-span-3">
-      <div class="kpi-card new">
-        <div class="card-body">
-          <div class="meta">Nouvelles Inscriptions</div>
-          <div class="value">{{ newAppsCount() }}</div>
-          <div class="sub">{{ Math.round((newAppsCount() / totalApps()) * 100) || 0 }}% du volume total</div>
+      <div class="kpi-card-premium">
+        <div class="card-content">
+          <p class="card-label">Nouvelles Inscriptions</p>
+          <div class="flex items-baseline gap-2">
+            <span class="card-value">{{ newAppsCount() }}</span>
+            <span class="card-trend success">{{ Math.round((newAppsCount() / totalApps()) * 100) || 0 }}%</span>
+          </div>
+          <p class="card-hint">Candidats externes</p>
         </div>
-        <div class="card-icon"><lucide-icon [name]="TrendingUp"></lucide-icon></div>
+        <div class="card-icon-box success">
+          <lucide-icon [name]="TrendingUp"></lucide-icon>
+        </div>
       </div>
-    </div>
 
-    <div class="col-span-12 md:col-span-3">
-      <div class="kpi-card reenrolled">
-        <div class="card-body">
-          <div class="meta">Réinscriptions</div>
-          <div class="value">{{ reEnrollCount() }}</div>
-          <div class="sub">Élèves internes reconduits</div>
+      <div class="kpi-card-premium">
+        <div class="card-content">
+          <p class="card-label">Réinscriptions</p>
+          <div class="flex items-baseline gap-2">
+            <span class="card-value">{{ reEnrollCount() }}</span>
+          </div>
+          <p class="card-hint">Anciens élèves reconduits</p>
         </div>
-        <div class="card-icon"><lucide-icon [name]="Users"></lucide-icon></div>
+        <div class="card-icon-box warning">
+          <lucide-icon [name]="Users"></lucide-icon>
+        </div>
       </div>
-    </div>
 
-    <div class="col-span-12 md:col-span-3">
-      <div class="kpi-card conversion">
-        <div class="card-body">
-          <div class="meta">Taux de Conversion</div>
-          <div class="value">{{ conversionRate() }}%</div>
-          <div class="progress-mini"><div class="fill" [style.width.%]="conversionRate()"></div></div>
-          <div class="sub">Dossiers validés / Total</div>
+      <div class="kpi-card-premium dark-mode">
+        <div class="card-content">
+          <p class="card-label">Taux de Conversion</p>
+          <div class="flex items-baseline gap-2">
+            <span class="card-value">{{ conversionRate() }}%</span>
+          </div>
+          <div class="progress-bar-mini">
+            <div class="fill" [style.width.%]="conversionRate()"></div>
+          </div>
+          <p class="card-hint">Dossiers validés / Total</p>
         </div>
-        <div class="card-icon"><lucide-icon [name]="Activity"></lucide-icon></div>
+        <div class="card-icon-box accent">
+          <lucide-icon [name]="Activity"></lucide-icon>
+        </div>
       </div>
     </div>
 
     <!-- LIGNE 2 : STATUS & LEVELS -->
-    
-    <!-- Workflow Status Distribution -->
-    <div class="col-span-12 lg:col-span-7">
-      <section class="stat-card">
-        <div class="card-header">
-          <h3>Entonnoir de Conversion</h3>
-          <p>Répartition par étape du workflow d'admission</p>
-        </div>
-        <div class="card-body">
-          <div class="funnel-viz">
-            <div class="funnel-step">
-              <div class="step-label">Soumis</div>
-              <div class="step-bar-container"><div class="bar bg-primary" [style.width.%]="(statusStats().submitted / totalApps()) * 100"></div></div>
-              <div class="step-value">{{ statusStats().submitted }}</div>
-            </div>
-            <div class="funnel-step">
-              <div class="step-label">Vérifiés</div>
-              <div class="step-bar-container"><div class="bar bg-blue-400" [style.width.%]="(statusStats().verified / totalApps()) * 100"></div></div>
-              <div class="step-value">{{ statusStats().verified }}</div>
-            </div>
-            <div class="funnel-step">
-              <div class="step-label">En Évaluation</div>
-              <div class="step-bar-container"><div class="bar bg-amber-400" [style.width.%]="(statusStats().testing / totalApps()) * 100"></div></div>
-              <div class="step-value">{{ statusStats().testing }}</div>
-            </div>
-            <div class="funnel-step">
-              <div class="step-label">Admis</div>
-              <div class="step-bar-container"><div class="bar bg-emerald-500" [style.width.%]="(statusStats().validated / totalApps()) * 100"></div></div>
-              <div class="step-value">{{ statusStats().validated }}</div>
-            </div>
-            <div class="funnel-step">
-              <div class="step-label">Refusés</div>
-              <div class="step-bar-container"><div class="bar bg-rose-500" [style.width.%]="(statusStats().rejected / totalApps()) * 100"></div></div>
-              <div class="step-value">{{ statusStats().rejected }}</div>
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
-
-    <!-- Levels Distribution -->
-    <div class="col-span-12 lg:col-span-5">
-      <section class="stat-card">
-        <div class="card-header">
-          <h3>Répartition par Niveau</h3>
-          <p>Top 6 des niveaux les plus demandés</p>
-        </div>
-        <div class="card-body">
-          <div class="levels-stack">
-            <div *ngFor="let level of appsByLevel()" class="level-row">
-              <div class="level-info">
-                <span class="level-name text-slate-700 font-bold">{{ level.name }}</span>
-                <span class="level-count text-slate-400 text-xs">{{ level.count }} dossiers</span>
+    <div class="grid grid-cols-12 gap-8 mt-8">
+      
+      <!-- Workflow Status Distribution -->
+      <div class="col-span-12 lg:col-span-7">
+        <section class="stat-container">
+          <header class="container-header">
+            <h3>Entonnoir de Conversion</h3>
+            <p>Répartition par étape du workflow d'admission</p>
+          </header>
+          <div class="container-body">
+            <div class="funnel-stack">
+              <div class="funnel-step">
+                <span class="step-name">Soumis</span>
+                <div class="bar-wrap"><div class="bar bg-slate-200" [style.width.%]="(statusStats().submitted / totalApps()) * 100"></div></div>
+                <span class="step-count">{{ statusStats().submitted }}</span>
               </div>
-              <div class="level-bar-track">
-                <div class="level-bar-fill" [style.width.%]="level.percentage"></div>
+              <div class="funnel-step">
+                <span class="step-name">Vérifiés</span>
+                <div class="bar-wrap"><div class="bar bg-blue-400" [style.width.%]="(statusStats().verified / totalApps()) * 100"></div></div>
+                <span class="step-count">{{ statusStats().verified }}</span>
+              </div>
+              <div class="funnel-step">
+                <span class="step-name">Évaluation</span>
+                <div class="bar-wrap"><div class="bar bg-amber-400" [style.width.%]="(statusStats().testing / totalApps()) * 100"></div></div>
+                <span class="step-count">{{ statusStats().testing }}</span>
+              </div>
+              <div class="funnel-step">
+                <span class="step-name">Admis</span>
+                <div class="bar-wrap"><div class="bar bg-emerald-500" [style.width.%]="(statusStats().validated / totalApps()) * 100"></div></div>
+                <span class="step-count">{{ statusStats().validated }}</span>
+              </div>
+              <div class="funnel-step">
+                <span class="step-name">Refusés</span>
+                <div class="bar-wrap"><div class="bar bg-rose-500" [style.width.%]="(statusStats().rejected / totalApps()) * 100"></div></div>
+                <span class="step-count">{{ statusStats().rejected }}</span>
               </div>
             </div>
-            <div *ngIf="appsByLevel().length === 0" class="text-center py-12 text-slate-400 italic">
-              Aucune donnée disponible.
+          </div>
+        </section>
+      </div>
+
+      <!-- Levels Distribution -->
+      <div class="col-span-12 lg:col-span-5">
+        <section class="stat-container">
+          <header class="container-header">
+            <h3>Répartition par Niveau</h3>
+            <p>Top des demandes par cycle scolaire</p>
+          </header>
+          <div class="container-body">
+            <div class="levels-list">
+              <div *ngFor="let level of appsByLevel()" class="level-entry">
+                <div class="level-info">
+                  <span class="name">{{ level.name }}</span>
+                  <span class="count">{{ level.count }} dossiers</span>
+                </div>
+                <div class="track">
+                  <div class="fill" [style.width.%]="level.percentage"></div>
+                </div>
+              </div>
+              <div *ngIf="appsByLevel().length === 0" class="empty-hint">
+                Aucune donnée disponible.
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
+
     </div>
-
-  </main>
-
-</div>
+  </div>
+</app-fw-page-shell>
 
 <ng-template #loadingView>
   <div class="initial-loader">
-    <lucide-icon [name]="RefreshCw" [size]="48" class="animate-spin text-primary"></lucide-icon>
-    <p>Génération de vos statistiques stratégiques...</p>
+    <div class="loader-content">
+      <lucide-icon [name]="RefreshCw" [size]="48" class="animate-spin text-primary"></lucide-icon>
+      <p>Génération stratégique...</p>
+    </div>
   </div>
 </ng-template>

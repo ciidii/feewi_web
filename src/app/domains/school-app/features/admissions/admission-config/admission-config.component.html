@@ -1,74 +1,41 @@
-<div class="admission-config-page">
-
-  <!-- HEADER -->
-  <header class="page-header">
-    <div class="header-content">
-
-      <div class="header-left">
-        <div class="icon-badge"><lucide-icon [name]="Settings2" [size]="20"></lucide-icon></div>
-        <div>
-          <h1>Gouvernance du Portail</h1>
-          <p>Configuration de l'expérience d'admission<span *ngIf="activeYear()"> — {{ activeYear()?.label }}</span></p>
-        </div>
+<app-fw-page-shell
+  title="Gouvernance du Portail"
+  [description]="'Configuration de l\'expérience d\'admission • ' + (activeYear()?.label || '...') "
+  [icon]="Settings2"
+  [tabs]="currentScope() === 'GLOBAL' ? admissionTabs : []"
+  [activeTabId]="activeTab()"
+  (tabChange)="activeTab.set($any($event))"
+  density="compact"
+>
+  <!-- ACTIONS -->
+  <div actions class="flex items-center gap-3">
+    <!-- Statut Portail (Pill sémantique) -->
+    <div class="portal-status-wrap" *ngIf="config(); let cfg">
+      <div class="portal-status-pill" [class.online]="cfg.portalActive" (click)="togglePortal()" title="Cliquer pour basculer">
+        <div class="status-dot"></div>
+        <span>{{ cfg.portalActive ? 'Portail en ligne' : 'Portail hors-ligne' }}</span>
       </div>
-
-      <div class="header-center" *ngIf="config(); let cfg">
-        <div class="portal-status-pill" [class.online]="cfg.portalActive" (click)="togglePortal()" title="Cliquer pour basculer">
-          <div class="status-dot"></div>
-          <span>{{ cfg.portalActive ? 'Portail ouvert' : 'Portail fermé' }}</span>
-          <lucide-icon [name]="ToggleIcon" [size]="14"></lucide-icon>
-        </div>
-      </div>
-
-      <div class="header-actions">
-        <button class="btn-preview" (click)="previewPortal()">
-          <lucide-icon [name]="Eye" [size]="15"></lucide-icon>
-          <span>Simulateur</span>
-        </button>
-        <button class="btn-save" [class.is-dirty]="isDirty()" (click)="onSave()"
-                [disabled]="isSaving() || isLoading() || !isDirty() || currentScope() === 'YEAR' || currentScope() === 'CYCLE'">
-          <lucide-icon *ngIf="isSaving()" [name]="RefreshCw" [size]="15" class="animate-spin"></lucide-icon>
-          <lucide-icon *ngIf="!isSaving()" [name]="Save" [size]="15"></lucide-icon>
-          <span>{{ isSaving() ? 'Publication...' : 'Publier' }}</span>
-          <span class="dirty-dot" *ngIf="isDirty() && !isSaving()"></span>
-        </button>
-      </div>
-
     </div>
-  </header>
 
-  <!-- TABS (masqués en scope YEAR, CYCLE et LEVEL — ces éditeurs sont autonomes) -->
-  <nav class="cms-tabs-nav" *ngIf="currentScope() === 'GLOBAL'">
-    <div class="tabs-container">
-      <button class="tab-item" [class.active]="activeTab() === 'PILLARS'" (click)="activeTab.set('PILLARS')">
-        <lucide-icon [name]="LayoutGrid" [size]="15"></lucide-icon>
-        <span>Formulaire</span>
-      </button>
-      <button class="tab-item" [class.active]="activeTab() === 'DOCUMENTS'" (click)="activeTab.set('DOCUMENTS')">
-        <lucide-icon [name]="FileText" [size]="15"></lucide-icon>
-        <span>Documents</span>
-        <span class="tab-badge">{{ activeChecklist().length }}</span>
-      </button>
-      <button class="tab-item" [class.active]="activeTab() === 'ASSESSMENT'" (click)="activeTab.set('ASSESSMENT')">
-        <lucide-icon [name]="ClipboardList" [size]="15"></lucide-icon>
-        <span>Évaluation</span>
-      </button>
-      <button class="tab-item" [class.active]="activeTab() === 'SERVICES'" (click)="activeTab.set('SERVICES')">
-        <lucide-icon [name]="Wrench" [size]="15"></lucide-icon>
-        <span>Services</span>
-        <span class="tab-badge" *ngIf="activeServices().length">{{ activeServices().length }}</span>
-      </button>
-      <button class="tab-item" [class.active]="activeTab() === 'WORKFLOW'" (click)="activeTab.set('WORKFLOW')">
-        <lucide-icon [name]="ShieldCheck" [size]="15"></lucide-icon>
-        <span>Paramètres</span>
-      </button>
-    </div>
-  </nav>
+    <app-fw-button variant="tertiary" size="md" [icon]="Eye" (click)="previewPortal()">
+      Simulateur
+    </app-fw-button>
+
+    <app-fw-button
+      variant="primary"
+      size="md"
+      [icon]="Save"
+      [loading]="isSaving()"
+      [disabled]="!isDirty() || currentScope() !== 'GLOBAL'"
+      (click)="onSave()">
+      Publier
+    </app-fw-button>
+  </div>
 
   <!-- BODY -->
-  <div class="portal-admin-layout" *ngIf="config(); let cfg">
+  <div class="portal-admin-layout animate-in fade-in duration-700" *ngIf="config(); let cfg">
 
-    <!-- SIDEBAR -->
+    <!-- SIDEBAR DE PORTÉE (SCOPE) -->
     <aside class="scope-sidebar">
       <div class="nav-section-title">Portée</div>
 
@@ -82,7 +49,7 @@
 
       <div class="nav-divider"></div>
       <div class="nav-section-title">
-        Années
+        Années scolaires
         <span class="level-count">{{ availableYears().length }}</span>
       </div>
 
@@ -101,7 +68,7 @@
 
       <div class="nav-divider"></div>
       <div class="nav-section-title">
-        Niveaux
+        Niveaux d'entrée
         <span class="level-count">{{ levels().length }}</span>
       </div>
 
@@ -143,7 +110,6 @@
           <span class="scope-chip">Politique globale</span>
           <p>Ces réglages s'appliquent à toute l'école par défaut.</p>
         </div>
-        <span class="dirty-badge" *ngIf="isDirty()">● Modifications en attente</span>
       </div>
 
       <!-- ══════════ YEAR OVERRIDE EDITOR ══════════ -->
@@ -986,4 +952,4 @@
     <p>Chargement de la configuration…</p>
   </div>
 
-</div>
+</app-fw-page-shell>

@@ -53,13 +53,24 @@ import {PortalPreviewDialogComponent} from './components/portal-preview-dialog/p
 import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 import {ServiceFormComponent} from './components/service-form/service-form.component';
 
+import { FwPageShellComponent } from '../../../../../shared/components/page-shell/page-shell.component';
+import { FwButtonComponent } from '../../../../../shared/components/button/button.component';
+import { FwTab } from '../../../../../shared/components/tabs/tabs.component';
+
 export type ConfigTab = 'PILLARS' | 'DOCUMENTS' | 'ASSESSMENT' | 'SERVICES' | 'WORKFLOW';
 export type ConfigScope = 'GLOBAL' | 'LEVEL' | 'YEAR' | 'CYCLE';
 
 @Component({
   selector: 'app-admission-config',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, MatDialogModule],
+  imports: [
+    CommonModule, 
+    FormsModule, 
+    LucideAngularModule, 
+    MatDialogModule, 
+    FwPageShellComponent,
+    FwButtonComponent
+  ],
   templateUrl: './admission-config.component.html',
   styleUrls: ['./admission-config.component.scss']
 })
@@ -85,6 +96,15 @@ export class AdmissionConfigComponent implements OnInit {
   selectedYearId = signal<string | null>(null);
   activeTab = signal<ConfigTab>('PILLARS');
   activePillarKey = signal<string>('identity');
+
+  // Onglets intégrés au Shell (visibles uniquement en scope GLOBAL)
+  readonly admissionTabs: FwTab[] = [
+    { id: 'PILLARS', label: 'Formulaire', icon: LayoutGrid },
+    { id: 'DOCUMENTS', label: 'Documents', icon: FileText },
+    { id: 'ASSESSMENT', label: 'Évaluation', icon: ClipboardList },
+    { id: 'SERVICES', label: 'Services', icon: Wrench },
+    { id: 'WORKFLOW', label: 'Paramètres', icon: ShieldCheck }
+  ];
 
   // Year override local form state (isolated from global config)
   yearOverrideForm = signal<YearOverrideConfig>({

@@ -1,147 +1,109 @@
 @use '../../../../../../styles/tokens' as *;
 
-.admission-dashboard-page {
-  background: #f8fafc;
-  min-height: 100vh;
-}
-
-.page-header {
-  background: white;
-  border-bottom: 1px solid #e2e8f0;
-  padding: 1.5rem 2.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  .header-left {
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
-    .icon-badge {
-      width: 48px; height: 48px; border-radius: 14px;
-      display: flex; align-items: center; justify-content: center;
-    }
-  }
-
-  .period-selector {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    background: #f1f5f9;
-    border-radius: 999px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: #475569;
-  }
-}
-
-// --- KPI CARDS ---
-.kpi-card {
-  background: white;
-  border-radius: 20px;
-  padding: 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
-  height: 100%;
+/* KPI CARDS PREMIUM (Style Zen) */
+.kpi-card-premium {
   position: relative;
-  overflow: hidden;
-
-  .meta { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 0.5rem; }
-  .value { font-size: 2rem; font-weight: 800; color: #0f172a; line-height: 1; margin-bottom: 0.5rem; }
-  .sub { font-size: 0.75rem; color: #94a3b8; }
-
-  .card-icon {
-    width: 40px; height: 40px; border-radius: 12px;
-    background: #f8fafc; color: #64748b;
-    display: flex; align-items: center; justify-content: center;
-    lucide-icon { width: 20px; height: 20px; }
-  }
-
-  &.conversion {
-    background: linear-gradient(135deg, #1e2937 0%, #0f172a 100%);
-    .meta, .sub { color: #94a3b8; }
-    .value { color: white; }
-    .card-icon { background: rgba(255,255,255,0.1); color: white; }
-    .progress-mini {
-      height: 4px; background: rgba(255,255,255,0.1); border-radius: 99px; margin: 1rem 0;
-      .fill { height: 100%; background: #2563eb; border-radius: 99px; }
-    }
-  }
-}
-
-// --- STAT CARDS ---
-.stat-card {
   background: white;
   border-radius: 24px;
-  border: 1px solid #e2e8f0;
+  padding: 1.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  box-shadow: 0 4px 15px -4px rgba(0, 0, 0, 0.04);
+  transition: all var(--fw-transition);
+  border: none;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.08);
+  }
+
+  &.dark-mode {
+    background: var(--fw-midnight);
+    .card-label, .card-hint { color: rgba(255,255,255,0.6); }
+    .card-value { color: white; }
+    .card-icon-box { background: rgba(255,255,255,0.1); color: white; }
+  }
+
+  .card-label { font-size: 0.75rem; font-weight: 850; text-transform: uppercase; color: var(--fw-text-tertiary); letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+  .card-value { font-size: 2.25rem; font-weight: 850; color: var(--fw-midnight); line-height: 1; }
+  .card-hint { font-size: 0.75rem; font-weight: 600; color: var(--fw-text-tertiary); margin-top: 0.5rem; }
+  
+  .card-trend {
+    font-size: 0.75rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;
+    &.success { color: var(--fw-success); background: var(--fw-success-bg); }
+  }
+
+  .card-icon-box {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--fw-surface-sunken); color: var(--fw-text-tertiary);
+    
+    &.info { background: var(--fw-primary-alpha); color: var(--fw-primary); }
+    &.success { background: var(--fw-success-bg); color: var(--fw-success); }
+    &.warning { background: var(--fw-warning-bg); color: var(--fw-warning); }
+    &.accent { background: var(--fw-primary); color: white; }
+  }
+
+  .progress-bar-mini {
+    height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; margin-top: 1rem; width: 100px;
+    .fill { height: 100%; background: var(--fw-primary); border-radius: 10px; transition: width 1s ease; }
+  }
+}
+
+/* STAT CONTAINERS (Sections) */
+.stat-container {
+  background: white;
+  border-radius: 28px;
+  box-shadow: 0 4px 15px -4px rgba(0, 0, 0, 0.04);
   height: 100%;
   display: flex;
   flex-direction: column;
+  border: none;
 
-  .card-header {
-    padding: 1.5rem 2rem;
-    border-bottom: 1px solid #f1f5f9;
-    h3 { font-size: 1rem; font-weight: 700; color: #0f172a; margin: 0; }
-    p { font-size: 0.8rem; color: #64748b; margin: 4px 0 0; }
-  }
-
-  .card-body {
+  .container-header {
     padding: 2rem;
-    flex: 1;
+    border-bottom: 1px solid var(--fw-surface-sunken);
+    h3 { font-size: 1rem; font-weight: 800; color: var(--fw-midnight); margin: 0; text-transform: uppercase; letter-spacing: 0.02em; }
+    p { font-size: 0.8125rem; color: var(--fw-text-tertiary); font-weight: 600; margin: 4px 0 0; }
   }
+
+  .container-body { padding: 2rem; flex: 1; }
 }
 
-// --- FUNNEL VIZ ---
-.funnel-viz {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
+/* FUNNEL VISUALIZATION */
+.funnel-stack { display: flex; flex-direction: column; gap: 1.5rem; }
 .funnel-step {
-  display: grid;
-  grid-template-columns: 120px 1fr 40px;
-  align-items: center;
-  gap: 1.5rem;
-
-  .step-label { font-size: 0.85rem; font-weight: 600; color: #475569; }
-  .step-value { font-size: 0.9rem; font-weight: 800; color: #0f172a; text-align: right; }
-  
-  .step-bar-container {
-    height: 10px;
-    background: #f1f5f9;
-    border-radius: 999px;
-    overflow: hidden;
-    .bar { height: 100%; border-radius: 999px; transition: width 1s ease-out; }
-  }
+  display: grid; grid-template-columns: 120px 1fr 40px; align-items: center; gap: 1.5rem;
+  .step-name { font-size: 0.8125rem; font-weight: 700; color: var(--fw-text-secondary); }
+  .step-count { font-size: 0.875rem; font-weight: 850; color: var(--fw-midnight); text-align: right; }
+  .bar-wrap { height: 12px; background: var(--fw-surface-sunken); border-radius: 10px; overflow: hidden; .bar { height: 100%; border-radius: 10px; transition: width 1s ease-out; } }
 }
 
-// --- LEVELS STACK ---
-.levels-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+/* LEVELS LIST */
+.levels-list { display: flex; flex-direction: column; gap: 1.75rem; }
+.level-entry {
+  .level-info { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 0.625rem;
+    .name { font-size: 0.875rem; font-weight: 700; color: var(--fw-text-secondary); }
+    .count { font-size: 0.75rem; font-weight: 800; color: var(--fw-text-tertiary); text-transform: uppercase; }
+  }
+  .track { height: 6px; background: var(--fw-surface-sunken); border-radius: 10px; .fill { height: 100%; background: var(--fw-midnight); border-radius: 10px; } }
 }
 
-.level-row {
-  .level-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    margin-bottom: 0.5rem;
-    .level-name { font-size: 0.9rem; }
-  }
-  .level-bar-track {
-    height: 6px; background: #f1f5f9; border-radius: 99px;
-    .level-bar-fill { height: 100%; background: #0f172a; border-radius: 99px; }
-  }
+/* CUSTOM UI ELEMENTS */
+.period-selector-pill {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.5rem 1rem; background: var(--fw-surface-sunken);
+  border-radius: 100px; font-size: 0.75rem; font-weight: 800;
+  color: var(--fw-text-tertiary); text-transform: uppercase; letter-spacing: 0.05em;
+  lucide-icon { color: var(--fw-primary); }
 }
 
 .initial-loader {
-  position: fixed; inset: 0; background: white; z-index: 100;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 1rem; p { font-weight: 700; color: #2563eb; }
+  position: fixed; inset: 0; background: white; z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  .loader-content { text-align: center; p { margin-top: 1.5rem; font-weight: 850; color: var(--fw-primary); text-transform: uppercase; letter-spacing: 0.1em; } }
 }
+
+.empty-hint { text-align: center; padding: 3rem; color: var(--fw-text-tertiary); font-weight: 600; font-style: italic; font-size: 0.875rem; }

@@ -21,10 +21,12 @@ import {Admission} from '../../../../../core/models/enrollment.model';
 import {Level} from '../../../../../core/models/academic.model';
 import {finalize, forkJoin} from 'rxjs';
 
+import { FwPageShellComponent } from '../../../../../shared/components/page-shell/page-shell.component';
+
 @Component({
   selector: 'app-admission-dashboard',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [CommonModule, LucideAngularModule, FwPageShellComponent],
   templateUrl: './admission-dashboard.component.html',
   styleUrls: ['./admission-dashboard.component.scss']
 })

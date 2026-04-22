@@ -63,9 +63,10 @@
       <!-- ENROLLMENT -->
       <ng-container *ngIf="navService.activeService() === 'enrollment'">
         <span class="nav-section-title">Inscriptions</span>
-        <a *ngFor="let item of enrollmentItems"
+        <a *ngFor="let item of enrollmentItems; let i = index"
            [routerLink]="item.route"
            routerLinkActive="active-link"
+           [routerLinkActiveOptions]="i === 0 ? {exact: true} : {exact: false}"
            class="sidebar-link"
            [attr.data-label]="item.label">
           <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
@@ -76,9 +77,10 @@
       <!-- REGISTRY -->
       <ng-container *ngIf="navService.activeService() === 'registry'">
         <span class="nav-section-title">Registre Élèves</span>
-        <a *ngFor="let item of registryItems"
+        <a *ngFor="let item of registryItems; let i = index"
            [routerLink]="item.route"
            routerLinkActive="active-link"
+           [routerLinkActiveOptions]="i === 0 ? {exact: true} : {exact: false}"
            class="sidebar-link"
            [attr.data-label]="item.label">
           <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
@@ -89,9 +91,10 @@
       <!-- ACADEMIC -->
       <ng-container *ngIf="navService.activeService() === 'academic'">
         <span class="nav-section-title">Pilotage</span>
-        <a *ngFor="let item of academicItems"
+        <a *ngFor="let item of academicItems; let i = index"
            [routerLink]="item.route"
            routerLinkActive="active-link"
+           [routerLinkActiveOptions]="i === 0 ? {exact: true} : {exact: false}"
            class="sidebar-link"
            [attr.data-label]="item.label">
           <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
@@ -102,9 +105,10 @@
       <!-- IDENTITY -->
       <ng-container *ngIf="navService.activeService() === 'identity'">
         <span class="nav-section-title">Sécurité & Staff</span>
-        <a *ngFor="let item of identityItems"
+        <a *ngFor="let item of identityItems; let i = index"
            [routerLink]="item.route"
            routerLinkActive="active-link"
+           [routerLinkActiveOptions]="i === 0 ? {exact: true} : {exact: false}"
            class="sidebar-link"
            [attr.data-label]="item.label">
           <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
