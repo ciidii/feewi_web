@@ -7,13 +7,13 @@
 }
 
 /* ==========================================================================
-   1. LAYOUT : ACADEMIC HORIZONTAL ROWS (Aligning Heights)
+   1. LAYOUT : ACADEMIC HORIZONTAL ROWS
    ========================================================================== */
 .academic-row {
   display: grid;
   grid-template-columns: 1fr 400px;
   gap: 1.5rem;
-  align-items: stretch; // Force same height for both columns in a row
+  align-items: stretch;
 
   @media (max-width: 1200px) {
     grid-template-columns: 1fr;
@@ -22,13 +22,12 @@
 }
 
 /* ==========================================================================
-   2. TOP STATS BAR (COMPACT & ANALYTICAL)
+   2. TOP STATS BAR
    ========================================================================== */
 .stats-strip {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
-
   @media (max-width: 1024px) { grid-template-columns: repeat(2, 1fr); }
 }
 
@@ -48,7 +47,6 @@
       .value { font-size: 1.75rem; font-weight: 900; color: var(--fw-midnight); font-family: var(--fw-font-display); }
       .trend { font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; 
         &.up { color: var(--fw-success); background: var(--fw-success-bg); }
-        &.down { color: var(--fw-error); background: var(--fw-error-bg); }
       }
     }
     .sub-data { font-size: 11px; color: var(--fw-text-tertiary); font-weight: 600; margin-top: 0.25rem; }
@@ -78,30 +76,37 @@
     background: white;
     border-bottom: 1px solid var(--fw-surface-sunken);
     display: flex; justify-content: space-between; align-items: center;
-    
     h3 { font-size: 0.75rem; font-weight: 850; color: var(--fw-text-tertiary); text-transform: uppercase; letter-spacing: 0.1em; margin: 0; }
   }
 
-  .section-body { padding: 0; flex: 1; display: flex; flex-direction: column; }
+  .section-body { padding: 0; flex: 1; }
 }
 
-/* COMPACT DATA TABLE */
 .compact-action-table {
   width: 100%;
   border-collapse: collapse;
-  flex: 1;
   
   tr { 
     border-bottom: 1px solid var(--fw-surface-sunken); 
+    border-left: 3px solid transparent; // Barre d'accentuation invisible par défaut
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
     &:last-child { border-bottom: none; }
-    &:hover { background: var(--fw-surface-sunken); }
+
+    /* HOVER DISTINCTIF */
+    &:hover { 
+      background: var(--fw-primary-alpha); 
+      border-left-color: var(--fw-primary);
+      transform: scale(1.002);
+      .chevron-cell { transform: translateX(4px); color: var(--fw-primary); }
+    }
   }
 
-  td { padding: 1rem 1.5rem; }
+  td { padding: 1.125rem 1.5rem; }
 
   .action-cell {
-    display: flex; align-items: center; gap: 1rem;
-    .icon-box { width: 36px; height: 36px; border-radius: 8px; display: grid; place-items: center; }
+    display: flex; align-items: center; gap: 1.25rem;
+    
     .label-wrap {
       display: flex; flex-direction: column;
       strong { font-size: 0.875rem; font-weight: 800; color: var(--fw-midnight); }
@@ -109,65 +114,61 @@
     }
   }
 
-  .count-cell { text-align: right; font-size: 1.125rem; font-weight: 850; color: var(--fw-midnight); font-family: var(--fw-font-mono); }
+  .chevron-cell { 
+    text-align: right; 
+    color: var(--fw-text-tertiary); 
+    width: 40px;
+    padding-right: 2rem;
+    transition: all 0.2s;
+  }
 }
 
-/* 🚀 PIPELINE REFINEMENT */
-.pipeline-ribbon {
+/* SMART ICON BOX WITH BADGE & SEMANTIC COLORS */
+.icon-box-smart {
+  width: 40px; 
+  height: 40px; 
+  border-radius: 12px; 
   display: flex;
-  align-items: stretch;
-  gap: 4px;
-  padding: 1.5rem;
-  background: var(--fw-surface-sunken);
-  margin: 1.5rem;
-  border-radius: 12px;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
 
-  .step {
-    flex: 1;
-    background: white;
-    padding: 0.875rem;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    
-    &:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
-    &:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
+  lucide-icon { width: 20px; height: 20px; }
 
-    &.active {
-      background: var(--fw-midnight);
-      .label { color: rgba(255,255,255,0.6); }
-      .val { color: white; }
-    }
+  /* Couleurs sémantiques */
+  &.verify { background: var(--fw-info-bg); color: var(--fw-info); }
+  &.evaluate { background: var(--fw-warning-bg); color: var(--fw-warning); }
+  &.incomplete { background: var(--fw-error-bg); color: var(--fw-error); }
+  &.decision { background: var(--fw-primary); color: white; }
 
-    .label { font-size: 9px; font-weight: 850; text-transform: uppercase; color: var(--fw-text-tertiary); margin-bottom: 0.25rem; }
-    .val { font-size: 1.125rem; font-weight: 900; color: var(--fw-midnight); }
-    
-    &:not(:last-child)::after {
-      content: '';
-      position: absolute;
-      right: -10px; top: 50%;
-      transform: translateY(-50%);
-      border-top: 10px solid transparent;
-      border-bottom: 10px solid transparent;
-      border-left: 10px solid white;
-      z-index: 2;
-    }
-    
-    &.active:not(:last-child)::after { border-left-color: var(--fw-midnight); }
-  }
+  .smart-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    z-index: 10;
+    background: var(--fw-midnight);
+    color: white;
+    font-size: 10px;
+    font-weight: 850;
+    height: 18px;
+    min-width: 18px;
+    padding: 0 4px;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    border: 2px solid white;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    line-height: 1;
 
-  .conversion-bridge {
-    width: 30px;
-    display: grid; place-items: center;
-    font-size: 10px; font-weight: 850; color: var(--fw-text-tertiary);
-    background: rgba(0,0,0,0.03);
-    margin: 0 -2px;
-    z-index: 1;
+    &.danger { background: var(--fw-error); }
+    &.primary { background: var(--fw-primary); }
   }
 }
 
 /* ==========================================================================
-   4. MONITORING BLOCKS (SIDEBAR ZONE)
+   4. MONITORING BLOCKS
    ========================================================================== */
 .monitoring-card {
   background: white;
@@ -221,6 +222,46 @@
 /* ==========================================================================
    5. UI UTILS
    ========================================================================== */
+.pipeline-ribbon {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  padding: 1.5rem;
+  background: var(--fw-surface-sunken);
+  margin: 1.5rem;
+  border-radius: 12px;
+
+  .step {
+    flex: 1;
+    background: white;
+    padding: 0.875rem;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    &:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+    &:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
+    &.active {
+      background: var(--fw-midnight);
+      .label { color: rgba(255,255,255,0.6); }
+      .val { color: white; }
+    }
+    .label { font-size: 9px; font-weight: 850; text-transform: uppercase; color: var(--fw-text-tertiary); margin-bottom: 0.25rem; }
+    .val { font-size: 1.125rem; font-weight: 900; color: var(--fw-midnight); }
+    &:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      right: -10px; top: 50%;
+      transform: translateY(-50%);
+      border-top: 10px solid transparent;
+      border-bottom: 10px solid transparent;
+      border-left: 10px solid white;
+      z-index: 2;
+    }
+    &.active:not(:last-child)::after { border-left-color: var(--fw-midnight); }
+  }
+  .conversion-bridge { width: 30px; display: grid; place-items: center; font-size: 10px; font-weight: 850; color: var(--fw-text-tertiary); background: rgba(0,0,0,0.03); margin: 0 -2px; z-index: 1; }
+}
+
 .campaign-selector {
   display: flex; align-items: center; gap: 0.5rem;
   padding: 0.4rem 0.875rem; background: var(--fw-midnight); color: white;

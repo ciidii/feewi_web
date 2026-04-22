@@ -40,14 +40,13 @@ import { FwReportModalComponent, ReportItem } from '../../../../../shared/compon
   selector: 'app-admission-dashboard',
   standalone: true,
   imports: [
-    CommonModule, 
-    LucideAngularModule, 
+    CommonModule,
+    LucideAngularModule,
     FwPageShellComponent,
     FwButtonComponent,
     RouterLink,
     TranslateModule,
-    MatDialogModule,
-    FwReportModalComponent
+    MatDialogModule
   ],
   templateUrl: './admission-dashboard.component.html',
   styleUrls: ['./admission-dashboard.component.scss']

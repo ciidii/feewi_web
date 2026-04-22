@@ -80,33 +80,45 @@
         <div class="section-body">
           <table class="compact-action-table">
             <tbody>
-              <tr [routerLink]="['/admin/admissions/list']" [queryParams]="{status: 'SUBMITTED'}" class="cursor-pointer">
+              <tr [routerLink]="['/admin/admissions/list']" [queryParams]="{status: 'SUBMITTED'}" class="cursor-pointer group">
                 <td class="action-cell">
-                  <div class="icon-box bg-blue-50 text-blue-600"><lucide-icon [name]="ClipboardCheck"></lucide-icon></div>
+                  <div class="icon-box-smart verify">
+                    <lucide-icon [name]="ClipboardCheck"></lucide-icon>
+                    <span class="smart-badge" *ngIf="pendingVerification() > 0">{{ pendingVerification() }}</span>
+                  </div>
                   <div class="label-wrap"><strong>Vérification administrative</strong><span>Dossiers en attente de relecture</span></div>
                 </td>
-                <td class="count-cell">{{ pendingVerification() }}</td>
+                <td class="chevron-cell"><lucide-icon [name]="ArrowRight" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all"></lucide-icon></td>
               </tr>
-              <tr [routerLink]="['/admin/admissions/list']" [queryParams]="{status: 'VERIFIED'}" class="cursor-pointer">
+              <tr [routerLink]="['/admin/admissions/list']" [queryParams]="{status: 'VERIFIED'}" class="cursor-pointer group">
                 <td class="action-cell">
-                  <div class="icon-box bg-amber-50 text-amber-600"><lucide-icon [name]="GraduationCap"></lucide-icon></div>
+                  <div class="icon-box-smart evaluate">
+                    <lucide-icon [name]="GraduationCap"></lucide-icon>
+                    <span class="smart-badge" *ngIf="pendingEvaluation() > 0">{{ pendingEvaluation() }}</span>
+                  </div>
                   <div class="label-wrap"><strong>Planification évaluations</strong><span>Tests et entretiens à organiser</span></div>
                 </td>
-                <td class="count-cell">{{ pendingEvaluation() }}</td>
+                <td class="chevron-cell"><lucide-icon [name]="ArrowRight" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all"></lucide-icon></td>
               </tr>
-              <tr [routerLink]="['/admin/admissions/list']" [queryParams]="{incomplete: true}" class="cursor-pointer">
+              <tr [routerLink]="['/admin/admissions/list']" [queryParams]="{incomplete: true}" class="cursor-pointer group">
                 <td class="action-cell">
-                  <div class="icon-box bg-rose-50 text-rose-600"><lucide-icon [name]="XCircle"></lucide-icon></div>
+                  <div class="icon-box-smart incomplete">
+                    <lucide-icon [name]="XCircle"></lucide-icon>
+                    <span class="smart-badge danger" *ngIf="incompleteDossiers() > 0">{{ incompleteDossiers() }}</span>
+                  </div>
                   <div class="label-wrap"><strong>Relances documents</strong><span>Pièces manquantes ou rejetées</span></div>
                 </td>
-                <td class="count-cell">{{ incompleteDossiers() }}</td>
+                <td class="chevron-cell"><lucide-icon [name]="ArrowRight" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all"></lucide-icon></td>
               </tr>
-              <tr [routerLink]="['/admin/admissions/list']" [queryParams]="{status: 'ADMITTED'}" class="cursor-pointer">
+              <tr [routerLink]="['/admin/admissions/list']" [queryParams]="{status: 'ADMITTED'}" class="cursor-pointer group">
                 <td class="action-cell">
-                  <div class="icon-box bg-primary text-white"><lucide-icon [name]="ShieldCheck"></lucide-icon></div>
+                  <div class="icon-box-smart decision">
+                    <lucide-icon [name]="ShieldCheck"></lucide-icon>
+                    <span class="smart-badge primary" *ngIf="pendingDecision() > 0">{{ pendingDecision() }}</span>
+                  </div>
                   <div class="label-wrap"><strong>Validation Direction</strong><span>Dossiers prêts pour décision finale</span></div>
                 </td>
-                <td class="count-cell text-primary font-black">{{ pendingDecision() }}</td>
+                <td class="chevron-cell"><lucide-icon [name]="ArrowRight" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all"></lucide-icon></td>
               </tr>
             </tbody>
           </table>
