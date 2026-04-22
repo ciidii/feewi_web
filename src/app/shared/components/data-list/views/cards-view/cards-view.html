@@ -2,7 +2,7 @@
   <div
     *ngFor="let row of data()"
     class="feewi-card group"
-    [class.selected]="isSelected(row.id)"
+    [class.is-selected]="isSelected(row.id)"
     (click)="onRowClick.emit(row)"
   >
     <!-- Zone de sélection (Top Right) -->
@@ -32,60 +32,54 @@
     <div class="card-body">
       <!-- Titre et sous-titre -->
       <div class="title-section">
-        <h3 class="truncate" [title]="row.title">{{ row.title }}</h3>
-        <p class="line-clamp-2">{{ row.subtitle || 'Aucune description disponible' }}</p>
+        <h3 class="truncate text-midnight font-bold" [title]="row.title">{{ row.title }}</h3>
+        <p class="line-clamp-2 text-slate-medium text-sm">{{ row.subtitle || 'Aucune description disponible' }}</p>
       </div>
 
       <!-- Badges -->
-      <div class="badge-container">
-        <span
-          *ngFor="let badge of row.badges || []"
-          class="feewi-badge"
-          [ngClass]="getBadgeClass()(badge.type)"
-        >
-          {{ badge.label }}
-        </span>
+      <div class="badge-container flex flex-wrap gap-2 mt-4">
+        <app-fw-badge 
+          *ngFor="let badge of row.badges || []" 
+          [status]="badge.label" 
+          [tokenOverride]="$any(badge.type)" 
+          size="xs">
+        </app-fw-badge>
       </div>
 
       <!-- Grille de Métadonnées (Compacte) -->
-      <div class="metadata-grid">
+      <div class="metadata-grid mt-6 pt-4">
         <div class="meta-item">
-          <lucide-icon [name]="Globe"></lucide-icon>
+          <lucide-icon [name]="Globe" class="w-3.5 h-3.5"></lucide-icon>
           <span>{{ row.metadata?.['domain'] || 'Standard' }}</span>
         </div>
         <div class="meta-item" *ngIf="row.metadata?.['location']">
-          <lucide-icon [name]="MapPin"></lucide-icon>
+          <lucide-icon [name]="MapPin" class="w-3.5 h-3.5"></lucide-icon>
           <span>{{ row.metadata?.['location'] }}</span>
         </div>
         <div class="meta-item">
-          <lucide-icon [name]="Calendar"></lucide-icon>
+          <lucide-icon [name]="Calendar" class="w-3.5 h-3.5"></lucide-icon>
           <span>{{ formatDate(row.date) }}</span>
-        </div>
-        <div class="meta-item">
-          <lucide-icon [name]="Hash"></lucide-icon>
-          <span>ID: {{ row.id.toString() | slice:0:8 }}</span>
         </div>
       </div>
     </div>
 
     <!-- Pied de carte : Actions -->
-    <div class="card-footer">
-      <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+    <div class="card-footer bg-slate-50/50 px-6 py-4 flex items-center justify-between">
+      <span class="text-[9px] font-bold text-slate-medium uppercase tracking-widest">
         {{ isSelected(row.id) ? 'Sélectionné' : 'Détails' }}
       </span>
 
-      <div class="action-group" (click)="$event.stopPropagation()">
-        <ng-container *ngFor="let action of actions()">
-          <button
+      <div class="action-group flex gap-1" (click)="$event.stopPropagation()">
+        <ng-container *ngFor="let action of actions().slice(0, 3)">
+          <app-fw-button
             *ngIf="!action.hideIf || !action.hideIf(row)"
             (click)="onAction.emit({ actionId: action.id, row: row })"
-            [disabled]="action.disableIf && action.disableIf(row)"
-            class="action-btn transition-all"
-            [ngClass]="action.type || 'default'"
+            [disabled]="!!(action.disableIf && action.disableIf(row))"
+            [variant]="'tertiary'"
+            [size]="'sm'"
+            [icon]="action.icon"
             [title]="action.label"
-          >
-            <lucide-icon [name]="action.icon" class="w-3.5 h-3.5"></lucide-icon>
-          </button>
+          ></app-fw-button>
         </ng-container>
       </div>
     </div>
@@ -95,12 +89,12 @@
 <!-- État vide -->
 <div *ngIf="data().length === 0" class="py-32 text-center animate-in fade-in duration-700">
   <div class="inline-flex flex-col items-center gap-6">
-    <div class="w-24 h-24 bg-slate-50 rounded-[32px] flex items-center justify-center text-slate-200 border border-slate-100 shadow-inner">
+    <div class="w-24 h-24 bg-slate-50 rounded-[32px] flex items-center justify-center text-slate-200 shadow-inner">
       <lucide-icon [name]="LayoutGrid" class="w-12 h-12"></lucide-icon>
     </div>
     <div class="space-y-1">
-      <p class="text-lg font-bold text-slate-900 tracking-tight">Catalogue vide</p>
-      <p class="text-xs text-slate-400 font-medium">Aucun élément ne correspond à votre recherche actuelle.</p>
+      <h3 class="text-lg font-bold text-midnight tracking-tight italic uppercase">Catalogue vide</h3>
+      <p class="text-sm text-slate-medium font-medium">Aucun élément ne correspond à votre recherche actuelle.</p>
     </div>
   </div>
 </div>

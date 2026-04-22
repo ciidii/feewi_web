@@ -10,9 +10,11 @@ import {
   Calendar,
   Clock,
   ChevronRight,
-  Circle
+  Circle, MapPin
 } from 'lucide-angular';
-import {RowAction, TableRow} from '../../../../models/data-list.models';
+import { RowAction, TableRow } from '../../../../models/data-list.models';
+import { FwButtonComponent } from '../../../button/button.component';
+import { FwBadgeComponent } from '../../../badge/badge.component';
 
 
 export interface TimelineGroup {
@@ -26,7 +28,9 @@ export interface TimelineGroup {
   imports: [
     CommonModule,
     MatCheckboxModule,
-    LucideAngularModule
+    LucideAngularModule,
+    FwButtonComponent,
+    FwBadgeComponent
   ],
   templateUrl: './timeline-view.html',
   styleUrls: ['./timeline-view.scss']
@@ -39,6 +43,9 @@ export class TimelineViewComponent {
 
   /** Les données à afficher */
   data = input<TableRow[]>([]);
+
+  /** État de chargement */
+  isLoading = input<boolean>(false);
 
   /** IDs des éléments sélectionnés */
   selectedIds = input<Set<string | number>>(new Set());
@@ -150,4 +157,5 @@ export class TimelineViewComponent {
   protected readonly Clock = Clock;
   protected readonly ChevronRight = ChevronRight;
   protected readonly Circle = Circle;
+  protected readonly MapPin = MapPin;
 }

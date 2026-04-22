@@ -8,58 +8,65 @@
   &:hover, &.opacity-100 { opacity: 1; }
 }
 
-.avatar {
+.table-avatar {
   width: 32px;
   height: 32px;
-  border-radius: var(--fw-radius-md);
+  border-radius: 10px;
   background: var(--fw-surface-sunken);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
   overflow: hidden;
 
   .avatar-img { width: 100%; height: 100%; object-fit: cover; }
   .avatar-fallback { font-size: 10px; font-weight: 800; color: var(--fw-text-tertiary); }
 }
 
-.badge-table {
-  padding: 2px 8px;
-  border-radius: var(--fw-radius-full);
-  font-size: 9px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  border: 1px solid transparent;
-  white-space: nowrap;
+/* TABLE STYLES - ZERO BORDERS */
+table {
+  border-spacing: 0;
+  border-collapse: separate;
 }
 
-.table-action {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--fw-radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+thead {
   background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &.more { color: var(--fw-text-tertiary); &:hover { background: var(--fw-surface-sunken); color: var(--fw-text-primary); } }
+  
+  tr th {
+    border: none;
+    background: transparent;
+  }
 }
 
-/* REDIMENSIONNEMENT DES COLONNES (Impératif 5) */
+tbody tr {
+  background: white;
+  transition: all var(--fw-transition);
+
+  td {
+    border: none;
+  }
+
+  &:hover {
+    background: var(--fw-surface-sunken) !important;
+  }
+
+  &.is-selected {
+    background: var(--fw-primary-alpha) !important;
+  }
+}
+
+/* REDIMENSIONNEMENT DES COLONNES */
 th {
   position: relative;
   
   .column-resizer {
     position: absolute;
-    top: 0;
+    top: 25%;
     right: 0;
-    width: 4px;
-    height: 100%;
+    width: 2px;
+    height: 50%;
     cursor: col-resize;
     z-index: 10;
+    background-color: transparent;
     transition: background-color 0.2s;
 
     &:hover {
@@ -70,6 +77,12 @@ th {
   &.group\/header:hover .column-resizer {
     background-color: var(--fw-border-strong);
   }
+}
+
+.fw-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }

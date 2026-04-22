@@ -31,7 +31,7 @@
       <p class="hero-desc" *ngIf="!welcomeMessage()">Bienvenue sur notre plateforme d'inscription simplifiée. Démarrez votre dossier en quelques minutes.</p>
 
       <div class="hero-actions mt-10 flex justify-center gap-4">
-         <app-fw-button variant="secondary" [icon]="Search" routerLink="/enrollment/tracker">
+         <app-fw-button [variant]="'secondary'" [icon]="Search" routerLink="/enrollment/tracker">
             Reprendre une inscription
          </app-fw-button>
       </div>
@@ -71,7 +71,7 @@
             <div *ngIf="!year.isAdminOnly" class="year-actions">
               <ng-container *ngIf="year.hasBothTypes; else singleType">
                 <app-fw-button
-                  variant="primary"
+                  [variant]="'primary'"
                   class="w-full"
                   [routerLink]="['/enrollment/form-stepper']"
                   [queryParams]="{ yearId: year.id, type: 'NEW_ENROLLMENT' }"
@@ -79,7 +79,7 @@
                   Nouvelle Inscription
                 </app-fw-button>
                 <app-fw-button
-                  variant="secondary"
+                  [variant]="'secondary'"
                   class="w-full"
                   [routerLink]="['/enrollment/form-stepper']"
                   [queryParams]="{ yearId: year.id, type: 'RE_ENROLLMENT' }"
@@ -89,7 +89,7 @@
               </ng-container>
               <ng-template #singleType>
                 <app-fw-button
-                  variant="primary"
+                  [variant]="'primary'"
                   class="w-full"
                   [routerLink]="['/enrollment/form-stepper']"
                   [queryParams]="{ yearId: year.id, type: year.canNewEnrollment ? 'NEW_ENROLLMENT' : 'RE_ENROLLMENT' }"
@@ -112,7 +112,7 @@
       </div>
       <h2>Inscriptions fermées</h2>
       <p>L'établissement n'accepte pas de nouveaux dossiers en ligne actuellement.</p>
-      <app-fw-button variant="secondary" [icon]="Phone">Contacter le secrétariat</app-fw-button>
+      <app-fw-button [variant]="'secondary'" [icon]="Phone">Contacter le secrétariat</app-fw-button>
     </div>
 
     <!-- Quick Actions -->

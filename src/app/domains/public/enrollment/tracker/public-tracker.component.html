@@ -45,7 +45,7 @@
             <lucide-icon [name]="Info" [size]="16"></lucide-icon>
             <span>{{ error() }}</span>
           </div>
-          <app-fw-button type="submit" variant="primary" class="w-full" size="lg"
+          <app-fw-button type="submit" [variant]="'primary'" class="w-full" [size]="'lg'"
                          [icon]="ArrowRight" iconPosition="right">
             Rechercher le dossier
           </app-fw-button>
@@ -63,7 +63,7 @@
             <lucide-icon [name]="Info" [size]="16"></lucide-icon>
             <span>{{ error() }}</span>
           </div>
-          <app-fw-button (click)="onSearchByEmail()" variant="primary" class="w-full" size="lg"
+          <app-fw-button (click)="onSearchByEmail()" [variant]="'primary'" class="w-full" [size]="'lg'"
                          [icon]="ArrowRight" iconPosition="right">
             Rechercher par email
           </app-fw-button>
@@ -97,8 +97,8 @@
           <span class="family-ref">{{ bundle()?.reference }}</span>
         </div>
         <div class="family-actions">
-          <app-fw-button (click)="reload()" variant="ghost" size="sm" [icon]="RefreshCw">Actualiser</app-fw-button>
-          <app-fw-button (click)="reset()" variant="ghost" size="sm" [icon]="Search">Autre dossier</app-fw-button>
+          <app-fw-button (click)="reload()" [variant]="'ghost'" [size]="'sm'" [icon]="RefreshCw">Actualiser</app-fw-button>
+          <app-fw-button (click)="reset()" [variant]="'ghost'" [size]="'sm'" [icon]="Search">Autre dossier</app-fw-button>
         </div>
       </div>
 
@@ -115,7 +115,7 @@
           <p class="dp-sub">L'école examine les dossiers de vos enfants. Vous serez notifié dès qu'une décision est prise.</p>
         </div>
         <div class="dp-actions">
-          <app-fw-button variant="ghost" [icon]="RefreshCw" (click)="reload()">Actualiser</app-fw-button>
+          <app-fw-button [variant]="'ghost'" [icon]="RefreshCw" (click)="reload()">Actualiser</app-fw-button>
         </div>
       </div>
 
@@ -132,7 +132,7 @@
           </div>
         </div>
         <div class="dp-actions">
-          <app-fw-button variant="primary" [icon]="CheckCircle" iconPosition="right"
+          <app-fw-button [variant]="'primary'" [icon]="CheckCircle" iconPosition="right"
                          [loading]="isDeciding()" (click)="onConfirmAdmitted()">
             Procéder au paiement
           </app-fw-button>
@@ -174,11 +174,11 @@
           </div>
 
           <div class="dp-actions dp-actions-full">
-            <app-fw-button variant="primary" [icon]="CheckCircle" iconPosition="right"
+            <app-fw-button [variant]="'primary'" [icon]="CheckCircle" iconPosition="right"
                            [loading]="isDeciding()" (click)="onConfirmAdmitted()">
               Valider les admis
             </app-fw-button>
-            <app-fw-button variant="danger" [icon]="XCircle"
+            <app-fw-button [variant]="'danger'" [icon]="XCircle"
                            [loading]="isDeciding()" (click)="onCancelAll()">
               Tout annuler
             </app-fw-button>
@@ -230,8 +230,8 @@
     <div *ngIf="!isLoading() && mode() === 'single' && admission(); let app" class="single-state">
       <ng-container *ngTemplateOutlet="admissionDetail; context: { app: app }"></ng-container>
       <div class="actions-footer">
-        <app-fw-button (click)="reset()" variant="ghost" [icon]="Search">Suivre un autre dossier</app-fw-button>
-        <app-fw-button (click)="reload()" variant="secondary" [icon]="RefreshCw">Actualiser</app-fw-button>
+        <app-fw-button (click)="reset()" [variant]="'ghost'" [icon]="Search">Suivre un autre dossier</app-fw-button>
+        <app-fw-button (click)="reload()" [variant]="'secondary'" [icon]="RefreshCw">Actualiser</app-fw-button>
       </div>
     </div>
 
@@ -260,7 +260,7 @@
 
         <!-- CTA DRAFT : continuer -->
         <div *ngIf="app.status === 'DRAFT'" class="mt-6">
-          <app-fw-button variant="primary" size="md" [icon]="ArrowRight" iconPosition="right"
+          <app-fw-button [variant]="'primary'" [size]="'md'" [icon]="ArrowRight" iconPosition="right"
                          [routerLink]="['/enrollment/form-stepper']">
             Continuer l'inscription
           </app-fw-button>
@@ -424,8 +424,8 @@
           <h3>Besoin d'aide ?</h3>
           <p>Contactez notre service admission pour toute question.</p>
           <div class="contact-actions">
-            <app-fw-button variant="secondary" size="sm" [icon]="Phone">Appeler</app-fw-button>
-            <app-fw-button variant="secondary" size="sm" [icon]="Mail">Email</app-fw-button>
+            <app-fw-button [variant]="'secondary'" [size]="'sm'" [icon]="Phone">Appeler</app-fw-button>
+            <app-fw-button [variant]="'secondary'" [size]="'sm'" [icon]="Mail">Email</app-fw-button>
           </div>
         </div>
       </div>

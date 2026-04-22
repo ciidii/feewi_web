@@ -22,7 +22,7 @@ import { FwButtonComponent } from '../button/button.component';
 
       <!-- Actions -->
       <div class="action-zone" *ngIf="ctaLabel">
-        <app-fw-button (click)="ctaClick.emit()" variant="primary" [size]="density === 'compact' ? 'sm' : 'md'">
+        <app-fw-button (click)="ctaClick.emit()" [variant]="'primary'" [size]="density === 'compact' ? 'sm' : 'md'">
           {{ ctaLabel }}
         </app-fw-button>
       </div>

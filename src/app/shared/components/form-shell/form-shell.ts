@@ -1,8 +1,8 @@
-import { CommonModule } from '@angular/common';
-import { LucideAngularModule, X, Save } from 'lucide-angular';
-import { Component, input, output, HostListener } from '@angular/core';
-import { FwButtonComponent } from '../button/button.component';
-import { A11yModule } from '@angular/cdk/a11y';
+import {CommonModule} from '@angular/common';
+import {LucideAngularModule, Save, X} from 'lucide-angular';
+import {Component, HostListener, input, output} from '@angular/core';
+import {FwButtonComponent} from '../button/button.component';
+import {A11yModule} from '@angular/cdk/a11y';
 
 export type FormShellMode = 'page' | 'dialog';
 

@@ -2,53 +2,61 @@
   title="Répertoire des Élèves"
   description="Gérez le référentiel central des élèves inscrits dans l'établissement."
   [icon]="Users"
+  [tabs]="studentTabs()"
+  [activeTabId]="activeTabId()"
+  (tabChange)="onTabChange($event)"
   density="compact"
 >
   <!-- ACTIONS -->
   <div actions class="flex items-center gap-3">
-    <button
-      class="flex items-center gap-2 px-4 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all active:scale-95">
-      <lucide-icon [name]="Download" class="w-4 h-4"></lucide-icon>
+    <app-fw-button
+      [variant]="'tertiary'"
+      [size]="'md'"
+      [icon]="Download"
+    >
       Exporter
-    </button>
-    <button
-      class="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-primary rounded-xl hover:bg-primary-hover shadow-lg shadow-primary-alpha transition-all active:scale-95">
-      <lucide-icon [name]="UserPlus" class="w-4 h-4"></lucide-icon>
+    </app-fw-button>
+    <app-fw-button
+      [variant]="'primary'"
+      [size]="'md'"
+      [icon]="UserPlus"
+    >
       Inscrire un élève
-    </button>
+    </app-fw-button>
   </div>
 
   <!-- CONTENU -->
-  <div class="space-y-6 animate-in fade-in duration-500">
+  <div class="space-y-6 animate-in fade-in duration-700">
     
-    <!-- Barre d'outils (Recherche & Filtres) -->
-    <div class="flex items-center justify-between gap-4">
-      <div class="relative flex-1 max-w-md">
+    <!-- Barre d'outils Intégrée -->
+    <div class="flex items-center justify-between gap-6 bg-white/50 backdrop-blur-sm p-4 rounded-2xl shadow-sm">
+      <div class="relative flex-1 max-w-lg group">
         <lucide-icon [name]="Search"
-                    class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></lucide-icon>
+                    class="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400 group-focus-within:text-primary transition-colors"></lucide-icon>
         <input
           type="text"
-          placeholder="Rechercher par nom, prénom ou matricule..."
-          class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-alpha focus:border-primary transition-all"
+          placeholder="Rechercher un élève (nom, matricule, classe...)"
+          class="w-full pl-12 pr-4 py-3 bg-white rounded-xl text-sm font-bold text-midnight focus:outline-none focus:ring-4 focus:ring-primary-alpha focus:border-primary transition-all shadow-sm"
           #searchInput
           (input)="onSearch(searchInput.value)"
         >
       </div>
 
-      <div class="flex items-center gap-2">
-        <button class="p-2.5 text-slate-500 hover:bg-white border border-transparent hover:border-slate-200 rounded-xl transition-all" title="Filtres avancés">
-          <lucide-icon [name]="Filter" class="w-5 h-5"></lucide-icon>
-        </button>
+      <div class="flex items-center gap-3">
+        <app-fw-button [variant]="'tertiary'" [size]="'md'" [icon]="Filter">Filtres</app-fw-button>
       </div>
     </div>
 
-    <!-- Liste des données -->
+    <!-- Liste des données en mode intégré (pas de double toolbar) -->
     <app-data-list
       [data]="studentRows()"
       [actions]="studentActions"
-      [tabs]="studentTabs()"
+      [total]="studentPage()?.totalElements || 0"
       [isLoading]="loadingService.isLoading()"
-      (onTabChange)="onTabChange($event)"
+      [cardMode]="false"
+      [showSearch]="false"
+      [showFilterButton]="false"
+      defaultView="cards"
       (onAction)="handleAction($event)"
     ></app-data-list>
 

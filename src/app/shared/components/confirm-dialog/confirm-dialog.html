@@ -11,7 +11,7 @@
   </div>
 
   <div footer-left>
-    <app-fw-button variant="ghost" (click)="onCancel()">
+    <app-fw-button [variant]="'ghost'" (click)="onCancel()">
       {{ data.cancelLabel || 'Annuler' }}
     </app-fw-button>
   </div>

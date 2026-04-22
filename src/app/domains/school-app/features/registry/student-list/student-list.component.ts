@@ -6,14 +6,16 @@ import { firstValueFrom, Subject, debounceTime, distinctUntilChanged, takeUntil 
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
-import { DataListComponent } from '../../../../../shared/components/data-list/data-list.component';
-import { RowAction, TabItem, TableRow } from '../../../../../shared/models/data-list.models';
+import { RowAction, TableRow } from '../../../../../shared/models/data-list.models';
 import { StudentRegistryService } from '../../../../../core/services/student-registry.service';
 import { StudentSummary, StudentStatus } from '../../../../../core/models/student.model';
 import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 import { NotificationService } from '../../../../../shared/services/notification.service';
 import { LoadingService } from '../../../../../shared/services/loading.service';
 import { FwPageShellComponent } from '../../../../../shared/components/page-shell/page-shell.component';
+import { FwTab } from '../../../../../shared/components/tabs/tabs.component';
+import {DataListComponent} from '../../../../../shared/components/data-list/data-list.component';
+import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
 
 @Component({
   selector: 'app-student-list',
@@ -24,7 +26,8 @@ import { FwPageShellComponent } from '../../../../../shared/components/page-shel
     LucideAngularModule,
     MatMenuModule,
     MatDialogModule,
-    FwPageShellComponent
+    FwPageShellComponent,
+    FwButtonComponent
   ],
   templateUrl:  './student-list.component.html',
   styleUrl: './student-list.component.scss',
@@ -45,7 +48,7 @@ export class StudentListComponent implements OnInit, OnDestroy {
   readonly Users = Users;
 
   // --- ÉTATS ---
-  activeTab = signal('Tous');
+  activeTabId = signal('Tous');
   searchQuery = signal('');
 
   private searchSubject = new Subject<string>();
@@ -60,20 +63,18 @@ export class StudentListComponent implements OnInit, OnDestroy {
     return page.content.map(student => this.mapToTableRow(student));
   });
 
-  // --- CONFIGURATION UI (Impératif 4) ---
+  // --- CONFIGURATION UI ---
   readonly studentActions: RowAction[] = [
     { id: 'view', label: 'Dossier complet', icon: Eye, type: 'primary' },
     { id: 'history', label: 'Logs & Historique', icon: History, type: 'default' },
     { id: 'suspend', label: 'Suspendre', icon: UserMinus, type: 'danger' }
   ];
 
-  readonly studentTabs = computed<TabItem[]>(() => {
-    const page = this.studentPage();
-    const total = page?.totalElements || 0;
+  readonly studentTabs = computed<FwTab[]>(() => {
     return [
-      { label: 'Tous', icon: GraduationCap, count: total },
-      { label: 'Actifs', icon: UserCheck },
-      { label: 'Suspendus', icon: ShieldAlert }
+      { id: 'Tous', label: 'Tous les élèves', icon: GraduationCap },
+      { id: 'Actifs', label: 'Inscrits Actifs', icon: UserCheck },
+      { id: 'Suspendus', label: 'Suspendus', icon: ShieldAlert }
     ];
   });
 
@@ -146,7 +147,7 @@ export class StudentListComponent implements OnInit, OnDestroy {
   }
 
   onTabChange(tab: string) {
-    this.activeTab.set(tab);
+    this.activeTabId.set(tab);
     let status: StudentStatus | undefined;
     if (tab === 'Actifs') status = 'ACTIVE';
     if (tab === 'Suspendus') status = 'SUSPENDED';

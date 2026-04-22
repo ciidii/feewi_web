@@ -14,9 +14,9 @@ import {
   Phone,
   LayoutGrid, Globe, Check, Hash
 } from 'lucide-angular';
-import {RowAction, TableRow} from '../../../../models/data-list.models';
-
-// Importer les modèles
+import { RowAction, TableRow } from '../../../../models/data-list.models';
+import { FwBadgeComponent } from '../../../badge/badge.component';
+import { FwButtonComponent } from '../../../button/button.component';
 
 @Component({
   selector: 'app-cards-view',
@@ -24,7 +24,9 @@ import {RowAction, TableRow} from '../../../../models/data-list.models';
   imports: [
     CommonModule,
     MatCheckboxModule,
-    LucideAngularModule
+    LucideAngularModule,
+    FwBadgeComponent,
+    FwButtonComponent
   ],
   templateUrl: './cards-view.html',
   styleUrls: ['./cards-view.scss']

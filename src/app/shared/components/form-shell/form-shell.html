@@ -40,7 +40,7 @@
     <div class="footer-right">
       <app-fw-button
         *ngIf="showCancel()"
-        variant="ghost"
+        [variant]="'ghost'"
         (click)="onCancel()"
         [disabled]="isLoading()"
       >
@@ -48,7 +48,7 @@
       </app-fw-button>
 
       <app-fw-button
-        variant="primary"
+        [variant]="'primary'"
         [loading]="isLoading()"
         [disabled]="!canSave()"
         (click)="onSave()"

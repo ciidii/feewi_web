@@ -39,18 +39,18 @@ import {
 // Importer les composants
 import { ExpandableViewComponent } from './views/expandable-view/expandable-view';
 import { CardsViewComponent } from './views/cards-view/cards-view';
-import {SortState, TableViewComponent} from './views/table-view/table-view';
+import { SortState, TableViewComponent } from './views/table-view/table-view';
 import { TimelineViewComponent } from './views/timeline-view/timeline-view';
 import { CardSkeletonComponent } from '../skeleton/card-skeleton.component';
 import { BlockLoaderComponent } from '../loader/block-loader.component';
 import { FwEmptyStateComponent } from '../empty-state/empty-state.component';
 import { SmartTooltipDirective } from '../../directives/smart-tooltip.directive';
 import { FwRefreshBannerComponent } from '../refresh-banner/refresh-banner.component';
-
+import { FwButtonComponent } from '../button/button.component';
 
 // Importer les services
 import { ViewPreferenceService } from '../../services/view-preference.service';
-import {SkeletonComponent} from '../skeleton/skeleton.component';
+import { SkeletonComponent } from '../skeleton/skeleton.component';
 
 @Component({
   selector: 'app-data-list',
@@ -69,7 +69,8 @@ import {SkeletonComponent} from '../skeleton/skeleton.component';
     MatMenuModule,
     BlockLoaderComponent,
     FwEmptyStateComponent,
-    FwRefreshBannerComponent
+    FwRefreshBannerComponent,
+    FwButtonComponent
   ],
   templateUrl: './data-list.component.html',
   styleUrls: ['./data-list.component.scss']
@@ -137,6 +138,9 @@ export class DataListComponent {
 
   /** Données périmées (Impératif 3) */
   isStale = input<boolean>(false);
+
+  /** Mode carte (bordures, fond blanc) ou intégré */
+  cardMode = input<boolean>(true);
 
   // ===========================================
   // OUTPUTS (événements vers le parent)
@@ -213,14 +217,14 @@ export class DataListComponent {
       label: 'Vue Tableau',
       icon: Table,
       description: 'Affichage classique en lignes et colonnes',
-      isAvailable: true  // Maintenant disponible
+      isAvailable: true
     },
     {
       id: 'timeline',
       label: 'Vue Chronologique',
       icon: Calendar,
       description: 'Organisation par date',
-      isAvailable: true  // Maintenant disponible
+      isAvailable: true
     }
   ];
 
@@ -446,12 +450,7 @@ export class DataListComponent {
       default: return 'bg-slate-50 text-slate-600 border-slate-200';
     }
   }
-  // ===========================================
-// MÉTHODES POUR LE SÉLECTEUR DE VUES INTELLIGENT
-// ===========================================
 
-  /** Obtenir l'icône de la vue actuelle */
-  /** Obtenir l'icône de la vue actuelle */
   /** Obtenir l'icône de la vue actuelle */
   getCurrentViewIcon(): any {
     const currentView = this.viewOptions.find(v => v.id === this.viewMode());
@@ -466,27 +465,8 @@ export class DataListComponent {
 
   /** Vérifier si une vue est nouvelle (pour afficher le badge) */
   isNewView(viewId: string): boolean {
-    // Les vues récemment ajoutées - à ajuster selon vos besoins
     const newViews = ['cards', 'timeline'];
     return newViews.includes(viewId);
-  }
-
-  /** Marquer une vue comme vue (optionnel) */
-  markViewAsSeen(viewId: string): void {
-    try {
-      localStorage.setItem(`view-${viewId}-seen`, 'true');
-    } catch (error) {
-      console.warn('Impossible d\'accéder au localStorage', error);
-    }
-  }
-
-  /** Vérifier si une vue a déjà été vue (optionnel) */
-  hasViewBeenSeen(viewId: string): boolean {
-    try {
-      return localStorage.getItem(`view-${viewId}-seen`) === 'true';
-    } catch (error) {
-      return false;
-    }
   }
 
   // ===========================================
@@ -516,7 +496,3 @@ export class DataListComponent {
     this.isFiltersOpen.update(v => !v);
   }
 }
-
-
-
-

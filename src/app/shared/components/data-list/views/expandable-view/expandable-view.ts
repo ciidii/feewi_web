@@ -13,8 +13,10 @@ import {
   Mail,
   Printer
 } from 'lucide-angular';
-import {RowAction, TableRow} from '../../../../models/data-list.models';
-import {SkeletonComponent} from '../../../skeleton/skeleton.component';
+import { RowAction, TableRow } from '../../../../models/data-list.models';
+import { SkeletonComponent } from '../../../skeleton/skeleton.component';
+import { FwButtonComponent } from '../../../button/button.component';
+import { FwBadgeComponent } from '../../../badge/badge.component';
 
 @Component({
   selector: 'app-expandable-view',
@@ -23,7 +25,9 @@ import {SkeletonComponent} from '../../../skeleton/skeleton.component';
     CommonModule,
     MatCheckboxModule,
     LucideAngularModule,
-    SkeletonComponent
+    SkeletonComponent,
+    FwButtonComponent,
+    FwBadgeComponent
   ],
   templateUrl: './expandable-view.html',
   styleUrls: ['./expandable-view.scss']
@@ -107,22 +111,6 @@ export class ExpandableViewComponent {
       .replace(/_/g, ' ')        // Underscores to spaces
       .trim()
       .toLowerCase();
-  }
-
-  /** Obtenir la classe CSS d'une action */
-  getActionClass(action: RowAction): string {
-    switch (action.type) {
-      case 'primary':
-        return 'text-primary-600 hover:bg-primary-50';
-      case 'danger':
-        return 'text-rose-600 hover:bg-rose-50';
-      case 'success':
-        return 'text-emerald-600 hover:bg-emerald-50';
-      case 'warning':
-        return 'text-amber-600 hover:bg-amber-50';
-      default:
-        return 'text-slate-600 hover:bg-slate-100';
-    }
   }
 
   // ===========================================

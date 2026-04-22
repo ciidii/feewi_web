@@ -13,7 +13,6 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  border: 1px solid transparent;
   white-space: nowrap;
   transition: all 0.2s ease;
 
@@ -25,35 +24,30 @@
   &.token-success {
     background-color: var(--fw-success-bg);
     color: var(--fw-success-text);
-    border-color: var(--fw-success-border);
     .dot { background-color: var(--fw-success); }
   }
 
   &.token-warning {
     background-color: var(--fw-warning-bg);
     color: var(--fw-warning-text);
-    border-color: var(--fw-warning-border);
     .dot { background-color: var(--fw-warning); }
   }
 
   &.token-error {
     background-color: var(--fw-error-bg);
     color: var(--fw-error-text);
-    border-color: var(--fw-error-border);
     .dot { background-color: var(--fw-error); }
   }
 
   &.token-info {
     background-color: var(--fw-info-bg);
     color: var(--fw-info-text);
-    border-color: var(--fw-info-border);
     .dot { background-color: var(--fw-info); }
   }
 
   &.token-neutral {
     background-color: var(--fw-neutral-bg);
     color: var(--fw-neutral-text);
-    border-color: var(--fw-neutral-border);
     .dot { background-color: var(--fw-neutral-text); }
   }
 

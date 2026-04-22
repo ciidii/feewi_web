@@ -1,513 +1,187 @@
 :host {
   display: block;
-  width: 100%;
 }
 
-// Animations
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.animate-slideDown {
-  animation: slideDown 0.2s ease-out;
-}
-
-// Actions buttons
-.action-button {
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 0.75rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-  color: #64748b;
-
-  &:hover {
-    background-color: #f1f5f9;
-  }
-
-  &:active {
-    transform: scale(0.95);
-  }
-
-  &.validate:hover {
-    background-color: #f0fdf4;
-    color: #16a34a;
-  }
-
-  &.archive:hover {
-    background-color: #eff6ff;
-    color: #2563eb;
-  }
-
-  &.delete:hover {
-    background-color: #fef2f2;
-    color: #dc2626;
-  }
-
-  &.export:hover {
-    background-color: #e2e8f0;
-    color: #334155;
-  }
-}
-
-// Tabs
+/* TOOLBAR */
 .tab-button {
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #475569;
-  transition: all 0.2s;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 12px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--fw-text-tertiary);
+  transition: all var(--fw-transition);
+  border: none;
+  background: transparent;
+  cursor: pointer;
 
   &:hover {
-    color: #2563eb;
-    background-color: rgba(37, 99, 235, 0.05);
+    color: var(--fw-text-secondary);
+    background: var(--fw-surface-sunken);
   }
 
   &.active {
-    color: #1d4ed8;
-    background-color: #eff6ff;
+    color: var(--fw-primary);
+    background: var(--fw-primary-alpha);
   }
 
   .badge {
-    font-size: 0.625rem;
-    padding: 0.125rem 0.375rem;
-    border-radius: 9999px;
-    background-color: #f1f5f9;
-    color: #475569;
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: var(--fw-surface-sunken);
+    font-size: 10px;
+    color: var(--fw-text-tertiary);
 
     &.active {
-      background-color: #dbeafe;
-      color: #1d4ed8;
+      background: var(--fw-primary);
+      color: white;
     }
   }
 }
 
-// View options
-.view-option {
-  transition: all 0.2s;
-
-  &:hover {
-    color: #2563eb;
-  }
-}
-
-// Search input
+/* SEARCH INPUT */
 .search-input {
-  width: 16rem;
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.75rem;
-  padding: 0.5rem 2.5rem 0.5rem 2.5rem;
+  height: 40px;
+  background: var(--fw-surface-sunken);
+  border: 1.5px solid transparent;
+  border-radius: 12px;
+  padding: 0 1rem 0 2.5rem;
   font-size: 0.875rem;
-  outline: none;
-  transition: all 0.2s;
+  font-weight: 600;
+  color: var(--fw-text-primary);
+  width: 240px;
+  transition: all var(--fw-transition);
 
-  &:focus {
-    width: 20rem;
-    border-color: #2563eb;
-    background-color: white;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  &::placeholder {
+    color: var(--fw-text-placeholder);
   }
 
-  &.has-value {
-    background-color: white;
-    border-color: #bfdbfe;
+  &:focus, &.has-value {
+    width: 320px;
+    background: white;
+    border-color: var(--fw-primary);
+    box-shadow: 0 0 0 4px var(--fw-primary-alpha);
   }
 }
 
 .search-clear {
   position: absolute;
-  right: 0.5rem;
+  right: 0.75rem;
   top: 50%;
   transform: translateY(-50%);
-  padding: 0.25rem;
-  border-radius: 9999px;
-
-  &:hover {
-    background-color: #f1f5f9;
-  }
-}
-
-// Avatar
-.avatar {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 0.75rem;
-  background-color: #f1f5f9;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #e2e8f0;
-  overflow: hidden;
-  flex-shrink: 0;
-
-  &-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  &-fallback {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #475569;
-    text-transform: uppercase;
-  }
-}
-
-// Icon buttons
-.icon-btn {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #94a3b8;
-  transition: all 0.2s;
-
-  &:hover {
-    background-color: #f1f5f9;
-    color: #334155;
-  }
-
-  &.validate:hover {
-    background-color: #f0fdf4;
-    color: #16a34a;
-  }
-}
-
-// Quick actions
-.quick-action {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  background: white;
-  border: 1px solid #e2e8f0;
-  font-size: 0.875rem;
-  color: #475569;
-  transition: all 0.2s;
-
-  &:hover {
-    background: #f8fafc;
-    border-color: #2563eb;
-    color: #2563eb;
-  }
-}
-
-// Pagination
-.pagination-button {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 0.5rem;
-  border: 1px solid #e2e8f0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #64748b;
-  background: white;
-
-  &:hover:not(:disabled) {
-    border-color: #94a3b8;
-    color: #334155;
-  }
-
-  &:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-  }
-}
-
-.pagination-page {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #475569;
-
-  &:hover {
-    background-color: #f1f5f9;
-  }
-
-  &.active {
-    background-color: #2563eb;
-    color: white;
-
-    &:hover {
-      background-color: #1d4ed8;
-    }
-  }
-}
-
-// Badge mini
-.badge-mini {
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  border: 1px solid;
-}
-
-.badge-status {
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  border: 1px solid;
-}
-
-// Amélioration du menu
-.view-menu {
-  .mat-menu-item {
-    .text-primary-600 {
-      color: #2563eb;
-    }
-  }
-}
-
-// Badge nouveau dans le menu
-.bg-green-100 {
-  background-color: #dcfce7;
-}
-.text-green-700 {
-  color: #15803d;
-}
-.rounded-full {
-  border-radius: 9999px;
-}
-
-// Animation pour le bouton du sélecteur
-.view-switcher button {
-  transition: all 0.2s ease;
-
-  lucide-icon {
-    transition: transform 0.2s ease;
-  }
-
-  &:hover lucide-icon:last-child {
-    transform: translateY(2px);
-  }
-}
-
-// ===========================================
-// MENU DES VUES - VERSION OPTIMISÉE
-// ===========================================
-::ng-deep .view-menu {
-  min-width: 280px !important;
-  max-width: 320px !important;
-  background: white !important;
-  border-radius: 16px !important;
-  padding: 8px 0 !important;
-  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15), 0 10px 10px -5px rgba(0,0,0,0.04) !important;
-  margin-top: 8px !important;
-  border: 1px solid #e2e8f0 !important;
-  overflow: hidden !important;
-
-  // En-tête du menu
-  .menu-header {
-    padding: 12px 16px 8px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    border-bottom: 1px solid #f1f5f9;
-    margin-bottom: 4px;
-
-    lucide-icon {
-      color: #64748b;
-    }
-
-    span {
-      font-size: 11px;
-      font-weight: 600;
-      color: #64748b;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-  }
-
-  // Items du menu
-  .mat-menu-item {
-    height: auto !important;
-    line-height: normal !important;
-    padding: 0 !important;
-    background: white !important;
-
-    &:hover {
-      background-color: #f8fafc !important;
-    }
-
-    &.active {
-      background-color: #f8fafc !important;
-    }
-  }
-
-  // Contenu d'un item
-  .menu-item-content {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 12px 16px;
-    width: 100%;
-  }
-
-  // Partie gauche (icône)
-  .menu-item-left {
-    flex-shrink: 0;
-    width: 24px;
-    display: flex;
-    justify-content: center;
-
-    lucide-icon {
-      color: #64748b;
-      transition: color 0.2s;
-    }
-  }
-
-  // Partie centrale (texte)
-  .menu-item-center {
-    flex: 1;
-    min-width: 0; // Pour permettre le texte tronqué
-  }
-
-  // Titre de l'option
-  .menu-item-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 4px;
-
-    span:first-child {
-      font-size: 14px;
-      font-weight: 600;
-      color: #1e293b;
-    }
-  }
-
-  // Badge Nouveau
-  .new-badge {
-    background: #dcfce7;
-    color: #166534;
-    font-size: 9px;
-    font-weight: 700;
-    padding: 2px 6px;
-    border-radius: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
-    display: inline-flex;
-    align-items: center;
-    line-height: 1;
-  }
-
-  // Description
-  .menu-item-description {
-    font-size: 12px;
-    color: #64748b;
-    line-height: 1.4;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    max-width: 180px;
-  }
-
-  // Partie droite (checkmark)
-  .menu-item-right {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    margin-left: auto;
-  }
-
-  // Footer du menu
-  .menu-footer {
-    padding: 12px 16px 10px;
-    border-top: 1px solid #f1f5f9;
-    margin-top: 4px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    lucide-icon {
-      color: #94a3b8;
-      width: 14px;
-      height: 14px;
-    }
-
-    span {
-      font-size: 10px;
-      color: #94a3b8;
-    }
-  }
-}
-
-// Animation du menu
-.view-menu {
-  animation: slideDown 0.2s ease-out;
-  transform-origin: top right;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-// Style du bouton principal
-.view-switcher button {
-  min-width: 140px;
-  background-color: #f1f5f9;
-  border: 1px solid transparent;
-  border-radius: 10px;
-  padding: 8px 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.2s ease;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--fw-text-tertiary);
+  background: transparent;
+  border: none;
   cursor: pointer;
 
   &:hover {
-    background-color: #e2e8f0;
-    border-color: #cbd5e1;
+    background: var(--fw-surface-sunken);
+    color: var(--fw-text-primary);
+  }
+}
+
+/* ACTIONS GROUPÉES */
+.action-button {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  border: none;
+  background: white;
+  color: var(--fw-text-secondary);
+  box-shadow: var(--fw-shadow-sm);
+  cursor: pointer;
+  transition: all var(--fw-transition);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--fw-shadow-md);
+    color: var(--fw-primary);
   }
 
-  &:active {
-    transform: scale(0.98);
+  &.delete:hover {
+    color: var(--fw-error);
+  }
+}
+
+/* MENU VUE */
+.view-menu {
+  border-radius: 16px !important;
+  border: none !important;
+  box-shadow: var(--fw-shadow-xl) !important;
+  overflow: hidden;
+
+  .menu-header {
+    padding: 1rem 1.25rem;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--fw-text-tertiary);
+    background: var(--fw-surface-sunken);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
   }
 
-  lucide-icon:first-child {
-    color: #2563eb;
+  .view-menu-item {
+    padding: 0.75rem 1.25rem !important;
+    height: auto !important;
+
+    .menu-item-content {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      width: 100%;
+    }
+
+    .menu-item-center {
+      flex: 1;
+
+      .menu-item-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 700;
+        color: var(--fw-text-primary);
+        font-size: 0.875rem;
+      }
+
+      .menu-item-description {
+        font-size: 0.75rem;
+        color: var(--fw-text-tertiary);
+        font-weight: 500;
+      }
+    }
   }
 
-  span {
-    font-size: 14px;
-    font-weight: 500;
-    color: #1e293b;
-    flex: 1;
-    text-align: left;
+  .menu-footer {
+    padding: 0.75rem 1.25rem;
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--fw-text-tertiary);
+    border-top: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--fw-surface-sunken);
   }
+}
 
-  lucide-icon:last-child {
-    color: #64748b;
-    transition: transform 0.2s;
-  }
-
-  &:hover lucide-icon:last-child {
-    transform: translateY(2px);
-    color: #2563eb;
-  }
+.new-badge {
+  padding: 1px 4px;
+  background: var(--fw-primary);
+  color: white;
+  border-radius: 4px;
+  font-size: 8px;
+  font-weight: 800;
+  text-transform: uppercase;
 }

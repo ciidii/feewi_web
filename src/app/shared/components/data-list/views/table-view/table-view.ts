@@ -14,10 +14,12 @@ import {
   ArrowDown,
   Table
 } from 'lucide-angular';
-import {RowAction, TableRow} from '../../../../models/data-list.models';
+import { RowAction, TableRow } from '../../../../models/data-list.models';
 import { SmartTooltipDirective } from '../../../../directives/smart-tooltip.directive';
 import { FwDatePipe } from '../../../../pipes/fw-date.pipe';
 import { SkeletonComponent } from '../../../../components/skeleton/skeleton.component';
+import { FwButtonComponent } from '../../../../components/button/button.component';
+import { FwBadgeComponent } from '../../../../components/badge/badge.component';
 
 
 export type SortDirection = 'asc' | 'desc' | null;
@@ -33,9 +35,10 @@ export interface SortState {
     CommonModule,
     MatCheckboxModule,
     LucideAngularModule,
-    SmartTooltipDirective,
     FwDatePipe,
-    SkeletonComponent
+    SkeletonComponent,
+    FwButtonComponent,
+    FwBadgeComponent
   ],
   templateUrl: './table-view.html',
   styleUrls: ['./table-view.scss']
@@ -132,7 +135,7 @@ export class TableViewComponent {
 
     const diff = event.pageX - this.resizing.startX;
     const newWidth = Math.max(80, this.resizing.startWidth + diff);
-    
+
     this.columnWidths = {
       ...this.columnWidths,
       [this.resizing.column]: newWidth

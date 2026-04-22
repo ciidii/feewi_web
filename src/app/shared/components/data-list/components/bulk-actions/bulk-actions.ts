@@ -27,8 +27,6 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
         </div>
       </div>
 
-      <div class="divider-v"></div>
-
       <!-- Barre d'actions -->
       <div class="actions-group">
         <button 
@@ -71,7 +69,6 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
       background: var(--fw-primary-alpha);
       padding: 0.375rem 0.75rem;
       border-radius: var(--fw-radius-lg);
-      border: 1px solid var(--fw-primary-alpha);
       
       .counter-text {
         font-size: 0.75rem;
@@ -92,12 +89,6 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
       transition: background 0.2s;
 
       &:hover { background: var(--fw-primary-alpha); }
-    }
-
-    .divider-v {
-      height: 1.5rem;
-      width: 1.5px;
-      background: var(--fw-border);
     }
 
     .actions-group {

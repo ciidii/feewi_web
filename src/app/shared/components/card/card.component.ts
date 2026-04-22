@@ -16,7 +16,7 @@ import { CommonModule } from '@angular/common';
           <ng-content select="[card-actions]"></ng-content>
         </div>
       </div>
-      
+
       <div class="card-body">
         <ng-content></ng-content>
       </div>
@@ -31,9 +31,9 @@ import { CommonModule } from '@angular/common';
 
     .fw-card {
       background: white;
-      border: 1px solid var(--fw-border);
-      border-radius: 12px;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      border: none;
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+      border-radius: 24px;
       overflow: hidden;
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 

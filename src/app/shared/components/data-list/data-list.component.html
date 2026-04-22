@@ -1,9 +1,9 @@
-<div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col transition-all hover:shadow-md">
+<div [ngClass]="cardMode() ? 'bg-white rounded-2xl shadow-sm hover:shadow-md' : 'bg-transparent'" class="flex flex-col transition-all overflow-hidden">
 
   <!-- ======================================= -->
   <!-- TOOLBAR (Tabs + Sélecteur de vues + Recherche) -->
   <!-- ======================================= -->
-  <div class="flex items-center justify-between border-b border-slate-100 bg-white px-6 h-14">
+  <div class="flex items-center justify-between bg-white px-6 h-14" *ngIf="cardMode()">
 
     <!-- Mode Sélection (quand des éléments sont sélectionnés) -->
     <div *ngIf="selectionState().count > 0" class="flex items-center gap-4 animate-in slide-in-from-left">
@@ -76,9 +76,9 @@
       </nav>
 
       <!-- Bouton Filtres -->
-      <button 
+      <button
         *ngIf="showFilterButton()"
-        (click)="toggleFilters()" 
+        (click)="toggleFilters()"
         class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
         [ngClass]="isFiltersOpen() ? 'bg-primary-50 text-primary-700 border border-primary-200' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'"
       >
@@ -204,7 +204,7 @@
     </div>
 
     <!-- Loader Overlay (uniquement lors du rafraîchissement de données existantes) -->
-    <fw-block-loader 
+    <fw-block-loader
       *ngIf="isLoading() && data().length > 0"
       [center]="true"
       message="Mise à jour..."
@@ -277,37 +277,43 @@
   </div>
 </div>
 
-<!-- ======================================= -->
-<!-- FOOTER (Pagination + Infos) -->
-<!-- ======================================= -->
-<div class="px-6 py-4 border-t border-slate-100 bg-slate-50/30 flex items-center justify-between">
-  <!-- Informations -->
-  <div class="text-xs text-slate-500">
-    <span class="font-medium">{{ data().length }}</span> sur
-    <span class="font-medium">{{ total() }}</span> elements
-  </div>
+  <!-- ======================================= -->
+  <!-- FOOTER (Pagination + Infos) -->
+  <!-- ======================================= -->
+  <div class="px-8 py-5 bg-white flex items-center justify-between" *ngIf="totalPages() > 1 || data().length > 0">
+    <!-- Informations -->
+    <div class="text-xs font-bold text-slate-medium uppercase tracking-widest">
+      <span class="text-midnight">{{ data().length }}</span> sur
+      <span class="text-midnight">{{ total() }}</span> éléments
+    </div>
 
-  <!-- Pagination -->
-  <div class="flex items-center gap-4">
-    <div class="flex items-center gap-2">
-      <button class="pagination-button" [disabled]="page() === 0" (click)="previousPage()">
-        <lucide-icon [name]="ChevronLeft" class="w-4 h-4"></lucide-icon>
-      </button>
+    <!-- Pagination Premium -->
+    <div class="flex items-center gap-2" *ngIf="totalPages() > 1">
+      <app-fw-button
+        variant="tertiary"
+        size="sm"
+        [icon]="ChevronLeft"
+        [disabled]="page() === 0"
+        (click)="previousPage()">
+      </app-fw-button>
 
-      <div class="flex items-center gap-1">
+      <div class="flex items-center gap-1 mx-2">
         <button
           *ngFor="let p of pageNumbers()"
-          class="pagination-page"
-          [class.active]="p === page()"
           (click)="goToPage(p)"
+          class="w-9 h-9 rounded-full text-xs font-bold transition-all flex items-center justify-center"
+          [ngClass]="p === page() ? 'bg-primary text-white shadow-lg shadow-primary-alpha scale-110' : 'text-slate-medium hover:bg-surface-sunken'"
         >
           {{ p + 1 }}
         </button>
       </div>
 
-      <button class="pagination-button" [disabled]="page() >= totalPages() - 1" (click)="nextPage()">
-        <lucide-icon [name]="ChevronRight" class="w-4 h-4"></lucide-icon>
-      </button>
+      <app-fw-button
+        variant="tertiary"
+        size="sm"
+        [icon]="ChevronRight"
+        [disabled]="page() >= totalPages() - 1"
+        (click)="nextPage()">
+      </app-fw-button>
     </div>
   </div>
-</div>
