@@ -1,23 +1,45 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import {Component, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {Router, RouterModule} from '@angular/router';
 import {
-  LucideAngularModule, UserPlus, Save, X, RefreshCw,
-  User, ShieldCheck, GraduationCap, MapPin, Phone, Mail, BookOpen, HeartPulse, Users, School
+  BookOpen,
+  GraduationCap,
+  HeartPulse,
+  LucideAngularModule,
+  Mail,
+  MapPin,
+  Phone,
+  RefreshCw,
+  Save,
+  School,
+  ShieldCheck,
+  User,
+  UserPlus,
+  Users,
+  X
 } from 'lucide-angular';
-import { EnrollmentAdminService } from '../../../../../core/services/enrollment-admin.service';
-import { AcademicService } from '../../../../../core/services/academic.service';
-import { TenantContextService } from '../../../../../core/services/tenant-context.service';
-import { NotificationService } from '../../../../../shared/services/notification.service';
-import { Level, Filiere, AcademicYear } from '../../../../../core/models/academic.model';
-import { DirectEntryRequest } from '../../../../../core/models/enrollment.model';
-import { finalize, forkJoin } from 'rxjs';
+import {EnrollmentAdminService} from '../../../../../core/services/enrollment-admin.service';
+import {AcademicService} from '../../../../../core/services/academic.service';
+import {TenantContextService} from '../../../../../core/services/tenant-context.service';
+import {NotificationService} from '../../../../../shared/services/notification.service';
+import {AcademicYear, Filiere, Level} from '../../../../../core/models/academic.model';
+import {DirectEntryRequest} from '../../../../../core/models/enrollment.model';
+import {finalize, forkJoin} from 'rxjs';
+import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
+import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
 
 @Component({
   selector: 'app-admission-direct-entry',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, RouterModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    LucideAngularModule,
+    RouterModule,
+    FwButtonComponent,
+    FwPageShellComponent
+  ],
   templateUrl: './admission-direct-entry.component.html',
   styleUrls: ['./admission-direct-entry.component.scss']
 })

@@ -1,11 +1,9 @@
 import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {finalize, forkJoin, map, of, switchMap} from 'rxjs';
-import {BadgeCheck} from 'lucide-angular';
-import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
-import {Admission, AssessmentRequest, RequiredDocument} from '../../../../../core/models/enrollment.model';
 import {
   ArrowLeft,
+  BadgeCheck,
   CheckCircle,
   ChevronLeft,
   ChevronRight,
@@ -15,6 +13,7 @@ import {
   FileImage,
   FileSpreadsheet,
   FileText,
+  Globe,
   GraduationCap,
   HeartPulse,
   History as HistoryIcon,
@@ -45,11 +44,26 @@ import {AcademicYear, Filiere, Level} from '../../../../../core/models/academic.
 import {AdmissionWorkflowComponent} from '../components/admission-workflow/admission-workflow.component';
 import {FormsModule} from '@angular/forms';
 import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
+import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
+import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
+import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.component';
+import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
+import {Admission, AssessmentRequest, RequiredDocument} from '../../../../../core/models/enrollment.model';
 
 @Component({
   selector: 'app-admission-detail',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, RouterModule, AdmissionWorkflowComponent, FormsModule, MatDialogModule],
+  imports: [
+    CommonModule,
+    LucideAngularModule,
+    RouterModule,
+    AdmissionWorkflowComponent,
+    FormsModule,
+    MatDialogModule,
+    FwPageShellComponent,
+    FwButtonComponent,
+    FwBadgeComponent
+  ],
   templateUrl: './admission-detail.component.html',
   styleUrls: ['./admission-detail.component.scss']
 })
@@ -95,6 +109,12 @@ export class AdmissionDetailComponent implements OnInit {
     return this.filieres().find(f => f.id === app.schooling.filiereId)?.name || 'Filière inconnue';
   });
 
+  fullName = computed(() => {
+    const app = this.application();
+    if (!app) return 'Dossier';
+    return `${app.identity.firstName} ${app.identity.lastName}`;
+  });
+
   isReadyForFinalValidation = computed(() => {
     const app = this.application();
     if (!app) return false;
@@ -113,7 +133,161 @@ export class AdmissionDetailComponent implements OnInit {
     return allDocsProcessed && assessmentOk;
   });
 
-  // ... (dans la classe)
+  ngOnInit() {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) this.loadApplication(id);
+  }
+
+  loadApplication(id: string) {
+    this.isLoading.set(true);
+
+    forkJoin({
+      app: this.enrollmentAdminService.getApplicationById(id),
+      levels: this.academicService.getLevels(),
+      filieres: this.academicService.getFilieres(),
+      year: this.academicService.getCurrentYear()
+    }).pipe(
+      switchMap(({app, levels, filieres, year}) => {
+        this.application.set(app);
+        this.levels.set(levels);
+        this.filieres.set(filieres);
+        this.activeYear.set(year);
+
+        const targetLevelId = app.schooling.levelId;
+        if (targetLevelId) {
+          return this.enrollmentAdminService.getEffectiveConfig(targetLevelId);
+        } else {
+          return this.enrollmentAdminService.getConfig().pipe(
+            map(cfg => ({ schema: cfg.schema }))
+          );
+        }
+      }),
+      finalize(() => this.isLoading.set(false))
+    ).subscribe({
+      next: (effectiveConfig: any) => {
+        const aConfig = effectiveConfig?.schema?.assessment;
+        if (aConfig) {
+          const subjectKeys = Object.keys(aConfig.subjects || {});
+          this.assessmentSubjects.set(subjectKeys);
+          this.minPassingGrade.set(aConfig.minPassingGrade || 10);
+
+          const app = this.application();
+          const initialGrades: Record<string, number> = {};
+          subjectKeys.forEach((sub: string) => {
+            initialGrades[sub] = app?.assessment?.grades?.[sub] || 0;
+          });
+          this.evaluationGrades.set(initialGrades);
+        }
+
+        const data = this.application();
+        if (data?.assessment) {
+          this.evaluationComment = data.assessment.comments || '';
+          this.pedagogicalDecision.set(data.assessment.decision as any);
+          this.recommendedLevelId.set(data.assessment.recommendedLevelId || null);
+        }
+      },
+      error: (err) => {
+        console.error('Erreur chargement dossier:', err);
+        this.notificationService.error('Impossible de charger les données du dossier.');
+      }
+    });
+  }
+
+  // --- ACTIONS ---
+
+  verifyApplication() {
+    const app = this.application();
+    if (!app) return;
+    this.isActionLoading.set(true);
+    this.enrollmentAdminService.verifyApplication(app.id).pipe(
+      finalize(() => this.isActionLoading.set(false))
+    ).subscribe({
+      next: () => {
+        this.loadApplication(app.id);
+        this.notificationService.success('Dossier validé administrativement.');
+      }
+    });
+  }
+
+  admitManually() {
+    const app = this.application();
+    if (!app) return;
+    this.isActionLoading.set(true);
+    this.enrollmentAdminService.admitAdmission(app.id).pipe(
+      finalize(() => this.isActionLoading.set(false))
+    ).subscribe({
+      next: () => {
+        this.loadApplication(app.id);
+        this.notificationService.success('Candidat admis manuellement.');
+      }
+    });
+  }
+
+  validateFinal() {
+    const app = this.application();
+    if (!app) return;
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Confirmer l\'admission',
+        message: 'Confirmez-vous l\'admission définitive de cet élève ? Cette action est irréversible.',
+        confirmLabel: 'Confirmer l\'Admission',
+        type: 'warning'
+      }
+    });
+
+    dialogRef.afterClosed().pipe(
+      switchMap(confirmed => {
+        if (confirmed) {
+          this.isActionLoading.set(true);
+          return this.enrollmentAdminService.validateAdmission(app.id);
+        }
+        return of(null);
+      }),
+      finalize(() => this.isActionLoading.set(false))
+    ).subscribe({
+      next: (updated) => {
+        if (updated) {
+          this.loadApplication(app.id);
+          this.notificationService.success('Admission validée avec succès !');
+        }
+      }
+    });
+  }
+
+  overruleFinal() {
+    const app = this.application();
+    if (!app) return;
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Validation avec dérogation',
+        message: 'Vous allez valider ce dossier malgré des pièces manquantes ou un verrou numérique. Confirmer ?',
+        confirmLabel: 'Passer outre et Valider',
+        type: 'danger'
+      }
+    });
+
+    dialogRef.afterClosed().pipe(
+      switchMap(confirmed => {
+        if (confirmed) {
+          this.isActionLoading.set(true);
+          return this.enrollmentAdminService.overruleAdmission(app.id);
+        }
+        return of(null);
+      }),
+      finalize(() => this.isActionLoading.set(false))
+    ).subscribe({
+      next: (updated) => {
+        if (updated) {
+          this.loadApplication(app.id);
+          this.notificationService.warning('Admission validée par dérogation.');
+        }
+      }
+    });
+  }
 
   rejectFinal() {
     const app = this.application();
@@ -198,135 +372,7 @@ export class AdmissionDetailComponent implements OnInit {
     });
   }
 
-  mandatoryDocsSummary = computed(() => {
-    const app = this.application();
-    if (!app) return {total: 0, received: 0};
-    const mandatory = app.documents.filter(d => d.mandatory);
-    return {
-      total: mandatory.length,
-      received: mandatory.filter(d => d.status === 'UPLOADED' || d.status === 'RECEIVED').length
-    };
-  });
-
-  // --- ÉVALUATION ---
-  evaluationGrades = signal<Record<string, number>>({});
-  evaluationComment = '';
-  pedagogicalDecision = signal<'ADMITTED' | 'REJECTED' | 'WAITLIST'>('ADMITTED');
-  recommendedLevelId = signal<string | null>(null);
-
-  averageScore = computed(() => {
-    const grades = Object.values(this.evaluationGrades());
-    if (grades.length === 0) return '0.00';
-    const sum = grades.reduce((acc, curr) => acc + curr, 0);
-    return (sum / grades.length).toFixed(2);
-  });
-
-  updateGrade(subject: string, value: number) {
-    this.evaluationGrades.update(prev => ({...prev, [subject]: value}));
-  }
-
-  submitPedagogicalDecision() {
-    const app = this.application();
-    if (!app) return;
-
-    this.isActionLoading.set(true);
-    const decision = this.pedagogicalDecision();
-
-    const payload: AssessmentRequest = {
-      grades: this.evaluationGrades(),
-      comments: this.evaluationComment,
-      decision: decision === 'WAITLIST' ? null : decision,
-      recommendedLevelId: this.recommendedLevelId()
-    };
-
-    this.enrollmentAdminService.submitAssessment(app.id, payload).pipe(
-      finalize(() => this.isActionLoading.set(false))
-    ).subscribe({
-      next: () => {
-        this.loadApplication(app.id);
-        this.notificationService.success('Décision pédagogique enregistrée.');
-      }
-    });
-  }
-
-  admitManually() {
-    const app = this.application();
-    if (!app) return;
-    this.isActionLoading.set(true);
-    this.enrollmentAdminService.admitAdmission(app.id).pipe(
-      finalize(() => this.isActionLoading.set(false))
-    ).subscribe({
-      next: () => {
-        this.loadApplication(app.id);
-        this.notificationService.success('Candidat admis manuellement.');
-      }
-    });
-  }
-
-  ngOnInit() {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) this.loadApplication(id);
-  }
-
-  /**
-   * Chargement réactif des données (V3)
-   */
-  loadApplication(id: string) {
-    this.isLoading.set(true);
-
-    forkJoin({
-      app: this.enrollmentAdminService.getApplicationById(id),
-      levels: this.academicService.getLevels(),
-      filieres: this.academicService.getFilieres(),
-      year: this.academicService.getCurrentYear()
-    }).pipe(
-      switchMap(({app, levels, filieres, year}) => {
-        this.application.set(app);
-        this.levels.set(levels);
-        this.filieres.set(filieres);
-        this.activeYear.set(year);
-
-        const targetLevelId = app.schooling.levelId;
-
-        if (targetLevelId) {
-          return this.enrollmentAdminService.getEffectiveConfig(targetLevelId);
-        } else {
-          return this.enrollmentAdminService.getConfig().pipe(
-            map(cfg => ({ schema: cfg.schema }))
-          );
-        }
-
-      }),
-      finalize(() => this.isLoading.set(false))
-    ).subscribe({
-      next: (effectiveConfig: any) => {
-        const aConfig = effectiveConfig?.schema?.assessment;
-        if (aConfig) {
-          const subjectKeys = Object.keys(aConfig.subjects || {});
-          this.assessmentSubjects.set(subjectKeys);
-          this.minPassingGrade.set(aConfig.minPassingGrade || 10);
-
-          const app = this.application();
-          const initialGrades: Record<string, number> = {};
-          subjectKeys.forEach((sub: string) => {
-            initialGrades[sub] = app?.assessment?.grades?.[sub] || 0;
-          });
-          this.evaluationGrades.set(initialGrades);
-        }
-
-        const data = this.application();
-        if (data?.assessment) {
-          this.evaluationComment = data.assessment.comments || '';
-          this.pedagogicalDecision.set(data.assessment.decision as any);
-          this.recommendedLevelId.set(data.assessment.recommendedLevelId || null);
-        }
-      },
-      error: (err) => {
-        console.error('Erreur chargement dossier:', err);
-        this.notificationService.error('Impossible de charger les données du dossier.');
-      }
-    });
-  }
+  // --- DOCUMENTS ---
 
   receiveDocument(docCode: string) {
     const app = this.application();
@@ -374,107 +420,6 @@ export class AdmissionDetailComponent implements OnInit {
     });
   }
 
-  verifyApplication() {
-    const app = this.application();
-    if (!app) return;
-    this.isActionLoading.set(true);
-    this.enrollmentAdminService.verifyApplication(app.id).pipe(
-      finalize(() => this.isActionLoading.set(false))
-    ).subscribe({
-      next: () => {
-        this.loadApplication(app.id);
-        this.notificationService.success('Dossier validé administrativement.');
-      }
-    });
-  }
-
-  submitAssessment() {
-    const app = this.application();
-    if (!app) return;
-    this.isActionLoading.set(true);
-
-    const payload: AssessmentRequest = {
-      grades: this.evaluationGrades(),
-      comments: this.evaluationComment,
-      recommendedLevelId: this.recommendedLevelId()
-    };
-
-    this.enrollmentAdminService.submitAssessment(app.id, payload).pipe(
-      finalize(() => this.isActionLoading.set(false))
-    ).subscribe({
-      next: () => {
-        this.loadApplication(app.id);
-        this.notificationService.success('Évaluation enregistrée avec succès.');
-      }
-    });
-  }
-
-  validateFinal() {
-    const app = this.application();
-    if (!app) return;
-
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '400px',
-      data: {
-        title: 'Confirmer l\'admission',
-        message: 'Confirmez-vous l\'admission définitive de cet élève ? Cette action est irréversible.',
-        confirmLabel: 'Confirmer l\'Admission',
-        type: 'warning'
-      }
-    });
-
-    dialogRef.afterClosed().pipe(
-      switchMap(confirmed => {
-        if (confirmed) {
-          this.isActionLoading.set(true);
-          return this.enrollmentAdminService.validateAdmission(app.id);
-        }
-        return of(null);
-      }),
-      finalize(() => this.isActionLoading.set(false))
-    ).subscribe({
-      next: (updated) => {
-        if (updated) {
-          this.loadApplication(app.id);
-          this.notificationService.success('Admission validée avec succès !');
-        }
-      }
-    });
-  }
-
-  overruleFinal() {
-    const app = this.application();
-    if (!app) return;
-
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '400px',
-      data: {
-        title: 'Validation avec dérogation',
-        message: 'Vous allez valider ce dossier malgré des pièces manquantes ou un verrou numérique. Confirmer ?',
-        confirmLabel: 'Passer outre et Valider',
-        type: 'danger'
-      }
-    });
-
-    dialogRef.afterClosed().pipe(
-      switchMap(confirmed => {
-        if (confirmed) {
-          this.isActionLoading.set(true);
-          return this.enrollmentAdminService.overruleAdmission(app.id);
-        }
-        return of(null);
-      }),
-      finalize(() => this.isActionLoading.set(false))
-    ).subscribe({
-      next: (updated) => {
-        if (updated) {
-          this.loadApplication(app.id);
-          this.notificationService.warning('Admission validée par dérogation.');
-        }
-      }
-    });
-  }
-
   previewDocument(doc: RequiredDocument) {
     if (doc.status === 'MISSING') return;
     this.selectedDoc.set(doc);
@@ -498,7 +443,58 @@ export class AdmissionDetailComponent implements OnInit {
     return FileText;
   }
 
-  // --- READONLY ICONS ---
+  // --- ÉVALUATION ---
+  evaluationGrades = signal<Record<string, number>>({});
+  evaluationComment = '';
+  pedagogicalDecision = signal<'ADMITTED' | 'REJECTED' | 'WAITLIST'>('ADMITTED');
+  recommendedLevelId = signal<string | null>(null);
+
+  averageScore = computed(() => {
+    const grades = Object.values(this.evaluationGrades());
+    if (grades.length === 0) return '0.00';
+    const sum = grades.reduce((acc, curr) => acc + curr, 0);
+    return (sum / grades.length).toFixed(2);
+  });
+
+  updateGrade(subject: string, value: number) {
+    this.evaluationGrades.update(prev => ({...prev, [subject]: value}));
+  }
+
+  submitPedagogicalDecision() {
+    const app = this.application();
+    if (!app) return;
+
+    this.isActionLoading.set(true);
+    const decision = this.pedagogicalDecision();
+
+    const payload: AssessmentRequest = {
+      grades: this.evaluationGrades(),
+      comments: this.evaluationComment,
+      decision: decision === 'WAITLIST' ? null : decision,
+      recommendedLevelId: this.recommendedLevelId()
+    };
+
+    this.enrollmentAdminService.submitAssessment(app.id, payload).pipe(
+      finalize(() => this.isActionLoading.set(false))
+    ).subscribe({
+      next: () => {
+        this.loadApplication(app.id);
+        this.notificationService.success('Décision pédagogique enregistrée.');
+      }
+    });
+  }
+
+  mandatoryDocsSummary = computed(() => {
+    const app = this.application();
+    if (!app) return {total: 0, received: 0};
+    const mandatory = app.documents.filter(d => d.mandatory);
+    return {
+      total: mandatory.length,
+      received: mandatory.filter(d => d.status === 'UPLOADED' || d.status === 'RECEIVED').length
+    };
+  });
+
+  // --- ICONS ---
   readonly ArrowLeft = ArrowLeft;
   readonly ChevronLeft = ChevronLeft;
   readonly ChevronRight = ChevronRight;
@@ -522,8 +518,9 @@ export class AdmissionDetailComponent implements OnInit {
   readonly HeartPulse = HeartPulse;
   readonly School = School;
   readonly Users = Users;
+  readonly Upload = Upload;
+  readonly Trash2 = Trash2;
+  readonly BadgeCheck = BadgeCheck;
+  readonly Globe = Globe;
   protected readonly Info = Info;
-  protected readonly Upload = Upload;
-  protected readonly Trash2 = Trash2;
-  protected readonly BadgeCheck = BadgeCheck;
 }

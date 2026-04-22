@@ -1,393 +1,241 @@
-<div class="admission-detail-page" *ngIf="application(); let app">
+<app-fw-page-shell
+  *ngIf="application() as app; else loader"
+  [title]="fullName()"
+  [description]="'Référence : #' + app.reference + ' • ' + (app.type === 'RE_ENROLLMENT' ? 'Réinscription' : 'Nouvelle Inscription')"
+  [icon]="User"
+  [backLink]="['/admin/admissions/list']"
+>
+  <!-- ACTIONS DE COMMANDE (COMMAND CENTER) -->
+  <div actions class="flex items-center gap-3">
+    <!-- Statut Dynamique -->
+    <div class="mr-4">
+      <app-fw-badge [status]="app.status" size="sm"></app-fw-badge>
+    </div>
 
-  <!-- BARRE DE NAVIGATION & ACTIONS (COMMAND CENTER) -->
-  <header class="detail-navbar">
-    <div class="header-left">
-      <button class="btn-back" routerLink="/admin/admissions" title="Retour à la liste">
-        <lucide-icon [name]="ArrowLeft" [size]="18"></lucide-icon>
-      </button>
-      <div class="application-identity">
-        <div class="ref-pill">#{{ app.reference }}</div>
-        <h1>{{ app.identity.firstName }} {{ app.identity.lastName }}</h1>
-        <div class="app-meta-row">
-          <span class="app-type">{{ app.type === 'RE_ENROLLMENT' ? 'Réinscription' : 'Nouvelle Inscription' }}</span>
-          <span class="channel-badge" [class.digital]="app.channel === 'DIGITAL'" [class.direct]="app.channel === 'DIRECT'">
-            {{ app.channel === 'DIGITAL' ? 'Portail' : 'Guichet' }}
-          </span>
+    <!-- Actions selon l'état -->
+    @if (app.status === 'SUBMITTED') {
+      <app-fw-button 
+        variant="primary" 
+        size="md" 
+        [icon]="ClipboardCheck" 
+        [loading]="isActionLoading()"
+        (click)="verifyApplication()">
+        Vérifier conformité
+      </app-fw-button>
+    }
+
+    @if (app.status === 'TESTING') {
+      <app-fw-button 
+        variant="primary" 
+        size="md" 
+        [icon]="BadgeCheck" 
+        [loading]="isActionLoading()"
+        (click)="admitManually()">
+        Admettre
+      </app-fw-button>
+    }
+
+    @if (['ADMITTED', 'WAITLIST'].includes(app.status)) {
+      <app-fw-button 
+        *ngIf="isReadyForFinalValidation()"
+        variant="primary" 
+        size="md" 
+        [icon]="GraduationCap" 
+        [loading]="isActionLoading()"
+        (click)="validateFinal()">
+        Valider Admission
+      </app-fw-button>
+
+      <app-fw-button 
+        *ngIf="!isReadyForFinalValidation() && app.status !== 'ADMITTED'"
+        variant="primary" 
+        size="md" 
+        [icon]="ShieldCheck" 
+        [loading]="isActionLoading()"
+        (click)="overruleFinal()">
+        Déroger & Valider
+      </app-fw-button>
+    }
+
+    <!-- Menu Utilitaires -->
+    <div class="flex items-center gap-1.5 ml-2 pl-4 border-l border-border-subtle">
+      <app-fw-button variant="tertiary" size="sm" [icon]="Printer" title="Imprimer le dossier"></app-fw-button>
+      
+      @if (!['VALIDATED', 'REJECTED', 'CANCELLED'].includes(app.status)) {
+        <app-fw-button variant="tertiary" size="sm" [icon]="HistoryIcon" (click)="waitlistFinal()" title="Mettre en attente"></app-fw-button>
+        <app-fw-button variant="danger" size="sm" [icon]="XCircle" (click)="rejectFinal()" title="Rejeter le dossier"></app-fw-button>
+        <app-fw-button variant="tertiary" size="sm" [icon]="Trash2" (click)="cancelAdmission()" title="Annuler le dossier"></app-fw-button>
+      }
+    </div>
+  </div>
+
+  <!-- CONTENU DU DOSSIER -->
+  <div class="admission-detail-grid animate-in slide-in-from-bottom-2 duration-700">
+    
+    <div class="main-column space-y-8">
+      <!-- Workflow Progress (Zen) -->
+      <section class="workflow-summary bg-white p-6 rounded-[2rem] shadow-sm">
+        <app-admission-workflow [state]="app.status"></app-admission-workflow>
+      </section>
+
+      <!-- PILIERS DU FORMULAIRE (Zero-Border Style) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- IDENTITÉ -->
+        <div class="pillar-card info" *ngIf="app.identity">
+          <header class="pillar-header">
+            <div class="icon-box"><lucide-icon [name]="User" [size]="18"></lucide-icon></div>
+            <h3>Identité Enfant</h3>
+          </header>
+          <div class="pillar-content">
+            <div class="data-row"><span>Prénoms</span><strong>{{ app.identity.firstName }}</strong></div>
+            <div class="data-row"><span>Nom</span><strong>{{ app.identity.lastName }}</strong></div>
+            <div class="data-row"><span>Naissance</span><strong>{{ app.identity.birthDate | date:'longDate' }}</strong></div>
+            <div class="data-row"><span>Genre</span><strong>{{ app.identity.gender === 'MALE' ? 'Garçon' : 'Fille' }}</strong></div>
+          </div>
+        </div>
+
+        <!-- SCOLARITÉ -->
+        <div class="pillar-card warning" *ngIf="app.schooling">
+          <header class="pillar-header">
+            <div class="icon-box"><lucide-icon [name]="School" [size]="18"></lucide-icon></div>
+            <h3>Vœu Scolaire</h3>
+          </header>
+          <div class="pillar-content">
+            <div class="data-row"><span>Niveau ciblé</span><strong class="text-primary">{{ levelName() }}</strong></div>
+            <div class="data-row" *ngIf="filiereName()"><span>Filière</span><strong>{{ filiereName() }}</strong></div>
+            <div class="data-row"><span>Origine</span><strong>{{ app.schooling.customFields?.['previousSchool'] || '—' }}</strong></div>
+            <div class="data-row"><span>Canal</span><span class="channel-tag" [class]="app.channel.toLowerCase()">{{ app.channel }}</span></div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="header-center">
-      <app-admission-workflow [state]="app.status"></app-admission-workflow>
-    </div>
-
-    <div class="header-right">
-      <div class="action-stack">
-        @if (app.status === 'SUBMITTED') {
-          <button class="btn-action primary" (click)="verifyApplication()" [disabled]="isActionLoading()">
-            <lucide-icon [name]="isActionLoading() ? RefreshCw : ClipboardCheck" [size]="18"
-                         [class.animate-spin]="isActionLoading()"></lucide-icon>
-            <span>Vérifier conformité</span>
-          </button>
-        }
-
-        @if (app.status === 'TESTING') {
-          <button class="btn-action primary" (click)="admitManually()" [disabled]="isActionLoading()">
-            <lucide-icon [name]="isActionLoading() ? RefreshCw : BadgeCheck" [size]="18"
-                         [class.animate-spin]="isActionLoading()"></lucide-icon>
-            <span>Admettre</span>
-          </button>
-        }
-
-        @if (['ADMITTED', 'WAITLIST'].includes(app.status)) {
-          <button *ngIf="isReadyForFinalValidation()" class="btn-action success" (click)="validateFinal()" [disabled]="isActionLoading()">
-            <lucide-icon [name]="isActionLoading() ? RefreshCw : GraduationCap" [size]="18"
-                         [class.animate-spin]="isActionLoading()"></lucide-icon>
-            <span>Valider l'Admission</span>
-          </button>
-
-          <button *ngIf="!isReadyForFinalValidation() && app.status !== 'ADMITTED'" class="btn-action warning" (click)="overruleFinal()" [disabled]="isActionLoading()">
-            <lucide-icon [name]="isActionLoading() ? RefreshCw : ShieldCheck" [size]="18"
-                         [class.animate-spin]="isActionLoading()"></lucide-icon>
-            <span>Valider (Dérogation)</span>
-          </button>
-        }
-
-        @if (!['VALIDATED', 'REJECTED', 'CANCELLED'].includes(app.status)) {
-          <div class="flex items-center gap-2 ml-2 pl-4 border-l border-slate-200">
-            <button class="btn-icon-only text-amber-600 hover:bg-amber-50" (click)="waitlistFinal()" title="Mettre en attente" [disabled]="isActionLoading()">
-              <lucide-icon [name]="HistoryIcon" [size]="18"></lucide-icon>
-            </button>
-            <button class="btn-icon-only text-rose-600 hover:bg-rose-50" (click)="rejectFinal()" title="Rejeter le dossier" [disabled]="isActionLoading()">
-              <lucide-icon [name]="XCircle" [size]="18"></lucide-icon>
-            </button>
-            <button class="btn-icon-only text-slate-400 hover:bg-slate-100" (click)="cancelAdmission()" title="Annuler le dossier" [disabled]="isActionLoading()">
-              <lucide-icon [name]="Trash2" [size]="18"></lucide-icon>
-            </button>
+      <!-- FAMILLE & RESPONSABLE -->
+      <section class="premium-section-card" *ngIf="app.primaryGuardian">
+        <header class="section-header">
+          <div class="flex items-center gap-3">
+            <lucide-icon [name]="Users" class="w-5 h-5 text-emerald-600"></lucide-icon>
+            <h3>Responsable Légal Principal</h3>
           </div>
-        }
-
-        <button class="btn-icon-only ml-2" title="Imprimer le dossier">
-          <lucide-icon [name]="Printer" [size]="18"></lucide-icon>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <main class="detail-body" [class.with-viewer]="showDocumentViewer()">
-
-    <!-- COLONNE GAUCHE : DOSSIER CANDIDAT -->
-    <div class="content-column scrollable-area">
-
-      <div class="grid grid-cols-12 gap-6">
-
-        <!-- PILIER 1 : IDENTITÉ -->
-        <section class="card col-span-12" *ngIf="app.identity">
-          <div class="card-header-modern">
-            <div class="icon-box">
-              <lucide-icon [name]="User" [size]="18"></lucide-icon>
+        </header>
+        <div class="section-body">
+          <div class="guardian-profile">
+            <div class="avatar-squircle">{{ app.primaryGuardian.firstName[0] }}{{ app.primaryGuardian.lastName[0] }}</div>
+            <div class="profile-info">
+              <h4>{{ app.primaryGuardian.firstName }} {{ app.primaryGuardian.lastName }}</h4>
+              <div class="tags-row">
+                <span class="tag">{{ app.primaryGuardian.relation }}</span>
+                <span class="tag financial" *ngIf="app.primaryGuardian.financialResponsible">Responsable Financier</span>
+              </div>
             </div>
-            <div class="title-meta">
-              <h2>Pilier : Identité de l'élève</h2>
-              <p>État civil et informations de base du candidat.</p>
+            <div class="contact-actions">
+              <app-fw-button variant="tertiary" size="sm" [icon]="Mail">{{ app.primaryGuardian.email }}</app-fw-button>
+              <app-fw-button variant="tertiary" size="sm" [icon]="Phone">{{ app.primaryGuardian.phone }}</app-fw-button>
             </div>
           </div>
+        </div>
+      </section>
 
-          <div class="card-content">
-            <div class="info-grid-modern">
-              <div class="data-item">
-                <label>Prénom(s)</label>
-                <div class="value">{{ app.identity.firstName }}</div>
-              </div>
-              <div class="data-item">
-                <label>Nom de famille</label>
-                <div class="value">{{ app.identity.lastName }}</div>
-              </div>
-              <div class="data-item">
-                <label>Date de Naissance</label>
-                <div class="value">{{ app.identity.birthDate | date:'longDate' }}</div>
-              </div>
-              <div class="data-item">
-                <label>Genre</label>
-                <div class="value">{{ app.identity.gender === 'MALE' ? 'Masculin' : 'Féminin' }}</div>
-              </div>
-              <div class="data-item">
-                <label>Lieu de Naissance</label>
-                <div class="value">{{ app.identity.birthPlace }}</div>
-              </div>
-              <div class="data-item">
-                <label>Nationalité</label>
-                <div class="value">{{ app.identity.customFields?.['nationality'] || 'Non renseignée' }}</div>
-              </div>
+      <!-- ÉVALUATION (SI ACTIVE) -->
+      <section class="premium-section-card evaluation" *ngIf="['VERIFIED', 'TESTING', 'VALIDATED', 'REJECTED'].includes(app.status)">
+        <header class="section-header">
+          <div class="flex items-center justify-between w-full">
+            <div class="flex items-center gap-3">
+              <lucide-icon [name]="GraduationCap" class="w-5 h-5 text-blue-600"></lucide-icon>
+              <h3>Décision Pédagogique</h3>
+            </div>
+            <div class="score-pill" [class.pass]="+averageScore() >= minPassingGrade()">
+              Moyenne : {{ averageScore() }} / 20
             </div>
           </div>
-        </section>
-
-        <!-- PILIER 2 : SANTÉ (NOUVEAU) -->
-        <section class="card col-span-12" *ngIf="app.medical">
-          <div class="card-header-modern">
-            <div class="icon-box text-rose-600 bg-rose-50">
-              <lucide-icon [name]="HeartPulse" [size]="18"></lucide-icon>
-            </div>
-            <div class="title-meta">
-              <h2>Pilier : Santé & Médical</h2>
-              <p>Informations vitales et contacts d'urgence.</p>
-            </div>
-          </div>
-          <div class="card-content">
-            <div class="info-grid-modern">
-              <div class="data-item">
-                <label>Groupe Sanguin</label>
-                <div class="value">{{ app.medical.customFields?.['bloodGroup'] || 'Non renseigné' }}</div>
-              </div>
-              <div class="data-item col-span-3">
-                <label>Allergies Critiques</label>
-                <div class="value text-rose-600 font-bold">{{ app.medical.customFields?.['criticalAllergies'] || 'Aucune signalée' }}</div>
-              </div>
-              <div class="data-item">
-                <label>Contact Urgence (Nom)</label>
-                <div class="value">{{ app.medical.customFields?.['emergencyContactName'] || 'Non renseigné' }}</div>
-              </div>
-              <div class="data-item">
-                <label>Contact Urgence (Tél)</label>
-                <div class="value font-mono">{{ app.medical.customFields?.['emergencyContactPhone'] || 'Non renseigné' }}</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- PILIER 3 : FAMILLE -->
-        <section class="card col-span-12" *ngIf="app.primaryGuardian">
-          <div class="card-header-modern">
-            <div class="icon-box text-emerald-600 bg-emerald-50">
-              <lucide-icon [name]="Users" [size]="18"></lucide-icon>
-            </div>
-            <div class="title-meta">
-              <h2>Pilier : Famille & Responsables</h2>
-              <p>Structure familiale et contacts des tuteurs.</p>
-            </div>
-          </div>
-          <div class="card-content">
-            <div class="parent-profile">
-              <div class="profile-header">
-                <div class="avatar-circle">{{ app.primaryGuardian.firstName[0] }}{{ app.primaryGuardian.lastName[0] }}</div>
-                <div class="profile-info">
-                  <h3>{{ app.primaryGuardian.firstName }} {{ app.primaryGuardian.lastName }}</h3>
-                  <div class="flex gap-2">
-                    <span class="relation-tag">{{ app.primaryGuardian.relation }}</span>
-                    <span class="relation-tag financial" *ngIf="app.primaryGuardian.financialResponsible">Responsable Financier</span>
-                  </div>
-                </div>
-              </div>
-              <div class="contact-strip">
-                <div class="contact-item"><lucide-icon [name]="Mail" [size]="14"></lucide-icon> {{ app.primaryGuardian.email }}</div>
-                <div class="contact-item"><lucide-icon [name]="Phone" [size]="14"></lucide-icon> {{ app.primaryGuardian.phone }}</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- PILIER 4 : SCOLARITÉ -->
-        <section class="card col-span-12" *ngIf="app.schooling">
-          <div class="card-header-modern">
-            <div class="icon-box text-amber-600 bg-amber-50">
-              <lucide-icon [name]="School" [size]="18"></lucide-icon>
-            </div>
-            <div class="title-meta">
-              <h2>Pilier : Vœux & Scolarité</h2>
-              <p>Orientation demandée et historique scolaire.</p>
-            </div>
-          </div>
-          <div class="card-content">
-            <div class="info-grid-modern">
-              <div class="data-item highlight">
-                <label>Niveau demandé</label>
-                <div class="value-badge">{{ levelName() }}</div>
-              </div>
-              <div class="data-item highlight" *ngIf="filiereName()">
-                <label>Série / Filière</label>
-                <div class="value-badge secondary">{{ filiereName() }}</div>
-              </div>
-              <div class="data-item col-span-2">
-                <label>Dernier établissement fréquenté</label>
-                <div class="value">{{ app.schooling.customFields?.['previousSchool'] || 'Non renseigné' }}</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- CARTE : SERVICES SOUSCRITS -->
-        <section class="card col-span-12" *ngIf="app.subscriptions && app.subscriptions.length > 0">
-          <div class="card-header-modern">
-            <div class="icon-box text-violet-600 bg-violet-50">
-              <lucide-icon [name]="School" [size]="18"></lucide-icon>
-            </div>
-            <div class="title-meta">
-              <h2>Services parascolaires</h2>
-              <p>Services souscrits par la famille pour cet enfant.</p>
-            </div>
-          </div>
-          <div class="card-content">
-            <div class="services-chips">
-              <div *ngFor="let sub of app.subscriptions" class="service-chip">
-                <span class="service-code">{{ sub.serviceCode }}</span>
-                <span class="service-option" *ngIf="sub.optionCode">{{ sub.optionCode }}</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- CARTE : ÉVALUATION -->
-        <section class="card col-span-12 assessment-card"
-                 *ngIf="['VERIFIED', 'TESTING', 'VALIDATED', 'REJECTED'].includes(app.status)">
-          <div class="card-header-modern">
-            <div class="icon-box text-blue-600 bg-blue-50">
-              <lucide-icon [name]="HistoryIcon" [size]="18"></lucide-icon>
-            </div>
-            <div class="title-meta">
-              <h2>Évaluation Pédagogique</h2>
-              <p>Saisie des notes et décision de la commission.</p>
-            </div>
-            <div class="avg-score-badge" [class.success]="+averageScore() >= minPassingGrade()"
-                 [class.danger]="+averageScore() < minPassingGrade() && +averageScore() > 0">
-              Moyenne: {{ averageScore() }} / 20
-            </div>
-          </div>
-
-          <div class="card-content">
-            <div class="evaluation-layout">
-              <div class="grades-column">
-                <table class="modern-eval-table">
-                  <thead>
-                  <tr>
-                    <th>Discipline</th>
-                    <th>Note</th>
+        </header>
+        <div class="section-body">
+          <div class="evaluation-grid">
+            <div class="grades-area">
+              <table class="zen-table">
+                <thead><tr><th>Matière</th><th>Note / 20</th></tr></thead>
+                <tbody>
+                  <tr *ngFor="let subject of assessmentSubjects()">
+                    <td class="font-bold">{{ subject }}</td>
+                    <td>
+                      <input type="number" [ngModel]="evaluationGrades()[subject]" (ngModelChange)="updateGrade(subject, $event)" 
+                             min="0" max="20" class="zen-input-small" [disabled]="app.status === 'VALIDATED'">
+                    </td>
                   </tr>
-                  </thead>
-                  <tbody>
-                    @for (subject of assessmentSubjects(); track subject) {
-                      <tr>
-                        <td class="subject-name">{{ subject }}</td>
-                        <td class="grade-input-cell">
-                          <input type="number" [ngModel]="evaluationGrades()[subject]" (ngModelChange)="updateGrade(subject, $event)" min="0" max="20" class="grade-input" [disabled]="app.status === 'VALIDATED' || app.status === 'REJECTED'">
-                        </td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
+                </tbody>
+              </table>
+            </div>
+            <div class="decision-area">
+              <div class="form-group">
+                <label>Observations du jury</label>
+                <textarea [(ngModel)]="evaluationComment" rows="3" placeholder="Commentaires pédagogiques..." [disabled]="app.status === 'VALIDATED'"></textarea>
               </div>
-
-              <div class="decision-column">
-                <div class="form-group-modern">
-                  <label>Observations du jury</label>
-                  <textarea [(ngModel)]="evaluationComment" rows="4" placeholder="Points forts, points faibles..." [disabled]="app.status === 'VALIDATED' || app.status === 'REJECTED'"></textarea>
-                </div>
-
-                <div class="decision-selector-modern">
-                  <label>Décision pédagogique</label>
-                  <div class="choice-group">
-                    <button class="btn-choice red" [class.active]="pedagogicalDecision() === 'REJECTED'" (click)="pedagogicalDecision.set('REJECTED')" [disabled]="app.status === 'VALIDATED'">Refusé</button>
-                    <button class="btn-choice amber" [class.active]="pedagogicalDecision() === 'WAITLIST'" (click)="pedagogicalDecision.set('WAITLIST')" [disabled]="app.status === 'VALIDATED'">Attente</button>
-                    <button class="btn-choice green" [class.active]="pedagogicalDecision() === 'ADMITTED'" (click)="pedagogicalDecision.set('ADMITTED')" [disabled]="app.status === 'VALIDATED'">Admis</button>
-                  </div>
-
-                  <button class="w-full mt-6 h-12 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 transition-all disabled:opacity-50"
-                          (click)="submitPedagogicalDecision()"
-                          [disabled]="isActionLoading() || app.status === 'VALIDATED'">
-                    <lucide-icon *ngIf="isActionLoading()" [name]="RefreshCw" [size]="18" class="animate-spin mr-2 inline"></lucide-icon>
-                    Confirmer la décision pédagogique
-                  </button>
-                </div>
+              <div class="decision-toggle-group">
+                <button (click)="pedagogicalDecision.set('REJECTED')" [class.active]="pedagogicalDecision() === 'REJECTED'" class="btn-dec red">Refusé</button>
+                <button (click)="pedagogicalDecision.set('WAITLIST')" [class.active]="pedagogicalDecision() === 'WAITLIST'" class="btn-dec amber">Attente</button>
+                <button (click)="pedagogicalDecision.set('ADMITTED')" [class.active]="pedagogicalDecision() === 'ADMITTED'" class="btn-dec green">Admis</button>
               </div>
+              <app-fw-button 
+                variant="primary" 
+                class="w-full mt-6" 
+                [loading]="isActionLoading()"
+                [disabled]="app.status === 'VALIDATED'"
+                (click)="submitPedagogicalDecision()">
+                Enregistrer la décision
+              </app-fw-button>
             </div>
           </div>
-        </section>
-
-      </div>
+        </div>
+      </section>
     </div>
 
-    <!-- COLONNE DROITE : DOCUMENTS -->
-    <aside class="side-column">
-      <div class="conformity-card" [class.ready]="isReadyForFinalValidation()">
-        <div class="card-header">
-          <lucide-icon [name]="isReadyForFinalValidation() ? CheckCircle : Info" [size]="20"></lucide-icon>
-          <h3>Conformité du Dossier</h3>
-        </div>
+    <!-- COLONNE DROITE : CONFORMITÉ & DOCUMENTS -->
+    <aside class="side-column space-y-6">
+      <div class="conformity-card-zen" [class.is-ready]="isReadyForFinalValidation()">
+        <header>
+          <lucide-icon [name]="isReadyForFinalValidation() ? CheckCircle : Info"></lucide-icon>
+          <span>Statut Conformité</span>
+        </header>
         <div class="check-list">
-          <div class="check-row" [class.done]="mandatoryDocsSummary().received === mandatoryDocsSummary().total">
-            <lucide-icon [name]="CheckCircle" [size]="14"></lucide-icon>
-            <span>Pièces jointes ({{ mandatoryDocsSummary().received }}/{{ mandatoryDocsSummary().total }})</span>
+          <div class="check-item" [class.checked]="mandatoryDocsSummary().received === mandatoryDocsSummary().total">
+            <lucide-icon [name]="CheckCircle"></lucide-icon>
+            Documents ({{ mandatoryDocsSummary().received }}/{{ mandatoryDocsSummary().total }})
           </div>
-          <div class="check-row" [class.done]="!!app.assessment">
-            <lucide-icon [name]="CheckCircle" [size]="14"></lucide-icon>
-            <span>Évaluation effectuée</span>
+          <div class="check-item" [class.checked]="!!app.assessment">
+            <lucide-icon [name]="CheckCircle"></lucide-icon>
+            Évaluation
           </div>
         </div>
       </div>
 
-      <div class="docs-section-modern">
-        <h3 class="section-title">Pièces Justificatives</h3>
-        <div class="docs-stack">
-          @for (doc of app.documents; track doc.code) {
-            <div class="doc-card-modern" [class.active]="selectedDoc()?.code === doc.code" [class.missing]="doc.status === 'MISSING'" (click)="previewDocument(doc)">
-              <div class="doc-type-icon">
-                <lucide-icon [name]="getFileIcon(doc.name)" [size]="18"></lucide-icon>
-              </div>
-              <div class="doc-details">
-                <span class="name">{{ doc.name }}</span>
-                <span class="status-badge" [class]="doc.status.toLowerCase()">{{ doc.status }}</span>
-              </div>
-              <div class="doc-action">
-                @if (uploadingDocCode() === doc.code) {
-                  <lucide-icon [name]="RefreshCw" [size]="16" class="animate-spin text-primary"></lucide-icon>
-                } @else {
-                  <div class="flex items-center gap-2">
-                    @if (doc.status === 'MISSING') {
-                      <button class="btn-mini-receive" (click)="receiveDocument(doc.code); $event.stopPropagation()">Recu</button>
-                    }
-                    <input type="file" #adminFileInput hidden (change)="onAdminFileSelected(doc.code, $event)">
-                    <button class="btn-icon-sm" (click)="adminFileInput.click(); $event.stopPropagation()" title="Uploader le scan">
-                      <lucide-icon [name]="Upload" [size]="14"></lucide-icon>
-                    </button>
-                    <button *ngIf="doc.status !== 'MISSING'" class="btn-icon-sm primary" (click)="previewDocument(doc); $event.stopPropagation()">
-                      <lucide-icon [name]="Eye" [size]="14"></lucide-icon>
-                    </button>
-                  </div>
-                }
-              </div>
-            </div>
-          }
+      <div class="docs-stack-zen">
+        <h4 class="sidebar-title">Pièces Justificatives</h4>
+        <div *ngFor="let doc of app.documents" 
+             class="doc-item-premium" 
+             [class.is-missing]="doc.status === 'MISSING'"
+             (click)="previewDocument(doc)">
+          <div class="doc-icon"><lucide-icon [name]="getFileIcon(doc.name)"></lucide-icon></div>
+          <div class="doc-info">
+            <span class="name">{{ doc.name }}</span>
+            <span class="status">{{ doc.status }}</span>
+          </div>
+          <div class="doc-actions" (click)="$event.stopPropagation()">
+            <input type="file" #adminFileInput hidden (change)="onAdminFileSelected(doc.code, $event)">
+            <button class="action-btn" (click)="adminFileInput.click()" title="Uploader">
+              <lucide-icon [name]="Upload" [size]="14"></lucide-icon>
+            </button>
+          </div>
         </div>
       </div>
     </aside>
 
-    <!-- VIEWER FLOTTANT -->
-    <div class="viewer-overlay" *ngIf="showDocumentViewer()" (click)="showDocumentViewer.set(false)">
-      <div class="viewer-window" (click)="$event.stopPropagation()">
-        <header class="viewer-header">
-          <div class="viewer-title">
-            <lucide-icon [name]="FileText" [size]="18"></lucide-icon>
-            <span>{{ selectedDoc()?.name }}</span>
-          </div>
-          <button (click)="showDocumentViewer.set(false)">
-            <lucide-icon [name]="XCircle" [size]="20"></lucide-icon>
-          </button>
-        </header>
-        <div class="viewer-body">
-          @if (selectedDocUrl()) {
-            <iframe [src]="selectedDocUrl()"></iframe>
-          }
-        </div>
-      </div>
-    </div>
-
-  </main>
-</div>
-
-<div class="initial-loader" *ngIf="isLoading()">
-  <div class="loader-content">
-    <lucide-icon [name]="RefreshCw" [size]="48" class="animate-spin text-primary"></lucide-icon>
-    <p>Chargement du dossier...</p>
   </div>
-</div>
+</app-fw-page-shell>
+
+<ng-template #loader>
+  <div class="initial-loader">
+    <div class="loader-content">
+      <lucide-icon [name]="RefreshCw" [size]="48" class="animate-spin text-primary"></lucide-icon>
+      <p>Chargement du dossier...</p>
+    </div>
+  </div>
+</ng-template>
