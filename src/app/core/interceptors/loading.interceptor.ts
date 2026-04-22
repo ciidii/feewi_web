@@ -14,9 +14,9 @@ export const loadingInterceptor: HttpInterceptorFn = (req, next) => {
   }
 
   // On détermine le contexte de chargement
-  // Si c'est une requête de données (GET), on utilise 'component' (Skeletons)
-  // Si c'est une action (POST/PATCH/DELETE), on pourrait utiliser 'global' ou laisser le composant gérer
-  const context = req.method === 'GET' ? 'component' : 'global';
+  // 'page' déclenche le loader YouTube-style en haut de page
+  // 'global' déclenche le splash screen (utilisé pour les actions lourdes)
+  const context = req.method === 'GET' ? 'page' : 'global';
   
   loadingService.start(context);
 

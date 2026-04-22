@@ -1,12 +1,11 @@
 <app-fw-page-shell
-  *ngIf="application() as app; else loader"
   [title]="fullName()"
-  [description]="'Référence : #' + app.reference + ' • ' + (app.type === 'RE_ENROLLMENT' ? 'Réinscription' : 'Nouvelle Inscription')"
+  [description]="application() ? 'Référence : #' + application()?.reference + ' • ' + (application()?.type === 'RE_ENROLLMENT' ? 'Réinscription' : 'Nouvelle Inscription') : 'Chargement du dossier...'"
   [icon]="User"
   [backLink]="['/admin/admissions/list']"
 >
   <!-- ACTIONS DE COMMANDE (COMMAND CENTER) -->
-  <div actions class="flex items-center gap-3">
+  <div actions class="flex items-center gap-3" *ngIf="application(); let app">
     <!-- Statut Dynamique -->
     <div class="mr-4">
       <app-fw-badge [status]="app.status" size="sm"></app-fw-badge>
@@ -70,7 +69,7 @@
   </div>
 
   <!-- CONTENU DU DOSSIER -->
-  <div class="admission-detail-grid animate-in slide-in-from-bottom-2 duration-700">
+  <div class="admission-detail-grid animate-in slide-in-from-bottom-2 duration-700" *ngIf="application(); let app; else skeletons">
     
     <div class="main-column space-y-8">
       <!-- Workflow Progress (Zen) -->
@@ -229,13 +228,22 @@
     </aside>
 
   </div>
+
 </app-fw-page-shell>
 
-<ng-template #loader>
-  <div class="initial-loader">
-    <div class="loader-content">
-      <lucide-icon [name]="RefreshCw" [size]="48" class="animate-spin text-primary"></lucide-icon>
-      <p>Chargement du dossier...</p>
+<ng-template #skeletons>
+  <div class="admission-detail-grid animate-pulse">
+    <div class="main-column space-y-8">
+      <div class="h-24 bg-white rounded-[2rem] shadow-sm"></div>
+      <div class="grid grid-cols-2 gap-6">
+        <div class="h-48 bg-white rounded-[2rem] shadow-sm"></div>
+        <div class="h-48 bg-white rounded-[2rem] shadow-sm"></div>
+      </div>
+      <div class="h-64 bg-white rounded-[2rem] shadow-sm"></div>
     </div>
+    <aside class="side-column space-y-6">
+      <div class="h-32 bg-slate-100 rounded-[2rem]"></div>
+      <div class="h-96 bg-white rounded-[2rem] shadow-sm"></div>
+    </aside>
   </div>
 </ng-template>
