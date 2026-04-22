@@ -1,4 +1,4 @@
-import { Component, input, output, signal, computed } from '@angular/core';
+import {Component, input, output, signal, computed, model} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -181,7 +181,7 @@ export class DataListComponent {
   searchQuery = signal('');
 
   /** IDs sélectionnés */
-  selectedIds = signal<Set<string | number>>(new Set());
+  selectedIds = model<Set<string | number>>(new Set());
 
   /** IDs des lignes dépliées (pour vue expandable) */
   expandedIds = signal<Set<string | number>>(new Set());

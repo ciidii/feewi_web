@@ -14,12 +14,13 @@ import {
   RefreshCw,
   Search,
   ShieldCheck,
+  Trash2,
   UserCheck,
   UserPlus,
   X,
   XCircle
 } from 'lucide-angular';
-import {debounceTime, distinctUntilChanged, finalize, firstValueFrom, Subject, takeUntil} from 'rxjs';
+import {debounceTime, distinctUntilChanged, finalize, firstValueFrom, forkJoin, Subject, takeUntil} from 'rxjs';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 
@@ -68,6 +69,7 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
   activeTab = signal('Tous');
   searchQuery = signal('');
   isLoading = signal(false);
+  selectedIds = signal<Set<string | number>>(new Set());
 
   // Filtres Avancés (Signals)
   selectedLevel = signal<string>('');
@@ -77,7 +79,72 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
   selectedStartDate = signal<string>('');
   selectedEndDate = signal<string>('');
 
-  // ... (rest of class)
+  // Données de référence pour les filtres
+  levels = signal<Level[]>([]);
+  years = signal<AcademicYear[]>([]);
+
+  // Pagination
+  currentPage = signal(0);
+  pageSize = signal(20);
+  pageSizeOptions = [20, 50, 100, 200];
+  totalElements = signal(0);
+  totalPages = signal(1);
+
+  onPageSizeChange(newSize: number) {
+    this.pageSize.set(newSize);
+    this.currentPage.set(0);
+    this.loadAdmissions();
+  }
+
+  toggleAllRows() {
+    const rows = this.admissionRows();
+    const current = this.selectedIds();
+
+    if (current.size === rows.length) {
+      this.selectedIds.set(new Set());
+    } else {
+      this.selectedIds.set(new Set(rows.map(r => r.id)));
+    }
+  }
+
+  handleBulkDelete() {
+    const ids = Array.from(this.selectedIds()).map(id => id.toString());
+    if (ids.length === 0) return;
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '450px',
+      data: {
+        title: 'Suppression groupée',
+        message: `Souhaitez-vous vraiment annuler les ${ids.length} dossiers sélectionnés ? Cette action est irréversible.`,
+        confirmLabel: 'Annuler les dossiers',
+        type: 'destructive'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.isLoading.set(true);
+        const tasks = ids.map(id => this.enrollmentAdminService.cancelAdmission(id));
+
+        forkJoin(tasks).pipe(
+          finalize(() => {
+            this.isLoading.set(false);
+            this.selectedIds.set(new Set());
+          })
+        ).subscribe({
+          next: () => {
+            this.notificationService.success(`${ids.length} dossiers ont été annulés.`);
+            this.loadAdmissions();
+          },
+          error: (err) => {
+            console.error('Bulk Delete Error:', err);
+            this.notificationService.error('Certains dossiers n\'ont pas pu être annulés.');
+            this.loadAdmissions();
+          }
+        });
+      }
+    });
+  }
 
   openFilterModal() {
     const dialogRef = this.dialog.open(AdmissionFilterModalComponent, {
@@ -103,23 +170,6 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
         this.onFilterChange();
       }
     });
-  }
-
-  // Données de référence pour les filtres
-  levels = signal<Level[]>([]);
-  years = signal<AcademicYear[]>([]);
-
-  // Pagination
-  currentPage = signal(0);
-  pageSize = signal(20);
-  pageSizeOptions = [20, 50, 100, 200];
-  totalElements = signal(0);
-  totalPages = signal(1);
-
-  onPageSizeChange(newSize: number) {
-    this.pageSize.set(newSize);
-    this.currentPage.set(0);
-    this.loadAdmissions();
   }
 
   rawApplications = signal<Admission[]>([]);
@@ -262,8 +312,7 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
           academicYearId: this.selectedYear() || undefined,
           channel: (this.selectedChannel() as any) || undefined,
           page: this.currentPage(),
-          size: this.pageSize(),
-          // Note: Les filtres 'incompleteOnly' et 'dates' sont prêts pour l'API
+          size: this.pageSize()
         } as any)
       );
 
@@ -421,4 +470,5 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
   readonly XCircle = XCircle;
   readonly X = X;
   readonly ArrowRight = ArrowRight;
+  readonly Trash2 = Trash2;
 }

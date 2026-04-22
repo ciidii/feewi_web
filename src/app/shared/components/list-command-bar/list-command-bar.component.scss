@@ -1,4 +1,4 @@
-@use '../../../../../styles/tokens' as *;
+@use '../../../../styles/tokens' as *;
 
 .unified-command-bar {
   background: white;
@@ -23,15 +23,49 @@
   padding: 0.75rem 1.5rem;
   gap: 1.5rem;
 
-  &.primary-row { 
-    background: white; 
-    border-bottom: 1px solid var(--fw-surface-sunken);
+  .primary-row { 
+      background: white; 
+      border-bottom: 1px solid var(--fw-surface-sunken);
+    }
+
+    &.filter-row { 
+      background: #fafbfc; 
+      padding: 0.5rem 1.5rem;
+    }
   }
 
-  &.filter-row { 
-    background: #fafbfc; 
-    padding: 0.5rem 1.5rem;
-  }
+  .master-checkbox {
+  transform: scale(0.9);
+  display: flex;
+  align-items: center;
+  margin-right: 0.5rem;
+}
+
+.bulk-info-badge {
+  background: var(--fw-primary-alpha);
+  color: var(--fw-primary);
+  padding: 0.25rem 0.75rem;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  
+  strong { font-size: 14px; font-weight: 900; margin-right: 2px; }
+}
+
+.bulk-actions-slot {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  /* Animation subtle pour les boutons qui apparaissent */
+  animation: slideInLeft 0.3s ease-out;
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 .search-box-academic {

@@ -12,12 +12,28 @@
     [pageSize]="pageSize()"
     [pageSizeOptions]="pageSizeOptions"
     [activeFilters]="activeFilterChips()"
+    [isAllSelected]="admissionRows().length > 0 && selectedIds().size === admissionRows().length"
+    [isPartiallySelected]="selectedIds().size > 0 && selectedIds().size < admissionRows().length"
+    [selectedCount]="selectedIds().size"
+    (toggleAll)="toggleAllRows()"
     (searchChange)="searchQuery.set($event); onFilterChange()"
     (clearSearch)="searchQuery.set(''); onFilterChange()"
     (pageSizeChange)="onPageSizeChange($event)"
     (removeFilter)="removeFilter($event)"
     (clearAllFilters)="clearAllFilters()"
   >
+    <!-- ACTIONS DE MASSE (Nouveau slot) -->
+    <div bulk-actions>
+      <app-fw-button 
+        variant="danger" 
+        size="sm" 
+        [icon]="Trash2" 
+        (click)="handleBulkDelete()"
+        [loading]="isLoading()">
+        Supprimer la sélection
+      </app-fw-button>
+    </div>
+
     <!-- ACTIONS PRIMAIRES -->
     <div primary-actions class="action-group-integrated">
       <app-fw-button variant="tertiary" size="sm" [icon]="Download" title="Exporter"></app-fw-button>
@@ -57,6 +73,7 @@
   <!-- LISTE DES DONNÉES -->
   <div class="list-container-integrated animate-in fade-in duration-700">
     <app-data-list
+      [(selectedIds)]="selectedIds"
       [data]="admissionRows()"
       [tabs]="admissionTabs()"
       [activeTab]="activeTab()"

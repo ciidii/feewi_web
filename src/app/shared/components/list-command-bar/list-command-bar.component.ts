@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter, ViewEncapsulation } from '@angu
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule, Search, X } from 'lucide-angular';
 import { FormsModule } from '@angular/forms';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 export interface ActiveFilterChip {
   key: string;
@@ -12,7 +13,7 @@ export interface ActiveFilterChip {
 @Component({
   selector: 'app-fw-list-command-bar',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, FormsModule],
+  imports: [CommonModule, LucideAngularModule, FormsModule, MatCheckboxModule],
   templateUrl: './list-command-bar.component.html',
   styleUrls: ['./list-command-bar.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -23,6 +24,12 @@ export class FwListCommandBarComponent {
   @Input() searchPlaceholder: string = 'Rechercher...';
   @Output() searchChange = new EventEmitter<string>();
   @Output() clearSearch = new EventEmitter<void>();
+
+  // --- SÉLECTION ---
+  @Input() selectedCount: number = 0;
+  @Input() isAllSelected: boolean = false;
+  @Input() isPartiallySelected: boolean = false;
+  @Output() toggleAll = new EventEmitter<void>();
 
   // --- FILTRES ACTIFS & COMPTEUR ---
   @Input() totalElements: number = 0;
