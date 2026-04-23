@@ -1,6 +1,6 @@
 <div class="fw-auth-container">
 
-  <!-- Floating Top Bar (Langue + Quick Help) -->
+  <!-- Floating Top Bar -->
   <div class="fw-auth-top-bar">
     <div class="fw-lang-picker">
       <button [class.active]="translate.currentLang === 'fr'" (click)="changeLanguage('fr')">FR</button>
@@ -10,75 +10,106 @@
 
   <div class="login-card">
 
-    <!-- Header Premium -->
+    <!-- Header -->
     <header class="login-header">
       <div class="logo-box">
-        <img src="feewi-icon.svg" alt="Feewi Icon" />
+        <img src="assets/feewi-icon.svg" alt="" aria-hidden="true" />
       </div>
       <h1 class="title">{{ 'auth.login.title' | translate }}</h1>
       <p class="subtitle">{{ 'auth.login.subtitle' | translate }}</p>
     </header>
 
     <!-- Formulaire -->
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+    <form
+      [formGroup]="loginForm"
+      (ngSubmit)="onSubmit()"
+      class="login-form"
+      [class.is-loading]="isLoading()"
+      [attr.aria-busy]="isLoading()"
+    >
 
-      <div class="fields-zone space-y-6">
-        <!-- Email Field -->
+      <div class="fields-zone">
+
+        <!-- Email -->
         <div class="fw-field">
-          <label class="fw-label">{{ 'auth.login.fields.email.label' | translate }}</label>
-          <div class="fw-input-wrapper" [class.error]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+          <label for="login-email" class="fw-label">
+            {{ 'auth.login.fields.email.label' | translate }}
+          </label>
+          <div class="fw-input-wrapper" [class.error]="emailInvalid">
             <div class="input-prefix">
-              <lucide-icon [name]="Mail" [size]="20"></lucide-icon>
+              <lucide-icon [name]="Mail" [size]="20" aria-hidden="true"></lucide-icon>
             </div>
             <input
+              id="login-email"
               type="email"
               formControlName="email"
+              autocomplete="email"
+              autofocus
               [placeholder]="'auth.login.fields.email.placeholder' | translate"
               class="fw-input"
+              [attr.aria-describedby]="emailInvalid ? 'email-error' : null"
+              [attr.aria-invalid]="emailInvalid"
             />
           </div>
+          <p *ngIf="emailInvalid" id="email-error" class="fw-field-error" role="alert">
+            {{ emailError | translate }}
+          </p>
         </div>
 
-        <!-- Password Field -->
+        <!-- Password -->
         <div class="fw-field">
-          <label class="fw-label">{{ 'auth.login.fields.password.label' | translate }}</label>
-          <div class="fw-input-wrapper" [class.error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
-            <div class="input-prefix">
-              <lucide-icon [name]="Lock" [size]="20"></lucide-icon>
-            </div>
-            <input
-              [type]="showPassword() ? 'text' : 'password'"
-              formControlName="password"
-              [placeholder]="'auth.login.fields.password.placeholder' | translate"
-              class="fw-input"
-            />
-            <button
-              type="button"
-              (click)="togglePassword()"
-              class="input-suffix bg-transparent border-none cursor-pointer hover:text-text-primary transition-colors"
-              [attr.aria-label]="showPassword() ? ('auth.login.fields.password.hide' | translate) : ('auth.login.fields.password.show' | translate)"
-            >
-              <lucide-icon [name]="showPassword() ? EyeOff : Eye" [size]="18"></lucide-icon>
-            </button>
-          </div>
-          <div class="field-footer">
-            <label class="fw-checkbox-wrapper">
-              <input type="checkbox" formControlName="rememberMe">
-              <span>{{ 'auth.login.fields.remember_me' | translate }}</span>
+          <div class="fw-field-header">
+            <label for="login-password" class="fw-label">
+              {{ 'auth.login.fields.password.label' | translate }}
             </label>
             <a routerLink="/auth/forgot-password" class="forgot-link">
               {{ 'auth.login.fields.password.forgot' | translate }}
             </a>
           </div>
+          <div class="fw-input-wrapper" [class.error]="passwordInvalid">
+            <div class="input-prefix">
+              <lucide-icon [name]="Lock" [size]="20" aria-hidden="true"></lucide-icon>
+            </div>
+            <input
+              id="login-password"
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              autocomplete="current-password"
+              [placeholder]="'auth.login.fields.password.placeholder' | translate"
+              class="fw-input"
+              [attr.aria-describedby]="passwordInvalid ? 'password-error' : null"
+              [attr.aria-invalid]="passwordInvalid"
+            />
+            <button
+              type="button"
+              (click)="togglePassword()"
+              class="input-suffix"
+              [attr.aria-label]="showPassword() ? ('auth.login.fields.password.hide' | translate) : ('auth.login.fields.password.show' | translate)"
+            >
+              <lucide-icon [name]="showPassword() ? EyeOff : Eye" [size]="18" aria-hidden="true"></lucide-icon>
+            </button>
+          </div>
+          <p *ngIf="passwordInvalid" id="password-error" class="fw-field-error" role="alert">
+            {{ passwordError | translate }}
+          </p>
         </div>
+
       </div>
 
-      <!-- Alert d'erreur -->
-      <app-fw-alert-banner *ngIf="loginError()" variant="error" class="mt-6">
+      <!-- Rester connecté — section autonome -->
+      <div class="remember-me-zone">
+        <label class="fw-checkbox-wrapper">
+          <input type="checkbox" formControlName="rememberMe">
+          <span>{{ 'auth.login.fields.remember_me' | translate }}</span>
+        </label>
+      </div>
+
+      <!-- Alerte erreur globale -->
+      <app-fw-alert-banner *ngIf="loginError()" variant="error">
         {{ 'auth.login.errors.invalid_credentials' | translate }}
       </app-fw-alert-banner>
 
-      <!-- Zone d'Action Principale -->
+      <!-- CTA Principal -->
       <div class="form-actions">
         <app-fw-button
           type="submit"
@@ -90,13 +121,14 @@
           {{ 'auth.login.actions.submit' | translate }}
         </app-fw-button>
       </div>
+
     </form>
 
-    <!-- Support & Footer -->
+    <!-- Footer -->
     <footer class="login-footer">
       <div class="support-zone">
-        <lucide-icon [name]="HelpCircle" [size]="14"></lucide-icon>
-        <a href="#" class="support-link">{{ 'auth.login.footer.support' | translate }}</a>
+        <lucide-icon [name]="HelpCircle" [size]="14" aria-hidden="true"></lucide-icon>
+        <a routerLink="/support" class="support-link">{{ 'auth.login.footer.support' | translate }}</a>
       </div>
       <p class="copyright">{{ 'auth.login.footer.copyright' | translate }}</p>
     </footer>

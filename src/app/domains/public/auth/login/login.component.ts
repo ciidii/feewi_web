@@ -51,6 +51,30 @@ export class LoginComponent {
   readonly AlertCircle = AlertCircle;
   readonly HelpCircle = HelpCircle;
 
+  get emailInvalid(): boolean {
+    const ctrl = this.loginForm.get('email');
+    return !!(ctrl?.invalid && ctrl?.touched);
+  }
+
+  get emailError(): string {
+    const ctrl = this.loginForm.get('email');
+    if (ctrl?.hasError('required')) return 'auth.login.fields.email.errors.required';
+    if (ctrl?.hasError('email'))    return 'auth.login.fields.email.errors.invalid';
+    return '';
+  }
+
+  get passwordInvalid(): boolean {
+    const ctrl = this.loginForm.get('password');
+    return !!(ctrl?.invalid && ctrl?.touched);
+  }
+
+  get passwordError(): string {
+    const ctrl = this.loginForm.get('password');
+    if (ctrl?.hasError('required'))   return 'auth.login.fields.password.errors.required';
+    if (ctrl?.hasError('minlength'))  return 'auth.login.fields.password.errors.minlength';
+    return '';
+  }
+
   changeLanguage(lang: string) {
     this.translate.use(lang);
     localStorage.setItem('feewi_lang', lang);

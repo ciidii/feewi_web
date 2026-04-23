@@ -2,49 +2,84 @@
   display: block;
 }
 
-/* 
-  Styles sp├®cifiques au domaine Login non g├®r├®s par le CSS global.
-  La plupart du layout (carte, header, inputs) est d├®sormais centralis├® 
-  dans styles.scss pour une coh├®rence Premium.
-*/
-
 .login-form {
-  .field-footer {
+
+  /* État de chargement — freeze visuel des champs */
+  &.is-loading .fields-zone {
+    opacity: 0.5;
+    pointer-events: none;
+    transition: opacity var(--fw-transition-fast);
+  }
+
+  /* Label + lien "Mot de passe oublié" côte à côte */
+  .fw-field-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-top: 10px;
-    padding: 0 4px;
-    
+    align-items: baseline;
+    margin-bottom: 10px;
+
+    .fw-label {
+      margin-bottom: 0;
+    }
+
     .forgot-link {
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 700;
       color: var(--fw-primary);
       text-transform: uppercase;
       text-decoration: none;
       letter-spacing: 0.05em;
       opacity: 0.8;
-      transition: opacity 0.2s;
+      transition: opacity var(--fw-transition-fast);
+      white-space: nowrap;
 
       &:hover {
         opacity: 1;
         text-decoration: underline;
       }
+
+      &:focus-visible {
+        outline: 2px solid var(--fw-primary);
+        outline-offset: 2px;
+        border-radius: 2px;
+      }
     }
   }
 
-  .form-actions {
-    margin-top: 2.5rem;
-    padding-top: 0.5rem;
+  /* Message d'erreur inline sous un champ */
+  .fw-field-error {
+    margin: 6px 0 0 4px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--fw-error);
+    line-height: 1.4;
     display: flex;
-    justify-content: center;
+    align-items: center;
+    gap: 4px;
+
+    &::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
+    }
+  }
+
+  /* "Rester connecté" — section autonome entre les champs et le CTA */
+  .remember-me-zone {
+    margin: 20px 0 24px;
+    padding: 0 4px;
+  }
+
+  /* CTA — full width */
+  .form-actions {
+    margin-top: 0;
 
     app-fw-button {
-      width: 220px;
-
-      @media (max-width: 768px) {
-        width: 100%;
-      }
+      width: 100%;
     }
   }
 }
@@ -55,10 +90,6 @@
   border-top: 1px solid var(--fw-border);
   text-align: center;
 
-  @media (max-width: 768px) {
-    margin-top: 3rem;
-  }
-  
   .support-zone {
     display: flex;
     align-items: center;
@@ -66,27 +97,30 @@
     gap: 8px;
     margin-bottom: 1rem;
     color: var(--fw-text-tertiary);
-    
+
     .support-link {
       font-size: 11px;
       font-weight: 600;
       color: var(--fw-text-tertiary);
       text-decoration: none;
-      transition: color 0.2s;
+      transition: color var(--fw-transition-fast);
 
-      &:hover {
-        color: var(--fw-text-secondary);
-        text-decoration: underline;
+      &:hover { color: var(--fw-text-secondary); text-decoration: underline; }
+
+      &:focus-visible {
+        outline: 2px solid var(--fw-primary);
+        outline-offset: 2px;
+        border-radius: 2px;
       }
     }
   }
 
   .copyright {
-    font-size: 9px;
+    font-size: 11px;
     font-weight: 700;
     color: var(--fw-text-tertiary);
     text-transform: uppercase;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.10em;
     opacity: 0.5;
   }
 }

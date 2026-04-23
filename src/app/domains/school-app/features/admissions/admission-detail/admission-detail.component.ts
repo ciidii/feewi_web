@@ -1,9 +1,10 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { finalize, forkJoin, map, of, switchMap } from 'rxjs';
 import {
   LucideAngularModule,
   ArrowLeft,
+  ArrowRight,
   CheckCircle,
   ChevronLeft,
   ChevronRight,
@@ -32,7 +33,8 @@ import {
   Users,
   XCircle,
   BadgeCheck,
-  Globe
+  Globe,
+  Activity
 } from 'lucide-angular';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { EnrollmentAdminService } from '../../../../../core/services/enrollment-admin.service';
@@ -50,6 +52,8 @@ import { FwBadgeComponent } from '../../../../../shared/components/badge/badge.c
 import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 import { Admission, AssessmentRequest, RequiredDocument } from '../../../../../core/models/enrollment.model';
 
+export type PillarTab = 'identity' | 'schooling' | 'family' | 'medical' | 'assessment' | 'services';
+
 @Component({
   selector: 'app-admission-detail',
   standalone: true,
@@ -65,7 +69,8 @@ import { Admission, AssessmentRequest, RequiredDocument } from '../../../../../c
     FwBadgeComponent
   ],
   templateUrl: './admission-detail.component.html',
-  styleUrls: ['./admission-detail.component.scss']
+  styleUrls: ['./admission-detail.component.scss'],
+  encapsulation: ViewEncapsulation.None
 })
 export class AdmissionDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -81,6 +86,9 @@ export class AdmissionDetailComponent implements OnInit {
   isLoading = signal(true);
   isActionLoading = signal(false);
   uploadingDocCode = signal<string | null>(null);
+
+  // Navigation par Piliers
+  activePillarTab = signal<PillarTab>('identity');
 
   levels = signal<Level[]>([]);
   filieres = signal<Filiere[]>([]);
@@ -119,11 +127,9 @@ export class AdmissionDetailComponent implements OnInit {
     const app = this.application();
     if (!app) return false;
 
-    // La validation finale (ADMITTED/WAITLIST → VALIDATED) est réservée à la Direction
     const validStatus = ['ADMITTED', 'WAITLIST'].includes(app.status);
     if (!validStatus) return false;
 
-    // VERROU NUMÉRIQUE : Tous les documents obligatoires doivent être traitées (UPLOADED, RECEIVED ou VERIFIED)
     const mandatoryDocs = app.documents.filter(d => d.mandatory);
     const allDocsProcessed = mandatoryDocs.every(d =>
       ['UPLOADED', 'RECEIVED', 'VERIFIED'].includes(d.status)
@@ -494,6 +500,15 @@ export class AdmissionDetailComponent implements OnInit {
     };
   });
 
+  // --- NAVIGATION PILIERS ---
+  setPillarTab(tab: PillarTab) {
+    this.activePillarTab.set(tab);
+  }
+
+  getObjectKeys(obj: any): string[] {
+    return obj ? Object.keys(obj) : [];
+  }
+
   // --- ICONS ---
   readonly ArrowLeft = ArrowLeft;
   readonly ChevronLeft = ChevronLeft;
@@ -522,5 +537,7 @@ export class AdmissionDetailComponent implements OnInit {
   readonly Trash2 = Trash2;
   readonly BadgeCheck = BadgeCheck;
   readonly Globe = Globe;
+  readonly ArrowRight = ArrowRight;
+  readonly Activity = Activity;
   protected readonly Info = Info;
 }
