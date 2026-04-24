@@ -1,7 +1,7 @@
 import {computed, inject, Injectable, signal} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Router} from '@angular/router';
-import {catchError, map, Observable, of, tap} from 'rxjs';
+import {catchError, map, Observable, of, switchMap, tap} from 'rxjs';
 import {TenantContextService} from './tenant-context.service';
 import {SchoolService} from './school.service';
 import {NavigationContextService} from './navigation-context.service';
@@ -77,10 +77,8 @@ export class AuthService {
     console.log('[AuthService] Attempting login for:', email);
     return this.http.post<LoginResponse>(`${this.API_URL}/auth/login`, {email, password}).pipe(
       tap(response => this.storeToken(response.access_token, rememberMe)),
-      map(() => {
-        this.fetchProfile().subscribe();
-        return true;
-      }),
+      switchMap(() => this.fetchProfile()),
+      map(profile => !!profile),
       catchError(error => {
         console.error('[AuthService] Login failed', error);
         return of(false);
@@ -101,10 +99,13 @@ export class AuthService {
     console.log('[AuthService] Attempting impersonation for:', userId);
     return this.http.post<LoginResponse>(`${this.API_URL}/auth/impersonate/${userId}`, {}).pipe(
       tap(response => this.storeToken(response.access_token, true)),
-      map(() => {
-        this.fetchProfile().subscribe();
-        this.router.navigate(['/admin/dashboard']);
-        return true;
+      switchMap(() => this.fetchProfile()),
+      map(profile => {
+        if (profile) {
+          this.router.navigate(['/admin/dashboard']);
+          return true;
+        }
+        return false;
       }),
       catchError(error => {
         console.error('[AuthService] Impersonation failed', error);

@@ -6,12 +6,20 @@
       "fields": {
         "email": {
           "label": "Login ID",
-          "placeholder": "your@email.com"
+          "placeholder": "your@email.com",
+          "errors": {
+            "required": "Email address is required",
+            "invalid": "Invalid email format"
+          }
         },
         "password": {
           "label": "Password",
           "placeholder": "••••••••",
-          "forgot": "Forgot password?"
+          "forgot": "Forgot password?",
+          "errors": {
+            "required": "Password is required",
+            "minlength": "Password must be at least 6 characters long"
+          }
         },
         "remember_me": "Stay signed in"
       },

@@ -6,12 +6,20 @@
       "fields": {
         "email": {
           "label": "Identifiant",
-          "placeholder": "votre@email.com"
+          "placeholder": "votre@email.com",
+          "errors": {
+            "required": "L'adresse email est requise",
+            "invalid": "Format d'email invalide"
+          }
         },
         "password": {
           "label": "Mot de passe",
           "placeholder": "••••••••",
-          "forgot": "Mot de passe oublié ?"
+          "forgot": "Mot de passe oublié ?",
+          "errors": {
+            "required": "Le mot de passe est requis",
+            "minlength": "Le mot de passe doit faire au moins 6 caractères"
+          }
         },
         "remember_me": "Rester connecté"
       },

@@ -38,7 +38,7 @@
 
     @if (!['VALIDATED', 'REJECTED', 'CANCELLED'].includes(app.status)) {
       <div class="danger-zone">
-        <app-fw-button variant="danger" size="sm" [icon]="XCircle" (click)="rejectFinal()" aria-label="Rejeter la candidature">
+        <app-fw-button variant="danger" size="sm" [icon]="XCircle" [loading]="isActionLoading()" (click)="rejectFinal()" aria-label="Rejeter la candidature">
           Rejeter
         </app-fw-button>
       </div>
@@ -47,6 +47,9 @@
 
   <!-- MAIN LAYOUT -->
   <div class="decision-hub-layout animate-in fade-in duration-700" *ngIf="application(); let app; else skeletons">
+
+    <!-- Global action loader overlay -->
+    <fw-block-loader *ngIf="isActionLoading()" [center]="true" message="Mise à jour du dossier..."></fw-block-loader>
 
     <!-- MAIN CONTENT AREA -->
     <main class="pillar-content-area">

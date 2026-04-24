@@ -60,9 +60,9 @@ import { CommonModule } from '@angular/common';
     }
 
     @keyframes progress-slide {
-      0% { transform: scaleX(0) translateX(0); }
-      40% { transform: scaleX(0.4) translateX(50%); }
-      100% { transform: scaleX(0) translateX(250%); }
+      0% { transform: translateX(-100%) scaleX(0.2); }
+      50% { transform: translateX(0) scaleX(0.5); }
+      100% { transform: translateX(100%) scaleX(0.2); }
     }
 
     @keyframes progress-gradient {
