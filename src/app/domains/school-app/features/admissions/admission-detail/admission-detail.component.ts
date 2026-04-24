@@ -52,6 +52,7 @@ import { FwBadgeComponent } from '../../../../../shared/components/badge/badge.c
 import { FwTab } from '../../../../../shared/components/tabs/tabs.component';
 import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 import { Admission, AssessmentRequest, RequiredDocument } from '../../../../../core/models/enrollment.model';
+import { ServiceConfig } from '../../../../../core/models/enrollment/config';
 
 export type PillarTab = 'identity' | 'schooling' | 'family' | 'medical' | 'assessment' | 'services';
 
@@ -102,6 +103,7 @@ export class AdmissionDetailComponent implements OnInit {
   // --- CONFIGURATION DYNAMIQUE ---
   assessmentSubjects = signal<string[]>([]);
   minPassingGrade = signal<number>(10);
+  servicesConfig = signal<ServiceConfig[]>([]);
 
   // --- CALCULS RÉACTIFS ---
   levelName = computed(() => {
@@ -203,6 +205,11 @@ export class AdmissionDetailComponent implements OnInit {
             initialGrades[sub] = app?.assessment?.grades?.[sub] || 0;
           });
           this.evaluationGrades.set(initialGrades);
+        }
+
+        const sConfig = effectiveConfig?.schema?.services?.availableServices;
+        if (sConfig?.length) {
+          this.servicesConfig.set(sConfig);
         }
 
         const data = this.application();
@@ -521,12 +528,24 @@ export class AdmissionDetailComponent implements OnInit {
   });
 
   // --- NAVIGATION PILIERS ---
-  setPillarTab(tab: PillarTab) {
-    this.activePillarTab.set(tab);
+  setPillarTab(tab: string) {
+    this.activePillarTab.set(tab as PillarTab);
   }
 
   getObjectKeys(obj: any): string[] {
     return obj ? Object.keys(obj) : [];
+  }
+
+  getServiceConfig(serviceCode: string): ServiceConfig | undefined {
+    return this.servicesConfig().find(s => s.code === serviceCode);
+  }
+
+  // Transforme camelCase → "Title Case" en attendant le pipe partagé (P1.4)
+  formatKey(key: string): string {
+    return key
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, s => s.toUpperCase())
+      .trim();
   }
 
   // --- ICONS ---

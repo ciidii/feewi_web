@@ -166,24 +166,24 @@
             <h2 class="panel-title">Informations médicales</h2>
             <div class="panel-badge">Santé</div>
           </div>
-          <div class="info-grid">
-            <div class="info-field" [class.alert]="app.medical.customFields?.['criticalAllergies']">
-              <label>Allergies critiques</label>
-              <span class="field-value">{{ app.medical.customFields?.['criticalAllergies'] || 'Aucune allergie signalée' }}</span>
+
+          <ng-container *ngIf="getObjectKeys(app.medical.customFields).length > 0; else medicalEmpty">
+            <div class="info-grid">
+              <div class="info-field"
+                   *ngFor="let key of getObjectKeys(app.medical.customFields)"
+                   [class.alert]="key === 'criticalAllergies' && app.medical.customFields![key]">
+                <label>{{ formatKey(key) }}</label>
+                <span class="field-value">{{ app.medical.customFields![key] || 'Non renseigné' }}</span>
+              </div>
             </div>
-            <div class="info-field">
-              <label>Groupe sanguin</label>
-              <span class="field-value">{{ app.medical.customFields?.['bloodGroup'] || 'Inconnu' }}</span>
+          </ng-container>
+
+          <ng-template #medicalEmpty>
+            <div class="empty-state">
+              <lucide-icon [name]="HeartPulse" [size]="48"></lucide-icon>
+              <p>Aucune information médicale renseignée</p>
             </div>
-            <div class="info-field">
-              <label>Contact d'urgence</label>
-              <span class="field-value">{{ app.medical.customFields?.['emergencyContactName'] || 'Non renseigné' }}</span>
-            </div>
-            <div class="info-field">
-              <label>Téléphone urgence</label>
-              <span class="field-value">{{ app.medical.customFields?.['emergencyContactPhone'] || 'Non renseigné' }}</span>
-            </div>
-          </div>
+          </ng-template>
         </div>
 
         <!-- ASSESSMENT PANEL -->
@@ -263,15 +263,30 @@
         <div class="pillar-panel" *ngIf="activePillarTab() === 'services'">
           <div class="panel-header">
             <h2 class="panel-title">Services souscrits</h2>
-            <div class="panel-badge">Options</div>
+            <div class="panel-badge">{{ app.subscriptions?.length || 0 }} service(s)</div>
           </div>
-          <div class="services-list">
+
+          <div class="services-list" *ngIf="app.subscriptions?.length; else servicesEmpty">
             <div *ngFor="let sub of app.subscriptions" class="service-card">
               <div class="service-icon">
                 <lucide-icon [name]="Activity" [size]="20"></lucide-icon>
               </div>
+              <div class="service-info">
+                <h4>{{ getServiceConfig(sub.serviceCode)?.label || sub.serviceCode }}</h4>
+                <span class="service-option">Option : {{ sub.optionCode }}</span>
+              </div>
+              <span *ngIf="getServiceConfig(sub.serviceCode)?.mandatory" class="service-mandatory-badge">
+                Obligatoire
+              </span>
             </div>
           </div>
+
+          <ng-template #servicesEmpty>
+            <div class="empty-state">
+              <lucide-icon [name]="Activity" [size]="48"></lucide-icon>
+              <p>Aucun service souscrit</p>
+            </div>
+          </ng-template>
         </div>
 
       </div>

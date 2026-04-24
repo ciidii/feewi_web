@@ -410,44 +410,54 @@
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  background: #fafbfc;
+  background: var(--fw-surface-sunken);
   border-radius: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--fw-border);
 
   .service-icon {
     width: 40px;
     height: 40px;
-    background: white;
+    background: var(--fw-surface-card);
     border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--fw-primary);
+    flex-shrink: 0;
   }
 
   .service-info {
     flex: 1;
+    min-width: 0;
 
     h4 {
       margin: 0 0 0.25rem 0;
       font-size: 0.875rem;
       font-weight: 600;
-      color: #1a2c3e;
+      color: var(--fw-text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .service-status {
-      font-size: 0.7rem;
-      font-weight: 600;
-      text-transform: uppercase;
-
-      &.ACTIVE {
-        color: #10b981;
-      }
-
-      &.PENDING {
-        color: #d97706;
-      }
+    .service-option {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--fw-text-tertiary);
     }
+  }
+
+  .service-mandatory-badge {
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 3px 8px;
+    border-radius: var(--fw-radius-full);
+    background: var(--fw-warning-bg);
+    color: var(--fw-warning);
+    border: 1px solid var(--fw-warning-border);
   }
 }
 
