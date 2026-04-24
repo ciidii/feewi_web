@@ -34,7 +34,7 @@ import {
   XCircle,
   BadgeCheck,
   Globe,
-  Activity
+  Activity, Loader2
 } from 'lucide-angular';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { EnrollmentAdminService } from '../../../../../core/services/enrollment-admin.service';
@@ -540,4 +540,5 @@ export class AdmissionDetailComponent implements OnInit {
   readonly ArrowRight = ArrowRight;
   readonly Activity = Activity;
   protected readonly Info = Info;
+  protected readonly Loader2 = Loader2;
 }

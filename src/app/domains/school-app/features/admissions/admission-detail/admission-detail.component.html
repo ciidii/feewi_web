@@ -5,43 +5,51 @@
   [backLink]="['/admin/admissions/list']"
   density="compact"
 >
-  <!-- ACTIONS DE COMMANDE (STICKY HEADER) -->
+  <!-- STICKY HEADER ACTIONS -->
   <div actions class="flex items-center gap-2" *ngIf="application(); let app">
     <app-fw-badge [status]="app.status" size="sm"></app-fw-badge>
     <div class="divider-v mx-3"></div>
 
-    <!-- Actions métier -->
+    <!-- Business Actions -->
     @if (app.status === 'SUBMITTED') {
       <app-fw-button variant="primary" size="sm" [icon]="ClipboardCheck" [loading]="isActionLoading()" (click)="verifyApplication()">
-        Valider conformité
+        Vérifier conformité
       </app-fw-button>
     }
     @if (app.status === 'TESTING') {
       <app-fw-button variant="primary" size="sm" [icon]="BadgeCheck" [loading]="isActionLoading()" (click)="admitManually()">
-        Admettre candidat
+        Admettre
       </app-fw-button>
     }
     @if (['ADMITTED', 'WAITLIST'].includes(app.status)) {
       <app-fw-button *ngIf="isReadyForFinalValidation()" variant="primary" size="sm" [icon]="GraduationCap" [loading]="isActionLoading()" (click)="validateFinal()">
-        Valider Admission
+        Valider admission
       </app-fw-button>
-      <app-fw-button *ngIf="!isReadyForFinalValidation() && app.status !== 'ADMITTED'" variant="primary" size="sm" [icon]="ShieldCheck" [loading]="isActionLoading()" (click)="overruleFinal()">
-        Déroger & Valider
+      <app-fw-button *ngIf="!isReadyForFinalValidation() && app.status !== 'ADMITTED'" size="sm" [icon]="ShieldCheck" [loading]="isActionLoading()" (click)="overruleFinal()">
+        Dérogation
       </app-fw-button>
     }
 
     <div class="divider-v mx-2"></div>
-    <app-fw-button variant="tertiary" size="sm" [icon]="Printer" title="Imprimer"></app-fw-button>
+    <app-fw-button variant="tertiary" size="sm" [icon]="Printer" aria-label="Imprimer le dossier"></app-fw-button>
+
     @if (!['VALIDATED', 'REJECTED', 'CANCELLED'].includes(app.status)) {
-      <app-fw-button variant="danger" size="sm" [icon]="XCircle" (click)="rejectFinal()" title="Rejeter"></app-fw-button>
+      <div class="danger-zone">
+        <app-fw-button variant="danger" size="sm" [icon]="XCircle" (click)="rejectFinal()" aria-label="Rejeter la candidature">
+          Rejeter
+        </app-fw-button>
+      </div>
     }
   </div>
 
-  <!-- LAYOUT 3 COLONNES : DECISION HUB -->
+  <!-- MAIN LAYOUT -->
   <div class="decision-hub-layout animate-in fade-in duration-700" *ngIf="application(); let app; else skeletons">
-    
-    <!-- COLONNE 1 : PILLAR RAIL (NAVIGATION INTERNE) -->
+
+    <!-- LEFT NAVIGATION -->
     <aside class="pillar-rail">
+      <div class="rail-header">
+        <span class="rail-label">Navigation</span>
+      </div>
       <nav class="rail-nav">
         <button (click)="setPillarTab('identity')" [class.active]="activePillarTab() === 'identity'">
           <lucide-icon [name]="User" [size]="18"></lucide-icon>
@@ -70,70 +78,111 @@
       </nav>
     </aside>
 
-    <!-- COLONNE 2 : PILLAR CONTENT (VUE DÉTAILLÉE) -->
+    <!-- MAIN CONTENT AREA -->
     <main class="pillar-content-area">
-      
-      <!-- CONTENU DYNAMIQUE SELON L'ONGLET ACTIF -->
       <div class="pillar-scroll-wrapper custom-scrollbar">
-        
-        <!-- ONGLET : IDENTITÉ -->
+
+        <!-- IDENTITY PANEL -->
         <div class="pillar-panel" *ngIf="activePillarTab() === 'identity'">
-          <h2 class="pillar-title">Fiche d'Identité</h2>
-          <div class="academic-data-grid">
-            <div class="data-item"><strong>Prénoms</strong><span>{{ app.identity.firstName }}</span></div>
-            <div class="data-item"><strong>Nom de famille</strong><span>{{ app.identity.lastName }}</span></div>
-            <div class="data-item"><strong>Date de naissance</strong><span>{{ app.identity.birthDate | date:'longDate' }}</span></div>
-            <div class="data-item"><strong>Lieu de naissance</strong><span>{{ app.identity.birthPlace }}</span></div>
-            <div class="data-item"><strong>Sexe / Genre</strong><span>{{ app.identity.gender === 'MALE' ? 'Masculin' : 'Féminin' }}</span></div>
-            <!-- Custom Fields Identity -->
+          <div class="panel-header">
+            <h2 class="panel-title">Informations personnelles</h2>
+            <div class="panel-badge">État civil</div>
+          </div>
+          <div class="info-grid">
+            <div class="info-field">
+              <label>Prénoms</label>
+              <span class="field-value">{{ app.identity.firstName }}</span>
+            </div>
+            <div class="info-field">
+              <label>Nom de famille</label>
+              <span class="field-value">{{ app.identity.lastName }}</span>
+            </div>
+            <div class="info-field">
+              <label>Date de naissance</label>
+              <span class="field-value">{{ app.identity.birthDate | date:'longDate' }}</span>
+            </div>
+            <div class="info-field">
+              <label>Lieu de naissance</label>
+              <span class="field-value">{{ app.identity.birthPlace }}</span>
+            </div>
+            <div class="info-field">
+              <label>Genre</label>
+              <span class="field-value">{{ app.identity.gender === 'MALE' ? 'Masculin' : 'Féminin' }}</span>
+            </div>
             <ng-container *ngIf="app.identity.customFields as fields">
-              <div class="data-item" *ngFor="let key of getObjectKeys(fields)">
-                <strong>{{ key | titlecase }}</strong>
-                <span>{{ fields[key] }}</span>
+              <div class="info-field" *ngFor="let key of getObjectKeys(fields)">
+                <label>{{ key | titlecase }}</label>
+                <span class="field-value">{{ fields[key] }}</span>
               </div>
             </ng-container>
           </div>
         </div>
 
-        <!-- ONGLET : SCOLARITÉ -->
+        <!-- SCHOOLING PANEL -->
         <div class="pillar-panel" *ngIf="activePillarTab() === 'schooling'">
-          <h2 class="pillar-title">Vœux de Scolarité</h2>
-          <div class="academic-data-grid">
-            <div class="data-item highlight"><strong>Niveau demandé</strong><span>{{ levelName() }}</span></div>
-            <div class="data-item" *ngIf="filiereName()"><strong>Filière</strong><span>{{ filiereName() }}</span></div>
-            <div class="data-item"><strong>Type d'admission</strong><span>{{ app.type === 'RE_ENROLLMENT' ? 'Réinscription' : 'Nouvelle Admission' }}</span></div>
-            <div class="data-item"><strong>École d'origine</strong><span>{{ app.schooling.customFields?.['previousSchool'] || '—' }}</span></div>
-            <!-- Custom Fields Schooling -->
+          <div class="panel-header">
+            <h2 class="panel-title">Parcours scolaire</h2>
+            <div class="panel-badge">Vœux d'admission</div>
+          </div>
+          <div class="info-grid">
+            <div class="info-field highlight">
+              <label>Niveau demandé</label>
+              <span class="field-value">{{ levelName() }}</span>
+            </div>
+            <div class="info-field" *ngIf="filiereName()">
+              <label>Filière</label>
+              <span class="field-value">{{ filiereName() }}</span>
+            </div>
+            <div class="info-field">
+              <label>Type d'admission</label>
+              <span class="field-value">{{ app.type === 'RE_ENROLLMENT' ? 'Réinscription' : 'Nouvelle admission' }}</span>
+            </div>
+            <div class="info-field">
+              <label>Établissement d'origine</label>
+              <span class="field-value">{{ app.schooling.customFields?.['previousSchool'] || 'Non renseigné' }}</span>
+            </div>
             <ng-container *ngIf="app.schooling.customFields as fields">
-              <div class="data-item" *ngFor="let key of getObjectKeys(fields)">
+              <div class="info-field" *ngFor="let key of getObjectKeys(fields)">
                 <ng-container *ngIf="key !== 'previousSchool'">
-                  <strong>{{ key | titlecase }}</strong>
-                  <span>{{ fields[key] }}</span>
+                  <label>{{ key | titlecase }}</label>
+                  <span class="field-value">{{ fields[key] }}</span>
                 </ng-container>
               </div>
             </ng-container>
           </div>
         </div>
 
-        <!-- ONGLET : FAMILLE -->
+        <!-- FAMILY PANEL -->
         <div class="pillar-panel" *ngIf="activePillarTab() === 'family'">
-          <h2 class="pillar-title">Responsable & Famille</h2>
-          <div class="guardian-card-academic" *ngIf="app.primaryGuardian">
-            <div class="g-header">
-              <div class="g-avatar-large">{{ app.primaryGuardian.firstName[0] }}{{ app.primaryGuardian.lastName[0] }}</div>
-              <div class="g-main-info">
+          <div class="panel-header">
+            <h2 class="panel-title">Responsable légal</h2>
+            <div class="panel-badge">Coordonnées</div>
+          </div>
+          <div class="guardian-card" *ngIf="app.primaryGuardian">
+            <div class="guardian-header">
+              <div class="guardian-avatar">{{ app.primaryGuardian.firstName[0] }}{{ app.primaryGuardian.lastName[0] }}</div>
+              <div class="guardian-info">
                 <h3>{{ app.primaryGuardian.firstName }} {{ app.primaryGuardian.lastName }}</h3>
-                <span class="relation-badge">{{ app.primaryGuardian.relation }}</span>
+                <span class="guardian-relation">{{ app.primaryGuardian.relation }}</span>
               </div>
             </div>
-            <div class="academic-data-grid mt-6">
-              <div class="data-item"><strong>Téléphone</strong><span class="text-primary font-bold">{{ app.primaryGuardian.phone }}</span></div>
-              <div class="data-item"><strong>Email</strong><span>{{ app.primaryGuardian.email }}</span></div>
-              <div class="data-item"><strong>Responsable Financier</strong><span>{{ app.primaryGuardian.financialResponsible ? 'OUI' : 'NON' }}</span></div>
-              <!-- Custom Fields Family -->
+            <div class="guardian-details">
+              <div class="detail-item">
+                <lucide-icon [name]="Phone" [size]="14"></lucide-icon>
+                <span>{{ app.primaryGuardian.phone }}</span>
+              </div>
+              <div class="detail-item">
+                <lucide-icon [name]="Mail" [size]="14"></lucide-icon>
+                <span>{{ app.primaryGuardian.email }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="financial-badge" [class.active]="app.primaryGuardian.financialResponsible">
+                  {{ app.primaryGuardian.financialResponsible ? 'Responsable financier' : 'Non responsable financier' }}
+                </span>
+              </div>
               <ng-container *ngIf="app.primaryGuardian.customFields as fields">
-                <div class="data-item" *ngFor="let key of getObjectKeys(fields)">
-                  <strong>{{ key | titlecase }}</strong>
+                <div class="detail-item" *ngFor="let key of getObjectKeys(fields)">
+                  <strong>{{ key | titlecase }} :</strong>
                   <span>{{ fields[key] }}</span>
                 </div>
               </ng-container>
@@ -141,102 +190,173 @@
           </div>
         </div>
 
-        <!-- ONGLET : MÉDICAL -->
+        <!-- MEDICAL PANEL -->
         <div class="pillar-panel" *ngIf="activePillarTab() === 'medical'">
-          <h2 class="pillar-title">Dossier Médical</h2>
-          <div class="academic-data-grid">
-            <div class="data-item" [class.alert]="app.medical.customFields?.['criticalAllergies']">
-              <strong>Allergies Critiques</strong>
-              <span>{{ app.medical.customFields?.['criticalAllergies'] || 'Aucune allergie signalée' }}</span>
+          <div class="panel-header">
+            <h2 class="panel-title">Informations médicales</h2>
+            <div class="panel-badge">Santé</div>
+          </div>
+          <div class="info-grid">
+            <div class="info-field" [class.alert]="app.medical.customFields?.['criticalAllergies']">
+              <label>Allergies critiques</label>
+              <span class="field-value">{{ app.medical.customFields?.['criticalAllergies'] || 'Aucune allergie signalée' }}</span>
             </div>
-            <div class="data-item"><strong>Groupe Sanguin</strong><span>{{ app.medical.customFields?.['bloodGroup'] || 'Inconnu' }}</span></div>
-            <div class="data-item"><strong>Contact d'Urgence</strong><span>{{ app.medical.customFields?.['emergencyContactName'] || '—' }}</span></div>
-            <div class="data-item"><strong>Tel. Urgence</strong><span>{{ app.medical.customFields?.['emergencyContactPhone'] || '—' }}</span></div>
+            <div class="info-field">
+              <label>Groupe sanguin</label>
+              <span class="field-value">{{ app.medical.customFields?.['bloodGroup'] || 'Inconnu' }}</span>
+            </div>
+            <div class="info-field">
+              <label>Contact d'urgence</label>
+              <span class="field-value">{{ app.medical.customFields?.['emergencyContactName'] || 'Non renseigné' }}</span>
+            </div>
+            <div class="info-field">
+              <label>Téléphone urgence</label>
+              <span class="field-value">{{ app.medical.customFields?.['emergencyContactPhone'] || 'Non renseigné' }}</span>
+            </div>
           </div>
         </div>
 
-        <!-- ONGLET : ÉVALUATION -->
+        <!-- ASSESSMENT PANEL -->
         <div class="pillar-panel" *ngIf="activePillarTab() === 'assessment'">
-          <h2 class="pillar-title">Évaluation Pédagogique</h2>
-          <div class="assessment-layout" *ngIf="app.assessment">
-            <div class="grades-card">
-              <table class="academic-scores-table">
-                <thead><tr><th>Discipline</th><th class="text-right">Note / 20</th></tr></thead>
+          <div class="panel-header">
+            <h2 class="panel-title">Évaluation pédagogique</h2>
+            <div class="panel-badge">Jury</div>
+          </div>
+          <div class="assessment-container" *ngIf="app.assessment">
+            <div class="grades-section">
+              <table class="grades-table">
+                <thead>
+                <tr><th>Discipline</th><th class="text-right">Note / 20</th></tr>
+                </thead>
                 <tbody>
-                  <tr *ngFor="let subject of assessmentSubjects()">
-                    <td>{{ subject }}</td>
-                    <td class="text-right">
-                      <input type="number" [ngModel]="evaluationGrades()[subject]" (ngModelChange)="updateGrade(subject, $event)" 
-                             class="score-input" [disabled]="app.status === 'VALIDATED'">
-                    </td>
-                  </tr>
+                <tr *ngFor="let subject of assessmentSubjects()">
+                  <td class="subject-name">{{ subject }}</td>
+                  <td class="text-right">
+                    <input type="number"
+                           [ngModel]="evaluationGrades()[subject]"
+                           (ngModelChange)="updateGrade(subject, $event)"
+                           class="grade-input"
+                           step="0.5"
+                           min="0"
+                           max="20"
+                           [disabled]="app.status === 'VALIDATED'">
+                  </td>
+                </tr>
                 </tbody>
                 <tfoot>
-                  <tr class="total-row">
-                    <td>MOYENNE GÉNÉRALE</td>
-                    <td class="text-right font-black text-lg" [class.text-success]="+averageScore() >= minPassingGrade()" [class.text-error]="+averageScore() < minPassingGrade()">
-                      {{ averageScore() }}
-                    </td>
-                  </tr>
+                <tr class="average-row">
+                  <td>Moyenne générale</td>
+                  <td class="text-right">
+                      <span class="average-score" [class.passing]="+averageScore() >= minPassingGrade()" [class.failing]="+averageScore() < minPassingGrade()">
+                        {{ averageScore() }} / 20
+                      </span>
+                  </td>
+                </tr>
                 </tfoot>
               </table>
             </div>
-            <div class="decision-card">
-              <div class="form-group-academic">
-                <label>Commentaires du jury</label>
-                <textarea [(ngModel)]="evaluationComment" rows="4" [disabled]="app.status === 'VALIDATED'"></textarea>
+            <div class="decision-section">
+              <div class="comment-field">
+                <label>Observations du jury</label>
+                <textarea [(ngModel)]="evaluationComment"
+                          rows="4"
+                          placeholder="Motif de la décision, points d'attention, etc."
+                          [disabled]="app.status === 'VALIDATED'"></textarea>
               </div>
-              <div class="decision-selector-segmented">
-                <button (click)="pedagogicalDecision.set('REJECTED')" [class.active]="pedagogicalDecision() === 'REJECTED'" class="d-btn red">Refusé</button>
-                <button (click)="pedagogicalDecision.set('WAITLIST')" [class.active]="pedagogicalDecision() === 'WAITLIST'" class="d-btn amber">Attente</button>
-                <button (click)="pedagogicalDecision.set('ADMITTED')" [class.active]="pedagogicalDecision() === 'ADMITTED'" class="d-btn green">Admis</button>
+              <div class="decision-buttons">
+                <button (click)="pedagogicalDecision.set('REJECTED')"
+                        [class.active]="pedagogicalDecision() === 'REJECTED'"
+                        class="decision-btn reject">Refusé</button>
+                <button (click)="pedagogicalDecision.set('WAITLIST')"
+                        [class.active]="pedagogicalDecision() === 'WAITLIST'"
+                        class="decision-btn waitlist">Liste d'attente</button>
+                <button (click)="pedagogicalDecision.set('ADMITTED')"
+                        [class.active]="pedagogicalDecision() === 'ADMITTED'"
+                        class="decision-btn admit">Admis</button>
               </div>
-              <app-fw-button variant="primary" class="w-full mt-6" [loading]="isActionLoading()" [disabled]="app.status === 'VALIDATED'" (click)="submitPedagogicalDecision()">
-                Valider la décision
+              <app-fw-button variant="primary"
+                             class="submit-btn"
+                             [loading]="isActionLoading()"
+                             [disabled]="app.status === 'VALIDATED'"
+                             (click)="submitPedagogicalDecision()">
+                Enregistrer la décision
               </app-fw-button>
             </div>
           </div>
-          <div *ngIf="!app.assessment" class="p-8 text-center bg-slate-50 rounded-xl">
-             <p class="text-slate-400 italic">Aucune évaluation configurée pour ce niveau.</p>
+          <div *ngIf="!app.assessment" class="empty-state">
+            <lucide-icon [name]="GraduationCap" [size]="48"></lucide-icon>
+            <p>Aucune évaluation configurée pour ce niveau</p>
+          </div>
+        </div>
+
+        <!-- SERVICES PANEL -->
+        <div class="pillar-panel" *ngIf="activePillarTab() === 'services'">
+          <div class="panel-header">
+            <h2 class="panel-title">Services souscrits</h2>
+            <div class="panel-badge">Options</div>
+          </div>
+          <div class="services-list">
+            <div *ngFor="let sub of app.subscriptions" class="service-card">
+              <div class="service-icon">
+                <lucide-icon [name]="Activity" [size]="20"></lucide-icon>
+              </div>
+            </div>
           </div>
         </div>
 
       </div>
     </main>
 
-    <!-- COLONNE 3 : CONTROL & CONFORMITY SIDEBAR -->
+    <!-- RIGHT SIDEBAR -->
     <aside class="conformity-sidebar">
-      
-      <!-- Workflow Progress (Vertical) -->
-      <section class="sidebar-block workflow-vertical">
-        <h4 class="block-title">Suivi du dossier</h4>
-        <app-admission-workflow [state]="app.status" mode="vertical"></app-admission-workflow>
-      </section>
 
-      <!-- Checklist Documents -->
-      <section class="sidebar-block documents-checklist">
-        <h4 class="block-title">Checklist Documentaire</h4>
-        <div class="docs-stack">
-          <div *ngFor="let doc of app.documents" class="doc-row-academic" [class.missing]="doc.status === 'MISSING'" (click)="previewDocument(doc)">
-            <lucide-icon [name]="getFileIcon(doc.name)" [size]="14"></lucide-icon>
-            <div class="doc-info">
-              <span class="name">{{ doc.name }}</span>
-              <span class="status">{{ doc.status }}</span>
+      <!-- 1. Conformité — bloquant décisionnel, toujours en premier -->
+      <div class="compliance-card" [class.compliant]="isReadyForFinalValidation()">
+        <lucide-icon [name]="isReadyForFinalValidation() ? CheckCircle : ShieldCheck" [size]="20"></lucide-icon>
+        <div class="compliance-text">
+          <strong>{{ isReadyForFinalValidation() ? 'Dossier conforme' : 'Dossier non conforme' }}</strong>
+          <span>{{ mandatoryDocsSummary().received }} pièce(s) sur {{ mandatoryDocsSummary().total }} obligatoire(s)</span>
+        </div>
+      </div>
+
+      <!-- 2. Pièces justificatives -->
+      <section class="sidebar-card documents-card">
+        <div class="card-header">
+          <lucide-icon [name]="FileText" [size]="16"></lucide-icon>
+          <h4>Pièces justificatives</h4>
+          <span class="doc-counter">{{ mandatoryDocsSummary().received }}/{{ mandatoryDocsSummary().total }}</span>
+        </div>
+        <div class="documents-list">
+          <div *ngFor="let doc of app.documents"
+               class="document-item"
+               [class.missing]="doc.status === 'MISSING'"
+               (click)="previewDocument(doc)">
+            <lucide-icon [name]="getFileIcon(doc.name)" [size]="16"></lucide-icon>
+            <div class="document-info">
+              <span class="document-name">{{ doc.name }}</span>
+              <span class="document-status">{{ doc.status === 'MISSING' ? 'Manquant' : 'Reçu' }}</span>
             </div>
-            <button class="mini-upload" (click)="$event.stopPropagation(); adminFileInput.click()"><lucide-icon [name]="Upload" [size]="12"></lucide-icon></button>
+            <button
+              class="upload-btn"
+              [class.uploading]="uploadingDocCode() === doc.code"
+              [attr.aria-label]="'Déposer ' + doc.name"
+              (click)="$event.stopPropagation(); adminFileInput.click()"
+            >
+              <lucide-icon [name]="uploadingDocCode() === doc.code ? Loader2 : Upload" [size]="14" [class.animate-spin]="uploadingDocCode() === doc.code"></lucide-icon>
+            </button>
             <input type="file" #adminFileInput hidden (change)="onAdminFileSelected(doc.code, $event)">
           </div>
         </div>
       </section>
 
-      <!-- Conformité Indicator -->
-      <div class="conformity-gauge" [class.ready]="isReadyForFinalValidation()">
-        <lucide-icon [name]="isReadyForFinalValidation() ? CheckCircle : Info" [size]="20"></lucide-icon>
-        <div class="text">
-          <strong>{{ isReadyForFinalValidation() ? 'Dossier Conforme' : 'Dossier Incomplet' }}</strong>
-          <span>{{ mandatoryDocsSummary().received }} / {{ mandatoryDocsSummary().total }} pièces fournies</span>
+      <!-- 3. Workflow — contexte, pas chemin critique -->
+      <section class="sidebar-card workflow-card">
+        <div class="card-header">
+          <lucide-icon [name]="HistoryIcon" [size]="16"></lucide-icon>
+          <h4>État d'avancement</h4>
         </div>
-      </div>
+        <app-admission-workflow [state]="app.status" mode="vertical"></app-admission-workflow>
+      </section>
 
     </aside>
 
@@ -245,9 +365,9 @@
 </app-fw-page-shell>
 
 <ng-template #skeletons>
-  <div class="decision-hub-layout animate-pulse">
-    <div class="pillar-rail h-96 bg-slate-50 rounded-xl"></div>
-    <div class="pillar-content-area h-96 bg-white rounded-xl shadow-sm"></div>
-    <div class="conformity-sidebar h-96 bg-slate-50 rounded-xl"></div>
+  <div class="skeleton-layout">
+    <div class="skeleton-rail"></div>
+    <div class="skeleton-content"></div>
+    <div class="skeleton-sidebar"></div>
   </div>
 </ng-template>
