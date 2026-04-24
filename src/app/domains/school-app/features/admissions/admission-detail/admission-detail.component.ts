@@ -49,6 +49,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { FwPageShellComponent } from '../../../../../shared/components/page-shell/page-shell.component';
 import { FwButtonComponent } from '../../../../../shared/components/button/button.component';
 import { FwBadgeComponent } from '../../../../../shared/components/badge/badge.component';
+import { FwTab } from '../../../../../shared/components/tabs/tabs.component';
 import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 import { Admission, AssessmentRequest, RequiredDocument } from '../../../../../core/models/enrollment.model';
 
@@ -121,6 +122,25 @@ export class AdmissionDetailComponent implements OnInit {
     const app = this.application();
     if (!app) return 'Dossier';
     return `${app.identity.firstName} ${app.identity.lastName}`;
+  });
+
+  pillarTabs = computed((): FwTab[] => {
+    const app = this.application();
+    const tabs: FwTab[] = [
+      { id: 'identity',  label: 'Identité',   icon: User       },
+      { id: 'schooling', label: 'Scolarité',   icon: School     },
+      { id: 'family',    label: 'Famille',     icon: Users      },
+      { id: 'medical',   label: 'Médical',     icon: HeartPulse },
+    ];
+
+    if (app?.subscriptions?.length) {
+      tabs.push({ id: 'services', label: 'Services', icon: Activity, count: app.subscriptions.length });
+    }
+
+    const assessmentEnabled = ['VERIFIED', 'TESTING', 'VALIDATED', 'REJECTED'].includes(app?.status ?? '');
+    tabs.push({ id: 'assessment', label: 'Évaluation', icon: GraduationCap, disabled: !assessmentEnabled });
+
+    return tabs;
   });
 
   isReadyForFinalValidation = computed(() => {

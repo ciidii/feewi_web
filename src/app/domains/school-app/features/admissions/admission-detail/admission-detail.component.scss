@@ -18,7 +18,7 @@
    ========================================================================== */
 .decision-hub-layout {
   display: grid;
-  grid-template-columns: 260px 1fr 360px;
+  grid-template-columns: 1fr 360px;
   gap: 0;
   height: calc(100vh - 140px);
   background: white;
@@ -27,98 +27,13 @@
   overflow: hidden;
   border: 1px solid rgba(0, 0, 0, 0.06);
 
-  @media (max-width: 1400px) {
-    grid-template-columns: 100px 1fr 320px;
-  }
   @media (max-width: 1100px) {
-    grid-template-columns: 1fr 320px;
-    .pillar-rail {
-      display: none;
-    }
+    grid-template-columns: 1fr 300px;
   }
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
     .conformity-sidebar {
       display: none;
-    }
-  }
-}
-
-/* ==========================================================================
-   LEFT NAVIGATION - PILLAR RAIL
-   ========================================================================== */
-.pillar-rail {
-  background: #fafbfc;
-  border-right: 1px solid rgba(0, 0, 0, 0.06);
-  padding: 1.5rem 0;
-
-  .rail-header {
-    padding: 0 1rem 1rem 1rem;
-    margin-bottom: 0.5rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-
-    .rail-label {
-      font-size: 0.7rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: #8c9aaf;
-    }
-  }
-
-  .rail-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    padding: 0 0.75rem;
-
-    button {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 0.75rem 1rem;
-      border: none;
-      border-radius: 10px;
-      background: transparent;
-      color: #5b6e8c;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-weight: 500;
-      font-size: 0.875rem;
-
-      lucide-icon {
-        flex-shrink: 0;
-        opacity: 0.7;
-      }
-
-      &:hover {
-        background: rgba(0, 0, 0, 0.02);
-        color: #1a2c3e;
-
-        lucide-icon {
-          opacity: 1;
-        }
-      }
-
-      &.active {
-        background: white;
-        color: var(--fw-primary);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-
-        lucide-icon {
-          opacity: 1;
-          color: var(--fw-primary);
-        }
-      }
-
-      @media (max-width: 1400px) {
-        justify-content: center;
-        padding: 0.875rem;
-
-        span {
-          display: none;
-        }
-      }
     }
   }
 }
@@ -726,26 +641,21 @@
    ========================================================================== */
 .skeleton-layout {
   display: grid;
-  grid-template-columns: 260px 1fr 360px;
+  grid-template-columns: 1fr 360px;
   gap: 0;
   height: calc(100vh - 140px);
   background: white;
   border-radius: 20px;
   overflow: hidden;
 
-  .skeleton-rail {
-    background: #fafbfc;
-    animation: pulse 1.5s ease-in-out infinite;
-  }
-
   .skeleton-content {
     background: white;
-    animation: pulse 1.5s ease-in-out infinite 0.2s;
+    animation: pulse 1.5s ease-in-out infinite;
   }
 
   .skeleton-sidebar {
     background: #fafbfc;
-    animation: pulse 1.5s ease-in-out infinite 0.4s;
+    animation: pulse 1.5s ease-in-out infinite 0.2s;
   }
 }
 

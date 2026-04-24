@@ -3,6 +3,9 @@
   [description]="application() ? 'Dossier #' + application()?.reference : 'Chargement...'"
   [icon]="User"
   [backLink]="['/admin/admissions/list']"
+  [tabs]="pillarTabs()"
+  [activeTabId]="activePillarTab()"
+  (tabChange)="setPillarTab($event)"
   density="compact"
 >
   <!-- STICKY HEADER ACTIONS -->
@@ -44,39 +47,6 @@
 
   <!-- MAIN LAYOUT -->
   <div class="decision-hub-layout animate-in fade-in duration-700" *ngIf="application(); let app; else skeletons">
-
-    <!-- LEFT NAVIGATION -->
-    <aside class="pillar-rail">
-      <div class="rail-header">
-        <span class="rail-label">Navigation</span>
-      </div>
-      <nav class="rail-nav">
-        <button (click)="setPillarTab('identity')" [class.active]="activePillarTab() === 'identity'">
-          <lucide-icon [name]="User" [size]="18"></lucide-icon>
-          <span>Identité</span>
-        </button>
-        <button (click)="setPillarTab('schooling')" [class.active]="activePillarTab() === 'schooling'">
-          <lucide-icon [name]="School" [size]="18"></lucide-icon>
-          <span>Scolarité</span>
-        </button>
-        <button (click)="setPillarTab('family')" [class.active]="activePillarTab() === 'family'">
-          <lucide-icon [name]="Users" [size]="18"></lucide-icon>
-          <span>Famille</span>
-        </button>
-        <button (click)="setPillarTab('medical')" [class.active]="activePillarTab() === 'medical'">
-          <lucide-icon [name]="HeartPulse" [size]="18"></lucide-icon>
-          <span>Médical</span>
-        </button>
-        <button *ngIf="app.subscriptions?.length" (click)="setPillarTab('services')" [class.active]="activePillarTab() === 'services'">
-          <lucide-icon [name]="Activity" [size]="18"></lucide-icon>
-          <span>Services</span>
-        </button>
-        <button *ngIf="['VERIFIED', 'TESTING', 'VALIDATED', 'REJECTED'].includes(app.status)" (click)="setPillarTab('assessment')" [class.active]="activePillarTab() === 'assessment'">
-          <lucide-icon [name]="GraduationCap" [size]="18"></lucide-icon>
-          <span>Évaluation</span>
-        </button>
-      </nav>
-    </aside>
 
     <!-- MAIN CONTENT AREA -->
     <main class="pillar-content-area">
@@ -366,7 +336,6 @@
 
 <ng-template #skeletons>
   <div class="skeleton-layout">
-    <div class="skeleton-rail"></div>
     <div class="skeleton-content"></div>
     <div class="skeleton-sidebar"></div>
   </div>
