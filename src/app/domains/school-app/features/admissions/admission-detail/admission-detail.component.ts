@@ -53,6 +53,7 @@ import { FwTab } from '../../../../../shared/components/tabs/tabs.component';
 import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 import { Admission, AssessmentRequest, RequiredDocument } from '../../../../../core/models/enrollment.model';
 import { ServiceConfig } from '../../../../../core/models/enrollment/config';
+import { CamelToLabelPipe } from '../../../../../shared/pipes/camel-to-label.pipe';
 
 export type PillarTab = 'identity' | 'schooling' | 'family' | 'medical' | 'assessment' | 'services';
 
@@ -68,7 +69,8 @@ export type PillarTab = 'identity' | 'schooling' | 'family' | 'medical' | 'asses
     MatDialogModule,
     FwPageShellComponent,
     FwButtonComponent,
-    FwBadgeComponent
+    FwBadgeComponent,
+    CamelToLabelPipe
   ],
   templateUrl: './admission-detail.component.html',
   styleUrls: ['./admission-detail.component.scss'],
@@ -540,13 +542,6 @@ export class AdmissionDetailComponent implements OnInit {
     return this.servicesConfig().find(s => s.code === serviceCode);
   }
 
-  // Transforme camelCase → "Title Case" en attendant le pipe partagé (P1.4)
-  formatKey(key: string): string {
-    return key
-      .replace(/([A-Z])/g, ' $1')
-      .replace(/^./, s => s.toUpperCase())
-      .trim();
-  }
 
   // --- ICONS ---
   readonly ArrowLeft = ArrowLeft;

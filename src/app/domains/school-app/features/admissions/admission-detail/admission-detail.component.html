@@ -81,7 +81,7 @@
             </div>
             <ng-container *ngIf="app.identity.customFields as fields">
               <div class="info-field" *ngFor="let key of getObjectKeys(fields)">
-                <label>{{ key | titlecase }}</label>
+                <label>{{ key | camelToLabel }}</label>
                 <span class="field-value">{{ fields[key] }}</span>
               </div>
             </ng-container>
@@ -114,7 +114,7 @@
             <ng-container *ngIf="app.schooling.customFields as fields">
               <div class="info-field" *ngFor="let key of getObjectKeys(fields)">
                 <ng-container *ngIf="key !== 'previousSchool'">
-                  <label>{{ key | titlecase }}</label>
+                  <label>{{ key | camelToLabel }}</label>
                   <span class="field-value">{{ fields[key] }}</span>
                 </ng-container>
               </div>
@@ -152,7 +152,7 @@
               </div>
               <ng-container *ngIf="app.primaryGuardian.customFields as fields">
                 <div class="detail-item" *ngFor="let key of getObjectKeys(fields)">
-                  <strong>{{ key | titlecase }} :</strong>
+                  <strong>{{ key | camelToLabel }} :</strong>
                   <span>{{ fields[key] }}</span>
                 </div>
               </ng-container>
@@ -172,7 +172,7 @@
               <div class="info-field"
                    *ngFor="let key of getObjectKeys(app.medical.customFields)"
                    [class.alert]="key === 'criticalAllergies' && app.medical.customFields![key]">
-                <label>{{ formatKey(key) }}</label>
+                <label>{{ key | camelToLabel }}</label>
                 <span class="field-value">{{ app.medical.customFields![key] || 'Non renseigné' }}</span>
               </div>
             </div>
