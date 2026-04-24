@@ -52,8 +52,10 @@ import { FwBadgeComponent } from '../../../../../shared/components/badge/badge.c
 import { FwTab } from '../../../../../shared/components/tabs/tabs.component';
 import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 import { Admission, AssessmentRequest, RequiredDocument } from '../../../../../core/models/enrollment.model';
-import { ServiceConfig } from '../../../../../core/models/enrollment/config';
+import { EnrollmentSchema, ServiceConfig } from '../../../../../core/models/enrollment/config';
 import { CamelToLabelPipe } from '../../../../../shared/pipes/camel-to-label.pipe';
+import { PageProgressComponent } from '../../../../../shared/components/loader/page-progress.component';
+import { BlockLoaderComponent } from '../../../../../shared/components/loader/block-loader.component';
 
 export type PillarTab = 'identity' | 'schooling' | 'family' | 'medical' | 'assessment' | 'services';
 
@@ -70,7 +72,9 @@ export type PillarTab = 'identity' | 'schooling' | 'family' | 'medical' | 'asses
     FwPageShellComponent,
     FwButtonComponent,
     FwBadgeComponent,
-    CamelToLabelPipe
+    CamelToLabelPipe,
+    PageProgressComponent,
+    BlockLoaderComponent
   ],
   templateUrl: './admission-detail.component.html',
   styleUrls: ['./admission-detail.component.scss'],
@@ -103,6 +107,7 @@ export class AdmissionDetailComponent implements OnInit {
   selectedDocUrl = signal<SafeResourceUrl | null>(null);
 
   // --- CONFIGURATION DYNAMIQUE ---
+  effectiveSchema = signal<EnrollmentSchema | null>(null);
   assessmentSubjects = signal<string[]>([]);
   minPassingGrade = signal<number>(10);
   servicesConfig = signal<ServiceConfig[]>([]);
@@ -130,17 +135,34 @@ export class AdmissionDetailComponent implements OnInit {
 
   pillarTabs = computed((): FwTab[] => {
     const app = this.application();
-    const tabs: FwTab[] = [
-      { id: 'identity',  label: 'Identité',   icon: User       },
-      { id: 'schooling', label: 'Scolarité',   icon: School     },
-      { id: 'family',    label: 'Famille',     icon: Users      },
-      { id: 'medical',   label: 'Médical',     icon: HeartPulse },
-    ];
+    const schema = this.effectiveSchema();
+    const tabs: FwTab[] = [];
 
-    if (app?.subscriptions?.length) {
+    // Identité — toujours présente (pas de flag enabled dans le schema)
+    tabs.push({ id: 'identity', label: 'Identité', icon: User });
+
+    // Scolarité — affichée sauf si explicitement désactivée
+    if (schema?.schooling?.enabled !== false) {
+      tabs.push({ id: 'schooling', label: 'Scolarité', icon: School });
+    }
+
+    // Famille — affichée sauf si explicitement désactivée
+    if (schema?.family?.enabled !== false) {
+      tabs.push({ id: 'family', label: 'Famille', icon: Users });
+    }
+
+    // Médical — affiché sauf si explicitement désactivé
+    if (schema?.medical?.enabled !== false) {
+      tabs.push({ id: 'medical', label: 'Médical', icon: HeartPulse });
+    }
+
+    // Services — affiché uniquement si le pilier est activé dans la config ET des souscriptions existent
+    const servicesEnabled = schema ? schema.services?.enabled === true : !!app?.subscriptions?.length;
+    if (servicesEnabled && app?.subscriptions?.length) {
       tabs.push({ id: 'services', label: 'Services', icon: Activity, count: app.subscriptions.length });
     }
 
+    // Évaluation — toujours présente, désactivée selon le statut du workflow
     const assessmentEnabled = ['VERIFIED', 'TESTING', 'VALIDATED', 'REJECTED'].includes(app?.status ?? '');
     tabs.push({ id: 'assessment', label: 'Évaluation', icon: GraduationCap, disabled: !assessmentEnabled });
 
@@ -195,6 +217,10 @@ export class AdmissionDetailComponent implements OnInit {
       finalize(() => this.isLoading.set(false))
     ).subscribe({
       next: (effectiveConfig: any) => {
+        if (effectiveConfig?.schema) {
+          this.effectiveSchema.set(effectiveConfig.schema as EnrollmentSchema);
+        }
+
         const aConfig = effectiveConfig?.schema?.assessment;
         if (aConfig) {
           const subjectKeys = Object.keys(aConfig.subjects || {});
