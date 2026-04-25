@@ -56,6 +56,7 @@ import {ServiceFormComponent} from './components/service-form/service-form.compo
 import { FwPageShellComponent } from '../../../../../shared/components/page-shell/page-shell.component';
 import { FwButtonComponent } from '../../../../../shared/components/button/button.component';
 import { FwTab } from '../../../../../shared/components/tabs/tabs.component';
+import { PageProgressComponent } from '../../../../../shared/components/loader/page-progress.component';
 
 export type ConfigTab = 'PILLARS' | 'DOCUMENTS' | 'ASSESSMENT' | 'SERVICES' | 'WORKFLOW';
 export type ConfigScope = 'GLOBAL' | 'LEVEL' | 'YEAR' | 'CYCLE';
@@ -64,12 +65,13 @@ export type ConfigScope = 'GLOBAL' | 'LEVEL' | 'YEAR' | 'CYCLE';
   selector: 'app-admission-config',
   standalone: true,
   imports: [
-    CommonModule, 
-    FormsModule, 
-    LucideAngularModule, 
-    MatDialogModule, 
+    CommonModule,
+    FormsModule,
+    LucideAngularModule,
+    MatDialogModule,
     FwPageShellComponent,
-    FwButtonComponent
+    FwButtonComponent,
+    PageProgressComponent
   ],
   templateUrl: './admission-config.component.html',
   styleUrls: ['./admission-config.component.scss']
@@ -180,14 +182,26 @@ export class AdmissionConfigComponent implements OnInit {
 
   levelsByCycle = computed(() => {
     const allLevels = this.levels();
-    const cycleMap = new Map(this.academicCycles().map(c => [c.id, c.cycleCode]));
+    const allCycles = this.academicCycles();
+    
+    // Map pour retrouver le cycleCode par ID de cycle
+    const cycleCodeMap = new Map<string, string>();
+    allCycles.forEach(c => cycleCodeMap.set(c.id, c.cycleCode));
+
     return this.cycles
-      .map(c => ({
-        cycle: c,
-        levels: allLevels
-          .filter(l => cycleMap.get(l.cycleId) === c.type)
-          .sort((a, b) => a.rank - b.rank)
-      }))
+      .map(c => {
+        const matchingLevels = allLevels
+          .filter(l => {
+            const levelCycleCode = cycleCodeMap.get(l.cycleId) || l.cycle?.cycleCode;
+            return levelCycleCode === c.type;
+          })
+          .sort((a, b) => a.rank - b.rank);
+          
+        return {
+          cycle: c,
+          levels: matchingLevels
+        };
+      })
       .filter(g => g.levels.length > 0 || this.hasCycleOverride(g.cycle.type));
   });
 
@@ -600,6 +614,12 @@ export class AdmissionConfigComponent implements OnInit {
   removeCycleService(code: string) {
     this.cycleOverrideForm.update(f => ({
       ...f, additionalServices: (f.additionalServices || []).filter(s => s.code !== code)
+    }));
+  }
+
+  updateCycleServiceMandatory(code: string, mandatory: boolean) {
+    this.cycleOverrideForm.update(f => ({
+      ...f, additionalServices: (f.additionalServices || []).map(s => s.code === code ? {...s, mandatory} : s)
     }));
   }
 

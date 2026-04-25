@@ -281,12 +281,31 @@
 // override-dot color variant for years
 .override-dot.year { background: #0ea5e9; }
 
-// ─── LOADING ─────────────────────────────────────────────────────────────────
-.loading-overlay {
-  position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 1000;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem;
-  p { font-weight: 800; color: var(--fw-primary); font-size: 1rem; letter-spacing: 0.05em; text-transform: uppercase; }
+// ─── SECTION TOOLBAR MODIFIER ────────────────────────────────────────────────
+.section-toolbar.flush { margin-bottom: 0; }
+
+// ─── SPACING HELPERS ─────────────────────────────────────────────────────────
+.assessment-detail { margin-top: 1.25rem; }
+.subjects-block    { margin-top: 1rem; }
+
+// ─── OVERRIDE INLINE MARGINS NOW IN BASE RULES ───────────────────────────────
+.docs-table      { margin-top: 1rem; }
+.services-table  { margin-top: 1rem; }
+.grade-threshold-row { margin-top: 1rem; }
+.empty-state-card    { margin-top: 1rem; }
+
+// ─── TOGGLE SWITCH AS BUTTON (WCAG) ──────────────────────────────────────────
+.toggle-switch {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  &:focus-visible {
+    outline: 2px solid var(--fw-primary);
+    outline-offset: 3px;
+    border-radius: 100px;
+  }
 }
 
-.animate-spin { animation: spin 1s linear infinite; }
-@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+// ─── DOC NAME (non-input variant) ────────────────────────────────────────────
+.doc-name-text { font-size: 0.875rem; font-weight: 500; }
