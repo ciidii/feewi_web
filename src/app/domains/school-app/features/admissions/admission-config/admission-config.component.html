@@ -1,111 +1,105 @@
-<app-fw-page-shell
-  title="Gouvernance du Portail"
-  [description]="'Configuration de l\'expérience d\'admission • ' + (activeYear()?.label || '...') "
-  [icon]="Settings2"
-  [tabs]="currentScope() === 'GLOBAL' ? admissionTabs : []"
-  [activeTabId]="activeTab()"
-  (tabChange)="activeTab.set($any($event))"
-  density="compact"
->
-  <div actions class="flex items-center gap-3">
-    <div class="portal-status-wrap" *ngIf="config(); let cfg">
-      <div class="portal-status-pill" [class.online]="cfg.portalActive" (click)="togglePortal()"
-           title="Cliquer pour basculer">
-        <div class="status-dot"></div>
-        <span>{{ cfg.portalActive ? 'Portail en ligne' : 'Portail hors-ligne' }}</span>
+<div class="config-feature-root" *ngIf="config(); let cfg">
+
+  <!-- SIDEBAR DE PORTÉE (Élément le plus global) -->
+  <aside class="scope-sidebar">
+
+    <!-- Brand header -->
+    <div class="sidebar-header">
+      <div class="sidebar-brand-icon">
+        <lucide-icon [name]="ShieldCheck" [size]="14"></lucide-icon>
+      </div>
+      <div class="sidebar-brand-text">
+        <span class="sidebar-brand-name">Portail d'admission</span>
+        <span class="sidebar-brand-year">{{ activeYear()?.label || '...' }}</span>
       </div>
     </div>
 
-    <app-fw-button variant="tertiary" size="md" [icon]="Eye" (click)="previewPortal()">
-      Simulateur
-    </app-fw-button>
+    <!-- Portée globale -->
+    <button class="scope-item" [class.active]="currentScope() === 'GLOBAL'" (click)="setScope('GLOBAL')">
+      <div class="scope-icon"><lucide-icon [name]="Globe" [size]="15"></lucide-icon></div>
+      <div class="scope-label-wrap">
+        <span class="scope-name">École</span>
+        <span class="scope-sub">Configuration globale</span>
+      </div>
+    </button>
 
-    <app-fw-button
-      variant="primary"
-      size="md"
-      [icon]="Save"
-      [loading]="isSaving()"
-      [disabled]="!isDirty() || currentScope() !== 'GLOBAL'"
-      (click)="onSave()">
-      Publier
-    </app-fw-button>
-  </div>
+    <!-- Années scolaires -->
+    <div class="nav-divider"></div>
+    <div class="nav-section-title">
+      Années scolaires
+      <span class="level-count">{{ availableYears().length }}</span>
+    </div>
 
-  <!-- BODY -->
-  <div class="portal-admin-layout animate-in fade-in duration-700" *ngIf="config(); let cfg">
-
-    <!-- SIDEBAR DE PORTÉE (SCOPE) -->
-    <aside class="scope-sidebar">
-      <div class="nav-section-title">Portée</div>
-
-      <button class="scope-item" [class.active]="currentScope() === 'GLOBAL'" (click)="setScope('GLOBAL')">
-        <div class="scope-icon global">
-          <lucide-icon [name]="Globe" [size]="15"></lucide-icon>
-        </div>
-        <div class="scope-label-wrap">
-          <span class="scope-name">École</span>
-          <span class="scope-sub">Configuration globale</span>
-        </div>
+    <div class="years-scroll">
+      <button
+        *ngFor="let year of availableYears()"
+        class="year-item"
+        [class.active]="selectedYearId() === year.id"
+        (click)="setScope('YEAR', year.id)"
+      >
+        <lucide-icon [name]="Calendar" [size]="12"></lucide-icon>
+        <span class="truncate">{{ year.label }}</span>
+        <span class="override-dot year" *ngIf="hasYearOverride(year.id)" title="Override actif"></span>
       </button>
+    </div>
 
-      <div class="nav-divider"></div>
-      <div class="nav-section-title">
-        Années scolaires
-        <span class="level-count">{{ availableYears().length }}</span>
-      </div>
+    <!-- Niveaux d'entrée -->
+    <div class="nav-divider"></div>
+    <div class="nav-section-title">
+      Niveaux d'entrée
+      <span class="level-count">{{ levels().length }}</span>
+    </div>
 
-      <div class="levels-scroll">
-        <button
-          *ngFor="let year of availableYears()"
-          class="scope-item level-item"
-          [class.active]="selectedYearId() === year.id"
-          (click)="setScope('YEAR', year.id)"
-        >
-          <div class="scope-icon level">
-            <lucide-icon [name]="Calendar" [size]="13"></lucide-icon>
-          </div>
-          <span class="truncate level-name">{{ year.label }}</span>
-          <span class="override-dot year" *ngIf="hasYearOverride(year.id)" title="Override actif"></span>
+    <div class="levels-scroll">
+      <div *ngFor="let group of levelsByCycle()" class="cycle-group">
+        <button class="cycle-header"
+                [class.active]="selectedCycleType() === group.cycle.type && currentScope() === 'CYCLE'"
+                (click)="setScope('CYCLE', group.cycle.type)">
+          <div class="cycle-icon"><lucide-icon [name]="group.cycle.icon" [size]="13"></lucide-icon></div>
+          <span class="cycle-name">{{ group.cycle.label }}</span>
+          <span class="override-dot" *ngIf="hasCycleOverride(group.cycle.type)" title="Override cycle actif"></span>
         </button>
-      </div>
-
-      <div class="nav-divider"></div>
-      <div class="nav-section-title">
-        Niveaux d'entrée
-        <span class="level-count">{{ levels().length }}</span>
-      </div>
-
-      <div class="levels-scroll">
-        <div *ngFor="let group of levelsByCycle()" class="cycle-group">
-
-          <button class="cycle-header"
-                  [class.active]="selectedCycleType() === group.cycle.type && currentScope() === 'CYCLE'"
-                  (click)="setScope('CYCLE', group.cycle.type)">
-            <div class="cycle-icon">
-              <lucide-icon [name]="group.cycle.icon" [size]="13"></lucide-icon>
-            </div>
-            <span class="cycle-name">{{ group.cycle.label }}</span>
-            <span class="override-dot" *ngIf="hasCycleOverride(group.cycle.type)" title="Override cycle actif"></span>
+        <div class="cycle-levels" *ngIf="group.levels.length > 0">
+          <button *ngFor="let level of group.levels"
+                  class="level-subitem"
+                  [class.active]="selectedLevelId() === level.id"
+                  (click)="setScope('LEVEL', level.id)">
+            <span class="truncate">{{ level.name }}</span>
+            <span class="override-dot" *ngIf="hasLevelOverride(level.id)" title="Override niveau actif"></span>
           </button>
-
-          <div class="cycle-levels" *ngIf="group.levels.length > 0">
-            <button *ngFor="let level of group.levels"
-                    class="level-subitem"
-                    [class.active]="selectedLevelId() === level.id"
-                    (click)="setScope('LEVEL', level.id)">
-              <span class="truncate">{{ level.name }}</span>
-              <span class="override-dot" *ngIf="hasLevelOverride(level.id)" title="Override niveau actif"></span>
-            </button>
-          </div>
-
         </div>
       </div>
-    </aside>
+    </div>
 
-    <!-- MAIN EDITOR -->
-    <main class="editor-container" [class.level-mode]="currentScope() === 'LEVEL' || currentScope() === 'CYCLE'"
-          [class.year-mode]="currentScope() === 'YEAR'"
-          [class.has-dirty-bar]="isDirty() && currentScope() === 'GLOBAL'">
+  </aside>
+
+  <!-- CONTENU PILOTÉ (Shell + Tabs) -->
+  <div class="config-viewport">
+    <app-fw-page-shell
+      [title]="currentScope() === 'GLOBAL' ? 'Gouvernance du Portail' : 'Surcharge de Configuration'"
+      [description]="'Configuration de l\'expérience d\'admission • ' + (activeYear()?.label || '...')"
+      [icon]="currentScope() === 'GLOBAL' ? Settings2 : Sparkles"
+      [tabs]="currentScope() === 'GLOBAL' ? admissionTabs : []"
+      [activeTabId]="activeTab()"
+      (tabChange)="activeTab.set($any($event))"
+      density="compact"
+    >
+      <div actions class="flex items-center gap-3">
+        <div class="portal-status-wrap">
+          <div class="portal-status-pill" [class.online]="cfg.portalActive" (click)="togglePortal()" title="Cliquer pour basculer">
+            <div class="status-dot"></div>
+            <span>{{ cfg.portalActive ? 'Portail en ligne' : 'Portail hors-ligne' }}</span>
+          </div>
+        </div>
+        <app-fw-button variant="tertiary" size="md" [icon]="Eye" (click)="previewPortal()">Simulateur</app-fw-button>
+        <app-fw-button variant="primary" size="md" [icon]="Save" [loading]="isSaving()" [disabled]="!isDirty() || currentScope() !== 'GLOBAL'" (click)="onSave()">Publier</app-fw-button>
+      </div>
+
+      <main class="editor-container"
+            [class.level-mode]="currentScope() === 'LEVEL' || currentScope() === 'CYCLE'"
+            [class.year-mode]="currentScope() === 'YEAR'"
+            [class.has-dirty-bar]="isDirty() && currentScope() === 'GLOBAL'">
+
 
       <!-- CONTEXT BANNER -->
       <div class="context-banner" *ngIf="currentScope() === 'GLOBAL'">
@@ -695,7 +689,7 @@
       <!-- ══════════ TAB : PILLARS (FORMULAIRE) ══════════ -->
       <ng-container *ngIf="activeTab() === 'PILLARS' && currentScope() === 'GLOBAL'">
         <div class="pillars-editor animate-in fade-in">
-          
+
           <!-- Sous-navigation (Niveau 2) -->
           <div class="pillar-tabs-nav">
             <app-fw-tabs
@@ -733,7 +727,7 @@
 
             <!-- Contenu si pilier actif -->
             <ng-container *ngIf="isPillarEnabled(activePillarId()) || activePillarId() === 'identity'">
-              
+
               <!-- Champs système -->
               <section class="pillar-section" *ngIf="activePillarCoreFields().length > 0">
                 <div class="pillar-section-header">
@@ -1035,84 +1029,26 @@
         </div>
       </ng-container>
 
-      <!-- ══════════ TAB : WORKFLOW / PARAMÈTRES ══════════ -->
-      <ng-container *ngIf="activeTab() === 'WORKFLOW' && currentScope() === 'GLOBAL'">
-        <div class="workflow-editor">
-
-          <div class="editor-section">
-            <div class="section-label">Accès au portail</div>
-            <div class="portal-toggle-card" [class.open]="cfg.portalActive">
-              <div class="portal-icon">
-                <lucide-icon [name]="cfg.portalActive ? Globe : Lock" [size]="26"></lucide-icon>
-              </div>
-              <div class="portal-info">
-                <strong>{{ cfg.portalActive ? 'Portail en ligne' : 'Portail hors-ligne' }}</strong>
-                <span>{{ cfg.portalActive ? 'Les parents peuvent créer et soumettre des dossiers.' : 'Le formulaire public est suspendu.' }}</span>
-              </div>
-              <button
-                role="switch"
-                class="toggle-switch lg"
-                [class.on]="cfg.portalActive"
-                [attr.aria-checked]="cfg.portalActive"
-                aria-label="Mettre le portail en ligne ou hors ligne"
-                (click)="togglePortal()">
-                <div class="track">
-                  <div class="thumb"></div>
-                </div>
-              </button>
-            </div>
-          </div>
-
-          <div class="editor-section">
-            <div class="section-label">Mode d'inscription</div>
-            <div class="mode-grid">
-              <button *ngFor="let m of registrationModes" class="mode-card"
-                      [class.active]="cfg.registrationMode === m.value" (click)="updateRegistrationMode(m.value)">
-                <lucide-icon [name]="m.icon" [size]="18"></lucide-icon>
-                <span class="mode-name">{{ m.label }}</span>
-                <span class="mode-desc">{{ m.desc }}</span>
-              </button>
-            </div>
-          </div>
-
-          <div class="editor-section">
-            <div class="section-label danger">Zone de maintenance</div>
-            <div class="danger-block">
-              <div class="danger-icon">
-                <lucide-icon [name]="AlertTriangle" [size]="18"></lucide-icon>
-              </div>
-              <div class="danger-text">
-                <strong>Réinitialisation d'usine</strong>
-                <span>Supprime toutes les personnalisations et restaure les standards Feewi. Irréversible.</span>
-              </div>
-              <app-fw-button variant="danger" (click)="resetToSystemDefaults()">
-                Réinitialiser
-              </app-fw-button>
-            </div>
-          </div>
-
-        </div>
-      </ng-container>
-
-    </main>
+      </main>
+    </app-fw-page-shell>
   </div>
 
-  <!-- STICKY SAVE BAR -->
+  <!-- STICKY SAVE BAR (portée GLOBAL uniquement) -->
   <div class="sticky-save-bar" *ngIf="isDirty() && currentScope() === 'GLOBAL'">
     <div class="save-bar-content">
-      <span class="save-bar-label">
-        <span class="save-dot"></span>
-        Modifications non publiées
-      </span>
+      <span class="save-bar-label"><span class="save-dot"></span> Modifications non publiées</span>
       <div class="save-bar-actions">
-        <app-fw-button variant="tertiary" [disabled]="isSaving()" (click)="discardChanges()">
-          Annuler
-        </app-fw-button>
-        <app-fw-button variant="primary" [icon]="Save" [loading]="isSaving()" (click)="onSave()">
-          Publier les modifications
-        </app-fw-button>
+        <app-fw-button variant="tertiary" [disabled]="isSaving()" (click)="discardChanges()">Annuler</app-fw-button>
+        <app-fw-button variant="primary" [icon]="Save" [loading]="isSaving()" (click)="onSave()">Publier</app-fw-button>
       </div>
     </div>
   </div>
 
-</app-fw-page-shell>
+</div>
+
+<!-- LOADER INITIAL -->
+<div class="loading-overlay" *ngIf="isLoading()">
+  <lucide-icon [name]="RefreshCw" [size]="36" class="animate-spin"></lucide-icon>
+  <p>Chargement de la configuration…</p>
+</div>
+

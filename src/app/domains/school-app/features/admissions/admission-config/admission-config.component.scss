@@ -2,51 +2,70 @@
 
 :host { display: block; height: 100%; }
 
-// ─── LAYOUT ──────────────────────────────────────────────────────────────────
-.portal-admin-layout {
-  display: grid; 
-  grid-template-columns: 260px 1fr;
-  gap: 2rem;
+// ─── ROOT LAYOUT ─────────────────────────────────────────────────────────────
+.config-feature-root {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 0;
+  height: 100vh;
+  background: var(--fw-ice);
+  overflow: hidden;
+}
+
+.config-viewport {
   height: 100%;
-}
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--fw-ice);
+  animation: fade-in 0.4s ease-out;
 
-// ─── PORTAL STATUS PILL ──────────────────────────────────────────────────────
-.portal-status-wrap {
-  margin-right: 1rem;
-}
-
-.portal-status-pill {
-  display: flex; align-items: center; gap: 0.625rem;
-  padding: 0.5rem 1rem; border-radius: 100px;
-  background: var(--fw-surface-sunken);
-  cursor: pointer; font-size: 0.75rem; font-weight: 800;
-  color: var(--fw-text-tertiary); transition: all 0.2s; user-select: none;
-  text-transform: uppercase; letter-spacing: 0.05em;
-
-  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--fw-text-tertiary); transition: background 0.3s; }
-
-  &.online {
-    background: var(--fw-success-bg); color: var(--fw-success);
-    .status-dot { background: var(--fw-success); box-shadow: 0 0 0 4px var(--fw-success-alpha); }
+  app-fw-page-shell {
+    height: 100%;
+    // On retire les marges internes du shell si nécessaire ici
   }
-  &:hover { transform: translateY(-1px); box-shadow: var(--fw-shadow-md); }
 }
 
 // ─── SCOPE SIDEBAR ───────────────────────────────────────────────────────────
 .scope-sidebar {
-  background: white; 
-  border-radius: 24px;
-  padding: 1.5rem 1rem;
+  background: white;
+  border-right: 1px solid var(--fw-border-subtle);
+  padding: 1.5rem 1.25rem;
   display: flex; flex-direction: column;
-  box-shadow: var(--fw-shadow-sm);
-  height: fit-content;
-  position: sticky;
-  top: 1rem;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  z-index: 10;
+}
 
+// ── Brand header ─────────────────────────────────────────────────────────────
+.sidebar-header {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding-bottom: 1.25rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--fw-border-subtle);
+
+  .sidebar-brand-icon {
+    width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0;
+    display: grid; place-items: center;
+    background: var(--fw-primary-alpha); color: var(--fw-primary);
+  }
+
+  .sidebar-brand-text {
+    display: flex; flex-direction: column;
+    .sidebar-brand-name { font-size: 0.8125rem; font-weight: 800; color: var(--fw-midnight); line-height: 1.2; }
+    .sidebar-brand-year { font-size: 10px; color: var(--fw-text-tertiary); font-weight: 600; margin-top: 1px; }
+  }
+}
+
+// ── Scope section labels ──────────────────────────────────────────────────────
+.scope-sidebar {
   .nav-section-title {
     font-size: 10px; font-weight: 850; text-transform: uppercase;
     color: var(--fw-text-tertiary); letter-spacing: 0.12em;
-    padding: 0 0.75rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;
+    padding: 0 0.5rem; margin-bottom: 0.5rem;
+    display: flex; align-items: center; gap: 0.5rem;
+
     .level-count {
       display: inline-flex; align-items: center; justify-content: center;
       padding: 1px 6px; border-radius: 20px;
@@ -54,57 +73,95 @@
     }
   }
 
-  .nav-divider { height: 1px; background: var(--fw-border-subtle); margin: 1.25rem 0; }
+  .nav-divider { height: 1px; background: var(--fw-border-subtle); margin: 1rem 0.25rem; }
 
+  // ── Global scope button (École) ─────────────────────────────────────────────
   .scope-item {
-    display: flex; align-items: center; gap: 0.75rem;
-    padding: 0.75rem; border-radius: 14px; border: none;
-    background: transparent; cursor: pointer; transition: all 0.2s; width: 100%;
+    display: flex; align-items: center; gap: 0.875rem;
+    padding: 0.875rem 1rem; border-radius: 16px; border: none;
+    background: transparent; cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 100%; margin-bottom: 0.5rem;
 
     .scope-icon {
-      width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; flex-shrink: 0;
+      width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; flex-shrink: 0;
       background: var(--fw-surface-sunken); color: var(--fw-text-tertiary);
-      transition: all 0.2s;
+      transition: all 0.25s;
     }
 
     .scope-label-wrap {
       display: flex; flex-direction: column; text-align: left;
-      .scope-name { font-size: 0.875rem; font-weight: 700; color: var(--fw-midnight); }
-      .scope-sub { font-size: 10px; color: var(--fw-text-tertiary); font-weight: 500; }
+      .scope-name { font-size: 0.875rem; font-weight: 800; color: var(--fw-midnight); }
+      .scope-sub  { font-size: 10px; color: var(--fw-text-tertiary); font-weight: 600; }
     }
 
-    &:hover { background: var(--fw-surface-sunken); }
+    &:hover { background: var(--fw-surface-sunken); transform: translateX(3px); }
+
     &.active {
-      background: var(--fw-primary-alpha);
-      .scope-icon { background: var(--fw-primary); color: white; }
-      .scope-name, .scope-sub { color: var(--fw-primary); }
+      background: var(--fw-midnight);
+      transform: translateX(3px);
+      box-shadow: var(--fw-shadow-lg);
+      .scope-icon  { background: rgb(255 255 255 / 12%); color: white; }
+      .scope-name  { color: white; }
+      .scope-sub   { color: rgb(255 255 255 / 50%); }
     }
   }
 
-  .levels-scroll {
-    max-height: 400px;
+  // ── Year compact items ────────────────────────────────────────────────────────
+  .year-item {
+    display: flex; align-items: center; gap: 0.625rem;
+    width: 100%; padding: 0.5rem 0.875rem; border-radius: 10px;
+    border: none; background: transparent; cursor: pointer;
+    transition: all 0.2s; margin-bottom: 0.125rem;
+    font-size: 0.8125rem; font-weight: 700; color: var(--fw-text-secondary);
+
+    lucide-icon { flex-shrink: 0; color: var(--fw-text-tertiary); }
+
+    &:hover { background: var(--fw-surface-sunken); color: var(--fw-midnight); transform: translateX(2px); }
+    &.active {
+      background: var(--fw-primary-alpha); color: var(--fw-primary);
+      transform: translateX(2px);
+      lucide-icon { color: var(--fw-primary); }
+    }
+  }
+
+  // ── Years scroll (fixed height — années peu nombreuses) ────────────────────
+  .years-scroll {
+    max-height: 150px;
     overflow-y: auto;
-    &::-webkit-scrollbar { width: 4px; }
+    padding-right: 2px;
+    &::-webkit-scrollbar { width: 3px; }
     &::-webkit-scrollbar-thumb { background: var(--fw-border); border-radius: 10px; }
   }
 
-  .cycle-group { margin-bottom: 0.25rem; }
+  // ── Levels scroll (flex-1 → prend tout l'espace restant) ──────────────────
+  .levels-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 2px;
+    margin-bottom: 0.5rem;
+    &::-webkit-scrollbar { width: 3px; }
+    &::-webkit-scrollbar-thumb { background: var(--fw-border); border-radius: 10px; }
+  }
+
+  // ── Cycle groups ─────────────────────────────────────────────────────────────
+  .cycle-group { margin-bottom: 0.5rem; }
 
   .cycle-header {
-    display: flex; align-items: center; gap: 0.625rem;
-    width: 100%; padding: 0.5rem 0.75rem; border-radius: 10px;
+    display: flex; align-items: center; gap: 0.75rem;
+    width: 100%; padding: 0.625rem 0.875rem; border-radius: 12px;
     border: none; background: transparent; cursor: pointer;
     transition: all 0.2s;
 
     .cycle-icon {
-      width: 24px; height: 24px; border-radius: 6px; flex-shrink: 0;
+      width: 26px; height: 26px; border-radius: 7px; flex-shrink: 0;
       display: grid; place-items: center;
       background: var(--fw-surface-sunken); color: var(--fw-text-tertiary);
     }
 
     .cycle-name {
       flex: 1; text-align: left;
-      font-size: 0.8125rem; font-weight: 700; color: var(--fw-midnight);
+      font-size: 0.8125rem; font-weight: 750; color: var(--fw-midnight);
     }
 
     .override-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--fw-warning); flex-shrink: 0; }
@@ -118,25 +175,25 @@
   }
 
   .cycle-levels {
-    margin-left: 1.125rem;
-    padding-left: 0.75rem;
+    margin-left: 1.25rem;
+    padding-left: 0.875rem;
     border-left: 1.5px solid var(--fw-border-subtle);
-    margin-top: 0.25rem;
+    margin-top: 0.375rem;
     margin-bottom: 0.75rem;
-    display: flex; flex-direction: column; gap: 0.125rem;
+    display: flex; flex-direction: column; gap: 0.25rem;
   }
 
   .level-subitem {
-    display: flex; align-items: center; gap: 0.5rem;
-    width: 100%; padding: 0.375rem 0.75rem; border-radius: 8px;
+    display: flex; align-items: center; gap: 0.625rem;
+    width: 100%; padding: 0.5rem 0.875rem; border-radius: 10px;
     border: none; background: transparent; cursor: pointer;
     transition: all 0.2s;
     font-size: 0.8125rem; font-weight: 600; color: var(--fw-text-secondary);
 
     .override-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--fw-warning); flex-shrink: 0; }
 
-    &:hover { background: var(--fw-surface-sunken); color: var(--fw-midnight); }
-    &.active { background: var(--fw-primary-alpha); color: var(--fw-primary); }
+    &:hover { background: var(--fw-surface-sunken); color: var(--fw-midnight); transform: translateX(2px); }
+    &.active { background: var(--fw-primary-alpha); color: var(--fw-primary); transform: translateX(2px); }
   }
 }
 
@@ -354,7 +411,7 @@
 }
 
 // override-dot color variant for years
-.override-dot.year { background: #0ea5e9; }
+.override-dot.year { background: var(--fw-info); }
 
 // ─── SECTION TOOLBAR MODIFIER ────────────────────────────────────────────────
 .section-toolbar.flush { margin-bottom: 0; }
