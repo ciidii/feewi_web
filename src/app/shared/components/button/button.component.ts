@@ -1,6 +1,6 @@
-import { CommonModule } from '@angular/common';
-import { LucideAngularModule, Loader2 } from 'lucide-angular';
-import { Component, computed, Input, ViewEncapsulation } from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Loader2, LucideAngularModule} from 'lucide-angular';
+import {Component, computed, Input, ViewEncapsulation} from '@angular/core';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'accent' | 'destructive' | 'tertiary';
 export type ButtonSize = 'sm' | 'md' | 'lg';
@@ -66,9 +66,12 @@ export class FwButtonComponent {
 
   iconSize = computed(() => {
     switch (this.size) {
-      case 'sm': return 14;
-      case 'lg': return 18;
-      default: return 16;
+      case 'sm':
+        return 14;
+      case 'lg':
+        return 18;
+      default:
+        return 16;
     }
   });
 

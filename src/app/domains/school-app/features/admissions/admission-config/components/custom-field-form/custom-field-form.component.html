@@ -1,65 +1,121 @@
 <app-fw-form-shell
-  title="Ajouter une Question"
-  subtitle="Créez un nouveau champ de saisie personnalisé pour le formulaire d'admission."
+  title="Configuration du Champ"
+  subtitle="Créez et personnalisez une question pour le formulaire parent."
   [icon]="MessageSquare"
-  saveLabel="Ajouter le champ"
+  saveLabel="Valider et Créer"
   cancelLabel="Annuler"
   [canSave]="fieldForm.valid"
   (save)="onSave()"
   (cancel)="onCancel()"
 >
-  <form [formGroup]="fieldForm" class="space-y-6">
-    
-    <!-- Libellé de la question -->
-    <div class="space-y-2">
-      <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Libellé de la question</label>
-      <div class="relative group">
-        <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors">
-          <lucide-icon [name]="Type" class="w-4.5 h-4.5"></lucide-icon>
-        </div>
-        <input 
-          type="text" 
-          formControlName="label" 
-          placeholder="Ex: Allergies alimentaires de l'enfant ?" 
-          class="fw-input"
-          [class.error]="isInvalid('label')"
-        />
-      </div>
-    </div>
+  <!-- Barre de navigation interne -->
+  <div class="-mx-6 -mt-6 mb-6">
+    <app-fw-tabs
+      [tabs]="formTabs"
+      [activeTabId]="activeTab()"
+      (tabChange)="onTabChange($event)"
+      density="compact"
+    ></app-fw-tabs>
+  </div>
 
-    <!-- Type de réponse -->
-    <div class="grid grid-cols-2 gap-4">
+  <form [formGroup]="fieldForm" class="space-y-6">
+
+    <!-- ONGLET : QUESTION (BASIQUE) -->
+    <div *ngIf="activeTab() === 'basic'" class="space-y-6 animate-in fade-in">
+      <div class="space-y-2">
+        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Libellé de la question</label>
+        <div class="relative group">
+          <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors">
+            <lucide-icon [name]="Type" class="w-4.5 h-4.5"></lucide-icon>
+          </div>
+          <input
+            type="text"
+            formControlName="label"
+            placeholder="Ex: Allergies alimentaires de l'enfant ?"
+            class="fw-input"
+            [class.error]="isInvalid('label')"
+          />
+        </div>
+      </div>
+
       <div class="space-y-2">
         <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Type de réponse</label>
         <select formControlName="type" class="fw-input">
           <option value="TEXT">Texte court</option>
+          <option value="TEXTAREA">Paragraphe (Texte long)</option>
           <option value="NUMBER">Nombre</option>
           <option value="DATE">Date</option>
           <option value="BOOLEAN">Case à cocher (Oui/Non)</option>
+          <option value="SELECT">Liste déroulante</option>
         </select>
       </div>
 
-      <div class="space-y-2">
-        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Placeholder / Aide</label>
-        <input 
-          type="text" 
-          formControlName="placeholder" 
-          placeholder="Ex: Précisez ici..." 
-          class="fw-input"
-        />
+      <div class="p-4 bg-blue-50/50 rounded-xl border border-blue-100 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <lucide-icon [name]="Info" class="w-4 h-4 text-blue-500"></lucide-icon>
+          <span class="text-sm font-semibold text-slate-700">Rendre cette réponse obligatoire</span>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" formControlName="mandatory" class="sr-only peer">
+          <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+        </label>
       </div>
     </div>
 
-    <!-- Option Obligatoire -->
-    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <lucide-icon [name]="Info" class="w-4 h-4 text-slate-400"></lucide-icon>
-        <span class="text-sm font-semibold text-slate-700">Rendre cette réponse obligatoire</span>
+    <!-- ONGLET : OPTIONS & AIDE -->
+    <div *ngIf="activeTab() === 'options'" class="space-y-6 animate-in fade-in">
+      <div class="space-y-2">
+        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Placeholder / Message d'aide</label>
+        <div class="relative group">
+          <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors">
+            <lucide-icon [name]="HelpCircle" class="w-4.5 h-4.5"></lucide-icon>
+          </div>
+          <input
+            type="text"
+            formControlName="placeholder"
+            placeholder="Ex: Précisez ici les détails si nécessaire..."
+            class="fw-input"
+          />
+        </div>
+        <p class="text-[10px] text-slate-400 italic ml-1">S'affiche à l'intérieur du champ quand il est vide.</p>
       </div>
-      <label class="relative inline-flex items-center cursor-pointer">
-        <input type="checkbox" formControlName="mandatory" class="sr-only peer">
-        <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-      </label>
+
+      <!-- Note: La gestion des options du SELECT pourra être ajoutée ici plus tard -->
+      <div *ngIf="fieldForm.get('type')?.value === 'SELECT'" class="p-4 bg-orange-50 rounded-xl border border-orange-100">
+        <p class="text-xs font-semibold text-orange-700 flex items-center gap-2">
+          <lucide-icon [name]="Settings" class="w-4 h-4"></lucide-icon>
+          Configuration des options bientôt disponible
+        </p>
+      </div>
+    </div>
+
+    <!-- ONGLET : APERÇU -->
+    <div *ngIf="activeTab() === 'preview'" class="space-y-6 animate-in fade-in">
+      <div class="p-6 bg-slate-50 rounded-2xl border border-dashed border-slate-300">
+        <div class="space-y-3">
+          <label class="block text-sm font-bold text-slate-700">
+            {{ fieldForm.get('label')?.value || 'Votre question ici...' }}
+            <span *ngIf="fieldForm.get('mandatory')?.value" class="text-primary ml-1">*</span>
+          </label>
+
+          <!-- Rendu dynamique selon type -->
+          <ng-container [ngSwitch]="fieldForm.get('type')?.value">
+            <input *ngSwitchCase="'TEXT'" type="text" class="fw-input bg-white pointer-events-none" [placeholder]="fieldForm.get('placeholder')?.value || ''">
+            <textarea *ngSwitchCase="'TEXTAREA'" class="fw-input bg-white h-24 pointer-events-none" [placeholder]="fieldForm.get('placeholder')?.value || ''"></textarea>
+            <input *ngSwitchCase="'NUMBER'" type="number" class="fw-input bg-white pointer-events-none">
+            <input *ngSwitchCase="'DATE'" type="date" class="fw-input bg-white pointer-events-none">
+            <div *ngSwitchCase="'BOOLEAN'" class="flex items-center gap-2">
+              <div class="w-5 h-5 rounded border border-slate-300 bg-white"></div>
+              <span class="text-sm text-slate-600">Case à cocher</span>
+            </div>
+            <select *ngSwitchCase="'SELECT'" class="fw-input bg-white pointer-events-none">
+              <option>Exemple de liste...</option>
+            </select>
+          </ng-container>
+
+          <p class="text-[10px] text-slate-400">Rendu simulé (Portail Parent)</p>
+        </div>
+      </div>
     </div>
 
   </form>

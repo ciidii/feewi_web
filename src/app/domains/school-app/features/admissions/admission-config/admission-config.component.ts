@@ -31,7 +31,7 @@ import {
   Users,
   Wrench
 } from 'lucide-angular';
-import {finalize, forkJoin, Observable} from 'rxjs';
+import {finalize, forkJoin} from 'rxjs';
 import {EnrollmentAdminService} from '../../../../../core/services/enrollment-admin.service';
 import {
   CycleOverrideConfig,
@@ -43,7 +43,7 @@ import {
   ServicesSchemaConfig,
   YearOverrideConfig
 } from '../../../../../core/models/enrollment.model';
-import { CycleType } from '../../../../../core/models/enrollment/base-types';
+import {CycleType} from '../../../../../core/models/enrollment/base-types';
 import {NotificationService} from '../../../../../shared/services/notification.service';
 import {AcademicService} from '../../../../../core/services/academic.service';
 import {AcademicYear, Cycle, Level} from '../../../../../core/models/academic.model';
@@ -54,10 +54,9 @@ import {PortalPreviewDialogComponent} from './components/portal-preview-dialog/p
 import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 import {ServiceFormComponent} from './components/service-form/service-form.component';
 
-import { FwPageShellComponent } from '../../../../../shared/components/page-shell/page-shell.component';
-import { FwButtonComponent } from '../../../../../shared/components/button/button.component';
-import { FwTab } from '../../../../../shared/components/tabs/tabs.component';
-import { PageProgressComponent } from '../../../../../shared/components/loader/page-progress.component';
+import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
+import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
+import {FwTab, FwTabsComponent} from '../../../../../shared/components/tabs/tabs.component';
 
 export type ConfigTab = 'PILLARS' | 'DOCUMENTS' | 'ASSESSMENT' | 'SERVICES' | 'WORKFLOW';
 export type ConfigScope = 'GLOBAL' | 'LEVEL' | 'YEAR' | 'CYCLE';
@@ -72,7 +71,7 @@ export type ConfigScope = 'GLOBAL' | 'LEVEL' | 'YEAR' | 'CYCLE';
     MatDialogModule,
     FwPageShellComponent,
     FwButtonComponent,
-    PageProgressComponent
+    FwTabsComponent
   ],
   templateUrl: './admission-config.component.html',
   styleUrls: ['./admission-config.component.scss']
@@ -98,16 +97,23 @@ export class AdmissionConfigComponent implements OnInit {
   selectedLevelId = signal<string | null>(null);
   selectedYearId = signal<string | null>(null);
   activeTab = signal<ConfigTab>('PILLARS');
-  activePillarKey = signal<string>('identity');
-  openPillars = signal<Set<string>>(new Set(['identity', 'medical', 'family', 'schooling']));
+  activePillarId = signal<string>('identity');
 
-  // Onglets intégrés au Shell (visibles uniquement en scope GLOBAL)
+  // Onglets Niveau 1 (Shell)
   readonly admissionTabs: FwTab[] = [
-    { id: 'PILLARS', label: 'Formulaire', icon: LayoutGrid },
-    { id: 'DOCUMENTS', label: 'Documents', icon: FileText },
-    { id: 'ASSESSMENT', label: 'Évaluation', icon: ClipboardList },
-    { id: 'SERVICES', label: 'Services', icon: Wrench },
-    { id: 'WORKFLOW', label: 'Paramètres', icon: ShieldCheck }
+    {id: 'PILLARS', label: 'Formulaire', icon: LayoutGrid},
+    {id: 'DOCUMENTS', label: 'Documents', icon: FileText},
+    {id: 'ASSESSMENT', label: 'Évaluation', icon: ClipboardList},
+    {id: 'SERVICES', label: 'Services', icon: Wrench},
+    {id: 'WORKFLOW', label: 'Paramètres', icon: ShieldCheck}
+  ];
+
+  // Onglets Niveau 2 (Interne au Formulaire)
+  readonly pillarTabs: FwTab[] = [
+    {id: 'identity', label: 'Identité', icon: UserCog},
+    {id: 'medical', label: 'Santé', icon: HeartPulse},
+    {id: 'family', label: 'Famille', icon: Users},
+    {id: 'schooling', label: 'Scolarité', icon: School}
   ];
 
   // Year override local form state (isolated from global config)
@@ -141,29 +147,29 @@ export class AdmissionConfigComponent implements OnInit {
 
   // --- STATIC DATA ---
   readonly cycles: { type: CycleType; label: string; icon: any }[] = [
-    { type: 'MATERNAL',     label: 'Préscolaire / Maternelle', icon: Sparkles     },
-    { type: 'PRIMARY',      label: 'École primaire',           icon: School       },
-    { type: 'MIDDLE_SCHOOL',label: 'Collège',                  icon: Users        },
-    { type: 'HIGH_SCHOOL',  label: 'Lycée',                    icon: GraduationCap},
+    {type: 'MATERNAL', label: 'Préscolaire / Maternelle', icon: Sparkles},
+    {type: 'PRIMARY', label: 'École primaire', icon: School},
+    {type: 'MIDDLE_SCHOOL', label: 'Collège', icon: Users},
+    {type: 'HIGH_SCHOOL', label: 'Lycée', icon: GraduationCap},
   ];
 
   readonly systemPillars = [
-    {key: 'identity',  label: 'Identité',  icon: UserCog},
-    {key: 'medical',   label: 'Santé',     icon: HeartPulse},
-    {key: 'family',    label: 'Famille',   icon: Users},
+    {key: 'identity', label: 'Identité', icon: UserCog},
+    {key: 'medical', label: 'Santé', icon: HeartPulse},
+    {key: 'family', label: 'Famille', icon: Users},
     {key: 'schooling', label: 'Scolarité', icon: School}
   ];
 
   readonly assessmentTypes = [
-    {value: 'DOSSIER',   label: 'Dossier',   desc: 'Étude des pièces uniquement',     icon: ClipboardList},
-    {value: 'EXAM',      label: 'Examen',    desc: 'Notes sur matières définies',     icon: Hash},
-    {value: 'INTERVIEW', label: 'Entretien', desc: 'Évaluation orale de motivation',  icon: MessageSquare}
+    {value: 'DOSSIER', label: 'Dossier', desc: 'Étude des pièces uniquement', icon: ClipboardList},
+    {value: 'EXAM', label: 'Examen', desc: 'Notes sur matières définies', icon: Hash},
+    {value: 'INTERVIEW', label: 'Entretien', desc: 'Évaluation orale de motivation', icon: MessageSquare}
   ];
 
   readonly registrationModes = [
-    {value: 'PARENT_ONLY', label: 'Portail parents', desc: 'Inscription en ligne uniquement',   icon: Users},
-    {value: 'ADMIN_ONLY',  label: 'Guichet seul',    desc: 'Saisie directe par le secrétariat', icon: UserCog},
-    {value: 'BOTH',        label: 'Mode mixte',      desc: 'Portail et guichet activés',         icon: Globe}
+    {value: 'PARENT_ONLY', label: 'Portail parents', desc: 'Inscription en ligne uniquement', icon: Users},
+    {value: 'ADMIN_ONLY', label: 'Guichet seul', desc: 'Saisie directe par le secrétariat', icon: UserCog},
+    {value: 'BOTH', label: 'Mode mixte', desc: 'Portail et guichet activés', icon: Globe}
   ];
 
   // --- COMPUTED ---
@@ -185,7 +191,7 @@ export class AdmissionConfigComponent implements OnInit {
   levelsByCycle = computed(() => {
     const allLevels = this.levels();
     const allCycles = this.academicCycles();
-    
+
     // Map pour retrouver le cycleCode par ID de cycle
     const cycleCodeMap = new Map<string, string>();
     allCycles.forEach(c => cycleCodeMap.set(c.id, c.cycleCode));
@@ -198,7 +204,7 @@ export class AdmissionConfigComponent implements OnInit {
             return levelCycleCode === c.type;
           })
           .sort((a, b) => a.rank - b.rank);
-          
+
         return {
           cycle: c,
           levels: matchingLevels
@@ -212,6 +218,8 @@ export class AdmissionConfigComponent implements OnInit {
     return !!(c && i && JSON.stringify(c) !== JSON.stringify(i));
   });
 
+  activePillarKey = computed(() => this.activePillarId());
+
   activePillar = computed<any>(() => {
     const cfg = this.config();
     if (!cfg) return null;
@@ -222,7 +230,7 @@ export class AdmissionConfigComponent implements OnInit {
     this.systemPillars.find(p => p.key === this.activePillarKey())?.label || ''
   );
 
-  activePillarCoreFields = computed<{name: string; label: string}[]>(() => {
+  activePillarCoreFields = computed<{ name: string; label: string }[]>(() => {
     const pillar = this.activePillar();
     if (!pillar) return [];
     const controls = this.activePillarKey() === 'family'
@@ -299,36 +307,10 @@ export class AdmissionConfigComponent implements OnInit {
     return (cfg.schema as any)[key]?.enabled !== false;
   }
 
-  isPillarOpen(key: string): boolean { return this.openPillars().has(key); }
-
-  togglePillarAccordion(key: string) {
-    this.openPillars.update(set => {
-      const next = new Set(set);
-      next.has(key) ? next.delete(key) : next.add(key);
-      return next;
-    });
-  }
-
-  getPillarCoreFields(key: string): {name: string; label: string}[] {
-    const cfg = this.config();
-    if (!cfg) return [];
-    const pillar = (cfg.schema as any)[key];
-    if (!pillar) return [];
-    const controls = key === 'family' ? pillar.guardianCoreFieldControls : pillar.coreFieldControls;
-    if (!controls) return [];
-    return Object.entries(controls as Record<string, any>).map(([name, ctrl]) => ({name, label: ctrl.label as string}));
-  }
-
-  getPillarCustomFields(key: string): FieldConfig[] {
-    const cfg = this.config();
-    if (!cfg) return [];
-    const pillar = (cfg.schema as any)[key];
-    if (!pillar) return [];
-    return (key === 'family' ? pillar.guardianCustomFields : pillar.customFields) || [];
-  }
-
   // --- LIFECYCLE ---
-  ngOnInit() { this.loadInitialData(); }
+  ngOnInit() {
+    this.loadInitialData();
+  }
 
   loadInitialData() {
     this.isLoading.set(true);
@@ -462,7 +444,12 @@ export class AdmissionConfigComponent implements OnInit {
       this.isYearOverrideSaving.set(true);
       this.enrollmentService.deleteYearOverride(yearId)
         .pipe(finalize(() => this.isYearOverrideSaving.set(false)))
-        .subscribe({next: () => { this.notificationService.success('Override supprimé.'); this.loadInitialData(); }});
+        .subscribe({
+          next: () => {
+            this.notificationService.success('Override supprimé.');
+            this.loadInitialData();
+          }
+        });
     });
   }
 
@@ -475,11 +462,11 @@ export class AdmissionConfigComponent implements OnInit {
   addLevelDoc() {
     this.dialog.open(DocumentTypeFormComponent, {width: '450px', panelClass: 'feewi-dialog-panel'})
       .afterClosed().subscribe(result => {
-        if (!result) return;
-        this.levelOverrideForm.update(f => ({
-          ...f, additionalDocuments: [...(f.additionalDocuments || []), result]
-        }));
-      });
+      if (!result) return;
+      this.levelOverrideForm.update(f => ({
+        ...f, additionalDocuments: [...(f.additionalDocuments || []), result]
+      }));
+    });
   }
 
   removeLevelDoc(code: string) {
@@ -548,7 +535,12 @@ export class AdmissionConfigComponent implements OnInit {
     this.isLevelOverrideSaving.set(true);
     this.enrollmentService.updateLevelOverride(levelId, this.levelOverrideForm())
       .pipe(finalize(() => this.isLevelOverrideSaving.set(false)))
-      .subscribe({next: () => { this.notificationService.success('Override niveau publié.'); this.loadInitialData(); }});
+      .subscribe({
+        next: () => {
+          this.notificationService.success('Override niveau publié.');
+          this.loadInitialData();
+        }
+      });
   }
 
   deleteLevelOverride() {
@@ -566,7 +558,12 @@ export class AdmissionConfigComponent implements OnInit {
       this.isLevelOverrideSaving.set(true);
       this.enrollmentService.deleteLevelOverride(levelId)
         .pipe(finalize(() => this.isLevelOverrideSaving.set(false)))
-        .subscribe({next: () => { this.notificationService.success('Override supprimé.'); this.loadInitialData(); }});
+        .subscribe({
+          next: () => {
+            this.notificationService.success('Override supprimé.');
+            this.loadInitialData();
+          }
+        });
     });
   }
 
@@ -576,7 +573,7 @@ export class AdmissionConfigComponent implements OnInit {
     const existing = this.config()?.cycleOverrides?.[cycleType];
     this.cycleOverrideForm.set(existing
       ? JSON.parse(JSON.stringify(existing))
-      : { assessment: null, additionalDocuments: [], additionalServices: [] }
+      : {assessment: null, additionalDocuments: [], additionalServices: []}
     );
   }
 
@@ -586,7 +583,12 @@ export class AdmissionConfigComponent implements OnInit {
     this.isCycleOverrideSaving.set(true);
     this.enrollmentService.updateCycleOverride(cycleType, this.cycleOverrideForm())
       .pipe(finalize(() => this.isCycleOverrideSaving.set(false)))
-      .subscribe({ next: () => { this.notificationService.success('Override cycle publié.'); this.loadInitialData(); }});
+      .subscribe({
+        next: () => {
+          this.notificationService.success('Override cycle publié.');
+          this.loadInitialData();
+        }
+      });
   }
 
   deleteCycleOverride() {
@@ -604,18 +606,23 @@ export class AdmissionConfigComponent implements OnInit {
       this.isCycleOverrideSaving.set(true);
       this.enrollmentService.deleteCycleOverride(cycleType)
         .pipe(finalize(() => this.isCycleOverrideSaving.set(false)))
-        .subscribe({ next: () => { this.notificationService.success('Override supprimé.'); this.loadInitialData(); }});
+        .subscribe({
+          next: () => {
+            this.notificationService.success('Override supprimé.');
+            this.loadInitialData();
+          }
+        });
     });
   }
 
   addCycleDoc() {
     this.dialog.open(DocumentTypeFormComponent, {width: '450px', panelClass: 'feewi-dialog-panel'})
       .afterClosed().subscribe(result => {
-        if (!result) return;
-        this.cycleOverrideForm.update(f => ({
-          ...f, additionalDocuments: [...(f.additionalDocuments || []), result]
-        }));
-      });
+      if (!result) return;
+      this.cycleOverrideForm.update(f => ({
+        ...f, additionalDocuments: [...(f.additionalDocuments || []), result]
+      }));
+    });
   }
 
   removeCycleDoc(code: string) {
@@ -634,11 +641,11 @@ export class AdmissionConfigComponent implements OnInit {
   addCycleService() {
     this.dialog.open(ServiceFormComponent, {width: '500px', panelClass: 'feewi-dialog-panel'})
       .afterClosed().subscribe((result: ServiceConfig | undefined) => {
-        if (!result) return;
-        this.cycleOverrideForm.update(f => ({
-          ...f, additionalServices: [...(f.additionalServices || []), result]
-        }));
-      });
+      if (!result) return;
+      this.cycleOverrideForm.update(f => ({
+        ...f, additionalServices: [...(f.additionalServices || []), result]
+      }));
+    });
   }
 
   removeCycleService(code: string) {
@@ -702,10 +709,10 @@ export class AdmissionConfigComponent implements OnInit {
 
   // --- PILLAR METHODS ---
 
-  updateCoreFieldLabel(fieldName: string, label: string, key?: string) {
+  updateCoreFieldLabel(fieldName: string, label: string) {
     const current = this.config();
     if (!current) return;
-    const k = key ?? this.activePillarKey();
+    const k = this.activePillarKey();
     const pillar = {...(current.schema as any)[k]};
     const ctrlKey = k === 'family' ? 'guardianCoreFieldControls' : 'coreFieldControls';
     if (!pillar[ctrlKey]) return;
@@ -720,23 +727,23 @@ export class AdmissionConfigComponent implements OnInit {
     this.config.set({...current, schema: {...current.schema, [key]: {...pillar, enabled: !pillar?.enabled}}});
   }
 
-  addCustomField(key?: string) {
+  addCustomField() {
     this.dialog.open(CustomFieldFormComponent, {width: '500px', panelClass: 'feewi-dialog-panel'})
       .afterClosed().subscribe(result => {
-        if (!result || !this.config()) return;
-        const current = this.config()!;
-        const k = key ?? this.activePillarKey();
-        const pillar = {...(current.schema as any)[k]};
-        const cfKey = k === 'family' ? 'guardianCustomFields' : 'customFields';
-        pillar[cfKey] = [...(pillar[cfKey] || []), result];
-        this.config.set({...current, schema: {...current.schema, [k]: pillar}});
-      });
+      if (!result || !this.config()) return;
+      const current = this.config()!;
+      const k = this.activePillarKey();
+      const pillar = {...(current.schema as any)[k]};
+      const cfKey = k === 'family' ? 'guardianCustomFields' : 'customFields';
+      pillar[cfKey] = [...(pillar[cfKey] || []), result];
+      this.config.set({...current, schema: {...current.schema, [k]: pillar}});
+    });
   }
 
-  removeCustomField(fieldName: string, key?: string) {
+  removeCustomField(fieldName: string) {
     const current = this.config();
     if (!current) return;
-    const k = key ?? this.activePillarKey();
+    const k = this.activePillarKey();
     const pillar = {...(current.schema as any)[k]};
     const cfKey = k === 'family' ? 'guardianCustomFields' : 'customFields';
     pillar[cfKey] = (pillar[cfKey] || []).filter((f: FieldConfig) => f.name !== fieldName);
@@ -751,7 +758,10 @@ export class AdmissionConfigComponent implements OnInit {
     const presetDocuments = current.schema.documents.presetDocuments.map((d: PresetDocumentConfig) =>
       d.code === code ? {...d, mandatory} : d
     );
-    this.config.set({...current, schema: {...current.schema, documents: {...current.schema.documents, presetDocuments}}});
+    this.config.set({
+      ...current,
+      schema: {...current.schema, documents: {...current.schema.documents, presetDocuments}}
+    });
   }
 
   updateDocumentName(code: string, name: string) {
@@ -760,24 +770,33 @@ export class AdmissionConfigComponent implements OnInit {
     const presetDocuments = current.schema.documents.presetDocuments.map((d: PresetDocumentConfig) =>
       d.code === code ? {...d, name} : d
     );
-    this.config.set({...current, schema: {...current.schema, documents: {...current.schema.documents, presetDocuments}}});
+    this.config.set({
+      ...current,
+      schema: {...current.schema, documents: {...current.schema.documents, presetDocuments}}
+    });
   }
 
   addDocumentType() {
     this.dialog.open(DocumentTypeFormComponent, {width: '450px', panelClass: 'feewi-dialog-panel'})
       .afterClosed().subscribe(result => {
-        if (!result || !this.config()) return;
-        const current = this.config()!;
-        const presetDocuments = [...current.schema.documents.presetDocuments, result];
-        this.config.set({...current, schema: {...current.schema, documents: {...current.schema.documents, presetDocuments}}});
+      if (!result || !this.config()) return;
+      const current = this.config()!;
+      const presetDocuments = [...current.schema.documents.presetDocuments, result];
+      this.config.set({
+        ...current,
+        schema: {...current.schema, documents: {...current.schema.documents, presetDocuments}}
       });
+    });
   }
 
   removeDocumentType(code: string) {
     const current = this.config();
     if (!current) return;
     const presetDocuments = current.schema.documents.presetDocuments.filter((d: PresetDocumentConfig) => d.code !== code);
-    this.config.set({...current, schema: {...current.schema, documents: {...current.schema.documents, presetDocuments}}});
+    this.config.set({
+      ...current,
+      schema: {...current.schema, documents: {...current.schema.documents, presetDocuments}}
+    });
   }
 
   // --- ASSESSMENT METHODS ---
@@ -834,11 +853,11 @@ export class AdmissionConfigComponent implements OnInit {
   addService() {
     this.dialog.open(ServiceFormComponent, {width: '500px', panelClass: 'feewi-dialog-panel'})
       .afterClosed().subscribe((result: ServiceConfig | undefined) => {
-        if (!result) return;
-        this.patchServices({
-          availableServices: [...this.activeServices(), result]
-        });
+      if (!result) return;
+      this.patchServices({
+        availableServices: [...this.activeServices(), result]
       });
+    });
   }
 
   updateServiceMandatory(code: string, mandatory: boolean) {
@@ -892,19 +911,41 @@ export class AdmissionConfigComponent implements OnInit {
       this.isLoading.set(true);
       this.enrollmentService.resetConfig()
         .pipe(finalize(() => this.isLoading.set(false)))
-        .subscribe({next: () => { this.notificationService.success('Configuration réinitialisée.'); this.loadInitialData(); }});
+        .subscribe({
+          next: () => {
+            this.notificationService.success('Configuration réinitialisée.');
+            this.loadInitialData();
+          }
+        });
     });
   }
 
   // --- ICONS ---
-  readonly Settings2 = Settings2; readonly Eye = Eye; readonly Save = Save;
-  readonly RefreshCw = RefreshCw; readonly Globe = Globe; readonly GraduationCap = GraduationCap;
-  readonly ShieldCheck = ShieldCheck; readonly Plus = Plus; readonly Trash2 = Trash2;
-  readonly Sparkles = Sparkles; readonly Info = Info; readonly MessageSquare = MessageSquare;
-  readonly LayoutGrid = LayoutGrid; readonly Lock = Lock; readonly ClipboardList = ClipboardList;
-  readonly HeartPulse = HeartPulse; readonly Users = Users; readonly School = School;
-  readonly FileText = FileText; readonly Hash = Hash; readonly ToggleIcon = ToggleIcon;
-  readonly AlertTriangle = AlertTriangle; readonly UserCog = UserCog;
-  readonly Calendar = Calendar; readonly CalendarClock = CalendarClock; readonly Wrench = Wrench;
+  readonly Settings2 = Settings2;
+  readonly Eye = Eye;
+  readonly Save = Save;
+  readonly RefreshCw = RefreshCw;
+  readonly Globe = Globe;
+  readonly GraduationCap = GraduationCap;
+  readonly ShieldCheck = ShieldCheck;
+  readonly Plus = Plus;
+  readonly Trash2 = Trash2;
+  readonly Sparkles = Sparkles;
+  readonly Info = Info;
+  readonly MessageSquare = MessageSquare;
+  readonly LayoutGrid = LayoutGrid;
+  readonly Lock = Lock;
+  readonly ClipboardList = ClipboardList;
+  readonly HeartPulse = HeartPulse;
+  readonly Users = Users;
+  readonly School = School;
+  readonly FileText = FileText;
+  readonly Hash = Hash;
+  readonly ToggleIcon = ToggleIcon;
+  readonly AlertTriangle = AlertTriangle;
+  readonly UserCog = UserCog;
+  readonly Calendar = Calendar;
+  readonly CalendarClock = CalendarClock;
+  readonly Wrench = Wrench;
   readonly ChevronDown = ChevronDown;
 }

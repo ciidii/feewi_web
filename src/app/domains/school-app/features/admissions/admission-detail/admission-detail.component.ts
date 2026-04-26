@@ -1,10 +1,11 @@
-import { Component, computed, inject, OnInit, signal, ViewEncapsulation } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { finalize, forkJoin, map, of, switchMap } from 'rxjs';
+import {Component, computed, inject, OnInit, signal, ViewEncapsulation} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {finalize, forkJoin, map, of, switchMap} from 'rxjs';
 import {
-  LucideAngularModule,
+  Activity,
   ArrowLeft,
   ArrowRight,
+  BadgeCheck,
   CheckCircle,
   ChevronLeft,
   ChevronRight,
@@ -14,10 +15,13 @@ import {
   FileImage,
   FileSpreadsheet,
   FileText,
+  Globe,
   GraduationCap,
   HeartPulse,
   History as HistoryIcon,
   Info,
+  Loader2,
+  LucideAngularModule,
   Mail,
   MapPin,
   Phone,
@@ -31,31 +35,27 @@ import {
   Upload,
   User,
   Users,
-  XCircle,
-  BadgeCheck,
-  Globe,
-  Activity, Loader2
+  XCircle
 } from 'lucide-angular';
-import { ActivatedRoute, RouterModule } from '@angular/router';
-import { EnrollmentAdminService } from '../../../../../core/services/enrollment-admin.service';
-import { DocumentEngineService } from '../../../../../core/services/document-engine.service';
-import { AcademicService } from '../../../../../core/services/academic.service';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { NotificationService } from '../../../../../shared/services/notification.service';
-import { AcademicYear, Filiere, Level } from '../../../../../core/models/academic.model';
-import { AdmissionWorkflowComponent } from '../components/admission-workflow/admission-workflow.component';
-import { FormsModule } from '@angular/forms';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { FwPageShellComponent } from '../../../../../shared/components/page-shell/page-shell.component';
-import { FwButtonComponent } from '../../../../../shared/components/button/button.component';
-import { FwBadgeComponent } from '../../../../../shared/components/badge/badge.component';
-import { FwTab } from '../../../../../shared/components/tabs/tabs.component';
-import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
-import { Admission, AssessmentRequest, RequiredDocument } from '../../../../../core/models/enrollment.model';
-import { EnrollmentSchema, ServiceConfig } from '../../../../../core/models/enrollment/config';
-import { CamelToLabelPipe } from '../../../../../shared/pipes/camel-to-label.pipe';
-import { PageProgressComponent } from '../../../../../shared/components/loader/page-progress.component';
-import { BlockLoaderComponent } from '../../../../../shared/components/loader/block-loader.component';
+import {ActivatedRoute, RouterModule} from '@angular/router';
+import {EnrollmentAdminService} from '../../../../../core/services/enrollment-admin.service';
+import {DocumentEngineService} from '../../../../../core/services/document-engine.service';
+import {AcademicService} from '../../../../../core/services/academic.service';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import {NotificationService} from '../../../../../shared/services/notification.service';
+import {AcademicYear, Filiere, Level} from '../../../../../core/models/academic.model';
+import {AdmissionWorkflowComponent} from '../components/admission-workflow/admission-workflow.component';
+import {FormsModule} from '@angular/forms';
+import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
+import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
+import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
+import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.component';
+import {FwTab} from '../../../../../shared/components/tabs/tabs.component';
+import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
+import {Admission, AssessmentRequest, RequiredDocument} from '../../../../../core/models/enrollment.model';
+import {EnrollmentSchema, ServiceConfig} from '../../../../../core/models/enrollment/config';
+import {CamelToLabelPipe} from '../../../../../shared/pipes/camel-to-label.pipe';
+import {BlockLoaderComponent} from '../../../../../shared/components/loader/block-loader.component';
 
 export type PillarTab = 'identity' | 'schooling' | 'family' | 'medical' | 'assessment' | 'services';
 
@@ -73,7 +73,6 @@ export type PillarTab = 'identity' | 'schooling' | 'family' | 'medical' | 'asses
     FwButtonComponent,
     FwBadgeComponent,
     CamelToLabelPipe,
-    PageProgressComponent,
     BlockLoaderComponent
   ],
   templateUrl: './admission-detail.component.html',
@@ -139,32 +138,32 @@ export class AdmissionDetailComponent implements OnInit {
     const tabs: FwTab[] = [];
 
     // Identité — toujours présente (pas de flag enabled dans le schema)
-    tabs.push({ id: 'identity', label: 'Identité', icon: User });
+    tabs.push({id: 'identity', label: 'Identité', icon: User});
 
     // Scolarité — affichée sauf si explicitement désactivée
     if (schema?.schooling?.enabled !== false) {
-      tabs.push({ id: 'schooling', label: 'Scolarité', icon: School });
+      tabs.push({id: 'schooling', label: 'Scolarité', icon: School});
     }
 
     // Famille — affichée sauf si explicitement désactivée
     if (schema?.family?.enabled !== false) {
-      tabs.push({ id: 'family', label: 'Famille', icon: Users });
+      tabs.push({id: 'family', label: 'Famille', icon: Users});
     }
 
     // Médical — affiché sauf si explicitement désactivé
     if (schema?.medical?.enabled !== false) {
-      tabs.push({ id: 'medical', label: 'Médical', icon: HeartPulse });
+      tabs.push({id: 'medical', label: 'Médical', icon: HeartPulse});
     }
 
     // Services — affiché uniquement si le pilier est activé dans la config ET des souscriptions existent
     const servicesEnabled = schema ? schema.services?.enabled === true : !!app?.subscriptions?.length;
     if (servicesEnabled && app?.subscriptions?.length) {
-      tabs.push({ id: 'services', label: 'Services', icon: Activity, count: app.subscriptions.length });
+      tabs.push({id: 'services', label: 'Services', icon: Activity, count: app.subscriptions.length});
     }
 
     // Évaluation — toujours présente, désactivée selon le statut du workflow
     const assessmentEnabled = ['VERIFIED', 'TESTING', 'VALIDATED', 'REJECTED'].includes(app?.status ?? '');
-    tabs.push({ id: 'assessment', label: 'Évaluation', icon: GraduationCap, disabled: !assessmentEnabled });
+    tabs.push({id: 'assessment', label: 'Évaluation', icon: GraduationCap, disabled: !assessmentEnabled});
 
     return tabs;
   });
@@ -210,7 +209,7 @@ export class AdmissionDetailComponent implements OnInit {
           return this.enrollmentAdminService.getEffectiveConfig(targetLevelId);
         } else {
           return this.enrollmentAdminService.getConfig().pipe(
-            map(cfg => ({ schema: cfg.schema }))
+            map(cfg => ({schema: cfg.schema}))
           );
         }
       }),

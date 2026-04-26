@@ -143,7 +143,82 @@
 // ─── EDITOR CONTAINER ────────────────────────────────────────────────────────
 .editor-container {
   display: flex; flex-direction: column; gap: 1.5rem;
-  &.has-dirty-bar { padding-bottom: 80px; }
+  min-height: 600px; // Stabilise la hauteur initiale
+  overflow-y: auto; 
+  scrollbar-gutter: stable; // RÉSERVE l'espace du scroll pour éviter le layout shift
+  
+  &.has-dirty-bar { padding-bottom: 100px; }
+}
+
+// ─── PILLAR TABS NAV (Niveau 2 - Style Segmented Control) ───────────────────
+.pillar-tabs-nav {
+  background: var(--fw-surface-sunken);
+  border-radius: 18px;
+  padding: 0.375rem;
+  margin-bottom: 0.5rem;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--fw-border-subtle);
+
+  app-fw-tabs { 
+    width: 100%; 
+    
+    // Override profond pour un look "Segmented" unique
+    ::ng-deep {
+      .tabs-wrapper {
+        border-bottom: none !important;
+        background: transparent !important;
+      }
+      
+      .tabs-container {
+        padding: 0 !important;
+        gap: 2px !important;
+      }
+
+      .tab-item {
+        flex: 1;
+        justify-content: center;
+        height: 40px !important;
+        border-radius: 12px !important;
+        padding: 0 1rem !important;
+        font-size: 0.75rem !important;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+
+        &:hover:not(:disabled):not(.active) {
+          background: rgba(255,255,255,0.5) !important;
+          color: var(--fw-midnight) !important;
+        }
+
+        &.active {
+          background: white !important;
+          color: var(--fw-primary) !important;
+          box-shadow: var(--fw-shadow-sm), 0 2px 4px rgba(0,0,0,0.02) !important;
+          
+          .tab-icon { color: var(--fw-primary) !important; }
+        }
+
+        // Supprime la ligne bleue standard sous l'onglet
+        .active-indicator { display: none !important; }
+      }
+    }
+  }
+}
+
+// ─── PILLAR PANEL ────────────────────────────────────────────────────────────
+.pillar-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  animation: slide-up 0.3s ease-out;
+}
+
+.pillar-disabled-hint {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 1.25rem; background: var(--fw-surface-sunken);
+  border-radius: 16px; color: var(--fw-text-tertiary);
+  font-size: 0.875rem; font-weight: 500;
+  border: 1px dashed var(--fw-border);
 }
 
 // ─── CONTEXT BANNER ──────────────────────────────────────────────────────────

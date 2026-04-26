@@ -2,9 +2,11 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { LucideAngularModule, MessageSquare, Type, Info, Plus, Trash2, List } from 'lucide-angular';
+import { LucideAngularModule, MessageSquare, Type, Info, Plus, Trash2, List, Eye, Settings, HelpCircle } from 'lucide-angular';
 import { FormShellComponent } from '../../../../../../../shared/components/form-shell/form-shell';
 import { FieldConfig } from '../../../../../../../core/models/enrollment.model';
+import { FwTabsComponent, FwTab } from '../../../../../../../shared/components/tabs/tabs.component';
+import { signal } from '@angular/core';
 
 @Component({
   selector: 'app-custom-field-form',
@@ -14,7 +16,8 @@ import { FieldConfig } from '../../../../../../../core/models/enrollment.model';
     ReactiveFormsModule,
     MatDialogModule,
     LucideAngularModule,
-    FormShellComponent
+    FormShellComponent,
+    FwTabsComponent
   ],
   templateUrl: './custom-field-form.component.html',
   styleUrls: ['./custom-field-form.component.scss']
@@ -26,13 +29,29 @@ export class CustomFieldFormComponent {
   readonly MessageSquare = MessageSquare;
   readonly Type = Type;
   readonly Info = Info;
+  readonly Eye = Eye;
+  readonly Settings = Settings;
+  readonly HelpCircle = HelpCircle;
+
+  // --- NAVIGATION PAR ONGLETS ---
+  activeTab = signal<string>('basic');
+  readonly formTabs: FwTab[] = [
+    { id: 'basic', label: 'Question', icon: MessageSquare },
+    { id: 'options', label: 'Options & Aide', icon: Settings },
+    { id: 'preview', label: 'Aperçu Direct', icon: Eye }
+  ];
 
   fieldForm: FormGroup = this.fb.group({
     label: ['', [Validators.required, Validators.minLength(3)]],
     type: ['TEXT', Validators.required],
-    mandatory: [false], // Renommé mandatory pour V4
-    placeholder: ['']
+    mandatory: [false],
+    placeholder: [''],
+    options: [[]] // Pour le futur type SELECT
   });
+
+  onTabChange(tabId: string) {
+    this.activeTab.set(tabId);
+  }
 
   onSave() {
     if (this.fieldForm.valid) {

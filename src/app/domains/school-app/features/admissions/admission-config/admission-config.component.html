@@ -7,13 +7,10 @@
   (tabChange)="activeTab.set($any($event))"
   density="compact"
 >
-  <!-- Progress bar de chargement -->
-  <fw-page-progress *ngIf="isLoading()"></fw-page-progress>
-
-  <!-- ACTIONS -->
   <div actions class="flex items-center gap-3">
     <div class="portal-status-wrap" *ngIf="config(); let cfg">
-      <div class="portal-status-pill" [class.online]="cfg.portalActive" (click)="togglePortal()" title="Cliquer pour basculer">
+      <div class="portal-status-pill" [class.online]="cfg.portalActive" (click)="togglePortal()"
+           title="Cliquer pour basculer">
         <div class="status-dot"></div>
         <span>{{ cfg.portalActive ? 'Portail en ligne' : 'Portail hors-ligne' }}</span>
       </div>
@@ -42,7 +39,9 @@
       <div class="nav-section-title">Portée</div>
 
       <button class="scope-item" [class.active]="currentScope() === 'GLOBAL'" (click)="setScope('GLOBAL')">
-        <div class="scope-icon global"><lucide-icon [name]="Globe" [size]="15"></lucide-icon></div>
+        <div class="scope-icon global">
+          <lucide-icon [name]="Globe" [size]="15"></lucide-icon>
+        </div>
         <div class="scope-label-wrap">
           <span class="scope-name">École</span>
           <span class="scope-sub">Configuration globale</span>
@@ -62,7 +61,9 @@
           [class.active]="selectedYearId() === year.id"
           (click)="setScope('YEAR', year.id)"
         >
-          <div class="scope-icon level"><lucide-icon [name]="Calendar" [size]="13"></lucide-icon></div>
+          <div class="scope-icon level">
+            <lucide-icon [name]="Calendar" [size]="13"></lucide-icon>
+          </div>
           <span class="truncate level-name">{{ year.label }}</span>
           <span class="override-dot year" *ngIf="hasYearOverride(year.id)" title="Override actif"></span>
         </button>
@@ -80,7 +81,9 @@
           <button class="cycle-header"
                   [class.active]="selectedCycleType() === group.cycle.type && currentScope() === 'CYCLE'"
                   (click)="setScope('CYCLE', group.cycle.type)">
-            <div class="cycle-icon"><lucide-icon [name]="group.cycle.icon" [size]="13"></lucide-icon></div>
+            <div class="cycle-icon">
+              <lucide-icon [name]="group.cycle.icon" [size]="13"></lucide-icon>
+            </div>
             <span class="cycle-name">{{ group.cycle.label }}</span>
             <span class="override-dot" *ngIf="hasCycleOverride(group.cycle.type)" title="Override cycle actif"></span>
           </button>
@@ -101,7 +104,8 @@
 
     <!-- MAIN EDITOR -->
     <main class="editor-container" [class.level-mode]="currentScope() === 'LEVEL' || currentScope() === 'CYCLE'"
-          [class.year-mode]="currentScope() === 'YEAR'" [class.has-dirty-bar]="isDirty() && currentScope() === 'GLOBAL'">
+          [class.year-mode]="currentScope() === 'YEAR'"
+          [class.has-dirty-bar]="isDirty() && currentScope() === 'GLOBAL'">
 
       <!-- CONTEXT BANNER -->
       <div class="context-banner" *ngIf="currentScope() === 'GLOBAL'">
@@ -117,7 +121,9 @@
         <div class="year-override-editor">
 
           <div class="year-editor-header">
-            <div class="year-icon"><lucide-icon [name]="CalendarClock" [size]="20"></lucide-icon></div>
+            <div class="year-icon">
+              <lucide-icon [name]="CalendarClock" [size]="20"></lucide-icon>
+            </div>
             <div>
               <h3>Override — {{ selectedYearName() }}</h3>
               <p>Règles d'inscription spécifiques à cette année scolaire.</p>
@@ -149,7 +155,9 @@
                 [attr.aria-checked]="yearOverrideForm().enrollmentOpen"
                 aria-label="Ouvrir ou fermer les inscriptions"
                 (click)="updateYearOverrideField('enrollmentOpen', !yearOverrideForm().enrollmentOpen)">
-                <div class="track"><div class="thumb"></div></div>
+                <div class="track">
+                  <div class="thumb"></div>
+                </div>
               </button>
             </div>
           </div>
@@ -179,9 +187,12 @@
           <div class="editor-section">
             <div class="section-label">Types d'inscription autorisés</div>
             <div class="allowed-types-grid">
-              <label class="type-check-card" [class.active]="yearOverrideForm().allowedTypes?.includes('NEW_ENROLLMENT')"
+              <label class="type-check-card"
+                     [class.active]="yearOverrideForm().allowedTypes?.includes('NEW_ENROLLMENT')"
                      (click)="toggleYearAllowedType('NEW_ENROLLMENT')">
-                <div class="check-box"><div class="check-mark" *ngIf="yearOverrideForm().allowedTypes?.includes('NEW_ENROLLMENT')">✓</div></div>
+                <div class="check-box">
+                  <div class="check-mark" *ngIf="yearOverrideForm().allowedTypes?.includes('NEW_ENROLLMENT')">✓</div>
+                </div>
                 <div>
                   <span class="type-name">Nouvelle inscription</span>
                   <span class="type-sub">Nouveaux élèves entrants</span>
@@ -189,7 +200,9 @@
               </label>
               <label class="type-check-card" [class.active]="yearOverrideForm().allowedTypes?.includes('RE_ENROLLMENT')"
                      (click)="toggleYearAllowedType('RE_ENROLLMENT')">
-                <div class="check-box"><div class="check-mark" *ngIf="yearOverrideForm().allowedTypes?.includes('RE_ENROLLMENT')">✓</div></div>
+                <div class="check-box">
+                  <div class="check-mark" *ngIf="yearOverrideForm().allowedTypes?.includes('RE_ENROLLMENT')">✓</div>
+                </div>
                 <div>
                   <span class="type-name">Réinscription</span>
                   <span class="type-sub">Élèves déjà scolarisés</span>
@@ -200,7 +213,8 @@
 
           <!-- Mode d'inscription -->
           <div class="editor-section">
-            <div class="section-label">Mode d'inscription <span class="label-hint">(surcharge le mode global)</span></div>
+            <div class="section-label">Mode d'inscription <span class="label-hint">(surcharge le mode global)</span>
+            </div>
             <div class="mode-grid">
               <button *ngFor="let m of registrationModes" class="mode-card"
                       [class.active]="yearOverrideForm().registrationMode === m.value"
@@ -229,7 +243,8 @@
 
           <!-- Actions -->
           <div class="year-editor-actions">
-            <app-fw-button variant="primary" [icon]="Save" [loading]="isYearOverrideSaving()" (click)="saveYearOverride()">
+            <app-fw-button variant="primary" [icon]="Save" [loading]="isYearOverrideSaving()"
+                           (click)="saveYearOverride()">
               Publier l'override
             </app-fw-button>
           </div>
@@ -242,7 +257,9 @@
         <div class="year-override-editor">
 
           <div class="year-editor-header">
-            <div class="year-icon"><lucide-icon [name]="GraduationCap" [size]="20"></lucide-icon></div>
+            <div class="year-icon">
+              <lucide-icon [name]="GraduationCap" [size]="20"></lucide-icon>
+            </div>
             <div>
               <h3>Override — {{ selectedCycleName() }}</h3>
               <p>Règles partagées par tous les niveaux de ce cycle.</p>
@@ -261,7 +278,8 @@
             <div class="section-toolbar flush">
               <div>
                 <h3>Documents additionnels</h3>
-                <p>Pièces supplémentaires requises pour tous les niveaux de ce cycle. <span class="label-hint">(s'ajoutent à la liste globale)</span></p>
+                <p>Pièces supplémentaires requises pour tous les niveaux de ce cycle. <span class="label-hint">(s'ajoutent à la liste globale)</span>
+                </p>
               </div>
               <app-fw-button variant="secondary" size="sm" [icon]="Plus" (click)="addCycleDoc()">
                 Ajouter
@@ -273,7 +291,9 @@
               </div>
               <div *ngFor="let doc of cycleDocsList()" class="doc-row">
                 <div class="doc-name-cell">
-                  <div class="doc-icon"><lucide-icon [name]="FileText" [size]="15"></lucide-icon></div>
+                  <div class="doc-icon">
+                    <lucide-icon [name]="FileText" [size]="15"></lucide-icon>
+                  </div>
                   <span class="doc-name-text">{{ doc.name }}</span>
                 </div>
                 <code class="doc-code">{{ doc.code }}</code>
@@ -285,11 +305,14 @@
                     [attr.aria-checked]="doc.mandatory"
                     [attr.aria-label]="'Document ' + doc.name + ' obligatoire'"
                     (click)="updateCycleDocMandatory(doc.code, !doc.mandatory)">
-                    <div class="track"><div class="thumb"></div></div>
+                    <div class="track">
+                      <div class="thumb"></div>
+                    </div>
                   </button>
                   <span [class.text-required]="doc.mandatory">{{ doc.mandatory ? 'Oui' : 'Non' }}</span>
                 </div>
-                <button class="btn-icon-del" (click)="removeCycleDoc(doc.code)" [attr.aria-label]="'Supprimer ' + doc.name">
+                <button class="btn-icon-del" (click)="removeCycleDoc(doc.code)"
+                        [attr.aria-label]="'Supprimer ' + doc.name">
                   <lucide-icon [name]="Trash2" [size]="13"></lucide-icon>
                 </button>
               </div>
@@ -307,7 +330,8 @@
             <div class="section-toolbar flush">
               <div>
                 <h3>Services additionnels</h3>
-                <p>Services parascolaires spécifiques à ce cycle. <span class="label-hint">(s'ajoutent aux services globaux)</span></p>
+                <p>Services parascolaires spécifiques à ce cycle. <span class="label-hint">(s'ajoutent aux services globaux)</span>
+                </p>
               </div>
               <app-fw-button variant="secondary" size="sm" [icon]="Plus" (click)="addCycleService()">
                 Ajouter
@@ -319,7 +343,9 @@
               </div>
               <div *ngFor="let svc of cycleServicesList()" class="service-row">
                 <div class="service-name-cell">
-                  <div class="service-icon"><lucide-icon [name]="Wrench" [size]="14"></lucide-icon></div>
+                  <div class="service-icon">
+                    <lucide-icon [name]="Wrench" [size]="14"></lucide-icon>
+                  </div>
                   <div>
                     <span class="svc-label">{{ svc.label }}</span>
                     <code class="svc-code">{{ svc.code }}</code>
@@ -337,11 +363,14 @@
                     [attr.aria-checked]="svc.mandatory"
                     [attr.aria-label]="'Service ' + svc.label + ' obligatoire'"
                     (click)="updateCycleServiceMandatory(svc.code, !svc.mandatory)">
-                    <div class="track"><div class="thumb"></div></div>
+                    <div class="track">
+                      <div class="thumb"></div>
+                    </div>
                   </button>
                   <span>{{ svc.mandatory ? 'Oui' : 'Non' }}</span>
                 </div>
-                <button class="btn-icon-del" (click)="removeCycleService(svc.code)" [attr.aria-label]="'Supprimer ' + svc.label">
+                <button class="btn-icon-del" (click)="removeCycleService(svc.code)"
+                        [attr.aria-label]="'Supprimer ' + svc.label">
                   <lucide-icon [name]="Trash2" [size]="13"></lucide-icon>
                 </button>
               </div>
@@ -372,7 +401,9 @@
                 [attr.aria-checked]="cycleAssessmentEnabled()"
                 aria-label="Activer une évaluation spécifique pour ce cycle"
                 (click)="toggleCycleAssessmentOverride()">
-                <div class="track"><div class="thumb"></div></div>
+                <div class="track">
+                  <div class="thumb"></div>
+                </div>
               </button>
             </div>
 
@@ -381,7 +412,9 @@
                 <div class="assessment-type-grid">
                   <button *ngFor="let t of assessmentTypes" class="type-card"
                           [class.active]="aCycle.type === t.value" (click)="updateCycleAssessmentType(t.value)">
-                    <div class="type-icon"><lucide-icon [name]="t.icon" [size]="20"></lucide-icon></div>
+                    <div class="type-icon">
+                      <lucide-icon [name]="t.icon" [size]="20"></lucide-icon>
+                    </div>
                     <span class="type-name">{{ t.label }}</span>
                     <span class="type-desc">{{ t.desc }}</span>
                     <div class="type-check" *ngIf="aCycle.type === t.value">
@@ -401,20 +434,27 @@
                   <div class="subject-add-row">
                     <input type="text" #cycleSubjectInput placeholder="Ex : Mathématiques" class="subject-input"
                            (keyup.enter)="addCycleSubject(cycleSubjectInput)">
-                    <app-fw-button variant="tertiary" size="sm" [icon]="Plus" (click)="addCycleSubject(cycleSubjectInput)">
+                    <app-fw-button variant="tertiary" size="sm" [icon]="Plus"
+                                   (click)="addCycleSubject(cycleSubjectInput)">
                       Ajouter
                     </app-fw-button>
                   </div>
                   <div class="subjects-table" *ngIf="cycleAssessmentSubjectsList().length > 0; else noCycleSubjects">
-                    <div class="subjects-header"><span>Matière</span><span class="text-center">Coefficient</span><span></span></div>
+                    <div class="subjects-header"><span>Matière</span><span
+                      class="text-center">Coefficient</span><span></span></div>
                     <div *ngFor="let s of cycleAssessmentSubjectsList()" class="subject-row">
                       <span class="subject-name">{{ s.name }}</span>
                       <div class="coef-cell">
-                        <button class="coef-btn" (click)="updateCycleSubjectCoef(s.name, +s.coef - 1)" [disabled]="+s.coef <= 1">−</button>
+                        <button class="coef-btn" (click)="updateCycleSubjectCoef(s.name, +s.coef - 1)"
+                                [disabled]="+s.coef <= 1">−
+                        </button>
                         <span class="coef-val">{{ s.coef }}</span>
-                        <button class="coef-btn" (click)="updateCycleSubjectCoef(s.name, +s.coef + 1)" [disabled]="+s.coef >= 10">+</button>
+                        <button class="coef-btn" (click)="updateCycleSubjectCoef(s.name, +s.coef + 1)"
+                                [disabled]="+s.coef >= 10">+
+                        </button>
                       </div>
-                      <button class="btn-icon-del" (click)="removeCycleSubject(s.name)" [attr.aria-label]="'Supprimer ' + s.name">
+                      <button class="btn-icon-del" (click)="removeCycleSubject(s.name)"
+                              [attr.aria-label]="'Supprimer ' + s.name">
                         <lucide-icon [name]="Trash2" [size]="13"></lucide-icon>
                       </button>
                     </div>
@@ -432,7 +472,8 @@
 
           <!-- Actions -->
           <div class="year-editor-actions">
-            <app-fw-button variant="primary" [icon]="Save" [loading]="isCycleOverrideSaving()" (click)="saveCycleOverride()">
+            <app-fw-button variant="primary" [icon]="Save" [loading]="isCycleOverrideSaving()"
+                           (click)="saveCycleOverride()">
               Publier l'override
             </app-fw-button>
           </div>
@@ -445,7 +486,9 @@
         <div class="year-override-editor">
 
           <div class="year-editor-header">
-            <div class="year-icon"><lucide-icon [name]="GraduationCap" [size]="20"></lucide-icon></div>
+            <div class="year-icon">
+              <lucide-icon [name]="GraduationCap" [size]="20"></lucide-icon>
+            </div>
             <div>
               <h3>Override — {{ selectedLevelName() }}</h3>
               <p>Règles d'inscription spécifiques à ce niveau.</p>
@@ -477,14 +520,17 @@
                 [attr.aria-checked]="levelOverrideForm().active"
                 aria-label="Ouvrir ou fermer ce niveau aux inscriptions"
                 (click)="updateLevelOverrideField('active', !levelOverrideForm().active)">
-                <div class="track"><div class="thumb"></div></div>
+                <div class="track">
+                  <div class="thumb"></div>
+                </div>
               </button>
             </div>
           </div>
 
           <!-- Plafond inscriptions -->
           <div class="editor-section">
-            <div class="section-label">Plafond de nouvelles inscriptions <span class="label-hint">(laisser vide = illimité)</span></div>
+            <div class="section-label">Plafond de nouvelles inscriptions <span class="label-hint">(laisser vide = illimité)</span>
+            </div>
             <div class="date-range-row">
               <div class="date-field">
                 <label>Nb max</label>
@@ -492,7 +538,8 @@
                        (ngModelChange)="updateLevelOverrideField('maxNewEnrollments', $event || null)"
                        class="date-input" min="0" placeholder="∞">
               </div>
-              <span class="date-hint">Nouvelles inscriptions autorisées sur ce niveau avant fermeture automatique.</span>
+              <span
+                class="date-hint">Nouvelles inscriptions autorisées sur ce niveau avant fermeture automatique.</span>
             </div>
           </div>
 
@@ -513,7 +560,9 @@
               </div>
               <div *ngFor="let doc of levelDocsList()" class="doc-row">
                 <div class="doc-name-cell">
-                  <div class="doc-icon"><lucide-icon [name]="FileText" [size]="15"></lucide-icon></div>
+                  <div class="doc-icon">
+                    <lucide-icon [name]="FileText" [size]="15"></lucide-icon>
+                  </div>
                   <span class="doc-name-text">{{ doc.name }}</span>
                 </div>
                 <code class="doc-code">{{ doc.code }}</code>
@@ -525,11 +574,14 @@
                     [attr.aria-checked]="doc.mandatory"
                     [attr.aria-label]="'Document ' + doc.name + ' obligatoire'"
                     (click)="updateLevelDocMandatory(doc.code, !doc.mandatory)">
-                    <div class="track"><div class="thumb"></div></div>
+                    <div class="track">
+                      <div class="thumb"></div>
+                    </div>
                   </button>
                   <span [class.text-required]="doc.mandatory">{{ doc.mandatory ? 'Oui' : 'Non' }}</span>
                 </div>
-                <button class="btn-icon-del" (click)="removeLevelDoc(doc.code)" [attr.aria-label]="'Supprimer ' + doc.name">
+                <button class="btn-icon-del" (click)="removeLevelDoc(doc.code)"
+                        [attr.aria-label]="'Supprimer ' + doc.name">
                   <lucide-icon [name]="Trash2" [size]="13"></lucide-icon>
                 </button>
               </div>
@@ -560,7 +612,9 @@
                 [attr.aria-checked]="levelAssessmentEnabled()"
                 aria-label="Activer une évaluation spécifique pour ce niveau"
                 (click)="toggleLevelAssessmentOverride()">
-                <div class="track"><div class="thumb"></div></div>
+                <div class="track">
+                  <div class="thumb"></div>
+                </div>
               </button>
             </div>
 
@@ -569,7 +623,9 @@
                 <div class="assessment-type-grid">
                   <button *ngFor="let t of assessmentTypes" class="type-card"
                           [class.active]="aLevel.type === t.value" (click)="updateLevelAssessmentType(t.value)">
-                    <div class="type-icon"><lucide-icon [name]="t.icon" [size]="20"></lucide-icon></div>
+                    <div class="type-icon">
+                      <lucide-icon [name]="t.icon" [size]="20"></lucide-icon>
+                    </div>
                     <span class="type-name">{{ t.label }}</span>
                     <span class="type-desc">{{ t.desc }}</span>
                     <div class="type-check" *ngIf="aLevel.type === t.value">
@@ -589,20 +645,27 @@
                   <div class="subject-add-row">
                     <input type="text" #lvlSubjectInput placeholder="Ex : Mathématiques" class="subject-input"
                            (keyup.enter)="addLevelSubject(lvlSubjectInput)">
-                    <app-fw-button variant="tertiary" size="sm" [icon]="Plus" (click)="addLevelSubject(lvlSubjectInput)">
+                    <app-fw-button variant="tertiary" size="sm" [icon]="Plus"
+                                   (click)="addLevelSubject(lvlSubjectInput)">
                       Ajouter
                     </app-fw-button>
                   </div>
                   <div class="subjects-table" *ngIf="levelAssessmentSubjectsList().length > 0; else noLvlSubjects">
-                    <div class="subjects-header"><span>Matière</span><span class="text-center">Coefficient</span><span></span></div>
+                    <div class="subjects-header"><span>Matière</span><span
+                      class="text-center">Coefficient</span><span></span></div>
                     <div *ngFor="let s of levelAssessmentSubjectsList()" class="subject-row">
                       <span class="subject-name">{{ s.name }}</span>
                       <div class="coef-cell">
-                        <button class="coef-btn" (click)="updateLevelSubjectCoef(s.name, +s.coef - 1)" [disabled]="+s.coef <= 1">−</button>
+                        <button class="coef-btn" (click)="updateLevelSubjectCoef(s.name, +s.coef - 1)"
+                                [disabled]="+s.coef <= 1">−
+                        </button>
                         <span class="coef-val">{{ s.coef }}</span>
-                        <button class="coef-btn" (click)="updateLevelSubjectCoef(s.name, +s.coef + 1)" [disabled]="+s.coef >= 10">+</button>
+                        <button class="coef-btn" (click)="updateLevelSubjectCoef(s.name, +s.coef + 1)"
+                                [disabled]="+s.coef >= 10">+
+                        </button>
                       </div>
-                      <button class="btn-icon-del" (click)="removeLevelSubject(s.name)" [attr.aria-label]="'Supprimer ' + s.name">
+                      <button class="btn-icon-del" (click)="removeLevelSubject(s.name)"
+                              [attr.aria-label]="'Supprimer ' + s.name">
                         <lucide-icon [name]="Trash2" [size]="13"></lucide-icon>
                       </button>
                     </div>
@@ -620,7 +683,8 @@
 
           <!-- Actions -->
           <div class="year-editor-actions">
-            <app-fw-button variant="primary" [icon]="Save" [loading]="isLevelOverrideSaving()" (click)="saveLevelOverride()">
+            <app-fw-button variant="primary" [icon]="Save" [loading]="isLevelOverrideSaving()"
+                           (click)="saveLevelOverride()">
               Publier l'override
             </app-fw-button>
           </div>
@@ -628,118 +692,108 @@
         </div>
       </ng-container>
 
-      <!-- ══════════ TAB : PILLARS (Accordion) ══════════ -->
+      <!-- ══════════ TAB : PILLARS (FORMULAIRE) ══════════ -->
       <ng-container *ngIf="activeTab() === 'PILLARS' && currentScope() === 'GLOBAL'">
-        <div class="pillars-accordion">
+        <div class="pillars-editor animate-in fade-in">
+          
+          <!-- Sous-navigation (Niveau 2) -->
+          <div class="pillar-tabs-nav">
+            <app-fw-tabs
+              [tabs]="pillarTabs"
+              [activeTabId]="activePillarId()"
+              (tabChange)="activePillarId.set($event)"
+              density="compact"
+            ></app-fw-tabs>
+          </div>
 
-          <div *ngFor="let p of systemPillars"
-               class="pillar-accordion-item"
-               [class.is-off]="!isPillarEnabled(p.key) && p.key !== 'identity'">
+          <!-- Contenu du pilier actif -->
+          <div class="pillar-panel" *ngIf="activePillar()">
 
-            <!-- En-tête accordéon -->
-            <div class="pillar-accordion-header" (click)="togglePillarAccordion(p.key)">
-              <div class="pillar-accordion-icon">
-                <lucide-icon [name]="p.icon" [size]="16"></lucide-icon>
+            <!-- Toggle d'activation (sauf Identité) -->
+            <div class="pillar-enable-row" *ngIf="activePillarId() !== 'identity'">
+              <div class="enable-info">
+                <strong>Activer le pilier « {{ activePillarLabel() }} »</strong>
+                <span>Ajoute cette étape au formulaire d'inscription public.</span>
               </div>
-              <div class="pillar-accordion-title">
-                <span class="pillar-name">{{ p.label }}</span>
-                <span class="pillar-field-count" *ngIf="getPillarCustomFields(p.key).length > 0">
-                  {{ getPillarCustomFields(p.key).length }} champ(s) perso
-                </span>
-              </div>
-
-              <!-- Toggle enabled (sauf Identité) -->
-              <button *ngIf="p.key !== 'identity'"
+              <button
                 role="switch"
-                class="toggle-switch sm pillar-inline-toggle"
-                [class.on]="isPillarEnabled(p.key)"
-                [attr.aria-checked]="isPillarEnabled(p.key)"
-                [attr.aria-label]="'Activer le pilier ' + p.label"
-                (click)="$event.stopPropagation(); togglePillarEnabled(p.key)">
+                class="toggle-switch lg"
+                [class.on]="isPillarEnabled(activePillarId())"
+                [attr.aria-checked]="isPillarEnabled(activePillarId())"
+                (click)="togglePillarEnabled(activePillarId())">
                 <div class="track"><div class="thumb"></div></div>
               </button>
-
-              <lucide-icon
-                [name]="ChevronDown"
-                [size]="16"
-                class="accordion-chevron"
-                [class.rotated]="isPillarOpen(p.key)">
-              </lucide-icon>
             </div>
 
-            <!-- Corps accordéon -->
-            <div class="pillar-accordion-body" *ngIf="isPillarOpen(p.key)">
-
-              <!-- Pilier désactivé -->
-              <div class="pillar-disabled-hint" *ngIf="!isPillarEnabled(p.key) && p.key !== 'identity'">
-                <lucide-icon [name]="Lock" [size]="14"></lucide-icon>
-                <span>Ce pilier est désactivé. Activez-le pour configurer ses champs.</span>
-              </div>
-
-              <!-- Contenu si pilier actif -->
-              <ng-container *ngIf="isPillarEnabled(p.key) || p.key === 'identity'">
-
-                <!-- Champs système -->
-                <section class="pillar-section" *ngIf="getPillarCoreFields(p.key).length > 0">
-                  <div class="pillar-section-header">
-                    <div class="header-row">
-                      <div class="icon-tag lock"><lucide-icon [name]="Lock" [size]="11"></lucide-icon></div>
-                      <div>
-                        <h4>Champs système</h4>
-                        <p>Renommez les libellés affichés sans modifier la structure.</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="core-fields-grid">
-                    <div *ngFor="let field of getPillarCoreFields(p.key)" class="core-field-card">
-                      <span class="field-key">{{ field.name }}</span>
-                      <input type="text" [value]="field.label"
-                             (change)="updateCoreFieldLabel(field.name, $any($event.target).value, p.key)"
-                             class="field-label-input" placeholder="Libellé affiché…">
-                    </div>
-                  </div>
-                </section>
-
-                <!-- Champs personnalisés -->
-                <section class="pillar-section">
-                  <div class="pillar-section-header">
-                    <div class="header-row">
-                      <div class="icon-tag custom"><lucide-icon [name]="Plus" [size]="11"></lucide-icon></div>
-                      <div>
-                        <h4>Champs personnalisés</h4>
-                        <p>Questions spécifiques à votre établissement.</p>
-                      </div>
-                    </div>
-                    <app-fw-button variant="secondary" size="sm" [icon]="Plus" (click)="addCustomField(p.key)">
-                      Ajouter
-                    </app-fw-button>
-                  </div>
-                  <div class="custom-fields-list">
-                    <div *ngFor="let f of getPillarCustomFields(p.key)" class="custom-field-row">
-                      <span class="field-type-chip" [attr.data-type]="f.type">{{ f.type }}</span>
-                      <div class="field-info">
-                        <span class="field-label">{{ f.label }}</span>
-                        <span class="field-name-mono">{{ f.name }}</span>
-                      </div>
-                      <span class="mandatory-chip" [class.required]="f.mandatory">
-                        {{ f.mandatory ? 'Requis' : 'Optionnel' }}
-                      </span>
-                      <button *ngIf="!f.preset" class="btn-icon-del" (click)="removeCustomField(f.name, p.key)" [attr.aria-label]="'Supprimer le champ ' + f.name">
-                        <lucide-icon [name]="Trash2" [size]="13"></lucide-icon>
-                      </button>
-                      <div *ngIf="f.preset" class="btn-lock" title="Champ système — non supprimable">
-                        <lucide-icon [name]="Lock" [size]="13"></lucide-icon>
-                      </div>
-                    </div>
-                    <div *ngIf="getPillarCustomFields(p.key).length === 0" class="empty-custom-hint">
-                      <lucide-icon [name]="Info" [size]="16"></lucide-icon>
-                      <span>Aucun champ personnalisé — cliquez sur « Ajouter » pour en créer un.</span>
-                    </div>
-                  </div>
-                </section>
-
-              </ng-container>
+            <!-- Message si pilier désactivé -->
+            <div class="pillar-disabled-hint" *ngIf="!isPillarEnabled(activePillarId()) && activePillarId() !== 'identity'">
+              <lucide-icon [name]="Lock" [size]="14"></lucide-icon>
+              <span>Ce pilier est désactivé. Activez-le pour configurer ses champs.</span>
             </div>
+
+            <!-- Contenu si pilier actif -->
+            <ng-container *ngIf="isPillarEnabled(activePillarId()) || activePillarId() === 'identity'">
+              
+              <!-- Champs système -->
+              <section class="pillar-section" *ngIf="activePillarCoreFields().length > 0">
+                <div class="pillar-section-header">
+                  <div class="header-row">
+                    <div class="icon-tag lock"><lucide-icon [name]="Lock" [size]="11"></lucide-icon></div>
+                    <div>
+                      <h4>Champs système</h4>
+                      <p>Renommez les libellés affichés sans modifier la structure.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="core-fields-grid">
+                  <div *ngFor="let field of activePillarCoreFields()" class="core-field-card">
+                    <span class="field-key">{{ field.name }}</span>
+                    <input type="text" [value]="field.label"
+                           (change)="updateCoreFieldLabel(field.name, $any($event.target).value)"
+                           class="field-label-input" placeholder="Libellé affiché…">
+                  </div>
+                </div>
+              </section>
+
+              <!-- Champs personnalisés -->
+              <section class="pillar-section">
+                <div class="pillar-section-header">
+                  <div class="header-row">
+                    <div class="icon-tag custom"><lucide-icon [name]="Plus" [size]="11"></lucide-icon></div>
+                    <div>
+                      <h4>Champs personnalisés</h4>
+                      <p>Questions spécifiques à votre établissement.</p>
+                    </div>
+                  </div>
+                  <app-fw-button variant="secondary" size="sm" [icon]="Plus" (click)="addCustomField()">
+                    Ajouter
+                  </app-fw-button>
+                </div>
+
+                <div class="custom-fields-list">
+                  <div *ngFor="let f of activePillarCustomFields()" class="custom-field-row">
+                    <span class="field-type-chip" [attr.data-type]="f.type">{{ f.type }}</span>
+                    <div class="field-info">
+                      <span class="field-label">{{ f.label }}</span>
+                      <span class="field-name-mono">{{ f.name }}</span>
+                    </div>
+                    <span class="mandatory-chip" [class.required]="f.mandatory">
+                      {{ f.mandatory ? 'Requis' : 'Optionnel' }}
+                    </span>
+                    <button *ngIf="!f.preset" class="btn-icon-del" (click)="removeCustomField(f.name)" title="Supprimer">
+                      <lucide-icon [name]="Trash2" [size]="13"></lucide-icon>
+                    </button>
+                    <div *ngIf="f.preset" class="btn-lock" title="Champ système — non supprimable">
+                      <lucide-icon [name]="Lock" [size]="13"></lucide-icon>
+                    </div>
+                  </div>
+                  <div *ngIf="activePillarCustomFields().length === 0" class="empty-custom-hint">
+                    <lucide-icon [name]="Info" [size]="16"></lucide-icon>
+                    <span>Aucun champ personnalisé — cliquez sur « Ajouter » pour en créer un.</span>
+                  </div>
+                </div>
+              </section>
+            </ng-container>
 
           </div>
         </div>
@@ -767,7 +821,9 @@
             </div>
             <div *ngFor="let doc of activeChecklist()" class="doc-row">
               <div class="doc-name-cell">
-                <div class="doc-icon"><lucide-icon [name]="FileText" [size]="15"></lucide-icon></div>
+                <div class="doc-icon">
+                  <lucide-icon [name]="FileText" [size]="15"></lucide-icon>
+                </div>
                 <input type="text" [value]="doc.name"
                        (change)="updateDocumentName(doc.code, $any($event.target).value)"
                        class="doc-name-input" placeholder="Nom du document…">
@@ -781,11 +837,14 @@
                   [attr.aria-checked]="doc.mandatory"
                   [attr.aria-label]="'Document ' + doc.name + ' obligatoire'"
                   (click)="updateDocumentMandatory(doc.code, !doc.mandatory)">
-                  <div class="track"><div class="thumb"></div></div>
+                  <div class="track">
+                    <div class="thumb"></div>
+                  </div>
                 </button>
                 <span [class.text-required]="doc.mandatory">{{ doc.mandatory ? 'Oui' : 'Non' }}</span>
               </div>
-              <button class="btn-icon-del" (click)="removeDocumentType(doc.code)" [attr.aria-label]="'Supprimer ' + doc.name">
+              <button class="btn-icon-del" (click)="removeDocumentType(doc.code)"
+                      [attr.aria-label]="'Supprimer ' + doc.name">
                 <lucide-icon [name]="Trash2" [size]="13"></lucide-icon>
               </button>
             </div>
@@ -812,7 +871,9 @@
             <div class="assessment-type-grid">
               <button *ngFor="let t of assessmentTypes" class="type-card"
                       [class.active]="aCfg.type === t.value" (click)="updateAssessmentType(t.value)">
-                <div class="type-icon"><lucide-icon [name]="t.icon" [size]="20"></lucide-icon></div>
+                <div class="type-icon">
+                  <lucide-icon [name]="t.icon" [size]="20"></lucide-icon>
+                </div>
                 <span class="type-name">{{ t.label }}</span>
                 <span class="type-desc">{{ t.desc }}</span>
                 <div class="type-check" *ngIf="aCfg.type === t.value">
@@ -852,9 +913,13 @@
               <div *ngFor="let s of assessmentSubjectsList()" class="subject-row">
                 <span class="subject-name">{{ s.name }}</span>
                 <div class="coef-cell">
-                  <button class="coef-btn" (click)="updateSubjectCoef(s.name, +s.coef - 1)" [disabled]="+s.coef <= 1">−</button>
+                  <button class="coef-btn" (click)="updateSubjectCoef(s.name, +s.coef - 1)" [disabled]="+s.coef <= 1">
+                    −
+                  </button>
                   <span class="coef-val">{{ s.coef }}</span>
-                  <button class="coef-btn" (click)="updateSubjectCoef(s.name, +s.coef + 1)" [disabled]="+s.coef >= 10">+</button>
+                  <button class="coef-btn" (click)="updateSubjectCoef(s.name, +s.coef + 1)" [disabled]="+s.coef >= 10">
+                    +
+                  </button>
                 </div>
                 <button class="btn-icon-del" (click)="removeSubject(s.name)" [attr.aria-label]="'Supprimer ' + s.name">
                   <lucide-icon [name]="Trash2" [size]="13"></lucide-icon>
@@ -893,7 +958,9 @@
                 [attr.aria-checked]="servicesEnabled()"
                 aria-label="Activer ou désactiver le module services"
                 (click)="toggleServicesEnabled()">
-                <div class="track"><div class="thumb"></div></div>
+                <div class="track">
+                  <div class="thumb"></div>
+                </div>
               </button>
             </div>
           </div>
@@ -918,7 +985,9 @@
               </div>
               <div *ngFor="let svc of activeServices()" class="service-row">
                 <div class="service-name-cell">
-                  <div class="service-icon"><lucide-icon [name]="Wrench" [size]="14"></lucide-icon></div>
+                  <div class="service-icon">
+                    <lucide-icon [name]="Wrench" [size]="14"></lucide-icon>
+                  </div>
                   <div>
                     <span class="svc-label">{{ svc.label }}</span>
                     <code class="svc-code">{{ svc.code }}</code>
@@ -936,11 +1005,14 @@
                     [attr.aria-checked]="svc.mandatory"
                     [attr.aria-label]="'Service ' + svc.label + ' obligatoire'"
                     (click)="updateServiceMandatory(svc.code, !svc.mandatory)">
-                    <div class="track"><div class="thumb"></div></div>
+                    <div class="track">
+                      <div class="thumb"></div>
+                    </div>
                   </button>
                   <span [class.text-required]="svc.mandatory">{{ svc.mandatory ? 'Oui' : 'Non' }}</span>
                 </div>
-                <button *ngIf="!svc.preset" class="btn-icon-del" (click)="removeService(svc.code)" [attr.aria-label]="'Supprimer ' + svc.label">
+                <button *ngIf="!svc.preset" class="btn-icon-del" (click)="removeService(svc.code)"
+                        [attr.aria-label]="'Supprimer ' + svc.label">
                   <lucide-icon [name]="Trash2" [size]="13"></lucide-icon>
                 </button>
                 <div *ngIf="svc.preset" class="btn-lock" title="Service système — non supprimable">
@@ -984,7 +1056,9 @@
                 [attr.aria-checked]="cfg.portalActive"
                 aria-label="Mettre le portail en ligne ou hors ligne"
                 (click)="togglePortal()">
-                <div class="track"><div class="thumb"></div></div>
+                <div class="track">
+                  <div class="thumb"></div>
+                </div>
               </button>
             </div>
           </div>
@@ -1004,7 +1078,9 @@
           <div class="editor-section">
             <div class="section-label danger">Zone de maintenance</div>
             <div class="danger-block">
-              <div class="danger-icon"><lucide-icon [name]="AlertTriangle" [size]="18"></lucide-icon></div>
+              <div class="danger-icon">
+                <lucide-icon [name]="AlertTriangle" [size]="18"></lucide-icon>
+              </div>
               <div class="danger-text">
                 <strong>Réinitialisation d'usine</strong>
                 <span>Supprime toutes les personnalisations et restaure les standards Feewi. Irréversible.</span>
