@@ -628,94 +628,119 @@
         </div>
       </ng-container>
 
-      <!-- ══════════ TAB : PILLARS ══════════ -->
+      <!-- ══════════ TAB : PILLARS (Accordion) ══════════ -->
       <ng-container *ngIf="activeTab() === 'PILLARS' && currentScope() === 'GLOBAL'">
-        <div class="pillars-editor">
+        <div class="pillars-accordion">
 
-          <div class="pillar-nav">
-            <button *ngFor="let p of systemPillars" class="pillar-nav-btn"
-                    [class.active]="activePillarKey() === p.key" (click)="activePillarKey.set(p.key)">
-              <lucide-icon [name]="p.icon" [size]="15"></lucide-icon>
-              <span>{{ p.label }}</span>
-              <span class="pillar-off-badge" *ngIf="!isPillarEnabled(p.key)">off</span>
-            </button>
-          </div>
+          <div *ngFor="let p of systemPillars"
+               class="pillar-accordion-item"
+               [class.is-off]="!isPillarEnabled(p.key) && p.key !== 'identity'">
 
-          <div class="pillar-panel" *ngIf="activePillar()">
-
-            <div class="pillar-enable-row" *ngIf="activePillarKey() !== 'identity'">
-              <div class="enable-info">
-                <strong>Activer le pilier « {{ activePillarLabel() }} »</strong>
-                <span>Ajoute cette étape au formulaire d'inscription public.</span>
+            <!-- En-tête accordéon -->
+            <div class="pillar-accordion-header" (click)="togglePillarAccordion(p.key)">
+              <div class="pillar-accordion-icon">
+                <lucide-icon [name]="p.icon" [size]="16"></lucide-icon>
               </div>
-              <button
+              <div class="pillar-accordion-title">
+                <span class="pillar-name">{{ p.label }}</span>
+                <span class="pillar-field-count" *ngIf="getPillarCustomFields(p.key).length > 0">
+                  {{ getPillarCustomFields(p.key).length }} champ(s) perso
+                </span>
+              </div>
+
+              <!-- Toggle enabled (sauf Identité) -->
+              <button *ngIf="p.key !== 'identity'"
                 role="switch"
-                class="toggle-switch lg"
-                [class.on]="isPillarEnabled(activePillarKey())"
-                [attr.aria-checked]="isPillarEnabled(activePillarKey())"
-                [attr.aria-label]="'Activer le pilier ' + activePillarLabel()"
-                (click)="togglePillarEnabled(activePillarKey())">
+                class="toggle-switch sm pillar-inline-toggle"
+                [class.on]="isPillarEnabled(p.key)"
+                [attr.aria-checked]="isPillarEnabled(p.key)"
+                [attr.aria-label]="'Activer le pilier ' + p.label"
+                (click)="$event.stopPropagation(); togglePillarEnabled(p.key)">
                 <div class="track"><div class="thumb"></div></div>
               </button>
+
+              <lucide-icon
+                [name]="ChevronDown"
+                [size]="16"
+                class="accordion-chevron"
+                [class.rotated]="isPillarOpen(p.key)">
+              </lucide-icon>
             </div>
 
-            <section class="pillar-section" *ngIf="activePillarCoreFields().length > 0">
-              <div class="pillar-section-header">
-                <div class="header-row">
-                  <div class="icon-tag lock"><lucide-icon [name]="Lock" [size]="11"></lucide-icon></div>
-                  <div>
-                    <h4>Champs système</h4>
-                    <p>Renommez les libellés affichés sans modifier la structure.</p>
-                  </div>
-                </div>
-              </div>
-              <div class="core-fields-grid">
-                <div *ngFor="let field of activePillarCoreFields()" class="core-field-card">
-                  <span class="field-key">{{ field.name }}</span>
-                  <input type="text" [value]="field.label"
-                         (change)="updateCoreFieldLabel(field.name, $any($event.target).value)"
-                         class="field-label-input" placeholder="Libellé affiché…">
-                </div>
-              </div>
-            </section>
+            <!-- Corps accordéon -->
+            <div class="pillar-accordion-body" *ngIf="isPillarOpen(p.key)">
 
-            <section class="pillar-section">
-              <div class="pillar-section-header">
-                <div class="header-row">
-                  <div class="icon-tag custom"><lucide-icon [name]="Plus" [size]="11"></lucide-icon></div>
-                  <div>
-                    <h4>Champs personnalisés</h4>
-                    <p>Questions spécifiques à votre établissement.</p>
-                  </div>
-                </div>
-                <app-fw-button variant="secondary" size="sm" [icon]="Plus" (click)="addCustomField()">
-                  Ajouter
-                </app-fw-button>
+              <!-- Pilier désactivé -->
+              <div class="pillar-disabled-hint" *ngIf="!isPillarEnabled(p.key) && p.key !== 'identity'">
+                <lucide-icon [name]="Lock" [size]="14"></lucide-icon>
+                <span>Ce pilier est désactivé. Activez-le pour configurer ses champs.</span>
               </div>
 
-              <div class="custom-fields-list">
-                <div *ngFor="let f of activePillarCustomFields()" class="custom-field-row">
-                  <span class="field-type-chip" [attr.data-type]="f.type">{{ f.type }}</span>
-                  <div class="field-info">
-                    <span class="field-label">{{ f.label }}</span>
-                    <span class="field-name-mono">{{ f.name }}</span>
+              <!-- Contenu si pilier actif -->
+              <ng-container *ngIf="isPillarEnabled(p.key) || p.key === 'identity'">
+
+                <!-- Champs système -->
+                <section class="pillar-section" *ngIf="getPillarCoreFields(p.key).length > 0">
+                  <div class="pillar-section-header">
+                    <div class="header-row">
+                      <div class="icon-tag lock"><lucide-icon [name]="Lock" [size]="11"></lucide-icon></div>
+                      <div>
+                        <h4>Champs système</h4>
+                        <p>Renommez les libellés affichés sans modifier la structure.</p>
+                      </div>
+                    </div>
                   </div>
-                  <span class="mandatory-chip" [class.required]="f.mandatory">
-                    {{ f.mandatory ? 'Requis' : 'Optionnel' }}
-                  </span>
-                  <button *ngIf="!f.preset" class="btn-icon-del" (click)="removeCustomField(f.name)" [attr.aria-label]="'Supprimer le champ ' + f.name">
-                    <lucide-icon [name]="Trash2" [size]="13"></lucide-icon>
-                  </button>
-                  <div *ngIf="f.preset" class="btn-lock" title="Champ système — non supprimable">
-                    <lucide-icon [name]="Lock" [size]="13"></lucide-icon>
+                  <div class="core-fields-grid">
+                    <div *ngFor="let field of getPillarCoreFields(p.key)" class="core-field-card">
+                      <span class="field-key">{{ field.name }}</span>
+                      <input type="text" [value]="field.label"
+                             (change)="updateCoreFieldLabel(field.name, $any($event.target).value, p.key)"
+                             class="field-label-input" placeholder="Libellé affiché…">
+                    </div>
                   </div>
-                </div>
-                <div *ngIf="activePillarCustomFields().length === 0" class="empty-custom-hint">
-                  <lucide-icon [name]="Info" [size]="16"></lucide-icon>
-                  <span>Aucun champ personnalisé — cliquez sur « Ajouter » pour en créer un.</span>
-                </div>
-              </div>
-            </section>
+                </section>
+
+                <!-- Champs personnalisés -->
+                <section class="pillar-section">
+                  <div class="pillar-section-header">
+                    <div class="header-row">
+                      <div class="icon-tag custom"><lucide-icon [name]="Plus" [size]="11"></lucide-icon></div>
+                      <div>
+                        <h4>Champs personnalisés</h4>
+                        <p>Questions spécifiques à votre établissement.</p>
+                      </div>
+                    </div>
+                    <app-fw-button variant="secondary" size="sm" [icon]="Plus" (click)="addCustomField(p.key)">
+                      Ajouter
+                    </app-fw-button>
+                  </div>
+                  <div class="custom-fields-list">
+                    <div *ngFor="let f of getPillarCustomFields(p.key)" class="custom-field-row">
+                      <span class="field-type-chip" [attr.data-type]="f.type">{{ f.type }}</span>
+                      <div class="field-info">
+                        <span class="field-label">{{ f.label }}</span>
+                        <span class="field-name-mono">{{ f.name }}</span>
+                      </div>
+                      <span class="mandatory-chip" [class.required]="f.mandatory">
+                        {{ f.mandatory ? 'Requis' : 'Optionnel' }}
+                      </span>
+                      <button *ngIf="!f.preset" class="btn-icon-del" (click)="removeCustomField(f.name, p.key)" [attr.aria-label]="'Supprimer le champ ' + f.name">
+                        <lucide-icon [name]="Trash2" [size]="13"></lucide-icon>
+                      </button>
+                      <div *ngIf="f.preset" class="btn-lock" title="Champ système — non supprimable">
+                        <lucide-icon [name]="Lock" [size]="13"></lucide-icon>
+                      </div>
+                    </div>
+                    <div *ngIf="getPillarCustomFields(p.key).length === 0" class="empty-custom-hint">
+                      <lucide-icon [name]="Info" [size]="16"></lucide-icon>
+                      <span>Aucun champ personnalisé — cliquez sur « Ajouter » pour en créer un.</span>
+                    </div>
+                  </div>
+                </section>
+
+              </ng-container>
+            </div>
+
           </div>
         </div>
       </ng-container>

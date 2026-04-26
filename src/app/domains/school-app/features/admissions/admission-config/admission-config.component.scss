@@ -296,10 +296,23 @@
 
 // ─── TOGGLE SWITCH AS BUTTON (WCAG) ──────────────────────────────────────────
 .toggle-switch {
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
+  position: relative; flex-shrink: 0;
+  width: 36px; height: 20px;
+  border-radius: 999px;
+  background: var(--fw-border);
+  border: none; padding: 0; cursor: pointer;
+  transition: background 0.22s;
+
+  .track { width: 100%; height: 100%; border-radius: 999px; }
+  .thumb {
+    width: 14px; height: 14px; border-radius: 50%;
+    background: white; position: absolute; top: 3px; left: 3px;
+    transition: transform 0.22s;
+  }
+
+  &.on { background: var(--fw-primary); .thumb { transform: translateX(16px); } }
+  &.sm { width: 32px; height: 18px; .thumb { width: 12px; height: 12px; } &.on .thumb { transform: translateX(14px); } }
+
   &:focus-visible {
     outline: 2px solid var(--fw-primary);
     outline-offset: 3px;
@@ -309,3 +322,94 @@
 
 // ─── DOC NAME (non-input variant) ────────────────────────────────────────────
 .doc-name-text { font-size: 0.875rem; font-weight: 500; }
+
+// ─── PILLARS ACCORDION ───────────────────────────────────────────────────────
+.pillars-accordion {
+  display: flex; flex-direction: column; gap: 0.75rem;
+}
+
+.pillar-accordion-item {
+  background: white; border-radius: 20px;
+  box-shadow: var(--fw-shadow-sm);
+  overflow: hidden; transition: opacity 0.2s;
+
+  &.is-off { opacity: 0.6; }
+}
+
+.pillar-accordion-header {
+  display: flex; align-items: center; gap: 0.875rem;
+  padding: 1.25rem 1.5rem; cursor: pointer;
+  user-select: none; transition: background 0.15s;
+
+  &:hover { background: var(--fw-surface-sunken); }
+}
+
+.pillar-accordion-icon {
+  width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+  display: grid; place-items: center;
+  background: var(--fw-primary-alpha); color: var(--fw-primary);
+}
+
+.pillar-accordion-title {
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: 0.625rem;
+
+  .pillar-name { font-size: 0.9375rem; font-weight: 800; color: var(--fw-midnight); }
+
+  .pillar-field-count {
+    font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px;
+    background: var(--fw-primary-alpha); color: var(--fw-primary);
+  }
+}
+
+.pillar-inline-toggle { margin-left: auto; }
+
+.accordion-chevron {
+  color: var(--fw-text-tertiary); transition: transform 0.25s; flex-shrink: 0;
+  &.rotated { transform: rotate(180deg); }
+}
+
+.pillar-accordion-body {
+  padding: 0 1.5rem 1.5rem;
+  border-top: 1px solid var(--fw-border-subtle);
+}
+
+.pillar-disabled-hint {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 1rem; margin-top: 1rem; border-radius: 12px;
+  background: var(--fw-surface-sunken); color: var(--fw-text-tertiary);
+  font-size: 0.8125rem; font-weight: 500;
+}
+
+.pillar-section { margin-top: 1.25rem; }
+
+.pillar-section-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 0.875rem;
+
+  h4 { font-size: 0.875rem; font-weight: 800; color: var(--fw-midnight); margin: 0; }
+  p  { font-size: 0.8125rem; color: var(--fw-text-tertiary); font-weight: 500; margin: 2px 0 0; }
+}
+
+.header-row { display: flex; align-items: flex-start; gap: 0.625rem; }
+
+.icon-tag {
+  width: 24px; height: 24px; border-radius: 6px; flex-shrink: 0;
+  display: grid; place-items: center;
+  &.lock   { background: var(--fw-surface-sunken); color: var(--fw-text-tertiary); }
+  &.custom { background: var(--fw-primary-alpha); color: var(--fw-primary); }
+}
+
+.custom-fields-list { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem; }
+
+.empty-custom-hint {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.875rem 1rem; border-radius: 12px;
+  background: var(--fw-surface-sunken); color: var(--fw-text-tertiary);
+  font-size: 0.8125rem; font-weight: 500;
+}
+
+.btn-lock {
+  width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+  display: grid; place-items: center;
+  background: var(--fw-surface-sunken); color: var(--fw-text-tertiary);
+}

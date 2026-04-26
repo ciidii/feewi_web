@@ -5,6 +5,7 @@ import {
   AlertTriangle,
   Calendar,
   CalendarClock,
+  ChevronDown,
   ClipboardList,
   Eye,
   FileText,
@@ -98,6 +99,7 @@ export class AdmissionConfigComponent implements OnInit {
   selectedYearId = signal<string | null>(null);
   activeTab = signal<ConfigTab>('PILLARS');
   activePillarKey = signal<string>('identity');
+  openPillars = signal<Set<string>>(new Set(['identity', 'medical', 'family', 'schooling']));
 
   // Onglets intégrés au Shell (visibles uniquement en scope GLOBAL)
   readonly admissionTabs: FwTab[] = [
@@ -295,6 +297,34 @@ export class AdmissionConfigComponent implements OnInit {
     const cfg = this.config();
     if (!cfg) return true;
     return (cfg.schema as any)[key]?.enabled !== false;
+  }
+
+  isPillarOpen(key: string): boolean { return this.openPillars().has(key); }
+
+  togglePillarAccordion(key: string) {
+    this.openPillars.update(set => {
+      const next = new Set(set);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return next;
+    });
+  }
+
+  getPillarCoreFields(key: string): {name: string; label: string}[] {
+    const cfg = this.config();
+    if (!cfg) return [];
+    const pillar = (cfg.schema as any)[key];
+    if (!pillar) return [];
+    const controls = key === 'family' ? pillar.guardianCoreFieldControls : pillar.coreFieldControls;
+    if (!controls) return [];
+    return Object.entries(controls as Record<string, any>).map(([name, ctrl]) => ({name, label: ctrl.label as string}));
+  }
+
+  getPillarCustomFields(key: string): FieldConfig[] {
+    const cfg = this.config();
+    if (!cfg) return [];
+    const pillar = (cfg.schema as any)[key];
+    if (!pillar) return [];
+    return (key === 'family' ? pillar.guardianCustomFields : pillar.customFields) || [];
   }
 
   // --- LIFECYCLE ---
@@ -672,15 +702,15 @@ export class AdmissionConfigComponent implements OnInit {
 
   // --- PILLAR METHODS ---
 
-  updateCoreFieldLabel(fieldName: string, label: string) {
+  updateCoreFieldLabel(fieldName: string, label: string, key?: string) {
     const current = this.config();
     if (!current) return;
-    const key = this.activePillarKey();
-    const pillar = {...(current.schema as any)[key]};
-    const ctrlKey = key === 'family' ? 'guardianCoreFieldControls' : 'coreFieldControls';
+    const k = key ?? this.activePillarKey();
+    const pillar = {...(current.schema as any)[k]};
+    const ctrlKey = k === 'family' ? 'guardianCoreFieldControls' : 'coreFieldControls';
     if (!pillar[ctrlKey]) return;
     pillar[ctrlKey] = {...pillar[ctrlKey], [fieldName]: {...pillar[ctrlKey][fieldName], label}};
-    this.config.set({...current, schema: {...current.schema, [key]: pillar}});
+    this.config.set({...current, schema: {...current.schema, [k]: pillar}});
   }
 
   togglePillarEnabled(key: string) {
@@ -690,27 +720,27 @@ export class AdmissionConfigComponent implements OnInit {
     this.config.set({...current, schema: {...current.schema, [key]: {...pillar, enabled: !pillar?.enabled}}});
   }
 
-  addCustomField() {
+  addCustomField(key?: string) {
     this.dialog.open(CustomFieldFormComponent, {width: '500px', panelClass: 'feewi-dialog-panel'})
       .afterClosed().subscribe(result => {
         if (!result || !this.config()) return;
         const current = this.config()!;
-        const key = this.activePillarKey();
-        const pillar = {...(current.schema as any)[key]};
-        const cfKey = key === 'family' ? 'guardianCustomFields' : 'customFields';
+        const k = key ?? this.activePillarKey();
+        const pillar = {...(current.schema as any)[k]};
+        const cfKey = k === 'family' ? 'guardianCustomFields' : 'customFields';
         pillar[cfKey] = [...(pillar[cfKey] || []), result];
-        this.config.set({...current, schema: {...current.schema, [key]: pillar}});
+        this.config.set({...current, schema: {...current.schema, [k]: pillar}});
       });
   }
 
-  removeCustomField(fieldName: string) {
+  removeCustomField(fieldName: string, key?: string) {
     const current = this.config();
     if (!current) return;
-    const key = this.activePillarKey();
-    const pillar = {...(current.schema as any)[key]};
-    const cfKey = key === 'family' ? 'guardianCustomFields' : 'customFields';
+    const k = key ?? this.activePillarKey();
+    const pillar = {...(current.schema as any)[k]};
+    const cfKey = k === 'family' ? 'guardianCustomFields' : 'customFields';
     pillar[cfKey] = (pillar[cfKey] || []).filter((f: FieldConfig) => f.name !== fieldName);
-    this.config.set({...current, schema: {...current.schema, [key]: pillar}});
+    this.config.set({...current, schema: {...current.schema, [k]: pillar}});
   }
 
   // --- DOCUMENT METHODS ---
@@ -876,4 +906,5 @@ export class AdmissionConfigComponent implements OnInit {
   readonly FileText = FileText; readonly Hash = Hash; readonly ToggleIcon = ToggleIcon;
   readonly AlertTriangle = AlertTriangle; readonly UserCog = UserCog;
   readonly Calendar = Calendar; readonly CalendarClock = CalendarClock; readonly Wrench = Wrench;
+  readonly ChevronDown = ChevronDown;
 }
