@@ -112,13 +112,21 @@ export class AdmissionConfigComponent implements OnInit {
     {id: 'WORKFLOW', label: 'Paramètres', icon: ShieldCheck}
   ];
 
-  // Onglets Niveau 2 (Interne au Formulaire)
-  readonly pillarTabs: FwTab[] = [
-    {id: 'identity', label: 'Identité', icon: UserCog},
-    {id: 'medical', label: 'Santé', icon: HeartPulse},
-    {id: 'family', label: 'Famille', icon: Users},
-    {id: 'schooling', label: 'Scolarité', icon: School}
-  ];
+  // Onglets Niveau 2 — computed pour afficher le badge "count" des champs perso
+  pillarTabs = computed<FwTab[]>(() => {
+    const cfg = this.config();
+    return this.systemPillars.map(p => {
+      const pillar = cfg ? (cfg.schema as any)[p.key] : null;
+      const cfKey = p.key === 'family' ? 'guardianCustomFields' : 'customFields';
+      const customCount: number = pillar ? ((pillar[cfKey] as FieldConfig[]) || []).length : 0;
+      return {
+        id: p.key,
+        label: p.label,
+        icon: p.icon,
+        count: customCount > 0 ? customCount : undefined
+      };
+    });
+  });
 
   // Year override local form state (isolated from global config)
   yearOverrideForm = signal<YearOverrideConfig>({

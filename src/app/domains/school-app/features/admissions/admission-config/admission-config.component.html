@@ -714,7 +714,7 @@
           <!-- Sous-navigation (Niveau 2) -->
           <div class="pillar-tabs-nav">
             <app-fw-tabs
-              [tabs]="pillarTabs"
+              [tabs]="pillarTabs()"
               [activeTabId]="activePillarId()"
               (tabChange)="activePillarId.set($event)"
               density="compact"
@@ -747,7 +747,7 @@
             </div>
 
             <!-- Contenu si pilier actif -->
-            <ng-container *ngIf="isPillarEnabled(activePillarId()) || activePillarId() === 'identity'">
+            <div class="pillar-content" *ngIf="isPillarEnabled(activePillarId()) || activePillarId() === 'identity'">
 
               <!-- Champs système -->
               <section class="pillar-section" *ngIf="activePillarCoreFields().length > 0">
@@ -808,7 +808,7 @@
                   </div>
                 </div>
               </section>
-            </ng-container>
+            </div>
 
           </div>
         </div>
