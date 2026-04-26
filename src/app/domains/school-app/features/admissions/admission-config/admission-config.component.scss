@@ -878,6 +878,48 @@
   50%       { box-shadow: 0 0 0 8px rgba(245, 158, 11, 0.08); }
 }
 
+// ─── TAB EDITOR WRAPPERS ─────────────────────────────────────────────────────
+.documents-editor,
+.assessment-editor,
+.services-editor,
+.workflow-editor { display: flex; flex-direction: column; gap: 1.5rem; }
+
+// ─── WORKFLOW : canal d'inscription ──────────────────────────────────────────
+.workflow-mode-grid { grid-template-columns: repeat(3, 1fr); }
+
+// ─── WORKFLOW : texte légal ───────────────────────────────────────────────────
+.legal-textarea { min-height: 120px; }
+
+.legal-hint {
+  display: flex; align-items: center; gap: 0.375rem;
+  font-size: 0.75rem; color: var(--fw-text-tertiary); font-weight: 500;
+  margin-top: 0.625rem;
+  lucide-icon { flex-shrink: 0; }
+}
+
+// ─── WORKFLOW : zone dangereuse ───────────────────────────────────────────────
+.danger-zone-card {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 1.5rem;
+  padding: 1.25rem 1.5rem; border-radius: 16px;
+  background: var(--fw-error-bg); border: 1px solid var(--fw-error-border);
+}
+
+.danger-zone-info {
+  display: flex; align-items: flex-start; gap: 0.875rem;
+
+  lucide-icon { color: var(--fw-error); flex-shrink: 0; margin-top: 2px; }
+
+  strong {
+    font-size: 0.9375rem; font-weight: 800; color: var(--fw-midnight);
+    display: block; margin-bottom: 2px;
+  }
+
+  span {
+    font-size: 0.875rem; color: var(--fw-text-secondary); font-weight: 500;
+    line-height: 1.5;
+  }
+}
+
 // ─── PILLARS ACCORDION ───────────────────────────────────────────────────────
 .pillars-accordion {
   display: flex; flex-direction: column; gap: 0.75rem;

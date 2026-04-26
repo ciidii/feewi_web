@@ -1050,6 +1050,69 @@
         </div>
       </ng-container>
 
+      <!-- ══════════ TAB : WORKFLOW (Paramètres) ══════════ -->
+      <ng-container *ngIf="activeTab() === 'WORKFLOW' && currentScope() === 'GLOBAL'">
+        <div class="workflow-editor">
+
+          <!-- Mode d'inscription global -->
+          <div class="editor-section">
+            <div class="section-toolbar flush">
+              <div>
+                <h3>Canal d'inscription</h3>
+                <p>Détermine comment les familles peuvent soumettre un dossier d'admission.</p>
+              </div>
+            </div>
+            <div class="mode-grid workflow-mode-grid">
+              <button *ngFor="let m of registrationModes"
+                      class="mode-card"
+                      [class.active]="cfg.registrationMode === m.value"
+                      (click)="updateRegistrationMode(m.value)">
+                <lucide-icon [name]="m.icon" [size]="22"></lucide-icon>
+                <span class="mode-name">{{ m.label }}</span>
+                <span class="mode-desc">{{ m.desc }}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Texte légal & consentement -->
+          <div class="editor-section">
+            <div class="section-toolbar flush">
+              <div>
+                <h3>Texte de consentement</h3>
+                <p>Affiché en bas du formulaire — les familles doivent l'accepter avant de soumettre.</p>
+              </div>
+            </div>
+            <textarea class="welcome-textarea legal-textarea" rows="5"
+                      [ngModel]="cfg.legalText"
+                      (ngModelChange)="updateLegalText($event)"
+                      placeholder="Ex : En soumettant ce formulaire, vous acceptez que les données saisies soient traitées conformément à notre politique de confidentialité…">
+            </textarea>
+            <p class="legal-hint">
+              <lucide-icon [name]="Info" [size]="12"></lucide-icon>
+              Laisser vide = aucune case de consentement affichée sur le portail.
+            </p>
+          </div>
+
+          <!-- Zone dangereuse -->
+          <div class="editor-section">
+            <div class="section-label danger">Zone dangereuse</div>
+            <div class="danger-zone-card">
+              <div class="danger-zone-info">
+                <lucide-icon [name]="AlertTriangle" [size]="20"></lucide-icon>
+                <div>
+                  <strong>Réinitialisation d'usine</strong>
+                  <span>Supprime toutes vos personnalisations (champs, documents, évaluation) et restaure les standards Feewi. Action irréversible.</span>
+                </div>
+              </div>
+              <app-fw-button variant="danger" size="sm" [icon]="RefreshCw" (click)="resetToSystemDefaults()">
+                Réinitialiser
+              </app-fw-button>
+            </div>
+          </div>
+
+        </div>
+      </ng-container>
+
       </main>
     </app-fw-page-shell>
   </div>

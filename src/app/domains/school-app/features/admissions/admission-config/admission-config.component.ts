@@ -892,6 +892,11 @@ export class AdmissionConfigComponent implements OnInit {
     if (c) this.config.set({...c, registrationMode: mode as any});
   }
 
+  updateLegalText(text: string) {
+    const c = this.config();
+    if (c) this.config.set({...c, legalText: text || null});
+  }
+
   togglePortal() {
     const c = this.config();
     if (!c) return;
