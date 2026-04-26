@@ -57,6 +57,8 @@ import {ServiceFormComponent} from './components/service-form/service-form.compo
 import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
 import {FwTab, FwTabsComponent} from '../../../../../shared/components/tabs/tabs.component';
+import {PageProgressComponent} from '../../../../../shared/components/loader/page-progress.component';
+import {BlockLoaderComponent} from '../../../../../shared/components/loader/block-loader.component';
 
 export type ConfigTab = 'PILLARS' | 'DOCUMENTS' | 'ASSESSMENT' | 'SERVICES' | 'WORKFLOW';
 export type ConfigScope = 'GLOBAL' | 'LEVEL' | 'YEAR' | 'CYCLE';
@@ -71,7 +73,9 @@ export type ConfigScope = 'GLOBAL' | 'LEVEL' | 'YEAR' | 'CYCLE';
     MatDialogModule,
     FwPageShellComponent,
     FwButtonComponent,
-    FwTabsComponent
+    FwTabsComponent,
+    PageProgressComponent,
+    BlockLoaderComponent
   ],
   templateUrl: './admission-config.component.html',
   styleUrls: ['./admission-config.component.scss']
@@ -216,6 +220,15 @@ export class AdmissionConfigComponent implements OnInit {
   isDirty = computed(() => {
     const c = this.config(), i = this.initialConfig();
     return !!(c && i && JSON.stringify(c) !== JSON.stringify(i));
+  });
+
+  shellDescription = computed(() => {
+    switch (this.currentScope()) {
+      case 'YEAR':   return `Surcharge d'année • ${this.selectedYearName()}`;
+      case 'CYCLE':  return `Surcharge de cycle • ${this.selectedCycleName()}`;
+      case 'LEVEL':  return `Surcharge de niveau • ${this.selectedLevelName()}`;
+      default:       return `Configuration de l'expérience d'admission • ${this.activeYear()?.label || '...'}`;
+    }
   });
 
   activePillarKey = computed(() => this.activePillarId());

@@ -77,22 +77,43 @@
   <div class="config-viewport">
     <app-fw-page-shell
       [title]="currentScope() === 'GLOBAL' ? 'Gouvernance du Portail' : 'Surcharge de Configuration'"
-      [description]="'Configuration de l\'expérience d\'admission • ' + (activeYear()?.label || '...')"
+      [description]="shellDescription()"
       [icon]="currentScope() === 'GLOBAL' ? Settings2 : Sparkles"
       [tabs]="currentScope() === 'GLOBAL' ? admissionTabs : []"
       [activeTabId]="activeTab()"
       (tabChange)="activeTab.set($any($event))"
       density="compact"
     >
-      <div actions class="flex items-center gap-3">
-        <div class="portal-status-wrap">
-          <div class="portal-status-pill" [class.online]="cfg.portalActive" (click)="togglePortal()" title="Cliquer pour basculer">
-            <div class="status-dot"></div>
-            <span>{{ cfg.portalActive ? 'Portail en ligne' : 'Portail hors-ligne' }}</span>
+      <!-- Indicateur de chargement / sauvegarde -->
+      <fw-page-progress *ngIf="isLoading() || isSaving()"></fw-page-progress>
+
+      <div actions class="actions-zone">
+        <!-- Scope GLOBAL : status portail + actions globales -->
+        <ng-container *ngIf="currentScope() === 'GLOBAL'">
+          <button class="portal-status-pill"
+            [class.online]="cfg.portalActive"
+            (click)="togglePortal()"
+            [title]="cfg.portalActive ? 'Mettre hors-ligne' : 'Mettre en ligne'">
+            <span class="status-dot"></span>
+            <span>{{ cfg.portalActive ? 'En ligne' : 'Hors-ligne' }}</span>
+          </button>
+          <app-fw-button variant="tertiary" size="md" [icon]="Eye" (click)="previewPortal()">Simulateur</app-fw-button>
+          <app-fw-button variant="primary" size="md" [icon]="Save" [loading]="isSaving()" [disabled]="!isDirty()" (click)="onSave()">Publier</app-fw-button>
+        </ng-container>
+
+        <!-- Scope OVERRIDE : chip de contexte actif -->
+        <ng-container *ngIf="currentScope() !== 'GLOBAL'">
+          <div class="scope-context-chip">
+            <lucide-icon
+              [name]="currentScope() === 'YEAR' ? Calendar : currentScope() === 'CYCLE' ? GraduationCap : Lock"
+              [size]="12">
+            </lucide-icon>
+            <span>{{
+              currentScope() === 'YEAR'  ? selectedYearName()  :
+              currentScope() === 'CYCLE' ? selectedCycleName() : selectedLevelName()
+            }}</span>
           </div>
-        </div>
-        <app-fw-button variant="tertiary" size="md" [icon]="Eye" (click)="previewPortal()">Simulateur</app-fw-button>
-        <app-fw-button variant="primary" size="md" [icon]="Save" [loading]="isSaving()" [disabled]="!isDirty() || currentScope() !== 'GLOBAL'" (click)="onSave()">Publier</app-fw-button>
+        </ng-container>
       </div>
 
       <main class="editor-container"
@@ -1046,9 +1067,6 @@
 
 </div>
 
-<!-- LOADER INITIAL -->
-<div class="loading-overlay" *ngIf="isLoading()">
-  <lucide-icon [name]="RefreshCw" [size]="36" class="animate-spin"></lucide-icon>
-  <p>Chargement de la configuration…</p>
-</div>
+<!-- Loader de démarrage (config pas encore chargée) -->
+<fw-block-loader *ngIf="isLoading() && !config()" [center]="true" message="Chargement de la configuration…"></fw-block-loader>
 
