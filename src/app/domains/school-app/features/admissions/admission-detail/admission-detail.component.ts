@@ -140,10 +140,8 @@ export class AdmissionDetailComponent implements OnInit {
     // Identité — toujours présente (pas de flag enabled dans le schema)
     tabs.push({id: 'identity', label: 'Identité', icon: User});
 
-    // Scolarité — affichée sauf si explicitement désactivée
-    if (schema?.schooling?.enabled !== false) {
-      tabs.push({id: 'schooling', label: 'Scolarité', icon: School});
-    }
+    // Scolarité — Core, toujours présente
+    tabs.push({id: 'schooling', label: 'Scolarité', icon: School});
 
     // Famille — affichée sauf si explicitement désactivée
     if (schema?.family?.enabled !== false) {
