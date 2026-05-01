@@ -724,8 +724,8 @@
           <!-- Contenu du pilier actif -->
           <div class="pillar-panel" *ngIf="activePillar()">
 
-            <!-- Toggle d'activation (sauf Identité) -->
-            <div class="pillar-enable-row" *ngIf="activePillarId() !== 'identity'">
+            <!-- Toggle d'activation (piliers Preset uniquement — pas les Core) -->
+            <div class="pillar-enable-row" *ngIf="!isCorePillar(activePillarId())">
               <div class="enable-info">
                 <strong>Activer le pilier « {{ activePillarLabel() }} »</strong>
                 <span>Ajoute cette étape au formulaire d'inscription public.</span>
@@ -741,13 +741,44 @@
             </div>
 
             <!-- Message si pilier désactivé -->
-            <div class="pillar-disabled-hint" *ngIf="!isPillarEnabled(activePillarId()) && activePillarId() !== 'identity'">
+            <div class="pillar-disabled-hint" *ngIf="!isPillarEnabled(activePillarId()) && !isCorePillar(activePillarId())">
               <lucide-icon [name]="Lock" [size]="14"></lucide-icon>
               <span>Ce pilier est désactivé. Activez-le pour configurer ses champs.</span>
             </div>
 
             <!-- Contenu si pilier actif -->
-            <div class="pillar-content" *ngIf="isPillarEnabled(activePillarId()) || activePillarId() === 'identity'">
+            <div class="pillar-content" *ngIf="isPillarEnabled(activePillarId()) || isCorePillar(activePillarId())">
+
+              <!-- Option spécifique Famille : allowedWithoutGuardian (Phase 2) -->
+              <div class="p-4 bg-orange-50 border border-orange-100 rounded-xl flex items-center justify-between mb-6" *ngIf="activePillarId() === 'family'">
+                <div class="flex items-center gap-3">
+                  <lucide-icon [name]="UserCog" class="w-5 h-5 text-orange-600"></lucide-icon>
+                  <div>
+                    <strong class="text-sm text-orange-900 block">Autoriser l'inscription sans responsable légal</strong>
+                    <span class="text-xs text-orange-700 font-medium">Permet aux élèves autonomes (ex: majeurs) de s'inscrire seuls.</span>
+                  </div>
+                </div>
+                <button role="switch" class="toggle-switch sm" [class.on]="config()?.schema?.family?.allowedWithoutGuardian" (click)="toggleFamilyGuardianRequirement()">
+                  <div class="track"><div class="thumb"></div></div>
+                </button>
+              </div>
+
+              <!-- Consignes aux parents (Phase 4) -->
+              <section class="pillar-section instruction-section">
+                <div class="pillar-section-header">
+                  <div class="header-row">
+                    <div class="icon-tag info"><lucide-icon [name]="MessageSquare" [size]="11"></lucide-icon></div>
+                    <div>
+                      <h4>Consignes aux parents</h4>
+                      <p>Texte d'aide affiché en haut de cette étape sur le portail.</p>
+                    </div>
+                  </div>
+                </div>
+                <textarea class="welcome-textarea" rows="2"
+                          [ngModel]="config()?.instructions?.[activePillarId()]"
+                          (ngModelChange)="updatePillarInstruction(activePillarId(), $event)"
+                          placeholder="Ex : Veuillez remplir vos informations d'identité exactement comme sur votre acte de naissance..."></textarea>
+              </section>
 
               <!-- Champs système -->
               <section class="pillar-section" *ngIf="activePillarCoreFields().length > 0">
@@ -899,14 +930,16 @@
           </div>
 
           <div class="editor-section">
-            <div class="section-label">Note minimale d'admission</div>
+            <div class="section-label">Note maximale d'admission</div>
             <div class="grade-threshold-row">
               <input type="number" [ngModel]="aCfg.minPassingGrade"
                      (ngModelChange)="updateMinPassingGrade($event)"
                      class="grade-input-lg" min="0" [max]="aCfg.maxGrade" step="0.5">
               <span class="grade-sep">/</span>
-              <span class="grade-max">{{ aCfg.maxGrade }}</span>
-              <span class="grade-hint">Seuil en dessous duquel un candidat n'est pas admis automatiquement.</span>
+              <input type="number" [ngModel]="aCfg.maxGrade"
+                     (ngModelChange)="updateMaxGrade($event)"
+                     class="grade-input-lg" min="1" step="1">
+              <span class="grade-hint">Seuil et plafond de notation (ex: 20, 100).</span>
             </div>
           </div>
 

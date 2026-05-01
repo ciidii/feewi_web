@@ -173,9 +173,10 @@ export class AdmissionConfigComponent implements OnInit {
   ];
 
   readonly assessmentTypes = [
-    {value: 'DOSSIER', label: 'Dossier', desc: 'Étude des pièces uniquement', icon: ClipboardList},
-    {value: 'EXAM', label: 'Examen', desc: 'Notes sur matières définies', icon: Hash},
-    {value: 'INTERVIEW', label: 'Entretien', desc: 'Évaluation orale de motivation', icon: MessageSquare}
+    {value: 'DOSSIER',   label: 'Dossier',   desc: 'Étude des pièces uniquement',       icon: ClipboardList},
+    {value: 'EXAM',      label: 'Examen',     desc: 'Notes sur matières définies',        icon: Hash},
+    {value: 'INTERVIEW', label: 'Entretien',  desc: 'Évaluation orale de motivation',     icon: MessageSquare},
+    {value: 'MIXED',     label: 'Mixte',      desc: 'Combine plusieurs modalités',        icon: Settings2}
   ];
 
   readonly registrationModes = [
@@ -321,8 +322,12 @@ export class AdmissionConfigComponent implements OnInit {
   );
 
   // --- HELPERS ---
+  isCorePillar(key: string): boolean {
+    return key === 'identity' || key === 'schooling';
+  }
+
   isPillarEnabled(key: string): boolean {
-    if (key === 'identity') return true;
+    if (this.isCorePillar(key)) return true;
     const cfg = this.config();
     if (!cfg) return true;
     return (cfg.schema as any)[key]?.enabled !== false;
@@ -730,6 +735,20 @@ export class AdmissionConfigComponent implements OnInit {
 
   // --- PILLAR METHODS ---
 
+  updatePillarInstruction(key: string, text: string) {
+    const current = this.config();
+    if (!current) return;
+    const instructions = { ...(current.instructions || {}), [key]: text };
+    this.config.set({ ...current, instructions });
+  }
+
+  toggleFamilyGuardianRequirement() {
+    const current = this.config();
+    if (!current) return;
+    const family = { ...current.schema.family, allowedWithoutGuardian: !current.schema.family.allowedWithoutGuardian };
+    this.config.set({ ...current, schema: { ...current.schema, family } });
+  }
+
   updateCoreFieldLabel(fieldName: string, label: string) {
     const current = this.config();
     if (!current) return;
@@ -743,7 +762,7 @@ export class AdmissionConfigComponent implements OnInit {
 
   togglePillarEnabled(key: string) {
     const current = this.config();
-    if (!current || key === 'identity') return;
+    if (!current || this.isCorePillar(key)) return;
     const pillar = (current.schema as any)[key];
     this.config.set({...current, schema: {...current.schema, [key]: {...pillar, enabled: !pillar?.enabled}}});
   }
@@ -826,6 +845,13 @@ export class AdmissionConfigComponent implements OnInit {
     const c = this.config();
     if (c?.schema.assessment)
       this.config.set({...c, schema: {...c.schema, assessment: {...c.schema.assessment, type}}});
+  }
+
+  updateMaxGrade(grade: number) {
+    const c = this.config();
+    if (c?.schema.assessment) {
+      this.config.set({...c, schema: {...c.schema, assessment: {...c.schema.assessment, maxGrade: grade}}});
+    }
   }
 
   updateMinPassingGrade(grade: number) {

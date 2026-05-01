@@ -1,4 +1,4 @@
-import { AssessmentType, CycleType, FieldType, RegistrationMode } from './base-types';
+import {AssessmentType, FieldType, RegistrationMode} from './base-types';
 
 // --- CHAMPS ---
 
@@ -7,6 +7,7 @@ export interface FieldConfig {
   label: string;
   type: FieldType;
   mandatory: boolean;
+  hidden?: boolean;
   preset?: boolean;
   placeholder?: string;
   options?: string[];
@@ -16,7 +17,6 @@ export interface CoreFieldControl {
   label: string;
 }
 
-// --- SCHÉMA PAR PILIER ---
 
 export interface IdentitySchemaConfig {
   coreFieldControls: Record<string, CoreFieldControl>;
@@ -36,7 +36,6 @@ export interface MedicalSchemaConfig {
 }
 
 export interface SchoolingSchemaConfig {
-  enabled: boolean;
   coreFieldControls: Record<string, CoreFieldControl>;
   customFields: FieldConfig[];
 }

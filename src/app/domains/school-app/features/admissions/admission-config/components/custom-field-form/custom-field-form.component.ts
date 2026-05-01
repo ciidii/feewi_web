@@ -1,8 +1,8 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { LucideAngularModule, MessageSquare, Type, Info, Plus, Trash2, List, Eye, Settings, HelpCircle } from 'lucide-angular';
+import { LucideAngularModule, MessageSquare, Type, Info, Plus, Trash2, List, Eye, Settings, HelpCircle, X } from 'lucide-angular';
 import { FormShellComponent } from '../../../../../../../shared/components/form-shell/form-shell';
 import { FieldConfig } from '../../../../../../../core/models/enrollment.model';
 import { FwTabsComponent, FwTab } from '../../../../../../../shared/components/tabs/tabs.component';
@@ -17,7 +17,8 @@ import { signal } from '@angular/core';
     MatDialogModule,
     LucideAngularModule,
     FormShellComponent,
-    FwTabsComponent
+    FwTabsComponent,
+    FormsModule
   ],
   templateUrl: './custom-field-form.component.html',
   styleUrls: ['./custom-field-form.component.scss']
@@ -32,6 +33,7 @@ export class CustomFieldFormComponent {
   readonly Eye = Eye;
   readonly Settings = Settings;
   readonly HelpCircle = HelpCircle;
+  readonly X = X;
 
   // --- NAVIGATION PAR ONGLETS ---
   activeTab = signal<string>('basic');
@@ -46,11 +48,27 @@ export class CustomFieldFormComponent {
     type: ['TEXT', Validators.required],
     mandatory: [false],
     placeholder: [''],
-    options: [[]] // Pour le futur type SELECT
+    options: [[]] // Tableau de chaînes pour SELECT
   });
+
+  optionInput = '';
 
   onTabChange(tabId: string) {
     this.activeTab.set(tabId);
+  }
+
+  addOption() {
+    const val = this.optionInput.trim();
+    if (!val) return;
+    const current = this.fieldForm.get('options')?.value || [];
+    if (current.includes(val)) return;
+    this.fieldForm.patchValue({ options: [...current, val] });
+    this.optionInput = '';
+  }
+
+  removeOption(opt: string) {
+    const current = this.fieldForm.get('options')?.value || [];
+    this.fieldForm.patchValue({ options: current.filter((x: string) => x !== opt) });
   }
 
   onSave() {
@@ -62,8 +80,9 @@ export class CustomFieldFormComponent {
         name: generatedName,
         label: formValue.label,
         type: formValue.type,
-        mandatory: formValue.mandatory, // Alignement strict V4
-        placeholder: formValue.placeholder || undefined
+        mandatory: formValue.mandatory,
+        placeholder: formValue.placeholder || undefined,
+        options: formValue.type === 'SELECT' ? formValue.options : undefined
       };
 
       this.dialogRef.close(result);
