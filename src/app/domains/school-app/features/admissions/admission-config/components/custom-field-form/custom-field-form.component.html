@@ -1,8 +1,8 @@
 <app-fw-form-shell
-  title="Configuration du Champ"
-  subtitle="Créez et personnalisez une question pour le formulaire parent."
+  [title]="dialogTitle"
+  [subtitle]="dialogSubtitle"
   [icon]="MessageSquare"
-  saveLabel="Valider et Créer"
+  [saveLabel]="dialogSaveLabel"
   cancelLabel="Annuler"
   [canSave]="fieldForm.valid"
   (save)="onSave()"
@@ -58,6 +58,20 @@
         <label class="relative inline-flex items-center cursor-pointer">
           <input type="checkbox" formControlName="mandatory" class="sr-only peer">
           <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+        </label>
+      </div>
+
+      <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <lucide-icon [name]="Eye" class="w-4 h-4 text-slate-400"></lucide-icon>
+          <div>
+            <span class="text-sm font-semibold text-slate-700 block">Masquer ce champ</span>
+            <span class="text-xs text-slate-400">Le champ est conservé mais non affiché au parent.</span>
+          </div>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" formControlName="hidden" class="sr-only peer">
+          <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-slate-600"></div>
         </label>
       </div>
     </div>

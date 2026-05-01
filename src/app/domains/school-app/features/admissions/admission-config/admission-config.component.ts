@@ -8,7 +8,9 @@ import {
   ChevronDown,
   ClipboardList,
   Eye,
+  EyeOff,
   FileText,
+  Pencil,
   Globe,
   GraduationCap,
   Hash,
@@ -790,6 +792,46 @@ export class AdmissionConfigComponent implements OnInit {
     this.config.set({...current, schema: {...current.schema, [k]: pillar}});
   }
 
+  updateCustomFieldMandatory(fieldName: string, mandatory: boolean) {
+    const current = this.config();
+    if (!current) return;
+    const k = this.activePillarKey();
+    const pillar = {...(current.schema as any)[k]};
+    const cfKey = k === 'family' ? 'guardianCustomFields' : 'customFields';
+    pillar[cfKey] = (pillar[cfKey] || []).map((f: FieldConfig) =>
+      f.name === fieldName ? {...f, mandatory} : f
+    );
+    this.config.set({...current, schema: {...current.schema, [k]: pillar}});
+  }
+
+  updateCustomFieldHidden(fieldName: string, hidden: boolean) {
+    const current = this.config();
+    if (!current) return;
+    const k = this.activePillarKey();
+    const pillar = {...(current.schema as any)[k]};
+    const cfKey = k === 'family' ? 'guardianCustomFields' : 'customFields';
+    pillar[cfKey] = (pillar[cfKey] || []).map((f: FieldConfig) =>
+      f.name === fieldName ? {...f, hidden: hidden || undefined} : f
+    );
+    this.config.set({...current, schema: {...current.schema, [k]: pillar}});
+  }
+
+  editCustomField(field: FieldConfig) {
+    this.dialog.open(CustomFieldFormComponent, {
+      width: '500px', panelClass: 'feewi-dialog-panel', data: {field}
+    }).afterClosed().subscribe((result: FieldConfig | undefined) => {
+      if (!result || !this.config()) return;
+      const current = this.config()!;
+      const k = this.activePillarKey();
+      const pillar = {...(current.schema as any)[k]};
+      const cfKey = k === 'family' ? 'guardianCustomFields' : 'customFields';
+      pillar[cfKey] = (pillar[cfKey] || []).map((f: FieldConfig) =>
+        f.name === field.name ? result : f
+      );
+      this.config.set({...current, schema: {...current.schema, [k]: pillar}});
+    });
+  }
+
   // --- DOCUMENT METHODS ---
 
   updateDocumentMandatory(code: string, mandatory: boolean) {
@@ -1000,4 +1042,6 @@ export class AdmissionConfigComponent implements OnInit {
   readonly CalendarClock = CalendarClock;
   readonly Wrench = Wrench;
   readonly ChevronDown = ChevronDown;
+  readonly EyeOff = EyeOff;
+  readonly Pencil = Pencil;
 }

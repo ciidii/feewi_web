@@ -817,16 +817,33 @@
                 </div>
 
                 <div class="custom-fields-list">
-                  <div *ngFor="let f of activePillarCustomFields()" class="custom-field-row">
+                  <div *ngFor="let f of activePillarCustomFields()"
+                       class="custom-field-row" [class.field-hidden]="f.hidden">
                     <span class="field-type-chip" [attr.data-type]="f.type">{{ f.type }}</span>
                     <div class="field-info">
                       <span class="field-label">{{ f.label }}</span>
                       <span class="field-name-mono">{{ f.name }}</span>
                     </div>
-                    <span class="mandatory-chip" [class.required]="f.mandatory">
+                    <!-- Toggle obligatoire -->
+                    <button class="mandatory-chip" [class.required]="f.mandatory"
+                            (click)="updateCustomFieldMandatory(f.name, !f.mandatory)"
+                            [title]="f.mandatory ? 'Rendre optionnel' : 'Rendre obligatoire'">
                       {{ f.mandatory ? 'Requis' : 'Optionnel' }}
-                    </span>
-                    <button *ngIf="!f.preset" class="btn-icon-del" (click)="removeCustomField(f.name)" title="Supprimer">
+                    </button>
+                    <!-- Toggle visibilité -->
+                    <button class="btn-icon-vis" [class.is-hidden]="f.hidden"
+                            (click)="updateCustomFieldHidden(f.name, !f.hidden)"
+                            [title]="f.hidden ? 'Masqué — cliquer pour afficher' : 'Masquer ce champ'">
+                      <lucide-icon [name]="f.hidden ? EyeOff : Eye" [size]="13"></lucide-icon>
+                    </button>
+                    <!-- Édition (champs custom uniquement) -->
+                    <button *ngIf="!f.preset" class="btn-icon-edit"
+                            (click)="editCustomField(f)" title="Modifier le champ">
+                      <lucide-icon [name]="Pencil" [size]="13"></lucide-icon>
+                    </button>
+                    <!-- Suppression ou verrou -->
+                    <button *ngIf="!f.preset" class="btn-icon-del"
+                            (click)="removeCustomField(f.name)" title="Supprimer">
                       <lucide-icon [name]="Trash2" [size]="13"></lucide-icon>
                     </button>
                     <div *ngIf="f.preset" class="btn-lock" title="Champ système — non supprimable">

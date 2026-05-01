@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { LucideAngularModule, MessageSquare, Type, Info, Plus, Trash2, List, Eye, Settings, HelpCircle, X } from 'lucide-angular';
 import { FormShellComponent } from '../../../../../../../shared/components/form-shell/form-shell';
 import { FieldConfig } from '../../../../../../../core/models/enrollment.model';
@@ -26,6 +26,12 @@ import { signal } from '@angular/core';
 export class CustomFieldFormComponent {
   private fb = inject(FormBuilder);
   private dialogRef = inject(MatDialogRef<CustomFieldFormComponent>);
+  private data: { field: FieldConfig } | null = inject(MAT_DIALOG_DATA, { optional: true });
+
+  get isEditMode(): boolean { return !!this.data?.field; }
+  get dialogTitle(): string { return this.isEditMode ? 'Modifier le Champ' : 'Nouveau Champ Personnalisé'; }
+  get dialogSubtitle(): string { return this.isEditMode ? 'Modifiez les propriétés de ce champ personnalisé.' : 'Créez une question spécifique à votre établissement.'; }
+  get dialogSaveLabel(): string { return this.isEditMode ? 'Enregistrer' : 'Valider et Créer'; }
 
   readonly MessageSquare = MessageSquare;
   readonly Type = Type;
@@ -44,11 +50,12 @@ export class CustomFieldFormComponent {
   ];
 
   fieldForm: FormGroup = this.fb.group({
-    label: ['', [Validators.required, Validators.minLength(3)]],
-    type: ['TEXT', Validators.required],
-    mandatory: [false],
-    placeholder: [''],
-    options: [[]] // Tableau de chaînes pour SELECT
+    label:       [this.data?.field?.label       ?? '',     [Validators.required, Validators.minLength(3)]],
+    type:        [this.data?.field?.type        ?? 'TEXT', Validators.required],
+    mandatory:   [this.data?.field?.mandatory   ?? false],
+    hidden:      [this.data?.field?.hidden      ?? false],
+    placeholder: [this.data?.field?.placeholder ?? ''],
+    options:     [this.data?.field?.options     ?? []]
   });
 
   optionInput = '';
@@ -73,18 +80,17 @@ export class CustomFieldFormComponent {
 
   onSave() {
     if (this.fieldForm.valid) {
-      const formValue = this.fieldForm.value;
-      const generatedName = this.generateFieldName(formValue.label);
-
+      const v = this.fieldForm.value;
       const result: FieldConfig = {
-        name: generatedName,
-        label: formValue.label,
-        type: formValue.type,
-        mandatory: formValue.mandatory,
-        placeholder: formValue.placeholder || undefined,
-        options: formValue.type === 'SELECT' ? formValue.options : undefined
+        name:        this.isEditMode ? this.data!.field.name : this.generateFieldName(v.label),
+        label:       v.label,
+        type:        v.type,
+        mandatory:   v.mandatory,
+        hidden:      v.hidden || undefined,
+        preset:      this.isEditMode ? this.data!.field.preset : undefined,
+        placeholder: v.placeholder || undefined,
+        options:     v.type === 'SELECT' ? v.options : undefined
       };
-
       this.dialogRef.close(result);
     } else {
       this.fieldForm.markAllAsTouched();
