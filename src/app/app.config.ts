@@ -4,6 +4,7 @@ import {provideAnimationsAsync} from '@angular/platform-browser/animations/async
 import {provideHttpClient, withInterceptors} from '@angular/common/http';
 
 import {routes} from './app.routes';
+import {authInterceptor} from './core/interceptors/auth.interceptor';
 import {tenantInterceptor} from './core/interceptors/tenant.interceptor';
 import {loadingInterceptor} from './core/interceptors/loading.interceptor';
 import {AuthService} from './core/services/auth.service';
@@ -35,7 +36,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({eventCoalescing: true}),
     provideRouter(routes),
     provideAnimationsAsync(),
-    provideHttpClient(withInterceptors([loadingInterceptor, tenantInterceptor])),
+    provideHttpClient(withInterceptors([loadingInterceptor, authInterceptor, tenantInterceptor])),
     importProvidersFrom(
       TranslateModule.forRoot({
         loader: {

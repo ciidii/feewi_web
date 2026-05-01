@@ -61,6 +61,9 @@ export class AuthService {
   }
 
   private storeToken(token: string, rememberMe: boolean): void {
+    // On commence par tout nettoyer pour éviter les conflits entre localStorage et sessionStorage
+    this.clearToken();
+
     if (rememberMe) {
       localStorage.setItem(this.TOKEN_KEY, token);
     } else {
@@ -74,13 +77,23 @@ export class AuthService {
   }
 
   login(email: string, password: string, rememberMe = false): Observable<boolean> {
-    console.log('[AuthService] Attempting login for:', email);
+    console.log(`[AuthService] Attempting login for: ${email}`);
     return this.http.post<LoginResponse>(`${this.API_URL}/auth/login`, {email, password}).pipe(
-      tap(response => this.storeToken(response.access_token, rememberMe)),
-      switchMap(() => this.fetchProfile()),
-      map(profile => !!profile),
+      tap(response => {
+        console.log('[AuthService] Login successful, storing token...');
+        this.storeToken(response.access_token, rememberMe);
+      }),
+      switchMap(() => {
+        console.log('[AuthService] Token stored, now fetching profile...');
+        return this.fetchProfile();
+      }),
+      map(profile => {
+        const success = !!profile;
+        console.log(`[AuthService] Login process completed. Success: ${success}`);
+        return success;
+      }),
       catchError(error => {
-        console.error('[AuthService] Login failed', error);
+        console.error('[AuthService] Login failed at some stage:', error);
         return of(false);
       })
     );
@@ -115,15 +128,17 @@ export class AuthService {
   }
 
   fetchProfile(): Observable<UserProfile | null> {
-    console.log('[AuthService] Fetching profile...');
+    const token = this.getToken();
+    console.log('[AuthService] Fetching profile. Token present:', !!token);
+    
     return this.http.get<UserProfile>(`${this.API_URL}/users/me`).pipe(
       tap(profile => {
-        console.log('[AuthService] Profile fetched successfully:', profile.email);
+        console.log('[AuthService] Profile fetched successfully for:', profile.email);
         this._currentUser.set(profile);
         this.updateTenantContext(profile);
       }),
       catchError(error => {
-        console.warn('[AuthService] Failed to fetch profile (User might not be logged in)');
+        console.error('[AuthService] Error fetching profile:', error);
         this._currentUser.set(null);
         return of(null);
       })
