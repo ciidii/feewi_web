@@ -281,6 +281,10 @@ export class AdmissionConfigComponent implements OnInit {
     this.config()?.schema?.services?.availableServices || []
   );
 
+  documentsEnabled = computed(() =>
+    this.config()?.schema?.documents?.enabled ?? true
+  );
+
   servicesEnabled = computed(() =>
     this.config()?.schema?.services?.enabled ?? false
   );
@@ -927,6 +931,13 @@ export class AdmissionConfigComponent implements OnInit {
   }
 
   // --- SERVICES METHODS ---
+
+  toggleDocumentsEnabled() {
+    const c = this.config();
+    if (!c) return;
+    const documents = {...c.schema.documents, enabled: !c.schema.documents.enabled};
+    this.config.set({...c, schema: {...c.schema, documents}});
+  }
 
   private patchServices(patch: Partial<ServicesSchemaConfig>) {
     const c = this.config();
