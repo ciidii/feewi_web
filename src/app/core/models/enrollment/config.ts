@@ -17,13 +17,14 @@ export interface CoreFieldControl {
   label: string;
 }
 
-
 export interface IdentitySchemaConfig {
+  label?: string;
   coreFieldControls: Record<string, CoreFieldControl>;
   customFields: FieldConfig[];
 }
 
 export interface FamilySchemaConfig {
+  label?: string;
   enabled: boolean;
   allowedWithoutGuardian: boolean;
   guardianCoreFieldControls: Record<string, CoreFieldControl>;
@@ -31,16 +32,19 @@ export interface FamilySchemaConfig {
 }
 
 export interface MedicalSchemaConfig {
+  label?: string;
   enabled: boolean;
   customFields: FieldConfig[];
 }
 
 export interface SchoolingSchemaConfig {
+  label?: string;
   coreFieldControls: Record<string, CoreFieldControl>;
   customFields: FieldConfig[];
 }
 
 export interface DocumentSchemaConfig {
+  label?: string;
   enabled: boolean;
   presetDocuments: PresetDocumentConfig[];
 }
@@ -52,6 +56,7 @@ export interface PresetDocumentConfig {
 }
 
 export interface AssessmentSchemaConfig {
+  label?: string;
   type: AssessmentType;
   subjects: Record<string, number>;
   maxGrade: number;
@@ -69,6 +74,7 @@ export interface ServiceConfig {
 }
 
 export interface ServicesSchemaConfig {
+  label?: string;
   enabled: boolean;
   availableServices: ServiceConfig[];
 }

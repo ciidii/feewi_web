@@ -27,9 +27,9 @@ import { FwEmptyStateComponent } from '../../../../../../shared/components/empty
         <div class="inline-flex items-center justify-center w-14 h-14 bg-midnight text-white rounded-2xl mb-5 shadow-lg shadow-midnight/10">
           <lucide-icon [name]="Users" [size]="28"></lucide-icon>
         </div>
-        <h1 class="text-3xl font-display font-black text-midnight tracking-tight mb-2">Dossiers des enfants</h1>
+        <h1 class="text-3xl font-display font-black text-midnight tracking-tight mb-2">{{ title || 'Dossiers des enfants' }}</h1>
         <p class="text-base text-text-secondary font-medium max-w-lg leading-relaxed">
-          Complétez les informations pour chaque enfant. Une fois tous les dossiers prêts, vous pourrez soumettre l'ensemble de votre demande.
+          {{ subtitle || 'Complétez les informations pour chaque enfant. Une fois tous les dossiers prêts, vous pourrez soumettre l\\'ensemble de votre demande.' }}
         </p>
       </div>
 
@@ -55,7 +55,7 @@ import { FwEmptyStateComponent } from '../../../../../../shared/components/empty
                 {{ adm.identity.firstName }} {{ adm.identity.lastName }}
               </p>
               <div class="flex items-center gap-3">
-                <span class="text-[10px] font-black uppercase text-text-tertiary tracking-widest">{{ levelName(adm) }}</span>
+                <span class="text-[10px] font-black uppercase text-text-tertiary tracking-widest">{{ schoolingLabel }}: {{ levelName(adm) }}</span>
                 <app-fw-badge [status]="isReady(adm) ? 'SUBMITTED' : 'DRAFT'"
                               [labelOverride]="isReady(adm) ? 'Prêt' : 'Incomplet'"
                               size="xs"></app-fw-badge>              </div>
@@ -133,6 +133,9 @@ import { FwEmptyStateComponent } from '../../../../../../shared/components/empty
 export class StepHubComponent {
   @Input() admissions: Admission[] = [];
   @Input() allLevels: any[] = [];
+  @Input() title?: string;
+  @Input() subtitle?: string;
+  @Input() schoolingLabel = 'Scolarité';
   @Output() editChild  = new EventEmitter<Admission>();
   @Output() addChild   = new EventEmitter<void>();
   @Output() submitAll  = new EventEmitter<void>();

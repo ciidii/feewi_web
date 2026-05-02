@@ -97,6 +97,7 @@
         <app-step-family
           *ngIf="globalPhase() === 'GUARDIAN'"
           [data]="familyStore"
+          [title]="schema()?.family?.label"
           [coreFieldControls]="schema()?.family?.guardianCoreFieldControls || {}"
           [customFields]="familyCustomFields()"
           [instruction]="instructions()['family']">
@@ -107,6 +108,7 @@
           *ngIf="globalPhase() === 'HUB' && !isChildFlow()"
           [admissions]="admissions()"
           [allLevels]="levels()"
+          [schoolingLabel]="schema()?.schooling?.label || 'Scolarité'"
           (editChild)="openChildEditor($event)"
           (addChild)="addNewChild()"
           (submitAll)="goToReview()">
@@ -117,6 +119,7 @@
           *ngIf="isChildFlow() && childPhase() === 'STUDENT'"
           [identity]="store.identity"
           [schooling]="store.schooling"
+          [title]="schema()?.identity?.label"
           [coreFieldControls]="schema()?.identity?.coreFieldControls || {}"
           [customFields]="identityCustomFields()"
           [schoolingCustomFields]="schoolingCustomFields()"
@@ -130,6 +133,7 @@
         <app-step-medical
           *ngIf="isChildFlow() && childPhase() === 'MEDICAL'"
           [medical]="store.medical"
+          [title]="schema()?.medical?.label"
           [customFields]="medicalCustomFields()"
           [instruction]="instructions()['medical']">
         </app-step-medical>
@@ -137,13 +141,24 @@
         <!-- Phase CHILD : Services -->
         <app-step-services
           *ngIf="isChildFlow() && childPhase() === 'SERVICES'"
+          [title]="schema()?.services?.label"
           [availableServices]="schema()?.services?.availableServices || []"
           (selectionsChange)="store.services = $event">
         </app-step-services>
 
+        <!-- Phase CHILD : Extra Pillars -->
+        <app-step-extra
+          *ngIf="isChildFlow() && isExtraPillarKey(childPhase()!)"
+          [data]="store.extraPillars[childPhase()!]"
+          [customFields]="getExtraPillarConfig(childPhase()!)?.customFields || []"
+          [title]="getExtraPillarConfig(childPhase()!)?.label || ''"
+          [instruction]="instructions()[childPhase()!]">
+        </app-step-extra>
+
         <!-- Phase CHILD : Documents -->
         <app-step-vault
           *ngIf="isChildFlow() && childPhase() === 'DOCS'"
+          [title]="schema()?.documents?.label"
           [documents]="activeAdmission()?.documents || []"
           [uploadingDocCode]="uploadingDoc()"
           (onFileSelected)="onDocUpload($event)">

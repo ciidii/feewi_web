@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { BookOpen, Bus, Heart, LucideAngularModule, Star, Utensils, LayoutGrid, Check } from 'lucide-angular';
 import { ServiceConfig, ServiceSubscriptionRequest } from '../../../../../../core/models/enrollment';
 import { FwBadgeComponent } from '../../../../../../shared/components/badge/badge.component';
+import { FwButtonComponent } from '../../../../../../shared/components/button/button.component';
 
 interface ServiceSelection {
   svc: ServiceConfig;
@@ -13,7 +14,7 @@ interface ServiceSelection {
 @Component({
   selector: 'app-step-services',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, FwBadgeComponent],
+  imports: [CommonModule, LucideAngularModule, FwBadgeComponent, FwButtonComponent],
   template: `
     <div class="animate-fade">
       <!-- 🏛️ Institutional Header -->
@@ -21,9 +22,9 @@ interface ServiceSelection {
         <div class="inline-flex items-center justify-center w-14 h-14 bg-midnight text-white rounded-2xl mb-5 shadow-lg shadow-midnight/10">
           <lucide-icon [name]="LayoutGrid" [size]="28"></lucide-icon>
         </div>
-        <h1 class="text-3xl font-display font-black text-midnight tracking-tight mb-2">Services & Extras</h1>
+        <h1 class="text-3xl font-display font-black text-midnight tracking-tight mb-2">{{ title || 'Services & Extras' }}</h1>
         <p class="text-base text-text-secondary font-medium max-w-lg leading-relaxed">
-          Sélectionnez les prestations additionnelles souhaitées pour l'accompagnement de votre enfant.
+          {{ subtitle || 'Sélectionnez les prestations additionnelles souhaitées pour l\\'accompagnement de votre enfant.' }}
         </p>
       </div>
 
@@ -111,6 +112,8 @@ interface ServiceSelection {
 })
 export class StepServicesComponent implements OnChanges {
   @Input() availableServices: ServiceConfig[] = [];
+  @Input() title?: string;
+  @Input() subtitle?: string;
   @Output() selectionsChange = new EventEmitter<ServiceSubscriptionRequest[]>();
 
   selections: ServiceSelection[] = [];

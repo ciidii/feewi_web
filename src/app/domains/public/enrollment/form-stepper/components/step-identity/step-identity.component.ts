@@ -16,9 +16,9 @@ import { CycleGroup } from '../../../../../../core/models/academic.model';
         <div class="inline-flex items-center justify-center w-14 h-14 bg-midnight text-white rounded-2xl mb-5 shadow-lg shadow-midnight/10">
           <lucide-icon [name]="User" [size]="28"></lucide-icon>
         </div>
-        <h1 class="text-3xl font-display font-black text-midnight tracking-tight mb-2">Identité de l'élève</h1>
+        <h1 class="text-3xl font-display font-black text-midnight tracking-tight mb-2">{{ title || 'Identité de l\\'élève' }}</h1>
         <p class="text-base text-text-secondary font-medium max-w-lg leading-relaxed">
-          Saisissez les informations d'état civil de l'enfant et sélectionnez son futur niveau scolaire.
+          {{ subtitle || 'Saisissez les informations d\\'état civil de l\\'enfant et sélectionnez son futur niveau scolaire.' }}
         </p>
 
         <!-- 💡 Dynamic Instruction Banner -->
@@ -164,6 +164,8 @@ export class StepIdentityComponent {
   @Input() availableLevels: any[] = [];
   @Input() groupedLevels: CycleGroup[] = [];
   @Input() instruction?: string;
+  @Input() title?: string;
+  @Input() subtitle?: string;
   @Output() onLevelChange = new EventEmitter<string>();
 
   readonly User = User;

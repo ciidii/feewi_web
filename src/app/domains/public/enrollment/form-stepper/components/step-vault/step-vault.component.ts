@@ -16,9 +16,9 @@ import { FwBadgeComponent } from '../../../../../../shared/components/badge/badg
         <div class="inline-flex items-center justify-center w-14 h-14 bg-midnight text-white rounded-2xl mb-5 shadow-lg shadow-midnight/10">
           <lucide-icon [name]="ShieldCheck" [size]="28"></lucide-icon>
         </div>
-        <h1 class="text-3xl font-display font-black text-midnight tracking-tight mb-2">Pièces justificatives</h1>
+        <h1 class="text-3xl font-display font-black text-midnight tracking-tight mb-2">{{ title || 'Pièces justificatives' }}</h1>
         <p class="text-base text-text-secondary font-medium max-w-lg leading-relaxed">
-          Veuillez télécharger les documents requis pour finaliser l'inscription de l'élève.
+          {{ subtitle || 'Veuillez télécharger les documents requis pour finaliser l inscription de élève.' }}
         </p>
       </div>
 
@@ -46,11 +46,11 @@ import { FwBadgeComponent } from '../../../../../../shared/components/badge/badg
               <p class="font-black text-midnight text-lg truncate mb-1">{{ doc.name }}</p>
               <div class="flex items-center gap-3">
                 <!-- Badge Obligatoire : Uniquement si manquant ou rejeté -->
-                <app-fw-badge *ngIf="doc.mandatory && (doc.status === 'MISSING' || doc.status === 'REJECTED')" 
+                <app-fw-badge *ngIf="doc.mandatory && (doc.status === 'MISSING' || doc.status === 'REJECTED')"
                               status="REQUIRED" labelOverride="Obligatoire" size="xs"></app-fw-badge>
 
                 <!-- Badge de Statut Réel -->
-                <app-fw-badge [status]="doc.status === 'MISSING' ? 'DRAFT' : doc.status" 
+                <app-fw-badge [status]="doc.status === 'MISSING' ? 'DRAFT' : doc.status"
                               [labelOverride]="docStatusLabel(doc.status)"
                               size="xs"></app-fw-badge>              </div>
             </div>
@@ -95,6 +95,8 @@ import { FwBadgeComponent } from '../../../../../../shared/components/badge/badg
 export class StepVaultComponent {
   @Input() documents: RequiredDocument[] = [];
   @Input() uploadingDocCode: string | null = null;
+  @Input() title?: string;
+  @Input() subtitle?: string;
   @Output() onFileSelected = new EventEmitter<{ code: string; file: File }>();
 
   onFileChange(code: string, input: HTMLInputElement) {

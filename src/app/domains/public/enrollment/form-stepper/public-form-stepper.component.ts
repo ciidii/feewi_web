@@ -32,6 +32,7 @@ import { StepServicesComponent } from './components/step-services/step-services.
 import { StepVaultComponent } from './components/step-vault/step-vault.component';
 import { StepReviewComponent } from './components/step-review/step-review.component';
 import { StepHubComponent } from './components/step-hub/step-hub.component';
+import { StepExtraComponent } from './components/step-extra/step-extra.component';
 import { FwButtonComponent } from '../../../../shared/components/button/button.component';
 
 export type GlobalPhase = 'GUARDIAN' | 'HUB' | 'REVIEW';
@@ -46,7 +47,7 @@ const CHILD_STEPS: ChildPhase[] = ['STUDENT', 'MEDICAL', 'SERVICES', 'DOCS'];
     CommonModule, LucideAngularModule,
     StepFamilyComponent, StepIdentityComponent, StepMedicalComponent,
     StepServicesComponent, StepVaultComponent, StepReviewComponent,
-    StepHubComponent, FwButtonComponent
+    StepHubComponent, StepExtraComponent, FwButtonComponent
   ],
   templateUrl: './public-form-stepper.component.html',
   styleUrls: ['./public-form-stepper.component.scss']
@@ -63,7 +64,7 @@ export class PublicFormStepperComponent implements OnInit {
 
   // ── Phases ────────────────────────────────────────────────────────────────
   globalPhase = signal<GlobalPhase>('GUARDIAN');
-  childPhase  = signal<ChildPhase | null>(null);
+  childPhase  = signal<string | null>(null);
 
   isChildFlow = computed(() => this.childPhase() !== null);
 
@@ -107,10 +108,18 @@ export class PublicFormStepperComponent implements OnInit {
 
   admissions = computed(() => this.bundle()?.admissions ?? []);
 
-  childSteps = computed<ChildPhase[]>(() => {
+  childSteps = computed<string[]>(() => {
     const schema = this.schema();
-    const base: ChildPhase[] = ['STUDENT'];
+    const base: string[] = ['STUDENT'];
     if (schema?.medical?.enabled !== false) base.push('MEDICAL');
+    
+    // Ajout des piliers personnalisés
+    if (schema?.extraPillars) {
+      schema.extraPillars.forEach(p => {
+        if (p.enabled) base.push(p.key);
+      });
+    }
+
     if (schema?.services?.enabled) base.push('SERVICES');
     if (schema?.documents?.enabled !== false) base.push('DOCS');
     return base;
@@ -144,6 +153,7 @@ export class PublicFormStepperComponent implements OnInit {
       customFields: {} as Record<string, any>
     },
     medical:  { customFields: {} as Record<string, any> },
+    extraPillars: {} as Record<string, { customFields: Record<string, any> }>,
     services: [] as ServiceSubscriptionRequest[]
   };
 
@@ -195,6 +205,11 @@ export class PublicFormStepperComponent implements OnInit {
         if (!this.store.schooling.academicYearId) {
           const active = years.find(y => y.active) ?? years[0];
           if (active) this.store.schooling.academicYearId = active.id;
+        }
+
+        // Si le pilier Famille est désactivé, on passe directement au HUB
+        if (config.schema.family?.enabled === false && this.globalPhase() === 'GUARDIAN') {
+          this.globalPhase.set('HUB');
         }
 
         if (resumeRef && resumeCode) {
@@ -269,6 +284,16 @@ export class PublicFormStepperComponent implements OnInit {
       customFields: adm.schooling.customFields ?? {}
     };
     this.store.medical  = { customFields: adm.medical?.customFields ?? {} };
+    
+    // Chargement des piliers extra (si présents dans l'entité Admission)
+    this.store.extraPillars = (adm as any).extraPillars || {};
+    // S'assurer que chaque clé de schéma a son objet dans le store
+    this.schema()?.extraPillars?.forEach(p => {
+      if (!this.store.extraPillars[p.key]) {
+        this.store.extraPillars[p.key] = { customFields: {} };
+      }
+    });
+
     this.store.services = [];
     if (adm.schooling?.levelId) {
       this.enrollment.getLevelConfig(adm.schooling.levelId).subscribe(cfg => this.levelConfig.set(cfg));
@@ -280,6 +305,10 @@ export class PublicFormStepperComponent implements OnInit {
     this.store.identity  = { firstName: '', lastName: '', gender: 'MALE', birthDate: '', birthPlace: '', customFields: {} };
     this.store.schooling = { academicYearId: yearId, levelId: '', cycleType: undefined, filiereId: null, customFields: {} };
     this.store.medical   = { customFields: {} };
+    this.store.extraPillars = {};
+    this.schema()?.extraPillars?.forEach(p => {
+      this.store.extraPillars[p.key] = { customFields: {} };
+    });
     this.store.services  = [];
     this.levelConfig.set(null);
   }
@@ -375,11 +404,17 @@ export class PublicFormStepperComponent implements OnInit {
 
   // ── Logique par étape ─────────────────────────────────────────────────────
   private async runChildStep(): Promise<boolean> {
-    switch (this.childPhase()) {
+    const phase = this.childPhase();
+    if (!phase) return true;
+
+    switch (phase) {
       case 'STUDENT':  return this.saveStudent();
       case 'MEDICAL':  return this.savePillar('pillar_medical', this.store.medical);
       case 'SERVICES': return this.saveServices();
-      default:         return true; // DOCS → géré par upload inline
+      case 'DOCS':     return true; // géré par upload inline
+      default:
+        // C'est un pilier extra
+        return this.savePillar(phase, this.store.extraPillars[phase]);
     }
   }
 
@@ -503,17 +538,38 @@ export class PublicFormStepperComponent implements OnInit {
   }
 
   // ── Helpers sidebar ───────────────────────────────────────────────────────
-  childStepLabel(s: ChildPhase): string {
-    return { STUDENT: 'Identité', MEDICAL: 'Santé', SERVICES: 'Services', DOCS: 'Documents' }[s];
+  childStepLabel(s: string): string {
+    const schema = this.schema();
+    switch (s) {
+      case 'STUDENT':  return schema?.identity?.label || 'Identité';
+      case 'MEDICAL':  return schema?.medical?.label || 'Santé';
+      case 'SERVICES': return schema?.services?.label || 'Services';
+      case 'DOCS':     return schema?.documents?.label || 'Documents';
+      default:
+        // C'est un pilier extra
+        return schema?.extraPillars?.find(p => p.key === s)?.label || 'Info';
+    }
   }
 
-  childStepIcon(s: ChildPhase): any {
-    return { STUDENT: User, MEDICAL: HeartPulse, SERVICES: LayoutGrid, DOCS: FileText }[s];
+  childStepIcon(s: string): any {
+    if (s === 'STUDENT') return User;
+    if (s === 'MEDICAL') return HeartPulse;
+    if (s === 'SERVICES') return LayoutGrid;
+    if (s === 'DOCS') return FileText;
+    return Sparkles;
   }
 
-  isChildStepDone(s: ChildPhase): boolean {
+  isChildStepDone(s: string): boolean {
     const list = this.childSteps();
     return list.indexOf(s) < list.indexOf(this.childPhase()!);
+  }
+
+  isExtraPillarKey(s: string): boolean {
+    return !['STUDENT', 'MEDICAL', 'SERVICES', 'DOCS'].includes(s);
+  }
+
+  getExtraPillarConfig(key: string) {
+    return this.schema()?.extraPillars?.find(p => p.key === key);
   }
 
   private savePhase(global: GlobalPhase, child?: string, admissionId?: string) {

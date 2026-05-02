@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import {Info, LucideAngularModule, Users} from 'lucide-angular';
+import {Info, LucideAngularModule, Users, UserCog} from 'lucide-angular';
 import { FieldConfig } from '../../../../../../core/models/enrollment';
 
 // Champs optionnels "preset" qui correspondent à des propriétés top-level du Guardian
@@ -18,9 +18,9 @@ const GUARDIAN_TOP_LEVEL: ReadonlySet<string> = new Set(['email', 'phone']);
         <div class="inline-flex items-center justify-center w-14 h-14 bg-midnight text-white rounded-2xl mb-5 shadow-lg shadow-midnight/10">
           <lucide-icon [name]="Users" [size]="28"></lucide-icon>
         </div>
-        <h1 class="text-3xl font-display font-black text-midnight tracking-tight mb-2">Responsable légal</h1>
+        <h1 class="text-3xl font-display font-black text-midnight tracking-tight mb-2">{{ title || 'Responsable légal' }}</h1>
         <p class="text-base text-text-secondary font-medium max-w-lg leading-relaxed">
-          Identifiez le tuteur principal qui sera le point de contact privilégié pour l'établissement.
+          {{ subtitle || 'Identifiez le tuteur principal qui sera le point de contact privilégié pour l\\'établissement.' }}
         </p>
 
         <!-- 💡 Dynamic Instruction Banner -->
@@ -30,8 +30,25 @@ const GUARDIAN_TOP_LEVEL: ReadonlySet<string> = new Set(['email', 'phone']);
         </div>
       </div>
 
+      <!-- 👤 Option Élève Autonome (Si autorisé) -->
+      <div *ngIf="allowedWithoutGuardian" class="mb-10 p-6 bg-surface-sunken border border-border rounded-3xl flex items-center justify-between shadow-sm">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-midnight shadow-sm">
+            <lucide-icon [name]="UserCog" [size]="24"></lucide-icon>
+          </div>
+          <div>
+            <h4 class="font-black text-midnight text-sm uppercase tracking-tight">Inscription en autonomie</h4>
+            <p class="text-xs text-text-secondary font-medium">Cochez cette case si l'élève est son propre responsable légal.</p>
+          </div>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" [(ngModel)]="data.isIndependent" class="sr-only peer">
+          <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-midnight"></div>
+        </label>
+      </div>
+
       <!-- 📝 Form Grid -->
-      <div class="grid grid-cols-2 gap-x-8 gap-y-1">
+      <div class="grid grid-cols-2 gap-x-8 gap-y-1" [class.opacity-40]="data.isIndependent" [class.pointer-events-none]="data.isIndependent">
 
         <!-- Lien de parenté -->
         <div class="fw-field">
@@ -72,6 +89,14 @@ const GUARDIAN_TOP_LEVEL: ReadonlySet<string> = new Set(['email', 'phone']);
           <label class="fw-label">{{ coreLabel('phone') }}</label>
           <div class="fw-input-wrapper">
             <input type="tel" [(ngModel)]="data.primaryGuardian.phone" class="fw-input" placeholder="+221 .. ... .. ..">
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="fw-field" *ngIf="isPillarFieldEnabled('email')">
+          <label class="fw-label">{{ coreLabel('email') }}</label>
+          <div class="fw-input-wrapper">
+            <input type="email" [(ngModel)]="data.primaryGuardian.email" class="fw-input" placeholder="parent@exemple.com">
           </div>
         </div>
 
@@ -130,11 +155,19 @@ export class StepFamilyComponent {
   @Input() coreFieldControls: Record<string, { label: string }> = {};
   @Input() customFields: FieldConfig[] = [];
   @Input() instruction?: string;
+  @Input() title?: string;
+  @Input() subtitle?: string;
+  @Input() allowedWithoutGuardian = false;
 
   readonly Users = Users;
+  readonly UserCog = UserCog;
 
   coreLabel(field: string): string {
     return this.coreFieldControls?.[field]?.label ?? field;
+  }
+
+  isPillarFieldEnabled(field: string): boolean {
+    return !!this.coreFieldControls?.[field];
   }
 
   isTopLevel(name: string): boolean {
