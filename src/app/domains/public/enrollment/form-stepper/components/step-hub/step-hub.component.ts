@@ -37,8 +37,8 @@ import { FwEmptyStateComponent } from '../../../../../../shared/components/empty
       <div class="space-y-4 mb-10">
         <div *ngFor="let adm of admissions"
              class="group flex flex-col sm:flex-row items-center justify-between gap-6 p-6 rounded-[32px] border-2 transition-all hover:shadow-lg bg-white"
+             [ngClass]="{ 'bg-success-bg/30': isReady(adm) }"
              [class.border-success-border]="isReady(adm)"
-             [class.bg-success-bg/30]="isReady(adm)"
              [class.border-border]="!isReady(adm)">
 
           <!-- Identité enfant -->

@@ -30,9 +30,9 @@ interface ServiceSelection {
       <div class="space-y-4">
         <div *ngFor="let item of selections"
              class="group flex flex-col p-6 md:p-8 rounded-[32px] border-2 cursor-pointer transition-all duration-300 bg-white shadow-sm hover:shadow-md"
+             [ngClass]="{ 'bg-primary-alpha/5': item.selected }"
              [class.border-primary]="item.selected"
              [class.border-border]="!item.selected"
-             [class.bg-primary-alpha/5]="item.selected"
              [class.cursor-default]="item.svc.mandatory"
              (click)="!item.svc.mandatory && toggle(item)">
 
