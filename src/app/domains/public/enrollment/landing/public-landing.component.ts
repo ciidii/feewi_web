@@ -12,7 +12,7 @@ import {
   Calendar,
   FileText,
   ShieldCheck,
-  Globe, RefreshCw, Phone, GraduationCap, ChevronRight, AlertCircle
+  Globe, RefreshCw, Phone, GraduationCap, ChevronRight, AlertCircle, Lock
 } from 'lucide-angular';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { EnrollmentPublicService } from '../../../../core/services/enrollment-public.service';
@@ -118,4 +118,5 @@ export class PublicLandingComponent implements OnInit {
   readonly GraduationCap = GraduationCap;
   readonly ChevronRight = ChevronRight;
   readonly AlertCircle = AlertCircle;
+  readonly Lock = Lock;
 }
