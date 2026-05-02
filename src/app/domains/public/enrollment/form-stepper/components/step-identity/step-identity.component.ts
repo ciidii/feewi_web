@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, User } from 'lucide-angular';
+import {Info, LucideAngularModule, User} from 'lucide-angular';
 import { FieldConfig } from '../../../../../../core/models/enrollment';
 import { CycleGroup } from '../../../../../../core/models/academic.model';
 
@@ -11,40 +11,45 @@ import { CycleGroup } from '../../../../../../core/models/academic.model';
   imports: [CommonModule, FormsModule, LucideAngularModule],
   template: `
     <div class="animate-fade">
-      <!-- Header -->
+      <!-- 🏛️ Institutional Header -->
       <div class="mb-10">
-        <div class="inline-flex items-center justify-center w-12 h-12 bg-primary-alpha text-primary rounded-xl mb-4">
-          <lucide-icon [name]="User" [size]="24"></lucide-icon>
+        <div class="inline-flex items-center justify-center w-14 h-14 bg-midnight text-white rounded-2xl mb-5 shadow-lg shadow-midnight/10">
+          <lucide-icon [name]="User" [size]="28"></lucide-icon>
         </div>
-        <h1 class="text-3xl font-display font-black text-midnight tracking-tight">Identité de l'élève</h1>
-        <p class="text-sm text-text-secondary font-medium mt-2 max-w-lg">
+        <h1 class="text-3xl font-display font-black text-midnight tracking-tight mb-2">Identité de l'élève</h1>
+        <p class="text-base text-text-secondary font-medium max-w-lg leading-relaxed">
           Saisissez les informations d'état civil de l'enfant et sélectionnez son futur niveau scolaire.
         </p>
-        <div *ngIf="instruction" class="mt-4 px-4 py-3 bg-primary-alpha/10 rounded-xl border border-primary-alpha text-sm text-text-secondary">
-          {{ instruction }}
+
+        <!-- 💡 Dynamic Instruction Banner -->
+        <div *ngIf="instruction" class="mt-6 p-4 bg-primary-alpha/5 border-l-4 border-primary rounded-r-xl flex gap-3 items-start">
+          <lucide-icon [name]="Info" [size]="18" class="text-primary shrink-0 mt-0.5"></lucide-icon>
+          <p class="text-sm font-semibold text-primary leading-snug">{{ instruction }}</p>
         </div>
       </div>
 
       <!-- ── Section Vœu scolaire ──────────────────────────────── -->
-      <div class="flex items-center gap-3 mb-6">
-        <div class="w-1 h-5 bg-primary rounded-full"></div>
-        <span class="text-xs font-black uppercase tracking-widest text-text-tertiary">Vœu scolaire</span>
+      <div class="flex items-center gap-3 mb-8">
+        <div class="w-1.5 h-6 bg-primary rounded-full"></div>
+        <span class="text-[11px] font-black uppercase tracking-[0.2em] text-text-tertiary">Vœu scolaire</span>
       </div>
 
-      <div class="grid grid-cols-2 gap-x-8 gap-y-2 mb-10">
+      <div class="grid grid-cols-2 gap-x-8 gap-y-1 mb-12">
 
-        <!-- Niveau scolaire -->
-        <div class="col-span-2 fw-field p-6 bg-primary-alpha/5 rounded-2xl border-2 border-primary-alpha">
-          <label class="fw-label text-primary">{{ coreLabel('levelId') }}</label>
-          <select [(ngModel)]="schooling.levelId"
-                  (change)="onLevelChange.emit(schooling.levelId)"
-                  class="fw-input border-primary-alpha bg-white focus:ring-primary/20">
-            <option value="">Sélectionnez le niveau souhaité...</option>
-            <optgroup *ngFor="let group of groupedLevels" [label]="group.cycle.name || group.cycle.systemName">
-              <option *ngFor="let level of group.levels" [value]="level.id">{{ level.name }}</option>
-            </optgroup>
-          </select>
-          <span class="fw-hint">Le choix du niveau détermine les documents requis pour le dossier.</span>
+        <!-- Niveau scolaire (Highlight) -->
+        <div class="col-span-2 fw-field p-8 bg-primary-alpha/5 rounded-3xl border-2 border-primary-alpha mb-4">
+          <label class="fw-label text-primary font-bold">{{ coreLabel('levelId') }}</label>
+          <div class="fw-input-wrapper mt-2 border-primary-alpha bg-white focus-within:border-primary">
+            <select [(ngModel)]="schooling.levelId"
+                    (change)="onLevelChange.emit(schooling.levelId)"
+                    class="fw-input">
+              <option value="">Sélectionnez le niveau souhaité...</option>
+              <optgroup *ngFor="let group of groupedLevels" [label]="group.cycle.name || group.cycle.systemName">
+                <option *ngFor="let level of group.levels" [value]="level.id">{{ level.name }}</option>
+              </optgroup>
+            </select>
+          </div>
+          <span class="fw-hint text-primary/70 mt-3 font-medium">Le choix du niveau détermine les documents requis pour le dossier.</span>
         </div>
 
         <!-- Champs dynamiques Scolarité -->
@@ -54,64 +59,71 @@ import { CycleGroup } from '../../../../../../core/models/academic.model';
               {{ field.label }}
               <span *ngIf="field.mandatory" class="required">*</span>
             </label>
-            <ng-container [ngSwitch]="field.type">
-              <select *ngSwitchCase="'SELECT'" [(ngModel)]="schooling.customFields[field.name]" class="fw-input">
-                <option value="">Sélectionner...</option>
-                <option *ngFor="let opt of field.options ?? []" [value]="opt">{{ opt }}</option>
-              </select>
-              <textarea *ngSwitchCase="'TEXTAREA'" [(ngModel)]="schooling.customFields[field.name]" rows="3" class="fw-input h-auto py-3"></textarea>
-              <input *ngSwitchCase="'DATE'" type="date" [(ngModel)]="schooling.customFields[field.name]" class="fw-input">
-              <input *ngSwitchDefault type="text" [(ngModel)]="schooling.customFields[field.name]" class="fw-input">
-            </ng-container>
+            <div class="fw-input-wrapper" [class.h-auto]="field.type === 'TEXTAREA'">
+              <ng-container [ngSwitch]="field.type">
+                <select *ngSwitchCase="'SELECT'" [(ngModel)]="schooling.customFields[field.name]" class="fw-input">
+                  <option value="">Sélectionner...</option>
+                  <option *ngFor="let opt of field.options ?? []" [value]="opt">{{ opt }}</option>
+                </select>
+                <textarea *ngSwitchCase="'TEXTAREA'" [(ngModel)]="schooling.customFields[field.name]" rows="3" class="fw-input py-4"></textarea>
+                <input *ngSwitchCase="'DATE'" type="date" [(ngModel)]="schooling.customFields[field.name]" class="fw-input">
+                <input *ngSwitchDefault type="text" [(ngModel)]="schooling.customFields[field.name]" class="fw-input">
+              </ng-container>
+            </div>
           </div>
         </ng-container>
 
       </div>
 
-      <!-- ── Séparateur ─────────────────────────────────────────── -->
-      <div class="flex items-center gap-4 mb-8">
-        <div class="flex-1 h-px bg-border"></div>
-      </div>
-
       <!-- ── Section État civil ─────────────────────────────────── -->
-      <div class="flex items-center gap-3 mb-6">
-        <div class="w-1 h-5 bg-primary rounded-full"></div>
-        <span class="text-xs font-black uppercase tracking-widest text-text-tertiary">État civil</span>
+      <div class="flex items-center gap-3 mb-8">
+        <div class="w-1.5 h-6 bg-midnight rounded-full"></div>
+        <span class="text-[11px] font-black uppercase tracking-[0.2em] text-text-tertiary">État civil</span>
       </div>
 
-      <div class="grid grid-cols-2 gap-x-8 gap-y-2">
+      <div class="grid grid-cols-2 gap-x-8 gap-y-1">
 
         <!-- Prénom -->
         <div class="fw-field">
           <label class="fw-label">{{ coreLabel('firstName') }}</label>
-          <input type="text" [(ngModel)]="identity.firstName" class="fw-input" placeholder="Prénom de l'enfant">
+          <div class="fw-input-wrapper">
+            <input type="text" [(ngModel)]="identity.firstName" class="fw-input" placeholder="Prénom de l'enfant">
+          </div>
         </div>
 
         <!-- Nom -->
         <div class="fw-field">
           <label class="fw-label">{{ coreLabel('lastName') }}</label>
-          <input type="text" [(ngModel)]="identity.lastName" class="fw-input" placeholder="Nom de famille">
+          <div class="fw-input-wrapper">
+            <input type="text" [(ngModel)]="identity.lastName" class="fw-input" placeholder="Nom de famille">
+          </div>
         </div>
 
         <!-- Genre -->
         <div class="fw-field">
           <label class="fw-label">{{ coreLabel('gender') }}</label>
-          <select [(ngModel)]="identity.gender" class="fw-input">
-            <option value="MALE">Garçon</option>
-            <option value="FEMALE">Fille</option>
-          </select>
+          <div class="fw-input-wrapper">
+            <select [(ngModel)]="identity.gender" class="fw-input">
+              <option value="MALE">Garçon</option>
+              <option value="FEMALE">Fille</option>
+            </select>
+          </div>
         </div>
 
         <!-- Date de naissance -->
         <div class="fw-field">
           <label class="fw-label">{{ coreLabel('birthDate') }}</label>
-          <input type="date" [(ngModel)]="identity.birthDate" class="fw-input">
+          <div class="fw-input-wrapper">
+            <input type="date" [(ngModel)]="identity.birthDate" class="fw-input">
+          </div>
         </div>
 
         <!-- Lieu de naissance -->
         <div class="col-span-2 fw-field">
           <label class="fw-label">{{ coreLabel('birthPlace') }}</label>
-          <input type="text" [(ngModel)]="identity.birthPlace" class="fw-input" placeholder="Ville ou lieu de naissance">
+          <div class="fw-input-wrapper">
+            <input type="text" [(ngModel)]="identity.birthPlace" class="fw-input" placeholder="Ville ou lieu de naissance">
+          </div>
         </div>
 
         <!-- Champs dynamiques identité -->
@@ -121,15 +133,17 @@ import { CycleGroup } from '../../../../../../core/models/academic.model';
               {{ field.label }}
               <span *ngIf="field.mandatory" class="required">*</span>
             </label>
-            <ng-container [ngSwitch]="field.type">
-              <select *ngSwitchCase="'SELECT'" [(ngModel)]="identity.customFields[field.name]" class="fw-input">
-                <option value="">Sélectionner...</option>
-                <option *ngFor="let opt of field.options ?? []" [value]="opt">{{ opt }}</option>
-              </select>
-              <textarea *ngSwitchCase="'TEXTAREA'" [(ngModel)]="identity.customFields[field.name]" rows="3" class="fw-input h-auto py-3"></textarea>
-              <input *ngSwitchCase="'DATE'" type="date" [(ngModel)]="identity.customFields[field.name]" class="fw-input">
-              <input *ngSwitchDefault type="text" [(ngModel)]="identity.customFields[field.name]" class="fw-input">
-            </ng-container>
+            <div class="fw-input-wrapper" [class.h-auto]="field.type === 'TEXTAREA'">
+              <ng-container [ngSwitch]="field.type">
+                <select *ngSwitchCase="'SELECT'" [(ngModel)]="identity.customFields[field.name]" class="fw-input">
+                  <option value="">Sélectionner...</option>
+                  <option *ngFor="let opt of field.options ?? []" [value]="opt">{{ opt }}</option>
+                </select>
+                <textarea *ngSwitchCase="'TEXTAREA'" [(ngModel)]="identity.customFields[field.name]" rows="3" class="fw-input py-4"></textarea>
+                <input *ngSwitchCase="'DATE'" type="date" [(ngModel)]="identity.customFields[field.name]" class="fw-input">
+                <input *ngSwitchDefault type="text" [(ngModel)]="identity.customFields[field.name]" class="fw-input">
+              </ng-container>
+            </div>
           </div>
         </ng-container>
 
@@ -157,4 +171,6 @@ export class StepIdentityComponent {
   coreLabel(field: string): string {
     return this.coreFieldControls?.[field]?.label ?? field;
   }
+
+  protected readonly Info = Info;
 }

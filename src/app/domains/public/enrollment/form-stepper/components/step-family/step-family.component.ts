@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, Users } from 'lucide-angular';
+import {Info, LucideAngularModule, Users} from 'lucide-angular';
 import { FieldConfig } from '../../../../../../core/models/enrollment';
 
 // Champs optionnels "preset" qui correspondent à des propriétés top-level du Guardian
@@ -13,34 +13,40 @@ const GUARDIAN_TOP_LEVEL: ReadonlySet<string> = new Set(['email', 'phone']);
   imports: [CommonModule, FormsModule, LucideAngularModule],
   template: `
     <div class="animate-fade">
-      <!-- Header -->
+      <!-- 🏛️ Institutional Header -->
       <div class="mb-10">
-        <div class="inline-flex items-center justify-center w-12 h-12 bg-primary-alpha text-primary rounded-xl mb-4">
-          <lucide-icon [name]="Users" [size]="24"></lucide-icon>
+        <div class="inline-flex items-center justify-center w-14 h-14 bg-midnight text-white rounded-2xl mb-5 shadow-lg shadow-midnight/10">
+          <lucide-icon [name]="Users" [size]="28"></lucide-icon>
         </div>
-        <h1 class="text-3xl font-display font-black text-midnight tracking-tight">Responsable légal</h1>
-        <p class="text-sm text-text-secondary font-medium mt-2 max-w-lg">
-          Veuillez identifier le tuteur principal qui sera le point de contact privilégié pour cet établissement.
+        <h1 class="text-3xl font-display font-black text-midnight tracking-tight mb-2">Responsable légal</h1>
+        <p class="text-base text-text-secondary font-medium max-w-lg leading-relaxed">
+          Identifiez le tuteur principal qui sera le point de contact privilégié pour l'établissement.
         </p>
-        <div *ngIf="instruction" class="mt-4 px-4 py-3 bg-primary-alpha/10 rounded-xl border border-primary-alpha text-sm text-text-secondary">
-          {{ instruction }}
+
+        <!-- 💡 Dynamic Instruction Banner -->
+        <div *ngIf="instruction" class="mt-6 p-4 bg-primary-alpha/5 border-l-4 border-primary rounded-r-xl flex gap-3 items-start">
+          <lucide-icon [name]="Info" [size]="18" class="text-primary shrink-0 mt-0.5"></lucide-icon>
+          <p class="text-sm font-semibold text-primary leading-snug">{{ instruction }}</p>
         </div>
       </div>
 
-      <div class="grid grid-cols-2 gap-x-8 gap-y-2">
+      <!-- 📝 Form Grid -->
+      <div class="grid grid-cols-2 gap-x-8 gap-y-1">
 
         <!-- Lien de parenté -->
         <div class="fw-field">
           <label class="fw-label">{{ coreLabel('relation') }}</label>
-          <select [(ngModel)]="data.primaryGuardian.relation" class="fw-input">
-            <option value="FATHER">Père</option>
-            <option value="MOTHER">Mère</option>
-            <option value="UNCLE">Oncle</option>
-            <option value="AUNT">Tante</option>
-            <option value="GRANDPARENT">Grand-parent</option>
-            <option value="GUARDIAN">Tuteur légal</option>
-            <option value="OTHER">Autre</option>
-          </select>
+          <div class="fw-input-wrapper">
+            <select [(ngModel)]="data.primaryGuardian.relation" class="fw-input">
+              <option value="FATHER">Père</option>
+              <option value="MOTHER">Mère</option>
+              <option value="UNCLE">Oncle</option>
+              <option value="AUNT">Tante</option>
+              <option value="GRANDPARENT">Grand-parent</option>
+              <option value="GUARDIAN">Tuteur légal</option>
+              <option value="OTHER">Autre</option>
+            </select>
+          </div>
         </div>
 
         <div class="hidden md:block"></div>
@@ -48,19 +54,25 @@ const GUARDIAN_TOP_LEVEL: ReadonlySet<string> = new Set(['email', 'phone']);
         <!-- Nom -->
         <div class="fw-field">
           <label class="fw-label">{{ coreLabel('lastName') }}</label>
-          <input type="text" [(ngModel)]="data.primaryGuardian.lastName" class="fw-input" placeholder="Ex: NDIAYE">
+          <div class="fw-input-wrapper">
+            <input type="text" [(ngModel)]="data.primaryGuardian.lastName" class="fw-input" placeholder="Ex: NDIAYE">
+          </div>
         </div>
 
         <!-- Prénom -->
         <div class="fw-field">
           <label class="fw-label">{{ coreLabel('firstName') }}</label>
-          <input type="text" [(ngModel)]="data.primaryGuardian.firstName" class="fw-input" placeholder="Ex: Moussa">
+          <div class="fw-input-wrapper">
+            <input type="text" [(ngModel)]="data.primaryGuardian.firstName" class="fw-input" placeholder="Ex: Moussa">
+          </div>
         </div>
 
         <!-- Téléphone -->
         <div class="fw-field">
           <label class="fw-label">{{ coreLabel('phone') }}</label>
-          <input type="tel" [(ngModel)]="data.primaryGuardian.phone" class="fw-input" placeholder="+221 .. ... .. ..">
+          <div class="fw-input-wrapper">
+            <input type="tel" [(ngModel)]="data.primaryGuardian.phone" class="fw-input" placeholder="+221 .. ... .. ..">
+          </div>
         </div>
 
         <!-- Champs dynamiques (preset + custom) -->
@@ -71,35 +83,37 @@ const GUARDIAN_TOP_LEVEL: ReadonlySet<string> = new Set(['email', 'phone']);
               <span *ngIf="field.mandatory" class="required">*</span>
             </label>
 
-            <!-- Champ top-level (ex: email) -->
-            <ng-container *ngIf="isTopLevel(field.name); else customField">
-              <input [type]="field.name === 'email' ? 'email' : 'text'"
-                     [(ngModel)]="data.primaryGuardian[field.name]"
-                     class="fw-input"
-                     [placeholder]="field.name === 'email' ? 'parent@exemple.com' : ''">
-            </ng-container>
-
-            <!-- Champ customFields -->
-            <ng-template #customField>
-              <ng-container [ngSwitch]="field.type">
-                <select *ngSwitchCase="'SELECT'"
-                        [(ngModel)]="data.primaryGuardian.customFields[field.name]"
-                        class="fw-input">
-                  <option value="">Sélectionner...</option>
-                  <option *ngFor="let opt of field.options ?? []" [value]="opt">{{ opt }}</option>
-                </select>
-                <textarea *ngSwitchCase="'TEXTAREA'"
-                          [(ngModel)]="data.primaryGuardian.customFields[field.name]"
-                          rows="3"
-                          class="fw-input h-auto py-3"></textarea>
-                <input *ngSwitchCase="'DATE'" type="date"
-                       [(ngModel)]="data.primaryGuardian.customFields[field.name]"
-                       class="fw-input">
-                <input *ngSwitchDefault type="text"
-                       [(ngModel)]="data.primaryGuardian.customFields[field.name]"
-                       class="fw-input">
+            <div class="fw-input-wrapper" [class.h-auto]="field.type === 'TEXTAREA'">
+              <!-- Champ top-level (ex: email) -->
+              <ng-container *ngIf="isTopLevel(field.name); else customField">
+                <input [type]="field.name === 'email' ? 'email' : 'text'"
+                       [(ngModel)]="data.primaryGuardian[field.name]"
+                       class="fw-input"
+                       [placeholder]="field.name === 'email' ? 'parent@exemple.com' : ''">
               </ng-container>
-            </ng-template>
+
+              <!-- Champ customFields -->
+              <ng-template #customField>
+                <ng-container [ngSwitch]="field.type">
+                  <select *ngSwitchCase="'SELECT'"
+                          [(ngModel)]="data.primaryGuardian.customFields[field.name]"
+                          class="fw-input">
+                    <option value="">Sélectionner...</option>
+                    <option *ngFor="let opt of field.options ?? []" [value]="opt">{{ opt }}</option>
+                  </select>
+                  <textarea *ngSwitchCase="'TEXTAREA'"
+                            [(ngModel)]="data.primaryGuardian.customFields[field.name]"
+                            rows="3"
+                            class="fw-input py-4"></textarea>
+                  <input *ngSwitchCase="'DATE'" type="date"
+                         [(ngModel)]="data.primaryGuardian.customFields[field.name]"
+                         class="fw-input">
+                  <input *ngSwitchDefault type="text"
+                         [(ngModel)]="data.primaryGuardian.customFields[field.name]"
+                         class="fw-input">
+                </ng-container>
+              </ng-template>
+            </div>
           </div>
         </ng-container>
 
@@ -126,4 +140,6 @@ export class StepFamilyComponent {
   isTopLevel(name: string): boolean {
     return GUARDIAN_TOP_LEVEL.has(name);
   }
+
+  protected readonly Info = Info;
 }

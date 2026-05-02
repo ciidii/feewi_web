@@ -16,13 +16,13 @@ interface ServiceSelection {
   imports: [CommonModule, LucideAngularModule, FwBadgeComponent],
   template: `
     <div class="animate-fade">
-      <!-- Header -->
+      <!-- 🏛️ Institutional Header -->
       <div class="mb-10">
-        <div class="inline-flex items-center justify-center w-12 h-12 bg-primary-alpha text-primary rounded-xl mb-4">
-          <lucide-icon [name]="LayoutGrid" [size]="24"></lucide-icon>
+        <div class="inline-flex items-center justify-center w-14 h-14 bg-midnight text-white rounded-2xl mb-5 shadow-lg shadow-midnight/10">
+          <lucide-icon [name]="LayoutGrid" [size]="28"></lucide-icon>
         </div>
-        <h1 class="text-3xl font-display font-black text-midnight tracking-tight">Services & Extras</h1>
-        <p class="text-sm text-text-secondary font-medium mt-2 max-w-lg">
+        <h1 class="text-3xl font-display font-black text-midnight tracking-tight mb-2">Services & Extras</h1>
+        <p class="text-base text-text-secondary font-medium max-w-lg leading-relaxed">
           Sélectionnez les prestations additionnelles souhaitées pour l'accompagnement de votre enfant.
         </p>
       </div>

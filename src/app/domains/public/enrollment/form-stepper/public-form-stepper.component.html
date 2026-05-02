@@ -28,7 +28,7 @@
       </div>
     </div>
 
-    <!-- Niveau 2 : Stepper Global -->
+    <!-- Niveau 2 : Stepper Global (Épuré) -->
     <nav class="global-nav">
       <div class="container">
         <!-- Step 1: Famille -->
@@ -61,34 +61,36 @@
         </div>
       </div>
     </nav>
-
-    <!-- Barre de Contexte Enfant (uniquement lors de l'édition d'un élève) -->
-    <div class="child-context-bar" *ngIf="isChildFlow()">
-      <div class="container">
-        <div class="child-info">
-          <div class="avatar">{{ activeAdmission()?.identity?.firstName?.charAt(0) || 'E' }}</div>
-          <span class="name">Dossier de {{ activeAdmission()?.identity?.firstName || 'Nouvel élève' }}</span>
-        </div>
-        
-        <div class="child-steps">
-          <div *ngFor="let s of childSteps()" class="c-step" 
-               [class.active]="childPhase() === s"
-               [class.done]="isChildStepDone(s)"
-               [title]="childStepLabel(s)">
-            <lucide-icon [name]="childStepIcon(s)" [size]="14"></lucide-icon>
-          </div>
-        </div>
-      </div>
-      <!-- Barre de progression enfant (Mobile-ready) -->
-      <div class="progress-track">
-        <div class="progress-fill" [style.width.%]="childProgress()"></div>
-      </div>
-    </div>
   </header>
 
   <!-- 📝 CONTENU PRINCIPAL (Centré) -->
   <main class="stepper-main">
     <div class="form-container">
+
+      <!-- 🟢 BANNIÈRE DE CONTEXTE ENFANT (Intégrée au flux) -->
+      <header class="child-context-banner animate-in fade-in slide-in-from-top-4 duration-500" *ngIf="isChildFlow()">
+        <div class="child-meta">
+          <div class="child-avatar">{{ activeAdmission()?.identity?.firstName?.charAt(0) || 'E' }}</div>
+          <div class="child-info">
+            <p class="context-label">Édition du dossier</p>
+            <h2 class="child-name">{{ activeAdmission()?.identity?.firstName || 'Nouvel élève' }} {{ activeAdmission()?.identity?.lastName }}</h2>
+          </div>
+        </div>
+        
+        <div class="child-steps-nav">
+          <div *ngFor="let s of childSteps()" class="cs-item" 
+               [class.active]="childPhase() === s"
+               [class.done]="isChildStepDone(s)">
+            <lucide-icon [name]="childStepIcon(s)" [size]="16"></lucide-icon>
+            <span class="cs-label">{{ childStepLabel(s) }}</span>
+          </div>
+        </div>
+
+        <!-- Barre de progression discrète -->
+        <div class="cs-progress-bar">
+          <div class="fill" [style.width.%]="childProgress()"></div>
+        </div>
+      </header>
       
       <div class="view-viewport">
         <!-- Phase GUARDIAN -->
