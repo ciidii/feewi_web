@@ -19,6 +19,9 @@ import { FieldConfig } from '../../../../../../core/models/enrollment';
         <p class="text-sm text-text-secondary font-medium mt-2 max-w-lg">
           Ces informations sont strictement confidentielles et ne seront accessibles qu'au personnel habilité.
         </p>
+        <div *ngIf="instruction" class="mt-4 px-4 py-3 bg-primary-alpha/10 rounded-xl border border-primary-alpha text-sm text-text-secondary">
+          {{ instruction }}
+        </div>
       </div>
 
       <div *ngIf="customFields.length > 0; else noFields" class="grid grid-cols-2 gap-x-8 gap-y-2">
@@ -71,6 +74,7 @@ import { FieldConfig } from '../../../../../../core/models/enrollment';
 export class StepMedicalComponent {
   @Input() medical: any;
   @Input() customFields: FieldConfig[] = [];
+  @Input() instruction?: string;
 
   readonly HeartPulse = HeartPulse;
 }

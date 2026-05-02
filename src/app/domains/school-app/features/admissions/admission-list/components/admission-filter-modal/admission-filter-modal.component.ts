@@ -5,7 +5,7 @@ import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/materia
 import { LucideAngularModule, Filter, X, Clock, UserCheck, CheckCircle, Calendar, School } from 'lucide-angular';
 import { FwButtonComponent } from '../../../../../../../shared/components/button/button.component';
 import { FwModalShellComponent } from '../../../../../../../shared/components/modal-shell/modal-shell.component';
-import { AcademicYear, Level } from '../../../../../../../core/models/academic.model';
+import { AcademicYear, Level, CycleGroup } from '../../../../../../../core/models/academic.model';
 
 export interface AdmissionFilterData {
   selectedYear: string;
@@ -13,7 +13,7 @@ export interface AdmissionFilterData {
   selectedChannel: string;
   selectedStartDate: string;
   selectedEndDate: string;
-  levels: Level[];
+  groupedLevels: CycleGroup[];
   years: AcademicYear[];
 }
 

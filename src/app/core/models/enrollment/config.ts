@@ -73,6 +73,15 @@ export interface ServicesSchemaConfig {
   availableServices: ServiceConfig[];
 }
 
+// --- PILIERS EXTRA (créés par l'établissement) ---
+
+export interface ExtraPillarConfig {
+  key: string;
+  label: string;
+  enabled: boolean;
+  customFields: FieldConfig[];
+}
+
 // --- SCHÉMA GLOBAL ---
 
 export interface EnrollmentSchema {
@@ -83,6 +92,7 @@ export interface EnrollmentSchema {
   documents: DocumentSchemaConfig;
   assessment: AssessmentSchemaConfig;
   services?: ServicesSchemaConfig;
+  extraPillars?: ExtraPillarConfig[];
 }
 
 // --- CONFIG NIVEAU (OVERRIDE) ---

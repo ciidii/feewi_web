@@ -156,7 +156,7 @@ export class CycleDetailComponent implements OnInit {
 
         if (currentCycle) {
           this.cycle.set(currentCycle);
-          const cycleName = currentCycle.customName || currentCycle.systemName;
+          const cycleName = currentCycle.customName || currentCycle.systemName || currentCycle.cycleCode || currentCycle.id;
           this.navState.setBreadcrumb(['Accueil', 'Structure', cycleName]);
 
           const cycleLevels = allLevels.filter(l => {

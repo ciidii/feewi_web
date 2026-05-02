@@ -10,7 +10,6 @@ import {
   Eye,
   EyeOff,
   FileText,
-  Pencil,
   Globe,
   GraduationCap,
   Hash,
@@ -20,6 +19,7 @@ import {
   Lock,
   LucideAngularModule,
   MessageSquare,
+  Pencil,
   Plus,
   RefreshCw,
   Save,
@@ -38,6 +38,7 @@ import {EnrollmentAdminService} from '../../../../../core/services/enrollment-ad
 import {
   CycleOverrideConfig,
   EnrollmentConfig,
+  ExtraPillarConfig,
   FieldConfig,
   LevelOverrideConfig,
   PresetDocumentConfig,
@@ -48,7 +49,7 @@ import {
 import {CycleType} from '../../../../../core/models/enrollment/base-types';
 import {NotificationService} from '../../../../../shared/services/notification.service';
 import {AcademicService} from '../../../../../core/services/academic.service';
-import {AcademicYear, Cycle, Level} from '../../../../../core/models/academic.model';
+import {AcademicYear, Cycle, CycleGroup, Level} from '../../../../../core/models/academic.model';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {DocumentTypeFormComponent} from './components/document-type-form/document-type-form.component';
 import {CustomFieldFormComponent} from './components/custom-field-form/custom-field-form.component';
@@ -95,6 +96,7 @@ export class AdmissionConfigComponent implements OnInit {
   initialConfig = signal<EnrollmentConfig | null>(null);
   activeYear = signal<AcademicYear | null>(null);
   levels = signal<Level[]>([]);
+  groupedLevels = signal<CycleGroup[]>([]);
   academicCycles = signal<Cycle[]>([]);
   availableYears = signal<AcademicYear[]>([]);
   isLoading = signal(true);
@@ -104,6 +106,8 @@ export class AdmissionConfigComponent implements OnInit {
   selectedYearId = signal<string | null>(null);
   activeTab = signal<ConfigTab>('PILLARS');
   activePillarId = signal<string>('identity');
+  showAddPillarForm = signal(false);
+  newPillarLabel = '';
 
   // Onglets Niveau 1 (Shell)
   readonly admissionTabs: FwTab[] = [
@@ -117,17 +121,19 @@ export class AdmissionConfigComponent implements OnInit {
   // Onglets Niveau 2 — computed pour afficher le badge "count" des champs perso
   pillarTabs = computed<FwTab[]>(() => {
     const cfg = this.config();
-    return this.systemPillars.map(p => {
+    const systemTabs = this.systemPillars.map(p => {
       const pillar = cfg ? (cfg.schema as any)[p.key] : null;
       const cfKey = p.key === 'family' ? 'guardianCustomFields' : 'customFields';
       const customCount: number = pillar ? ((pillar[cfKey] as FieldConfig[]) || []).length : 0;
-      return {
-        id: p.key,
-        label: p.label,
-        icon: p.icon,
-        count: customCount > 0 ? customCount : undefined
-      };
+      return {id: p.key, label: p.label, icon: p.icon, count: customCount > 0 ? customCount : undefined};
     });
+    const extraTabs: FwTab[] = (cfg?.schema?.extraPillars || []).map(p => ({
+      id: p.key,
+      label: p.label,
+      icon: Sparkles,
+      count: (p.customFields || []).length > 0 ? (p.customFields || []).length : undefined
+    }));
+    return [...systemTabs, ...extraTabs];
   });
 
   // Year override local form state (isolated from global config)
@@ -175,10 +181,10 @@ export class AdmissionConfigComponent implements OnInit {
   ];
 
   readonly assessmentTypes = [
-    {value: 'DOSSIER',   label: 'Dossier',   desc: 'Étude des pièces uniquement',       icon: ClipboardList},
-    {value: 'EXAM',      label: 'Examen',     desc: 'Notes sur matières définies',        icon: Hash},
-    {value: 'INTERVIEW', label: 'Entretien',  desc: 'Évaluation orale de motivation',     icon: MessageSquare},
-    {value: 'MIXED',     label: 'Mixte',      desc: 'Combine plusieurs modalités',        icon: Settings2}
+    {value: 'DOSSIER', label: 'Dossier', desc: 'Étude des pièces uniquement', icon: ClipboardList},
+    {value: 'EXAM', label: 'Examen', desc: 'Notes sur matières définies', icon: Hash},
+    {value: 'INTERVIEW', label: 'Entretien', desc: 'Évaluation orale de motivation', icon: MessageSquare},
+    {value: 'MIXED', label: 'Mixte', desc: 'Combine plusieurs modalités', icon: Settings2}
   ];
 
   readonly registrationModes = [
@@ -204,25 +210,17 @@ export class AdmissionConfigComponent implements OnInit {
   });
 
   levelsByCycle = computed(() => {
-    const allLevels = this.levels();
-    const allCycles = this.academicCycles();
-
-    // Map pour retrouver le cycleCode par ID de cycle
-    const cycleCodeMap = new Map<string, string>();
-    allCycles.forEach(c => cycleCodeMap.set(c.id, c.cycleCode));
+    const grouped = this.groupedLevels();
 
     return this.cycles
       .map(c => {
-        const matchingLevels = allLevels
-          .filter(l => {
-            const levelCycleCode = cycleCodeMap.get(l.cycleId) || l.cycle?.cycleCode;
-            return levelCycleCode === c.type;
-          })
-          .sort((a, b) => a.rank - b.rank);
+        // Recherche du groupe correspondant par code (supporte les deux formats de code)
+        const matchingGroup = grouped.find(g => (g.cycle.code || g.cycle.cycleCode) === c.type);
+        const levels = matchingGroup?.levels || [];
 
         return {
           cycle: c,
-          levels: matchingLevels
+          levels: [...levels].sort((a, b) => a.rank - b.rank)
         };
       })
       .filter(g => g.levels.length > 0 || this.hasCycleOverride(g.cycle.type));
@@ -235,26 +233,37 @@ export class AdmissionConfigComponent implements OnInit {
 
   shellDescription = computed(() => {
     switch (this.currentScope()) {
-      case 'YEAR':   return `Surcharge d'année • ${this.selectedYearName()}`;
-      case 'CYCLE':  return `Surcharge de cycle • ${this.selectedCycleName()}`;
-      case 'LEVEL':  return `Surcharge de niveau • ${this.selectedLevelName()}`;
-      default:       return `Configuration de l'expérience d'admission • ${this.activeYear()?.label || '...'}`;
+      case 'YEAR':
+        return `Surcharge d'année • ${this.selectedYearName()}`;
+      case 'CYCLE':
+        return `Surcharge de cycle • ${this.selectedCycleName()}`;
+      case 'LEVEL':
+        return `Surcharge de niveau • ${this.selectedLevelName()}`;
+      default:
+        return `Configuration de l'expérience d'admission • ${this.activeYear()?.label || '...'}`;
     }
   });
 
   activePillarKey = computed(() => this.activePillarId());
 
+  isExtraPillar = computed(() => !this.systemPillars.some(p => p.key === this.activePillarId()));
+
   activePillar = computed<any>(() => {
     const cfg = this.config();
     if (!cfg) return null;
+    if (this.isExtraPillar()) {
+      return (cfg.schema.extraPillars || []).find(p => p.key === this.activePillarKey()) || null;
+    }
     return (cfg.schema as Record<string, any>)[this.activePillarKey()] || null;
   });
 
   activePillarLabel = computed(() =>
-    this.systemPillars.find(p => p.key === this.activePillarKey())?.label || ''
+    this.systemPillars.find(p => p.key === this.activePillarKey())?.label ||
+    (this.config()?.schema?.extraPillars || []).find(p => p.key === this.activePillarKey())?.label || ''
   );
 
   activePillarCoreFields = computed<{ name: string; label: string }[]>(() => {
+    if (this.isExtraPillar()) return [];
     const pillar = this.activePillar();
     if (!pillar) return [];
     const controls = this.activePillarKey() === 'family'
@@ -267,6 +276,7 @@ export class AdmissionConfigComponent implements OnInit {
   activePillarCustomFields = computed<FieldConfig[]>(() => {
     const pillar = this.activePillar();
     if (!pillar) return [];
+    if (this.isExtraPillar()) return pillar.customFields || [];
     return (this.activePillarKey() === 'family' ? pillar.guardianCustomFields : pillar.customFields) || [];
   });
 
@@ -332,10 +342,17 @@ export class AdmissionConfigComponent implements OnInit {
     return key === 'identity' || key === 'schooling';
   }
 
+  private isExtraPillarKey(key: string): boolean {
+    return !this.systemPillars.some(p => p.key === key);
+  }
+
   isPillarEnabled(key: string): boolean {
     if (this.isCorePillar(key)) return true;
     const cfg = this.config();
     if (!cfg) return true;
+    if (this.isExtraPillarKey(key)) {
+      return (cfg.schema.extraPillars || []).find(p => p.key === key)?.enabled !== false;
+    }
     return (cfg.schema as any)[key]?.enabled !== false;
   }
 
@@ -351,9 +368,10 @@ export class AdmissionConfigComponent implements OnInit {
       activeYear: this.academicService.getCurrentYear(),
       allYears: this.academicService.getYears(),
       levels: this.academicService.getLevels(),
+      grouped: this.academicService.getGroupedLevels(),
       cycles: this.academicService.getCycles()
     }).pipe(finalize(() => this.isLoading.set(false))).subscribe({
-      next: ({config, activeYear, allYears, levels, cycles}) => {
+      next: ({config, activeYear, allYears, levels, grouped, cycles}) => {
         if (!config.schema.assessment)
           config.schema.assessment = {type: 'DOSSIER', subjects: {}, maxGrade: 20, minPassingGrade: 10};
         if (!config.schema.documents.presetDocuments)
@@ -365,6 +383,7 @@ export class AdmissionConfigComponent implements OnInit {
         this.activeYear.set(activeYear);
         this.availableYears.set(allYears);
         this.levels.set(levels);
+        this.groupedLevels.set(grouped);
         this.academicCycles.set(cycles);
       },
       error: (err) => console.error('[AdmissionConfig]', err)
@@ -744,15 +763,15 @@ export class AdmissionConfigComponent implements OnInit {
   updatePillarInstruction(key: string, text: string) {
     const current = this.config();
     if (!current) return;
-    const instructions = { ...(current.instructions || {}), [key]: text };
-    this.config.set({ ...current, instructions });
+    const instructions = {...(current.instructions || {}), [key]: text};
+    this.config.set({...current, instructions});
   }
 
   toggleFamilyGuardianRequirement() {
     const current = this.config();
     if (!current) return;
-    const family = { ...current.schema.family, allowedWithoutGuardian: !current.schema.family.allowedWithoutGuardian };
-    this.config.set({ ...current, schema: { ...current.schema, family } });
+    const family = {...current.schema.family, allowedWithoutGuardian: !current.schema.family.allowedWithoutGuardian};
+    this.config.set({...current, schema: {...current.schema, family}});
   }
 
   updateCoreFieldLabel(fieldName: string, label: string) {
@@ -769,16 +788,36 @@ export class AdmissionConfigComponent implements OnInit {
   togglePillarEnabled(key: string) {
     const current = this.config();
     if (!current || this.isCorePillar(key)) return;
-    const pillar = (current.schema as any)[key];
-    this.config.set({...current, schema: {...current.schema, [key]: {...pillar, enabled: !pillar?.enabled}}});
+    if (this.isExtraPillarKey(key)) {
+      const extraPillars = (current.schema.extraPillars || []).map(p =>
+        p.key === key ? {...p, enabled: !p.enabled} : p
+      );
+      this.config.set({...current, schema: {...current.schema, extraPillars}});
+    } else {
+      const pillar = (current.schema as any)[key];
+      this.config.set({...current, schema: {...current.schema, [key]: {...pillar, enabled: !pillar?.enabled}}});
+    }
+  }
+
+  private patchExtraPillarFields(key: string, fn: (fields: FieldConfig[]) => FieldConfig[]) {
+    const c = this.config();
+    if (!c) return;
+    const extraPillars = (c.schema.extraPillars || []).map(p =>
+      p.key === key ? {...p, customFields: fn(p.customFields || [])} : p
+    );
+    this.config.set({...c, schema: {...c.schema, extraPillars}});
   }
 
   addCustomField() {
     this.dialog.open(CustomFieldFormComponent, {width: '500px', panelClass: 'feewi-dialog-panel'})
       .afterClosed().subscribe(result => {
       if (!result || !this.config()) return;
-      const current = this.config()!;
       const k = this.activePillarKey();
+      if (this.isExtraPillar()) {
+        this.patchExtraPillarFields(k, fields => [...fields, result]);
+        return;
+      }
+      const current = this.config()!;
       const pillar = {...(current.schema as any)[k]};
       const cfKey = k === 'family' ? 'guardianCustomFields' : 'customFields';
       pillar[cfKey] = [...(pillar[cfKey] || []), result];
@@ -787,9 +826,13 @@ export class AdmissionConfigComponent implements OnInit {
   }
 
   removeCustomField(fieldName: string) {
+    const k = this.activePillarKey();
+    if (this.isExtraPillar()) {
+      this.patchExtraPillarFields(k, fields => fields.filter(f => f.name !== fieldName));
+      return;
+    }
     const current = this.config();
     if (!current) return;
-    const k = this.activePillarKey();
     const pillar = {...(current.schema as any)[k]};
     const cfKey = k === 'family' ? 'guardianCustomFields' : 'customFields';
     pillar[cfKey] = (pillar[cfKey] || []).filter((f: FieldConfig) => f.name !== fieldName);
@@ -797,9 +840,13 @@ export class AdmissionConfigComponent implements OnInit {
   }
 
   updateCustomFieldMandatory(fieldName: string, mandatory: boolean) {
+    const k = this.activePillarKey();
+    if (this.isExtraPillar()) {
+      this.patchExtraPillarFields(k, fields => fields.map(f => f.name === fieldName ? {...f, mandatory} : f));
+      return;
+    }
     const current = this.config();
     if (!current) return;
-    const k = this.activePillarKey();
     const pillar = {...(current.schema as any)[k]};
     const cfKey = k === 'family' ? 'guardianCustomFields' : 'customFields';
     pillar[cfKey] = (pillar[cfKey] || []).map((f: FieldConfig) =>
@@ -809,9 +856,15 @@ export class AdmissionConfigComponent implements OnInit {
   }
 
   updateCustomFieldHidden(fieldName: string, hidden: boolean) {
+    const k = this.activePillarKey();
+    if (this.isExtraPillar()) {
+      this.patchExtraPillarFields(k, fields =>
+        fields.map(f => f.name === fieldName ? {...f, hidden: hidden || undefined} : f)
+      );
+      return;
+    }
     const current = this.config();
     if (!current) return;
-    const k = this.activePillarKey();
     const pillar = {...(current.schema as any)[k]};
     const cfKey = k === 'family' ? 'guardianCustomFields' : 'customFields';
     pillar[cfKey] = (pillar[cfKey] || []).map((f: FieldConfig) =>
@@ -821,18 +874,56 @@ export class AdmissionConfigComponent implements OnInit {
   }
 
   editCustomField(field: FieldConfig) {
+    const k = this.activePillarKey();
     this.dialog.open(CustomFieldFormComponent, {
       width: '500px', panelClass: 'feewi-dialog-panel', data: {field}
     }).afterClosed().subscribe((result: FieldConfig | undefined) => {
       if (!result || !this.config()) return;
+      if (this.isExtraPillar()) {
+        this.patchExtraPillarFields(k, fields => fields.map(f => f.name === field.name ? result : f));
+        return;
+      }
       const current = this.config()!;
-      const k = this.activePillarKey();
       const pillar = {...(current.schema as any)[k]};
       const cfKey = k === 'family' ? 'guardianCustomFields' : 'customFields';
       pillar[cfKey] = (pillar[cfKey] || []).map((f: FieldConfig) =>
         f.name === field.name ? result : f
       );
       this.config.set({...current, schema: {...current.schema, [k]: pillar}});
+    });
+  }
+
+  addExtraPillar() {
+    const label = this.newPillarLabel.trim();
+    if (!label) return;
+    const c = this.config();
+    if (!c) return;
+    const key = 'extra_' + label.toLowerCase().replace(/[^a-z0-9]/g, '_').substring(0, 20);
+    const newPillar: ExtraPillarConfig = {key, label, enabled: true, customFields: []};
+    const extraPillars = [...(c.schema.extraPillars || []), newPillar];
+    this.config.set({...c, schema: {...c.schema, extraPillars}});
+    this.activePillarId.set(key);
+    this.showAddPillarForm.set(false);
+    this.newPillarLabel = '';
+  }
+
+  removeExtraPillar(key: string) {
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Supprimer ce pilier',
+        message: 'Tous les champs personnalisés de ce pilier seront définitivement supprimés.',
+        confirmLabel: 'Supprimer',
+        cancelLabel: 'Annuler',
+        type: 'danger'
+      }
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      const c = this.config();
+      if (!c) return;
+      const extraPillars = (c.schema.extraPillars || []).filter(p => p.key !== key);
+      this.config.set({...c, schema: {...c.schema, extraPillars}});
+      this.activePillarId.set('identity');
     });
   }
 

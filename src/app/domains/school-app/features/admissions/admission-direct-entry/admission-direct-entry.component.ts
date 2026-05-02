@@ -23,7 +23,7 @@ import {EnrollmentAdminService} from '../../../../../core/services/enrollment-ad
 import {AcademicService} from '../../../../../core/services/academic.service';
 import {TenantContextService} from '../../../../../core/services/tenant-context.service';
 import {NotificationService} from '../../../../../shared/services/notification.service';
-import {AcademicYear, Filiere, Level} from '../../../../../core/models/academic.model';
+import {AcademicYear, CycleGroup, Filiere, Level} from '../../../../../core/models/academic.model';
 import {DirectEntryRequest} from '../../../../../core/models/enrollment.model';
 import {finalize, forkJoin} from 'rxjs';
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
@@ -58,6 +58,7 @@ export class AdmissionDirectEntryComponent implements OnInit {
 
   // --- RÉFÉRENTIELS ---
   levels = signal<Level[]>([]);
+  groupedLevels = signal<CycleGroup[]>([]);
   filieres = signal<Filiere[]>([]);
   activeYear = signal<AcademicYear | null>(null);
 
@@ -113,13 +114,15 @@ export class AdmissionDirectEntryComponent implements OnInit {
     forkJoin({
       year: this.academicService.getCurrentYear(),
       levels: this.academicService.getLevels(),
+      grouped: this.academicService.getGroupedLevels(),
       filieres: this.academicService.getFilieres()
     }).pipe(
       finalize(() => this.isLoading.set(false))
     ).subscribe({
-      next: ({ year, levels, filieres }) => {
+      next: ({ year, levels, grouped, filieres }) => {
         this.activeYear.set(year);
         this.levels.set(levels);
+        this.groupedLevels.set(grouped);
         this.filieres.set(filieres);
         if (year) this.entryForm.patchValue({ academicYearId: year.id });
       }

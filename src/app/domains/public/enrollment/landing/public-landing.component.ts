@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, Injector } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import {
@@ -12,13 +12,14 @@ import {
   Calendar,
   FileText,
   ShieldCheck,
-  Globe, RefreshCw, Phone, GraduationCap, ChevronRight
+  Globe, RefreshCw, Phone, GraduationCap, ChevronRight, AlertCircle
 } from 'lucide-angular';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { EnrollmentPublicService } from '../../../../core/services/enrollment-public.service';
-import { finalize } from 'rxjs';
+import { TenantContextService } from '../../../../core/services/tenant-context.service';
+import { filter, finalize, take } from 'rxjs';
 import { PublicPortalSummary } from '../../../../core/models/enrollment';
 import { FwButtonComponent } from '../../../../shared/components/button/button.component';
-import { FwPublicHeaderComponent } from '../../../../shared/layout/public-header/public-header.component';
 
 @Component({
   selector: 'app-public-landing',
@@ -29,13 +30,17 @@ import { FwPublicHeaderComponent } from '../../../../shared/layout/public-header
 })
 export class PublicLandingComponent implements OnInit {
   private enrollmentService = inject(EnrollmentPublicService);
+  private injector = inject(Injector);
+  tenantCtx = inject(TenantContextService);
 
   summary = signal<PublicPortalSummary | null>(null);
   isLoading = signal(true);
+  isError = signal(false);
 
-  activeYears = computed(() =>
-    this.summary()?.availableYears.filter(y => y.active) ?? []
-  );
+  schoolInitials = computed(() => {
+    const name = this.tenantCtx.activeTenant()?.name ?? '';
+    return name.split(' ').slice(0, 2).map((w: string) => w[0]).join('').toUpperCase() || 'EC';
+  });
 
   yearCards = computed(() => {
     const years = this.summary()?.availableYears ?? [];
@@ -49,23 +54,51 @@ export class PublicLandingComponent implements OnInit {
   });
 
   noYearsAvailable = computed(() =>
-    this.summary() !== null && this.activeYears().length === 0
+    this.summary() !== null && this.yearCards().length === 0
   );
 
   welcomeMessage = computed(() =>
-    this.activeYears()[0]?.welcomeMessage ?? null
+    this.yearCards().find(y => y.active)?.welcomeMessage
+      ?? this.yearCards()[0]?.welcomeMessage
+      ?? null
   );
 
+  yearStateLabel(state: string): string {
+    switch (state) {
+      case 'PLANNING':  return 'Pré-inscriptions';
+      case 'ACTIVE':    return 'Campagne Active';
+      case 'CLOSING':   return 'Derniers jours';
+      default:          return 'Campagne';
+    }
+  }
+
+  yearStateClass(state: string): string {
+    switch (state) {
+      case 'PLANNING': return 'is-planning';
+      case 'CLOSING':  return 'is-closing';
+      default:         return '';
+    }
+  }
+
   ngOnInit() {
-    this.loadSummary();
+    // Le tenant est résolu de manière async par le layout parent.
+    // On attend qu'il soit disponible avant de charger le portail.
+    toObservable(this.tenantCtx.activeTenant, { injector: this.injector })
+      .pipe(
+        filter(tenant => tenant !== null),
+        take(1)
+      )
+      .subscribe(() => this.loadSummary());
   }
 
   loadSummary() {
     this.isLoading.set(true);
+    this.isError.set(false);
     this.enrollmentService.getPortalSummary().pipe(
       finalize(() => this.isLoading.set(false))
-    ).subscribe((data: PublicPortalSummary) => {
-      this.summary.set(data);
+    ).subscribe({
+      next: (data: PublicPortalSummary) => this.summary.set(data),
+      error: () => this.isError.set(true)
     });
   }
 
@@ -84,4 +117,5 @@ export class PublicLandingComponent implements OnInit {
   readonly RefreshCw = RefreshCw;
   readonly GraduationCap = GraduationCap;
   readonly ChevronRight = ChevronRight;
+  readonly AlertCircle = AlertCircle;
 }

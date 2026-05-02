@@ -35,7 +35,9 @@
               <label>Niveau demandé *</label>
               <select formControlName="levelId" class="zen-select highlight">
                 <option value="">Sélectionner...</option>
-                <option *ngFor="let lvl of levels()" [value]="lvl.id">{{ lvl.name }}</option>
+                <optgroup *ngFor="let group of groupedLevels()" [label]="group.cycle.name || group.cycle.systemName">
+                  <option *ngFor="let lvl of group.levels" [value]="lvl.id">{{ lvl.name }}</option>
+                </optgroup>
               </select>
             </div>
             <div class="form-group">

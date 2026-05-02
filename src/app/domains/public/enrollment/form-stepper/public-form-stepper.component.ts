@@ -16,6 +16,7 @@ import { TenantContextService } from '../../../../core/services/tenant-context.s
 import { NotificationService } from '../../../../shared/services/notification.service';
 
 import { Admission } from '../../../../core/models/enrollment/entities';
+import { CycleGroup, Level } from '../../../../core/models/academic.model';
 import {
   AdmissionBundleResponse,
   AvailableYearSummary,
@@ -75,7 +76,8 @@ export class PublicFormStepperComponent implements OnInit {
   // ── Config ────────────────────────────────────────────────────────────────
   config         = signal<DefaultConfigResponse | null>(null);
   levelConfig    = signal<LevelConfigResponse | null>(null);
-  levels         = signal<any[]>([]);
+  levels         = signal<Level[]>([]);
+  groupedLevels  = signal<CycleGroup[]>([]);
   availableYears = signal<AvailableYearSummary[]>([]);
   admissionType  = signal<'NEW_ENROLLMENT' | 'RE_ENROLLMENT'>('NEW_ENROLLMENT');
 
@@ -86,12 +88,31 @@ export class PublicFormStepperComponent implements OnInit {
   // ── Computed ─────────────────────────────────────────────────────────────
   schema = computed(() => this.levelConfig()?.schema ?? this.config()?.schema);
 
+  instructions = computed(() =>
+    this.levelConfig()?.instructions ?? this.config()?.instructions ?? {}
+  );
+
+  familyCustomFields = computed(() =>
+    (this.schema()?.family?.guardianCustomFields || []).filter(f => !f.hidden)
+  );
+  identityCustomFields = computed(() =>
+    (this.schema()?.identity?.customFields || []).filter(f => !f.hidden)
+  );
+  schoolingCustomFields = computed(() =>
+    (this.schema()?.schooling?.customFields || []).filter(f => !f.hidden)
+  );
+  medicalCustomFields = computed(() =>
+    (this.schema()?.medical?.customFields || []).filter(f => !f.hidden)
+  );
+
   admissions = computed(() => this.bundle()?.admissions ?? []);
 
   childSteps = computed<ChildPhase[]>(() => {
-    const base: ChildPhase[] = ['STUDENT', 'MEDICAL'];
-    if (this.config()?.schema?.services?.enabled) base.push('SERVICES');
-    base.push('DOCS');
+    const schema = this.schema();
+    const base: ChildPhase[] = ['STUDENT'];
+    if (schema?.medical?.enabled !== false) base.push('MEDICAL');
+    if (schema?.services?.enabled) base.push('SERVICES');
+    if (schema?.documents?.enabled !== false) base.push('DOCS');
     return base;
   });
 
@@ -160,11 +181,13 @@ export class PublicFormStepperComponent implements OnInit {
     forkJoin({
       config:  this.enrollment.getDefaultConfig(),
       levels:  this.academic.getLevels(),
+      grouped: this.academic.getGroupedLevels(),
       summary: this.enrollment.getPortalSummary()
     }).pipe(finalize(() => this.loading.set(false))).subscribe({
-      next: ({ config, levels, summary }) => {
+      next: ({ config, levels, grouped, summary }) => {
         this.config.set(config);
         this.levels.set(levels);
+        this.groupedLevels.set(grouped);
         if (!config.portalActive) { this.portalClosed.set(true); return; }
 
         const years = summary.availableYears ?? [];
@@ -264,8 +287,8 @@ export class PublicFormStepperComponent implements OnInit {
   // ── Niveau ────────────────────────────────────────────────────────────────
   onLevelChange(levelId: string) {
     this.store.schooling.levelId = levelId;
-    const level = this.levels().find(l => l.id === levelId);
-    if (level?.cycleType) this.store.schooling.cycleType = level.cycleType;
+    const group = this.groupedLevels().find(g => g.levels.some(l => l.id === levelId));
+    if (group) this.store.schooling.cycleType = group.cycle.code ?? group.cycle.cycleCode;
     if (levelId) this.enrollment.getLevelConfig(levelId).subscribe(cfg => this.levelConfig.set(cfg));
   }
 

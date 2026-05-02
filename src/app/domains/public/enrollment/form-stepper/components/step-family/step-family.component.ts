@@ -22,6 +22,9 @@ const GUARDIAN_TOP_LEVEL: ReadonlySet<string> = new Set(['email', 'phone']);
         <p class="text-sm text-text-secondary font-medium mt-2 max-w-lg">
           Veuillez identifier le tuteur principal qui sera le point de contact privilégié pour cet établissement.
         </p>
+        <div *ngIf="instruction" class="mt-4 px-4 py-3 bg-primary-alpha/10 rounded-xl border border-primary-alpha text-sm text-text-secondary">
+          {{ instruction }}
+        </div>
       </div>
 
       <div class="grid grid-cols-2 gap-x-8 gap-y-2">
@@ -112,6 +115,7 @@ export class StepFamilyComponent {
   @Input() data: any;
   @Input() coreFieldControls: Record<string, { label: string }> = {};
   @Input() customFields: FieldConfig[] = [];
+  @Input() instruction?: string;
 
   readonly Users = Users;
 

@@ -37,10 +37,12 @@ export interface Holiday {
 
 export interface Cycle {
   id: string;
-  cycleCode: string;   // Code système (ex: PRIMARY)
-  systemName: string;  // Nom par défaut (ex: Élémentaire)
-  customName?: string; // Nom personnalisé par l'école
-  active: boolean;
+  cycleCode?: string;   // Gardé pour compatibilité
+  systemName?: string;  // Gardé pour compatibilité
+  name?: string;        // Nouveau (JSON)
+  code?: string;        // Nouveau (JSON)
+  customName?: string;
+  active?: boolean;
   rank: number;
 }
 
@@ -48,8 +50,16 @@ export interface Level {
   id: string;
   name: string;
   rank: number;
-  cycleId: string;
+  cycleId?: string;
   cycle?: Cycle;
+}
+
+/**
+ * Structure groupée Cycle -> Niveaux (Nouvel End-point)
+ */
+export interface CycleGroup {
+  cycle: Cycle;
+  levels: Level[];
 }
 
 export interface Filiere {

@@ -96,7 +96,8 @@
           *ngIf="globalPhase() === 'GUARDIAN'"
           [data]="familyStore"
           [coreFieldControls]="schema()?.family?.guardianCoreFieldControls || {}"
-          [customFields]="schema()?.family?.guardianCustomFields || []">
+          [customFields]="familyCustomFields()"
+          [instruction]="instructions()['family']">
         </app-step-family>
 
         <!-- Phase HUB -->
@@ -115,8 +116,11 @@
           [identity]="store.identity"
           [schooling]="store.schooling"
           [coreFieldControls]="schema()?.identity?.coreFieldControls || {}"
-          [customFields]="schema()?.identity?.customFields || []"
+          [customFields]="identityCustomFields()"
+          [schoolingCustomFields]="schoolingCustomFields()"
           [availableLevels]="levels()"
+          [groupedLevels]="groupedLevels()"
+          [instruction]="instructions()['identity']"
           (onLevelChange)="onLevelChange($event)">
         </app-step-identity>
 
@@ -124,7 +128,8 @@
         <app-step-medical
           *ngIf="isChildFlow() && childPhase() === 'MEDICAL'"
           [medical]="store.medical"
-          [customFields]="schema()?.medical?.customFields || []">
+          [customFields]="medicalCustomFields()"
+          [instruction]="instructions()['medical']">
         </app-step-medical>
 
         <!-- Phase CHILD : Services -->

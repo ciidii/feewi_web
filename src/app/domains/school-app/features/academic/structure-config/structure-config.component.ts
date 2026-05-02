@@ -71,9 +71,9 @@ export class StructureConfigComponent implements OnInit {
   displayCycles = computed<TableRow[]>(() => {
     return this.cycles().map(c => ({
       id: c.id,
-      title: c.customName || c.systemName,
-      subtitle: `Code Système : ${c.cycleCode}`,
-      avatarLabel: c.cycleCode.substring(0, 2).toUpperCase(),
+      title: c.customName || c.systemName || c.cycleCode || c.id,
+      subtitle: `Code Système : ${c.cycleCode ?? '—'}`,
+      avatarLabel: (c.cycleCode ?? c.id).substring(0, 2).toUpperCase(),
       badges: [
         {label: 'ACTIF', type: 'success'},
         {label: `RANG ${c.rank}`, type: 'info'}

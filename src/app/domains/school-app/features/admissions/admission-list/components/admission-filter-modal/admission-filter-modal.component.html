@@ -41,7 +41,9 @@
           <label>Niveau d'Enseignement</label>
           <select [(ngModel)]="form.level">
             <option value="">Tous les niveaux</option>
-            <option *ngFor="let l of data.levels" [value]="l.id">{{ l.name }}</option>
+            <optgroup *ngFor="let group of data.groupedLevels" [label]="group.cycle.name || group.cycle.systemName">
+              <option *ngFor="let l of group.levels" [value]="l.id">{{ l.name }}</option>
+            </optgroup>
           </select>
         </div>
       </div>

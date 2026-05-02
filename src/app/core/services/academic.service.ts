@@ -1,15 +1,16 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, catchError, throwError } from 'rxjs';
+import { Observable, catchError, map, throwError } from 'rxjs';
 import { EnvironmentService } from './environment.service';
 import { NotificationService } from '../../shared/services/notification.service';
-import { 
-  AcademicYear, 
-  CreateYearRequest, 
-  Period, 
-  Holiday, 
-  Cycle, 
-  Level, 
+import {
+  AcademicYear,
+  CreateYearRequest,
+  Period,
+  Holiday,
+  Cycle,
+  Level,
+  CycleGroup,
   SchoolClass,
   Filiere,
   CreateClassRequest,
@@ -203,11 +204,32 @@ export class AcademicService {
     );
   }
 
+  /**
+   * Récupère la structure académique groupée (Cycles -> Niveaux)
+   * C'est la nouvelle manière "propre" de récupérer le référentiel.
+   */
+  getGroupedLevels(): Observable<CycleGroup[]> {
+    return this.http.get<CycleGroup[]>(`${this.API_URL}/levels`).pipe(
+      catchError(this.handleError('Erreur lors du chargement de la structure académique'))
+    );
+  }
+
+  /**
+   * Récupère la liste à plat des niveaux.
+   * Adapté pour les sélecteurs simples.
+   */
   getLevels(cycleId?: string): Observable<Level[]> {
-    let params = new HttpParams();
-    if (cycleId) params = params.set('cycleId', cycleId);
-    return this.http.get<Level[]>(`${this.API_URL}/levels`, { params }).pipe(
-      catchError(this.handleError('Erreur lors du chargement des niveaux'))
+    // Si un cycleId est fourni, on peut garder l'ancien endpoint ou filtrer le nouveau
+    if (cycleId) {
+      let params = new HttpParams().set('cycleId', cycleId);
+      return this.http.get<Level[]>(`${this.API_URL}/levels`, { params }).pipe(
+        catchError(this.handleError('Erreur lors du chargement des niveaux'))
+      );
+    }
+
+    // Par défaut, on utilise la structure groupée et on l'aplatit pour la compatibilité
+    return this.getGroupedLevels().pipe(
+      map(groups => groups.flatMap(g => g.levels))
     );
   }
 
@@ -282,7 +304,7 @@ export class AcademicService {
   getCurriculum(levelId: string, filiereId?: string): Observable<CurriculumItem[]> {
     let params = new HttpParams();
     if (filiereId) params = params.set('filiereId', filiereId);
-    
+
     return this.http.get<CurriculumItem[]>(`${this.API_URL}/curriculum/by-level/${levelId}`, { params }).pipe(
       catchError(this.handleError('Erreur lors du chargement du programme'))
     );

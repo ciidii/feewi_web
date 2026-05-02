@@ -258,6 +258,58 @@
   }
 }
 
+// ─── PILLAR NAV ROW (tabs + add-pillar button) ───────────────────────────────
+.pillar-nav-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  .pillar-tabs-nav { flex: 1; margin-bottom: 0; }
+}
+
+.btn-add-pillar {
+  display: inline-flex; align-items: center; gap: 0.375rem;
+  padding: 0 1rem; height: 40px; border-radius: 12px; flex-shrink: 0;
+  border: 1.5px dashed var(--fw-border); background: transparent;
+  font-size: 0.75rem; font-weight: 700; color: var(--fw-text-tertiary);
+  cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  &:hover { border-color: var(--fw-primary); color: var(--fw-primary); background: var(--fw-primary-alpha); }
+  &.active { border-style: solid; border-color: var(--fw-primary); color: var(--fw-primary); background: var(--fw-primary-alpha); }
+}
+
+// ─── ADD PILLAR INLINE FORM ───────────────────────────────────────────────────
+.add-pillar-form {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 1rem 1.25rem; border-radius: 16px;
+  background: var(--fw-primary-alpha); border: 1.5px solid var(--fw-primary);
+  margin-bottom: 0.5rem;
+}
+
+.add-pillar-input {
+  flex: 1; padding: 0.5rem 0.875rem; border-radius: 10px;
+  border: 1px solid var(--fw-border-subtle); background: white;
+  font-size: 0.875rem; font-weight: 600; color: var(--fw-midnight);
+  &:focus { outline: none; border-color: var(--fw-primary); box-shadow: 0 0 0 4px var(--fw-primary-alpha); }
+  &::placeholder { color: var(--fw-text-tertiary); font-weight: 500; }
+}
+
+.btn-confirm-pillar {
+  padding: 0.5rem 1.125rem; border-radius: 10px; border: none;
+  background: var(--fw-primary); color: white;
+  font-size: 0.8125rem; font-weight: 800; cursor: pointer; flex-shrink: 0;
+  transition: all 0.15s;
+  &:hover:not(:disabled) { background: var(--fw-primary-dark, var(--fw-primary)); filter: brightness(1.1); }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+}
+
+.btn-cancel-pillar {
+  padding: 0.5rem 1rem; border-radius: 10px;
+  border: 1px solid var(--fw-border-subtle); background: white;
+  font-size: 0.8125rem; font-weight: 700; color: var(--fw-text-secondary);
+  cursor: pointer; flex-shrink: 0; transition: all 0.15s;
+  &:hover { border-color: var(--fw-border); color: var(--fw-midnight); }
+}
+
 // ─── PORTAL STATUS PILL ──────────────────────────────────────────────────────
 .portal-status-pill {
   display: inline-flex; align-items: center; gap: 0.5rem;
@@ -993,6 +1045,7 @@
   display: grid; place-items: center;
   &.lock   { background: var(--fw-surface-sunken); color: var(--fw-text-tertiary); }
   &.custom { background: var(--fw-primary-alpha); color: var(--fw-primary); }
+  &.info   { background: var(--fw-info-bg, #eff6ff); color: var(--fw-info, #3b82f6); }
 }
 
 .custom-fields-list { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem; }

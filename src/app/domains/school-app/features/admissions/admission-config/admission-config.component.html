@@ -718,14 +718,39 @@
         <ng-container *ngIf="activeTab() === 'PILLARS' && currentScope() === 'GLOBAL'">
           <div class="pillars-editor animate-in fade-in">
 
-            <!-- Sous-navigation (Niveau 2) -->
-            <div class="pillar-tabs-nav">
-              <app-fw-tabs
-                [tabs]="pillarTabs()"
-                [activeTabId]="activePillarId()"
-                (tabChange)="activePillarId.set($event)"
-                density="compact"
-              ></app-fw-tabs>
+            <!-- Sous-navigation (Niveau 2) + bouton Nouveau Pilier -->
+            <div class="pillar-nav-row">
+              <div class="pillar-tabs-nav">
+                <app-fw-tabs
+                  [tabs]="pillarTabs()"
+                  [activeTabId]="activePillarId()"
+                  (tabChange)="activePillarId.set($event)"
+                  density="compact"
+                ></app-fw-tabs>
+              </div>
+              <button class="btn-add-pillar" (click)="showAddPillarForm.set(!showAddPillarForm())"
+                      [class.active]="showAddPillarForm()" title="Créer un pilier personnalisé">
+                <lucide-icon [name]="Plus" [size]="14"></lucide-icon>
+                <span>Nouveau pilier</span>
+              </button>
+            </div>
+
+            <!-- Formulaire inline d'ajout de pilier -->
+            <div class="add-pillar-form animate-in fade-in" *ngIf="showAddPillarForm()">
+              <lucide-icon [name]="Sparkles" [size]="16" class="text-primary flex-shrink-0"></lucide-icon>
+              <input
+                type="text"
+                [(ngModel)]="newPillarLabel"
+                placeholder="Nom du pilier (ex : Transport, Hébergement…)"
+                class="add-pillar-input"
+                (keyup.enter)="addExtraPillar()"
+              />
+              <button class="btn-confirm-pillar" [disabled]="!newPillarLabel.trim()" (click)="addExtraPillar()">
+                Créer
+              </button>
+              <button class="btn-cancel-pillar" (click)="showAddPillarForm.set(false); newPillarLabel = ''">
+                Annuler
+              </button>
             </div>
 
             <!-- Contenu du pilier actif -->
@@ -878,6 +903,24 @@
                     </div>
                   </div>
                 </section>
+
+                <!-- Zone danger — Supprimer le pilier (extra seulement) -->
+                <section class="pillar-section" *ngIf="isExtraPillar()">
+                  <div class="danger-zone-card">
+                    <div class="danger-zone-info">
+                      <lucide-icon [name]="Trash2" [size]="18"></lucide-icon>
+                      <div>
+                        <strong>Supprimer ce pilier</strong>
+                        <span>Cette action supprimera définitivement le pilier et tous ses champs personnalisés.</span>
+                      </div>
+                    </div>
+                    <app-fw-button variant="danger" size="sm" [icon]="Trash2"
+                                   (click)="removeExtraPillar(activePillarId())">
+                      Supprimer
+                    </app-fw-button>
+                  </div>
+                </section>
+
               </div>
 
             </div>

@@ -1,166 +1,230 @@
-<div class="landing-page bg-surface-page min-h-screen" *ngIf="summary(); let s">
+<div class="portal-page" *ngIf="summary(); let s">
 
-  <!-- Modern Header -->
-  <header class="header-nav">
-    <div class="nav-container">
-      <div class="brand">
-        <div class="brand-logo">
-          <lucide-icon [name]="GraduationCap" [size]="20"></lucide-icon>
+  <!-- ── Portal Header ──────────────────────────────────────── -->
+  <header class="portal-header">
+    <div class="header-inner">
+      <div class="school-brand">
+        <div class="school-avatar" *ngIf="!tenantCtx.activeTenant()?.logoUrl">
+          {{ schoolInitials() }}
         </div>
-        <span class="brand-name">{{ s.tenantId | uppercase }}</span>
+        <img *ngIf="tenantCtx.activeTenant()?.logoUrl"
+             [src]="tenantCtx.activeTenant()?.logoUrl"
+             class="school-logo" alt="Logo école" />
+        <span class="school-name">{{ tenantCtx.activeTenant()?.name ?? 'Portail d\'Admission' }}</span>
       </div>
-      <div class="portal-status" [class.is-open]="s.portalActive">
-        <span class="status-dot"></span>
-        {{ s.portalActive ? 'Inscriptions Ouvertes' : 'Portail Fermé' }}
+
+      <div class="header-right">
+        <span class="official-badge">
+          <lucide-icon [name]="ShieldCheck" [size]="11"></lucide-icon>
+          Portail officiel
+        </span>
+        <app-fw-button [variant]="'secondary'" [icon]="Search" routerLink="/enrollment/tracker">
+          Suivre mon dossier
+        </app-fw-button>
       </div>
     </div>
   </header>
 
-  <main class="main-content">
-
-    <!-- Hero Section -->
-    <section class="hero-section animate-fade">
-      <div class="hero-badge">
-        <lucide-icon [name]="ShieldCheck" [size]="14"></lucide-icon>
-        Portail d'Admission Officiel
-      </div>
+  <!-- ── Hero ──────────────────────────────────────────────── -->
+  <section class="hero-section">
+    <div class="content-wrap">
+      <p class="hero-eyebrow">Inscriptions en ligne</p>
       <h1 class="hero-title">
-        Construisons ensemble l'avenir de <span class="text-gradient">votre enfant.</span>
+        Bienvenue sur le portail<br>
+        <span class="text-gradient">{{ tenantCtx.activeTenant()?.name ?? 'de votre établissement' }}</span>
       </h1>
-      <p class="hero-desc" *ngIf="welcomeMessage()">{{ welcomeMessage() }}</p>
-      <p class="hero-desc" *ngIf="!welcomeMessage()">Bienvenue sur notre plateforme d'inscription simplifiée. Démarrez votre dossier en quelques minutes.</p>
+      <p class="hero-sub" *ngIf="welcomeMessage()">{{ welcomeMessage() }}</p>
+      <p class="hero-sub" *ngIf="!welcomeMessage()">
+        Déposez votre dossier en ligne, en toute sécurité, à tout moment.
+      </p>
+    </div>
+    <div class="hero-shape"></div>
+  </section>
 
-      <div class="hero-actions mt-10 flex justify-center gap-4">
-         <app-fw-button [variant]="'secondary'" [icon]="Search" routerLink="/enrollment/tracker">
-            Reprendre une inscription
-         </app-fw-button>
-      </div>
-    </section>
+  <!-- ── Campaigns ─────────────────────────────────────────── -->
+  <section class="campaigns-section content-wrap" *ngIf="s.portalActive && !noYearsAvailable()">
+    <div class="section-header">
+      <span class="section-label">Campagnes disponibles</span>
+      <p class="section-desc">Sélectionnez la rentrée pour démarrer votre dossier.</p>
+    </div>
 
-    <!-- Inscriptions Section -->
-    <section class="enroll-section" *ngIf="s.portalActive && !noYearsAvailable()">
-      <div class="section-head">
-        <h2 class="section-title">Campagnes disponibles</h2>
-        <p class="section-desc">Sélectionnez la période de rentrée souhaitée pour commencer.</p>
-      </div>
+    <div class="years-grid">
+      <div *ngFor="let year of yearCards()"
+           class="year-card"
+           [class.is-admin-only]="year.isAdminOnly"
+           [class.state-planning]="year.state === 'PLANNING'"
+           [class.state-closing]="year.state === 'CLOSING'">
 
-      <div class="years-grid">
-        <div *ngFor="let year of yearCards()" class="year-card" [class.admin-only]="year.isAdminOnly">
-          <div class="year-content">
-            <div class="year-header">
-              <span class="year-tag" [class.is-planning]="year.state === 'PLANNING'">
-                {{ year.state === 'PLANNING' ? 'Pré-inscriptions' : 'Campagne Active' }}
-              </span>
-              <h3 class="year-label">Année {{ year.label }}</h3>
+        <div class="year-state-bar"></div>
+
+        <div class="year-body">
+          <!-- Top row: badge + year name -->
+          <div class="year-top">
+            <div>
+              <span class="year-state-chip">{{ yearStateLabel(year.state) }}</span>
+              <h3 class="year-name">Année {{ year.label }}</h3>
             </div>
-
-            <div class="year-period">
-              <lucide-icon [name]="Calendar" [size]="14"></lucide-icon>
-              <span>{{ year.registrationStartDate | date:'dd MMM' }} — {{ year.registrationEndDate | date:'dd MMM yyyy' }}</span>
+            <div class="year-type-pills" *ngIf="!year.isAdminOnly">
+              <span *ngIf="year.canNewEnrollment" class="type-pill type-new">Nouvelle</span>
+              <span *ngIf="year.canReEnrollment" class="type-pill type-re">Réinscription</span>
             </div>
+          </div>
 
-            <p *ngIf="year.welcomeMessage" class="year-note">{{ year.welcomeMessage }}</p>
+          <!-- Period -->
+          <div class="year-period">
+            <lucide-icon [name]="Calendar" [size]="13"></lucide-icon>
+            <span>{{ year.registrationStartDate | date:'dd MMM' }} — {{ year.registrationEndDate | date:'dd MMM yyyy' }}</span>
+          </div>
 
-            <!-- Mode ADMIN_ONLY -->
-            <div *ngIf="year.isAdminOnly" class="notice-box">
-              <lucide-icon [name]="Phone" [size]="16"></lucide-icon>
-              <span>Inscriptions uniquement sur place. Veuillez contacter l'établissement.</span>
-            </div>
+          <!-- Welcome note -->
+          <p *ngIf="year.welcomeMessage" class="year-note">{{ year.welcomeMessage }}</p>
 
-            <!-- Mode ONLINE -->
-            <div *ngIf="!year.isAdminOnly" class="year-actions">
-              <ng-container *ngIf="year.hasBothTypes; else singleType">
-                <app-fw-button
-                  [variant]="'primary'"
-                  class="w-full"
-                  [routerLink]="['/enrollment/form-stepper']"
-                  [queryParams]="{ yearId: year.id, type: 'NEW_ENROLLMENT' }"
-                >
-                  Nouvelle Inscription
-                </app-fw-button>
-                <app-fw-button
-                  [variant]="'secondary'"
-                  class="w-full"
-                  [routerLink]="['/enrollment/form-stepper']"
-                  [queryParams]="{ yearId: year.id, type: 'RE_ENROLLMENT' }"
-                >
-                  Réinscription
-                </app-fw-button>
-              </ng-container>
-              <ng-template #singleType>
-                <app-fw-button
-                  [variant]="'primary'"
-                  class="w-full"
-                  [routerLink]="['/enrollment/form-stepper']"
-                  [queryParams]="{ yearId: year.id, type: year.canNewEnrollment ? 'NEW_ENROLLMENT' : 'RE_ENROLLMENT' }"
-                  [icon]="ArrowRight"
-                  iconPosition="right"
-                >
-                  {{ year.canNewEnrollment ? 'Démarrer le dossier' : 'Se réinscrire' }}
-                </app-fw-button>
-              </ng-template>
-            </div>
+          <!-- Admin only notice -->
+          <div *ngIf="year.isAdminOnly" class="admin-notice">
+            <lucide-icon [name]="Phone" [size]="14"></lucide-icon>
+            <span>Inscriptions uniquement sur place. Veuillez contacter l'établissement directement.</span>
+          </div>
+
+          <!-- CTA buttons -->
+          <div *ngIf="!year.isAdminOnly" class="year-actions">
+            <ng-container *ngIf="year.hasBothTypes; else singleAction">
+              <app-fw-button [variant]="'primary'" class="w-full"
+                             [routerLink]="['/enrollment/form-stepper']"
+                             [queryParams]="{ yearId: year.id, type: 'NEW_ENROLLMENT' }">
+                Nouvelle inscription
+              </app-fw-button>
+              <app-fw-button [variant]="'secondary'" class="w-full"
+                             [routerLink]="['/enrollment/form-stepper']"
+                             [queryParams]="{ yearId: year.id, type: 'RE_ENROLLMENT' }">
+                Réinscription
+              </app-fw-button>
+            </ng-container>
+            <ng-template #singleAction>
+              <app-fw-button [variant]="'primary'" class="w-full"
+                             [routerLink]="['/enrollment/form-stepper']"
+                             [queryParams]="{ yearId: year.id, type: year.canNewEnrollment ? 'NEW_ENROLLMENT' : 'RE_ENROLLMENT' }"
+                             [icon]="ArrowRight" iconPosition="right">
+                {{ year.canNewEnrollment ? 'Démarrer le dossier' : 'Se réinscrire' }}
+              </app-fw-button>
+            </ng-template>
           </div>
         </div>
       </div>
-    </section>
-
-    <!-- Portail Fermé -->
-    <div class="empty-portal" *ngIf="!s.portalActive || noYearsAvailable()">
-      <div class="empty-icon">
-        <lucide-icon [name]="Clock" [size]="32"></lucide-icon>
-      </div>
-      <h2>Inscriptions fermées</h2>
-      <p>L'établissement n'accepte pas de nouveaux dossiers en ligne actuellement.</p>
-      <app-fw-button [variant]="'secondary'" [icon]="Phone">Contacter le secrétariat</app-fw-button>
     </div>
+  </section>
 
-    <!-- Quick Actions -->
-    <div class="quick-access">
-      <div class="access-card group" routerLink="/enrollment/tracker">
-        <div class="card-icon">
-          <lucide-icon [name]="Search" [size]="20"></lucide-icon>
-        </div>
-        <div class="card-body">
-          <h3>Suivre un dossier</h3>
-          <p>Consultez l'état d'avancement de votre demande.</p>
-        </div>
-        <lucide-icon [name]="ChevronRight" [size]="16" class="arrow"></lucide-icon>
+  <!-- ── Portal Closed ─────────────────────────────────────── -->
+  <div class="closed-portal content-wrap" *ngIf="!s.portalActive || noYearsAvailable()">
+    <div class="closed-icon">
+      <lucide-icon [name]="Clock" [size]="28"></lucide-icon>
+    </div>
+    <h2 class="closed-title">Inscriptions fermées</h2>
+    <p class="closed-desc">L'établissement n'accepte pas de nouveaux dossiers en ligne pour le moment.</p>
+    <app-fw-button [variant]="'secondary'" [icon]="Phone">Contacter le secrétariat</app-fw-button>
+  </div>
+
+  <!-- ── How it works ──────────────────────────────────────── -->
+  <section class="how-section">
+    <div class="content-wrap">
+      <div class="section-header center">
+        <span class="section-label">Comment ça marche</span>
+        <p class="section-desc">Trois étapes simples pour soumettre votre dossier.</p>
       </div>
 
-      <div class="access-card group">
-        <div class="card-icon">
-          <lucide-icon [name]="FileText" [size]="20"></lucide-icon>
+      <div class="how-steps">
+        <div class="how-step">
+          <div class="step-circle">
+            <lucide-icon [name]="FileText" [size]="20"></lucide-icon>
+          </div>
+          <div class="step-num">1</div>
+          <h4 class="step-title">Remplissez le dossier</h4>
+          <p class="step-desc">Identité, famille et pièces jointes en quelques minutes.</p>
         </div>
-        <div class="card-body">
-          <h3>Pièces à fournir</h3>
-          <p>Liste des justificatifs obligatoires par niveau.</p>
+
+        <div class="how-connector">
+          <div class="connector-line"></div>
         </div>
-        <lucide-icon [name]="ChevronRight" [size]="16" class="arrow"></lucide-icon>
+
+        <div class="how-step">
+          <div class="step-circle">
+            <lucide-icon [name]="Search" [size]="20"></lucide-icon>
+          </div>
+          <div class="step-num">2</div>
+          <h4 class="step-title">Suivez en temps réel</h4>
+          <p class="step-desc">Un code unique pour consulter l'avancement de votre demande.</p>
+        </div>
+
+        <div class="how-connector">
+          <div class="connector-line"></div>
+        </div>
+
+        <div class="how-step">
+          <div class="step-circle">
+            <lucide-icon [name]="GraduationCap" [size]="20"></lucide-icon>
+          </div>
+          <div class="step-num">3</div>
+          <h4 class="step-title">Recevez la décision</h4>
+          <p class="step-desc">L'équipe pédagogique étudie votre dossier et vous contacte.</p>
+        </div>
       </div>
     </div>
+  </section>
 
-  </main>
-
-  <footer class="landing-footer">
-    <div class="footer-container">
-      <p>&copy; 2026 Feewi Platform • Système de gestion d'éducation moderne</p>
-      <div class="footer-links">
-        <a href="#">Confidentialité</a>
-        <span class="separator"></span>
-        <a href="#">Aide & Support</a>
+  <!-- ── Quick Access ──────────────────────────────────────── -->
+  <section class="quick-section content-wrap">
+    <div class="quick-grid">
+      <div class="quick-card" routerLink="/enrollment/tracker">
+        <div class="quick-icon">
+          <lucide-icon [name]="Search" [size]="18"></lucide-icon>
+        </div>
+        <div class="quick-body">
+          <h4>Suivre mon dossier</h4>
+          <p>Renseignez votre code de suivi pour consulter l'état de votre demande.</p>
+        </div>
+        <lucide-icon [name]="ChevronRight" [size]="16" class="quick-arrow"></lucide-icon>
       </div>
+
+      <div class="quick-card">
+        <div class="quick-icon">
+          <lucide-icon [name]="FileText" [size]="18"></lucide-icon>
+        </div>
+        <div class="quick-body">
+          <h4>Pièces justificatives</h4>
+          <p>Consultez la liste des documents obligatoires selon le niveau souhaité.</p>
+        </div>
+        <lucide-icon [name]="ChevronRight" [size]="16" class="quick-arrow"></lucide-icon>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ────────────────────────────────────────────── -->
+  <footer class="portal-footer">
+    <div class="footer-inner content-wrap">
+      <span class="footer-school">{{ tenantCtx.activeTenant()?.name ?? 'Établissement' }}</span>
+      <span class="footer-powered">Propulsé par <strong>Feewi</strong></span>
     </div>
   </footer>
 
 </div>
 
-<!-- Initial Loader -->
+<!-- ── Full Loader ────────────────────────────────────────── -->
 <div class="full-loader" *ngIf="isLoading()">
   <div class="loader-content">
-    <div class="pulse-logo">
-      <lucide-icon [name]="RefreshCw" [size]="48" class="animate-spin text-primary"></lucide-icon>
+    <lucide-icon [name]="RefreshCw" [size]="40" class="animate-spin text-primary"></lucide-icon>
+    <p>Chargement du portail...</p>
+  </div>
+</div>
+
+<!-- ── Error State ────────────────────────────────────────── -->
+<div class="error-state" *ngIf="!isLoading() && isError()">
+  <div class="error-inner">
+    <div class="error-icon">
+      <lucide-icon [name]="AlertCircle" [size]="28"></lucide-icon>
     </div>
-    <p>Initialisation du portail...</p>
+    <h2 class="error-title">Portail indisponible</h2>
+    <p class="error-desc">Impossible de charger les informations du portail. Vérifiez votre connexion et réessayez.</p>
+    <app-fw-button [variant]="'primary'" [icon]="RefreshCw" (click)="loadSummary()">
+      Réessayer
+    </app-fw-button>
   </div>
 </div>

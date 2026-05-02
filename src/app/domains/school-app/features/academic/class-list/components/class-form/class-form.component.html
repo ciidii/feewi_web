@@ -28,7 +28,11 @@
               <lucide-icon [name]="Layers" class="w-4 h-4"></lucide-icon>
             </div>
             <mat-select formControlName="levelId" placeholder="Choisir le niveau" class="fw-select" [class.error]="isInvalid('levelId')">
-              <mat-option *ngFor="let level of levels()" [value]="level.id">{{ level.name }}</mat-option>
+              <mat-optgroup *ngFor="let group of groupedLevels()" [label]="group.cycle.name || group.cycle.systemName || 'Cycle'">
+                <mat-option *ngFor="let level of group.levels" [value]="level.id">
+                  {{ level.name }}
+                </mat-option>
+              </mat-optgroup>
             </mat-select>
           </div>
         </div>

@@ -27,4 +27,4 @@ export type FieldType = 'TEXT' | 'TEXTAREA' | 'DATE' | 'SELECT' | 'BOOLEAN' | 'N
 
 export type CycleType = 'MATERNAL' | 'PRIMARY' | 'MIDDLE_SCHOOL' | 'HIGH_SCHOOL';
 
-export type AcademicYearState = 'PLANNING' | 'ACTIVE' | 'CLOSED';
+export type AcademicYearState = 'PLANNING' | 'ACTIVE' | 'CLOSED' | 'CLOSING';

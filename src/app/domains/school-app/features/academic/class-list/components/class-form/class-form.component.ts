@@ -8,7 +8,7 @@ import { LucideAngularModule, School, Type, Hash, Layers, Info, Tag } from 'luci
 import { AcademicService } from '../../../../../../../core/services/academic.service';
 import { NotificationService } from '../../../../../../../shared/services/notification.service';
 import { FormShellComponent } from '../../../../../../../shared/components/form-shell/form-shell';
-import { AcademicYear, Level, Filiere } from '../../../../../../../core/models/academic.model';
+import { AcademicYear, Level, Filiere, CycleGroup } from '../../../../../../../core/models/academic.model';
 
 @Component({
   selector: 'app-class-form',
@@ -47,7 +47,7 @@ export class ClassFormComponent implements OnInit {
     capacity: [35, [Validators.required, Validators.min(1), Validators.max(100)]]
   });
 
-  levels = signal<Level[]>([]);
+  groupedLevels = signal<CycleGroup[]>([]);
   filieres = signal<Filiere[]>([]);
   isLoading = signal(false);
 
@@ -61,7 +61,7 @@ export class ClassFormComponent implements OnInit {
       this.classForm.patchValue({ levelId: this.dialogData.levelId });
     }
 
-    this.levels.set(this.dialogData.levels || []);
+    this.groupedLevels.set(this.dialogData.groupedLevels || []);
     this.loadFilieres();
   }
 

@@ -8,7 +8,7 @@ import { TeachingManagerComponent } from './components/teaching-manager/teaching
 import {DataListComponent} from '../../../../../shared/components/data-list/data-list.component';
 import {AcademicService} from '../../../../../core/services/academic.service';
 import {NotificationService} from '../../../../../shared/services/notification.service';
-import {AcademicYear, Level, SchoolClass} from '../../../../../core/models/academic.model';
+import {AcademicYear, Level, SchoolClass, CycleGroup} from '../../../../../core/models/academic.model';
 import {RowAction, TableRow} from '../../../../../shared/models/data-list.models';
 import { FwPageShellComponent } from '../../../../../shared/components/page-shell/page-shell.component';
 
@@ -39,7 +39,7 @@ export class ClassListComponent implements OnInit {
   // États
   currentYear = signal<AcademicYear | null>(null);
   classes = signal<SchoolClass[]>([]);
-  levels = signal<Level[]>([]);
+  groupedLevels = signal<CycleGroup[]>([]);
   isLoading = signal(true);
 
   // Actions pour les classes
@@ -78,8 +78,8 @@ export class ClassListComponent implements OnInit {
       const year = await firstValueFrom(this.academicService.getCurrentYear());
       this.currentYear.set(year);
 
-      const levelsData = await firstValueFrom(this.academicService.getLevels());
-      this.levels.set(levelsData);
+      const groupedData = await firstValueFrom(this.academicService.getGroupedLevels());
+      this.groupedLevels.set(groupedData);
 
       await this.loadClasses(year.id);
     } catch (error) {
@@ -104,7 +104,7 @@ export class ClassListComponent implements OnInit {
       panelClass: 'feewi-dialog-panel',
       data: {
         year: this.currentYear(),
-        levels: this.levels()
+        groupedLevels: this.groupedLevels()
       }
     });
 

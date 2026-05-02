@@ -29,7 +29,7 @@ import {RowAction, TabItem, TableRow} from '../../../../../shared/models/data-li
 import {EnrollmentAdminService} from '../../../../../core/services/enrollment-admin.service';
 import {AcademicService} from '../../../../../core/services/academic.service';
 import {Admission, AdmissionStatus} from '../../../../../core/models/enrollment.model';
-import {AcademicYear, Level} from '../../../../../core/models/academic.model';
+import {AcademicYear, Level, CycleGroup} from '../../../../../core/models/academic.model';
 import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 import {NotificationService} from '../../../../../shared/services/notification.service';
 import {FormsModule} from '@angular/forms';
@@ -81,6 +81,7 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
 
   // Données de référence pour les filtres
   levels = signal<Level[]>([]);
+  groupedLevels = signal<CycleGroup[]>([]);
   years = signal<AcademicYear[]>([]);
 
   // Pagination
@@ -155,7 +156,7 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
         selectedChannel: this.selectedChannel(),
         selectedStartDate: this.selectedStartDate(),
         selectedEndDate: this.selectedEndDate(),
-        levels: this.levels(),
+        groupedLevels: this.groupedLevels(),
         years: this.years()
       }
     });
@@ -274,7 +275,10 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
   }
 
   loadFilterData() {
-    this.academicService.getLevels().subscribe(levels => this.levels.set(levels));
+    this.academicService.getGroupedLevels().subscribe(groups => {
+      this.groupedLevels.set(groups);
+      this.levels.set(groups.flatMap(g => g.levels));
+    });
     this.academicService.getYears().subscribe(years => this.years.set(years));
   }
 
