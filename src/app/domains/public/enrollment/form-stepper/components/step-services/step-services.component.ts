@@ -29,61 +29,65 @@ interface ServiceSelection {
 
       <div class="space-y-4">
         <div *ngFor="let item of selections"
-             class="group flex flex-col p-6 rounded-2xl border-2 cursor-pointer transition-all duration-300"
+             class="group flex flex-col p-6 md:p-8 rounded-[32px] border-2 cursor-pointer transition-all duration-300 bg-white shadow-sm hover:shadow-md"
              [class.border-primary]="item.selected"
-             [class.bg-white]="item.selected"
-             [class.shadow-md]="item.selected"
              [class.border-border]="!item.selected"
-             [class.bg-surface-sunken]="!item.selected"
-             [class.hover:border-primary-alpha]="!item.svc.mandatory"
+             [class.bg-primary-alpha/5]="item.selected"
              [class.cursor-default]="item.svc.mandatory"
              (click)="!item.svc.mandatory && toggle(item)">
 
-          <div class="flex items-center gap-5">
+          <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6">
             <!-- Icône -->
-            <div class="w-14 h-14 rounded-xl flex items-center justify-center shrink-0 transition-colors"
-                 [class.bg-primary]="item.selected"
+            <div class="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 transition-colors shadow-sm"
+                 [class.bg-midnight]="item.selected"
                  [class.text-white]="item.selected"
-                 [class.bg-white]="!item.selected"
-                 [class.text-primary]="!item.selected">
-              <lucide-icon [name]="getIcon(item.svc.code)" [size]="24"></lucide-icon>
+                 [class.bg-surface-sunken]="!item.selected"
+                 [class.text-midnight]="!item.selected">
+              <lucide-icon [name]="getIcon(item.svc.code)" [size]="28"></lucide-icon>
             </div>
 
             <!-- Info -->
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-3 flex-wrap">
-                <span class="font-bold text-midnight text-lg">{{ item.svc.label }}</span>
-                <app-fw-badge *ngIf="item.svc.mandatory" status="SUBMITTED" size="xs"></app-fw-badge>
+            <div class="flex-1 text-center sm:text-left min-w-0">
+              <div class="flex flex-col sm:flex-row items-center gap-3 mb-2">
+                <span class="font-black text-midnight text-xl tracking-tight leading-tight">{{ item.svc.label }}</span>
+                <app-fw-badge *ngIf="item.svc.mandatory" status="SUBMITTED" labelOverride="Inclus" size="xs"></app-fw-badge>
               </div>
-              <p class="text-xs text-text-secondary mt-1">Prestation gérée par l'établissement</p>
+              <p class="text-sm text-text-secondary font-medium leading-relaxed">Service d'accompagnement géré par l'établissement</p>
             </div>
 
             <!-- Checkbox Custom -->
-            <div class="w-8 h-8 rounded-full border-2 flex items-center justify-center shrink-0 transition-all duration-300"
+            <div class="hidden sm:flex w-10 h-10 rounded-xl border-2 items-center justify-center shrink-0 transition-all duration-300"
                  [class.bg-primary]="item.selected"
                  [class.border-primary]="item.selected"
                  [class.border-border]="!item.selected"
                  [class.bg-white]="!item.selected">
-              <lucide-icon *ngIf="item.selected" [name]="Check" [size]="16" class="text-white"></lucide-icon>
+              <lucide-icon *ngIf="item.selected" [name]="Check" [size]="20" class="text-white"></lucide-icon>
+            </div>
+            
+            <!-- Mobile Toggle -->
+            <div class="sm:hidden w-full">
+               <app-fw-button [variant]="item.selected ? 'primary' : 'secondary'" class="w-full">
+                 {{ item.selected ? 'Sélectionné' : 'Choisir' }}
+               </app-fw-button>
             </div>
           </div>
 
           <!-- Options Expansion -->
           <div *ngIf="item.selected && item.svc.options.length > 0"
-               class="mt-6 pt-6 border-t border-border animate-fade"
+               class="mt-8 pt-8 border-t border-border/50 animate-fade"
                (click)="$event.stopPropagation()">
-            <label class="fw-label mb-3">Option de service</label>
-            <div class="flex flex-wrap gap-2">
+            <label class="text-[10px] font-black uppercase tracking-[0.2em] text-text-tertiary mb-4 block">Variante ou Option</label>
+            <div class="flex flex-wrap gap-3">
               <button *ngFor="let opt of item.svc.options"
                       type="button"
-                      class="px-4 py-2 rounded-xl border-2 text-xs font-black uppercase tracking-widest transition-all"
+                      class="px-6 py-3 rounded-xl border-2 text-xs font-black uppercase tracking-widest transition-all"
                       [class.bg-midnight]="item.selectedOption === opt"
                       [class.text-white]="item.selectedOption === opt"
                       [class.border-midnight]="item.selectedOption === opt"
                       [class.bg-white]="item.selectedOption !== opt"
                       [class.text-text-tertiary]="item.selectedOption !== opt"
                       [class.border-border]="item.selectedOption !== opt"
-                      [class.hover:border-text-tertiary]="item.selectedOption !== opt"
+                      [class.hover:border-midnight]="item.selectedOption !== opt"
                       (click)="selectOption(item, opt); $event.stopPropagation()">
                 {{ opt }}
               </button>

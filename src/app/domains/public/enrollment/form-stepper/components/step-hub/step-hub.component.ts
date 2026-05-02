@@ -36,22 +36,22 @@ import { FwEmptyStateComponent } from '../../../../../../shared/components/empty
       <!-- Liste des enfants -->
       <div class="space-y-4 mb-10">
         <div *ngFor="let adm of admissions"
-             class="group flex items-center justify-between gap-4 p-6 rounded-3xl border-2 transition-all hover:shadow-lg bg-white"
+             class="group flex flex-col sm:flex-row items-center justify-between gap-6 p-6 rounded-[32px] border-2 transition-all hover:shadow-lg bg-white"
              [class.border-success-border]="isReady(adm)"
-             [class.bg-success-bg]="isReady(adm)"
+             [class.bg-success-bg/30]="isReady(adm)"
              [class.border-border]="!isReady(adm)">
 
           <!-- Identité enfant -->
-          <div class="flex items-center gap-5 min-w-0">
-            <div class="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 transition-colors shadow-sm"
+          <div class="flex items-center gap-5 min-w-0 w-full sm:w-auto">
+            <div class="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 transition-colors shadow-sm"
                  [class.bg-success-border]="isReady(adm)"
                  [class.text-success]="isReady(adm)"
                  [class.bg-surface-sunken]="!isReady(adm)"
                  [class.text-text-tertiary]="!isReady(adm)">
-              <lucide-icon [name]="User" [size]="24"></lucide-icon>
+              <lucide-icon [name]="User" [size]="28"></lucide-icon>
             </div>
             <div class="min-w-0">
-              <p class="font-black text-midnight text-lg truncate leading-tight mb-1">
+              <p class="font-black text-midnight text-xl truncate leading-tight mb-1">
                 {{ adm.identity.firstName }} {{ adm.identity.lastName }}
               </p>
               <div class="flex items-center gap-3">
@@ -63,14 +63,17 @@ import { FwEmptyStateComponent } from '../../../../../../shared/components/empty
           </div>
 
           <!-- Action -->
-          <app-fw-button
-            (click)="editChild.emit(adm)"
-            [variant]="isReady(adm) ? 'secondary' : 'primary'"
-            size="md"
-            [icon]="isReady(adm) ? Pencil : ArrowRight"
-          >
-            {{ isReady(adm) ? 'Modifier' : 'Compléter' }}
-          </app-fw-button>
+          <div class="w-full sm:w-auto">
+            <app-fw-button
+              (click)="editChild.emit(adm)"
+              [variant]="isReady(adm) ? 'secondary' : 'primary'"
+              size="md"
+              [icon]="isReady(adm) ? Pencil : ArrowRight"
+              class="w-full"
+            >
+              {{ isReady(adm) ? 'Modifier' : 'Compléter' }}
+            </app-fw-button>
+          </div>
         </div>
 
         <!-- État vide -->

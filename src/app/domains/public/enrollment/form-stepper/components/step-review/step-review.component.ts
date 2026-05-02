@@ -25,7 +25,7 @@ import { FwBadgeComponent } from '../../../../../../shared/components/badge/badg
       <div class="space-y-8">
 
         <!-- Responsable légal -->
-        <div class="p-8 rounded-[32px] border-2 border-border bg-white shadow-sm hover:shadow-md transition-shadow">
+        <div class="p-6 md:p-8 rounded-[32px] border-2 border-border bg-white shadow-sm hover:shadow-md transition-shadow">
           <div class="flex items-center gap-4 mb-8">
             <div class="w-12 h-12 rounded-2xl bg-surface-sunken text-midnight flex items-center justify-center shadow-sm">
               <lucide-icon [name]="Users" [size]="24"></lucide-icon>
@@ -33,7 +33,7 @@ import { FwBadgeComponent } from '../../../../../../shared/components/badge/badg
             <h3 class="font-display font-black text-midnight text-lg uppercase tracking-tight">Dossier Familial</h3>
           </div>
           
-          <div class="grid grid-cols-2 gap-10">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
             <div class="flex items-start gap-4">
               <div class="w-10 h-10 rounded-xl bg-primary-alpha text-primary flex items-center justify-center shrink-0">
                 <lucide-icon [name]="User" [size]="18"></lucide-icon>
@@ -60,7 +60,7 @@ import { FwBadgeComponent } from '../../../../../../shared/components/badge/badg
 
         <!-- Un bloc par enfant -->
         <div *ngFor="let adm of admissions; let i = index"
-             class="p-8 rounded-[32px] border-2 border-border bg-white shadow-sm hover:shadow-md transition-shadow">
+             class="p-6 md:p-8 rounded-[32px] border-2 border-border bg-white shadow-sm hover:shadow-md transition-shadow">
           <div class="flex items-center justify-between mb-8 pb-6 border-b border-border/50">
             <div class="flex items-center gap-4">
               <div class="w-12 h-12 rounded-2xl bg-midnight text-white flex items-center justify-center shadow-lg shadow-midnight/10">
@@ -76,7 +76,7 @@ import { FwBadgeComponent } from '../../../../../../shared/components/badge/badg
             <app-fw-badge [status]="'SUBMITTED'" labelOverride="Complet" size="sm"></app-fw-badge>
           </div>
 
-          <div class="grid grid-cols-2 gap-10">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
             <!-- Niveau & Services -->
             <div class="space-y-8">
               <div>
