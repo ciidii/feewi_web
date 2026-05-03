@@ -52,7 +52,11 @@ import { FwBadgeComponent } from '../../../../../../shared/components/badge/badg
                 <!-- Badge de Statut Réel -->
                 <app-fw-badge [status]="doc.status === 'MISSING' ? 'DRAFT' : doc.status"
                               [labelOverride]="docStatusLabel(doc.status)"
-                              size="xs"></app-fw-badge>              </div>
+                              size="xs"></app-fw-badge>
+              </div>
+              <!-- Message d'erreur explicite pour les docs obligatoires manquants -->
+              <p *ngIf="doc.mandatory && doc.status === 'MISSING'" class="fw-error-text mt-2">Ce document est requis pour finaliser l'inscription.</p>
+              <p *ngIf="doc.status === 'REJECTED'" class="fw-error-text mt-2 text-error">Document refusé par l'établissement. Veuillez en fournir un nouveau.</p>
             </div>
           </div>
 

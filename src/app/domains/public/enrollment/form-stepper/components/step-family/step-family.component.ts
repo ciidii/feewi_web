@@ -52,9 +52,12 @@ const GUARDIAN_TOP_LEVEL: ReadonlySet<string> = new Set(['email', 'phone']);
 
         <!-- Lien de parenté -->
         <div class="fw-field">
-          <label class="fw-label">{{ coreLabel('relation') }}</label>
+          <label class="fw-label">
+            {{ coreLabel('relation') }}
+            <span class="required">*</span>
+          </label>
           <div class="fw-input-wrapper">
-            <select [(ngModel)]="data.primaryGuardian.relation" class="fw-input">
+            <select [(ngModel)]="data.primaryGuardian.relation" name="relation" required #rel="ngModel" class="fw-input">
               <option value="FATHER">Père</option>
               <option value="MOTHER">Mère</option>
               <option value="UNCLE">Oncle</option>
@@ -64,39 +67,55 @@ const GUARDIAN_TOP_LEVEL: ReadonlySet<string> = new Set(['email', 'phone']);
               <option value="OTHER">Autre</option>
             </select>
           </div>
+          <span *ngIf="rel.invalid && rel.touched" class="fw-error-text">Le lien de parenté est requis.</span>
         </div>
 
         <div class="hidden md:block"></div>
 
         <!-- Nom -->
         <div class="fw-field">
-          <label class="fw-label">{{ coreLabel('lastName') }}</label>
+          <label class="fw-label">
+            {{ coreLabel('lastName') }}
+            <span class="required">*</span>
+          </label>
           <div class="fw-input-wrapper">
-            <input type="text" [(ngModel)]="data.primaryGuardian.lastName" class="fw-input" placeholder="Ex: NDIAYE">
+            <input type="text" [(ngModel)]="data.primaryGuardian.lastName" name="lastName" required #glname="ngModel"
+                   class="fw-input" placeholder="Ex: NDIAYE">
           </div>
+          <span *ngIf="glname.invalid && glname.touched" class="fw-error-text">Le nom est requis.</span>
         </div>
 
         <!-- Prénom -->
         <div class="fw-field">
-          <label class="fw-label">{{ coreLabel('firstName') }}</label>
+          <label class="fw-label">
+            {{ coreLabel('firstName') }}
+            <span class="required">*</span>
+          </label>
           <div class="fw-input-wrapper">
-            <input type="text" [(ngModel)]="data.primaryGuardian.firstName" class="fw-input" placeholder="Ex: Moussa">
+            <input type="text" [(ngModel)]="data.primaryGuardian.firstName" name="firstName" required #gfname="ngModel"
+                   class="fw-input" placeholder="Ex: Moussa">
           </div>
+          <span *ngIf="gfname.invalid && gfname.touched" class="fw-error-text">Le prénom est requis.</span>
         </div>
 
         <!-- Téléphone -->
         <div class="fw-field">
-          <label class="fw-label">{{ coreLabel('phone') }}</label>
+          <label class="fw-label">
+            {{ coreLabel('phone') }}
+            <span class="required">*</span>
+          </label>
           <div class="fw-input-wrapper">
-            <input type="tel" [(ngModel)]="data.primaryGuardian.phone" class="fw-input" placeholder="+221 .. ... .. ..">
+            <input type="tel" [(ngModel)]="data.primaryGuardian.phone" name="phone" required #gphone="ngModel"
+                   class="fw-input" placeholder="+221 .. ... .. ..">
           </div>
+          <span *ngIf="gphone.invalid && gphone.touched" class="fw-error-text">Le téléphone est requis.</span>
         </div>
 
         <!-- Email -->
         <div class="fw-field" *ngIf="isPillarFieldEnabled('email')">
           <label class="fw-label">{{ coreLabel('email') }}</label>
           <div class="fw-input-wrapper">
-            <input type="email" [(ngModel)]="data.primaryGuardian.email" class="fw-input" placeholder="parent@exemple.com">
+            <input type="email" [(ngModel)]="data.primaryGuardian.email" name="email" class="fw-input" placeholder="parent@exemple.com">
           </div>
         </div>
 
@@ -109,33 +128,46 @@ const GUARDIAN_TOP_LEVEL: ReadonlySet<string> = new Set(['email', 'phone']);
             </label>
 
             <div class="fw-input-wrapper" [class.h-auto]="field.type === 'TEXTAREA'">
-              <!-- Champ top-level (ex: email) -->
+              <!-- Champ top-level (ex: adresse) -->
               <ng-container *ngIf="isTopLevel(field.name); else customField">
-                <input [type]="field.name === 'email' ? 'email' : 'text'"
+                <input [type]="'text'"
                        [(ngModel)]="data.primaryGuardian[field.name]"
-                       class="fw-input"
-                       [placeholder]="field.name === 'email' ? 'parent@exemple.com' : ''">
+                       [name]="'g_' + field.name" [required]="field.mandatory" #gfld="ngModel"
+                       class="fw-input">
+                <span *ngIf="gfld.invalid && gfld.touched" class="fw-error-text">Ce champ est obligatoire.</span>
               </ng-container>
 
               <!-- Champ customFields -->
               <ng-template #customField>
                 <ng-container [ngSwitch]="field.type">
-                  <select *ngSwitchCase="'SELECT'"
-                          [(ngModel)]="data.primaryGuardian.customFields[field.name]"
-                          class="fw-input">
-                    <option value="">Sélectionner...</option>
-                    <option *ngFor="let opt of field.options ?? []" [value]="opt">{{ opt }}</option>
-                  </select>
-                  <textarea *ngSwitchCase="'TEXTAREA'"
-                            [(ngModel)]="data.primaryGuardian.customFields[field.name]"
-                            rows="3"
-                            class="fw-input py-4"></textarea>
-                  <input *ngSwitchCase="'DATE'" type="date"
-                         [(ngModel)]="data.primaryGuardian.customFields[field.name]"
-                         class="fw-input">
-                  <input *ngSwitchDefault type="text"
-                         [(ngModel)]="data.primaryGuardian.customFields[field.name]"
-                         class="fw-input">
+                  <ng-container *ngSwitchCase="'SELECT'">
+                    <select [(ngModel)]="data.primaryGuardian.customFields[field.name]"
+                            [name]="'gc_' + field.name" [required]="field.mandatory" #gfld1="ngModel"
+                            class="fw-input">
+                      <option value="">Sélectionner...</option>
+                      <option *ngFor="let opt of field.options ?? []" [value]="opt">{{ opt }}</option>
+                    </select>
+                    <span *ngIf="gfld1.invalid && gfld1.touched" class="fw-error-text">Ce champ est obligatoire.</span>
+                  </ng-container>
+                  <ng-container *ngSwitchCase="'TEXTAREA'">
+                    <textarea [(ngModel)]="data.primaryGuardian.customFields[field.name]"
+                              [name]="'gc_' + field.name" [required]="field.mandatory" #gfld2="ngModel"
+                              rows="3"
+                              class="fw-input py-4"></textarea>
+                    <span *ngIf="gfld2.invalid && gfld2.touched" class="fw-error-text">Ce champ est obligatoire.</span>
+                  </ng-container>
+                  <ng-container *ngSwitchCase="'DATE'">
+                    <input type="date" [(ngModel)]="data.primaryGuardian.customFields[field.name]"
+                           [name]="'gc_' + field.name" [required]="field.mandatory" #gfld3="ngModel"
+                           class="fw-input">
+                    <span *ngIf="gfld3.invalid && gfld3.touched" class="fw-error-text">Ce champ est obligatoire.</span>
+                  </ng-container>
+                  <ng-container *ngSwitchDefault>
+                    <input type="text" [(ngModel)]="data.primaryGuardian.customFields[field.name]"
+                           [name]="'gc_' + field.name" [required]="field.mandatory" #gfld4="ngModel"
+                           class="fw-input">
+                    <span *ngIf="gfld4.invalid && gfld4.touched" class="fw-error-text">Ce champ est obligatoire.</span>
+                  </ng-container>
                 </ng-container>
               </ng-template>
             </div>

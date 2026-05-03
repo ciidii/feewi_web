@@ -17,7 +17,7 @@ import { FieldConfig } from '../../../../../../core/models/enrollment';
         </div>
         <h1 class="text-3xl font-display font-black text-midnight tracking-tight mb-2">{{ title || 'Santé & Bien-être' }}</h1>
         <p class="text-base text-text-secondary font-medium max-w-lg leading-relaxed">
-          {{ subtitle || 'Ces informations sont strictement confidentielles et ne seront accessibles qu\\'au personnel habilité.' }}
+          {{ subtitle || 'Ces informations sont strictement confidentielles et ne seront accessibles qu au personnel habilité.' }}
         </p>
 
         <!-- 💡 Dynamic Instruction Banner -->
@@ -36,22 +36,37 @@ import { FieldConfig } from '../../../../../../core/models/enrollment';
             </label>
             <div class="fw-input-wrapper" [class.h-auto]="field.type === 'TEXTAREA'">
               <ng-container [ngSwitch]="field.type">
-                <select *ngSwitchCase="'SELECT'"
-                        [(ngModel)]="medical.customFields[field.name]"
-                        class="fw-input">
-                  <option value="">Sélectionner...</option>
-                  <option *ngFor="let opt of field.options ?? []" [value]="opt">{{ opt }}</option>
-                </select>
-                <textarea *ngSwitchCase="'TEXTAREA'"
-                          [(ngModel)]="medical.customFields[field.name]"
-                          rows="3"
-                          class="fw-input py-4"></textarea>
-                <input *ngSwitchCase="'DATE'" type="date"
-                       [(ngModel)]="medical.customFields[field.name]"
-                       class="fw-input">
-                <input *ngSwitchDefault type="text"
-                       [(ngModel)]="medical.customFields[field.name]"
-                       class="fw-input">
+                <ng-container *ngSwitchCase="'SELECT'">
+                  <select [(ngModel)]="medical.customFields[field.name]"
+                          [name]="'med_' + field.name" [required]="field.mandatory" #mfld1="ngModel"
+                          class="fw-input">
+                    <option value="">Sélectionner...</option>
+                    <option *ngFor="let opt of field.options ?? []" [value]="opt">{{ opt }}</option>
+                  </select>
+                  <span *ngIf="mfld1.invalid && mfld1.touched" class="fw-error-text">Ce champ est obligatoire.</span>
+                </ng-container>
+
+                <ng-container *ngSwitchCase="'TEXTAREA'">
+                  <textarea [(ngModel)]="medical.customFields[field.name]"
+                            [name]="'med_' + field.name" [required]="field.mandatory" #mfld2="ngModel"
+                            rows="3"
+                            class="fw-input py-4"></textarea>
+                  <span *ngIf="mfld2.invalid && mfld2.touched" class="fw-error-text">Ce champ est obligatoire.</span>
+                </ng-container>
+
+                <ng-container *ngSwitchCase="'DATE'">
+                  <input type="date" [(ngModel)]="medical.customFields[field.name]"
+                         [name]="'med_' + field.name" [required]="field.mandatory" #mfld3="ngModel"
+                         class="fw-input">
+                  <span *ngIf="mfld3.invalid && mfld3.touched" class="fw-error-text">Ce champ est obligatoire.</span>
+                </ng-container>
+
+                <ng-container *ngSwitchDefault>
+                  <input type="text" [(ngModel)]="medical.customFields[field.name]"
+                         [name]="'med_' + field.name" [required]="field.mandatory" #mfld4="ngModel"
+                         class="fw-input">
+                  <span *ngIf="mfld4.invalid && mfld4.touched" class="fw-error-text">Ce champ est obligatoire.</span>
+                </ng-container>
               </ng-container>
             </div>
           </div>

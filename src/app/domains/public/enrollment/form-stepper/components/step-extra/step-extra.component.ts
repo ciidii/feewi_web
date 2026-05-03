@@ -38,22 +38,34 @@ import { FieldConfig } from '../../../../../../core/models/enrollment';
 
             <div class="fw-input-wrapper" [class.h-auto]="field.type === 'TEXTAREA'">
               <ng-container [ngSwitch]="field.type">
-                <select *ngSwitchCase="'SELECT'"
-                        [(ngModel)]="data.customFields[field.name]"
-                        class="fw-input">
-                  <option value="">Sélectionner...</option>
-                  <option *ngFor="let opt of field.options ?? []" [value]="opt">{{ opt }}</option>
-                </select>
-                <textarea *ngSwitchCase="'TEXTAREA'"
-                          [(ngModel)]="data.customFields[field.name]"
-                          rows="3"
-                          class="fw-input py-4"></textarea>
-                <input *ngSwitchCase="'DATE'" type="date"
-                       [(ngModel)]="data.customFields[field.name]"
-                       class="fw-input">
-                <input *ngSwitchDefault type="text"
-                       [(ngModel)]="data.customFields[field.name]"
-                       class="fw-input">
+                <ng-container *ngSwitchCase="'SELECT'">
+                  <select [(ngModel)]="data.customFields[field.name]"
+                          [name]="'ex_' + field.name" [required]="field.mandatory" #exfld1="ngModel"
+                          class="fw-input">
+                    <option value="">Sélectionner...</option>
+                    <option *ngFor="let opt of field.options ?? []" [value]="opt">{{ opt }}</option>
+                  </select>
+                  <span *ngIf="exfld1.invalid && exfld1.touched" class="fw-error-text">Ce champ est obligatoire.</span>
+                </ng-container>
+                <ng-container *ngSwitchCase="'TEXTAREA'">
+                  <textarea [(ngModel)]="data.customFields[field.name]"
+                            [name]="'ex_' + field.name" [required]="field.mandatory" #exfld2="ngModel"
+                            rows="3"
+                            class="fw-input py-4"></textarea>
+                  <span *ngIf="exfld2.invalid && exfld2.touched" class="fw-error-text">Ce champ est obligatoire.</span>
+                </ng-container>
+                <ng-container *ngSwitchCase="'DATE'">
+                  <input type="date" [(ngModel)]="data.customFields[field.name]"
+                         [name]="'ex_' + field.name" [required]="field.mandatory" #exfld3="ngModel"
+                         class="fw-input">
+                  <span *ngIf="exfld3.invalid && exfld3.touched" class="fw-error-text">Ce champ est obligatoire.</span>
+                </ng-container>
+                <ng-container *ngSwitchDefault>
+                  <input type="text" [(ngModel)]="data.customFields[field.name]"
+                         [name]="'ex_' + field.name" [required]="field.mandatory" #exfld4="ngModel"
+                         class="fw-input">
+                  <span *ngIf="exfld4.invalid && exfld4.touched" class="fw-error-text">Ce champ est obligatoire.</span>
+                </ng-container>
               </ng-container>
             </div>
           </div>

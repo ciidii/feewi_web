@@ -379,11 +379,13 @@ html { height: 100%; }
     }
   }
 
-  &.error {
+  &.error,
+  &:has(.ng-invalid.ng-touched) {
     border-color: var(--fw-error);
     background: var(--fw-error-bg);
-    &:focus-within { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1); }
+    
     .input-prefix { color: var(--fw-error); }
+    &:focus-within { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1); }
   }
 }
 
@@ -407,6 +409,37 @@ html { height: 100%; }
       margin-left: 2px;
     }
   }
+
+  .fw-error-text {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--fw-error);
+    margin-top: 4px;
+    margin-left: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    animation: fw-shake 0.3s ease-in-out;
+
+    &::before {
+      content: "!";
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 14px;
+      height: 14px;
+      background: var(--fw-error);
+      color: white;
+      border-radius: 50%;
+      font-size: 8px;
+    }
+  }
+}
+
+@keyframes fw-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
 }
 
 /* --- PREMIUM CHECKBOX --- */
