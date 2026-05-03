@@ -34,6 +34,8 @@ import { StepReviewComponent } from './components/step-review/step-review.compon
 import { StepHubComponent } from './components/step-hub/step-hub.component';
 import { StepExtraComponent } from './components/step-extra/step-extra.component';
 import { FwButtonComponent } from '../../../../shared/components/button/button.component';
+import { SplashScreenComponent } from '../../../../shared/components/loader/splash-screen.component';
+import { PageProgressComponent } from '../../../../shared/components/loader/page-progress.component';
 
 export type GlobalPhase = 'GUARDIAN' | 'HUB' | 'REVIEW';
 export type ChildPhase  = 'STUDENT'  | 'MEDICAL' | 'SERVICES' | 'DOCS';
@@ -47,7 +49,8 @@ const CHILD_STEPS: ChildPhase[] = ['STUDENT', 'MEDICAL', 'SERVICES', 'DOCS'];
     CommonModule, LucideAngularModule,
     StepFamilyComponent, StepIdentityComponent, StepMedicalComponent,
     StepServicesComponent, StepVaultComponent, StepReviewComponent,
-    StepHubComponent, StepExtraComponent, FwButtonComponent
+    StepHubComponent, StepExtraComponent, FwButtonComponent,
+    SplashScreenComponent, PageProgressComponent
   ],
   templateUrl: './public-form-stepper.component.html',
   styleUrls: ['./public-form-stepper.component.scss']

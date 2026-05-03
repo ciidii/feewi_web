@@ -430,38 +430,6 @@
   }
 }
 
-// ── LOADER INITIAL ────────────────────────────────────────────────────────────
-.initial-loader {
-  position: fixed;
-  inset: 0;
-  background: var(--fw-surface-page);
-  display: grid;
-  place-items: center;
-  z-index: 1000;
-
-  .loader-wrap {
-    text-align: center;
-
-    p {
-      margin-top: 16px;
-      font-weight: 700;
-      font-size: 13px;
-      color: var(--fw-text-secondary);
-    }
-  }
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid var(--fw-border);
-  border-top-color: var(--fw-primary);
-  border-radius: 50%;
-  animation: spin 0.75s linear infinite;
-  margin: 0 auto;
-}
 
 // ── RESPONSIVE ────────────────────────────────────────────────────────────────
 @media (max-width: 768px) {

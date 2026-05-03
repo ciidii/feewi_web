@@ -20,11 +20,12 @@ import { TenantContextService } from '../../../../core/services/tenant-context.s
 import { filter, finalize, take } from 'rxjs';
 import { PublicPortalSummary } from '../../../../core/models/enrollment';
 import { FwButtonComponent } from '../../../../shared/components/button/button.component';
+import { SplashScreenComponent } from '../../../../shared/components/loader/splash-screen.component';
 
 @Component({
   selector: 'app-public-landing',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule, FwButtonComponent],
+  imports: [CommonModule, RouterModule, LucideAngularModule, FwButtonComponent, SplashScreenComponent],
   templateUrl: './public-landing.component.html',
   styleUrls: ['./public-landing.component.scss']
 })

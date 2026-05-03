@@ -201,12 +201,10 @@
 </div>
 
 <!-- ── CHARGEMENT ────────────────────────────────────────── -->
-<div class="full-loader" *ngIf="isLoading()">
-  <div class="loader-content">
-    <lucide-icon [name]="RefreshCw" [size]="40" class="animate-spin text-primary"></lucide-icon>
-    <p>Initialisation du guichet numérique...</p>
-  </div>
-</div>
+<fw-splash-screen
+  *ngIf="isLoading()"
+  message="Initialisation du guichet numérique...">
+</fw-splash-screen>
 
 <!-- ── ERREUR ────────────────────────────────────────────── -->
 <div class="error-state" *ngIf="!isLoading() && isError()">

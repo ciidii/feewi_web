@@ -584,26 +584,7 @@
   }
 }
 
-// ── ÉTATS GLOBAUX (loader / erreur) ───────────────────────────────────────────
-.full-loader {
-  position: fixed;
-  inset: 0;
-  background: var(--desk-bg);
-  z-index: 1000;
-  display: grid;
-  place-items: center;
-  text-align: center;
-
-  .loader-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-
-    p { font-size: 13px; font-weight: 700; color: var(--desk-text-sec); }
-  }
-}
-
+// ── ÉTATS GLOBAUX (erreur) ────────────────────────────────────────────────────
 .error-state {
   min-height: 80vh;
   display: grid;

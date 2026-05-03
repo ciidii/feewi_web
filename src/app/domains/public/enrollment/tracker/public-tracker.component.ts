@@ -16,6 +16,7 @@ import {finalize} from 'rxjs';
 import {FwButtonComponent} from '../../../../shared/components/button/button.component';
 import {FwBadgeComponent} from '../../../../shared/components/badge/badge.component';
 import {FwPublicHeaderComponent} from '../../../../shared/layout/public-header/public-header.component';
+import {BlockLoaderComponent} from '../../../../shared/components/loader/block-loader.component';
 
 type TrackerMode = 'bundle' | 'single' | 'search';
 type SearchTab  = 'code' | 'email';
@@ -24,7 +25,7 @@ type SearchTab  = 'code' | 'email';
   selector: 'app-public-tracker',
   standalone: true,
   imports: [CommonModule, RouterModule, LucideAngularModule, FormsModule,
-            FwButtonComponent, FwBadgeComponent, FwPublicHeaderComponent],
+            FwButtonComponent, FwBadgeComponent, FwPublicHeaderComponent, BlockLoaderComponent],
   templateUrl: './public-tracker.component.html',
   styleUrls: ['./public-tracker.component.scss']
 })
