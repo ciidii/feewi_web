@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import {
   ArrowLeft, ArrowRight, CheckCircle, FileText, GraduationCap,
   HeartPulse, LayoutGrid, Lock, LucideAngularModule, User, Users,
-  ChevronRight, Sparkles, ShieldCheck, ClipboardCheck, RefreshCw
+  ChevronRight, Sparkles, ShieldCheck, ClipboardCheck, RefreshCw, Save
 } from 'lucide-angular';
 import { finalize, forkJoin, switchMap } from 'rxjs';
 
@@ -71,6 +71,7 @@ export class PublicFormStepperComponent implements OnInit {
   // ── État ─────────────────────────────────────────────────────────────────
   loading      = signal(false);
   submitting   = signal(false);
+  savingDraft  = signal(false);
   uploadingDoc = signal<string | null>(null);
   portalClosed = signal(false);
 
@@ -275,13 +276,14 @@ export class PublicFormStepperComponent implements OnInit {
   }
 
   private loadChildIntoStore(adm: Admission) {
-    this.store.identity = { ...adm.identity, customFields: adm.identity.customFields ?? {} };
+    this.store.identity = { ...adm.identity, customFields: adm.identity?.customFields ?? {} };
     this.store.schooling = {
-      ...adm.schooling,
-      academicYearId: adm.schooling.academicYearId || this.store.schooling.academicYearId,
-      cycleType: adm.schooling.cycleType ?? undefined,
-      filiereId: adm.schooling.filiereId ?? null,
-      customFields: adm.schooling.customFields ?? {}
+      ...(adm.schooling ?? {}),
+      academicYearId: adm.schooling?.academicYearId || this.store.schooling.academicYearId,
+      levelId: adm.schooling?.levelId || '',
+      cycleType: adm.schooling?.cycleType ?? undefined,
+      filiereId: adm.schooling?.filiereId ?? null,
+      customFields: adm.schooling?.customFields ?? {}
     };
     this.store.medical  = { customFields: adm.medical?.customFields ?? {} };
     
@@ -521,6 +523,37 @@ export class PublicFormStepperComponent implements OnInit {
     });
   }
 
+  // ── Sauvegarde brouillon & sortie ─────────────────────────────────────────
+  async saveDraftAndExit() {
+    this.savingDraft.set(true);
+    try {
+      // GUARDIAN sans bundle : on crée d'abord le bundle (besoin du formulaire complet)
+      if (this.globalPhase() === 'GUARDIAN') {
+        const ok = await this.saveGuardian();
+        if (!ok) return; // formulaire incomplet — on reste sur la page
+      }
+
+      if (!this.bundle()?.id) {
+        this.router.navigate(['/enrollment']);
+        return;
+      }
+
+      // CHILD FLOW : tentative de sauvegarde du step courant (best-effort)
+      if (this.isChildFlow()) {
+        try { await this.runChildStep(); } catch { /* step incomplet — on part quand même */ }
+      }
+
+      // Mémoriser la position pour la reprise
+      this.savePhase(this.globalPhase(), this.childPhase() ?? undefined, this.activeAdmission()?.id ?? undefined);
+
+      this.router.navigate(['/enrollment/tracker'], {
+        queryParams: { bundleId: this.bundle()!.id, accessCode: this.bundle()!.accessCode }
+      });
+    } finally {
+      this.savingDraft.set(false);
+    }
+  }
+
   // ── Soumission finale ─────────────────────────────────────────────────────
   submit() {
     const bundleId = this.bundle()?.id;
@@ -592,4 +625,5 @@ export class PublicFormStepperComponent implements OnInit {
   readonly ShieldCheck = ShieldCheck;
   readonly ClipboardCheck = ClipboardCheck;
   readonly RefreshCw = RefreshCw;
+  readonly Save = Save;
 }

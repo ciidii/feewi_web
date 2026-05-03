@@ -251,7 +251,7 @@
       <div class="status-info">
         <app-fw-badge [status]="app.status" size="sm"></app-fw-badge>
         <h2 class="reference">{{ app.reference }}</h2>
-        <p class="student-name">{{ app.identity.firstName }} {{ app.identity.lastName }}</p>
+        <p class="student-name">{{ app.identity?.firstName }} {{ app.identity?.lastName }}</p>
 
         <div class="tracker-message" *ngIf="app.trackerMessage">
           <lucide-icon [name]="MessageSquare" [size]="15"></lucide-icon>
@@ -389,9 +389,9 @@
         <div class="summary-list">
           <div class="s-item">
             <span class="s-label">Élève</span>
-            <span class="s-value">{{ app.identity.firstName }} {{ app.identity.lastName }}</span>
+            <span class="s-value">{{ app.identity?.firstName }} {{ app.identity?.lastName }}</span>
           </div>
-          <div class="s-item">
+          <div class="s-item" *ngIf="app.schooling">
             <span class="s-label">Niveau demandé</span>
             <span class="s-value">{{ app.schooling.levelLabel || app.schooling.levelId }}</span>
           </div>

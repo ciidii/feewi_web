@@ -26,8 +26,11 @@
   <main class="content-wrap">
     
     <section class="desk-hero">
+      <p class="hero-eyebrow" *ngIf="tenantCtx.activeTenant()?.name">
+        {{ tenantCtx.activeTenant()?.name }}
+      </p>
       <h1 class="hero-title">
-        Bienvenue sur le guichet d'admission numérique
+        Guichet d'admission numérique
       </h1>
       <p class="hero-sub" *ngIf="welcomeMessage()">{{ welcomeMessage() }}</p>
       <p class="hero-sub" *ngIf="!welcomeMessage()">
@@ -37,9 +40,13 @@
 
     <!-- 📋 CARTES DE CAMPAGNE (Active Hub) -->
     <div class="campaign-hub" *ngIf="s.portalActive && !noYearsAvailable()">
-      <div *ngFor="let year of yearCards()" class="desk-card" [class.is-admin-only]="year.isAdminOnly">
-        
-        <div class="card-status-line" [class]="yearStateClass(year.state)">
+      <div *ngFor="let year of yearCards()"
+           class="desk-card"
+           [class.is-admin-only]="year.isAdminOnly"
+           [class.state-planning]="year.state === 'PLANNING'"
+           [class.state-closing]="year.state === 'CLOSING'">
+
+        <div class="card-status-line" [ngClass]="yearStateClass(year.state)">
           <span class="status-dot"></span>
           {{ yearStateLabel(year.state) }}
         </div>

@@ -17,13 +17,23 @@
           </div>
         </div>
 
-        <div class="session-info" *ngIf="bundleRef()">
-          <div class="access-badge">
-            <lucide-icon [name]="Lock" [size]="12"></lucide-icon>
-            <span class="ref">{{ bundleRef() }}</span>
-            <span class="separator"></span>
-            <span class="code">{{ accessCode() }}</span>
+        <div class="header-actions">
+          <div class="session-info" *ngIf="bundleRef()">
+            <span class="session-label">Dossier</span>
+            <div class="access-badge">
+              <lucide-icon [name]="Lock" [size]="12"></lucide-icon>
+              <span class="ref">{{ bundleRef() }}</span>
+              <span class="separator"></span>
+              <span class="code">{{ accessCode() }}</span>
+            </div>
           </div>
+          <button class="save-draft-btn"
+                  (click)="saveDraftAndExit()"
+                  [disabled]="savingDraft() || submitting()"
+                  type="button">
+            <lucide-icon [name]="Save" [size]="14"></lucide-icon>
+            <span class="save-label">Enregistrer & Quitter</span>
+          </button>
         </div>
       </div>
     </div>
@@ -184,8 +194,17 @@
       
       <!-- GUARDIAN -->
       <ng-container *ngIf="globalPhase() === 'GUARDIAN'">
-        <div class="flex-1"></div>
-        <app-fw-button 
+        <div class="flex-1 flex items-center justify-center">
+          <div class="step-context">
+            <span class="step-text">Étape 1 sur 3</span>
+            <div class="step-dots">
+              <div class="dot active"></div>
+              <div class="dot"></div>
+              <div class="dot"></div>
+            </div>
+          </div>
+        </div>
+        <app-fw-button
           (click)="nextGlobalStep()" 
           [loading]="submitting()"
           variant="primary"
@@ -198,15 +217,24 @@
 
       <!-- CHILD FLOW -->
       <ng-container *ngIf="isChildFlow()">
-        <app-fw-button 
-          (click)="prevChildStep()" 
+        <app-fw-button
+          (click)="prevChildStep()"
           variant="ghost"
           [icon]="ArrowLeft"
         >
           {{ childPhase() === 'STUDENT' ? 'Quitter' : 'Précédent' }}
         </app-fw-button>
-        <div class="flex-1"></div>
-        <app-fw-button 
+        <div class="flex-1 flex items-center justify-center">
+          <div class="step-context">
+            <span class="step-text">Étape {{ childSteps().indexOf(childPhase()!) + 1 }} sur {{ childSteps().length }}</span>
+            <div class="step-dots">
+              <div *ngFor="let s of childSteps()" class="dot"
+                   [class.active]="childPhase() === s"
+                   [class.done]="isChildStepDone(s)"></div>
+            </div>
+          </div>
+        </div>
+        <app-fw-button
           (click)="nextChildStep()" 
           [loading]="submitting()"
           variant="primary"
@@ -219,15 +247,24 @@
 
       <!-- REVIEW -->
       <ng-container *ngIf="globalPhase() === 'REVIEW'">
-        <app-fw-button 
-          (click)="globalPhase.set('HUB'); childPhase.set(null)" 
+        <app-fw-button
+          (click)="globalPhase.set('HUB'); childPhase.set(null)"
           variant="ghost"
           [icon]="ArrowLeft"
         >
           Retour aux enfants
         </app-fw-button>
-        <div class="flex-1"></div>
-        <app-fw-button 
+        <div class="flex-1 flex items-center justify-center">
+          <div class="step-context">
+            <span class="step-text">Étape 3 sur 3</span>
+            <div class="step-dots">
+              <div class="dot done"></div>
+              <div class="dot done"></div>
+              <div class="dot active"></div>
+            </div>
+          </div>
+        </div>
+        <app-fw-button
           (click)="submit()" 
           [loading]="submitting()"
           [disabled]="!consent.checked"

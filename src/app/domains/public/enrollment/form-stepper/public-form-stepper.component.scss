@@ -2,245 +2,387 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: var(--fw-surface-page);
+  background: var(--fw-surface-page);
+  font-family: var(--fw-font-sans);
 }
 
 .container {
-  max-width: 1000px;
+  max-width: 960px;
   margin: 0 auto;
   padding: 0 24px;
   width: 100%;
 }
 
-// ── HEADER (THE CONTROL TOWER) ─────────────────────────────────────────────
+// ── HEADER ────────────────────────────────────────────────────────────────────
 .stepper-header {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--fw-border);
+}
 
-  .header-top {
-    height: 64px;
-    border-bottom: 1px solid var(--fw-surface-sunken);
-    
-    .container {
-      height: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+// Ligne 1 : marque + session
+.header-top {
+  height: 60px;
+  border-bottom: 1px solid var(--fw-surface-sunken);
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
+  .container {
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
 
-      .school-logo {
-        width: 36px;
-        height: 36px;
-        background: var(--fw-midnight);
-        color: white;
-        border-radius: 10px;
-        display: grid;
-        place-items: center;
-        overflow: hidden;
-        img { width: 100%; height: 100%; object-fit: cover; }
-      }
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 
-      .school-info {
-        display: flex;
-        flex-direction: column;
-        .name { font-family: var(--fw-font-display); font-weight: 800; font-size: 0.8125rem; color: var(--fw-midnight); letter-spacing: -0.01em; }
-        .year { font-size: 10px; font-weight: 700; color: var(--fw-primary); text-transform: uppercase; letter-spacing: 0.05em; }
-      }
-    }
+  .school-logo {
+    width: 32px;
+    height: 32px;
+    background: var(--fw-midnight);
+    color: white;
+    border-radius: var(--fw-radius-md);
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    flex-shrink: 0;
 
-    .access-badge {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 12px;
-      background: var(--fw-surface-sunken);
-      border-radius: var(--fw-radius-full);
-      font-size: 10px;
+    img { width: 100%; height: 100%; object-fit: cover; }
+  }
+
+  .school-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+
+    .name {
+      font-family: var(--fw-font-display);
       font-weight: 800;
-      color: var(--fw-text-secondary);
-
-      .ref { color: var(--fw-midnight); }
-      .separator { width: 1px; height: 10px; background: var(--fw-border); }
-      .code { color: var(--fw-primary); font-family: var(--fw-font-mono); }
-    }
-  }
-
-  .global-nav {
-    height: 52px;
-
-    .container {
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
+      font-size: 13px;
+      color: var(--fw-midnight);
+      letter-spacing: -0.01em;
+      line-height: 1.2;
     }
 
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 0 8px;
-      opacity: 0.4;
-      transition: all 0.3s ease;
-
-      .indicator {
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        background: var(--fw-surface-sunken);
-        color: var(--fw-text-tertiary);
-        display: grid;
-        place-items: center;
-        font-size: 9px;
-        font-weight: 900;
-      }
-
-      .label { font-size: 0.75rem; font-weight: 700; color: var(--fw-midnight); text-transform: uppercase; letter-spacing: 0.05em; }
-      
-      .count-pill {
-        font-size: 9px;
-        background: var(--fw-primary);
-        color: white;
-        padding: 1px 6px;
-        border-radius: 10px;
-      }
-
-      &.active {
-        opacity: 1;
-        .indicator { background: var(--fw-primary); color: white; }
-      }
-
-      &.done {
-        opacity: 0.8;
-        .indicator { background: var(--fw-success); color: white; }
-      }
-    }
-
-    .nav-connector {
-      width: 32px;
-      height: 2px;
-      background: var(--fw-border);
-      border-radius: 2px;
-      &.active { background: var(--fw-success); }
+    .year {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--fw-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
     }
   }
 }
 
-// ── MAIN CONTENT & CHILD BANNER ───────────────────────────────────────────
-.stepper-main {
-  flex: 1;
-  padding: 48px 0 120px;
-
-  .form-container {
-    max-width: 800px;
-    margin: 0 auto;
-    width: 100%;
-    padding: 0 24px;
-  }
+// Groupe droite du header (badge + bouton brouillon)
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.child-context-banner {
+.save-draft-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: var(--fw-radius-full);
+  border: 1.5px solid var(--fw-border);
   background: white;
-  border: 1px solid var(--fw-border);
-  border-radius: 24px;
-  padding: 1.5rem;
-  margin-bottom: 2.5rem;
-  box-shadow: var(--fw-shadow-sm);
+  color: var(--fw-text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
 
-  .child-meta {
+  &:hover:not(:disabled) {
+    background: var(--fw-surface-sunken);
+    color: var(--fw-midnight);
+    border-color: rgba(0, 0, 0, 0.2);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+// Badge de session — info critique de récupération
+.session-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.session-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--fw-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.access-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background: var(--fw-midnight);
+  color: white;
+  border-radius: var(--fw-radius-full);
+  font-size: 11px;
+  font-weight: 700;
+  user-select: all;
+  cursor: copy;
+  transition: background 0.15s ease;
+
+  &:hover { background: #1e293b; }
+
+  .ref  { color: rgba(255, 255, 255, 0.7); font-weight: 600; }
+  .separator { width: 1px; height: 10px; background: rgba(255, 255, 255, 0.2); }
+  .code {
+    color: white;
+    font-family: var(--fw-font-mono);
+    font-weight: 900;
+    letter-spacing: 0.05em;
+  }
+}
+
+// Ligne 2 : navigation globale
+.global-nav {
+  height: 48px;
+
+  .container {
+    height: 100%;
     display: flex;
     align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-
-    .child-avatar {
-      width: 44px;
-      height: 44px;
-      background: var(--fw-primary-alpha);
-      color: var(--fw-primary);
-      border-radius: 14px;
-      display: grid;
-      place-items: center;
-      font-weight: 800;
-      font-size: 1.125rem;
-    }
-
-    .context-label { font-size: 11px; font-weight: 800; color: var(--fw-text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; }
-    .child-name { font-family: var(--fw-font-display); font-size: 1.25rem; font-weight: 800; color: var(--fw-midnight); letter-spacing: -0.02em; }
-  }
-
-  .child-steps-nav {
-    display: flex;
+    justify-content: center;
     gap: 8px;
-    margin-bottom: 1.25rem;
+  }
+}
 
-    .cs-item {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 10px;
-      border-radius: 12px;
-      background: var(--fw-surface-sunken);
-      color: var(--fw-text-tertiary);
-      transition: all 0.2s ease;
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: var(--fw-radius-lg);
+  opacity: 0.38;
+  transition: opacity 0.25s ease;
 
-      lucide-icon { opacity: 0.6; }
-      .cs-label { font-size: 12px; font-weight: 700; }
+  .indicator {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--fw-surface-sunken);
+    color: var(--fw-text-tertiary);
+    border: 1.5px solid var(--fw-border);
+    display: grid;
+    place-items: center;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+  }
 
-      &.active {
-        background: var(--fw-midnight);
-        color: white;
-        lucide-icon { opacity: 1; }
-      }
+  .label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--fw-midnight);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+  }
 
-      &.done {
-        background: var(--fw-success-bg);
-        color: var(--fw-success-text);
-        lucide-icon { opacity: 1; color: var(--fw-success); }
-      }
+  .count-pill {
+    font-size: 9px;
+    font-weight: 900;
+    background: var(--fw-primary);
+    color: white;
+    padding: 1px 6px;
+    border-radius: var(--fw-radius-full);
+  }
 
-      @media (max-width: 640px) {
-        .cs-label { display: none; }
-        padding: 12px;
-      }
+  &.active {
+    opacity: 1;
+
+    .indicator {
+      background: var(--fw-primary);
+      color: white;
+      border-color: var(--fw-primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
     }
   }
 
-  .cs-progress-bar {
-    height: 4px;
-    background: var(--fw-surface-sunken);
-    border-radius: 100px;
-    overflow: hidden;
+  &.done {
+    opacity: 0.75;
 
-    .fill {
-      height: 100%;
-      background: var(--fw-primary);
-      transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    .indicator {
+      background: var(--fw-success);
+      color: white;
+      border-color: var(--fw-success);
     }
   }
 }
 
-// ── FOOTER ──────────────────────────────────────────────────────────────────
+.nav-connector {
+  width: 28px;
+  height: 2px;
+  background: var(--fw-border);
+  border-radius: 2px;
+  transition: background 0.3s ease;
+
+  &.active { background: var(--fw-success); }
+}
+
+// ── CONTENU PRINCIPAL ─────────────────────────────────────────────────────────
+.stepper-main {
+  flex: 1;
+  padding: 40px 0 120px;
+}
+
+.form-container {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 24px;
+  width: 100%;
+}
+
+// ── BANNIÈRE ENFANT ───────────────────────────────────────────────────────────
+.child-context-banner {
+  background: white;
+  border: 1.5px solid var(--fw-border);
+  border-left: 3px solid var(--fw-primary);
+  border-radius: var(--fw-radius-xl);
+  padding: 20px 20px 16px;
+  margin-bottom: 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.child-meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.child-avatar {
+  width: 40px;
+  height: 40px;
+  background: var(--fw-primary-alpha);
+  color: var(--fw-primary);
+  border-radius: var(--fw-radius-lg);
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  font-size: 1.125rem;
+  flex-shrink: 0;
+}
+
+.context-label {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--fw-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 2px;
+}
+
+.child-name {
+  font-family: var(--fw-font-display);
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: var(--fw-midnight);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+// Navigation étapes enfant
+.child-steps-nav {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.cs-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: var(--fw-radius-md);
+  background: var(--fw-surface-sunken);
+  color: var(--fw-text-tertiary);
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+
+  lucide-icon { opacity: 0.5; flex-shrink: 0; }
+
+  .cs-label {
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &.active {
+    background: var(--fw-midnight);
+    color: white;
+    border-color: var(--fw-midnight);
+
+    lucide-icon { opacity: 1; }
+  }
+
+  &.done {
+    background: var(--fw-success-bg);
+    color: var(--fw-success); // fix: was --fw-success-text (token inexistant)
+    border-color: var(--fw-success-border);
+
+    lucide-icon { opacity: 1; color: var(--fw-success); }
+  }
+
+  @media (max-width: 560px) {
+    .cs-label { display: none; }
+    padding: 10px;
+  }
+}
+
+// Barre de progression
+.cs-progress-bar {
+  height: 3px;
+  background: var(--fw-surface-sunken);
+  border-radius: 100px;
+  overflow: hidden;
+
+  .fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--fw-primary), color-mix(in srgb, var(--fw-primary) 70%, #6366f1));
+    border-radius: 100px;
+    transition: width 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+// ── FOOTER NAVIGATION ─────────────────────────────────────────────────────────
 .stepper-footer {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 88px;
-  background: rgba(255, 255, 255, 0.9);
+  height: 80px;
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-top: 1px solid var(--fw-border);
   z-index: 90;
 
@@ -252,7 +394,43 @@
   }
 }
 
-// ── UTILS ───────────────────────────────────────────────────────────────────
+// Indicateur d'étape au centre du footer
+.step-context {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+
+  .step-text {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--fw-text-tertiary);
+    white-space: nowrap;
+  }
+
+  .step-dots {
+    display: flex;
+    gap: 4px;
+
+    .dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--fw-border);
+      transition: background 0.2s ease, width 0.2s ease;
+
+      &.active {
+        background: var(--fw-primary);
+        width: 12px;
+        border-radius: 2px;
+      }
+
+      &.done { background: var(--fw-success); }
+    }
+  }
+}
+
+// ── LOADER INITIAL ────────────────────────────────────────────────────────────
 .initial-loader {
   position: fixed;
   inset: 0;
@@ -260,23 +438,50 @@
   display: grid;
   place-items: center;
   z-index: 1000;
-  .loader-wrap { text-align: center; p { margin-top: 16px; font-weight: 800; font-size: 0.875rem; color: var(--fw-midnight); } }
+
+  .loader-wrap {
+    text-align: center;
+
+    p {
+      margin-top: 16px;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--fw-text-secondary);
+    }
+  }
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
-.spinner { width: 40px; height: 40px; border: 3px solid var(--fw-border); border-top-color: var(--fw-primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto; }
 
-// ── RESPONSIVE ──────────────────────────────────────────────────────────────
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--fw-border);
+  border-top-color: var(--fw-primary);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+  margin: 0 auto;
+}
+
+// ── RESPONSIVE ────────────────────────────────────────────────────────────────
 @media (max-width: 768px) {
-  .stepper-header {
-    .header-top { height: 56px; .access-badge { display: none; } }
-    .global-nav { 
-      height: 48px;
-      .nav-item .label { display: none; }
-      .nav-connector { width: 20px; }
-    }
+  .header-top {
+    height: 52px;
+
+    .session-label { display: none; }
+    .access-badge  { display: none; }
+    .save-label    { display: none; }
+    .save-draft-btn { padding: 6px 8px; }
   }
 
-  .stepper-main { padding: 24px 0 100px; }
-  .stepper-footer { height: 80px; }
+  .global-nav {
+    height: 44px;
+
+    .nav-item .label { display: none; }
+    .nav-connector { width: 16px; }
+  }
+
+  .stepper-main   { padding: 24px 0 96px; }
+  .stepper-footer { height: 72px; }
+  .step-context   { display: none; }
 }
