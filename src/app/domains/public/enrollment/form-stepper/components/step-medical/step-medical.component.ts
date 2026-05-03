@@ -1,8 +1,8 @@
-import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { HeartPulse, LucideAngularModule, Info, ShieldCheck } from 'lucide-angular';
-import { FieldConfig } from '../../../../../../core/models/enrollment';
+import {Component, Input} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {HeartPulse, Info, LucideAngularModule, ShieldCheck} from 'lucide-angular';
+import {FieldConfig} from '../../../../../../core/models/enrollment';
 
 @Component({
   selector: 'app-step-medical',

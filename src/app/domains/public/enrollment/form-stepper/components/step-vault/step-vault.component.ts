@@ -1,9 +1,9 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { CheckCircle, FileText, LucideAngularModule, RefreshCw, Upload, XCircle, ShieldCheck } from 'lucide-angular';
-import { RequiredDocument } from '../../../../../../core/models/enrollment';
-import { FwButtonComponent } from '../../../../../../shared/components/button/button.component';
-import { FwBadgeComponent } from '../../../../../../shared/components/badge/badge.component';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {CheckCircle, FileText, LucideAngularModule, RefreshCw, ShieldCheck, Upload, XCircle} from 'lucide-angular';
+import {RequiredDocument} from '../../../../../../core/models/enrollment';
+import {FwButtonComponent} from '../../../../../../shared/components/button/button.component';
+import {FwBadgeComponent} from '../../../../../../shared/components/badge/badge.component';
 
 @Component({
   selector: 'app-step-vault',

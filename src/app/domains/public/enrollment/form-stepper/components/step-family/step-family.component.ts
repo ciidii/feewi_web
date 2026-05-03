@@ -1,8 +1,8 @@
-import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import {Info, LucideAngularModule, Users, UserCog} from 'lucide-angular';
-import { FieldConfig } from '../../../../../../core/models/enrollment';
+import {Component, Input} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {Info, LucideAngularModule, UserCog, Users} from 'lucide-angular';
+import {FieldConfig} from '../../../../../../core/models/enrollment';
 
 // Champs optionnels "preset" qui correspondent à des propriétés top-level du Guardian
 const GUARDIAN_TOP_LEVEL: ReadonlySet<string> = new Set(['email', 'phone']);

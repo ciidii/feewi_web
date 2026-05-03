@@ -1,9 +1,9 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
 import {Info, LucideAngularModule, User} from 'lucide-angular';
-import { FieldConfig } from '../../../../../../core/models/enrollment';
-import { CycleGroup } from '../../../../../../core/models/academic.model';
+import {FieldConfig} from '../../../../../../core/models/enrollment';
+import {CycleGroup} from '../../../../../../core/models/academic.model';
 
 @Component({
   selector: 'app-step-identity',

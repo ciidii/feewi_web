@@ -1,8 +1,8 @@
-import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Info, LucideAngularModule, Sparkles } from 'lucide-angular';
-import { FieldConfig } from '../../../../../../core/models/enrollment';
+import {Component, Input} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {Info, LucideAngularModule, Sparkles} from 'lucide-angular';
+import {FieldConfig} from '../../../../../../core/models/enrollment';
 
 @Component({
   selector: 'app-step-extra',
