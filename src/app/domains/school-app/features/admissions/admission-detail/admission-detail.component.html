@@ -3,9 +3,6 @@
   [description]="application() ? 'Dossier #' + application()?.reference : 'Chargement...'"
   [icon]="User"
   [backLink]="['/admin/admissions/list']"
-  [tabs]="pillarTabs()"
-  [activeTabId]="activePillarTab()"
-  (tabChange)="setPillarTab($event)"
   density="compact"
 >
   <!-- STICKY HEADER ACTIONS -->
@@ -55,7 +52,7 @@
     <main class="pillar-content-area">
       <div class="pillar-scroll-wrapper custom-scrollbar">
 
-        <!-- 🏢 OVERVIEW PANEL (Permanent Context for all tabs) -->
+        <!-- 🏢 OVERVIEW PANEL (Permanent Context) -->
         <div class="quick-overview-panel">
           <div class="student-hero">
             <div class="avatar-lg">{{ application()?.identity?.firstName?.charAt(0) || '?' }}</div>
@@ -81,54 +78,16 @@
           </div>
         </div>
 
-        <!-- IDENTITY PANEL -->
-        <div class="pillar-panel" *ngIf="activePillarTab() === 'identity'">
-          <div class="panel-section">
-            <div class="section-header">
-              <lucide-icon [name]="User" [size]="16"></lucide-icon>
-              <h3>État Civil Complet</h3>
-            </div>
-            <div class="info-grid-dense">
-              <div class="info-field">
-                <label>Prénoms</label>
-                <span class="field-value">{{ app.identity.firstName }}</span>
-              </div>
-              <div class="info-field">
-                <label>Nom de famille</label>
-                <span class="field-value">{{ app.identity.lastName }}</span>
-              </div>
-              <div class="info-field">
-                <label>Date de naissance</label>
-                <span class="field-value">{{ app.identity.birthDate | date:'longDate' }}</span>
-              </div>
-              <div class="info-field">
-                <label>Lieu de naissance</label>
-                <span class="field-value">{{ app.identity.birthPlace }}</span>
-              </div>
+        <!-- 🏫 SCOLARITÉ (Section 1) -->
+        <section class="fw-split-card">
+          <div class="card-sidebar">
+            <div class="pillar-icon-box"><lucide-icon [name]="School" [size]="20"></lucide-icon></div>
+            <div class="pillar-title-group">
+              <h3>Vœux Scolaires</h3>
+              <p>Parcours cible et établissement d'origine</p>
             </div>
           </div>
-
-          <div class="panel-section" *ngIf="getObjectKeys(app.identity.customFields || {}).length > 0">
-            <div class="section-header">
-              <lucide-icon [name]="Plus" [size]="16"></lucide-icon>
-              <h3>Informations Additionnelles</h3>
-            </div>
-            <div class="info-grid-dense">
-              <div class="info-field" *ngFor="let key of getObjectKeys(app.identity.customFields || {})">
-                <label>{{ key | camelToLabel }}</label>
-                <span class="field-value">{{ app.identity.customFields![key] }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- SCHOOLING PANEL -->
-        <div class="pillar-panel" *ngIf="activePillarTab() === 'schooling'">
-          <div class="panel-section">
-            <div class="section-header">
-              <lucide-icon [name]="School" [size]="16"></lucide-icon>
-              <h3>Vœux & Parcours</h3>
-            </div>
+          <div class="card-content">
             <div class="info-grid-dense">
               <div class="info-field highlight">
                 <label>Niveau demandé</label>
@@ -146,15 +105,6 @@
                 <label>Établissement d'origine</label>
                 <span class="field-value text-primary font-bold">{{ app.schooling.customFields?.['previousSchool'] || 'Non renseigné' }}</span>
               </div>
-            </div>
-          </div>
-
-          <div class="panel-section" *ngIf="getObjectKeys(app.schooling.customFields || {}).length > 1">
-             <div class="section-header">
-              <lucide-icon [name]="Plus" [size]="16"></lucide-icon>
-              <h3>Autres données scolaires</h3>
-            </div>
-            <div class="info-grid-dense">
               <ng-container *ngFor="let key of getObjectKeys(app.schooling.customFields || {})">
                 <div class="info-field" *ngIf="key !== 'previousSchool'">
                   <label>{{ key | camelToLabel }}</label>
@@ -163,16 +113,56 @@
               </ng-container>
             </div>
           </div>
-        </div>
+        </section>
 
-        <!-- FAMILY PANEL -->
-        <div class="pillar-panel" *ngIf="activePillarTab() === 'family'">
-          <div class="panel-section">
-            <div class="section-header">
-              <lucide-icon [name]="Users" [size]="16"></lucide-icon>
-              <h3>Responsable légal principal</h3>
+        <!-- 👤 IDENTITÉ (Section 2) -->
+        <section class="fw-split-card">
+          <div class="card-sidebar">
+            <div class="pillar-icon-box"><lucide-icon [name]="User" [size]="20"></lucide-icon></div>
+            <div class="pillar-title-group">
+              <h3>Identité de l'élève</h3>
+              <p>Informations d'état civil</p>
             </div>
-            <div class="guardian-compact-card" *ngIf="app.primaryGuardian">
+          </div>
+          <div class="card-content">
+            <div class="info-grid-dense">
+              <div class="info-field">
+                <label>Prénoms</label>
+                <span class="field-value">{{ app.identity.firstName }}</span>
+              </div>
+              <div class="info-field">
+                <label>Nom de famille</label>
+                <span class="field-value">{{ app.identity.lastName }}</span>
+              </div>
+              <div class="info-field">
+                <label>Date de naissance</label>
+                <span class="field-value">{{ app.identity.birthDate | date:'longDate' }}</span>
+              </div>
+              <div class="info-field">
+                <label>Lieu de naissance</label>
+                <span class="field-value">{{ app.identity.birthPlace }}</span>
+              </div>
+              <ng-container *ngFor="let key of getObjectKeys(app.identity.customFields || {})">
+                <div class="info-field">
+                  <label>{{ key | camelToLabel }}</label>
+                  <span class="field-value">{{ app.identity.customFields![key] }}</span>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+        </section>
+
+        <!-- 👨‍👩‍👧 FAMILLE (Section 3) -->
+        <section class="fw-split-card" *ngIf="app.primaryGuardian">
+          <div class="card-sidebar">
+            <div class="pillar-icon-box"><lucide-icon [name]="Users" [size]="20"></lucide-icon></div>
+            <div class="pillar-title-group">
+              <h3>Responsable Légal</h3>
+              <p>Tuteur principal et finances</p>
+            </div>
+          </div>
+          <div class="card-content">
+            <div class="guardian-compact-card mb-6">
               <div class="card-left">
                 <div class="avatar-md">{{ app.primaryGuardian.firstName[0] }}{{ app.primaryGuardian.lastName[0] }}</div>
                 <div class="main-info">
@@ -188,205 +178,168 @@
                 </span>
               </div>
             </div>
-          </div>
 
-          <div class="panel-section" *ngIf="app.primaryGuardian && getObjectKeys(app.primaryGuardian.customFields || {}).length > 0">
-             <div class="section-header">
-              <lucide-icon [name]="Plus" [size]="16"></lucide-icon>
-              <h3>Informations tuteur</h3>
-            </div>
-            <div class="info-grid-dense">
+            <div class="info-grid-dense" *ngIf="getObjectKeys(app.primaryGuardian.customFields || {}).length > 0">
               <div class="info-field" *ngFor="let key of getObjectKeys(app.primaryGuardian.customFields || {})">
                 <label>{{ key | camelToLabel }}</label>
                 <span class="field-value">{{ app.primaryGuardian.customFields?.[key] }}</span>
               </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        <!-- MEDICAL PANEL -->
-        <div class="pillar-panel" *ngIf="activePillarTab() === 'medical'">
-          <div class="panel-header">
-            <h2 class="panel-title">Informations médicales</h2>
-            <div class="panel-badge">Santé</div>
+        <!-- 🏥 SANTÉ & SERVICES (Section 4 - Groupée) -->
+        <section class="fw-split-card" *ngIf="getObjectKeys(app.medical.customFields).length > 0 || app.subscriptions?.length">
+          <div class="card-sidebar">
+            <div class="pillar-icon-box"><lucide-icon [name]="HeartPulse" [size]="20"></lucide-icon></div>
+            <div class="pillar-title-group">
+              <h3>Santé & Services</h3>
+              <p>Données médicales et options</p>
+            </div>
           </div>
-
-          <ng-container *ngIf="getObjectKeys(app.medical.customFields).length > 0; else medicalEmpty">
-            <div class="info-grid">
-              <div class="info-field"
-                   *ngFor="let key of getObjectKeys(app.medical.customFields)"
-                   [class.alert]="key === 'criticalAllergies' && app.medical.customFields![key]">
+          <div class="card-content">
+            <!-- Médical -->
+            <div class="info-grid-dense mb-8" *ngIf="getObjectKeys(app.medical.customFields).length > 0">
+              <div class="info-field" *ngFor="let key of getObjectKeys(app.medical.customFields)">
                 <label>{{ key | camelToLabel }}</label>
-                <span class="field-value">{{ app.medical.customFields![key] || 'Non renseigné' }}</span>
+                <span class="field-value">{{ app.medical.customFields![key] }}</span>
               </div>
             </div>
-          </ng-container>
 
-          <ng-template #medicalEmpty>
-            <div class="empty-state">
-              <lucide-icon [name]="HeartPulse" [size]="48"></lucide-icon>
-              <p>Aucune information médicale renseignée</p>
+            <!-- Services -->
+            <div class="services-flow" *ngIf="app.subscriptions?.length">
+              <div *ngFor="let sub of app.subscriptions" class="service-badge-premium">
+                <lucide-icon [name]="Activity" [size]="14" class="svc-icon"></lucide-icon>
+                <span class="svc-name">{{ getServiceConfig(sub.serviceCode)?.label || sub.serviceCode }}</span>
+                <span class="svc-opt" *ngIf="sub.optionCode">{{ sub.optionCode }}</span>
+              </div>
             </div>
-          </ng-template>
-        </div>
-
-        <!-- ASSESSMENT PANEL -->
-        <div class="pillar-panel" *ngIf="activePillarTab() === 'assessment'">
-          <div class="panel-header">
-            <h2 class="panel-title">Évaluation pédagogique</h2>
-            <div class="panel-badge">Jury</div>
           </div>
-          <div class="assessment-container" *ngIf="app.assessment">
-            <div class="grades-section">
+        </section>
+
+        <!-- 🏁 ÉVALUATION PÉDAGOGIQUE (Le Bilan Final) -->
+        <div class="assessment-action-card animate-in slide-in-from-bottom-8 duration-700" *ngIf="effectiveSchema()?.assessment">
+          <header class="assessment-header">
+            <div class="icon-badge"><lucide-icon [name]="GraduationCap" [size]="24"></lucide-icon></div>
+            <div>
+              <h2>Décision de la Commission</h2>
+              <p>Étude du dossier et évaluation pédagogique</p>
+            </div>
+          </header>
+
+          <div class="assessment-body">
+            <!-- Notes -->
+            <div class="grades-display">
               <table class="grades-table">
                 <thead>
-                <tr><th>Discipline</th><th class="text-right">Note / 20</th></tr>
+                  <tr><th>Discipline / Matière</th><th class="text-right">Note / 20</th></tr>
                 </thead>
                 <tbody>
-                <tr *ngFor="let subject of assessmentSubjects()">
-                  <td class="subject-name">{{ subject }}</td>
-                  <td class="text-right">
-                    <input type="number"
-                           [ngModel]="evaluationGrades()[subject]"
-                           (ngModelChange)="updateGrade(subject, $event)"
-                           class="grade-input"
-                           step="0.5"
-                           min="0"
-                           max="20"
-                           [disabled]="app.status === 'VALIDATED'">
-                  </td>
-                </tr>
+                  <tr *ngFor="let subject of assessmentSubjects()">
+                    <td class="subject-name">{{ subject }}</td>
+                    <td class="text-right">
+                      <input type="number"
+                             [ngModel]="evaluationGrades()[subject]"
+                             (ngModelChange)="updateGrade(subject, $event)"
+                             class="grade-input"
+                             step="0.5" min="0" max="20"
+                             [disabled]="app.status === 'VALIDATED'">
+                    </td>
+                  </tr>
                 </tbody>
                 <tfoot>
-                <tr class="average-row">
-                  <td>Moyenne générale</td>
-                  <td class="text-right">
-                      <span class="average-score" [class.passing]="+averageScore() >= minPassingGrade()" [class.failing]="+averageScore() < minPassingGrade()">
-                        {{ averageScore() }} / 20
-                      </span>
-                  </td>
-                </tr>
+                  <tr class="average-row">
+                    <td>Moyenne Générale Estimée</td>
+                    <td class="text-right">
+                        <span class="average-score" [class.passing]="+averageScore() >= minPassingGrade()" [class.failing]="+averageScore() < minPassingGrade()">
+                          {{ averageScore() }} / 20
+                        </span>
+                    </td>
+                  </tr>
                 </tfoot>
               </table>
             </div>
-            <div class="decision-section">
-              <div class="comment-field">
-                <label>Observations du jury</label>
-                <textarea [(ngModel)]="evaluationComment"
-                          rows="4"
-                          placeholder="Motif de la décision, points d'attention, etc."
+
+            <!-- Décision -->
+            <div class="decision-box">
+              <div class="field">
+                <label class="decision-label">Observations et Motivations</label>
+                <textarea [(ngModel)]="evaluationComment" rows="4" 
+                          placeholder="Points forts, faiblesses, ou motif du refus..."
                           [disabled]="app.status === 'VALIDATED'"></textarea>
               </div>
-              <div class="decision-buttons">
-                <button (click)="pedagogicalDecision.set('REJECTED')"
-                        [class.active]="pedagogicalDecision() === 'REJECTED'"
-                        class="decision-btn reject">Refusé</button>
-                <button (click)="pedagogicalDecision.set('WAITLIST')"
-                        [class.active]="pedagogicalDecision() === 'WAITLIST'"
-                        class="decision-btn waitlist">Liste d'attente</button>
-                <button (click)="pedagogicalDecision.set('ADMITTED')"
-                        [class.active]="pedagogicalDecision() === 'ADMITTED'"
-                        class="decision-btn admit">Admis</button>
+
+              <div class="field">
+                <label class="decision-label">Verdict</label>
+                <div class="decision-actions">
+                  <button (click)="pedagogicalDecision.set('REJECTED')"
+                          [class.active]="pedagogicalDecision() === 'REJECTED'"
+                          class="btn-opt reject">Refusé</button>
+                  <button (click)="pedagogicalDecision.set('WAITLIST')"
+                          [class.active]="pedagogicalDecision() === 'WAITLIST'"
+                          class="btn-opt wait">Attente</button>
+                  <button (click)="pedagogicalDecision.set('ADMITTED')"
+                          [class.active]="pedagogicalDecision() === 'ADMITTED'"
+                          class="btn-opt admit">Admis</button>
+                </div>
               </div>
-              <app-fw-button variant="primary"
-                             class="submit-btn"
+
+              <app-fw-button variant="primary" size="lg" class="w-full mt-4"
                              [loading]="isActionLoading()"
                              [disabled]="app.status === 'VALIDATED'"
                              (click)="submitPedagogicalDecision()">
-                Enregistrer la décision
+                Enregistrer la décision finale
               </app-fw-button>
             </div>
           </div>
-          <div *ngIf="!app.assessment" class="empty-state">
-            <lucide-icon [name]="GraduationCap" [size]="48"></lucide-icon>
-            <p>Aucune évaluation configurée pour ce niveau</p>
-          </div>
-        </div>
-
-        <!-- SERVICES PANEL -->
-        <div class="pillar-panel" *ngIf="activePillarTab() === 'services'">
-          <div class="panel-header">
-            <h2 class="panel-title">Services souscrits</h2>
-            <div class="panel-badge">{{ app.subscriptions?.length || 0 }} service(s)</div>
-          </div>
-
-          <div class="services-list" *ngIf="app.subscriptions?.length; else servicesEmpty">
-            <div *ngFor="let sub of app.subscriptions" class="service-card">
-              <div class="service-icon">
-                <lucide-icon [name]="Activity" [size]="20"></lucide-icon>
-              </div>
-              <div class="service-info">
-                <h4>{{ getServiceConfig(sub.serviceCode)?.label || sub.serviceCode }}</h4>
-                <span class="service-option">Option : {{ sub.optionCode }}</span>
-              </div>
-              <span *ngIf="getServiceConfig(sub.serviceCode)?.mandatory" class="service-mandatory-badge">
-                Obligatoire
-              </span>
-            </div>
-          </div>
-
-          <ng-template #servicesEmpty>
-            <div class="empty-state">
-              <lucide-icon [name]="Activity" [size]="48"></lucide-icon>
-              <p>Aucun service souscrit</p>
-            </div>
-          </ng-template>
         </div>
 
       </div>
     </main>
 
-    <!-- RIGHT SIDEBAR -->
+    <!-- RIGHT SIDEBAR (Sticky Tools) -->
     <aside class="conformity-sidebar">
-
-      <!-- 1. Conformité — bloquant décisionnel, toujours en premier -->
+      <!-- Conformité -->
       <div class="compliance-card" [class.compliant]="isReadyForFinalValidation()">
         <lucide-icon [name]="isReadyForFinalValidation() ? CheckCircle : ShieldCheck" [size]="20"></lucide-icon>
         <div class="compliance-text">
-          <strong>{{ isReadyForFinalValidation() ? 'Dossier conforme' : 'Dossier non conforme' }}</strong>
-          <span>{{ mandatoryDocsSummary().received }} pièce(s) sur {{ mandatoryDocsSummary().total }} obligatoire(s)</span>
+          <strong>{{ isReadyForFinalValidation() ? 'Dossier Conforme' : 'Vérification en cours' }}</strong>
+          <span>{{ mandatoryDocsSummary().received }} / {{ mandatoryDocsSummary().total }} pièces obligatoires</span>
         </div>
       </div>
 
-      <!-- 2. Pièces justificatives -->
-      <section class="sidebar-card documents-card">
+      <!-- Pièces Jointes -->
+      <section class="sidebar-card">
         <div class="card-header">
           <lucide-icon [name]="FileText" [size]="16"></lucide-icon>
-          <h4>Pièces justificatives</h4>
+          <h4>Documents</h4>
           <span class="doc-counter">{{ mandatoryDocsSummary().received }}/{{ mandatoryDocsSummary().total }}</span>
         </div>
         <div class="documents-list">
           <div *ngFor="let doc of app.documents"
-               class="document-item"
-               [class.missing]="doc.status === 'MISSING'"
+               class="document-item" [class.missing]="doc.status === 'MISSING'"
                (click)="previewDocument(doc)">
             <lucide-icon [name]="getFileIcon(doc.name)" [size]="16"></lucide-icon>
             <div class="document-info">
               <span class="document-name">{{ doc.name }}</span>
               <span class="document-status">{{ doc.status === 'MISSING' ? 'Manquant' : 'Reçu' }}</span>
             </div>
-            <button
-              class="upload-btn"
-              [class.uploading]="uploadingDocCode() === doc.code"
-              [attr.aria-label]="'Déposer ' + doc.name"
-              (click)="$event.stopPropagation(); adminFileInput.click()"
-            >
-              <lucide-icon [name]="uploadingDocCode() === doc.code ? Loader2 : Upload" [size]="14" [class.animate-spin]="uploadingDocCode() === doc.code"></lucide-icon>
+            <button class="upload-btn" (click)="$event.stopPropagation(); adminFileInput.click()">
+              <lucide-icon [name]="Upload" [size]="14"></lucide-icon>
             </button>
             <input type="file" #adminFileInput hidden (change)="onAdminFileSelected(doc.code, $event)">
           </div>
         </div>
       </section>
 
-      <!-- 3. Workflow — contexte, pas chemin critique -->
-      <section class="sidebar-card workflow-card">
+      <!-- Workflow -->
+      <section class="sidebar-card">
         <div class="card-header">
           <lucide-icon [name]="HistoryIcon" [size]="16"></lucide-icon>
-          <h4>État d'avancement</h4>
+          <h4>Parcours Admission</h4>
         </div>
         <app-admission-workflow [state]="app.status" mode="vertical"></app-admission-workflow>
       </section>
-
     </aside>
 
   </div>
