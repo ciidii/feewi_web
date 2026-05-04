@@ -1,4 +1,4 @@
-import type { LucideIconData } from 'lucide-angular';
+import type {LucideIconData} from 'lucide-angular';
 
 // ===========================================
 // ÉNUMÉRATIONS ET TYPES DE BASE

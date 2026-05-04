@@ -1,12 +1,22 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {Component, inject, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { LucideAngularModule, MessageSquare, Type, Info, Plus, Trash2, List, Eye, Settings, HelpCircle, X } from 'lucide-angular';
-import { FormShellComponent } from '../../../../../../../shared/components/form-shell/form-shell';
-import { FieldConfig } from '../../../../../../../core/models/enrollment.model';
-import { FwTabsComponent, FwTab } from '../../../../../../../shared/components/tabs/tabs.component';
-import { signal } from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import {
+  Eye,
+  HelpCircle,
+  Info,
+  LucideAngularModule,
+  MessageSquare,
+  Plus,
+  Settings,
+  Trash2,
+  Type,
+  X
+} from 'lucide-angular';
+import {FormShellComponent} from '../../../../../../../shared/components/form-shell/form-shell';
+import {FieldConfig} from '../../../../../../../core/models/enrollment.model';
+import {FwTab, FwTabsComponent} from '../../../../../../../shared/components/tabs/tabs.component';
 
 @Component({
   selector: 'app-custom-field-form',

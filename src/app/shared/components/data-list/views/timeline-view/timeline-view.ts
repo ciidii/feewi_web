@@ -1,20 +1,12 @@
-import { Component, input, output, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import {Component, computed, input, output} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {MatCheckboxModule} from '@angular/material/checkbox';
 
 // Importer les icônes
-import {
-  LucideAngularModule,
-  Eye,
-  CheckCircle,
-  Calendar,
-  Clock,
-  ChevronRight,
-  Circle, MapPin
-} from 'lucide-angular';
-import { RowAction, TableRow } from '../../../../models/data-list.models';
-import { FwButtonComponent } from '../../../button/button.component';
-import { FwBadgeComponent } from '../../../badge/badge.component';
+import {Calendar, CheckCircle, ChevronRight, Circle, Clock, Eye, LucideAngularModule, MapPin} from 'lucide-angular';
+import {RowAction, TableRow} from '../../../../models/data-list.models';
+import {FwButtonComponent} from '../../../button/button.component';
+import {FwBadgeComponent} from '../../../badge/badge.component';
 
 
 export interface TimelineGroup {

@@ -1,6 +1,6 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { LucideAngularModule, Info, AlertTriangle, CheckCircle, XCircle, X } from 'lucide-angular';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {AlertTriangle, CheckCircle, Info, LucideAngularModule, X, XCircle} from 'lucide-angular';
 
 export type AlertVariant = 'info' | 'success' | 'warning' | 'error';
 
@@ -13,7 +13,7 @@ export type AlertVariant = 'info' | 'success' | 'warning' | 'error';
       <div class="alert-icon">
         <lucide-icon [name]="getIcon()" [size]="20"></lucide-icon>
       </div>
-      
+
       <div class="alert-content">
         <p class="alert-message"><ng-content></ng-content></p>
       </div>
@@ -100,7 +100,7 @@ export type AlertVariant = 'info' | 'success' | 'warning' | 'error';
 export class FwAlertBannerComponent {
   @Input() variant: AlertVariant = 'info';
   @Input() dismissible: boolean = false;
-  
+
   @Output() onClose = new EventEmitter<void>();
 
   visible = true;

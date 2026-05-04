@@ -1,4 +1,11 @@
-import { AdmissionStatus, AdmissionType, AdmissionChannel, DocumentStatus, GuardianRelation, CycleType } from './base-types';
+import {
+  AdmissionChannel,
+  AdmissionStatus,
+  AdmissionType,
+  CycleType,
+  DocumentStatus,
+  GuardianRelation
+} from './base-types';
 
 // --- PILIER IDENTITÉ ---
 

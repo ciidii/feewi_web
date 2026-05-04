@@ -1,4 +1,4 @@
-import { Injectable, signal, effect } from '@angular/core';
+import {effect, Injectable, signal} from '@angular/core';
 
 export type AppTheme = 'light' | 'dark' | 'high-contrast' | 'system';
 export type AppDensity = 'comfortable' | 'compact';
@@ -25,7 +25,7 @@ export class UiPreferenceService {
 
       document.documentElement.setAttribute('data-theme', themeToApply);
       document.documentElement.setAttribute('data-density', currentDensity);
-      
+
       // Persistance
       localStorage.setItem('fw-theme', currentTheme);
       localStorage.setItem('fw-density', currentDensity);

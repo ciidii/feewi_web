@@ -1,22 +1,22 @@
-import { HttpClient, HttpHeaders, HttpParams } from "@angular/common/http";
-import { inject, Injectable } from "@angular/core";
-import { EnvironmentService } from "./environment.service";
-import { NotificationService } from "../../shared/services/notification.service";
-import { TenantContextService } from "./tenant-context.service";
-import { catchError, Observable, throwError } from "rxjs";
-import { API_ENDPOINTS } from "../constants/api-endpoints";
+import {HttpClient, HttpHeaders, HttpParams} from "@angular/common/http";
+import {inject, Injectable} from "@angular/core";
+import {EnvironmentService} from "./environment.service";
+import {NotificationService} from "../../shared/services/notification.service";
+import {TenantContextService} from "./tenant-context.service";
+import {catchError, Observable, throwError} from "rxjs";
+import {API_ENDPOINTS} from "../constants/api-endpoints";
 import {
   Admission,
   AdmissionPageResponse,
   AdmissionStatus,
-  LevelConfigResponse,
-  EnrollmentConfig,
-  LevelOverrideConfig,
+  AssessmentRequest,
   CycleOverrideConfig,
-  YearOverrideConfig,
   CycleType,
   DirectEntryRequest,
-  AssessmentRequest
+  EnrollmentConfig,
+  LevelConfigResponse,
+  LevelOverrideConfig,
+  YearOverrideConfig
 } from '../models/enrollment.model';
 
 @Injectable({

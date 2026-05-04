@@ -1,25 +1,25 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { LucideAngularModule, Calendar, Plus, Play, Archive, CheckCircle, Clock, CalendarSearch } from 'lucide-angular';
-import { DataListComponent } from '../../../../../shared/components/data-list/data-list.component';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { AcademicService } from '../../../../../core/services/academic.service';
-import { NotificationService } from '../../../../../shared/services/notification.service';
-import { AcademicYear, YearStatus } from '../../../../../core/models/academic.model';
-import { RowAction, TabItem, TableRow } from '../../../../../shared/models/data-list.models';
-import { YearFormComponent } from './components/year-form/year-form.component';
-import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
-import { Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
-import { FwPageShellComponent } from '../../../../../shared/components/page-shell/page-shell.component';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Archive, Calendar, CalendarSearch, CheckCircle, Clock, LucideAngularModule, Play, Plus} from 'lucide-angular';
+import {DataListComponent} from '../../../../../shared/components/data-list/data-list.component';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import {AcademicService} from '../../../../../core/services/academic.service';
+import {NotificationService} from '../../../../../shared/services/notification.service';
+import {AcademicYear, YearStatus} from '../../../../../core/models/academic.model';
+import {RowAction, TabItem, TableRow} from '../../../../../shared/models/data-list.models';
+import {YearFormComponent} from './components/year-form/year-form.component';
+import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
+import {Router} from '@angular/router';
+import {firstValueFrom} from 'rxjs';
+import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
 
 @Component({
   selector: 'app-year-list',
   standalone: true,
   imports: [
-    CommonModule, 
-    LucideAngularModule, 
-    DataListComponent, 
+    CommonModule,
+    LucideAngularModule,
+    DataListComponent,
     MatDialogModule,
     FwPageShellComponent
   ],

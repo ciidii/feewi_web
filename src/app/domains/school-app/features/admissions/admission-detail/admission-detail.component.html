@@ -55,110 +55,151 @@
     <main class="pillar-content-area">
       <div class="pillar-scroll-wrapper custom-scrollbar">
 
+        <!-- 🏢 OVERVIEW PANEL (Permanent Context for all tabs) -->
+        <div class="quick-overview-panel">
+          <div class="student-hero">
+            <div class="avatar-lg">{{ application()?.identity?.firstName?.charAt(0) || '?' }}</div>
+            <div class="hero-info">
+              <div class="meta-row">
+                <span class="ref-pill">#{{ application()?.reference }}</span>
+                <span class="type-pill">{{ application()?.type === 'RE_ENROLLMENT' ? 'Réinscription' : 'Nouvelle admission' }}</span>
+              </div>
+              <h2 class="full-name">{{ application()?.identity?.firstName }} {{ application()?.identity?.lastName }}</h2>
+              <p class="target-level"><lucide-icon [name]="GraduationCap" [size]="14"></lucide-icon> {{ levelName() }} <span *ngIf="filiereName()">· {{ filiereName() }}</span></p>
+            </div>
+          </div>
+
+          <div class="overview-stats">
+            <div class="stat-item">
+              <span class="stat-label">Sexe</span>
+              <span class="stat-value">{{ application()?.identity?.gender === 'MALE' ? 'Masculin' : 'Féminin' }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Âge</span>
+              <span class="stat-value">{{ application()?.identity?.birthDate | date:'longDate' }}</span>
+            </div>
+          </div>
+        </div>
+
         <!-- IDENTITY PANEL -->
         <div class="pillar-panel" *ngIf="activePillarTab() === 'identity'">
-          <div class="panel-header">
-            <h2 class="panel-title">Informations personnelles</h2>
-            <div class="panel-badge">État civil</div>
-          </div>
-          <div class="info-grid">
-            <div class="info-field">
-              <label>Prénoms</label>
-              <span class="field-value">{{ app.identity.firstName }}</span>
+          <div class="panel-section">
+            <div class="section-header">
+              <lucide-icon [name]="User" [size]="16"></lucide-icon>
+              <h3>État Civil Complet</h3>
             </div>
-            <div class="info-field">
-              <label>Nom de famille</label>
-              <span class="field-value">{{ app.identity.lastName }}</span>
-            </div>
-            <div class="info-field">
-              <label>Date de naissance</label>
-              <span class="field-value">{{ app.identity.birthDate | date:'longDate' }}</span>
-            </div>
-            <div class="info-field">
-              <label>Lieu de naissance</label>
-              <span class="field-value">{{ app.identity.birthPlace }}</span>
-            </div>
-            <div class="info-field">
-              <label>Genre</label>
-              <span class="field-value">{{ app.identity.gender === 'MALE' ? 'Masculin' : 'Féminin' }}</span>
-            </div>
-            <ng-container *ngIf="app.identity.customFields as fields">
-              <div class="info-field" *ngFor="let key of getObjectKeys(fields)">
-                <label>{{ key | camelToLabel }}</label>
-                <span class="field-value">{{ fields[key] }}</span>
+            <div class="info-grid-dense">
+              <div class="info-field">
+                <label>Prénoms</label>
+                <span class="field-value">{{ app.identity.firstName }}</span>
               </div>
-            </ng-container>
+              <div class="info-field">
+                <label>Nom de famille</label>
+                <span class="field-value">{{ app.identity.lastName }}</span>
+              </div>
+              <div class="info-field">
+                <label>Date de naissance</label>
+                <span class="field-value">{{ app.identity.birthDate | date:'longDate' }}</span>
+              </div>
+              <div class="info-field">
+                <label>Lieu de naissance</label>
+                <span class="field-value">{{ app.identity.birthPlace }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-section" *ngIf="getObjectKeys(app.identity.customFields || {}).length > 0">
+            <div class="section-header">
+              <lucide-icon [name]="Plus" [size]="16"></lucide-icon>
+              <h3>Informations Additionnelles</h3>
+            </div>
+            <div class="info-grid-dense">
+              <div class="info-field" *ngFor="let key of getObjectKeys(app.identity.customFields || {})">
+                <label>{{ key | camelToLabel }}</label>
+                <span class="field-value">{{ app.identity.customFields![key] }}</span>
+              </div>
+            </div>
           </div>
         </div>
 
         <!-- SCHOOLING PANEL -->
         <div class="pillar-panel" *ngIf="activePillarTab() === 'schooling'">
-          <div class="panel-header">
-            <h2 class="panel-title">Parcours scolaire</h2>
-            <div class="panel-badge">Vœux d'admission</div>
-          </div>
-          <div class="info-grid">
-            <div class="info-field highlight">
-              <label>Niveau demandé</label>
-              <span class="field-value">{{ levelName() }}</span>
+          <div class="panel-section">
+            <div class="section-header">
+              <lucide-icon [name]="School" [size]="16"></lucide-icon>
+              <h3>Vœux & Parcours</h3>
             </div>
-            <div class="info-field" *ngIf="filiereName()">
-              <label>Filière</label>
-              <span class="field-value">{{ filiereName() }}</span>
-            </div>
-            <div class="info-field">
-              <label>Type d'admission</label>
-              <span class="field-value">{{ app.type === 'RE_ENROLLMENT' ? 'Réinscription' : 'Nouvelle admission' }}</span>
-            </div>
-            <div class="info-field">
-              <label>Établissement d'origine</label>
-              <span class="field-value">{{ app.schooling.customFields?.['previousSchool'] || 'Non renseigné' }}</span>
-            </div>
-            <ng-container *ngIf="app.schooling.customFields as fields">
-              <div class="info-field" *ngFor="let key of getObjectKeys(fields)">
-                <ng-container *ngIf="key !== 'previousSchool'">
-                  <label>{{ key | camelToLabel }}</label>
-                  <span class="field-value">{{ fields[key] }}</span>
-                </ng-container>
+            <div class="info-grid-dense">
+              <div class="info-field highlight">
+                <label>Niveau demandé</label>
+                <span class="field-value">{{ levelName() }}</span>
               </div>
-            </ng-container>
+              <div class="info-field" *ngIf="filiereName()">
+                <label>Filière</label>
+                <span class="field-value">{{ filiereName() }}</span>
+              </div>
+              <div class="info-field">
+                <label>Type d'admission</label>
+                <span class="field-value">{{ app.type === 'RE_ENROLLMENT' ? 'Réinscription' : 'Nouvelle admission' }}</span>
+              </div>
+              <div class="info-field">
+                <label>Établissement d'origine</label>
+                <span class="field-value text-primary font-bold">{{ app.schooling.customFields?.['previousSchool'] || 'Non renseigné' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-section" *ngIf="getObjectKeys(app.schooling.customFields || {}).length > 1">
+             <div class="section-header">
+              <lucide-icon [name]="Plus" [size]="16"></lucide-icon>
+              <h3>Autres données scolaires</h3>
+            </div>
+            <div class="info-grid-dense">
+              <ng-container *ngFor="let key of getObjectKeys(app.schooling.customFields || {})">
+                <div class="info-field" *ngIf="key !== 'previousSchool'">
+                  <label>{{ key | camelToLabel }}</label>
+                  <span class="field-value">{{ app.schooling.customFields![key] }}</span>
+                </div>
+              </ng-container>
+            </div>
           </div>
         </div>
 
         <!-- FAMILY PANEL -->
         <div class="pillar-panel" *ngIf="activePillarTab() === 'family'">
-          <div class="panel-header">
-            <h2 class="panel-title">Responsable légal</h2>
-            <div class="panel-badge">Coordonnées</div>
-          </div>
-          <div class="guardian-card" *ngIf="app.primaryGuardian">
-            <div class="guardian-header">
-              <div class="guardian-avatar">{{ app.primaryGuardian.firstName[0] }}{{ app.primaryGuardian.lastName[0] }}</div>
-              <div class="guardian-info">
-                <h3>{{ app.primaryGuardian.firstName }} {{ app.primaryGuardian.lastName }}</h3>
-                <span class="guardian-relation">{{ app.primaryGuardian.relation }}</span>
-              </div>
+          <div class="panel-section">
+            <div class="section-header">
+              <lucide-icon [name]="Users" [size]="16"></lucide-icon>
+              <h3>Responsable légal principal</h3>
             </div>
-            <div class="guardian-details">
-              <div class="detail-item">
-                <lucide-icon [name]="Phone" [size]="14"></lucide-icon>
-                <span>{{ app.primaryGuardian.phone }}</span>
+            <div class="guardian-compact-card" *ngIf="app.primaryGuardian">
+              <div class="card-left">
+                <div class="avatar-md">{{ app.primaryGuardian.firstName[0] }}{{ app.primaryGuardian.lastName[0] }}</div>
+                <div class="main-info">
+                  <h4>{{ app.primaryGuardian.firstName }} {{ app.primaryGuardian.lastName }}</h4>
+                  <span class="relation-tag">{{ app.primaryGuardian.relation }}</span>
+                </div>
               </div>
-              <div class="detail-item">
-                <lucide-icon [name]="Mail" [size]="14"></lucide-icon>
-                <span>{{ app.primaryGuardian.email }}</span>
-              </div>
-              <div class="detail-item">
-                <span class="financial-badge" [class.active]="app.primaryGuardian.financialResponsible">
-                  {{ app.primaryGuardian.financialResponsible ? 'Responsable financier' : 'Non responsable financier' }}
+              <div class="card-right">
+                <div class="contact-pill"><lucide-icon [name]="Phone" [size]="12"></lucide-icon> {{ app.primaryGuardian.phone }}</div>
+                <div class="contact-pill"><lucide-icon [name]="Mail" [size]="12"></lucide-icon> {{ app.primaryGuardian.email }}</div>
+                <span class="finance-badge" [class.active]="app.primaryGuardian.financialResponsible">
+                  {{ app.primaryGuardian.financialResponsible ? 'Payeur désigné' : 'Non payeur' }}
                 </span>
               </div>
-              <ng-container *ngIf="app.primaryGuardian.customFields as fields">
-                <div class="detail-item" *ngFor="let key of getObjectKeys(fields)">
-                  <strong>{{ key | camelToLabel }} :</strong>
-                  <span>{{ fields[key] }}</span>
-                </div>
-              </ng-container>
+            </div>
+          </div>
+
+          <div class="panel-section" *ngIf="app.primaryGuardian && getObjectKeys(app.primaryGuardian.customFields || {}).length > 0">
+             <div class="section-header">
+              <lucide-icon [name]="Plus" [size]="16"></lucide-icon>
+              <h3>Informations tuteur</h3>
+            </div>
+            <div class="info-grid-dense">
+              <div class="info-field" *ngFor="let key of getObjectKeys(app.primaryGuardian.customFields || {})">
+                <label>{{ key | camelToLabel }}</label>
+                <span class="field-value">{{ app.primaryGuardian.customFields?.[key] }}</span>
+              </div>
             </div>
           </div>
         </div>

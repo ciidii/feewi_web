@@ -1,17 +1,17 @@
-    import { Component, inject, OnInit, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { LucideAngularModule, BookOpen, Plus, Tag, Edit, Trash2, Search, Info } from 'lucide-angular';
-import { firstValueFrom } from 'rxjs';
-import { AcademicService } from '../../../../../core/services/academic.service';
-import { NotificationService } from '../../../../../shared/services/notification.service';
-import { Subject } from '../../../../../core/models/academic.model';
-import { DataListComponent } from '../../../../../shared/components/data-list/data-list.component';
-import { TableRow, RowAction } from '../../../../../shared/models/data-list.models';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { SubjectFormComponent } from '../structure-config/components/subject-form/subject-form.component';
-import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {BookOpen, Edit, Info, LucideAngularModule, Plus, Search, Tag, Trash2} from 'lucide-angular';
+import {firstValueFrom} from 'rxjs';
+import {AcademicService} from '../../../../../core/services/academic.service';
+import {NotificationService} from '../../../../../shared/services/notification.service';
+import {Subject} from '../../../../../core/models/academic.model';
+import {DataListComponent} from '../../../../../shared/components/data-list/data-list.component';
+import {RowAction, TableRow} from '../../../../../shared/models/data-list.models';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import {SubjectFormComponent} from '../structure-config/components/subject-form/subject-form.component';
+import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 
-import { FwPageShellComponent } from '../../../../../shared/components/page-shell/page-shell.component';
+import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
 
 @Component({
   selector: 'app-subject-library',

@@ -1,8 +1,8 @@
-import { Component, input, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatMenuModule } from '@angular/material/menu';
-import { LucideAngularModule, MoreHorizontal } from 'lucide-angular';
-import { RowAction, TableRow } from '../../../../models/data-list.models';
+import {Component, input, output} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {MatMenuModule} from '@angular/material/menu';
+import {LucideAngularModule, MoreHorizontal} from 'lucide-angular';
+import {RowAction, TableRow} from '../../../../models/data-list.models';
 
 @Component({
   selector: 'app-row-actions',
@@ -59,7 +59,7 @@ import { RowAction, TableRow } from '../../../../models/data-list.models';
       display: flex;
       align-items: center;
       gap: 12px;
-      
+
       .action-icon {
         color: var(--fw-text-tertiary);
       }

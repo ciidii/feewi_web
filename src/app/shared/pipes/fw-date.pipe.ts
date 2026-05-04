@@ -1,5 +1,5 @@
-import { Pipe, PipeTransform, LOCALE_ID, inject } from '@angular/core';
-import { formatDate } from '@angular/common';
+import {inject, LOCALE_ID, Pipe, PipeTransform} from '@angular/core';
+import {formatDate} from '@angular/common';
 
 /**
  * Pipe de formatage de date standardisé pour Feewi (Impératif 10)

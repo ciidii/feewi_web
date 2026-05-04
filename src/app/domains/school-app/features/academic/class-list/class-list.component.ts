@@ -1,24 +1,24 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { LucideAngularModule, School, Plus, Users, BookOpenCheck } from 'lucide-angular';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { firstValueFrom } from 'rxjs';
-import { ClassFormComponent } from './components/class-form/class-form.component';
-import { TeachingManagerComponent } from './components/teaching-manager/teaching-manager';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {BookOpenCheck, LucideAngularModule, Plus, School, Users} from 'lucide-angular';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import {firstValueFrom} from 'rxjs';
+import {ClassFormComponent} from './components/class-form/class-form.component';
+import {TeachingManagerComponent} from './components/teaching-manager/teaching-manager';
 import {DataListComponent} from '../../../../../shared/components/data-list/data-list.component';
 import {AcademicService} from '../../../../../core/services/academic.service';
 import {NotificationService} from '../../../../../shared/services/notification.service';
-import {AcademicYear, Level, SchoolClass, CycleGroup} from '../../../../../core/models/academic.model';
+import {AcademicYear, CycleGroup, SchoolClass} from '../../../../../core/models/academic.model';
 import {RowAction, TableRow} from '../../../../../shared/models/data-list.models';
-import { FwPageShellComponent } from '../../../../../shared/components/page-shell/page-shell.component';
+import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
 
 @Component({
   selector: 'app-class-list',
   standalone: true,
   imports: [
-    CommonModule, 
-    LucideAngularModule, 
-    DataListComponent, 
+    CommonModule,
+    LucideAngularModule,
+    DataListComponent,
     MatDialogModule,
     FwPageShellComponent
   ],

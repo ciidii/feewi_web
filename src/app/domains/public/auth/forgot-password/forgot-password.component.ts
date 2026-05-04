@@ -1,22 +1,22 @@
-import { Component, inject, signal, ViewEncapsulation } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
-import { LucideAngularModule, Mail, ArrowLeft, Info } from 'lucide-angular';
-import { AuthService } from '../../../../core/services/auth.service';
-import { NotificationService } from '../../../../shared/services/notification.service';
-import { FwButtonComponent } from '../../../../shared/components/button/button.component';
-import { FwAlertBannerComponent } from '../../../../shared/components/alert-banner/alert-banner.component';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import {Component, inject, signal, ViewEncapsulation} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
+import {Router, RouterModule} from '@angular/router';
+import {ArrowLeft, Info, LucideAngularModule, Mail} from 'lucide-angular';
+import {AuthService} from '../../../../core/services/auth.service';
+import {NotificationService} from '../../../../shared/services/notification.service';
+import {FwButtonComponent} from '../../../../shared/components/button/button.component';
+import {FwAlertBannerComponent} from '../../../../shared/components/alert-banner/alert-banner.component';
+import {TranslateModule, TranslateService} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-forgot-password',
   standalone: true,
   imports: [
-    CommonModule, 
-    ReactiveFormsModule, 
-    RouterModule, 
-    LucideAngularModule, 
+    CommonModule,
+    ReactiveFormsModule,
+    RouterModule,
+    LucideAngularModule,
     FwButtonComponent,
     FwAlertBannerComponent,
     TranslateModule
@@ -71,7 +71,7 @@ export class ForgotPasswordComponent {
     this.authService.forgotPassword(email).subscribe({
       next: () => {
         this.notificationService.success(
-          this.translate.instant('auth.forgot_password.notifications.success_message'), 
+          this.translate.instant('auth.forgot_password.notifications.success_message'),
           this.translate.instant('auth.forgot_password.notifications.success_title')
         );
         this.router.navigate(['/auth/reset-password'], { queryParams: { email } });

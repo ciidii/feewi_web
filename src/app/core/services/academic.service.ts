@@ -1,21 +1,21 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, catchError, map, throwError } from 'rxjs';
-import { EnvironmentService } from './environment.service';
-import { NotificationService } from '../../shared/services/notification.service';
+import {inject, Injectable} from '@angular/core';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import {catchError, map, Observable, throwError} from 'rxjs';
+import {EnvironmentService} from './environment.service';
+import {NotificationService} from '../../shared/services/notification.service';
 import {
   AcademicYear,
-  CreateYearRequest,
-  Period,
-  Holiday,
-  Cycle,
-  Level,
-  CycleGroup,
-  SchoolClass,
-  Filiere,
   CreateClassRequest,
-  Subject,
+  CreateYearRequest,
   CurriculumItem,
+  Cycle,
+  CycleGroup,
+  Filiere,
+  Holiday,
+  Level,
+  Period,
+  SchoolClass,
+  Subject,
   SyllabusDomain,
   Teaching
 } from '../models/academic.model';

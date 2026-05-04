@@ -13,10 +13,10 @@ import {
   Mail,
   Printer
 } from 'lucide-angular';
-import { RowAction, TableRow } from '../../../../models/data-list.models';
-import { SkeletonComponent } from '../../../skeleton/skeleton.component';
-import { FwButtonComponent } from '../../../button/button.component';
-import { FwBadgeComponent } from '../../../badge/badge.component';
+import {RowAction, TableRow} from '../../../../models/data-list.models';
+import {SkeletonComponent} from '../../../skeleton/skeleton.component';
+import {FwButtonComponent} from '../../../button/button.component';
+import {FwBadgeComponent} from '../../../badge/badge.component';
 
 @Component({
   selector: 'app-expandable-view',

@@ -1,27 +1,26 @@
-import { Component, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import {Component, inject, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {Router, RouterModule} from '@angular/router';
 import {
-  LucideAngularModule,
-  School as SchoolIcon,
-  Globe,
-  Mail,
-  ShieldCheck,
-  X,
-  Loader2,
-  Phone,
-  MapPin,
-  User,
-  Lock,
-  Quote,
-  CheckCircle2,
   AlertCircle,
-  ArrowLeft
+  ArrowLeft,
+  CheckCircle2,
+  Globe,
+  Loader2,
+  Lock,
+  LucideAngularModule,
+  Mail,
+  MapPin,
+  Phone,
+  Quote,
+  School as SchoolIcon,
+  ShieldCheck,
+  User,
+  X
 } from 'lucide-angular';
-import { SchoolService } from '../../../core/services/school.service';
-import { NotificationService } from '../../../shared/services/notification.service';
-import { FormShellComponent } from '../../../shared/components/form-shell/form-shell';
+import {SchoolService} from '../../../core/services/school.service';
+import {NotificationService} from '../../../shared/services/notification.service';
 
 @Component({
   selector: 'app-tenant-form',

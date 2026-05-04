@@ -1,11 +1,10 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable, catchError, throwError } from 'rxjs';
+import {inject, Injectable} from '@angular/core';
+import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
+import {catchError, Observable, throwError} from 'rxjs';
 
 import {
-  AdmissionBundleResponse,
   AddChildRequest,
-  AssessmentRequest,
+  AdmissionBundleResponse,
   CreateBundleRequest,
   DefaultConfigResponse,
   LevelConfigResponse,
@@ -13,12 +12,12 @@ import {
   ReEnrollRequest,
   ServiceSubscriptionRequest,
 } from '../models/enrollment/dtos';
-import { Admission } from '../models/enrollment/entities';
+import {Admission} from '../models/enrollment/entities';
 
-import { TenantContextService } from './tenant-context.service';
-import { EnvironmentService } from './environment.service';
-import { NotificationService } from '../../shared/services/notification.service';
-import { API_ENDPOINTS } from '../constants/api-endpoints';
+import {TenantContextService} from './tenant-context.service';
+import {EnvironmentService} from './environment.service';
+import {NotificationService} from '../../shared/services/notification.service';
+import {API_ENDPOINTS} from '../constants/api-endpoints';
 
 @Injectable({ providedIn: 'root' })
 export class EnrollmentPublicService {

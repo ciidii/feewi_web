@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
+import {Routes} from '@angular/router';
 
 export const SCHOOL_APP_ROUTES: Routes = [
   {

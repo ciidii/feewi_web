@@ -1,13 +1,13 @@
-import { Component, inject, signal, ViewEncapsulation } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
-import { LucideAngularModule, Lock, Mail, Loader2, Eye, EyeOff, AlertCircle, HelpCircle } from 'lucide-angular';
-import { AuthService } from '../../../../core/services/auth.service';
-import { LoadingService } from '../../../../shared/services/loading.service';
-import { FwButtonComponent } from '../../../../shared/components/button/button.component';
-import { FwAlertBannerComponent } from '../../../../shared/components/alert-banner/alert-banner.component';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import {Component, inject, signal, ViewEncapsulation} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormBuilder, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
+import {Router, RouterModule} from '@angular/router';
+import {AlertCircle, Eye, EyeOff, HelpCircle, Loader2, Lock, LucideAngularModule, Mail} from 'lucide-angular';
+import {AuthService} from '../../../../core/services/auth.service';
+import {LoadingService} from '../../../../shared/services/loading.service';
+import {FwButtonComponent} from '../../../../shared/components/button/button.component';
+import {FwAlertBannerComponent} from '../../../../shared/components/alert-banner/alert-banner.component';
+import {TranslateModule, TranslateService} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-login',

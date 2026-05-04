@@ -1,8 +1,8 @@
-import { animate, keyframes, state, style, transition, trigger } from '@angular/animations';
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Toast, ToastrService, ToastPackage } from 'ngx-toastr';
-import { LucideAngularModule, CheckCircle, AlertTriangle, XCircle, Info, X } from 'lucide-angular';
+import {animate, keyframes, state, style, transition, trigger} from '@angular/animations';
+import {Component, inject} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Toast, ToastPackage, ToastrService} from 'ngx-toastr';
+import {AlertTriangle, CheckCircle, Info, LucideAngularModule, X, XCircle} from 'lucide-angular';
 
 @Component({
   selector: 'app-fw-toast',

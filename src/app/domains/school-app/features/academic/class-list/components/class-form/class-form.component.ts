@@ -1,14 +1,14 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { firstValueFrom } from 'rxjs';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatSelectModule } from '@angular/material/select';
-import { LucideAngularModule, School, Type, Hash, Layers, Info, Tag } from 'lucide-angular';
-import { AcademicService } from '../../../../../../../core/services/academic.service';
-import { NotificationService } from '../../../../../../../shared/services/notification.service';
-import { FormShellComponent } from '../../../../../../../shared/components/form-shell/form-shell';
-import { AcademicYear, Level, Filiere, CycleGroup } from '../../../../../../../core/models/academic.model';
+import {Component, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {firstValueFrom} from 'rxjs';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import {MatSelectModule} from '@angular/material/select';
+import {Hash, Info, Layers, LucideAngularModule, School, Tag, Type} from 'lucide-angular';
+import {AcademicService} from '../../../../../../../core/services/academic.service';
+import {NotificationService} from '../../../../../../../shared/services/notification.service';
+import {FormShellComponent} from '../../../../../../../shared/components/form-shell/form-shell';
+import {CycleGroup, Filiere} from '../../../../../../../core/models/academic.model';
 
 @Component({
   selector: 'app-class-form',
@@ -55,7 +55,7 @@ export class ClassFormComponent implements OnInit {
     if (this.dialogData.year) {
       this.classForm.patchValue({ academicYearId: this.dialogData.year.id });
     }
-    
+
     // Pré-remplissage du niveau si fourni
     if (this.dialogData.levelId) {
       this.classForm.patchValue({ levelId: this.dialogData.levelId });

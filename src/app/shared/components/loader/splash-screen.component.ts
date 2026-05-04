@@ -1,5 +1,5 @@
-import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {Component, Input} from '@angular/core';
+import {CommonModule} from '@angular/common';
 
 @Component({
   selector: 'fw-splash-screen',
@@ -92,16 +92,16 @@ import { CommonModule } from '@angular/common';
     }
 
     @keyframes fw-logo-float {
-      0% { 
-        transform: translateY(0) scale(1); 
+      0% {
+        transform: translateY(0) scale(1);
         filter: drop-shadow(0 5px 15px rgba(0, 82, 255, 0.1));
       }
-      50% { 
-        transform: translateY(-6px) scale(1.02); 
+      50% {
+        transform: translateY(-6px) scale(1.02);
         filter: drop-shadow(0 20px 25px rgba(0, 82, 255, 0.2));
       }
-      100% { 
-        transform: translateY(0) scale(1); 
+      100% {
+        transform: translateY(0) scale(1);
         filter: drop-shadow(0 5px 15px rgba(0, 82, 255, 0.1));
       }
     }

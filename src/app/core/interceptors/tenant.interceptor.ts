@@ -1,14 +1,13 @@
-import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
-import { inject } from '@angular/core';
-import { catchError, throwError } from 'rxjs';
-import { TenantContextService } from '../services/tenant-context.service';
+import {HttpInterceptorFn} from '@angular/common/http';
+import {inject} from '@angular/core';
+import {TenantContextService} from '../services/tenant-context.service';
 
 export const tenantInterceptor: HttpInterceptorFn = (req, next) => {
   const tenantService = inject(TenantContextService);
-  
+
   // 1. Déterminer si c'est une requête vers une API Feewi
   const isApiRequest = req.url.includes('/api/v1');
-  
+
   if (!isApiRequest) return next(req);
 
   const activeTenantId = tenantService.activeTenant()?.id;

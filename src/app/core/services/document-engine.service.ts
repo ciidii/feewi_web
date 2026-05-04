@@ -1,12 +1,9 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpBackend, HttpHeaders } from '@angular/common/http';
-import { Observable, catchError, throwError } from 'rxjs';
-import { 
-  UploadTicketRequest, 
-  UploadTicketResponse 
-} from '../models/document.model';
-import { EnvironmentService } from './environment.service';
-import { NotificationService } from '../../shared/services/notification.service';
+import {inject, Injectable} from '@angular/core';
+import {HttpBackend, HttpClient, HttpHeaders} from '@angular/common/http';
+import {catchError, Observable, throwError} from 'rxjs';
+import {UploadTicketRequest, UploadTicketResponse} from '../models/document.model';
+import {EnvironmentService} from './environment.service';
+import {NotificationService} from '../../shared/services/notification.service';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +13,7 @@ export class DocumentEngineService {
   private handler = inject(HttpBackend);
   private envService = inject(EnvironmentService);
   private notificationService = inject(NotificationService);
-  
+
   // Instance HTTP sans intercepteurs pour l'upload direct vers S3/MinIO
   private directHttpClient = new HttpClient(this.handler);
 
@@ -56,8 +53,8 @@ export class DocumentEngineService {
    * Obtenir l'URL de visualisation d'un document (URL pré-signée temporaire)
    */
   getViewUrl(fileId: string): Observable<string> {
-    return this.http.get(`${this.baseUrl}/${fileId}/view`, { 
-      responseType: 'text' 
+    return this.http.get(`${this.baseUrl}/${fileId}/view`, {
+      responseType: 'text'
     }).pipe(
       catchError(this.handleError('Impossible de récupérer l\'aperçu du document'))
     );

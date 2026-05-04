@@ -1,11 +1,11 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { LucideAngularModule, BookOpen, Clock, ChevronRight, X, LayoutGrid, Target, Layers } from 'lucide-angular';
-import { firstValueFrom } from 'rxjs';
-import { AcademicService } from '../../../../../../../core/services/academic.service';
-import {SyllabusDomain, CurriculumItem, SyllabusChapter} from '../../../../../../../core/models/academic.model';
-import { NotificationService } from '../../../../../../../shared/services/notification.service';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import {BookOpen, ChevronRight, Clock, Layers, LayoutGrid, LucideAngularModule, Target, X} from 'lucide-angular';
+import {firstValueFrom} from 'rxjs';
+import {AcademicService} from '../../../../../../../core/services/academic.service';
+import {CurriculumItem, SyllabusChapter, SyllabusDomain} from '../../../../../../../core/models/academic.model';
+import {NotificationService} from '../../../../../../../shared/services/notification.service';
 
 @Component({
   selector: 'app-syllabus-viewer',

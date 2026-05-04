@@ -1,16 +1,15 @@
-import { Component, computed, inject, OnInit, signal, ViewEncapsulation } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { RouterModule } from '@angular/router';
-import { DataListComponent } from '../../../shared/components/data-list/data-list.component';
-import { RowAction, TabItem, TableRow } from '../../../shared/models/data-list.models';
-import { LucideAngularModule, Building2, Plus, Globe, ShieldCheck, Activity, Eye, Trash2 } from 'lucide-angular';
-import { TenantFormComponent } from '../tenant-form/tenant-form.component';
-import { TenantEditFormComponent } from '../tenant-edit-form/tenant-edit-form.component';
-import { SchoolService } from '../../../core/services/school.service';
-import { School } from '../../../core/models/school.model';
-import { NotificationService } from '../../../shared/services/notification.service';
-import {Router} from '@angular/router';
+import {Component, computed, inject, OnInit, signal, ViewEncapsulation} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import {Router, RouterModule} from '@angular/router';
+import {DataListComponent} from '../../../shared/components/data-list/data-list.component';
+import {RowAction, TabItem, TableRow} from '../../../shared/models/data-list.models';
+import {Activity, Building2, Eye, Globe, LucideAngularModule, Plus, ShieldCheck, Trash2} from 'lucide-angular';
+import {TenantFormComponent} from '../tenant-form/tenant-form.component';
+import {TenantEditFormComponent} from '../tenant-edit-form/tenant-edit-form.component';
+import {SchoolService} from '../../../core/services/school.service';
+import {School} from '../../../core/models/school.model';
+import {NotificationService} from '../../../shared/services/notification.service';
 
 @Component({
   selector: 'app-tenant-manager',

@@ -6,18 +6,18 @@ import {
   CheckCircle,
   Clock,
   Globe,
+  HeartPulse,
   Info,
+  Lock,
   LucideAngularModule,
+  Plus,
   RefreshCw,
+  School,
   Search,
   Sparkles,
   UserCheck,
   UserCog,
-  HeartPulse,
-  Users,
-  School,
-  Plus,
-  Lock
+  Users
 } from 'lucide-angular';
 import {EnrollmentConfig} from '../../../../../../../core/models/enrollment.model';
 import {AcademicYear} from '../../../../../../../core/models/academic.model';

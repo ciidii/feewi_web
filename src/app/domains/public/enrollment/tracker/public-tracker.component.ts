@@ -1,17 +1,32 @@
-import {Component, signal, computed, inject, OnInit} from '@angular/core';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {RouterModule, Router, ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router, RouterModule} from '@angular/router';
 import {FormsModule} from '@angular/forms';
 import {
+  AlertTriangle,
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  CheckCircle,
+  ChevronRight,
+  Clock,
+  FileText,
+  Info,
+  LayoutGrid,
   LucideAngularModule,
-  Clock, CheckCircle, MessageSquare, Phone, Mail, FileText,
-  Info, ArrowLeft, RefreshCw, Search, ArrowRight, ShieldCheck,
-  LayoutGrid, Check, Sparkles, XCircle, AlertTriangle, ChevronRight, Users
+  Mail,
+  MessageSquare,
+  Phone,
+  RefreshCw,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  Users,
+  XCircle
 } from 'lucide-angular';
 import {EnrollmentPublicService} from '../../../../core/services/enrollment-public.service';
 import {AdmissionSessionService} from '../../../../core/services/admission-session.service';
-import {Admission, AdmissionBundleResponse, DocumentStatus} from '../../../../core/models/enrollment.model';
-import {BundleDecisionState} from '../../../../core/models/enrollment/entities';
+import {Admission, AdmissionBundleResponse} from '../../../../core/models/enrollment.model';
 import {finalize} from 'rxjs';
 import {FwButtonComponent} from '../../../../shared/components/button/button.component';
 import {FwBadgeComponent} from '../../../../shared/components/badge/badge.component';

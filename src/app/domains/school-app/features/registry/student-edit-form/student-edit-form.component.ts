@@ -1,23 +1,23 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { LucideAngularModule, User, Stethoscope, ShieldAlert, Save, X } from 'lucide-angular';
-import { finalize } from 'rxjs';
+import {Component, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {ActivatedRoute, Router, RouterModule} from '@angular/router';
+import {LucideAngularModule, Save, ShieldAlert, Stethoscope, User, X} from 'lucide-angular';
+import {finalize} from 'rxjs';
 
-import { StudentRegistryService } from '../../../../../core/services/student-registry.service';
-import { StudentResponse, StudentStatus } from '../../../../../core/models/student.model';
-import { FormShellComponent } from '../../../../../shared/components/form-shell/form-shell';
-import { NotificationService } from '../../../../../shared/services/notification.service';
+import {StudentRegistryService} from '../../../../../core/services/student-registry.service';
+import {StudentResponse, StudentStatus} from '../../../../../core/models/student.model';
+import {FormShellComponent} from '../../../../../shared/components/form-shell/form-shell';
+import {NotificationService} from '../../../../../shared/services/notification.service';
 
 @Component({
   selector: 'app-student-edit-form',
   standalone: true,
   imports: [
-    CommonModule, 
-    ReactiveFormsModule, 
-    RouterModule, 
-    LucideAngularModule, 
+    CommonModule,
+    ReactiveFormsModule,
+    RouterModule,
+    LucideAngularModule,
     FormShellComponent
   ],
   templateUrl: './student-edit-form.component.html'
@@ -46,7 +46,7 @@ export class StudentEditFormComponent implements OnInit {
     status: ['', Validators.required],
     bloodGroup: [''],
     criticalAllergies: [''],
-    // On pourrait dynamiser les customFields selon une config, 
+    // On pourrait dynamiser les customFields selon une config,
     // ici on simplifie en mappant les champs connus.
     nationality: [''],
     birthPlace: ['']

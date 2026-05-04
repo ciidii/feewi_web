@@ -1,11 +1,11 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { LucideAngularModule, Bell, User, LogOut, Search, CalendarDays, ChevronDown } from 'lucide-angular';
-import { AuthService } from '../../services/auth.service';
-import { TenantContextService } from '../../services/tenant-context.service';
-import { NavigationContextService } from '../../services/navigation-context.service';
-import { LoadingService } from '../../../shared/services/loading.service';
-import { MatMenuModule } from '@angular/material/menu';
+import {Component, inject} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Bell, CalendarDays, ChevronDown, LogOut, LucideAngularModule, Search, User} from 'lucide-angular';
+import {AuthService} from '../../services/auth.service';
+import {TenantContextService} from '../../services/tenant-context.service';
+import {NavigationContextService} from '../../services/navigation-context.service';
+import {LoadingService} from '../../../shared/services/loading.service';
+import {MatMenuModule} from '@angular/material/menu';
 
 @Component({
   selector: 'app-header',

@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { LucideAngularModule, ServerCrash, RefreshCcw, WifiOff } from 'lucide-angular';
+import {Component} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {LucideAngularModule, RefreshCcw, ServerCrash, WifiOff} from 'lucide-angular';
 
 @Component({
   selector: 'app-server-error',

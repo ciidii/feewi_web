@@ -1,10 +1,10 @@
-import { Component, inject, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { LucideAngularModule, Search, X, BarChart3, Filter } from 'lucide-angular';
-import { FwModalShellComponent } from '../modal-shell/modal-shell.component';
-import { FwButtonComponent } from '../button/button.component';
-import { FormsModule } from '@angular/forms';
+import {Component, computed, inject, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import {BarChart3, Filter, LucideAngularModule, Search, X} from 'lucide-angular';
+import {FwModalShellComponent} from '../modal-shell/modal-shell.component';
+import {FwButtonComponent} from '../button/button.component';
+import {FormsModule} from '@angular/forms';
 
 export interface ReportItem {
   id: string | number;
@@ -50,8 +50,8 @@ export class FwReportModalComponent {
     const query = this.searchQuery().toLowerCase().trim();
     if (!query) return this.data.items;
 
-    return this.data.items.filter(item => 
-      item.title.toLowerCase().includes(query) || 
+    return this.data.items.filter(item =>
+      item.title.toLowerCase().includes(query) ||
       (item.subtitle && item.subtitle.toLowerCase().includes(query))
     );
   });

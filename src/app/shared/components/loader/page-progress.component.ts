@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {Component} from '@angular/core';
+import {CommonModule} from '@angular/common';
 
 @Component({
   selector: 'fw-page-progress',
@@ -34,16 +34,16 @@ import { CommonModule } from '@angular/common';
     .progress-bar {
       width: 100%;
       height: 100%;
-      background: linear-gradient(to right, 
-        #2563eb, 
-        #3b82f6, 
-        #60a5fa, 
-        #3b82f6, 
+      background: linear-gradient(to right,
+        #2563eb,
+        #3b82f6,
+        #60a5fa,
+        #3b82f6,
         #2563eb
       );
       background-size: 200% 100%;
       box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
-      animation: 
+      animation:
         progress-slide 2.5s cubic-bezier(0.65, 0, 0.35, 1) infinite,
         progress-gradient 1.5s linear infinite;
       transform-origin: left;

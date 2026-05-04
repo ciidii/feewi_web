@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { LucideAngularModule, ShieldAlert, Lock, Home } from 'lucide-angular';
+import {Component} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {RouterModule} from '@angular/router';
+import {Home, Lock, LucideAngularModule, ShieldAlert} from 'lucide-angular';
 
 @Component({
   selector: 'app-access-denied',

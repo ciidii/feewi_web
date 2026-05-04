@@ -1,7 +1,7 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { LucideAngularModule, Inbox } from 'lucide-angular';
-import { FwButtonComponent } from '../button/button.component';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Inbox, LucideAngularModule} from 'lucide-angular';
+import {FwButtonComponent} from '../button/button.component';
 
 @Component({
   selector: 'app-fw-empty-state',
@@ -44,7 +44,7 @@ import { FwButtonComponent } from '../button/button.component';
       &.compact {
         padding: var(--fw-space-xl) var(--fw-space-md);
         border-radius: var(--fw-radius-md);
-        
+
         .icon-box { margin-bottom: 1rem; width: 56px; height: 56px; }
         .state-title { font-size: 1rem; }
         .text-zone { margin-bottom: 1rem; }

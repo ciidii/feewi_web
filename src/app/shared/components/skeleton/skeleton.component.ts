@@ -1,13 +1,13 @@
-import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {Component, Input} from '@angular/core';
+import {CommonModule} from '@angular/common';
 
 @Component({
   selector: 'fw-skeleton',
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div 
-      class="fw-skeleton" 
+    <div
+      class="fw-skeleton"
       [ngClass]="shape"
       [style.width]="width"
       [style.height]="height"
@@ -27,7 +27,7 @@ import { CommonModule } from '@angular/common';
       position: relative;
       overflow: hidden;
       background-color: var(--fw-skeleton-bg);
-      
+
       &.circle { border-radius: 50% !important; }
       &.pill { border-radius: var(--fw-radius-full) !important; }
       &.rect { border-radius: var(--fw-radius-md); }
@@ -47,13 +47,13 @@ import { CommonModule } from '@angular/common';
 export class SkeletonComponent {
   /** 'circle', 'pill' or 'rect' */
   @Input() shape: 'circle' | 'pill' | 'rect' = 'rect';
-  
+
   /** Width (e.g., '100%', '48px') */
   @Input() width: string = '100%';
-  
+
   /** Height (e.g., '1rem', '48px') */
   @Input() height: string = '1rem';
-  
+
   /** Custom border radius if not using shapes */
   @Input() radius?: string;
 }

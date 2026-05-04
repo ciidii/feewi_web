@@ -1,9 +1,9 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { LucideAngularModule, AlertTriangle, CheckCircle, Info, HelpCircle } from 'lucide-angular';
-import { FwModalShellComponent } from '../modal-shell/modal-shell.component';
-import { FwButtonComponent, ButtonVariant } from '../button/button.component';
+import {Component, inject} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import {AlertTriangle, CheckCircle, HelpCircle, Info, LucideAngularModule} from 'lucide-angular';
+import {FwModalShellComponent} from '../modal-shell/modal-shell.component';
+import {ButtonVariant, FwButtonComponent} from '../button/button.component';
 
 export interface ConfirmDialogData {
   title: string;
@@ -17,10 +17,10 @@ export interface ConfirmDialogData {
   selector: 'app-confirm-dialog',
   standalone: true,
   imports: [
-    CommonModule, 
-    MatDialogModule, 
-    LucideAngularModule, 
-    FwModalShellComponent, 
+    CommonModule,
+    MatDialogModule,
+    LucideAngularModule,
+    FwModalShellComponent,
     FwButtonComponent
   ],
   templateUrl: './confirm-dialog.html',

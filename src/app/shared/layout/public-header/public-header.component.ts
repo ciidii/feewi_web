@@ -1,8 +1,8 @@
-import { Component, inject, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { LucideAngularModule, GraduationCap, Search, ShieldCheck, HelpCircle } from 'lucide-angular';
-import { TenantContextService } from '../../../core/services/tenant-context.service';
+import {Component, inject} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {RouterModule} from '@angular/router';
+import {GraduationCap, LucideAngularModule, Search, ShieldCheck} from 'lucide-angular';
+import {TenantContextService} from '../../../core/services/tenant-context.service';
 
 @Component({
   selector: 'app-fw-public-header',

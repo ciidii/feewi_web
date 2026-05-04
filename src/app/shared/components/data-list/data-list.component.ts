@@ -1,28 +1,28 @@
-import {Component, input, output, signal, computed, model} from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatMenuModule } from '@angular/material/menu';
+import {Component, computed, input, model, output, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {MatButtonModule} from '@angular/material/button';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatMenuModule} from '@angular/material/menu';
 import {
-  LucideAngularModule,
-  LayoutGrid,
-  Table,
+  Archive,
   Calendar,
-  Layers,
-  Search,
-  X,
+  Check,
+  CheckCircle,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
-  CheckCircle,
-  Trash2,
   Download,
-  Archive,
+  Filter,
   Inbox,
-  ChevronDown,
+  Layers,
+  LayoutGrid,
+  LucideAngularModule,
+  Search,
   Sparkles,
-  Check,
-  Filter
+  Table,
+  Trash2,
+  X
 } from 'lucide-angular';
 
 // Importer les modèles
@@ -37,20 +37,18 @@ import {
 } from '../../models/data-list.models';
 
 // Importer les composants
-import { ExpandableViewComponent } from './views/expandable-view/expandable-view';
-import { CardsViewComponent } from './views/cards-view/cards-view';
-import { SortState, TableViewComponent } from './views/table-view/table-view';
-import { TimelineViewComponent } from './views/timeline-view/timeline-view';
-import { CardSkeletonComponent } from '../skeleton/card-skeleton.component';
-import { BlockLoaderComponent } from '../loader/block-loader.component';
-import { FwEmptyStateComponent } from '../empty-state/empty-state.component';
-import { SmartTooltipDirective } from '../../directives/smart-tooltip.directive';
-import { FwRefreshBannerComponent } from '../refresh-banner/refresh-banner.component';
-import { FwButtonComponent } from '../button/button.component';
+import {ExpandableViewComponent} from './views/expandable-view/expandable-view';
+import {CardsViewComponent} from './views/cards-view/cards-view';
+import {SortState, TableViewComponent} from './views/table-view/table-view';
+import {TimelineViewComponent} from './views/timeline-view/timeline-view';
+import {CardSkeletonComponent} from '../skeleton/card-skeleton.component';
+import {BlockLoaderComponent} from '../loader/block-loader.component';
+import {FwEmptyStateComponent} from '../empty-state/empty-state.component';
+import {FwRefreshBannerComponent} from '../refresh-banner/refresh-banner.component';
+import {FwButtonComponent} from '../button/button.component';
 
 // Importer les services
-import { ViewPreferenceService } from '../../services/view-preference.service';
-import { SkeletonComponent } from '../skeleton/skeleton.component';
+import {ViewPreferenceService} from '../../services/view-preference.service';
 
 @Component({
   selector: 'app-data-list',

@@ -1,31 +1,38 @@
-import { Component, inject, ViewEncapsulation } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { NavigationStateService } from '../../services/navigation-state.service';
-import { AuthService } from '../../services/auth.service';
-import { MatMenuModule } from '@angular/material/menu';
+import {Component, inject, ViewEncapsulation} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {RouterModule} from '@angular/router';
+import {NavigationStateService} from '../../services/navigation-state.service';
+import {AuthService} from '../../services/auth.service';
+import {MatMenuModule} from '@angular/material/menu';
 import {
-  LucideAngularModule,
+  BarChart3,
+  BookOpen,
+  Briefcase,
+  Building2,
+  Calendar,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
-  Plus,
-  Users,
-  Calendar,
-  BookOpen,
   FileText,
-  Briefcase,
-  ShieldCheck,
-  Building2,
   Globe,
-  BarChart3,
   History,
   Layers,
-  UserPlus,
+  LayoutGrid,
+  LogOut,
+  LucideAngularModule,
+  Maximize,
+  Minimize,
+  Moon,
+  Plus,
+  ShieldCheck,
+  Sun,
+  User,
   UserCheck,
-  ChevronDown, Maximize, Minimize, Sun, Moon, User, LogOut, LayoutGrid
+  UserPlus,
+  Users
 } from 'lucide-angular';
 
-import { UiPreferenceService } from '../../../shared/services/ui-preference.service';
+import {UiPreferenceService} from '../../../shared/services/ui-preference.service';
 
 @Component({
   selector: 'app-sidebar',

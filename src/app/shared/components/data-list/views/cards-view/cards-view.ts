@@ -1,22 +1,25 @@
-import { Component, input, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import {Component, input, output} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {MatCheckboxModule} from '@angular/material/checkbox';
 
 // Importer les icônes nécessaires
 import {
-  LucideAngularModule,
-  Eye,
-  CheckCircle,
-  MoreHorizontal,
   Calendar,
-  MapPin,
+  Check,
+  CheckCircle,
+  Eye,
+  Globe,
+  Hash,
+  LayoutGrid,
+  LucideAngularModule,
   Mail,
-  Phone,
-  LayoutGrid, Globe, Check, Hash
+  MapPin,
+  MoreHorizontal,
+  Phone
 } from 'lucide-angular';
-import { RowAction, TableRow } from '../../../../models/data-list.models';
-import { FwBadgeComponent } from '../../../badge/badge.component';
-import { FwButtonComponent } from '../../../button/button.component';
+import {RowAction, TableRow} from '../../../../models/data-list.models';
+import {FwBadgeComponent} from '../../../badge/badge.component';
+import {FwButtonComponent} from '../../../button/button.component';
 
 @Component({
   selector: 'app-cards-view',

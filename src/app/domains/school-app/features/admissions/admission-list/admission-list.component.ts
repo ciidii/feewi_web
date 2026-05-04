@@ -29,7 +29,7 @@ import {RowAction, TabItem, TableRow} from '../../../../../shared/models/data-li
 import {EnrollmentAdminService} from '../../../../../core/services/enrollment-admin.service';
 import {AcademicService} from '../../../../../core/services/academic.service';
 import {Admission, AdmissionStatus} from '../../../../../core/models/enrollment.model';
-import {AcademicYear, Level, CycleGroup} from '../../../../../core/models/academic.model';
+import {AcademicYear, CycleGroup, Level} from '../../../../../core/models/academic.model';
 import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 import {NotificationService} from '../../../../../shared/services/notification.service';
 import {FormsModule} from '@angular/forms';

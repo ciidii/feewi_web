@@ -1,14 +1,14 @@
-import { Component, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatSelectModule } from '@angular/material/select';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
-import { LucideAngularModule, Calendar, Type, Hash, Info, Clock, AlertCircle } from 'lucide-angular';
-import { AcademicService } from '../../../../../../../core/services/academic.service';
-import { NotificationService } from '../../../../../../../shared/services/notification.service';
-import { FormShellComponent } from '../../../../../../../shared/components/form-shell/form-shell';
+import {Component, inject, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import {MatSelectModule} from '@angular/material/select';
+import {MatDatepickerModule} from '@angular/material/datepicker';
+import {MatNativeDateModule} from '@angular/material/core';
+import {AlertCircle, Calendar, Clock, Hash, Info, LucideAngularModule, Type} from 'lucide-angular';
+import {AcademicService} from '../../../../../../../core/services/academic.service';
+import {NotificationService} from '../../../../../../../shared/services/notification.service';
+import {FormShellComponent} from '../../../../../../../shared/components/form-shell/form-shell';
 
 @Component({
   selector: 'app-year-form',

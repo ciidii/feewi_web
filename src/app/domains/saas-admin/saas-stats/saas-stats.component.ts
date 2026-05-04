@@ -1,7 +1,16 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { LucideAngularModule, BarChart3, Building2, Users, Activity, TrendingUp, ArrowUpRight, ArrowDownRight } from 'lucide-angular';
-import { SchoolService } from '../../../core/services/school.service';
+import {Component, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {
+  Activity,
+  ArrowDownRight,
+  ArrowUpRight,
+  BarChart3,
+  Building2,
+  LucideAngularModule,
+  TrendingUp,
+  Users
+} from 'lucide-angular';
+import {SchoolService} from '../../../core/services/school.service';
 
 @Component({
   selector: 'app-saas-stats',

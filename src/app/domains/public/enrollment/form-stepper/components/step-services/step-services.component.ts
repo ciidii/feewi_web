@@ -1,9 +1,9 @@
-import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { BookOpen, Bus, Heart, LucideAngularModule, Star, Utensils, LayoutGrid, Check } from 'lucide-angular';
-import { ServiceConfig, ServiceSubscriptionRequest } from '../../../../../../core/models/enrollment';
-import { FwBadgeComponent } from '../../../../../../shared/components/badge/badge.component';
-import { FwButtonComponent } from '../../../../../../shared/components/button/button.component';
+import {Component, EventEmitter, Input, OnChanges, Output} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {BookOpen, Bus, Check, Heart, LayoutGrid, LucideAngularModule, Star, Utensils} from 'lucide-angular';
+import {ServiceConfig, ServiceSubscriptionRequest} from '../../../../../../core/models/enrollment';
+import {FwBadgeComponent} from '../../../../../../shared/components/badge/badge.component';
+import {FwButtonComponent} from '../../../../../../shared/components/button/button.component';
 
 interface ServiceSelection {
   svc: ServiceConfig;
@@ -64,7 +64,7 @@ interface ServiceSelection {
                  [class.bg-white]="!item.selected">
               <lucide-icon *ngIf="item.selected" [name]="Check" [size]="20" class="text-white"></lucide-icon>
             </div>
-            
+
             <!-- Mobile Toggle -->
             <div class="sm:hidden w-full">
                <app-fw-button [variant]="item.selected ? 'primary' : 'secondary'" class="w-full">

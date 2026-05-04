@@ -1,13 +1,25 @@
-import { Component, signal, computed, inject, OnInit, ViewEncapsulation } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { LucideAngularModule, UserPlus, Shield, Filter, Download, Users, UserCheck, UserX, Eye, Edit, Trash2 } from 'lucide-angular';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { DataListComponent } from '../../../../../shared/components/data-list/data-list.component';
-import { RowAction, TabItem, TableRow } from '../../../../../shared/models/data-list.models';
-import { IdentityService } from '../../../../../core/services/identity.service';
-import { AuthService } from '../../../../../core/services/auth.service';
-import { User } from '../../../../../core/models/user.model';
-import { StaffFormComponent } from './components/staff-form/staff-form.component';
+import {Component, computed, inject, OnInit, signal, ViewEncapsulation} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {
+  Download,
+  Edit,
+  Eye,
+  Filter,
+  LucideAngularModule,
+  Shield,
+  Trash2,
+  UserCheck,
+  UserPlus,
+  Users,
+  UserX
+} from 'lucide-angular';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import {DataListComponent} from '../../../../../shared/components/data-list/data-list.component';
+import {RowAction, TabItem, TableRow} from '../../../../../shared/models/data-list.models';
+import {IdentityService} from '../../../../../core/services/identity.service';
+import {AuthService} from '../../../../../core/services/auth.service';
+import {User} from '../../../../../core/models/user.model';
+import {StaffFormComponent} from './components/staff-form/staff-form.component';
 
 @Component({
   selector: 'app-staff-directory',
@@ -31,18 +43,18 @@ export class StaffDirectoryComponent implements OnInit {
   // Actions dynamiques pour le personnel
   readonly staffActions: RowAction[] = [
     { id: 'view', label: 'Voir profil', icon: Eye, type: 'primary' },
-    { 
-      id: 'edit', 
-      label: 'Modifier', 
-      icon: Edit, 
+    {
+      id: 'edit',
+      label: 'Modifier',
+      icon: Edit,
       type: 'primary',
       // Interdiction d'auto-modification (API V2)
       disableIf: (row) => row.metadata?.['isSelf'] === true
     },
-    { 
-      id: 'delete', 
-      label: 'Désactiver', 
-      icon: Trash2, 
+    {
+      id: 'delete',
+      label: 'Désactiver',
+      icon: Trash2,
       type: 'danger',
       // Interdiction d'auto-désactivation (API V2)
       disableIf: (row) => row.metadata?.['isSelf'] === true

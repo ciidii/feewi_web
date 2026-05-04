@@ -1,13 +1,12 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { LucideAngularModule, Layers, Type, Hash, Info } from 'lucide-angular';
-import { firstValueFrom } from 'rxjs';
-import { AcademicService } from '../../../../../../../core/services/academic.service';
-import { NotificationService } from '../../../../../../../shared/services/notification.service';
-import { FormShellComponent } from '../../../../../../../shared/components/form-shell/form-shell';
-import { Cycle } from '../../../../../../../core/models/academic.model';
+import {Component, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import {Hash, Info, Layers, LucideAngularModule, Type} from 'lucide-angular';
+import {firstValueFrom} from 'rxjs';
+import {AcademicService} from '../../../../../../../core/services/academic.service';
+import {NotificationService} from '../../../../../../../shared/services/notification.service';
+import {FormShellComponent} from '../../../../../../../shared/components/form-shell/form-shell';
 
 @Component({
   selector: 'app-cycle-form',

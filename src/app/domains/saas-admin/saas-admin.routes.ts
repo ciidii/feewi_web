@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
+import {Routes} from '@angular/router';
 
 export const SAAS_ADMIN_ROUTES: Routes = [
   {

@@ -1,9 +1,9 @@
-import { Component, inject, computed, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { LucideAngularModule, ShieldCheck, HelpCircle, LayoutDashboard, ArrowLeft, Search } from 'lucide-angular';
-import { TenantContextService } from '../../../../core/services/tenant-context.service';
-import { SchoolService } from '../../../../core/services/school.service';
+import {Component, computed, inject, OnInit} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {RouterModule} from '@angular/router';
+import {ArrowLeft, HelpCircle, LayoutDashboard, LucideAngularModule, Search, ShieldCheck} from 'lucide-angular';
+import {TenantContextService} from '../../../../core/services/tenant-context.service';
+import {SchoolService} from '../../../../core/services/school.service';
 
 @Component({
   selector: 'app-public-enrollment-layout',

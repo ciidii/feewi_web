@@ -14,17 +14,17 @@ import {RowAction, TableRow} from '../../../../../shared/models/data-list.models
 import {CycleFormComponent} from './components/cycle-form/cycle-form.component';
 import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
-import { FwAlertBannerComponent } from '../../../../../shared/components/alert-banner/alert-banner.component';
-import { FwPageShellComponent } from '../../../../../shared/components/page-shell/page-shell.component';
+import {FwAlertBannerComponent} from '../../../../../shared/components/alert-banner/alert-banner.component';
+import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
 
 @Component({
   selector: 'app-structure-config',
   standalone: true,
   imports: [
-    CommonModule, 
-    LucideAngularModule, 
-    MatDialogModule, 
-    DataListComponent, 
+    CommonModule,
+    LucideAngularModule,
+    MatDialogModule,
+    DataListComponent,
     FwButtonComponent,
     FwAlertBannerComponent,
     FwPageShellComponent

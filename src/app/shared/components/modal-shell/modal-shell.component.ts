@@ -1,7 +1,7 @@
-import { Component, Input, Output, EventEmitter, HostListener } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { LucideAngularModule, X } from 'lucide-angular';
-import { A11yModule } from '@angular/cdk/a11y';
+import {Component, EventEmitter, HostListener, Input, Output} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {LucideAngularModule, X} from 'lucide-angular';
+import {A11yModule} from '@angular/cdk/a11y';
 
 @Component({
   selector: 'app-fw-modal-shell',

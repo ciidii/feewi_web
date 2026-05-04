@@ -1,8 +1,8 @@
-import { Component, input, output, signal, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { LucideAngularModule, Sparkles } from 'lucide-angular';
-import { ViewMode, ViewConfig } from '../../../../models/data-list.models';
-import { ViewPreferenceService } from '../../../../services/view-preference.service';
+import {Component, effect, input, output, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {LucideAngularModule, Sparkles} from 'lucide-angular';
+import {ViewConfig, ViewMode} from '../../../../models/data-list.models';
+import {ViewPreferenceService} from '../../../../services/view-preference.service';
 
 @Component({
   selector: 'app-view-selector',

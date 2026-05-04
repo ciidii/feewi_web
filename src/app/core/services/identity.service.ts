@@ -1,12 +1,12 @@
-import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, catchError, finalize, tap, throwError } from 'rxjs';
-import { User, UserCreateRequest, UserType } from '../models/user.model';
-import { Role, Permission } from '../models/role.model';
-import { Page } from '../models/school.model';
-import { AuditLog } from '../models/audit.model';
-import { EnvironmentService } from './environment.service';
-import { NotificationService } from '../../shared/services/notification.service';
+import {inject, Injectable, signal} from '@angular/core';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import {catchError, finalize, Observable, tap, throwError} from 'rxjs';
+import {User, UserCreateRequest, UserType} from '../models/user.model';
+import {Permission, Role} from '../models/role.model';
+import {Page} from '../models/school.model';
+import {AuditLog} from '../models/audit.model';
+import {EnvironmentService} from './environment.service';
+import {NotificationService} from '../../shared/services/notification.service';
 
 @Injectable({
   providedIn: 'root',
@@ -45,7 +45,7 @@ export class IdentityService {
       .set('search', search)
       .set('page', page.toString())
       .set('size', size.toString());
-    
+
     if (type) params = params.set('type', type);
 
     return this.http.get<Page<User>>(`${this.API_URL}/users`, { params }).pipe(

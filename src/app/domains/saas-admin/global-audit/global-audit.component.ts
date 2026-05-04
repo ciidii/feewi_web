@@ -1,10 +1,10 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { LucideAngularModule, History, Search, Filter, Download, ShieldCheck, User, Activity } from 'lucide-angular';
-import { DataListComponent } from '../../../shared/components/data-list/data-list.component';
-import { TableRow, TabItem } from '../../../shared/models/data-list.models';
-import { SchoolService } from '../../../core/services/school.service';
-import { AuditLog } from '../../../core/models/audit.model';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Activity, Download, Filter, History, LucideAngularModule, Search, ShieldCheck} from 'lucide-angular';
+import {DataListComponent} from '../../../shared/components/data-list/data-list.component';
+import {TabItem, TableRow} from '../../../shared/models/data-list.models';
+import {SchoolService} from '../../../core/services/school.service';
+import {AuditLog} from '../../../core/models/audit.model';
 
 @Component({
   selector: 'app-global-audit',

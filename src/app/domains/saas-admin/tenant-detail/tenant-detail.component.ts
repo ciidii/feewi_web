@@ -1,23 +1,42 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule, Router } from '@angular/router';
+import {Component, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ActivatedRoute, Router, RouterModule} from '@angular/router';
 import {
+  Activity,
+  ArrowLeft,
+  Building2,
+  Calendar,
+  CheckCircle,
+  ChevronRight,
+  CreditCard,
+  Edit,
+  ExternalLink,
+  Globe,
+  GraduationCap,
+  History,
+  Lock,
   LucideAngularModule,
-  ArrowLeft, Building2, Mail, Phone, MapPin,
-  Globe, Calendar, ShieldCheck, CheckCircle,
-  XCircle, Edit, Trash2, Printer, MoreVertical,
-  Activity, Users, CreditCard, History, ChevronRight,
-  User, ExternalLink, RefreshCw, Lock, GraduationCap
+  Mail,
+  MapPin,
+  MoreVertical,
+  Phone,
+  Printer,
+  RefreshCw,
+  ShieldCheck,
+  Trash2,
+  User,
+  Users,
+  XCircle
 } from 'lucide-angular';
-import { SchoolService } from '../../../core/services/school.service';
-import { School } from '../../../core/models/school.model';
-import { NotificationService } from '../../../shared/services/notification.service';
-import { AuthService } from '../../../core/services/auth.service';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog';
-import { finalize } from 'rxjs';
-import { EnrollmentPublicService } from '../../../core/services/enrollment-public.service';
-import { PublicPortalSummary } from '../../../core/models/enrollment/dtos';
+import {SchoolService} from '../../../core/services/school.service';
+import {School} from '../../../core/models/school.model';
+import {NotificationService} from '../../../shared/services/notification.service';
+import {AuthService} from '../../../core/services/auth.service';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import {ConfirmDialogComponent} from '../../../shared/components/confirm-dialog/confirm-dialog';
+import {finalize} from 'rxjs';
+import {EnrollmentPublicService} from '../../../core/services/enrollment-public.service';
+import {PublicPortalSummary} from '../../../core/models/enrollment/dtos';
 
 @Component({
   selector: 'app-tenant-detail',

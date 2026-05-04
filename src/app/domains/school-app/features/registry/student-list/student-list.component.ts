@@ -1,19 +1,33 @@
-import { Component, inject, signal, ViewEncapsulation, OnInit, computed, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import { LucideAngularModule, Filter, Download, UserPlus, Search, Eye, UserMinus, UserCheck, ShieldAlert, GraduationCap, History, Info, Users } from 'lucide-angular';
-import { firstValueFrom, Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import {Component, computed, inject, OnDestroy, OnInit, signal, ViewEncapsulation} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Router} from '@angular/router';
+import {
+  Download,
+  Eye,
+  Filter,
+  GraduationCap,
+  History,
+  Info,
+  LucideAngularModule,
+  Search,
+  ShieldAlert,
+  UserCheck,
+  UserMinus,
+  UserPlus,
+  Users
+} from 'lucide-angular';
+import {debounceTime, distinctUntilChanged, firstValueFrom, Subject, takeUntil} from 'rxjs';
+import {MatMenuModule} from '@angular/material/menu';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 
-import { RowAction, TableRow } from '../../../../../shared/models/data-list.models';
-import { StudentRegistryService } from '../../../../../core/services/student-registry.service';
-import { StudentSummary, StudentStatus } from '../../../../../core/models/student.model';
-import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
-import { NotificationService } from '../../../../../shared/services/notification.service';
-import { LoadingService } from '../../../../../shared/services/loading.service';
-import { FwPageShellComponent } from '../../../../../shared/components/page-shell/page-shell.component';
-import { FwTab } from '../../../../../shared/components/tabs/tabs.component';
+import {RowAction, TableRow} from '../../../../../shared/models/data-list.models';
+import {StudentRegistryService} from '../../../../../core/services/student-registry.service';
+import {StudentStatus, StudentSummary} from '../../../../../core/models/student.model';
+import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
+import {NotificationService} from '../../../../../shared/services/notification.service';
+import {LoadingService} from '../../../../../shared/services/loading.service';
+import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
+import {FwTab} from '../../../../../shared/components/tabs/tabs.component';
 import {DataListComponent} from '../../../../../shared/components/data-list/data-list.component';
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
 

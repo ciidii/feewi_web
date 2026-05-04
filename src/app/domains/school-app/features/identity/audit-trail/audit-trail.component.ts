@@ -1,11 +1,11 @@
-import { Component, signal, inject, OnInit, ViewEncapsulation } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { LucideAngularModule, History, ShieldAlert, GraduationCap, CreditCard, Activity } from 'lucide-angular';
-import { firstValueFrom } from 'rxjs';
-import { DataListComponent } from '../../../../../shared/components/data-list/data-list.component';
-import { TabItem, TableRow } from '../../../../../shared/models/data-list.models';
-import { IdentityService } from '../../../../../core/services/identity.service';
-import { AuditLog } from '../../../../../core/models/audit.model';
+import {Component, inject, OnInit, signal, ViewEncapsulation} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Activity, CreditCard, GraduationCap, History, LucideAngularModule, ShieldAlert} from 'lucide-angular';
+import {firstValueFrom} from 'rxjs';
+import {DataListComponent} from '../../../../../shared/components/data-list/data-list.component';
+import {TabItem, TableRow} from '../../../../../shared/models/data-list.models';
+import {IdentityService} from '../../../../../core/services/identity.service';
+import {AuditLog} from '../../../../../core/models/audit.model';
 
 @Component({
   selector: 'app-audit-trail',
@@ -23,7 +23,7 @@ export class AuditTrailComponent implements OnInit {
   activeTab = signal('Tous');
   totalLogs = signal(0);
   isLoading = signal(false);
-  
+
   auditLogs = signal<TableRow[]>([]);
 
   auditTabs: TabItem[] = [
@@ -43,7 +43,7 @@ export class AuditTrailComponent implements OnInit {
       const response = await firstValueFrom(this.identityService.getTenantAuditLogs(page));
       this.totalLogs.set(response.totalElements);
       this.auditLogs.set(response.content.map((log, index) => this.mapLogToRow(log, index)));
-      
+
       // Update tabs count (simplified for now)
       this.auditTabs[0].count = response.totalElements;
     } catch (error) {
@@ -68,7 +68,7 @@ export class AuditTrailComponent implements OnInit {
   }
 
   private formatAction(action: string): string {
-    return action.split('_').map(word => 
+    return action.split('_').map(word =>
       word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
     ).join(' ');
   }

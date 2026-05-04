@@ -1,8 +1,8 @@
-import { Component, ViewEncapsulation } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { LucideAngularModule, Users, GraduationCap, TrendingUp, Activity, LayoutDashboard } from 'lucide-angular';
-import { FwPageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
-import { FwBadgeComponent } from '../../../../../shared/components/badge/badge.component';
+import {Component, ViewEncapsulation} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Activity, GraduationCap, LayoutDashboard, LucideAngularModule, TrendingUp, Users} from 'lucide-angular';
+import {FwPageHeaderComponent} from '../../../../../shared/components/page-header/page-header.component';
+import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.component';
 
 @Component({
   selector: 'app-dashboard',

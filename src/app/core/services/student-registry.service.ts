@@ -1,15 +1,10 @@
-import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, catchError, finalize, tap, throwError } from 'rxjs';
-import { 
-  StudentSummary, 
-  StudentResponse, 
-  UpdateStudentRequest, 
-  StudentStatus 
-} from '../models/student.model';
-import { Page } from '../models/school.model';
-import { EnvironmentService } from './environment.service';
-import { NotificationService } from '../../shared/services/notification.service';
+import {inject, Injectable, signal} from '@angular/core';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import {catchError, finalize, Observable, tap, throwError} from 'rxjs';
+import {StudentResponse, StudentStatus, StudentSummary, UpdateStudentRequest} from '../models/student.model';
+import {Page} from '../models/school.model';
+import {EnvironmentService} from './environment.service';
+import {NotificationService} from '../../shared/services/notification.service';
 
 @Injectable({
   providedIn: 'root',
@@ -41,9 +36,9 @@ export class StudentRegistryService {
    * Lister et Rechercher des élèves (Paginé)
    */
   getStudents(
-    query: string = '', 
-    status?: StudentStatus, 
-    page: number = 0, 
+    query: string = '',
+    status?: StudentStatus,
+    page: number = 0,
     size: number = 20
   ): Observable<Page<StudentSummary>> {
     this._loading.set(true);

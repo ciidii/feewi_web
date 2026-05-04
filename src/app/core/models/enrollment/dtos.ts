@@ -1,6 +1,6 @@
-import { AcademicYearState, AdmissionType, CycleType, RegistrationMode } from './base-types';
-import { AdmissionBundle, Admission, Guardian } from './entities';
-import { EnrollmentSchema } from './config';
+import {AcademicYearState, AdmissionType, CycleType, RegistrationMode} from './base-types';
+import {Admission, AdmissionBundle, Guardian} from './entities';
+import {EnrollmentSchema} from './config';
 
 // --- PORTAIL PUBLIC ---
 

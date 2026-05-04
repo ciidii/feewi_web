@@ -1,7 +1,7 @@
-import { Component, input, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { LucideAngularModule, X, CheckCircle, Archive, Trash2, Download } from 'lucide-angular';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import {Component, input, output} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Archive, CheckCircle, Download, LucideAngularModule, Trash2, X} from 'lucide-angular';
+import {MatCheckboxModule} from '@angular/material/checkbox';
 
 @Component({
   selector: 'app-bulk-actions',
@@ -11,14 +11,14 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
     <div class="bulk-actions-container animate-in slide-in-from-left duration-200">
       <!-- État de la sélection -->
       <div class="selection-status">
-        <mat-checkbox 
-          color="primary" 
-          [checked]="isAllSelected()" 
+        <mat-checkbox
+          color="primary"
+          [checked]="isAllSelected()"
           [indeterminate]="isPartiallySelected()"
           (change)="onToggleAll.emit()"
           class="scale-90"
         ></mat-checkbox>
-        
+
         <div class="counter-badge">
           <span class="counter-text">{{ selectedCount() }} sélectionné(s)</span>
           <button (click)="onClear.emit()" class="clear-btn" title="Tout désélectionner">
@@ -29,9 +29,9 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 
       <!-- Barre d'actions -->
       <div class="actions-group">
-        <button 
-          (click)="onBulkValidate.emit([])" 
-          class="bulk-btn success" 
+        <button
+          (click)="onBulkValidate.emit([])"
+          class="bulk-btn success"
           title="Valider la sélection"
         >
           <lucide-icon [name]="CheckCircle" [size]="20"></lucide-icon>
@@ -69,7 +69,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
       background: var(--fw-primary-alpha);
       padding: 0.375rem 0.75rem;
       border-radius: var(--fw-radius-lg);
-      
+
       .counter-text {
         font-size: 0.75rem;
         font-weight: 700;
@@ -114,7 +114,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
       &.success:hover { background: var(--fw-success-bg); color: var(--fw-success); }
       &.info:hover { background: var(--fw-info-bg); color: var(--fw-info); }
       &.danger:hover { background: var(--fw-error-bg); color: var(--fw-error); }
-      
+
       &:active { transform: scale(0.92); }
     }
   `]

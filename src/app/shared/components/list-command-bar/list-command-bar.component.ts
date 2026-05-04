@@ -1,8 +1,8 @@
-import { Component, Input, Output, EventEmitter, ViewEncapsulation } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { LucideAngularModule, Search, X } from 'lucide-angular';
-import { FormsModule } from '@angular/forms';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import {Component, EventEmitter, Input, Output, ViewEncapsulation} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {LucideAngularModule, Search, X} from 'lucide-angular';
+import {FormsModule} from '@angular/forms';
+import {MatCheckboxModule} from '@angular/material/checkbox';
 
 export interface ActiveFilterChip {
   key: string;

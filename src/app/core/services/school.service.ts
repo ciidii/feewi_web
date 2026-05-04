@@ -1,10 +1,10 @@
-import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { catchError, finalize, map, Observable, tap, throwError } from 'rxjs';
-import { School, Page, PublicSchoolResponse } from '../models/school.model';
-import { AuditLog } from '../models/audit.model';
-import { EnvironmentService } from './environment.service';
-import { NotificationService } from '../../shared/services/notification.service';
+import {inject, Injectable, signal} from '@angular/core';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import {catchError, finalize, Observable, tap, throwError} from 'rxjs';
+import {Page, PublicSchoolResponse, School} from '../models/school.model';
+import {AuditLog} from '../models/audit.model';
+import {EnvironmentService} from './environment.service';
+import {NotificationService} from '../../shared/services/notification.service';
 
 @Injectable({
   providedIn: 'root',

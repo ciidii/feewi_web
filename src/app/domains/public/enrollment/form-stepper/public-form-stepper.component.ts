@@ -1,22 +1,36 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ActivatedRoute, Router} from '@angular/router';
 import {
-  ArrowLeft, ArrowRight, CheckCircle, FileText, GraduationCap,
-  HeartPulse, LayoutGrid, Lock, LucideAngularModule, User, Users,
-  ChevronRight, Sparkles, ShieldCheck, ClipboardCheck, RefreshCw, Save
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle,
+  ChevronRight,
+  ClipboardCheck,
+  FileText,
+  GraduationCap,
+  HeartPulse,
+  LayoutGrid,
+  Lock,
+  LucideAngularModule,
+  RefreshCw,
+  Save,
+  ShieldCheck,
+  Sparkles,
+  User,
+  Users
 } from 'lucide-angular';
-import { finalize, forkJoin, switchMap } from 'rxjs';
+import {finalize, forkJoin, switchMap} from 'rxjs';
 
-import { EnrollmentPublicService } from '../../../../core/services/enrollment-public.service';
-import { DocumentEngineService } from '../../../../core/services/document-engine.service';
-import { AdmissionSessionService } from '../../../../core/services/admission-session.service';
-import { AcademicService } from '../../../../core/services/academic.service';
-import { TenantContextService } from '../../../../core/services/tenant-context.service';
-import { NotificationService } from '../../../../shared/services/notification.service';
+import {EnrollmentPublicService} from '../../../../core/services/enrollment-public.service';
+import {DocumentEngineService} from '../../../../core/services/document-engine.service';
+import {AdmissionSessionService} from '../../../../core/services/admission-session.service';
+import {AcademicService} from '../../../../core/services/academic.service';
+import {TenantContextService} from '../../../../core/services/tenant-context.service';
+import {NotificationService} from '../../../../shared/services/notification.service';
 
-import { Admission } from '../../../../core/models/enrollment/entities';
-import { CycleGroup, Level } from '../../../../core/models/academic.model';
+import {Admission} from '../../../../core/models/enrollment/entities';
+import {CycleGroup, Level} from '../../../../core/models/academic.model';
 import {
   AdmissionBundleResponse,
   AvailableYearSummary,
@@ -25,22 +39,20 @@ import {
   ServiceSubscriptionRequest,
 } from '../../../../core/models/enrollment/dtos';
 
-import { StepFamilyComponent } from './components/step-family/step-family.component';
-import { StepIdentityComponent } from './components/step-identity/step-identity.component';
-import { StepMedicalComponent } from './components/step-medical/step-medical.component';
-import { StepServicesComponent } from './components/step-services/step-services.component';
-import { StepVaultComponent } from './components/step-vault/step-vault.component';
-import { StepReviewComponent } from './components/step-review/step-review.component';
-import { StepHubComponent } from './components/step-hub/step-hub.component';
-import { StepExtraComponent } from './components/step-extra/step-extra.component';
-import { FwButtonComponent } from '../../../../shared/components/button/button.component';
-import { SplashScreenComponent } from '../../../../shared/components/loader/splash-screen.component';
-import { PageProgressComponent } from '../../../../shared/components/loader/page-progress.component';
+import {StepFamilyComponent} from './components/step-family/step-family.component';
+import {StepIdentityComponent} from './components/step-identity/step-identity.component';
+import {StepMedicalComponent} from './components/step-medical/step-medical.component';
+import {StepServicesComponent} from './components/step-services/step-services.component';
+import {StepVaultComponent} from './components/step-vault/step-vault.component';
+import {StepReviewComponent} from './components/step-review/step-review.component';
+import {StepHubComponent} from './components/step-hub/step-hub.component';
+import {StepExtraComponent} from './components/step-extra/step-extra.component';
+import {FwButtonComponent} from '../../../../shared/components/button/button.component';
+import {BlockLoaderComponent} from '../../../../shared/components/loader/block-loader.component';
+import {PageProgressComponent} from '../../../../shared/components/loader/page-progress.component';
 
 export type GlobalPhase = 'GUARDIAN' | 'HUB' | 'REVIEW';
 export type ChildPhase  = 'STUDENT'  | 'MEDICAL' | 'SERVICES' | 'DOCS';
-
-const CHILD_STEPS: ChildPhase[] = ['STUDENT', 'MEDICAL', 'SERVICES', 'DOCS'];
 
 @Component({
   selector: 'app-public-form-stepper',
@@ -50,7 +62,7 @@ const CHILD_STEPS: ChildPhase[] = ['STUDENT', 'MEDICAL', 'SERVICES', 'DOCS'];
     StepFamilyComponent, StepIdentityComponent, StepMedicalComponent,
     StepServicesComponent, StepVaultComponent, StepReviewComponent,
     StepHubComponent, StepExtraComponent, FwButtonComponent,
-    SplashScreenComponent, PageProgressComponent
+    BlockLoaderComponent, PageProgressComponent
   ],
   templateUrl: './public-form-stepper.component.html',
   styleUrls: ['./public-form-stepper.component.scss']
@@ -116,7 +128,7 @@ export class PublicFormStepperComponent implements OnInit {
     const schema = this.schema();
     const base: string[] = ['STUDENT'];
     if (schema?.medical?.enabled !== false) base.push('MEDICAL');
-    
+
     // Ajout des piliers personnalisés
     if (schema?.extraPillars) {
       schema.extraPillars.forEach(p => {
@@ -289,7 +301,7 @@ export class PublicFormStepperComponent implements OnInit {
       customFields: adm.schooling?.customFields ?? {}
     };
     this.store.medical  = { customFields: adm.medical?.customFields ?? {} };
-    
+
     // Chargement des piliers extra (si présents dans l'entité Admission)
     this.store.extraPillars = (adm as any).extraPillars || {};
     // S'assurer que chaque clé de schéma a son objet dans le store

@@ -2,7 +2,7 @@
 
   <!-- 🏛️ HEADER INSTITUTIONNEL (Top Bar) -->
   <header class="stepper-header">
-    <fw-page-progress *ngIf="loading()"></fw-page-progress>
+    <fw-page-progress *ngIf="loading() || submitting() || savingDraft()"></fw-page-progress>
     
     <!-- Niveau 1 : Marque & Session -->
     <div class="header-top">
@@ -283,5 +283,7 @@
 
 <!-- Loader initial -->
 <ng-template #loader>
-  <fw-splash-screen message="Chargement de votre session..."></fw-splash-screen>
+  <div class="min-h-screen flex items-center justify-center">
+    <fw-block-loader message="Chargement de votre session..."></fw-block-loader>
+  </div>
 </ng-template>

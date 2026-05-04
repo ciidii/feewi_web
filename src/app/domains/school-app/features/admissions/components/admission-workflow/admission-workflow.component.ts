@@ -1,6 +1,16 @@
-import { Component, input, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { LucideAngularModule, CheckCircle, Circle, Clock, AlertCircle, FileText, ClipboardCheck, GraduationCap, UserCheck } from 'lucide-angular';
+import {Component, computed, input} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {
+  AlertCircle,
+  CheckCircle,
+  Circle,
+  ClipboardCheck,
+  Clock,
+  FileText,
+  GraduationCap,
+  LucideAngularModule,
+  UserCheck
+} from 'lucide-angular';
 
 export type AdmissionState = 'DRAFT' | 'SUBMITTED' | 'VERIFIED' | 'TESTING' | 'ADMITTED' | 'WAITLIST' | 'VALIDATED' | 'REJECTED' | 'CANCELLED';
 

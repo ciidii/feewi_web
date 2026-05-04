@@ -1,7 +1,7 @@
-import { Injectable, signal, inject, computed } from '@angular/core';
-import { Router, NavigationEnd } from '@angular/router';
-import { filter } from 'rxjs/operators';
-import { NavigationStateService } from './navigation-state.service';
+import {computed, inject, Injectable, signal} from '@angular/core';
+import {NavigationEnd, Router} from '@angular/router';
+import {filter} from 'rxjs/operators';
+import {NavigationStateService} from './navigation-state.service';
 
 export type AppDomain = 'saas' | 'school' | 'public';
 
@@ -25,7 +25,7 @@ export class NavigationContextService {
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: any) => {
       const url = event.urlAfterRedirects;
-      
+
       // 1. Détermination du Domaine
       if (url.startsWith('/saas')) {
         this._currentDomain.set('saas');
@@ -34,7 +34,7 @@ export class NavigationContextService {
         this._currentDomain.set('public');
       } else {
         this._currentDomain.set('school');
-        
+
         // 2. Détermination du Service Actif (School App)
         if (url.startsWith('/admin/home') || url.startsWith('/admin/dashboard')) {
           this.navState.setActiveService('dashboard');

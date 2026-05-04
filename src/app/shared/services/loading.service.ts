@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import {Injectable, signal} from '@angular/core';
 
 export type LoadingContext = 'global' | 'page' | 'component' | 'none';
 
@@ -9,7 +9,7 @@ export class LoadingService {
   private loadingCount = signal(0);
   private currentContext = signal<LoadingContext>('none');
   private slowTimeoutId: ReturnType<typeof setTimeout> | null = null;
-  
+
   isLoading = signal(false);
   isSlowLoading = signal(false); // Restauré pour la compatibilité
   context = this.currentContext.asReadonly();
@@ -22,7 +22,7 @@ export class LoadingService {
     if (this.loadingCount() === 0) {
       this.isLoading.set(true);
       this.currentContext.set(context);
-      
+
       // Déclencher la détection de lenteur (5 secondes)
       this.slowTimeoutId = setTimeout(() => {
         if (this.isLoading()) {
@@ -43,7 +43,7 @@ export class LoadingService {
         this.isLoading.set(false);
         this.isSlowLoading.set(false);
         this.currentContext.set('none');
-        
+
         if (this.slowTimeoutId) {
           clearTimeout(this.slowTimeoutId);
           this.slowTimeoutId = null;

@@ -1,25 +1,24 @@
-import { Component, input, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import {Component, input, output} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {MatCheckboxModule} from '@angular/material/checkbox';
 
 // Importer les icônes nécessaires
 import {
-  LucideAngularModule,
-  Eye,
-  CheckCircle,
-  Printer,
-  MoreHorizontal,
-  ArrowUpDown,
-  ArrowUp,
   ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  CheckCircle,
+  Eye,
+  LucideAngularModule,
+  MoreHorizontal,
+  Printer,
   Table
 } from 'lucide-angular';
-import { RowAction, TableRow } from '../../../../models/data-list.models';
-import { SmartTooltipDirective } from '../../../../directives/smart-tooltip.directive';
-import { FwDatePipe } from '../../../../pipes/fw-date.pipe';
-import { SkeletonComponent } from '../../../../components/skeleton/skeleton.component';
-import { FwButtonComponent } from '../../../../components/button/button.component';
-import { FwBadgeComponent } from '../../../../components/badge/badge.component';
+import {RowAction, TableRow} from '../../../../models/data-list.models';
+import {FwDatePipe} from '../../../../pipes/fw-date.pipe';
+import {SkeletonComponent} from '../../../../components/skeleton/skeleton.component';
+import {FwButtonComponent} from '../../../../components/button/button.component';
+import {FwBadgeComponent} from '../../../../components/badge/badge.component';
 
 
 export type SortDirection = 'asc' | 'desc' | null;

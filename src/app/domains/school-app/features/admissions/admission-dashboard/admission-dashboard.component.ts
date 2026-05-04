@@ -1,5 +1,5 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
 import {
   Activity,
   AlertTriangle,
@@ -22,19 +22,18 @@ import {
   Users,
   XCircle
 } from 'lucide-angular';
-import { EnrollmentAdminService } from '../../../../../core/services/enrollment-admin.service';
-import { AcademicService } from '../../../../../core/services/academic.service';
-import { Admission } from '../../../../../core/models/enrollment.model';
-import { AcademicYear, Level, SchoolClass } from '../../../../../core/models/academic.model';
-import { finalize, forkJoin, switchMap } from 'rxjs';
-import { AuthService } from '../../../../../core/services/auth.service';
-import { FwPageShellComponent } from '../../../../../shared/components/page-shell/page-shell.component';
-import { FwButtonComponent } from '../../../../../shared/components/button/button.component';
-import { RouterLink } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
-import { FwReportModalComponent, ReportItem } from '../../../../../shared/components/report-modal/report-modal';
+import {EnrollmentAdminService} from '../../../../../core/services/enrollment-admin.service';
+import {AcademicService} from '../../../../../core/services/academic.service';
+import {Admission} from '../../../../../core/models/enrollment.model';
+import {AcademicYear, Level, SchoolClass} from '../../../../../core/models/academic.model';
+import {finalize, forkJoin, switchMap} from 'rxjs';
+import {AuthService} from '../../../../../core/services/auth.service';
+import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
+import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
+import {RouterLink} from '@angular/router';
+import {TranslateModule} from '@ngx-translate/core';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import {FwReportModalComponent, ReportItem} from '../../../../../shared/components/report-modal/report-modal';
 
 @Component({
   selector: 'app-admission-dashboard',

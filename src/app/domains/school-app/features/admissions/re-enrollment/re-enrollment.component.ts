@@ -1,40 +1,40 @@
-import { Component, signal, computed, inject, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { RouterModule, Router } from '@angular/router';
+import {Component, inject, OnDestroy, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {Router, RouterModule} from '@angular/router';
 import {
-  LucideAngularModule,
-  Search,
-  User,
   ArrowRight,
-  Save,
-  X,
-  Phone,
-  MapPin,
-  Sparkles,
   CheckCircle,
   Info,
-  RefreshCw
+  LucideAngularModule,
+  MapPin,
+  Phone,
+  RefreshCw,
+  Save,
+  Search,
+  Sparkles,
+  User,
+  X
 } from 'lucide-angular';
-import {Subject, debounceTime, distinctUntilChanged, takeUntil, firstValueFrom, forkJoin} from 'rxjs';
-import { IdentityService } from '../../../../../core/services/identity.service';
-import { EnrollmentPublicService } from '../../../../../core/services/enrollment-public.service';
-import { TenantContextService } from '../../../../../core/services/tenant-context.service';
-import { NotificationService } from '../../../../../shared/services/notification.service';
-import { AcademicService } from '../../../../../core/services/academic.service';
-import { User as StudentUser } from '../../../../../core/models/user.model';
+import {debounceTime, distinctUntilChanged, firstValueFrom, forkJoin, Subject, takeUntil} from 'rxjs';
+import {IdentityService} from '../../../../../core/services/identity.service';
+import {EnrollmentPublicService} from '../../../../../core/services/enrollment-public.service';
+import {TenantContextService} from '../../../../../core/services/tenant-context.service';
+import {NotificationService} from '../../../../../shared/services/notification.service';
+import {AcademicService} from '../../../../../core/services/academic.service';
+import {User as StudentUser} from '../../../../../core/models/user.model';
 import {Filiere, Level} from '../../../../../core/models/academic.model';
 
-import { FwPageShellComponent } from '../../../../../shared/components/page-shell/page-shell.component';
-import { FwButtonComponent } from '../../../../../shared/components/button/button.component';
+import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
+import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
 
 @Component({
   selector: 'app-secretary-re-enrollment',
   standalone: true,
   imports: [
-    CommonModule, 
-    FormsModule, 
-    LucideAngularModule, 
+    CommonModule,
+    FormsModule,
+    LucideAngularModule,
     RouterModule,
     FwPageShellComponent,
     FwButtonComponent

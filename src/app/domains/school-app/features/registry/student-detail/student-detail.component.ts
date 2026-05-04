@@ -1,43 +1,42 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
-import { finalize, forkJoin } from 'rxjs';
-import { 
-  LucideAngularModule, 
-  ArrowLeft, 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Calendar, 
-  History, 
-  Edit, 
-  Printer, 
-  Download,
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ActivatedRoute, RouterModule} from '@angular/router';
+import {finalize, forkJoin} from 'rxjs';
+import {
   AlertCircle,
-  Stethoscope,
-  Users,
+  ArrowLeft,
+  Calendar,
+  Download,
+  Edit,
+  History,
+  LucideAngularModule,
+  Mail,
+  MapPin,
+  Phone,
+  Printer,
   RefreshCw,
-  PhoneCall
+  Stethoscope,
+  User,
+  Users
 } from 'lucide-angular';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 
-import { StudentRegistryService } from '../../../../../core/services/student-registry.service';
-import { StudentResponse } from '../../../../../core/models/student.model';
-import { AcademicService } from '../../../../../core/services/academic.service';
-import { Level } from '../../../../../core/models/academic.model';
-import { NotificationService } from '../../../../../shared/services/notification.service';
-import { ConfirmDialogComponent } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
-import { FwPageShellComponent } from '../../../../../shared/components/page-shell/page-shell.component';
-import { FwBadgeComponent } from '../../../../../shared/components/badge/badge.component';
+import {StudentRegistryService} from '../../../../../core/services/student-registry.service';
+import {StudentResponse} from '../../../../../core/models/student.model';
+import {AcademicService} from '../../../../../core/services/academic.service';
+import {Level} from '../../../../../core/models/academic.model';
+import {NotificationService} from '../../../../../shared/services/notification.service';
+import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
+import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
+import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.component';
 
 @Component({
   selector: 'app-student-detail',
   standalone: true,
   imports: [
-    CommonModule, 
-    LucideAngularModule, 
-    RouterModule, 
+    CommonModule,
+    LucideAngularModule,
+    RouterModule,
     MatDialogModule,
     FwPageShellComponent,
     FwBadgeComponent

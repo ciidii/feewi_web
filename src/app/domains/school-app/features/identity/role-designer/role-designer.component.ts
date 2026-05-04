@@ -1,6 +1,6 @@
 import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import { firstValueFrom } from 'rxjs';
+import {firstValueFrom} from 'rxjs';
 import {
   ChevronRight,
   Info,

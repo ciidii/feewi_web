@@ -1,6 +1,6 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { LucideAngularModule, RefreshCw, X } from 'lucide-angular';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {LucideAngularModule, RefreshCw, X} from 'lucide-angular';
 
 @Component({
   selector: 'app-fw-refresh-banner',
@@ -13,7 +13,7 @@ import { LucideAngularModule, RefreshCw, X } from 'lucide-angular';
           <lucide-icon [name]="RefreshIcon" class="icon-spin" [size]="16"></lucide-icon>
           <span class="message">{{ message }}</span>
         </div>
-        
+
         <div class="banner-actions">
           <button (click)="onRefresh.emit()" class="refresh-btn">
             Actualiser
@@ -117,7 +117,7 @@ import { LucideAngularModule, RefreshCw, X } from 'lucide-angular';
 export class FwRefreshBannerComponent {
   @Input() message: string = 'Nouvelles données disponibles';
   @Input() visible: boolean = false;
-  
+
   @Output() onRefresh = new EventEmitter<void>();
 
   readonly RefreshIcon = RefreshCw;

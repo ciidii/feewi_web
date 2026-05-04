@@ -1,15 +1,28 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ActivatedRoute, RouterModule} from '@angular/router';
 import {
+  Archive,
+  ArrowLeft,
+  Calendar,
+  CheckCircle,
+  ChevronRight,
+  Clock,
+  Edit,
+  LayoutDashboard,
+  ListTodo,
   LucideAngularModule,
-  Calendar, Clock,
-  CheckCircle, Plus, LayoutDashboard,
-  ListTodo, Palmtree, ChevronRight,
-  MoreVertical, Edit, Trash2, Printer, Play, Archive, RotateCcw, XCircle, ArrowLeft
+  MoreVertical,
+  Palmtree,
+  Play,
+  Plus,
+  Printer,
+  RotateCcw,
+  Trash2,
+  XCircle
 } from 'lucide-angular';
-import { PeriodFormComponent } from './components/period-form/period-form.component';
-import { HolidayFormComponent } from './components/holiday-form/holiday-form.component';
+import {PeriodFormComponent} from './components/period-form/period-form.component';
+import {HolidayFormComponent} from './components/holiday-form/holiday-form.component';
 import {RowAction, TableRow} from '../../../../../shared/models/data-list.models';
 import {AcademicYear, Holiday, Period} from '../../../../../core/models/academic.model';
 import {AcademicService} from '../../../../../core/services/academic.service';
@@ -17,10 +30,10 @@ import {NotificationService} from '../../../../../shared/services/notification.s
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {DataListComponent} from '../../../../../shared/components/data-list/data-list.component';
 import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
-import { firstValueFrom } from 'rxjs';
-import { FwPageShellComponent } from '../../../../../shared/components/page-shell/page-shell.component';
-import { FwTab } from '../../../../../shared/components/tabs/tabs.component';
-import { FwBadgeComponent } from '../../../../../shared/components/badge/badge.component';
+import {firstValueFrom} from 'rxjs';
+import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
+import {FwTab} from '../../../../../shared/components/tabs/tabs.component';
+import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.component';
 
 export interface TimelineEvent {
   id: string;

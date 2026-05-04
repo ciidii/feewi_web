@@ -1,27 +1,27 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { firstValueFrom } from 'rxjs';
-import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material/dialog';
-import { LucideAngularModule, ListChecks, Plus, Trash2, Edit, Save, X, BookOpen, Hash, Clock } from 'lucide-angular';
-import { AcademicService } from '../../../../../../../core/services/academic.service';
-import { CurriculumItem, Level, Subject } from '../../../../../../../core/models/academic.model';
-import { NotificationService } from '../../../../../../../shared/services/notification.service';
-import { DataListComponent } from '../../../../../../../shared/components/data-list/data-list.component';
-import { TableRow, RowAction } from '../../../../../../../shared/models/data-list.models';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ConfirmDialogComponent } from '../../../../../../../shared/components/confirm-dialog/confirm-dialog';
-import { SyllabusViewerComponent } from '../syllabus-viewer/syllabus-viewer';
-import { FwModalShellComponent } from '../../../../../../../shared/components/modal-shell/modal-shell.component';
-import { FwButtonComponent } from '../../../../../../../shared/components/button/button.component';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {firstValueFrom} from 'rxjs';
+import {MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import {BookOpen, Clock, Edit, ListChecks, LucideAngularModule, Plus, Save, Trash2, X} from 'lucide-angular';
+import {AcademicService} from '../../../../../../../core/services/academic.service';
+import {CurriculumItem, Level, Subject} from '../../../../../../../core/models/academic.model';
+import {NotificationService} from '../../../../../../../shared/services/notification.service';
+import {DataListComponent} from '../../../../../../../shared/components/data-list/data-list.component';
+import {RowAction, TableRow} from '../../../../../../../shared/models/data-list.models';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {ConfirmDialogComponent} from '../../../../../../../shared/components/confirm-dialog/confirm-dialog';
+import {SyllabusViewerComponent} from '../syllabus-viewer/syllabus-viewer';
+import {FwModalShellComponent} from '../../../../../../../shared/components/modal-shell/modal-shell.component';
+import {FwButtonComponent} from '../../../../../../../shared/components/button/button.component';
 
 @Component({
   selector: 'app-curriculum-manager',
   standalone: true,
   imports: [
-    CommonModule, 
-    LucideAngularModule, 
-    MatDialogModule, 
-    DataListComponent, 
+    CommonModule,
+    LucideAngularModule,
+    MatDialogModule,
+    DataListComponent,
     ReactiveFormsModule,
     FwModalShellComponent,
     FwButtonComponent

@@ -1,35 +1,34 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
+import {Component, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import {MatSelectModule} from '@angular/material/select';
+import {MatButtonModule} from '@angular/material/button';
 import {
-  LucideAngularModule,
-  User,
-  Mail,
-  Phone,
-  Shield,
-  Save,
-  X,
-  CheckCircle,
-  Info,
-  Loader2,
   AlertCircle,
-  UserPlus,
-  UserCog,
-  GraduationCap,
   BookOpen,
   Calendar,
+  CheckCircle,
+  GraduationCap,
+  Info,
+  Loader2,
+  LucideAngularModule,
+  Mail,
+  Phone,
+  Save,
+  Shield,
   ShieldCheck,
-  Sparkles
+  Sparkles,
+  User,
+  UserCog,
+  UserPlus,
+  X
 } from 'lucide-angular';
-import { IdentityService } from '../../../../../../../core/services/identity.service';
-import { NotificationService } from '../../../../../../../shared/services/notification.service';
-import { FormShellComponent } from '../../../../../../../shared/components/form-shell/form-shell';
-import { UserType } from '../../../../../../../core/models/user.model';
-import { signal } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import {IdentityService} from '../../../../../../../core/services/identity.service';
+import {NotificationService} from '../../../../../../../shared/services/notification.service';
+import {FormShellComponent} from '../../../../../../../shared/components/form-shell/form-shell';
+import {UserType} from '../../../../../../../core/models/user.model';
+import {firstValueFrom} from 'rxjs';
 
 @Component({
   selector: 'app-staff-form',
@@ -85,7 +84,7 @@ export class StaffFormComponent implements OnInit {
     if (this.roles().length === 0) {
       firstValueFrom(this.identityService.getRoles());
     }
-    
+
     try {
       const types = await firstValueFrom(this.identityService.getUserTypes());
       // Filtrer pour ne garder que le personnel administratif et enseignant pour cet écran

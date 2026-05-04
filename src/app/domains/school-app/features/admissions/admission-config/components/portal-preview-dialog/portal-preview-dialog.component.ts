@@ -1,11 +1,10 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { LucideAngularModule, X, Monitor, Smartphone, Tablet } from 'lucide-angular';
-import { PortalPreviewComponent } from '../portal-preview/portal-preview.component';
-import { EnrollmentConfig } from '../../../../../../../core/models/enrollment.model';
-import { AcademicYear } from '../../../../../../../core/models/academic.model';
-import { signal } from '@angular/core';
+import {Component, inject, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import {LucideAngularModule, Monitor, Smartphone, Tablet, X} from 'lucide-angular';
+import {PortalPreviewComponent} from '../portal-preview/portal-preview.component';
+import {EnrollmentConfig} from '../../../../../../../core/models/enrollment.model';
+import {AcademicYear} from '../../../../../../../core/models/academic.model';
 
 @Component({
   selector: 'app-portal-preview-dialog',
@@ -52,7 +51,7 @@ import { signal } from '@angular/core';
     .preview-dialog-container { display: flex; flex-direction: column; height: 100vh; width: 100vw; overflow: hidden; }
     .preview-header { height: 72px; background: #0f172a; border-bottom: 1px solid #1e293b; display: flex; align-items: center; padding: 0 2rem; shrink: 0; }
     .preview-body { flex: 1; overflow: auto; }
-    
+
     .device-mockup { background: white; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); overflow: hidden; }
     .device-mockup.desktop { width: 1200px; height: 800px; border-radius: 12px; }
     .device-mockup.tablet { width: 768px; height: 1024px; border-radius: 32px; border: 12px solid #1e293b; }
@@ -67,7 +66,7 @@ import { signal } from '@angular/core';
 export class PortalPreviewDialogComponent {
   data: { config: EnrollmentConfig, activeYear: AcademicYear | null } = inject(MAT_DIALOG_DATA);
   private dialogRef = inject(MatDialogRef<PortalPreviewDialogComponent>);
-  
+
   viewMode = signal<'desktop' | 'tablet' | 'mobile'>('desktop');
 
   readonly Monitor = Monitor;

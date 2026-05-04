@@ -1,7 +1,7 @@
-import { Injectable, inject } from '@angular/core';
-import { Title } from '@angular/platform-browser';
-import { RouterStateSnapshot, TitleStrategy } from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
+import {inject, Injectable} from '@angular/core';
+import {Title} from '@angular/platform-browser';
+import {RouterStateSnapshot, TitleStrategy} from '@angular/router';
+import {TranslateService} from '@ngx-translate/core';
 
 @Injectable({ providedIn: 'root' })
 export class PageTitleStrategy extends TitleStrategy {
@@ -22,7 +22,7 @@ export class PageTitleStrategy extends TitleStrategy {
   override updateTitle(routerState: RouterStateSnapshot): void {
     const titleKey = this.buildTitle(routerState);
     this.currentTitleKey = titleKey;
-    
+
     if (titleKey) {
       this.updateBrowserTitle(titleKey);
     } else {

@@ -1,32 +1,29 @@
-import { Component, signal, computed, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import {Component, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {Router, RouterModule} from '@angular/router';
 import {
-  LucideAngularModule,
-  User,
-  Home,
-  Phone,
-  Sparkles,
-  CheckCircle,
   AlertTriangle,
   ArrowRight,
-  Edit2,
-  Check,
-  Search,
-  RefreshCw,
-  GraduationCap,
-  MapPin,
   Calendar,
-  Info
+  CheckCircle,
+  GraduationCap,
+  Info,
+  LucideAngularModule,
+  MapPin,
+  Phone,
+  RefreshCw,
+  Search,
+  Sparkles,
+  User
 } from 'lucide-angular';
-import { delay, finalize, firstValueFrom, of } from 'rxjs';
+import {delay, finalize, of} from 'rxjs';
 
-import { EnrollmentPublicService } from '../../../../core/services/enrollment-public.service';
-import { AcademicService } from '../../../../core/services/academic.service';
-import { TenantContextService } from '../../../../core/services/tenant-context.service';
-import { AcademicYear } from '../../../../core/models/academic.model';
-import { Admission } from '../../../../core/models/enrollment.model';
+import {EnrollmentPublicService} from '../../../../core/services/enrollment-public.service';
+import {AcademicService} from '../../../../core/services/academic.service';
+import {TenantContextService} from '../../../../core/services/tenant-context.service';
+import {AcademicYear} from '../../../../core/models/academic.model';
+import {Admission} from '../../../../core/models/enrollment.model';
 
 export type SoftStep = 'SEARCH' | 'CONFIRM' | 'SUCCESS';
 

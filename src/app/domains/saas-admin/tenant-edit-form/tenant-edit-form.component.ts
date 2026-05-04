@@ -1,12 +1,12 @@
-import { Component, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { LucideAngularModule, Building2, Mail, Phone, MapPin, Quote, Loader2, X, Save } from 'lucide-angular';
-import { SchoolService } from '../../../core/services/school.service';
-import { School } from '../../../core/models/school.model';
-import { NotificationService } from '../../../shared/services/notification.service';
-import { FormShellComponent } from '../../../shared/components/form-shell/form-shell';
+import {Component, inject, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import {Building2, Loader2, LucideAngularModule, Mail, MapPin, Phone, Quote, Save, X} from 'lucide-angular';
+import {SchoolService} from '../../../core/services/school.service';
+import {School} from '../../../core/models/school.model';
+import {NotificationService} from '../../../shared/services/notification.service';
+import {FormShellComponent} from '../../../shared/components/form-shell/form-shell';
 
 @Component({
   selector: 'app-tenant-edit-form',

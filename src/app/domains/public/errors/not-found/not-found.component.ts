@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { LucideAngularModule, Home, SearchX, ArrowLeft } from 'lucide-angular';
+import {Component} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {RouterModule} from '@angular/router';
+import {ArrowLeft, Home, LucideAngularModule, SearchX} from 'lucide-angular';
 
 @Component({
   selector: 'app-not-found',
@@ -34,7 +34,7 @@ import { LucideAngularModule, Home, SearchX, ArrowLeft } from 'lucide-angular';
             <lucide-icon [name]="Home" class="w-4 h-4"></lucide-icon>
             Retourner à l'accueil
           </button>
-          
+
           <button (click)="goBack()" class="flex items-center justify-center gap-2 h-12 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-50 transition-all active:scale-95">
             <lucide-icon [name]="ArrowLeft" class="w-4 h-4"></lucide-icon>
             Revenir en arrière

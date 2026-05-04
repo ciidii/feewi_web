@@ -1,11 +1,11 @@
-import { Component, inject, ViewEncapsulation } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { LucideAngularModule, Filter, X, Clock, UserCheck, CheckCircle, Calendar, School } from 'lucide-angular';
-import { FwButtonComponent } from '../../../../../../../shared/components/button/button.component';
-import { FwModalShellComponent } from '../../../../../../../shared/components/modal-shell/modal-shell.component';
-import { AcademicYear, Level, CycleGroup } from '../../../../../../../core/models/academic.model';
+import {Component, inject, ViewEncapsulation} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import {Calendar, CheckCircle, Clock, Filter, LucideAngularModule, School, UserCheck, X} from 'lucide-angular';
+import {FwButtonComponent} from '../../../../../../../shared/components/button/button.component';
+import {FwModalShellComponent} from '../../../../../../../shared/components/modal-shell/modal-shell.component';
+import {AcademicYear, CycleGroup} from '../../../../../../../core/models/academic.model';
 
 export interface AdmissionFilterData {
   selectedYear: string;

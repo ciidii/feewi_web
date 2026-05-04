@@ -1,9 +1,21 @@
-import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { CheckCircle, FileText, LayoutGrid, LucideAngularModule, User, Users, ClipboardCheck, Mail, Phone, ShieldAlert, Sparkles } from 'lucide-angular';
-import { Admission } from '../../../../../../core/models/enrollment/entities';
-import { FwBadgeComponent } from '../../../../../../shared/components/badge/badge.component';
+import {Component, Input} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {
+  CheckCircle,
+  ClipboardCheck,
+  FileText,
+  LayoutGrid,
+  LucideAngularModule,
+  Mail,
+  Phone,
+  ShieldAlert,
+  Sparkles,
+  User,
+  Users
+} from 'lucide-angular';
+import {Admission} from '../../../../../../core/models/enrollment/entities';
+import {FwBadgeComponent} from '../../../../../../shared/components/badge/badge.component';
 
 @Component({
   selector: 'app-step-review',
@@ -32,7 +44,7 @@ import { FwBadgeComponent } from '../../../../../../shared/components/badge/badg
             </div>
             <h3 class="font-display font-black text-midnight text-lg uppercase tracking-tight">Dossier Familial</h3>
           </div>
-          
+
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
             <div class="flex items-start gap-4">
               <div class="w-10 h-10 rounded-xl bg-primary-alpha text-primary flex items-center justify-center shrink-0">
@@ -44,7 +56,7 @@ import { FwBadgeComponent } from '../../../../../../shared/components/badge/badg
                 <p class="text-xs text-text-secondary mt-2 font-semibold bg-surface-sunken px-2 py-1 rounded w-fit">Lien : {{ family.primaryGuardian.relation }}</p>
               </div>
             </div>
-            
+
             <div class="space-y-4">
               <div class="flex items-center gap-4 text-base font-bold text-midnight bg-surface-sunken/50 p-3 rounded-xl border border-border/50">
                 <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm"><lucide-icon [name]="Phone" [size]="16" class="text-primary"></lucide-icon></div>
@@ -134,7 +146,7 @@ import { FwBadgeComponent } from '../../../../../../shared/components/badge/badg
             <div class="space-y-4 text-slate-300">
               <p *ngIf="legalText">{{ legalText }}</p>
               <p *ngIf="!legalText">
-                Je certifie sur l'honneur l'exactitude des informations fournies dans ce formulaire. 
+                Je certifie sur l'honneur l'exactitude des informations fournies dans ce formulaire.
                 Je comprends que toute fausse déclaration ou omission volontaire pourra entraîner l'annulation de la candidature de l'enfant auprès de l'établissement.
               </p>
             </div>

@@ -1,5 +1,5 @@
-import { Directive, ElementRef, HostListener, Input, inject } from '@angular/core';
-import { MatTooltip } from '@angular/material/tooltip';
+import {Directive, ElementRef, HostListener, inject, Input} from '@angular/core';
+import {MatTooltip} from '@angular/material/tooltip';
 
 @Directive({
   selector: '[fwSmartTooltip]',
@@ -20,7 +20,7 @@ export class SmartTooltipDirective {
   @HostListener('mouseenter')
   onMouseEnter() {
     const element = this.el.nativeElement;
-    
+
     // Détection de l'overflow (troncature)
     const isOverflowing = element.scrollWidth > element.offsetWidth;
 

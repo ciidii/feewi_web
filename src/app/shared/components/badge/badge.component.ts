@@ -1,5 +1,5 @@
-import { Component, Input, computed, ViewEncapsulation } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {Component, computed, Input, ViewEncapsulation} from '@angular/core';
+import {CommonModule} from '@angular/common';
 
 export interface BadgeConfig {
   label: string;

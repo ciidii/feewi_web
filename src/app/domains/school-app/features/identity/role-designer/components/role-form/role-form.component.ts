@@ -1,15 +1,15 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { firstValueFrom } from 'rxjs';
-import { LucideAngularModule, Shield, Save, X, Info, AlertCircle, Loader2, Type, FileText } from 'lucide-angular';
-import { IdentityService } from '../../../../../../../core/services/identity.service';
-import { NotificationService } from '../../../../../../../shared/services/notification.service';
-import { FormShellComponent } from '../../../../../../../shared/components/form-shell/form-shell';
+import {Component, inject, OnInit} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material/input';
+import {MatButtonModule} from '@angular/material/button';
+import {firstValueFrom} from 'rxjs';
+import {AlertCircle, FileText, Info, Loader2, LucideAngularModule, Save, Shield, Type, X} from 'lucide-angular';
+import {IdentityService} from '../../../../../../../core/services/identity.service';
+import {NotificationService} from '../../../../../../../shared/services/notification.service';
+import {FormShellComponent} from '../../../../../../../shared/components/form-shell/form-shell';
 
 @Component({
   selector: 'app-role-form',

@@ -1,18 +1,18 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { LucideAngularModule, FileText, Type, Info } from 'lucide-angular';
-import { FormShellComponent } from '../../../../../../../shared/components/form-shell/form-shell';
+import {Component, inject} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import {FileText, Info, LucideAngularModule, Type} from 'lucide-angular';
+import {FormShellComponent} from '../../../../../../../shared/components/form-shell/form-shell';
 
 @Component({
   selector: 'app-document-type-form',
   standalone: true,
   imports: [
-    CommonModule, 
-    ReactiveFormsModule, 
-    MatDialogModule, 
-    LucideAngularModule, 
+    CommonModule,
+    ReactiveFormsModule,
+    MatDialogModule,
+    LucideAngularModule,
     FormShellComponent
   ],
   templateUrl: './document-type-form.component.html',
@@ -35,7 +35,7 @@ export class DocumentTypeFormComponent {
     if (this.docForm.valid) {
       const name = this.docForm.value.name;
       const generatedCode = this.generateCode(name);
-      
+
       this.dialogRef.close({
         ...this.docForm.value,
         code: generatedCode

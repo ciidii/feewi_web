@@ -1,26 +1,32 @@
-import { Component, inject, OnInit, signal, computed, Injector } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import {Component, computed, inject, Injector, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {RouterModule} from '@angular/router';
 import {
-  LucideAngularModule,
-  CheckCircle,
-  Clock,
-  Sparkles,
-  Search,
+  AlertCircle,
   ArrowRight,
-  Info,
   Calendar,
+  CheckCircle,
+  ChevronRight,
+  Clock,
   FileText,
+  Globe,
+  GraduationCap,
+  Info,
+  Lock,
+  LucideAngularModule,
+  Phone,
+  RefreshCw,
+  Search,
   ShieldCheck,
-  Globe, RefreshCw, Phone, GraduationCap, ChevronRight, AlertCircle, Lock
+  Sparkles
 } from 'lucide-angular';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { EnrollmentPublicService } from '../../../../core/services/enrollment-public.service';
-import { TenantContextService } from '../../../../core/services/tenant-context.service';
-import { filter, finalize, take } from 'rxjs';
-import { PublicPortalSummary } from '../../../../core/models/enrollment';
-import { FwButtonComponent } from '../../../../shared/components/button/button.component';
-import { SplashScreenComponent } from '../../../../shared/components/loader/splash-screen.component';
+import {toObservable} from '@angular/core/rxjs-interop';
+import {EnrollmentPublicService} from '../../../../core/services/enrollment-public.service';
+import {TenantContextService} from '../../../../core/services/tenant-context.service';
+import {filter, finalize, take} from 'rxjs';
+import {PublicPortalSummary} from '../../../../core/models/enrollment';
+import {FwButtonComponent} from '../../../../shared/components/button/button.component';
+import {SplashScreenComponent} from '../../../../shared/components/loader/splash-screen.component';
 
 @Component({
   selector: 'app-public-landing',

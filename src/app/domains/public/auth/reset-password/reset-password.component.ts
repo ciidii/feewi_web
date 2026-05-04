@@ -1,20 +1,12 @@
 import {Component, computed, inject, signal, ViewEncapsulation} from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import {
-  LucideAngularModule,
-  ArrowLeft,
-  KeyRound,
-  ShieldCheck,
-  Lock,
-  Eye,
-  EyeOff
-} from 'lucide-angular';
-import { AuthService } from '../../../../core/services/auth.service';
-import { NotificationService } from '../../../../shared/services/notification.service';
-import { FwButtonComponent } from '../../../../shared/components/button/button.component';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import {CommonModule} from '@angular/common';
+import {AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators} from '@angular/forms';
+import {ActivatedRoute, Router, RouterModule} from '@angular/router';
+import {ArrowLeft, Eye, EyeOff, KeyRound, Lock, LucideAngularModule, ShieldCheck} from 'lucide-angular';
+import {AuthService} from '../../../../core/services/auth.service';
+import {NotificationService} from '../../../../shared/services/notification.service';
+import {FwButtonComponent} from '../../../../shared/components/button/button.component';
+import {TranslateModule, TranslateService} from '@ngx-translate/core';
 
 function passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
   const password = control.get('newPassword')?.value;

@@ -1,9 +1,9 @@
-import { Component, inject, signal, ViewEncapsulation } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { SplashScreenComponent } from './shared/components/loader/splash-screen.component';
-import { LoadingService } from './shared/services/loading.service';
-import { TranslateService } from '@ngx-translate/core';
+import {Component, inject, signal, ViewEncapsulation} from '@angular/core';
+import {RouterOutlet} from '@angular/router';
+import {CommonModule} from '@angular/common';
+import {SplashScreenComponent} from './shared/components/loader/splash-screen.component';
+import {LoadingService} from './shared/services/loading.service';
+import {TranslateService} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-root',

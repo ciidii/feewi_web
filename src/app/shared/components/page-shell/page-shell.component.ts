@@ -1,7 +1,7 @@
-import { Component, Input, Output, EventEmitter, ViewEncapsulation } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FwPageHeaderComponent } from '../page-header/page-header.component';
-import { FwTabsComponent, FwTab } from '../tabs/tabs.component';
+import {Component, EventEmitter, Input, Output, ViewEncapsulation} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FwPageHeaderComponent} from '../page-header/page-header.component';
+import {FwTab, FwTabsComponent} from '../tabs/tabs.component';
 
 @Component({
   selector: 'app-fw-page-shell',
@@ -9,7 +9,7 @@ import { FwTabsComponent, FwTab } from '../tabs/tabs.component';
   imports: [CommonModule, FwPageHeaderComponent, FwTabsComponent],
   template: `
     <div class="page-shell" [class.has-tabs]="tabs && tabs.length > 0">
-      
+
       <!-- HEADER FIXE -->
       <div class="shell-header-area">
         <app-fw-page-header

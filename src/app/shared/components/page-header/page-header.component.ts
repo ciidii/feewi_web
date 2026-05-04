@@ -1,7 +1,7 @@
-import { Component, Input, ViewEncapsulation } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { LucideAngularModule, ArrowLeft } from 'lucide-angular';
-import { RouterModule } from '@angular/router';
+import {Component, Input, ViewEncapsulation} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ArrowLeft, LucideAngularModule} from 'lucide-angular';
+import {RouterModule} from '@angular/router';
 
 @Component({
   selector: 'app-fw-page-header',
@@ -19,7 +19,7 @@ import { RouterModule } from '@angular/router';
         <div class="icon-container" *ngIf="icon">
           <lucide-icon [name]="icon" [size]="density === 'compact' ? 18 : 22"></lucide-icon>
         </div>
-        
+
         <!-- Titres -->
         <div class="titles">
           <h1 class="page-title">{{ title }}</h1>

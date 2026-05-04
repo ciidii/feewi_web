@@ -1,6 +1,6 @@
-import { Component, Input, Output, EventEmitter, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { LucideAngularModule } from 'lucide-angular';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {LucideAngularModule} from 'lucide-angular';
 
 export interface FwTab {
   id: string;

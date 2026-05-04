@@ -1,6 +1,6 @@
-import { inject } from '@angular/core';
-import { Router, CanActivateFn } from '@angular/router';
-import { AuthService } from '../services/auth.service';
+import {inject} from '@angular/core';
+import {CanActivateFn, Router} from '@angular/router';
+import {AuthService} from '../services/auth.service';
 
 export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
@@ -24,12 +24,12 @@ export const authGuard: CanActivateFn = (route, state) => {
 
     if (!hasRole) {
       console.warn(`[authGuard] Access denied for ${state.url}. Required roles: ${requiredRoles}`);
-      
+
       // Redirect to their specific "home" based on role to avoid loops
       if (user?.roles.includes('ROLE_SUPER_ADMIN')) {
         return router.createUrlTree(['/saas']);
       } else {
-        // If they are a school user but hitting a route they can't access, 
+        // If they are a school user but hitting a route they can't access,
         // redirect to root only if they aren't already there.
         if (state.url === '/') {
           console.error('[authGuard] User has no access even to root. Check role configuration.');
