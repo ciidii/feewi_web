@@ -31,6 +31,7 @@ import {
   Save,
   School,
   ShieldCheck,
+  Sparkles,
   Trash2,
   Upload,
   User,
@@ -53,7 +54,10 @@ import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-d
 import {Admission, AssessmentRequest, RequiredDocument} from '../../../../../core/models/enrollment.model';
 import {EnrollmentSchema, ServiceConfig} from '../../../../../core/models/enrollment/config';
 import {CamelToLabelPipe} from '../../../../../shared/pipes/camel-to-label.pipe';
-import {BlockLoaderComponent} from '../../../../../shared/components/loader/block-loader.component';
+import {
+  AdmissionDetailSkeletonComponent
+} from '../../../../../shared/components/skeleton/admission-detail-skeleton.component';
+import {SplashScreenComponent} from '../../../../../shared/components/loader/splash-screen.component';
 
 @Component({
   selector: 'app-admission-detail',
@@ -68,8 +72,10 @@ import {BlockLoaderComponent} from '../../../../../shared/components/loader/bloc
     FwPageShellComponent,
     FwButtonComponent,
     CamelToLabelPipe,
-    BlockLoaderComponent
+    AdmissionDetailSkeletonComponent,
+    SplashScreenComponent
   ],
+
   templateUrl: './admission-detail.component.html',
   styleUrls: ['./admission-detail.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -562,4 +568,5 @@ export class AdmissionDetailComponent implements OnInit {
   readonly Activity = Activity;
   protected readonly Info = Info;
   protected readonly Loader2 = Loader2;
+  protected readonly Sparkles = Sparkles;
 }

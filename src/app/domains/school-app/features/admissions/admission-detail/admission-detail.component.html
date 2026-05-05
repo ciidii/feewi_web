@@ -68,7 +68,7 @@
   <div class="decision-hub-layout animate-in fade-in duration-700" *ngIf="application(); let app; else skeletons">
 
     <!-- Global action loader overlay -->
-    <fw-block-loader *ngIf="isActionLoading()" [center]="true" message="Mise à jour du dossier..."></fw-block-loader>
+    <fw-splash-screen *ngIf="isActionLoading()" message="Mise à jour du dossier..."></fw-splash-screen>
 
     <!-- MAIN CONTENT AREA -->
     <main class="pillar-content-area">
@@ -381,8 +381,5 @@
 </app-fw-page-shell>
 
 <ng-template #skeletons>
-  <div class="skeleton-layout">
-    <div class="skeleton-content"></div>
-    <div class="skeleton-sidebar"></div>
-  </div>
+  <fw-admission-detail-skeleton></fw-admission-detail-skeleton>
 </ng-template>
