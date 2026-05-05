@@ -216,12 +216,10 @@
         <!-- 🏁 ÉVALUATION PÉDAGOGIQUE (Le Bilan Final) -->
         <div class="assessment-action-card animate-in slide-in-from-bottom-8 duration-700"
              *ngIf="effectiveSchema()?.assessment">
-          <header class="assessment-header">
-            <div class="icon-badge">
-              <lucide-icon [name]="GraduationCap" [size]="24"></lucide-icon>
-            </div>
-            <div>
-              <h2>Décision de la Commission</h2>
+          <header class="card-header">
+            <lucide-icon [name]="GraduationCap" [size]="16" class="header-icon"></lucide-icon>
+            <div class="pillar-title-group">
+              <h3>Décision de la Commission</h3>
               <p>Étude du dossier et évaluation pédagogique</p>
             </div>
           </header>
