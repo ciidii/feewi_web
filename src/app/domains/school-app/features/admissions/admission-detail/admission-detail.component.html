@@ -61,10 +61,16 @@
   </div>
 
   <!-- MAIN LAYOUT -->
-  <div class="decision-hub-layout animate-in fade-in duration-700" *ngIf="application(); let app; else skeletons">
+  <div class="decision-hub-layout animate-in fade-in duration-700" 
+       [class.is-loading]="isActionLoading()"
+       *ngIf="application(); let app; else skeletons">
+
+    <!-- 🚀 HYBRID LOADING FEEDBACK -->
+    <fw-page-progress *ngIf="isActionLoading()"></fw-page-progress>
+    <fw-block-loader *ngIf="isActionLoading()" [center]="true" message="Mise à jour..."></fw-block-loader>
 
     <!-- Global action loader overlay -->
-    <fw-splash-screen *ngIf="isActionLoading()" message="Mise à jour du dossier..."></fw-splash-screen>
+    <!-- (Supprimé car remplacé par BlockLoader discret) -->
 
     <!-- MAIN CONTENT AREA -->
     <main class="pillar-content-area">

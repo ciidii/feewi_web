@@ -88,10 +88,24 @@
   gap: 0;
   height: calc(100vh - 84px);
   overflow: hidden;
+  transition: all 0.3s ease;
+
+  &.is-loading {
+    pointer-events: none;
+    .pillar-content-area, .conformity-sidebar { opacity: 0.6; filter: grayscale(0.2); }
+  }
 
   @media (max-width: 1100px) { grid-template-columns: 1fr 300px; }
   @media (max-width: 768px) { grid-template-columns: 1fr; .conformity-sidebar { display: none; } }
 }
+...
+    .locked-message {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 1rem; background: var(--fw-success-bg); color: var(--fw-success-text);
+      border-radius: 12px; font-size: 0.8125rem; font-weight: 700;
+      border: 1px solid var(--fw-success); margin-top: 1rem;
+      animation: slideUp 0.4s ease-out;
+    }
 
 .pillar-content-area {
   background: transparent;

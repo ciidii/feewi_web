@@ -53,11 +53,12 @@ import {FwButtonComponent} from '../../../../../shared/components/button/button.
 import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 import {Admission, AssessmentRequest, RequiredDocument} from '../../../../../core/models/enrollment.model';
 import {EnrollmentSchema, ServiceConfig} from '../../../../../core/models/enrollment/config';
-import {CamelToLabelPipe} from '../../../../../shared/pipes/camel-to-label.pipe';
+import {BlockLoaderComponent} from '../../../../../shared/components/loader/block-loader.component';
+import {PageProgressComponent} from '../../../../../shared/components/loader/page-progress.component';
+import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.component';
 import {
   AdmissionDetailSkeletonComponent
 } from '../../../../../shared/components/skeleton/admission-detail-skeleton.component';
-import {SplashScreenComponent} from '../../../../../shared/components/loader/splash-screen.component';
 
 @Component({
   selector: 'app-admission-detail',
@@ -73,7 +74,9 @@ import {SplashScreenComponent} from '../../../../../shared/components/loader/spl
     FwButtonComponent,
     CamelToLabelPipe,
     AdmissionDetailSkeletonComponent,
-    SplashScreenComponent
+    BlockLoaderComponent,
+    PageProgressComponent,
+    FwBadgeComponent
   ],
 
   templateUrl: './admission-detail.component.html',
