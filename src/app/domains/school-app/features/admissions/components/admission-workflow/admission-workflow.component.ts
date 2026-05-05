@@ -32,6 +32,12 @@ export class AdmissionWorkflowComponent {
   /** État actuel du dossier d'admission */
   state = input.required<AdmissionState>();
 
+  /** Mode d'affichage */
+  mode = input<'horizontal' | 'vertical' | 'compact'>('horizontal');
+
+  /** Afficher les libellés */
+  showLabels = input<boolean>(true);
+
   /** Liste des étapes principales du workflow */
   steps: WorkflowStep[] = [
     { state: 'SUBMITTED', label: 'Soumis', icon: FileText, description: 'Le dossier est enregistré.' },

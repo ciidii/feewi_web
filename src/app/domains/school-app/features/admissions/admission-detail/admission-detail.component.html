@@ -6,36 +6,58 @@
   density="compact"
 >
   <!-- STICKY HEADER ACTIONS -->
-  <div actions class="flex items-center gap-2" *ngIf="application(); let app">
-    <app-fw-badge [status]="app.status" size="sm"></app-fw-badge>
-    <div class="divider-v mx-3"></div>
+  <div actions class="header-action-hub" *ngIf="application(); let app">
+    
+    <!-- 👤 Compact Student Info (Integrated from Overview Panel) -->
+    <div class="student-mini-context">
+      <div class="mini-avatar">{{ app.identity.firstName.charAt(0) }}</div>
+      <div class="mini-meta">
+        <div class="row-top">
+          <span class="mini-type" [class.is-re]="app.type === 'RE_ENROLLMENT'">
+            {{ app.type === 'RE_ENROLLMENT' ? 'Réinscription' : 'Admission' }}
+          </span>
+          <span class="mini-stats">{{ app.identity.gender === 'MALE' ? 'M' : 'F' }} · {{ app.identity.birthDate | date:'dd/MM/yyyy' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider-v"></div>
+
+    <!-- 🔄 INTEGRATED WORKFLOW (Compact Horizontal) -->
+    <div class="header-workflow-wrap">
+      <app-admission-workflow [state]="app.status" mode="compact"></app-admission-workflow>
+    </div>
+
+    <div class="divider-v"></div>
 
     <!-- Business Actions -->
-    @if (app.status === 'SUBMITTED') {
-      <app-fw-button variant="primary" size="sm" [icon]="ClipboardCheck" [loading]="isActionLoading()" (click)="verifyApplication()">
-        Vérifier conformité
-      </app-fw-button>
-    }
-    @if (app.status === 'TESTING') {
-      <app-fw-button variant="primary" size="sm" [icon]="BadgeCheck" [loading]="isActionLoading()" (click)="admitManually()">
-        Admettre
-      </app-fw-button>
-    }
-    @if (['ADMITTED', 'WAITLIST'].includes(app.status)) {
-      <app-fw-button *ngIf="isReadyForFinalValidation()" variant="primary" size="sm" [icon]="GraduationCap" [loading]="isActionLoading()" (click)="validateFinal()">
-        Valider admission
-      </app-fw-button>
-      <app-fw-button *ngIf="!isReadyForFinalValidation() && app.status !== 'ADMITTED'" size="sm" [icon]="ShieldCheck" [loading]="isActionLoading()" (click)="overruleFinal()">
-        Dérogation
-      </app-fw-button>
-    }
+    <div class="action-buttons-group">
+      @if (app.status === 'SUBMITTED') {
+        <app-fw-button variant="primary" size="sm" [icon]="ClipboardCheck" [loading]="isActionLoading()" (click)="verifyApplication()">
+          Vérifier
+        </app-fw-button>
+      }
+      @if (app.status === 'TESTING') {
+        <app-fw-button variant="primary" size="sm" [icon]="BadgeCheck" [loading]="isActionLoading()" (click)="admitManually()">
+          Admettre
+        </app-fw-button>
+      }
+      @if (['ADMITTED', 'WAITLIST'].includes(app.status)) {
+        <app-fw-button *ngIf="isReadyForFinalValidation()" variant="primary" size="sm" [icon]="GraduationCap" [loading]="isActionLoading()" (click)="validateFinal()">
+          Valider admission
+        </app-fw-button>
+        <app-fw-button *ngIf="!isReadyForFinalValidation() && app.status !== 'ADMITTED'" size="sm" [icon]="ShieldCheck" [loading]="isActionLoading()" (click)="overruleFinal()">
+          Dérogation
+        </app-fw-button>
+      }
+    </div>
 
-    <div class="divider-v mx-2"></div>
-    <app-fw-button variant="tertiary" size="sm" [icon]="Printer" aria-label="Imprimer le dossier"></app-fw-button>
+    <div class="divider-v"></div>
+    <app-fw-button variant="tertiary" size="sm" [icon]="Printer" aria-label="Imprimer"></app-fw-button>
 
     @if (!['VALIDATED', 'REJECTED', 'CANCELLED'].includes(app.status)) {
       <div class="danger-zone">
-        <app-fw-button variant="danger" size="sm" [icon]="XCircle" [loading]="isActionLoading()" (click)="rejectFinal()" aria-label="Rejeter la candidature">
+        <app-fw-button variant="danger" size="sm" [icon]="XCircle" [loading]="isActionLoading()" (click)="rejectFinal()">
           Rejeter
         </app-fw-button>
       </div>
@@ -52,31 +74,7 @@
     <main class="pillar-content-area">
       <div class="pillar-scroll-wrapper custom-scrollbar">
 
-        <!-- 🏢 OVERVIEW PANEL (Permanent Context) -->
-        <div class="quick-overview-panel">
-          <div class="student-hero">
-            <div class="avatar-lg">{{ application()?.identity?.firstName?.charAt(0) || '?' }}</div>
-            <div class="hero-info">
-              <div class="meta-row">
-                <span class="ref-pill">#{{ application()?.reference }}</span>
-                <span class="type-pill">{{ application()?.type === 'RE_ENROLLMENT' ? 'Réinscription' : 'Nouvelle admission' }}</span>
-              </div>
-              <h2 class="full-name">{{ application()?.identity?.firstName }} {{ application()?.identity?.lastName }}</h2>
-              <p class="target-level"><lucide-icon [name]="GraduationCap" [size]="14"></lucide-icon> {{ levelName() }} <span *ngIf="filiereName()">· {{ filiereName() }}</span></p>
-            </div>
-          </div>
-
-          <div class="overview-stats">
-            <div class="stat-item">
-              <span class="stat-label">Sexe</span>
-              <span class="stat-value">{{ application()?.identity?.gender === 'MALE' ? 'Masculin' : 'Féminin' }}</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-label">Âge</span>
-              <span class="stat-value">{{ application()?.identity?.birthDate | date:'longDate' }}</span>
-            </div>
-          </div>
-        </div>
+        <!-- 🏢 OVERVIEW PANEL DELETED (MOVED TO HEADER) -->
 
         <!-- 🏫 SCOLARITÉ (Section 1) -->
         <section class="fw-split-card">
@@ -264,7 +262,7 @@
             <div class="decision-box">
               <div class="field">
                 <label class="decision-label">Observations et Motivations</label>
-                <textarea [(ngModel)]="evaluationComment" rows="4" 
+                <textarea [(ngModel)]="evaluationComment" rows="4"
                           placeholder="Points forts, faiblesses, ou motif du refus..."
                           [disabled]="app.status === 'VALIDATED'"></textarea>
               </div>

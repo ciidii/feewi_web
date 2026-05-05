@@ -1,8 +1,8 @@
-<div class="workflow-container">
+<div class="workflow-container" [class]="mode()">
   <div class="workflow-steps">
     @for (step of steps; track step.state; let i = $index) {
-      <!-- Ligne de liaison -->
-      @if (i > 0) {
+      <!-- Ligne de liaison (seulement en horizontal ou compact) -->
+      @if (i > 0 && (mode() === 'horizontal' || mode() === 'compact')) {
         <div class="workflow-line" 
              [class.completed]="getStepStatus(i) !== 'future'"
              [class.active]="getStepStatus(i) === 'active'">
@@ -11,20 +11,24 @@
 
       <div class="workflow-step" [class]="getStepStatus(i)">
         <div class="step-icon-wrapper">
-          <div class="step-icon">
-            <lucide-icon [name]="step.icon" [size]="18"></lucide-icon>
+          <div class="step-icon" [title]="step.label">
+            <lucide-icon [name]="step.icon" [size]="mode() === 'compact' ? 14 : 18"></lucide-icon>
           </div>
           @if (getStepStatus(i) === 'completed') {
             <div class="step-check">
-              <lucide-icon [name]="CheckCircle" [size]="12"></lucide-icon>
+              <lucide-icon [name]="CheckCircle" [size]="10"></lucide-icon>
             </div>
           }
         </div>
         
-        <div class="step-info">
+        <div class="step-info" *ngIf="showLabels()">
           <span class="step-label">{{ step.label }}</span>
-          <!-- <span class="step-desc">{{ step.description }}</span> -->
         </div>
+
+        <!-- Ligne verticale (seulement en mode vertical) -->
+        @if (i < steps.length - 1 && mode() === 'vertical') {
+          <div class="vertical-line" [class.completed]="getStepStatus(i+1) !== 'future'"></div>
+        }
       </div>
     }
   </div>
