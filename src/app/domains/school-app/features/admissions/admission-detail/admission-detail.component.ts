@@ -20,7 +20,7 @@ import {
   HeartPulse,
   History as HistoryIcon,
   Info,
-  Loader2,
+  Loader2, Lock,
   LucideAngularModule,
   Mail,
   MapPin,
@@ -110,6 +110,20 @@ export class AdmissionDetailComponent implements OnInit {
   servicesConfig = signal<ServiceConfig[]>([]);
 
   // --- CALCULS RÉACTIFS ---
+  canVerify = computed(() => this.application()?.status === 'SUBMITTED');
+
+  canAssess = computed(() => {
+    const status = this.application()?.status;
+    return status === 'VERIFIED' || status === 'TESTING';
+  });
+
+  canValidate = computed(() => {
+    const app = this.application();
+    if (!app) return false;
+    const validStatus = ['ADMITTED', 'WAITLIST'].includes(app.status);
+    return validStatus && !!app.assessment;
+  });
+
   age = computed(() => {
     const app = this.application();
     if (!app?.identity?.birthDate) return null;
@@ -143,18 +157,12 @@ export class AdmissionDetailComponent implements OnInit {
 
   isReadyForFinalValidation = computed(() => {
     const app = this.application();
-    if (!app) return false;
-
-    const validStatus = ['ADMITTED', 'WAITLIST'].includes(app.status);
-    if (!validStatus) return false;
+    if (!app || !this.canValidate()) return false;
 
     const mandatoryDocs = app.documents.filter(d => d.mandatory);
-    const allDocsProcessed = mandatoryDocs.every(d =>
+    return mandatoryDocs.every(d =>
       ['UPLOADED', 'RECEIVED', 'VERIFIED'].includes(d.status)
     );
-
-    const assessmentOk = !!app.assessment;
-    return allDocsProcessed && assessmentOk;
   });
 
   ngOnInit() {
@@ -569,4 +577,5 @@ export class AdmissionDetailComponent implements OnInit {
   protected readonly Info = Info;
   protected readonly Loader2 = Loader2;
   protected readonly Sparkles = Sparkles;
+  protected readonly Lock = Lock;
 }

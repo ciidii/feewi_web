@@ -30,24 +30,20 @@
 
     <!-- Actions primaires -->
     <div class="action-buttons-group">
-      @if (app.status === 'SUBMITTED') {
+      @if (canVerify()) {
         <app-fw-button variant="primary" size="sm" [icon]="ClipboardCheck" [loading]="isActionLoading()"
                        (click)="verifyApplication()">
           Vérifier
         </app-fw-button>
       }
-      @if (app.status === 'TESTING') {
-        <app-fw-button variant="primary" size="sm" [icon]="BadgeCheck" [loading]="isActionLoading()"
-                       (click)="admitManually()">
-          Admettre
-        </app-fw-button>
-      }
-      @if (['ADMITTED', 'WAITLIST'].includes(app.status)) {
+
+      @if (canValidate()) {
         <app-fw-button *ngIf="isReadyForFinalValidation()" variant="primary" size="sm" [icon]="GraduationCap"
                        [loading]="isActionLoading()" (click)="validateFinal()">
-          Valider admission
+          Validation Finale
         </app-fw-button>
-        <app-fw-button *ngIf="!isReadyForFinalValidation() && app.status !== 'ADMITTED'" size="sm" [icon]="ShieldCheck"
+        <app-fw-button *ngIf="!isReadyForFinalValidation() && application()?.status !== 'VALIDATED'" size="sm"
+                       [icon]="ShieldCheck"
                        [loading]="isActionLoading()" (click)="overruleFinal()">
           Dérogation
         </app-fw-button>
@@ -242,7 +238,11 @@
             <lucide-icon [name]="GraduationCap" [size]="16" class="header-icon"></lucide-icon>
             <div class="pillar-title-group">
               <h3>Décision de la Commission</h3>
-              <p>Étude du dossier et évaluation pédagogique</p>
+              <p *ngIf="canAssess()">Étude du dossier et évaluation pédagogique</p>
+              <p *ngIf="!canAssess()" class="flex items-center gap-1 text-amber-500">
+                <lucide-icon [name]="Lock" [size]="10"></lucide-icon>
+                {{ application()?.status === 'SUBMITTED' ? 'Dossier en attente de vérification' : 'Évaluation verrouillée (Décision enregistrée)' }}
+              </p>
             </div>
           </header>
 
@@ -265,7 +265,7 @@
                            (ngModelChange)="updateGrade(subject, $event)"
                            class="grade-input"
                            step="0.5" min="0" max="20"
-                           [disabled]="app.status === 'VALIDATED'">
+                           [disabled]="!canAssess()">
                   </td>
                 </tr>
                 </tbody>
@@ -289,7 +289,7 @@
                 <label class="decision-label">Observations et Motivations</label>
                 <textarea [(ngModel)]="evaluationComment" rows="4"
                           placeholder="Points forts, faiblesses, ou motif du refus..."
-                          [disabled]="app.status === 'VALIDATED'"></textarea>
+                          [disabled]="!canAssess()"></textarea>
               </div>
 
               <div class="field">
@@ -297,22 +297,25 @@
                 <div class="decision-actions">
                   <button (click)="pedagogicalDecision.set('REJECTED')"
                           [class.active]="pedagogicalDecision() === 'REJECTED'"
+                          [disabled]="!canAssess()"
                           class="btn-opt reject">Refusé
                   </button>
                   <button (click)="pedagogicalDecision.set('WAITLIST')"
                           [class.active]="pedagogicalDecision() === 'WAITLIST'"
+                          [disabled]="!canAssess()"
                           class="btn-opt wait">Attente
                   </button>
                   <button (click)="pedagogicalDecision.set('ADMITTED')"
                           [class.active]="pedagogicalDecision() === 'ADMITTED'"
+                          [disabled]="!canAssess()"
                           class="btn-opt admit">Admis
                   </button>
                 </div>
               </div>
 
               <app-fw-button variant="primary" size="lg" class="w-full mt-4"
+                             *ngIf="canAssess()"
                              [loading]="isActionLoading()"
-                             [disabled]="app.status === 'VALIDATED'"
                              (click)="submitPedagogicalDecision()">
                 Enregistrer la décision finale
               </app-fw-button>
