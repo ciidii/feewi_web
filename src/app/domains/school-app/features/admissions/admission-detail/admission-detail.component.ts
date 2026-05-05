@@ -49,12 +49,11 @@ import {FormsModule} from '@angular/forms';
 import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
 import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
-import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.component';
 import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
-import { Admission, AssessmentRequest, RequiredDocument } from '../../../../../core/models/enrollment.model';
-import { EnrollmentSchema, ServiceConfig } from '../../../../../core/models/enrollment/config';
-import { CamelToLabelPipe } from '../../../../../shared/pipes/camel-to-label.pipe';
-import { BlockLoaderComponent } from '../../../../../shared/components/loader/block-loader.component';
+import {Admission, AssessmentRequest, RequiredDocument} from '../../../../../core/models/enrollment.model';
+import {EnrollmentSchema, ServiceConfig} from '../../../../../core/models/enrollment/config';
+import {CamelToLabelPipe} from '../../../../../shared/pipes/camel-to-label.pipe';
+import {BlockLoaderComponent} from '../../../../../shared/components/loader/block-loader.component';
 
 @Component({
   selector: 'app-admission-detail',
@@ -68,7 +67,6 @@ import { BlockLoaderComponent } from '../../../../../shared/components/loader/bl
     MatDialogModule,
     FwPageShellComponent,
     FwButtonComponent,
-    FwBadgeComponent,
     CamelToLabelPipe,
     BlockLoaderComponent
   ],

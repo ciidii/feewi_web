@@ -186,30 +186,20 @@
           </div>
         </section>
 
-        <!-- 🏥 SANTÉ & SERVICES (Section 4 - Groupée) -->
-        <section class="fw-split-card" *ngIf="getObjectKeys(app.medical.customFields).length > 0 || app.subscriptions?.length">
+        <!-- 🏥 SANTÉ (Section 4) -->
+        <section class="fw-split-card" *ngIf="getObjectKeys(app.medical.customFields).length > 0">
           <div class="card-sidebar">
             <div class="pillar-icon-box"><lucide-icon [name]="HeartPulse" [size]="20"></lucide-icon></div>
             <div class="pillar-title-group">
-              <h3>Santé & Services</h3>
-              <p>Données médicales et options</p>
+              <h3>Dossier Médical</h3>
+              <p>Santé et besoins spécifiques</p>
             </div>
           </div>
           <div class="card-content">
-            <!-- Médical -->
-            <div class="info-grid-dense mb-8" *ngIf="getObjectKeys(app.medical.customFields).length > 0">
+            <div class="info-grid-dense">
               <div class="info-field" *ngFor="let key of getObjectKeys(app.medical.customFields)">
                 <label>{{ key | camelToLabel }}</label>
                 <span class="field-value">{{ app.medical.customFields![key] }}</span>
-              </div>
-            </div>
-
-            <!-- Services -->
-            <div class="services-flow" *ngIf="app.subscriptions?.length">
-              <div *ngFor="let sub of app.subscriptions" class="service-badge-premium">
-                <lucide-icon [name]="Activity" [size]="14" class="svc-icon"></lucide-icon>
-                <span class="svc-name">{{ getServiceConfig(sub.serviceCode)?.label || sub.serviceCode }}</span>
-                <span class="svc-opt" *ngIf="sub.optionCode">{{ sub.optionCode }}</span>
               </div>
             </div>
           </div>
@@ -330,13 +320,21 @@
         </div>
       </section>
 
-      <!-- Workflow -->
-      <section class="sidebar-card">
+      <!-- Services & Extras -->
+      <section class="sidebar-card" *ngIf="app.subscriptions?.length">
         <div class="card-header">
-          <lucide-icon [name]="HistoryIcon" [size]="16"></lucide-icon>
-          <h4>Parcours Admission</h4>
+          <lucide-icon [name]="Activity" [size]="16"></lucide-icon>
+          <h4>Services & Options</h4>
+          <span class="doc-counter">{{ app.subscriptions.length }}</span>
         </div>
-        <app-admission-workflow [state]="app.status" mode="vertical"></app-admission-workflow>
+        <div class="services-list-sidebar">
+          <div *ngFor="let sub of app.subscriptions" class="sidebar-svc-item">
+            <div class="svc-main">
+              <span class="svc-name">{{ getServiceConfig(sub.serviceCode)?.label || sub.serviceCode }}</span>
+            </div>
+            <span class="svc-opt" *ngIf="sub.optionCode">{{ sub.optionCode }}</span>
+          </div>
+        </div>
       </section>
     </aside>
 
