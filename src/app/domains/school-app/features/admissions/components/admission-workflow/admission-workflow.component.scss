@@ -6,28 +6,71 @@
   // ── MODE COMPACT (Header) ──────────────────
   &.compact {
     padding: 0;
-    .workflow-steps { gap: 8px; max-width: none; }
-    .workflow-step { 
-      flex: none; 
-      .step-icon { width: 24px; height: 24px; border-width: 1px; }
-      .step-icon-wrapper { margin-bottom: 0; }
+
+    .workflow-steps {
+      gap: 8px;
+      max-width: none;
     }
-    .workflow-line { top: 12px; margin: 0 -4px; width: 16px; }
+
+    .workflow-step {
+      flex: none;
+
+      .step-icon {
+        width: 24px;
+        height: 24px;
+        border-width: 1px;
+      }
+
+      .step-icon-wrapper {
+        margin-bottom: 0;
+      }
+    }
+
+    .workflow-line {
+      top: 12px;
+      margin: 0 -4px;
+      width: 16px;
+    }
   }
 
   // ── MODE VERTICAL (Sidebar) ────────────────
   &.vertical {
-    .workflow-steps { flex-direction: column; align-items: flex-start; gap: 0; }
-    .workflow-step {
-      flex-direction: row; gap: 1rem; width: 100%; align-items: flex-start;
-      padding-bottom: 1.5rem;
-      .step-icon-wrapper { margin-bottom: 0; z-index: 2; }
-      .step-info { text-align: left; padding-top: 6px; }
+    .workflow-steps {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0;
     }
+
+    .workflow-step {
+      flex-direction: row;
+      gap: 1rem;
+      width: 100%;
+      align-items: flex-start;
+      padding-bottom: 1.5rem;
+
+      .step-icon-wrapper {
+        margin-bottom: 0;
+        z-index: 2;
+      }
+
+      .step-info {
+        text-align: left;
+        padding-top: 6px;
+      }
+    }
+
     .vertical-line {
-      position: absolute; left: 18px; top: 36px; bottom: -4px;
-      width: 2px; background: var(--fw-border); z-index: 1;
-      &.completed { background: #10b981; }
+      position: absolute;
+      left: 18px;
+      top: 36px;
+      bottom: -4px;
+      width: 2px;
+      background: var(--fw-border);
+      z-index: 1;
+
+      &.completed {
+        background: #10b981;
+      }
     }
   }
 }
@@ -76,7 +119,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 
   .step-info {
@@ -99,12 +142,23 @@
       color: var(--fw-white);
       box-shadow: 0 0 0 4px var(--fw-primary-alpha);
     }
-    .step-label { color: var(--fw-midnight); font-weight: 600; }
+
+    .step-label {
+      color: var(--fw-midnight);
+      font-weight: 600;
+    }
   }
 
   &.completed {
-    .step-icon { background: var(--fw-ice); border-color: #10b981; color: #10b981; }
-    .step-label { color: var(--fw-midnight); }
+    .step-icon {
+      background: var(--fw-ice);
+      border-color: #10b981;
+      color: #10b981;
+    }
+
+    .step-label {
+      color: var(--fw-midnight);
+    }
   }
 }
 
@@ -116,6 +170,12 @@
   position: relative;
   top: -12px;
   transition: all 0.3s ease;
-  &.completed { background: #10b981; }
-  &.active { background: linear-gradient(to right, #10b981, var(--fw-primary)); }
+
+  &.completed {
+    background: #10b981;
+  }
+
+  &.active {
+    background: linear-gradient(to right, #10b981, var(--fw-primary));
+  }
 }

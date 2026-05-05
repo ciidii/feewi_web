@@ -124,6 +124,15 @@ export class AdmissionDetailComponent implements OnInit {
     return `${app.identity.firstName} ${app.identity.lastName}`;
   });
 
+  richDescription = computed(() => {
+    const app = this.application();
+    if (!app) return 'Chargement...';
+    const typeLabel = app.type === 'RE_ENROLLMENT' ? 'Réinscription' : 'Nouvelle admission';
+    const gender = app.identity.gender === 'MALE' ? 'Masculin' : 'Féminin';
+    const birthDate = new Date(app.identity.birthDate).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return `Dossier #${app.reference} • ${gender} • Né(e) le ${birthDate} • ${typeLabel}`;
+  });
+
   isReadyForFinalValidation = computed(() => {
     const app = this.application();
     if (!app) return false;

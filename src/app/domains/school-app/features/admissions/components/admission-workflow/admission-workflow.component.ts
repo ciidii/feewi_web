@@ -12,7 +12,16 @@ import {
   UserCheck
 } from 'lucide-angular';
 
-export type AdmissionState = 'DRAFT' | 'SUBMITTED' | 'VERIFIED' | 'TESTING' | 'ADMITTED' | 'WAITLIST' | 'VALIDATED' | 'REJECTED' | 'CANCELLED';
+export type AdmissionState =
+  'DRAFT'
+  | 'SUBMITTED'
+  | 'VERIFIED'
+  | 'TESTING'
+  | 'ADMITTED'
+  | 'WAITLIST'
+  | 'VALIDATED'
+  | 'REJECTED'
+  | 'CANCELLED';
 
 export interface WorkflowStep {
   state: AdmissionState;
@@ -40,10 +49,10 @@ export class AdmissionWorkflowComponent {
 
   /** Liste des étapes principales du workflow */
   steps: WorkflowStep[] = [
-    { state: 'SUBMITTED', label: 'Soumis', icon: FileText, description: 'Le dossier est enregistré.' },
-    { state: 'VERIFIED', label: 'Vérifié', icon: ClipboardCheck, description: 'Documents approuvés par le secrétariat.' },
-    { state: 'TESTING', label: 'Évaluation', icon: GraduationCap, description: 'Test de niveau en cours ou terminé.' },
-    { state: 'VALIDATED', label: 'Décision', icon: UserCheck, description: 'Admission confirmée par la direction.' }
+    {state: 'SUBMITTED', label: 'Soumis', icon: FileText, description: 'Le dossier est enregistré.'},
+    {state: 'VERIFIED', label: 'Vérifié', icon: ClipboardCheck, description: 'Documents approuvés par le secrétariat.'},
+    {state: 'TESTING', label: 'Évaluation', icon: GraduationCap, description: 'Test de niveau en cours ou terminé.'},
+    {state: 'VALIDATED', label: 'Décision', icon: UserCheck, description: 'Admission confirmée par la direction.'}
   ];
 
   /** Détermine l'index de l'étape actuelle */

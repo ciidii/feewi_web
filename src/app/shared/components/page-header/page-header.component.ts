@@ -21,7 +21,7 @@ import {RouterModule} from '@angular/router';
         </div>
 
         <!-- Titres -->
-        <div class="titles">
+        <div class="titles" *ngIf="title">
           <h1 class="page-title">{{ title }}</h1>
           <p class="page-desc" *ngIf="description">{{ description }}</p>
         </div>

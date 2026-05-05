@@ -1,63 +1,63 @@
 <app-fw-page-shell
-  [title]="fullName()"
-  [description]="application() ? 'Dossier #' + application()?.reference : 'Chargement...'"
-  [icon]="User"
   [backLink]="['/admin/admissions/list']"
   density="compact"
 >
   <!-- STICKY HEADER ACTIONS -->
   <div actions class="header-action-hub" *ngIf="application(); let app">
 
-    <!-- 👤 Compact Student Info (Integrated from Overview Panel) -->
-    <div class="student-mini-context">
-      <div class="mini-avatar">{{ app.identity.firstName.charAt(0) }}</div>
-      <div class="mini-meta">
-        <div class="row-top">
-          <span class="mini-type" [class.is-re]="app.type === 'RE_ENROLLMENT'">
-            {{ app.type === 'RE_ENROLLMENT' ? 'Réinscription' : 'Admission' }}
-          </span>
-          <span class="mini-stats">{{ app.identity.gender === 'MALE' ? 'M' : 'F' }} · {{ app.identity.birthDate | date:'dd/MM/yyyy' }}</span>
-        </div>
+    <!-- Identité étudiant (List Item style) -->
+    <div class="header-student-identity">
+      <div class="stu-avatar">{{ app.identity.firstName.charAt(0) }}</div>
+      <div class="stu-info">
+        <span class="stu-name">{{ fullName() }}</span>
+        <span class="stu-ref">#{{ app.reference }}</span>
       </div>
     </div>
 
     <div class="divider-v"></div>
 
-    <!-- 🔄 INTEGRATED WORKFLOW (Compact Horizontal) -->
+    <!-- Type Badge -->
+    <span class="admission-type-chip" [class.is-re]="app.type === 'RE_ENROLLMENT'">
+      {{ app.type === 'RE_ENROLLMENT' ? 'Réinscription' : 'Admission' }}
+    </span>
+
+    <div class="divider-v"></div>
+
+    <!-- Workflow -->
     <div class="header-workflow-wrap">
       <app-admission-workflow [state]="app.status" mode="compact"></app-admission-workflow>
     </div>
 
-    <div class="divider-v"></div>
-
-    <!-- Business Actions -->
+    <!-- Actions primaires -->
     <div class="action-buttons-group">
       @if (app.status === 'SUBMITTED') {
-        <app-fw-button variant="primary" size="sm" [icon]="ClipboardCheck" [loading]="isActionLoading()" (click)="verifyApplication()">
+        <app-fw-button variant="primary" size="sm" [icon]="ClipboardCheck" [loading]="isActionLoading()"
+                       (click)="verifyApplication()">
           Vérifier
         </app-fw-button>
       }
       @if (app.status === 'TESTING') {
-        <app-fw-button variant="primary" size="sm" [icon]="BadgeCheck" [loading]="isActionLoading()" (click)="admitManually()">
+        <app-fw-button variant="primary" size="sm" [icon]="BadgeCheck" [loading]="isActionLoading()"
+                       (click)="admitManually()">
           Admettre
         </app-fw-button>
       }
       @if (['ADMITTED', 'WAITLIST'].includes(app.status)) {
-        <app-fw-button *ngIf="isReadyForFinalValidation()" variant="primary" size="sm" [icon]="GraduationCap" [loading]="isActionLoading()" (click)="validateFinal()">
+        <app-fw-button *ngIf="isReadyForFinalValidation()" variant="primary" size="sm" [icon]="GraduationCap"
+                       [loading]="isActionLoading()" (click)="validateFinal()">
           Valider admission
         </app-fw-button>
-        <app-fw-button *ngIf="!isReadyForFinalValidation() && app.status !== 'ADMITTED'" size="sm" [icon]="ShieldCheck" [loading]="isActionLoading()" (click)="overruleFinal()">
+        <app-fw-button *ngIf="!isReadyForFinalValidation() && app.status !== 'ADMITTED'" size="sm" [icon]="ShieldCheck"
+                       [loading]="isActionLoading()" (click)="overruleFinal()">
           Dérogation
         </app-fw-button>
       }
     </div>
 
-    <div class="divider-v"></div>
-    <app-fw-button variant="tertiary" size="sm" [icon]="Printer" aria-label="Imprimer"></app-fw-button>
-
     @if (!['VALIDATED', 'REJECTED', 'CANCELLED'].includes(app.status)) {
       <div class="danger-zone">
-        <app-fw-button variant="danger" size="sm" [icon]="XCircle" [loading]="isActionLoading()" (click)="rejectFinal()">
+        <app-fw-button variant="danger" size="sm" [icon]="XCircle" [loading]="isActionLoading()"
+                       (click)="rejectFinal()">
           Rejeter
         </app-fw-button>
       </div>
@@ -79,7 +79,9 @@
         <!-- 🏫 SCOLARITÉ (Section 1) -->
         <section class="fw-split-card">
           <div class="card-sidebar">
-            <div class="pillar-icon-box"><lucide-icon [name]="School" [size]="20"></lucide-icon></div>
+            <div class="pillar-icon-box">
+              <lucide-icon [name]="School" [size]="20"></lucide-icon>
+            </div>
             <div class="pillar-title-group">
               <h3>Vœux Scolaires</h3>
               <p>Parcours cible et établissement d'origine</p>
@@ -97,11 +99,13 @@
               </div>
               <div class="info-field">
                 <label>Type d'admission</label>
-                <span class="field-value">{{ app.type === 'RE_ENROLLMENT' ? 'Réinscription' : 'Nouvelle admission' }}</span>
+                <span
+                  class="field-value">{{ app.type === 'RE_ENROLLMENT' ? 'Réinscription' : 'Nouvelle admission' }}</span>
               </div>
               <div class="info-field">
                 <label>Établissement d'origine</label>
-                <span class="field-value text-primary font-bold">{{ app.schooling.customFields?.['previousSchool'] || 'Non renseigné' }}</span>
+                <span
+                  class="field-value text-primary font-bold">{{ app.schooling.customFields?.['previousSchool'] || 'Non renseigné' }}</span>
               </div>
               <ng-container *ngFor="let key of getObjectKeys(app.schooling.customFields || {})">
                 <div class="info-field" *ngIf="key !== 'previousSchool'">
@@ -116,7 +120,9 @@
         <!-- 👤 IDENTITÉ (Section 2) -->
         <section class="fw-split-card">
           <div class="card-sidebar">
-            <div class="pillar-icon-box"><lucide-icon [name]="User" [size]="20"></lucide-icon></div>
+            <div class="pillar-icon-box">
+              <lucide-icon [name]="User" [size]="20"></lucide-icon>
+            </div>
             <div class="pillar-title-group">
               <h3>Identité de l'élève</h3>
               <p>Informations d'état civil</p>
@@ -153,7 +159,9 @@
         <!-- 👨‍👩‍👧 FAMILLE (Section 3) -->
         <section class="fw-split-card" *ngIf="app.primaryGuardian">
           <div class="card-sidebar">
-            <div class="pillar-icon-box"><lucide-icon [name]="Users" [size]="20"></lucide-icon></div>
+            <div class="pillar-icon-box">
+              <lucide-icon [name]="Users" [size]="20"></lucide-icon>
+            </div>
             <div class="pillar-title-group">
               <h3>Responsable Légal</h3>
               <p>Tuteur principal et finances</p>
@@ -169,8 +177,14 @@
                 </div>
               </div>
               <div class="card-right">
-                <div class="contact-pill"><lucide-icon [name]="Phone" [size]="12"></lucide-icon> {{ app.primaryGuardian.phone }}</div>
-                <div class="contact-pill"><lucide-icon [name]="Mail" [size]="12"></lucide-icon> {{ app.primaryGuardian.email }}</div>
+                <div class="contact-pill">
+                  <lucide-icon [name]="Phone" [size]="12"></lucide-icon>
+                  {{ app.primaryGuardian.phone }}
+                </div>
+                <div class="contact-pill">
+                  <lucide-icon [name]="Mail" [size]="12"></lucide-icon>
+                  {{ app.primaryGuardian.email }}
+                </div>
                 <span class="finance-badge" [class.active]="app.primaryGuardian.financialResponsible">
                   {{ app.primaryGuardian.financialResponsible ? 'Payeur désigné' : 'Non payeur' }}
                 </span>
@@ -189,7 +203,9 @@
         <!-- 🏥 SANTÉ (Section 4) -->
         <section class="fw-split-card" *ngIf="getObjectKeys(app.medical?.customFields || {}).length > 0">
           <div class="card-sidebar">
-            <div class="pillar-icon-box"><lucide-icon [name]="HeartPulse" [size]="20"></lucide-icon></div>
+            <div class="pillar-icon-box">
+              <lucide-icon [name]="HeartPulse" [size]="20"></lucide-icon>
+            </div>
             <div class="pillar-title-group">
               <h3>Dossier Médical</h3>
               <p>Santé et besoins spécifiques</p>
@@ -206,9 +222,12 @@
         </section>
 
         <!-- 🏁 ÉVALUATION PÉDAGOGIQUE (Le Bilan Final) -->
-        <div class="assessment-action-card animate-in slide-in-from-bottom-8 duration-700" *ngIf="effectiveSchema()?.assessment">
+        <div class="assessment-action-card animate-in slide-in-from-bottom-8 duration-700"
+             *ngIf="effectiveSchema()?.assessment">
           <header class="assessment-header">
-            <div class="icon-badge"><lucide-icon [name]="GraduationCap" [size]="24"></lucide-icon></div>
+            <div class="icon-badge">
+              <lucide-icon [name]="GraduationCap" [size]="24"></lucide-icon>
+            </div>
             <div>
               <h2>Décision de la Commission</h2>
               <p>Étude du dossier et évaluation pédagogique</p>
@@ -220,30 +239,34 @@
             <div class="grades-display">
               <table class="grades-table">
                 <thead>
-                  <tr><th>Discipline / Matière</th><th class="text-right">Note / 20</th></tr>
+                <tr>
+                  <th>Discipline / Matière</th>
+                  <th class="text-right">Note / 20</th>
+                </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let subject of assessmentSubjects()">
-                    <td class="subject-name">{{ subject }}</td>
-                    <td class="text-right">
-                      <input type="number"
-                             [ngModel]="evaluationGrades()[subject]"
-                             (ngModelChange)="updateGrade(subject, $event)"
-                             class="grade-input"
-                             step="0.5" min="0" max="20"
-                             [disabled]="app.status === 'VALIDATED'">
-                    </td>
-                  </tr>
+                <tr *ngFor="let subject of assessmentSubjects()">
+                  <td class="subject-name">{{ subject }}</td>
+                  <td class="text-right">
+                    <input type="number"
+                           [ngModel]="evaluationGrades()[subject]"
+                           (ngModelChange)="updateGrade(subject, $event)"
+                           class="grade-input"
+                           step="0.5" min="0" max="20"
+                           [disabled]="app.status === 'VALIDATED'">
+                  </td>
+                </tr>
                 </tbody>
                 <tfoot>
-                  <tr class="average-row">
-                    <td>Moyenne Générale Estimée</td>
-                    <td class="text-right">
-                        <span class="average-score" [class.passing]="+averageScore() >= minPassingGrade()" [class.failing]="+averageScore() < minPassingGrade()">
+                <tr class="average-row">
+                  <td>Moyenne Générale Estimée</td>
+                  <td class="text-right">
+                        <span class="average-score" [class.passing]="+averageScore() >= minPassingGrade()"
+                              [class.failing]="+averageScore() < minPassingGrade()">
                           {{ averageScore() }} / 20
                         </span>
-                    </td>
-                  </tr>
+                  </td>
+                </tr>
                 </tfoot>
               </table>
             </div>
@@ -262,13 +285,16 @@
                 <div class="decision-actions">
                   <button (click)="pedagogicalDecision.set('REJECTED')"
                           [class.active]="pedagogicalDecision() === 'REJECTED'"
-                          class="btn-opt reject">Refusé</button>
+                          class="btn-opt reject">Refusé
+                  </button>
                   <button (click)="pedagogicalDecision.set('WAITLIST')"
                           [class.active]="pedagogicalDecision() === 'WAITLIST'"
-                          class="btn-opt wait">Attente</button>
+                          class="btn-opt wait">Attente
+                  </button>
                   <button (click)="pedagogicalDecision.set('ADMITTED')"
                           [class.active]="pedagogicalDecision() === 'ADMITTED'"
-                          class="btn-opt admit">Admis</button>
+                          class="btn-opt admit">Admis
+                  </button>
                 </div>
               </div>
 
