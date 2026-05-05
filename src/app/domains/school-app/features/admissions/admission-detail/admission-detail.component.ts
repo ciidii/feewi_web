@@ -54,6 +54,7 @@ import {Admission, AssessmentRequest, RequiredDocument} from '../../../../../cor
 import {EnrollmentSchema, ServiceConfig} from '../../../../../core/models/enrollment/config';
 import {CamelToLabelPipe} from '../../../../../shared/pipes/camel-to-label.pipe';
 import {BlockLoaderComponent} from '../../../../../shared/components/loader/block-loader.component';
+import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.component';
 
 @Component({
   selector: 'app-admission-detail',
@@ -68,7 +69,8 @@ import {BlockLoaderComponent} from '../../../../../shared/components/loader/bloc
     FwPageShellComponent,
     FwButtonComponent,
     CamelToLabelPipe,
-    BlockLoaderComponent
+    BlockLoaderComponent,
+    FwBadgeComponent
   ],
   templateUrl: './admission-detail.component.html',
   styleUrls: ['./admission-detail.component.scss'],
@@ -104,6 +106,17 @@ export class AdmissionDetailComponent implements OnInit {
   servicesConfig = signal<ServiceConfig[]>([]);
 
   // --- CALCULS RÉACTIFS ---
+  age = computed(() => {
+    const app = this.application();
+    if (!app?.identity?.birthDate) return null;
+    const birth = new Date(app.identity.birthDate);
+    const now = new Date();
+    let age = now.getFullYear() - birth.getFullYear();
+    const m = now.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) age--;
+    return age;
+  });
+
   levelName = computed(() => {
     const app = this.application();
     if (!app) return '...';
@@ -122,15 +135,6 @@ export class AdmissionDetailComponent implements OnInit {
     const app = this.application();
     if (!app) return 'Dossier';
     return `${app.identity.firstName} ${app.identity.lastName}`;
-  });
-
-  richDescription = computed(() => {
-    const app = this.application();
-    if (!app) return 'Chargement...';
-    const typeLabel = app.type === 'RE_ENROLLMENT' ? 'Réinscription' : 'Nouvelle admission';
-    const gender = app.identity.gender === 'MALE' ? 'Masculin' : 'Féminin';
-    const birthDate = new Date(app.identity.birthDate).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    return `Dossier #${app.reference} • ${gender} • Né(e) le ${birthDate} • ${typeLabel}`;
   });
 
   isReadyForFinalValidation = computed(() => {

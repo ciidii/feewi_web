@@ -191,7 +191,7 @@
               </div>
             </div>
 
-            <div class="info-grid-dense" *ngIf="getObjectKeys(app.primaryGuardian.customFields || {}).length > 0">
+            <div class="info-grid-dense" *ngIf="app.primaryGuardian && getObjectKeys(app.primaryGuardian.customFields || {}).length > 0">
               <div class="info-field" *ngFor="let key of getObjectKeys(app.primaryGuardian.customFields || {})">
                 <label>{{ key | camelToLabel }}</label>
                 <span class="field-value">{{ app.primaryGuardian.customFields?.[key] }}</span>
