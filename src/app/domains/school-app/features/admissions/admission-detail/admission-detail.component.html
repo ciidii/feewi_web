@@ -7,7 +7,7 @@
 >
   <!-- STICKY HEADER ACTIONS -->
   <div actions class="header-action-hub" *ngIf="application(); let app">
-    
+
     <!-- 👤 Compact Student Info (Integrated from Overview Panel) -->
     <div class="student-mini-context">
       <div class="mini-avatar">{{ app.identity.firstName.charAt(0) }}</div>
@@ -187,7 +187,7 @@
         </section>
 
         <!-- 🏥 SANTÉ (Section 4) -->
-        <section class="fw-split-card" *ngIf="getObjectKeys(app.medical.customFields).length > 0">
+        <section class="fw-split-card" *ngIf="getObjectKeys(app.medical?.customFields || {}).length > 0">
           <div class="card-sidebar">
             <div class="pillar-icon-box"><lucide-icon [name]="HeartPulse" [size]="20"></lucide-icon></div>
             <div class="pillar-title-group">
@@ -197,9 +197,9 @@
           </div>
           <div class="card-content">
             <div class="info-grid-dense">
-              <div class="info-field" *ngFor="let key of getObjectKeys(app.medical.customFields)">
+              <div class="info-field" *ngFor="let key of getObjectKeys(app.medical?.customFields || {})">
                 <label>{{ key | camelToLabel }}</label>
-                <span class="field-value">{{ app.medical.customFields![key] }}</span>
+                <span class="field-value">{{ app.medical?.customFields?.[key] }}</span>
               </div>
             </div>
           </div>
@@ -325,7 +325,7 @@
         <div class="card-header">
           <lucide-icon [name]="Activity" [size]="16"></lucide-icon>
           <h4>Services & Options</h4>
-          <span class="doc-counter">{{ app.subscriptions.length }}</span>
+          <span class="doc-counter">{{ app.subscriptions?.length }}</span>
         </div>
         <div class="services-list-sidebar">
           <div *ngFor="let sub of app.subscriptions" class="sidebar-svc-item">
