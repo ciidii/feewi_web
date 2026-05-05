@@ -18,101 +18,64 @@
 .header-action-hub {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   width: 100%;
   gap: 1.5rem;
+  position: relative;
 
-  // 👤 Student Identity (List Item style)
+  // 👤 Pillar 1: Student Identity (Left)
   .header-student-identity {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    flex-shrink: 0;
+    flex: 0 0 auto; // Don't grow, don't shrink
 
     .stu-avatar {
-      width: 38px;
-      height: 38px;
-      background: var(--fw-midnight);
-      color: white;
-      border-radius: 10px;
-      display: grid;
-      place-items: center;
-      font-weight: 800;
-      font-size: 1rem;
-      box-shadow: var(--fw-shadow-sm);
+      width: 38px; height: 38px;
+      background: var(--fw-midnight); color: white;
+      border-radius: 10px; display: grid; place-items: center;
+      font-weight: 800; font-size: 1rem; box-shadow: var(--fw-shadow-sm);
     }
 
     .stu-info {
-      display: flex;
-      flex-direction: column;
-      gap: 1px;
-
-      .stu-name {
-        font-family: var(--fw-font-display);
-        font-size: 0.875rem;
-        font-weight: 850;
-        color: var(--fw-midnight);
-        line-height: 1.2;
-      }
-
-      .stu-ref {
-        font-size: 11px;
-        font-weight: 700;
-        color: var(--fw-text-tertiary);
-        letter-spacing: 0.02em;
-      }
+      display: flex; flex-direction: column; gap: 1px;
+      .stu-name { font-family: var(--fw-font-display); font-size: 0.875rem; font-weight: 850; color: var(--fw-midnight); line-height: 1.2; white-space: nowrap; }
+      .stu-ref { font-size: 11px; font-weight: 700; color: var(--fw-text-tertiary); letter-spacing: 0.02em; }
     }
   }
 
-  .admission-type-chip {
-    padding: 2px 8px;
-    background: var(--fw-primary-alpha);
-    color: var(--fw-primary);
-    border-radius: 6px;
-    font-size: 10px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    &.is-re { background: var(--fw-success-bg); color: var(--fw-success-text); }
-  }
-
-  // 🔄 Centered Workflow
+  // 🔄 Pillar 2: Centered Workflow (Middle)
   .header-workflow-wrap {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    width: auto;
-    min-width: 400px;
+    flex: 1; // Occupy remaining space
     display: flex;
     justify-content: center;
+    min-width: 0;
 
-    // Increase internal spacing of the workflow steps
+    // Internal component spacing
     ::ng-deep .workflow-steps {
-      gap: 24px !important; // More air between steps
+      gap: 32px !important; // More air as requested
     }
     ::ng-deep .workflow-line {
-      margin: 0 -16px !important;
+      margin: 0 -20px !important;
     }
   }
 
-  .divider-v {
-    width: 1px;
-    height: 24px;
-    background: var(--fw-border);
-    flex-shrink: 0;
-  }
-
+  // 🛠️ Pillar 3: Action Group (Right)
   .action-buttons-group {
     display: flex;
     align-items: center;
     gap: 8px;
-    flex-shrink: 0;
+    flex: 0 0 auto; // Don't grow, don't shrink
   }
 
   .danger-zone {
-    padding-left: 1rem;
+    padding-left: 1.25rem;
     border-left: 1px solid var(--fw-border);
     flex-shrink: 0;
+  }
+
+  .divider-v {
+    width: 1px; height: 24px;
+    background: var(--fw-border); flex-shrink: 0;
   }
 }
 
