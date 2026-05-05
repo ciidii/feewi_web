@@ -77,16 +77,14 @@
         <!-- 🏢 OVERVIEW PANEL DELETED (MOVED TO HEADER) -->
 
         <!-- 🏫 SCOLARITÉ (Section 1) -->
-        <section class="fw-split-card">
-          <div class="card-sidebar">
-            <div class="pillar-icon-box">
-              <lucide-icon [name]="School" [size]="20"></lucide-icon>
-            </div>
+        <section class="fw-standard-card">
+          <header class="card-header">
+            <lucide-icon [name]="School" [size]="16" class="header-icon"></lucide-icon>
             <div class="pillar-title-group">
               <h3>Vœux Scolaires</h3>
               <p>Parcours cible et établissement d'origine</p>
             </div>
-          </div>
+          </header>
           <div class="card-content">
             <div class="info-grid-dense">
               <div class="info-field highlight">
@@ -118,16 +116,14 @@
         </section>
 
         <!-- 👤 IDENTITÉ (Section 2) -->
-        <section class="fw-split-card">
-          <div class="card-sidebar">
-            <div class="pillar-icon-box">
-              <lucide-icon [name]="User" [size]="20"></lucide-icon>
-            </div>
+        <section class="fw-standard-card">
+          <header class="card-header">
+            <lucide-icon [name]="User" [size]="16" class="header-icon"></lucide-icon>
             <div class="pillar-title-group">
               <h3>Identité de l'élève</h3>
               <p>Informations d'état civil</p>
             </div>
-          </div>
+          </header>
           <div class="card-content">
             <div class="info-grid-dense">
               <div class="info-field">
@@ -157,16 +153,14 @@
         </section>
 
         <!-- 👨‍👩‍👧 FAMILLE (Section 3) -->
-        <section class="fw-split-card" *ngIf="app.primaryGuardian">
-          <div class="card-sidebar">
-            <div class="pillar-icon-box">
-              <lucide-icon [name]="Users" [size]="20"></lucide-icon>
-            </div>
+        <section class="fw-standard-card" *ngIf="app.primaryGuardian">
+          <header class="card-header">
+            <lucide-icon [name]="Users" [size]="16" class="header-icon"></lucide-icon>
             <div class="pillar-title-group">
               <h3>Responsable Légal</h3>
               <p>Tuteur principal et finances</p>
             </div>
-          </div>
+          </header>
           <div class="card-content">
             <div class="guardian-compact-card mb-6">
               <div class="card-left">
@@ -201,16 +195,14 @@
         </section>
 
         <!-- 🏥 SANTÉ (Section 4) -->
-        <section class="fw-split-card" *ngIf="getObjectKeys(app.medical?.customFields || {}).length > 0">
-          <div class="card-sidebar">
-            <div class="pillar-icon-box">
-              <lucide-icon [name]="HeartPulse" [size]="20"></lucide-icon>
-            </div>
+        <section class="fw-standard-card" *ngIf="getObjectKeys(app.medical?.customFields || {}).length > 0">
+          <header class="card-header">
+            <lucide-icon [name]="HeartPulse" [size]="16" class="header-icon"></lucide-icon>
             <div class="pillar-title-group">
               <h3>Dossier Médical</h3>
               <p>Santé et besoins spécifiques</p>
             </div>
-          </div>
+          </header>
           <div class="card-content">
             <div class="info-grid-dense">
               <div class="info-field" *ngFor="let key of getObjectKeys(app.medical?.customFields || {})">
