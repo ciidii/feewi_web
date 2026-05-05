@@ -101,6 +101,7 @@ export interface Admission {
   admissionDeadline?: string;
   /** Résolu depuis le bundle par l'endpoint admin /details */
   primaryGuardian?: Guardian;
+  extraPillars?: Record<string, { customFields: Record<string, any> }>;
 
   createdAt: string;
   updatedAt: string;

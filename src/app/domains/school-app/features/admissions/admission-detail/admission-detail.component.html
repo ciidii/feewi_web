@@ -185,7 +185,8 @@
               </div>
             </div>
 
-            <div class="info-grid-dense" *ngIf="app.primaryGuardian && getObjectKeys(app.primaryGuardian.customFields || {}).length > 0">
+            <div class="info-grid-dense"
+                 *ngIf="app.primaryGuardian && getObjectKeys(app.primaryGuardian.customFields || {}).length > 0">
               <div class="info-field" *ngFor="let key of getObjectKeys(app.primaryGuardian.customFields || {})">
                 <label>{{ key | camelToLabel }}</label>
                 <span class="field-value">{{ app.primaryGuardian.customFields?.[key] }}</span>
@@ -212,6 +213,27 @@
             </div>
           </div>
         </section>
+
+        <!-- ✨ PILIERS SUPPLÉMENTAIRES (Dynamiques) -->
+        <ng-container *ngFor="let pillar of effectiveSchema()?.extraPillars">
+          <section class="fw-standard-card" *ngIf="pillar.enabled && app.extraPillars?.[pillar.key]">
+            <header class="card-header">
+              <lucide-icon [name]="Sparkles" [size]="16" class="header-icon"></lucide-icon>
+              <div class="pillar-title-group">
+                <h3>{{ pillar.label }}</h3>
+                <p>Informations complémentaires</p>
+              </div>
+            </header>
+            <div class="card-content">
+              <div class="info-grid-dense">
+                <div class="info-field" *ngFor="let field of pillar.customFields">
+                  <label>{{ field.label }}</label>
+                  <span class="field-value">{{ app.extraPillars![pillar.key].customFields[field.name] || '—' }}</span>
+                </div>
+              </div>
+            </div>
+          </section>
+        </ng-container>
 
         <!-- 🏁 ÉVALUATION PÉDAGOGIQUE (Le Bilan Final) -->
         <div class="assessment-action-card animate-in slide-in-from-bottom-8 duration-700"

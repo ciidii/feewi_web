@@ -54,7 +54,6 @@ import {Admission, AssessmentRequest, RequiredDocument} from '../../../../../cor
 import {EnrollmentSchema, ServiceConfig} from '../../../../../core/models/enrollment/config';
 import {CamelToLabelPipe} from '../../../../../shared/pipes/camel-to-label.pipe';
 import {BlockLoaderComponent} from '../../../../../shared/components/loader/block-loader.component';
-import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.component';
 
 @Component({
   selector: 'app-admission-detail',
@@ -69,8 +68,7 @@ import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.com
     FwPageShellComponent,
     FwButtonComponent,
     CamelToLabelPipe,
-    BlockLoaderComponent,
-    FwBadgeComponent
+    BlockLoaderComponent
   ],
   templateUrl: './admission-detail.component.html',
   styleUrls: ['./admission-detail.component.scss'],
