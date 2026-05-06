@@ -518,13 +518,18 @@ export class PublicFormStepperComponent implements OnInit {
     if (!admissionId) return;
 
     this.uploadingDoc.set(data.code);
+    this.submitting.set(true);
+
     this.docEngine.getUploadTicket({ fileName: data.file.name, contentType: data.file.type, serviceOrigin: 'enrollment' }).pipe(
       switchMap(ticket =>
         this.docEngine.uploadFileDirectly(ticket.uploadUrl, data.file).pipe(
           switchMap(() => this.enrollment.uploadDocument(admissionId, data.code, ticket.fileId))
         )
       ),
-      finalize(() => this.uploadingDoc.set(null))
+      finalize(() => {
+        this.uploadingDoc.set(null);
+        this.submitting.set(false);
+      })
     ).subscribe({ next: () => this.refreshBundle() });
   }
 

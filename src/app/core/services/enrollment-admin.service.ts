@@ -179,7 +179,7 @@ export class EnrollmentAdminService {
     return this.http.patch<Admission>(
       this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.RECEIVE_DOCUMENT(admissionId, docCode)),
       {},
-      { headers: this.getHeaders() }
+      { headers: this.getHeaders(true) }
     ).pipe(
       catchError(this.handleError('Erreur lors de la validation du document physique'))
     );
@@ -187,7 +187,7 @@ export class EnrollmentAdminService {
 
   /** Lier un fichier numérisé à un dossier (Admin) */
   linkDocument(admissionId: string, docCode: string, fileId: string): Observable<Admission> {
-    const headers = this.getHeaders().set('Content-Type', 'text/plain');
+    const headers = this.getHeaders(true).set('Content-Type', 'text/plain');
     return this.http.post<Admission>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.DOCUMENTS(admissionId, docCode)), fileId, { headers }).pipe(
       catchError(this.handleError('Erreur lors de la liaison du document numérisé'))
     );

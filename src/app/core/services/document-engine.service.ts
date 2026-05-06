@@ -31,7 +31,8 @@ export class DocumentEngineService {
    * ÉTAPE 1 : Demander un ticket d'upload au Document Engine
    */
   getUploadTicket(request: UploadTicketRequest): Observable<UploadTicketResponse> {
-    return this.http.post<UploadTicketResponse>(`${this.baseUrl}/upload-ticket`, request).pipe(
+    const headers = new HttpHeaders().set('x-skip-loader', 'true');
+    return this.http.post<UploadTicketResponse>(`${this.baseUrl}/upload-ticket`, request, { headers }).pipe(
       catchError(this.handleError('Impossible d\'obtenir un ticket d\'envoi'))
     );
   }

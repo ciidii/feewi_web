@@ -439,6 +439,7 @@ export class AdmissionDetailComponent implements OnInit {
     if (!file || !app) return;
 
     this.uploadingDocCode.set(docCode);
+    this.isActionLoading.set(true);
 
     this.documentService.getUploadTicket({
       fileName: file.name,
@@ -453,6 +454,7 @@ export class AdmissionDetailComponent implements OnInit {
       ),
       finalize(() => {
         this.uploadingDocCode.set(null);
+        this.isActionLoading.set(false);
         event.target.value = ''; // Reset input
       })
     ).subscribe({
