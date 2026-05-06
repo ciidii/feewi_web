@@ -75,8 +75,11 @@
   </header>
 
   <!-- 📝 CONTENU PRINCIPAL (Centré) -->
-  <main class="stepper-main">
+  <main class="stepper-main" [class.is-loading]="submitting() || savingDraft()">
     <div class="form-container">
+
+      <!-- 🚀 HYBRID LOADING FEEDBACK -->
+      <fw-block-loader *ngIf="submitting() || savingDraft()" [center]="true" message="Enregistrement..."></fw-block-loader>
 
       <!-- 🟢 BANNIÈRE DE CONTEXTE ENFANT (Intégrée au flux) -->
       <header class="child-context-banner animate-in fade-in slide-in-from-top-4 duration-500" *ngIf="isChildFlow()">

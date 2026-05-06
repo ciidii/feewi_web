@@ -248,6 +248,16 @@
 .stepper-main {
   flex: 1;
   padding: 40px 0 120px;
+  position: relative;
+  transition: all 0.3s ease;
+
+  &.is-loading {
+    pointer-events: none;
+    .form-container {
+      opacity: 0.5;
+      filter: blur(2px);
+    }
+  }
 }
 
 .form-container {

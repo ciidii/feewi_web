@@ -30,10 +30,11 @@ export class EnrollmentPublicService {
     return this.envService.getServiceUrl('enrollment');
   }
 
-  private getHeaders(): HttpHeaders {
+  private getHeaders(skipLoader = false): HttpHeaders {
     const tenantId = this.tenantContext.activeTenant()?.id;
     let headers = new HttpHeaders();
     if (tenantId) headers = headers.set('X-Tenant-Id', tenantId);
+    if (skipLoader) headers = headers.set('x-skip-loader', 'true');
     return headers;
   }
 
@@ -81,7 +82,7 @@ export class EnrollmentPublicService {
   /** ÉTAPE 1 — Initialise le dossier familial (bundle) */
   createBundle(request: CreateBundleRequest): Observable<AdmissionBundleResponse> {
     return this.http
-      .post<AdmissionBundleResponse>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.CREATE_BUNDLE), request, { headers: this.getHeaders() })
+      .post<AdmissionBundleResponse>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.CREATE_BUNDLE), request, { headers: this.getHeaders(true) })
       .pipe(catchError(this.handleError('Erreur lors de la création du dossier')));
   }
 
@@ -104,34 +105,34 @@ export class EnrollmentPublicService {
   /** ÉTAPE 2 — Ajoute un enfant au bundle */
   addChild(bundleId: string, request: AddChildRequest): Observable<Admission> {
     return this.http
-      .post<Admission>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.ADD_CHILD(bundleId)), request, { headers: this.getHeaders() })
+      .post<Admission>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.ADD_CHILD(bundleId)), request, { headers: this.getHeaders(true) })
       .pipe(catchError(this.handleError('Erreur lors de l\'ajout de l\'enfant')));
   }
 
   /** ÉTAPE 3 — Met à jour un pilier de l'admission (ex: identity, medical) */
   updateChildPillar(admissionId: string, pillarKey: string, data: any): Observable<void> {
     return this.http
-      .patch<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.UPDATE_PILLAR(admissionId, pillarKey)), data, { headers: this.getHeaders() })
+      .patch<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.UPDATE_PILLAR(admissionId, pillarKey)), data, { headers: this.getHeaders(true) })
       .pipe(catchError(this.handleError(`Erreur sur le pilier ${pillarKey}`)));
   }
 
   /** ÉTAPE 4 — Met à jour un pilier du bundle (ex: pillar_family) */
   updateFamilyPillar(bundleId: string, data: any): Observable<void> {
     return this.http
-      .patch<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.UPDATE_BUNDLE_PILLAR(bundleId, 'pillar_family')), data, { headers: this.getHeaders() })
+      .patch<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.UPDATE_BUNDLE_PILLAR(bundleId, 'pillar_family')), data, { headers: this.getHeaders(true) })
       .pipe(catchError(this.handleError('Erreur sur le volet famille')));
   }
 
   /** Services — Souscriptions cantine/transport */
   subscribeServices(admissionId: string, subscriptions: ServiceSubscriptionRequest[]): Observable<void> {
     return this.http
-      .patch<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.SUBSCRIPTIONS(admissionId)), subscriptions, { headers: this.getHeaders() })
+      .patch<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.SUBSCRIPTIONS(admissionId)), subscriptions, { headers: this.getHeaders(true) })
       .pipe(catchError(this.handleError('Erreur lors de la sélection des services')));
   }
 
   /** Documents — Upload URL brute (string) */
   uploadDocument(admissionId: string, docCode: string, fileUrl: string): Observable<void> {
-    const headers = this.getHeaders().set('Content-Type', 'text/plain');
+    const headers = this.getHeaders(true).set('Content-Type', 'text/plain');
     return this.http
       .post<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.DOCUMENTS(admissionId, docCode)), fileUrl, { headers })
       .pipe(catchError(this.handleError('Erreur lors de l\'envoi du document')));
@@ -140,14 +141,14 @@ export class EnrollmentPublicService {
   /** Soumet une admission individuelle */
   submitAdmission(admissionId: string): Observable<Admission> {
     return this.http
-      .post<Admission>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.SUBMIT_ADMISSION(admissionId)), null, { headers: this.getHeaders() })
+      .post<Admission>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.SUBMIT_ADMISSION(admissionId)), null, { headers: this.getHeaders(true) })
       .pipe(catchError(this.handleError('Erreur lors de la soumission')));
   }
 
   /** ÉTAPE 5 — Soumet l'intégralité du bundle familial */
   submitBundle(bundleId: string): Observable<AdmissionBundleResponse> {
     return this.http
-      .post<AdmissionBundleResponse>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.SUBMIT_BUNDLE(bundleId)), null, { headers: this.getHeaders() })
+      .post<AdmissionBundleResponse>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.SUBMIT_BUNDLE(bundleId)), null, { headers: this.getHeaders(true) })
       .pipe(catchError(this.handleError('Erreur lors de la soumission du bundle')));
   }
 
@@ -172,28 +173,28 @@ export class EnrollmentPublicService {
   /** Annule une admission */
   cancelAdmission(admissionId: string): Observable<void> {
     return this.http
-      .post<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.CANCEL(admissionId)), null, { headers: this.getHeaders() })
+      .post<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.CANCEL(admissionId)), null, { headers: this.getHeaders(true) })
       .pipe(catchError(this.handleError('Erreur lors de l\'annulation')));
   }
 
   /** Confirmation bundle par le parent : ADMITTED → paiement déclenché (PAYMENT_REQUIRED ou PARENT_CHOICE) */
   confirmAdmitted(bundleId: string, accessCode: string): Observable<AdmissionBundleResponse> {
     return this.http
-      .post<AdmissionBundleResponse>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.CONFIRM_ADMITTED(bundleId)), { accessCode }, { headers: this.getHeaders() })
+      .post<AdmissionBundleResponse>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.CONFIRM_ADMITTED(bundleId)), { accessCode }, { headers: this.getHeaders(true) })
       .pipe(catchError(this.handleError('Erreur lors de la confirmation')));
   }
 
   /** Annulation de tous les enfants admis du bundle (PARENT_CHOICE → CLOSED) */
   cancelAll(bundleId: string, accessCode: string): Observable<AdmissionBundleResponse> {
     return this.http
-      .post<AdmissionBundleResponse>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.CANCEL_ALL(bundleId)), { accessCode }, { headers: this.getHeaders() })
+      .post<AdmissionBundleResponse>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.CANCEL_ALL(bundleId)), { accessCode }, { headers: this.getHeaders(true) })
       .pipe(catchError(this.handleError('Erreur lors de l\'annulation')));
   }
 
   /** Réinscription élève existant */
   reEnroll(request: ReEnrollRequest): Observable<Admission> {
     return this.http
-      .post<Admission>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.RE_ENROLL), request, { headers: this.getHeaders() })
+      .post<Admission>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.RE_ENROLL), request, { headers: this.getHeaders(true) })
       .pipe(catchError(this.handleError('Erreur lors de la réinscription')));
   }
 }
