@@ -36,9 +36,13 @@ export class EnrollmentAdminService {
     return `${this.base}${path}`;
   }
 
-  private getHeaders(): HttpHeaders {
+  private getHeaders(skipLoader = false): HttpHeaders {
     const tenantId = this.tenantContext.activeTenant()?.id || 'default';
-    return new HttpHeaders().set('X-Tenant-Id', tenantId);
+    let headers = new HttpHeaders().set('X-Tenant-Id', tenantId);
+    if (skipLoader) {
+      headers = headers.set('x-skip-loader', 'true');
+    }
+    return headers;
   }
 
   private handleError(message: string) {
@@ -190,7 +194,7 @@ export class EnrollmentAdminService {
   }
 
   verifyApplication(admissionId: string): Observable<Admission> {
-    return this.http.patch<Admission>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.VERIFY(admissionId)), {}, { headers: this.getHeaders() }).pipe(
+    return this.http.patch<Admission>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.VERIFY(admissionId)), {}, { headers: this.getHeaders(true) }).pipe(
       catchError(this.handleError('Erreur lors de la vérification administrative'))
     );
   }
@@ -199,7 +203,7 @@ export class EnrollmentAdminService {
     return this.http.patch<Admission>(
       this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.ASSESSMENT(admissionId)),
       assessment,
-      { headers: this.getHeaders() }
+      { headers: this.getHeaders(true) }
     ).pipe(
       catchError(this.handleError('Erreur lors de l\'enregistrement de l\'évaluation'))
     );
@@ -208,19 +212,19 @@ export class EnrollmentAdminService {
   // --- API DIRECTION ---
 
   admitAdmission(admissionId: string): Observable<Admission> {
-    return this.http.patch<Admission>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.ADMIT(admissionId)), {}, { headers: this.getHeaders() }).pipe(
+    return this.http.patch<Admission>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.ADMIT(admissionId)), {}, { headers: this.getHeaders(true) }).pipe(
       catchError(this.handleError('Erreur lors de l\'admission manuelle'))
     );
   }
 
   validateAdmission(admissionId: string): Observable<Admission> {
-    return this.http.patch<Admission>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.VALIDATE(admissionId)), {}, { headers: this.getHeaders() }).pipe(
+    return this.http.patch<Admission>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.VALIDATE(admissionId)), {}, { headers: this.getHeaders(true) }).pipe(
       catchError(this.handleError('Erreur lors de la validation finale'))
     );
   }
 
   overruleAdmission(admissionId: string): Observable<Admission> {
-    return this.http.patch<Admission>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.OVERRULE(admissionId)), {}, { headers: this.getHeaders() }).pipe(
+    return this.http.patch<Admission>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.OVERRULE(admissionId)), {}, { headers: this.getHeaders(true) }).pipe(
       catchError(this.handleError('Erreur lors de la validation avec dérogation'))
     );
   }
@@ -229,14 +233,14 @@ export class EnrollmentAdminService {
     return this.http.patch<Admission>(
       this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.REJECT(admissionId)),
       JSON.stringify(reason),
-      { headers: this.getHeaders().set('Content-Type', 'application/json') }
+      { headers: this.getHeaders(true).set('Content-Type', 'application/json') }
     ).pipe(
       catchError(this.handleError('Erreur lors du rejet du dossier'))
     );
   }
 
   waitlistAdmission(admissionId: string): Observable<void> {
-    return this.http.patch<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.WAITLIST(admissionId)), {}, { headers: this.getHeaders() }).pipe(
+    return this.http.patch<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.WAITLIST(admissionId)), {}, { headers: this.getHeaders(true) }).pipe(
       catchError(this.handleError('Erreur lors du passage en liste d\'attente'))
     );
   }

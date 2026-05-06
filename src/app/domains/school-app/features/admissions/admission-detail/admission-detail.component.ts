@@ -59,6 +59,7 @@ import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.com
 import {
   AdmissionDetailSkeletonComponent
 } from '../../../../../shared/components/skeleton/admission-detail-skeleton.component';
+import {CamelToLabelPipe} from '../../../../../shared/pipes/camel-to-label.pipe';
 
 @Component({
   selector: 'app-admission-detail',
@@ -75,8 +76,7 @@ import {
     CamelToLabelPipe,
     AdmissionDetailSkeletonComponent,
     BlockLoaderComponent,
-    PageProgressComponent,
-    FwBadgeComponent
+    PageProgressComponent
   ],
 
   templateUrl: './admission-detail.component.html',

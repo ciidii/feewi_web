@@ -24,18 +24,18 @@ import {CommonModule} from '@angular/common';
       position: absolute;
       inset: 0;
       justify-content: center;
-      background: rgba(255, 255, 255, 0.4);
-      backdrop-filter: blur(1px);
-      z-index: 10;
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 100;
     }
 
     .spinner-dot {
-      width: 24px;
-      height: 24px;
-      border: 2.5px solid var(--fw-primary-alpha);
+      width: 32px;
+      height: 32px;
+      border: 2px solid var(--fw-border);
       border-top-color: var(--fw-primary);
       border-radius: 50%;
-      animation: fw-spin 0.8s linear infinite;
+      animation: fw-spin 0.6s linear infinite;
     }
 
     .loader-message {
