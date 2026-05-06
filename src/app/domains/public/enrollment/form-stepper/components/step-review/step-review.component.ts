@@ -132,20 +132,20 @@ import {FwBadgeComponent} from '../../../../../../shared/components/badge/badge.
 
       </div>
 
-      <!-- Consentement légal -->
-      <div class="mt-16 p-10 bg-midnight rounded-[40px] text-white shadow-2xl relative overflow-hidden">
-        <!-- Decoration -->
-        <div class="absolute top-0 right-0 w-32 h-32 bg-primary-alpha/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+      <!-- Consentement légal (Minimalist & High Priority) -->
+      <div class="mt-16 p-8 md:p-12 bg-white rounded-[32px] border-2 border-midnight shadow-xl relative overflow-hidden">
+        <!-- Accent Decoration -->
+        <div class="absolute top-0 right-0 w-32 h-32 bg-primary-alpha/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
 
         <div class="flex items-start gap-6 mb-10 relative z-1">
-          <div class="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center shrink-0 shadow-inner">
-            <lucide-icon [name]="ShieldAlert" [size]="28" class="text-primary"></lucide-icon>
+          <div class="w-14 h-14 rounded-2xl bg-surface-sunken text-primary flex items-center justify-center shrink-0 shadow-sm border border-border/50">
+            <lucide-icon [name]="ShieldAlert" [size]="28"></lucide-icon>
           </div>
-          <div class="text-sm leading-relaxed opacity-90 font-medium">
-            <h4 class="text-lg font-black uppercase tracking-tight mb-3">Certification sur l'honneur</h4>
-            <div class="space-y-4 text-slate-300">
-              <p *ngIf="legalText">{{ legalText }}</p>
-              <p *ngIf="!legalText">
+          <div class="text-sm leading-relaxed font-medium">
+            <h4 class="text-lg font-black uppercase tracking-tight text-midnight mb-3">Certification sur l'honneur</h4>
+            <div class="space-y-4 text-text-secondary">
+              <p *ngIf="legalText" class="leading-relaxed">{{ legalText }}</p>
+              <p *ngIf="!legalText" class="leading-relaxed">
                 Je certifie sur l'honneur l'exactitude des informations fournies dans ce formulaire.
                 Je comprends que toute fausse déclaration ou omission volontaire pourra entraîner l'annulation de la candidature de l'enfant auprès de l'établissement.
               </p>
@@ -153,17 +153,19 @@ import {FwBadgeComponent} from '../../../../../../shared/components/badge/badge.
           </div>
         </div>
 
-        <label class="flex items-center gap-5 p-6 rounded-3xl bg-white/5 border border-white/10 cursor-pointer hover:bg-white/10 transition-all group relative z-1">
+        <label class="flex items-center gap-5 p-6 rounded-2xl bg-surface-sunken border border-border cursor-pointer hover:bg-white hover:border-midnight transition-all group relative z-1">
           <div class="relative w-8 h-8 shrink-0">
             <input type="checkbox" [(ngModel)]="consent.checked"
                    class="peer absolute inset-0 opacity-0 cursor-pointer w-8 h-8 z-10">
-            <div class="w-8 h-8 rounded-xl border-2 border-white/20 transition-all
-                        peer-checked:bg-primary peer-checked:border-primary peer-checked:scale-110
-                        flex items-center justify-center shadow-lg">
+            <div class="w-8 h-8 rounded-xl border-2 border-border transition-all
+                        peer-checked:bg-midnight peer-checked:border-midnight peer-checked:scale-110
+                        flex items-center justify-center shadow-md bg-white">
               <lucide-icon *ngIf="consent.checked" [name]="CheckCircle" [size]="18" class="text-white"></lucide-icon>
             </div>
           </div>
-          <span class="text-base font-black uppercase tracking-tight text-white/90 group-hover:text-white">Je confirme la validité et l'exactitude de mon dossier</span>
+          <span class="text-base font-black uppercase tracking-tight text-midnight group-hover:text-primary transition-colors">
+            Je confirme la validité et l'exactitude de mon dossier
+          </span>
         </label>
       </div>
     </div>
