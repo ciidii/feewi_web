@@ -205,12 +205,7 @@ export class CycleDetailComponent implements OnInit {
   // --- GESTION DES NIVEAUX & PROGRAMMES ---
 
   openCurriculumManager(level: Level) {
-    this.dialog.open(CurriculumManagerComponent, {
-      width: '1000px',
-      maxWidth: '95vw',
-      panelClass: 'feewi-dialog-panel',
-      data: {level}
-    });
+    this.router.navigate(['/admin/classes/levels', level.id, 'curriculum']);
   }
 
   openEditLevel(level: Level) {

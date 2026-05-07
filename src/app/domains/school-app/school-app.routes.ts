@@ -78,6 +78,11 @@ export const SCHOOL_APP_ROUTES: Routes = [
         path: 'cycles/:id',
         title: 'Détails du Cycle',
         loadComponent: () => import('./features/academic/structure-config/cycle-detail/cycle-detail.component').then(m => m.CycleDetailComponent)
+      },
+      {
+        path: 'levels/:id/curriculum',
+        title: 'Programme du Niveau',
+        loadComponent: () => import('./features/academic/structure-config/curriculum-detail/curriculum-detail.component').then(m => m.CurriculumDetailComponent)
       }
     ]
   },
