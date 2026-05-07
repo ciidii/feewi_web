@@ -1,7 +1,7 @@
 <app-fw-page-shell
   *ngIf="cycle() as c"
-  [title]="c.customName || c.systemName"
-  [description]="richDescription()"
+  [title]="c.customName || c.systemName || 'Cycle'"
+  [description]="richDescription() || 'Gestion du cycle'"
   [icon]="Layers"
   [backLink]="['/admin/classes']"
   [tabs]="cycleTabs()"

@@ -208,9 +208,9 @@
           </header>
           <div class="card-content">
             <div class="info-grid-dense">
-              <div class="info-field" *ngFor="let key of getObjectKeys(app.medical?.customFields || {})">
+              <div class="info-field" *ngFor="let key of getObjectKeys(app.medical.customFields || {})">
                 <label>{{ key | camelToLabel }}</label>
-                <span class="field-value">{{ app.medical?.customFields?.[key] }}</span>
+                <span class="field-value">{{ app.medical.customFields?.[key] }}</span>
               </div>
             </div>
           </div>
