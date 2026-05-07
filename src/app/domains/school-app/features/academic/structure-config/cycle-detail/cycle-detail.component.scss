@@ -1,4 +1,132 @@
+@use '../../../../../../styles/tokens' as *;
+
 :host {
   display: block;
   height: 100%;
+  background: var(--fw-ice);
+}
+
+// ── THE MINIMALIST DOSSIER CARD ─────────────────────────────────────────────
+.fw-standard-card {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid var(--fw-border-subtle);
+  box-shadow: var(--fw-shadow-sm);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  transition: all 0.2s ease;
+
+  &:hover { box-shadow: var(--fw-shadow-md); border-color: var(--fw-border); }
+
+  .card-header {
+    padding: 1.25rem 1.5rem;
+    background: white;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .level-rank {
+      width: 32px; height: 32px;
+      background: var(--fw-surface-sunken);
+      color: var(--fw-text-tertiary);
+      border-radius: 8px;
+      display: grid; place-items: center;
+      font-size: 0.75rem; font-weight: 800;
+      border: 1px solid var(--fw-border-subtle);
+    }
+
+    .header-icon { color: var(--fw-text-tertiary); flex-shrink: 0; }
+
+    .pillar-title-group {
+      h3 {
+        font-family: var(--fw-font-ui);
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--fw-text-primary);
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      p { font-size: 11px; font-weight: 500; color: var(--fw-text-tertiary); margin: 1px 0 0; }
+    }
+  }
+
+  .card-content { padding: 1.5rem; }
+}
+
+// ── CLASS TILES GRID ───────────────────────────────────────────────────────
+.class-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.class-tile {
+  position: relative;
+  background: var(--fw-surface-sunken);
+  border: 1px solid var(--fw-border-subtle);
+  border-radius: 12px;
+  padding: 1.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  overflow: hidden;
+
+  &:hover {
+    background: var(--fw-primary);
+    border-color: var(--fw-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--fw-shadow-md);
+
+    .tile-name { color: white; }
+    .tile-meta { color: rgba(255,255,255,0.7); }
+    .tile-indicator { border-color: rgba(255,255,255,0.2); }
+    .tile-bg-icon { color: rgba(255,255,255,0.05); }
+  }
+
+  .tile-content { position: relative; z-index: 2; }
+  .tile-name { display: block; font-size: 0.875rem; font-weight: 750; color: var(--fw-midnight); margin-bottom: 2px; }
+  .tile-meta { display: block; font-size: 11px; font-weight: 500; color: var(--fw-text-tertiary); }
+
+  .tile-indicator {
+    display: flex; align-items: center; gap: 6px;
+    margin-top: 1rem; padding-top: 0.75rem;
+    border-top: 1px solid rgba(0,0,0,0.04);
+    
+    .dot { width: 6px; height: 6px; border-radius: 50%; }
+    .label { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; color: var(--fw-text-tertiary); }
+  }
+
+  .tile-bg-icon {
+    position: absolute; right: -8px; bottom: -8px;
+    width: 48px; height: 48px;
+    color: rgba(0,0,0,0.03);
+    transition: color 0.2s;
+  }
+}
+
+.add-class-btn {
+  border: 2px dashed var(--fw-border-subtle);
+  border-radius: 12px;
+  background: transparent;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.5rem; padding: 1.25rem;
+  transition: all 0.2s;
+  cursor: pointer;
+
+  lucide-icon { color: var(--fw-text-tertiary); }
+  span { font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--fw-text-tertiary); }
+
+  &:hover {
+    background: var(--fw-primary-alpha);
+    border-color: var(--fw-primary);
+    lucide-icon, span { color: var(--fw-primary); }
+  }
 }

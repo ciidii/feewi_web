@@ -132,6 +132,12 @@ export class CycleDetailComponent implements OnInit {
     }));
   });
 
+  richDescription = computed(() => {
+    const c = this.cycle();
+    if (!c) return 'Chargement...';
+    return `${this.levels().length} Niveaux • ${this.classes().length} Classes ouvertes • Session ${this.currentYear()?.label || '...'}`;
+  });
+
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
