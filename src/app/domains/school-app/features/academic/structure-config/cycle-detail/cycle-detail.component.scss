@@ -1,4 +1,4 @@
-@use '../../../../../../styles/tokens' as *;
+@use '../../../../../../../styles/tokens' as *;
 
 :host {
   display: block;
@@ -99,7 +99,7 @@
     display: flex; align-items: center; gap: 6px;
     margin-top: 1rem; padding-top: 0.75rem;
     border-top: 1px solid rgba(0,0,0,0.04);
-    
+
     .dot { width: 6px; height: 6px; border-radius: 50%; }
     .label { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; color: var(--fw-text-tertiary); }
   }

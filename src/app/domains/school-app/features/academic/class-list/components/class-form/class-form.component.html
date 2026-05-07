@@ -1,33 +1,28 @@
 <app-fw-form-shell
   title="Ouvrir une Classe"
-  subtitle="Créez une instance physique d'enseignement pour l'année scolaire en cours."
+  subtitle="Configuration de l'instance physique pour l'année en cours."
   [icon]="School"
-  statusLabel="Opérationnel"
   saveLabel="Ouvrir la classe"
   [isLoading]="isLoading()"
   [canSave]="classForm.valid"
   (save)="onSave()"
   (cancel)="onCancel()"
 >
-  <form [formGroup]="classForm" class="space-y-8">
+  <form [formGroup]="classForm" class="space-y-10 py-2">
     
     <!-- 1. Structure -->
-    <div class="space-y-5">
-      <div class="flex items-center gap-3">
-        <div class="flex items-center justify-center w-8 h-8 rounded-xl bg-primary-50 text-primary-600 font-bold text-xs">01</div>
-        <span class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Structure Pédagogique</span>
-        <div class="flex-1 h-px bg-slate-100"></div>
-      </div>
+    <div class="space-y-6">
+      <header class="section-header">
+        <lucide-icon [name]="Layers" [size]="14"></lucide-icon>
+        <span class="label">Structure Pédagogique</span>
+      </header>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Niveau -->
-        <div class="space-y-2">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Niveau d'enseignement</label>
-          <div class="relative">
-            <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 z-10">
-              <lucide-icon [name]="Layers" class="w-4 h-4"></lucide-icon>
-            </div>
-            <mat-select formControlName="levelId" placeholder="Choisir le niveau" class="fw-select" [class.error]="isInvalid('levelId')">
+        <div class="fw-field">
+          <label class="fw-label">Niveau d'enseignement</label>
+          <div class="fw-input-wrapper">
+            <mat-select formControlName="levelId" placeholder="Choisir le niveau" class="fw-input" [class.error]="isInvalid('levelId')">
               <mat-optgroup *ngFor="let group of groupedLevels()" [label]="group.cycle.name || group.cycle.systemName || 'Cycle'">
                 <mat-option *ngFor="let level of group.levels" [value]="level.id">
                   {{ level.name }}
@@ -38,13 +33,10 @@
         </div>
 
         <!-- Filière (Optionnel) -->
-        <div class="space-y-2">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Série / Filière (Optionnel)</label>
-          <div class="relative">
-            <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 z-10">
-              <lucide-icon [name]="Tag" class="w-4 h-4"></lucide-icon>
-            </div>
-            <mat-select formControlName="filiereId" placeholder="Tronc Commun" class="fw-select">
+        <div class="fw-field">
+          <label class="fw-label">Série / Filière (Optionnel)</label>
+          <div class="fw-input-wrapper">
+            <mat-select formControlName="filiereId" placeholder="Tronc Commun" class="fw-input">
               <mat-option [value]="null">Aucune (Tronc Commun)</mat-option>
               <mat-option *ngFor="let f of filieres()" [value]="f.id">{{ f.name }} ({{ f.code }})</mat-option>
             </mat-select>
@@ -54,43 +46,36 @@
     </div>
 
     <!-- 2. Configuration Physique -->
-    <div class="space-y-5">
-      <div class="flex items-center gap-3">
-        <div class="flex items-center justify-center w-8 h-8 rounded-xl bg-primary-50 text-primary-600 font-bold text-xs">02</div>
-        <span class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Détails de l'Instance</span>
-        <div class="flex-1 h-px bg-slate-100"></div>
-      </div>
+    <div class="space-y-6">
+      <header class="section-header">
+        <lucide-icon [name]="Type" [size]="14"></lucide-icon>
+        <span class="label">Détails de l'Instance</span>
+      </header>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Nom / Suffixe -->
-        <div class="space-y-2">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Suffixe (Nom)</label>
-          <div class="relative group">
-            <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors">
-              <lucide-icon [name]="Type" class="w-4.5 h-4.5"></lucide-icon>
-            </div>
-            <input type="text" formControlName="name" placeholder="Ex: A, B ou Bleue" class="fw-input" [class.error]="isInvalid('name')"/>
+        <div class="fw-field">
+          <label class="fw-label">Suffixe (Ex: A, B ou Bleue)</label>
+          <div class="fw-input-wrapper">
+            <input type="text" formControlName="name" placeholder="Nom de la classe" class="fw-input" [class.error]="isInvalid('name')"/>
           </div>
         </div>
 
         <!-- Capacité -->
-        <div class="space-y-2">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Capacité Max (Élèves)</label>
-          <div class="relative group">
-            <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors">
-              <lucide-icon [name]="Hash" class="w-4.5 h-4.5"></lucide-icon>
-            </div>
+        <div class="fw-field">
+          <label class="fw-label">Capacité Max (Élèves)</label>
+          <div class="fw-input-wrapper">
             <input type="number" formControlName="capacity" class="fw-input" [class.error]="isInvalid('capacity')"/>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Info Box -->
-    <div class="p-4 bg-primary-50/50 rounded-xl border border-primary-100 flex items-start gap-3">
-      <lucide-icon [name]="Info" class="w-4 h-4 text-primary-600 mt-0.5"></lucide-icon>
-      <p class="text-[11px] text-primary-800 leading-relaxed font-medium">
-        L'ouverture d'une classe crée une instance physique pour l'année en cours. Le nom complet sera automatiquement généré (ex: <span class="font-bold">CM2 A</span>).
+    <!-- Info Box Minimalist -->
+    <div class="p-4 bg-surface-sunken rounded-xl border border-border flex items-start gap-3">
+      <lucide-icon [name]="Info" [size]="16" class="text-text-tertiary mt-0.5"></lucide-icon>
+      <p class="text-[11px] text-text-secondary leading-relaxed font-medium">
+        L'ouverture d'une classe crée une instance physique pour l'année en cours. Le nom complet sera automatiquement généré (ex: <span class="text-midnight font-bold">CM2 A</span>).
       </p>
     </div>
 

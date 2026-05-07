@@ -229,13 +229,17 @@ export class CycleDetailComponent implements OnInit {
   // --- GESTION DES CLASSES ---
 
   openAddClass(level: Level) {
+    const currentCycle = this.cycle();
     const dialogRef = this.dialog.open(ClassFormComponent, {
       width: '640px',
       maxWidth: '95vw',
       panelClass: 'feewi-dialog-panel',
       data: {
         year: this.currentYear(),
-        levels: this.levels(),
+        groupedLevels: [{
+          cycle: currentCycle,
+          levels: this.levels()
+        }],
         levelId: level.id
       }
     });
