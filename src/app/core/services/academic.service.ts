@@ -176,7 +176,23 @@ export class AcademicService {
   }
 
   getClassById(id: string): Observable<SchoolClass> {
-    return this.http.get<SchoolClass>(`${this.API_URL}/classes/${id}`, { headers: this.getHeaders() }).pipe(
+    const directUrl = `${this.API_URL}/classes/${id}`;
+    return this.http.get<SchoolClass>(directUrl, { headers: this.getHeaders() }).pipe(
+      catchError(err => {
+        // Fallback: Rechercher dans la liste de l'année si le GET direct n'est pas autorisé (405)
+        if (err.status === 405) {
+          console.warn(`[AcademicService] Direct GET on ${directUrl} not allowed (405). Falling back to search in list.`);
+          return this.getCurrentYear().pipe(
+            switchMap(year => this.getClassesByYear(year.id)),
+            map(classes => {
+              const found = classes.find(c => String(c.id) === String(id));
+              if (!found) throw err; // Relancer l'erreur originale si non trouvé
+              return found;
+            })
+          );
+        }
+        return throwError(() => err);
+      }),
       catchError(this.handleError('Erreur lors du chargement des détails de la classe'))
     );
   }
