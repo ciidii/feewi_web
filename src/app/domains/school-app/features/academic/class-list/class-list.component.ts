@@ -11,6 +11,7 @@ import {NotificationService} from '../../../../../shared/services/notification.s
 import {AcademicYear, CycleGroup, SchoolClass} from '../../../../../core/models/academic.model';
 import {RowAction, TableRow} from '../../../../../shared/models/data-list.models';
 import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-class-list',
@@ -29,6 +30,7 @@ export class ClassListComponent implements OnInit {
   private academicService = inject(AcademicService);
   private notificationService = inject(NotificationService);
   private dialog = inject(MatDialog);
+  private router = inject(Router);
 
   // Icônes
   readonly School = School;
@@ -116,19 +118,10 @@ export class ClassListComponent implements OnInit {
   }
 
   handleClassAction(event: { actionId: string, row: TableRow }) {
-    if (event.actionId === 'teachings') {
-      this.openTeachingManager(event.row.rawData);
+    if (event.actionId === 'teachings' || event.actionId === 'view-students') {
+      this.router.navigate(['/admin/academic/classes', event.row.id]);
     } else {
       this.notificationService.info(`Action ${event.actionId} sur ${event.row.title}`);
     }
-  }
-
-  private openTeachingManager(schoolClass: SchoolClass) {
-    this.dialog.open(TeachingManagerComponent, {
-      width: '1000px',
-      maxWidth: '95vw',
-      panelClass: 'feewi-dialog-panel',
-      data: { schoolClass }
-    });
   }
 }

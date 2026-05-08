@@ -38,6 +38,7 @@ export class StudentRegistryService {
   getStudents(
     query: string = '',
     status?: StudentStatus,
+    classId?: string,
     page: number = 0,
     size: number = 20
   ): Observable<Page<StudentSummary>> {
@@ -48,6 +49,7 @@ export class StudentRegistryService {
 
     if (query) params = params.set('q', query);
     if (status) params = params.set('status', status);
+    if (classId) params = params.set('classId', classId);
 
     return this.http.get<Page<StudentSummary>>(this.API_URL, { params }).pipe(
       tap(response => this._studentsPage.set(response)),

@@ -43,7 +43,7 @@ import {FwButtonComponent} from '../../../../../shared/components/button/button.
     FwPageShellComponent,
     FwButtonComponent
   ],
-  templateUrl:  './student-list.component.html',
+  templateUrl: './student-list.component.html',
   styleUrl: './student-list.component.scss',
   encapsulation: ViewEncapsulation.None
 })
@@ -79,16 +79,16 @@ export class StudentListComponent implements OnInit, OnDestroy {
 
   // --- CONFIGURATION UI ---
   readonly studentActions: RowAction[] = [
-    { id: 'view', label: 'Dossier complet', icon: Eye, type: 'primary' },
-    { id: 'history', label: 'Logs & Historique', icon: History, type: 'default' },
-    { id: 'suspend', label: 'Suspendre', icon: UserMinus, type: 'danger' }
+    {id: 'view', label: 'Dossier complet', icon: Eye, type: 'primary'},
+    {id: 'history', label: 'Logs & Historique', icon: History, type: 'default'},
+    {id: 'suspend', label: 'Suspendre', icon: UserMinus, type: 'danger'}
   ];
 
   readonly studentTabs = computed<FwTab[]>(() => {
     return [
-      { id: 'Tous', label: 'Tous les élèves', icon: GraduationCap },
-      { id: 'Actifs', label: 'Inscrits Actifs', icon: UserCheck },
-      { id: 'Suspendus', label: 'Suspendus', icon: ShieldAlert }
+      {id: 'Tous', label: 'Tous les élèves', icon: GraduationCap},
+      {id: 'Actifs', label: 'Inscrits Actifs', icon: UserCheck},
+      {id: 'Suspendus', label: 'Suspendus', icon: ShieldAlert}
     ];
   });
 
@@ -117,12 +117,13 @@ export class StudentListComponent implements OnInit, OnDestroy {
   async loadStudents(query?: string, status?: StudentStatus, page: number = 0) {
     await this.loadingService.execute(async () => {
       try {
-        await firstValueFrom(this.studentService.getStudents(query, status, page));
+        await firstValueFrom(this.studentService.getStudents(query, status, undefined, page));
       } catch (e) {
         this.notificationService.error('Erreur lors du chargement des élèves.');
       }
     }, 'component');
   }
+
 
   private mapToTableRow(student: StudentSummary): TableRow {
     const initials = (student.firstName?.[0] || '') + (student.lastName?.[0] || '');
@@ -133,8 +134,8 @@ export class StudentListComponent implements OnInit, OnDestroy {
       avatarLabel: initials || '??',
       date: student.birthDate, // Envoyé brut, le Pipe fwDate s'en chargera dans DataList
       badges: [
-        { label: this.getStatusLabel(student.status), type: this.getStatusType(student.status) },
-        { label: student.gender === 'M' ? 'Garçon' : 'Fille', type: 'info' }
+        {label: this.getStatusLabel(student.status), type: this.getStatusType(student.status)},
+        {label: student.gender === 'M' ? 'Garçon' : 'Fille', type: 'info'}
       ],
       rawData: student
     };
@@ -152,11 +153,16 @@ export class StudentListComponent implements OnInit, OnDestroy {
 
   private getStatusType(status: StudentStatus): 'success' | 'warning' | 'danger' | 'info' | 'default' | 'primary' {
     switch (status) {
-      case 'ACTIVE': return 'success';
-      case 'SUSPENDED': return 'warning';
-      case 'LEFT': return 'danger';
-      case 'ARCHIVED': return 'info';
-      default: return 'default';
+      case 'ACTIVE':
+        return 'success';
+      case 'SUSPENDED':
+        return 'warning';
+      case 'LEFT':
+        return 'danger';
+      case 'ARCHIVED':
+        return 'info';
+      default:
+        return 'default';
     }
   }
 
@@ -191,7 +197,7 @@ export class StudentListComponent implements OnInit, OnDestroy {
       if (confirmed) {
         await this.loadingService.execute(async () => {
           try {
-            await firstValueFrom(this.studentService.updateStudent(id, { status: 'SUSPENDED' }));
+            await firstValueFrom(this.studentService.updateStudent(id, {status: 'SUSPENDED'}));
             this.notificationService.success('Élève suspendu avec succès.');
             this.loadStudents(this.searchQuery());
           } catch (e) {

@@ -175,6 +175,12 @@ export class AcademicService {
     );
   }
 
+  getClassById(id: string): Observable<SchoolClass> {
+    return this.http.get<SchoolClass>(`${this.API_URL}/classes/${id}`, { headers: this.getHeaders() }).pipe(
+      catchError(this.handleError('Erreur lors du chargement des détails de la classe'))
+    );
+  }
+
   createClass(request: CreateClassRequest): Observable<SchoolClass> {
     return this.http.post<SchoolClass>(`${this.API_URL}/classes`, request, { headers: this.getHeaders(true) }).pipe(
       catchError(this.handleError('Erreur lors de la création de la classe'))

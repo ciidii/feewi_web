@@ -245,7 +245,7 @@ export class CycleDetailComponent implements OnInit {
   }
 
   goToClassDetails(cls: SchoolClass) {
-    this.router.navigate(['/admin/academic/classes'], {queryParams: {classId: cls.id}});
+    this.router.navigate(['/admin/academic/classes', cls.id]);
   }
 
   // --- GESTION DES FILIÈRES ---
