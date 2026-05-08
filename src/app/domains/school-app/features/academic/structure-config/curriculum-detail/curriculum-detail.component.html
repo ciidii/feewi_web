@@ -132,11 +132,11 @@
         <div class="p-2 space-y-4">
           <div class="flex justify-between items-center">
             <span class="text-xs font-medium text-slate-500">Matières Obligatoires</span>
-            <span class="text-xs font-bold text-midnight">{{ curriculumItems().length - (curriculumItems() | filterBy:'optional':true).length }}</span>
+            <span class="text-xs font-bold text-midnight">{{ mandatoryCount() }}</span>
           </div>
           <div class="flex justify-between items-center">
             <span class="text-xs font-medium text-slate-500">Matières Optionnelles</span>
-            <span class="text-xs font-bold text-midnight">{{ (curriculumItems() | filterBy:'optional':true).length }}</span>
+            <span class="text-xs font-bold text-midnight">{{ optionalCount() }}</span>
           </div>
         </div>
       </section>

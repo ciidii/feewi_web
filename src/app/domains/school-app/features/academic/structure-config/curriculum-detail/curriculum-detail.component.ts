@@ -62,6 +62,7 @@ export class CurriculumDetailComponent implements OnInit {
   readonly BookOpen = BookOpen;
   readonly Clock = Clock;
   readonly GraduationCap = GraduationCap;
+  readonly Edit = Edit;
 
   // États
   levelId = signal<string | null>(null);
@@ -77,6 +78,9 @@ export class CurriculumDetailComponent implements OnInit {
   totalWeeklyHours = computed(() => {
     return this.curriculumItems().reduce((sum, item) => sum + (item.weeklyHours || 0), 0);
   });
+
+  mandatoryCount = computed(() => this.curriculumItems().filter(i => !i.optional).length);
+  optionalCount = computed(() => this.curriculumItems().filter(i => i.optional).length);
 
   // Formulaire d'ajout rapide
   addForm: FormGroup = this.fb.group({
