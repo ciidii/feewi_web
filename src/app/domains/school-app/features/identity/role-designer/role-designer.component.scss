@@ -32,7 +32,7 @@
 .scope-sidebar {
   background: white;
   border-right: 1px solid var(--fw-border-subtle);
-  padding: 1.5rem 1.25rem;
+  padding: 1rem 0.75rem;
   display: flex; flex-direction: column;
   height: 100vh;
   overflow: hidden;
@@ -40,79 +40,79 @@
   z-index: 10;
 
   .sidebar-header {
-    display: flex; align-items: center; gap: 0.75rem;
-    padding-bottom: 1.25rem;
-    margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 0.5rem;
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.75rem;
     border-bottom: 1px solid var(--fw-border-subtle);
 
     .sidebar-brand-icon-alt {
-      width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0;
+      width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
       display: grid; place-items: center;
       background: var(--fw-primary-alpha); color: var(--fw-primary);
     }
 
     .sidebar-brand-text {
-      display: flex; flex-direction: column;
-      .sidebar-brand-name { font-size: 0.8125rem; font-weight: 800; color: var(--fw-midnight); line-height: 1.2; }
-      .sidebar-brand-year { font-size: 10px; color: var(--fw-text-tertiary); font-weight: 600; margin-top: 1px; }
+      display: flex; flex-direction: column; min-width: 0;
+      .sidebar-brand-name { font-size: 0.75rem; font-weight: 800; color: var(--fw-midnight); line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .sidebar-brand-year { font-size: 9px; color: var(--fw-text-tertiary); font-weight: 600; margin-top: 1px; }
     }
   }
 
   .nav-section-title {
-    font-size: 10px; font-weight: 850; text-transform: uppercase;
-    color: var(--fw-text-tertiary); letter-spacing: 0.12em;
-    padding: 0 0.5rem; margin-bottom: 0.75rem;
+    font-size: 9px; font-weight: 850; text-transform: uppercase;
+    color: var(--fw-text-tertiary); letter-spacing: 0.1em;
+    padding: 0 0.5rem; margin-bottom: 0.5rem;
     display: flex; align-items: center; gap: 0.5rem;
 
     .level-count {
       display: inline-flex; align-items: center; justify-content: center;
-      padding: 1px 6px; border-radius: 20px;
-      background: var(--fw-surface-sunken); font-size: 9px; color: var(--fw-text-tertiary);
+      padding: 1px 5px; border-radius: 20px;
+      background: var(--fw-surface-sunken); font-size: 8px; color: var(--fw-text-tertiary);
     }
   }
 
-  .nav-divider { height: 1px; background: var(--fw-border-subtle); margin: 1rem 0.25rem; }
+  .nav-divider { height: 1px; background: var(--fw-border-subtle); margin: 0.75rem 0.25rem; }
 
   // ── Role items ─────────────────────────────────────────────────────────────
   .scope-item {
-    display: flex; align-items: center; gap: 0.875rem;
-    padding: 0.875rem 1rem; border-radius: 16px; border: none;
+    display: flex; align-items: center; gap: 0.625rem;
+    padding: 0.625rem 0.75rem; border-radius: 12px; border: none;
     background: transparent; cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    width: 100%; margin-bottom: 0.5rem;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 100%; margin-bottom: 0.25rem;
     position: relative;
 
     .scope-icon {
-      width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; flex-shrink: 0;
+      width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; flex-shrink: 0;
       background: var(--fw-surface-sunken); color: var(--fw-text-tertiary);
       transition: all 0.25s;
     }
 
     .scope-label-wrap {
       display: flex; flex-direction: column; text-align: left; min-width: 0;
-      .scope-name { font-size: 0.875rem; font-weight: 800; color: var(--fw-midnight); }
-      .scope-sub  { font-size: 10px; color: var(--fw-text-tertiary); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .scope-name { font-size: 0.8125rem; font-weight: 800; color: var(--fw-midnight); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .scope-sub  { font-size: 9px; color: var(--fw-text-tertiary); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     }
 
     .override-dot { 
-      position: absolute; right: 12px; top: 12px;
-      width: 6px; height: 6px; border-radius: 50%; background: var(--fw-warning); 
+      position: absolute; right: 8px; top: 8px;
+      width: 5px; height: 5px; border-radius: 50%; background: var(--fw-warning); 
     }
 
-    &:hover { background: var(--fw-surface-sunken); transform: translateX(3px); }
+    &:hover { background: var(--fw-surface-sunken); transform: translateX(2px); }
 
     &.active {
       background: var(--fw-midnight);
-      transform: translateX(3px);
-      box-shadow: var(--fw-shadow-lg);
+      transform: translateX(2px);
+      box-shadow: var(--fw-shadow-md);
       .scope-icon  { background: rgb(255 255 255 / 12%); color: white; }
       .scope-name  { color: white; }
-      .scope-sub   { color: rgb(255 255 255 / 50%); }
+      .scope-sub   { color: rgb(255 255 255 / 40%); }
     }
   }
 
   .levels-scroll {
-    flex: 1; overflow-y: auto; padding-right: 2px;
+    flex: 1; overflow-y: auto; overflow-x: hidden; padding-right: 2px;
     &::-webkit-scrollbar { width: 3px; }
     &::-webkit-scrollbar-thumb { background: var(--fw-border); border-radius: 10px; }
   }
