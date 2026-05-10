@@ -1,4 +1,4 @@
-@use '../../../../../../../styles/tokens' as *;
+@use '../../../../../../../../styles/tokens' as *;
 
 :host {
   display: block;
@@ -53,7 +53,7 @@
 ::ng-deep .mat-mdc-select.fw-input {
   display: flex;
   align-items: center;
-  
+
   .mat-mdc-select-trigger { width: 100%; }
   .mat-mdc-select-value { color: var(--fw-midnight); }
 }

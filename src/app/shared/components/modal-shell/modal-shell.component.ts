@@ -11,10 +11,15 @@ import {A11yModule} from '@angular/cdk/a11y';
     <div class="fw-modal-container animate-in fade-in zoom-in duration-200" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
       <!-- HEADER -->
       <header class="modal-header">
-        <div class="title-zone">
-          <h2 class="modal-title" *ngIf="title">{{ title }}</h2>
-          <p class="modal-subtitle" *ngIf="subtitle">{{ subtitle }}</p>
-          <ng-content select="[header-extra]"></ng-content>
+        <div class="header-left-zone">
+          <div class="modal-icon-wrap" *ngIf="icon">
+            <lucide-icon [name]="icon" [size]="20"></lucide-icon>
+          </div>
+          <div class="title-zone">
+            <h2 class="modal-title" *ngIf="title">{{ title }}</h2>
+            <p class="modal-subtitle" *ngIf="subtitle">{{ subtitle }}</p>
+            <ng-content select="[header-extra]"></ng-content>
+          </div>
         </div>
         <button (click)="close.emit()" class="close-icon-btn" aria-label="Fermer">
           <lucide-icon [name]="XIcon" [size]="20"></lucide-icon>
@@ -58,10 +63,27 @@ import {A11yModule} from '@angular/cdk/a11y';
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      padding: var(--fw-space-lg) var(--fw-space-lg) var(--fw-space-md);
+      padding: var(--fw-space-lg);
       border-bottom: 1px solid var(--fw-border);
       background: var(--fw-surface-card);
       z-index: 10;
+
+      .header-left-zone {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .modal-icon-wrap {
+        width: 44px;
+        height: 44px;
+        background: var(--fw-surface-sunken);
+        color: var(--fw-midnight);
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+      }
 
       .modal-title {
         font-family: var(--fw-font-display);
@@ -132,6 +154,7 @@ import {A11yModule} from '@angular/cdk/a11y';
 export class FwModalShellComponent {
   @Input() title?: string;
   @Input() subtitle?: string;
+  @Input() icon?: any;
   @Input() showFooter = true;
 
   @Output() close = new EventEmitter<void>();
