@@ -38,50 +38,28 @@
       </div>
     </div>
 
-    <!-- 2. Calendrier Administratif -->
+    <!-- 2. Temporalité Globale -->
     <div class="space-y-6">
       <header class="section-header">
         <lucide-icon [name]="Calendar" [size]="14"></lucide-icon>
-        <span class="label">Dates Administratives</span>
+        <span class="label">Période d'Exercice</span>
       </header>
 
       <div class="grid grid-cols-2 gap-6">
         <div class="fw-field">
-          <label class="fw-label">Début d'exercice</label>
+          <label class="fw-label">Date de début</label>
           <div class="fw-input-wrapper">
-            <input type="date" formControlName="adminStartDate" class="fw-input" [class.error]="isInvalid('adminStartDate')"/>
+            <input type="date" formControlName="startDate" class="fw-input" [class.error]="isInvalid('startDate')"/>
           </div>
         </div>
         <div class="fw-field">
-          <label class="fw-label">Fin d'exercice</label>
+          <label class="fw-label">Date de fin</label>
           <div class="fw-input-wrapper">
-            <input type="date" formControlName="adminEndDate" class="fw-input" [class.error]="isInvalid('adminEndDate')"/>
+            <input type="date" formControlName="endDate" class="fw-input" [class.error]="isInvalid('endDate')"/>
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- 3. Calendrier Pédagogique -->
-    <div class="space-y-6">
-      <header class="section-header">
-        <lucide-icon [name]="Clock" [size]="14"></lucide-icon>
-        <span class="label">Période des Cours</span>
-      </header>
-
-      <div class="grid grid-cols-2 gap-6">
-        <div class="fw-field">
-          <label class="fw-label">Début des leçons</label>
-          <div class="fw-input-wrapper">
-            <input type="date" formControlName="lessonsStartDate" class="fw-input"/>
-          </div>
-        </div>
-        <div class="fw-field">
-          <label class="fw-label">Fin des leçons</label>
-          <div class="fw-input-wrapper">
-            <input type="date" formControlName="lessonsEndDate" class="fw-input"/>
-          </div>
-        </div>
-      </div>
+      <p class="text-[10px] text-slate-400 italic ml-1">Les jalons spécifiques (cours, inscriptions, examens) seront configurables après la création.</p>
     </div>
 
     <!-- Info Box Minimalist -->

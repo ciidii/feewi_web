@@ -5,6 +5,7 @@ import {EnvironmentService} from './environment.service';
 import {NotificationService} from '../../shared/services/notification.service';
 import {TenantContextService} from './tenant-context.service';
 import {
+  AcademicMilestone,
   AcademicYear,
   CreateClassRequest,
   CreateYearRequest,
@@ -114,7 +115,29 @@ export class AcademicService {
   }
 
   // ===========================================
-  // PÉRIODES & CONGÉS
+  // JALONS (MILESTONES) - NOUVEAU V2
+  // ===========================================
+
+  getMilestones(yearId: string): Observable<AcademicMilestone[]> {
+    return this.http.get<AcademicMilestone[]>(`${this.API_URL}/years/${yearId}/milestones`, { headers: this.getHeaders() }).pipe(
+      catchError(this.handleError('Erreur lors du chargement des jalons du calendrier'))
+    );
+  }
+
+  createMilestone(yearId: string, milestone: Partial<AcademicMilestone>): Observable<AcademicMilestone> {
+    return this.http.post<AcademicMilestone>(`${this.API_URL}/years/${yearId}/milestones`, milestone, { headers: this.getHeaders(true) }).pipe(
+      catchError(this.handleError('Erreur lors de la création du jalon'))
+    );
+  }
+
+  deleteMilestone(yearId: string, milestoneId: string): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/years/${yearId}/milestones/${milestoneId}`, { headers: this.getHeaders(true) }).pipe(
+      catchError(this.handleError('Erreur lors de la suppression du jalon'))
+    );
+  }
+
+  // ===========================================
+  // PÉRIODES & CONGÉS (Anciens, gardés pour compatibilité ou migration)
   // ===========================================
 
   getPeriods(yearId: string): Observable<Period[]> {

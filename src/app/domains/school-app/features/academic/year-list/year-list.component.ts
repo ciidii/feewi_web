@@ -113,9 +113,9 @@ export class YearListComponent implements OnInit {
         return {
           id: year.id,
           title: year.label,
-          subtitle: `${this.getSystemTypeLabel(year.systemType)} • ${new Date(year.adminStartDate).getFullYear()}-${new Date(year.adminEndDate).getFullYear()}`,
+          subtitle: `${this.getSystemTypeLabel(year.systemType)} • Exercice du ${new Date(year.startDate).toLocaleDateString()} au ${new Date(year.endDate).toLocaleDateString()}`,
           avatarLabel: yearInitials,
-          date: `Cours: ${new Date(year.lessonsStartDate).toLocaleDateString()} au ${new Date(year.lessonsEndDate).toLocaleDateString()}`,
+          date: `Statut: ${year.status}`,
           badges: [{
             label: year.status,
             type: this.getBadgeType(year.status)

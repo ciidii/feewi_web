@@ -6,12 +6,20 @@ export interface AcademicYear {
   label: string;
   status: YearStatus;
   systemType: AcademicSystemType;
-  adminStartDate: string;
-  adminEndDate: string;
-  lessonsStartDate: string;
-  lessonsEndDate: string;
-  registrationStartDate?: string;
-  registrationEndDate?: string;
+  startDate: string;
+  endDate: string;
+  createdAt?: string;
+}
+
+export type MilestoneType = 'ENROLLMENT' | 'LESSONS' | 'EXAMS' | 'RE_ENROLLMENT' | 'VACATION';
+
+export interface AcademicMilestone {
+  id: string;
+  yearId: string;
+  type: MilestoneType;
+  label: string;
+  startDate: string;
+  endDate: string;
   createdAt?: string;
 }
 
@@ -147,8 +155,6 @@ export interface CreateClassRequest {
 export interface CreateYearRequest {
   label: string;
   systemType: AcademicSystemType;
-  adminStartDate: string;
-  adminEndDate: string;
-  lessonsStartDate: string;
-  lessonsEndDate: string;
+  startDate: string;
+  endDate: string;
 }

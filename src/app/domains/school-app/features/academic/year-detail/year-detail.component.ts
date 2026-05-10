@@ -19,12 +19,15 @@ import {
   Printer,
   RotateCcw,
   Trash2,
-  XCircle
+  XCircle,
+  Globe,
+  BookOpen,
+  Hash
 } from 'lucide-angular';
 import {PeriodFormComponent} from './components/period-form/period-form.component';
 import {HolidayFormComponent} from './components/holiday-form/holiday-form.component';
 import {RowAction, TableRow} from '../../../../../shared/models/data-list.models';
-import {AcademicYear, Holiday, Period} from '../../../../../core/models/academic.model';
+import {AcademicMilestone, AcademicYear, Holiday, Period} from '../../../../../core/models/academic.model';
 import {AcademicService} from '../../../../../core/services/academic.service';
 import {NotificationService} from '../../../../../shared/services/notification.service';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
@@ -40,12 +43,13 @@ import {BlockLoaderComponent} from '../../../../../shared/components/loader/bloc
 
 export interface TimelineEvent {
   id: string;
-  type: 'PERIOD' | 'HOLIDAY' | 'EXAM';
+  type: 'PERIOD' | 'HOLIDAY' | 'EXAM' | 'MILESTONE';
   label: string;
   startDate: string;
   endDate: string;
   description?: string;
   isClosed?: boolean;
+  milestoneType?: string;
 }
 
 @Component({
@@ -77,6 +81,7 @@ export class YearDetailComponent implements OnInit {
   year = signal<AcademicYear | null>(null);
   periods = signal<Period[]>([]);
   holidays = signal<Holiday[]>([]);
+  milestones = signal<AcademicMilestone[]>([]);
   isLoading = signal(true);
   isActionLoading = signal(false);
   activeTabId = signal('timeline');
@@ -131,10 +136,11 @@ export class YearDetailComponent implements OnInit {
     }));
   });
 
-  // Construction de la Timeline
+  // Construction de la Timeline (Intègre désormais les Milestones V2)
   timelineEvents = computed<TimelineEvent[]>(() => {
     const events: TimelineEvent[] = [];
 
+    // 1. Ajouter les périodes de cours
     this.periods().forEach(p => {
       events.push({
         id: p.id,
@@ -157,6 +163,7 @@ export class YearDetailComponent implements OnInit {
       }
     });
 
+    // 2. Ajouter les vacances
     this.holidays().forEach(h => {
       events.push({
         id: h.id,
@@ -168,8 +175,41 @@ export class YearDetailComponent implements OnInit {
       });
     });
 
+    // 3. Ajouter les Jalons V2 (ENROLLMENT, LESSONS, etc.)
+    this.milestones().forEach(m => {
+      events.push({
+        id: m.id,
+        type: 'MILESTONE',
+        label: m.label,
+        startDate: m.startDate,
+        endDate: m.endDate,
+        milestoneType: m.type,
+        description: this.getMilestoneDescription(m.type)
+      });
+    });
+
     return events.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
   });
+
+  private getMilestoneDescription(type: string): string {
+    switch (type) {
+      case 'ENROLLMENT': return 'Période d\'inscription des nouveaux élèves';
+      case 'RE_ENROLLMENT': return 'Campagne de réinscription des élèves actuels';
+      case 'LESSONS': return 'Période effective des cours';
+      case 'EXAMS': return 'Sessions d\'examens nationaux ou blancs';
+      default: return 'Jalon institutionnel';
+    }
+  }
+
+  getMilestoneIcon(type: string): any {
+    switch (type) {
+      case 'ENROLLMENT': return Globe;
+      case 'RE_ENROLLMENT': return RotateCcw;
+      case 'LESSONS': return BookOpen;
+      case 'EXAMS': return Hash;
+      default: return CheckCircle;
+    }
+  }
 
   // Icônes
   readonly ArrowLeft = ArrowLeft;
@@ -189,6 +229,8 @@ export class YearDetailComponent implements OnInit {
   readonly Archive = Archive;
   readonly RotateCcw = RotateCcw;
   readonly XCircle = XCircle;
+  readonly Globe = Globe;
+  readonly ListChecks = ListChecks;
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -200,15 +242,17 @@ export class YearDetailComponent implements OnInit {
   async loadYearDetails(id: string) {
     this.isLoading.set(true);
     try {
-      const [yearData, periodsData, holidaysData] = await Promise.all([
+      const [yearData, periodsData, holidaysData, milestonesData] = await Promise.all([
         firstValueFrom(this.academicService.getYearById(id)),
         firstValueFrom(this.academicService.getPeriods(id)),
-        firstValueFrom(this.academicService.getHolidays(id))
+        firstValueFrom(this.academicService.getHolidays(id)),
+        firstValueFrom(this.academicService.getMilestones(id))
       ]);
 
       this.year.set(yearData);
       this.periods.set(periodsData);
       this.holidays.set(holidaysData);
+      this.milestones.set(milestonesData);
     } catch (error) {
       this.notificationService.error("Erreur lors du chargement des détails de l'année.");
     } finally {

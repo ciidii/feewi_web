@@ -9,6 +9,7 @@ import {AlertCircle, Calendar, Clock, Hash, Info, LucideAngularModule, Type} fro
 import {AcademicService} from '../../../../../../../core/services/academic.service';
 import {NotificationService} from '../../../../../../../shared/services/notification.service';
 import {FormShellComponent} from '../../../../../../../shared/components/form-shell/form-shell';
+import {firstValueFrom} from 'rxjs';
 
 @Component({
   selector: 'app-year-form',
@@ -43,10 +44,8 @@ export class YearFormComponent {
   yearForm: FormGroup = this.fb.group({
     label: ['', [Validators.required, Validators.pattern('^20[0-9]{2}-20[0-9]{2}$')]],
     systemType: ['TRIMESTER', [Validators.required]],
-    adminStartDate: ['', [Validators.required]],
-    adminEndDate: ['', [Validators.required]],
-    lessonsStartDate: ['', [Validators.required]],
-    lessonsEndDate: ['', [Validators.required]]
+    startDate: ['', [Validators.required]],
+    endDate: ['', [Validators.required]]
   });
 
   isLoading = signal(false);
@@ -57,16 +56,15 @@ export class YearFormComponent {
       return;
     }
 
-    // Validation métier des dates (simplifiée ici)
-    const { adminStartDate, adminEndDate, lessonsStartDate, lessonsEndDate } = this.yearForm.value;
-    if (new Date(adminStartDate) >= new Date(adminEndDate)) {
-      this.notificationService.error("La date de fin administrative doit être après le début.");
+    const { startDate, endDate } = this.yearForm.value;
+    if (new Date(startDate) >= new Date(endDate)) {
+      this.notificationService.error("La date de fin doit être après le début.");
       return;
     }
 
     this.isLoading.set(true);
     try {
-      await this.academicService.createYear(this.yearForm.value);
+      await firstValueFrom(this.academicService.createYear(this.yearForm.value));
       this.notificationService.success('La rentrée a été planifiée avec succès.');
       this.dialogRef.close(true);
     } catch (error) {
