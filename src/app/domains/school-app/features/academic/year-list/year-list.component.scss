@@ -6,8 +6,14 @@
   background: var(--fw-ice);
 }
 
+.list-page-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 .list-container-integrated {
   flex: 1;
   overflow: hidden;
-  padding: 0 1.5rem 1.5rem;
 }

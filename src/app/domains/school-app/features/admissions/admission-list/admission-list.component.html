@@ -4,94 +4,89 @@
   [icon]="Layers"
   density="compact"
 >
-  <!-- BARRE DE COMMANDE UNIFIÉE (Composant Partagé) -->
-  <app-fw-list-command-bar
-    [searchQuery]="searchQuery()"
-    [searchPlaceholder]="'Rechercher un candidat...'"
-    [totalElements]="totalElements()"
-    [pageSize]="pageSize()"
-    [pageSizeOptions]="pageSizeOptions"
-    [activeFilters]="activeFilterChips()"
-    [isAllSelected]="admissionRows().length > 0 && selectedIds().size === admissionRows().length"
-    [isPartiallySelected]="selectedIds().size > 0 && selectedIds().size < admissionRows().length"
-    [selectedCount]="selectedIds().size"
-    (toggleAll)="toggleAllRows()"
-    (searchChange)="searchQuery.set($event); onFilterChange()"
-    (clearSearch)="searchQuery.set(''); onFilterChange()"
-    (pageSizeChange)="onPageSizeChange($event)"
-    (removeFilter)="removeFilter($event)"
-    (clearAllFilters)="clearAllFilters()"
-  >
-    <!-- ACTIONS DE MASSE (Nouveau slot) -->
-    <div bulk-actions>
-      <app-fw-button 
-        variant="danger" 
-        size="sm" 
-        [icon]="Trash2" 
-        (click)="handleBulkDelete()"
-        [loading]="isLoading()">
-        Supprimer la sélection
-      </app-fw-button>
-    </div>
-
-    <!-- ACTIONS PRIMAIRES -->
-    <div primary-actions class="action-group-integrated">
-      <app-fw-button variant="tertiary" size="sm" [icon]="Download" title="Exporter"></app-fw-button>
-      <app-fw-button variant="tertiary" size="sm" [icon]="RefreshCw" [loading]="isLoading()" (click)="loadAdmissions()" title="Actualiser"></app-fw-button>
-      <div class="divider-v"></div>
-      <app-fw-button variant="primary" size="sm" [icon]="UserPlus" routerLink="/admin/admissions/direct">
-        Nouveau Dossier
-      </app-fw-button>
-    </div>
-
-    <!-- FILTRES RAPIDES -->
-    <div quick-filters class="quick-filters-integrated">
-      <button class="filter-pill-toggle" [class.active]="incompleteOnly()" (click)="incompleteOnly.set(!incompleteOnly()); onFilterChange()">
-        <lucide-icon [name]="XCircle" [size]="14"></lucide-icon>
-        <span>Incomplets</span>
-      </button>
-
-      <div class="divider-v small"></div>
-
-      <select class="academic-select-ghost" [(ngModel)]="selectedYear" (change)="onFilterChange()">
-        <option value="">Toutes les années</option>
-        <option *ngFor="let year of years()" [value]="year.id">{{ year.label }}</option>
-      </select>
-
-      <select class="academic-select-ghost" [(ngModel)]="selectedLevel" (change)="onFilterChange()">
-        <option value="">Tous les niveaux</option>
-        <option *ngFor="let level of levels()" [value]="level.id">{{ level.name }}</option>
-      </select>
-
-      <button class="more-filters-trigger" (click)="openFilterModal()" [class.has-active]="selectedChannel() || selectedStartDate()">
-        <lucide-icon [name]="Filter" [size]="14"></lucide-icon>
-        <span>Avancé</span>
-      </button>
-    </div>
-  </app-fw-list-command-bar>
-
-  <!-- LISTE DES DONNÉES -->
-  <div class="list-container-integrated animate-in fade-in duration-700">
-    <app-data-list
-      [(selectedIds)]="selectedIds"
-      [data]="admissionRows()"
-      [tabs]="admissionTabs()"
-      [activeTab]="activeTab()"
-      [actions]="admissionActions"
-      [isLoading]="isLoading()"
-      [page]="currentPage()"
-      [total]="totalElements()"
-      [totalPages]="totalPages()"
-      [showSearch]="false"
-      [showFilterButton]="false"
-      [cardMode]="false"
-      defaultView="table"
-      (onTabChange)="onTabChange($event)"
-      (onPageChange)="onPageChange($event)"
-      (onAction)="handleAction($event)"
-      (onRowClick)="handleAction({ actionId: 'view', row: $event })"
+  <!-- CONTENU DE PAGE ALIGNÉ -->
+  <div class="list-page-content animate-in fade-in duration-500">
+    
+    <!-- BARRE DE COMMANDE UNIFIÉE (Composant Partagé) -->
+    <app-fw-list-command-bar
+      [searchQuery]="searchQuery()"
+      [searchPlaceholder]="'Rechercher un candidat...'"
+      [totalElements]="totalElements()"
+      [pageSize]="pageSize()"
+      [pageSizeOptions]="pageSizeOptions"
+      [activeFilters]="activeFilterChips()"
+      [isAllSelected]="admissionRows().length > 0 && selectedIds().size === admissionRows().length"
+      [isPartiallySelected]="selectedIds().size > 0 && selectedIds().size < admissionRows().length"
+      [selectedCount]="selectedIds().size"
+      (toggleAll)="toggleAllRows()"
+      (searchChange)="searchQuery.set($event); onFilterChange()"
+      (clearSearch)="searchQuery.set(''); onFilterChange()"
+      (pageSizeChange)="onPageSizeChange($event)"
+      (removeFilter)="removeFilter($event)"
+      (clearAllFilters)="clearAllFilters()"
     >
-    </app-data-list>
+      <!-- ACTIONS DE MASSE (Nouveau slot) -->
+      <div bulk-actions>
+        <app-fw-button 
+          variant="danger" 
+          size="sm" 
+          [icon]="Trash2" 
+          (click)="handleBulkDelete()"
+          [loading]="isLoading()">
+          Supprimer la sélection
+        </app-fw-button>
+      </div>
+
+      <!-- ACTIONS PRIMAIRES -->
+      <div primary-actions class="action-group-integrated">
+        <app-fw-button variant="tertiary" size="sm" [icon]="Download" title="Exporter"></app-fw-button>
+        <app-fw-button variant="tertiary" size="sm" [icon]="RefreshCw" [loading]="isLoading()" (click)="loadAdmissions()" title="Actualiser"></app-fw-button>
+        <div class="divider-v"></div>
+        <app-fw-button variant="primary" size="sm" [icon]="UserPlus" routerLink="/admin/admissions/direct">
+          Nouveau Dossier
+        </app-fw-button>
+      </div>
+
+      <!-- FILTRES RAPIDES -->
+      <div quick-filters class="quick-filters-integrated">
+        <button class="filter-pill-toggle" [class.active]="incompleteOnly()" (click)="incompleteOnly.set(!incompleteOnly()); onFilterChange()">
+          <lucide-icon [name]="XCircle" [size]="14"></lucide-icon>
+          <span>Incomplets</span>
+        </button>
+
+        <div class="divider-v small"></div>
+
+        <button class="more-filters-trigger" (click)="openFilterModal()" [class.has-active]="selectedChannel() || selectedStartDate()">
+          <lucide-icon [name]="Filter" [size]="14"></lucide-icon>
+          <span>Avancé</span>
+        </button>
+      </div>
+    </app-fw-list-command-bar>
+
+    <!-- LISTE DES DONNÉES -->
+    <div class="list-container-integrated">
+      <app-data-list
+        [(selectedIds)]="selectedIds"
+        [data]="admissionRows()"
+        [tabs]="admissionTabs()"
+        [activeTab]="activeTab()"
+        [actions]="admissionActions"
+        [isLoading]="isLoading()"
+        [page]="currentPage()"
+        [total]="totalElements()"
+        [totalPages]="totalPages()"
+        [showSearch]="false"
+        [showFilterButton]="false"
+        [cardMode]="false"
+        defaultView="table"
+        (onTabChange)="onTabChange($event)"
+        (onPageChange)="onPageChange($event)"
+        (onAction)="handleAction($event)"
+        (onRowClick)="handleAction({ actionId: 'view', row: $event })"
+      >
+      </app-data-list>
+    </div>
+
   </div>
 
 </app-fw-page-shell>

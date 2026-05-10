@@ -39,16 +39,25 @@ export class SubjectLibraryComponent implements OnInit {
   readonly Trash2 = Trash2;
   readonly Search = Search;
   readonly Info = Info;
+  readonly RefreshCw = RefreshCw;
 
   // États
   subjects = signal<Subject[]>([]);
   isLoading = signal(true);
   searchQuery = signal('');
 
+  activeFilterChips = computed(() => {
+    const chips: any[] = [];
+    if (this.searchQuery()) {
+      chips.push({key: 'q', label: 'Recherche', value: this.searchQuery()});
+    }
+    return chips;
+  });
+
   // Actions pour les matières
   readonly subjectActions: RowAction[] = [
-    { id: 'edit', label: 'Modifier', icon: Edit, type: 'primary' },
-    { id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger' }
+    {id: 'edit', label: 'Modifier', icon: Edit, type: 'primary'},
+    {id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger'}
   ];
 
   // Transformation des matières pour le DataList avec filtrage
@@ -99,7 +108,7 @@ export class SubjectLibraryComponent implements OnInit {
     const dialogRef = this.dialog.open(SubjectFormComponent, {
       width: '480px',
       panelClass: 'feewi-dialog-panel',
-      data: { subject }
+      data: {subject}
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -131,8 +140,15 @@ export class SubjectLibraryComponent implements OnInit {
     });
   }
 
-  updateSearch(event: Event) {
-    const query = (event.target as HTMLInputElement).value;
+  removeFilter(key: string) {
+    if (key === 'q') this.searchQuery.set('');
+  }
+
+  clearAllFilters() {
+    this.searchQuery.set('');
+  }
+
+  onSearch(query: string) {
     this.searchQuery.set(query);
   }
 }

@@ -4,53 +4,58 @@
   [icon]="School"
   density="compact"
 >
-  <!-- BARRE DE COMMANDE UNIFIÉE -->
-  <app-fw-list-command-bar
-    [searchQuery]="searchQuery()"
-    [searchPlaceholder]="'Rechercher une classe...'"
-    [totalElements]="classes().length"
-    [activeFilters]="activeFilterChips()"
-    (searchChange)="searchQuery.set($event)"
-    (clearSearch)="searchQuery.set('')"
-    (removeFilter)="removeFilter($event)"
-    (clearAllFilters)="clearAllFilters()"
-  >
-    <!-- ACTIONS PRIMAIRES -->
-    <div primary-actions class="flex items-center gap-2">
-      <app-fw-button variant="tertiary" size="sm" [icon]="RefreshCw" [loading]="isLoading()" (click)="loadClasses(selectedYear())" title="Actualiser"></app-fw-button>
-      <div class="divider-v"></div>
-      <app-fw-button 
-        (click)="openAddClassForm()"
-        variant="primary"
-        size="sm"
-        [icon]="Plus"
-      >
-        Ouvrir une classe
-      </app-fw-button>
+  <!-- CONTENU DE PAGE ALIGNÉ -->
+  <div class="list-page-content animate-in fade-in duration-500">
+    
+    <!-- BARRE DE COMMANDE UNIFIÉE -->
+    <app-fw-list-command-bar
+      [searchQuery]="searchQuery()"
+      [searchPlaceholder]="'Rechercher une classe...'"
+      [totalElements]="classes().length"
+      [activeFilters]="activeFilterChips()"
+      (searchChange)="searchQuery.set($event)"
+      (clearSearch)="searchQuery.set('')"
+      (removeFilter)="removeFilter($event)"
+      (clearAllFilters)="clearAllFilters()"
+    >
+      <!-- ACTIONS PRIMAIRES -->
+      <div primary-actions class="flex items-center gap-2">
+        <app-fw-button variant="tertiary" size="sm" [icon]="RefreshCw" [loading]="isLoading()" (click)="loadClasses(selectedYear())" title="Actualiser"></app-fw-button>
+        <div class="divider-v"></div>
+        <app-fw-button 
+          (click)="openAddClassForm()"
+          variant="primary"
+          size="sm"
+          [icon]="Plus"
+        >
+          Ouvrir une classe
+        </app-fw-button>
+      </div>
+
+      <!-- FILTRES RAPIDES -->
+      <div quick-filters>
+        <button class="more-filters-trigger" (click)="openFilterModal()" [class.has-active]="selectedLevel() || selectedYear() !== currentYear()?.id">
+          <lucide-icon [name]="Filter" [size]="14"></lucide-icon>
+          <span>Filtres</span>
+        </button>
+      </div>
+    </app-fw-list-command-bar>
+
+    <!-- LISTE DES CLASSES -->
+    <div class="list-container-integrated">
+      <app-data-list
+        [data]="displayClasses()"
+        [total]="displayClasses().length"
+        [actions]="classActions"
+        [isLoading]="isLoading()"
+        [showSearch]="false"
+        [showFilterButton]="false"
+        [cardMode]="false"
+        defaultView="table"
+        (onAction)="handleClassAction($event)"
+      ></app-data-list>
     </div>
 
-    <!-- FILTRES RAPIDES -->
-    <div quick-filters>
-      <button class="more-filters-trigger" (click)="openFilterModal()" [class.has-active]="selectedLevel() || selectedYear() !== currentYear()?.id">
-        <lucide-icon [name]="Filter" [size]="14"></lucide-icon>
-        <span>Filtres</span>
-      </button>
-    </div>
-  </app-fw-list-command-bar>
-
-  <!-- LISTE DES CLASSES -->
-  <div class="list-container-integrated animate-in fade-in duration-500">
-    <app-data-list
-      [data]="displayClasses()"
-      [total]="displayClasses().length"
-      [actions]="classActions"
-      [isLoading]="isLoading()"
-      [showSearch]="false"
-      [showFilterButton]="false"
-      [cardMode]="false"
-      defaultView="table"
-      (onAction)="handleClassAction($event)"
-    ></app-data-list>
   </div>
 
 </app-fw-page-shell>

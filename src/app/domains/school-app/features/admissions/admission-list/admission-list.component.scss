@@ -1,139 +1,21 @@
 @use '../../../../../../styles/tokens' as *;
 
-:host { display: block; height: 100%; }
+:host { display: block; height: 100%; background: var(--fw-ice); }
 
-/* --- BARRE DE COMMANDE UNIFIÉE (STICKY) --- */
-.unified-command-bar {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.08);
-  margin-bottom: 0.5rem;
-  border: 1px solid var(--fw-border-subtle);
+.list-page-content {
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  overflow: hidden;
-
-  @media (max-width: 1200px) { position: static; }
-}
-
-.command-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem 1.5rem;
-  gap: 1.5rem;
-
-  &.primary-row {
-    background: white;
-    border-bottom: 1px solid var(--fw-surface-sunken);
-  }
-
-  &.filter-row {
-    background: #fafbfc;
-    padding: 0.5rem 1.5rem;
-  }
-}
-
-.search-box-academic {
-  flex: 1;
-  max-width: 500px;
-  display: flex;
-  align-items: center;
-  background: var(--fw-surface-sunken);
-  border-radius: 8px;
-  padding: 0 1rem;
-  height: 38px;
-  transition: all 0.2s;
-  border: 1px solid transparent;
-
-  &:focus-within {
-    background: white;
-    border-color: var(--fw-primary);
-    box-shadow: 0 0 0 4px var(--fw-primary-alpha);
-  }
-
-  lucide-icon { color: var(--fw-text-tertiary); margin-right: 0.75rem; }
-  input { flex: 1; background: transparent; border: none; outline: none; font-size: 0.8125rem; font-weight: 600; color: var(--fw-midnight); }
-  .clear-btn { background: transparent; border: none; color: var(--fw-text-tertiary); cursor: pointer; padding: 4px; &:hover { color: var(--fw-midnight); } }
-}
-
-.action-group-integrated {
-  display: flex;
-  align-items: center;
   gap: 0.5rem;
-  .divider-v { width: 1px; height: 24px; background: var(--fw-border-subtle); margin: 0 0.5rem; }
-}
-
-.quick-filters-integrated {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-
-  .filter-pill-toggle {
-    height: 32px; padding: 0 0.875rem; border-radius: 100px; border: 1.5px solid var(--fw-border);
-    background: white; font-size: 11px; font-weight: 800; color: var(--fw-text-secondary);
-    display: flex; align-items: center; gap: 0.5rem; cursor: pointer; transition: all 0.2s;
-    text-transform: uppercase; letter-spacing: 0.02em;
-    &:hover { border-color: var(--fw-primary); color: var(--fw-primary); }
-    &.active { background: var(--fw-error-bg); color: var(--fw-error); border-color: var(--fw-error); }
-  }
-
-  .academic-select-ghost {
-    height: 32px; background: transparent; border: none; font-size: 0.8125rem; font-weight: 700;
-    color: var(--fw-text-secondary); cursor: pointer; padding: 0 0.5rem; border-radius: 6px;
-    &:hover { background: var(--fw-surface-sunken); color: var(--fw-midnight); }
-  }
-
-  .more-filters-trigger {
-    height: 32px; padding: 0 0.75rem; border-radius: 6px; border: none; background: transparent;
-    font-size: 11px; font-weight: 850; color: var(--fw-primary); text-transform: uppercase;
-    display: flex; align-items: center; gap: 0.5rem; cursor: pointer;
-    &:hover { background: var(--fw-primary-alpha); }
-  }
-
-  .divider-v.small { height: 16px; margin: 0 0.25rem; }
-}
-
-.pagination-controls-integrated {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  .results-text { font-size: 11px; color: var(--fw-text-tertiary); strong { color: var(--fw-midnight); font-weight: 850; } }
-  .page-size-select {
-    background: transparent; border: 1.5px solid var(--fw-border); border-radius: 6px;
-    font-size: 10px; font-weight: 850; padding: 2px 4px; color: var(--fw-text-secondary); outline: none;
-    &:focus { border-color: var(--fw-primary); }
-  }
-}
-
-.active-chips-row {
-  padding: 0.5rem 1.5rem;
-  background: white;
-  border-top: 1px solid var(--fw-surface-sunken);
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-
-  .academic-tag {
-    display: flex; align-items: center; gap: 0.5rem; padding: 3px 8px; background: var(--fw-surface-sunken); border-radius: 6px;
-    .t-label { font-size: 9px; font-weight: 800; color: var(--fw-text-tertiary); text-transform: uppercase; }
-    .t-val { font-size: 10px; font-weight: 750; color: var(--fw-midnight); }
-    button { border: none; background: transparent; padding: 2px; border-radius: 4px; cursor: pointer; color: var(--fw-text-tertiary); &:hover { color: var(--fw-error); } }
-  }
-
-  .btn-clear-all { font-size: 10px; font-weight: 850; color: var(--fw-primary); text-transform: uppercase; background: transparent; border: none; cursor: pointer; &:hover { text-decoration: underline; } }
 }
 
 .list-container-integrated {
-  background: white;
-  border-radius: 0 0 16px 16px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+  flex: 1;
   overflow: hidden;
-  margin-top: -1px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid var(--fw-border-subtle);
+  box-shadow: var(--fw-shadow-sm);
 
   ::ng-deep {
     tr { background-color: white !important; transition: all 0.15s ease-out !important; }
