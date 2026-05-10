@@ -205,10 +205,10 @@ export class StudentListComponent implements OnInit, OnDestroy {
     const id = event.row.id as string;
     switch (event.actionId) {
       case 'view':
-        this.notificationService.info('Détail élève bientôt disponible.');
+        this.router.navigate(['/admin/registry/students', id]);
         break;
       case 'edit':
-        this.notificationService.info('Édition élève bientôt disponible.');
+        this.router.navigate(['/admin/registry/students', id, 'edit']);
         break;
       case 'suspend':
         this.confirmSuspend(id, event.row.title);

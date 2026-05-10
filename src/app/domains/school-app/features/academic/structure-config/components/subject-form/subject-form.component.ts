@@ -2,7 +2,7 @@ import {Component, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
-import {BookOpen, Info, LucideAngularModule, Tag, Type} from 'lucide-angular';
+import {BookOpen, CheckCircle, Info, Layers, LucideAngularModule, Tag, Type} from 'lucide-angular';
 import {firstValueFrom} from 'rxjs';
 import {AcademicService} from '../../../../../../../core/services/academic.service';
 import {NotificationService} from '../../../../../../../shared/services/notification.service';
@@ -79,4 +79,7 @@ export class SubjectFormComponent implements OnInit {
     const control = this.subjectForm.get(controlName);
     return !!(control && control.invalid && (control.dirty || control.touched));
   }
+
+  protected readonly Layers = Layers;
+  protected readonly CheckCircle = CheckCircle;
 }

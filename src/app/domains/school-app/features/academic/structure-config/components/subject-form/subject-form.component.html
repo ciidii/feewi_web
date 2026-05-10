@@ -1,6 +1,6 @@
 <app-fw-form-shell
   [title]="isEditMode ? 'Modifier la Matière' : 'Nouvelle Matière'"
-  [subtitle]="'Référentiel global des disciplines d\\'enseignement.'"
+  [subtitle]="'Référentiel global des disciplines d\\enseignement.'"
   [icon]="BookOpen"
   [saveLabel]="isEditMode ? 'Enregistrer' : 'Créer la matière'"
   [isLoading]="isLoading()"
@@ -64,9 +64,9 @@
             <p class="text-[11px] text-text-secondary">Si activé, cette matière suit le programme officiel.</p>
           </div>
         </div>
-        <mat-slide-toggle 
+        <mat-slide-toggle
           #nationalToggle
-          color="primary" 
+          color="primary"
           formControlName="isProvisioned"
           (click)="$event.stopPropagation()"
         ></mat-slide-toggle>

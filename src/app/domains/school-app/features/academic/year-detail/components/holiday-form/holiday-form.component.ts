@@ -3,7 +3,7 @@ import {CommonModule} from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
-import {Calendar, Home, Info, LucideAngularModule, Palmtree, Type, XCircle} from 'lucide-angular';
+import {Calendar, Home, Info, LucideAngularModule, Palmtree, ShieldCheck, Type, XCircle} from 'lucide-angular';
 import {AcademicService} from '../../../../../../../core/services/academic.service';
 import {NotificationService} from '../../../../../../../shared/services/notification.service';
 import {FormShellComponent} from '../../../../../../../shared/components/form-shell/form-shell';
@@ -99,4 +99,6 @@ export class HolidayFormComponent implements OnInit {
     const control = this.holidayForm.get(controlName);
     return !!(control && control.invalid && (control.dirty || control.touched));
   }
+
+  protected readonly ShieldCheck = ShieldCheck;
 }

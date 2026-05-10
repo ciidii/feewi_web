@@ -1,4 +1,4 @@
-import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {Component, computed, inject, OnInit, signal, ViewEncapsulation} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ActivatedRoute, RouterModule} from '@angular/router';
 import {finalize, forkJoin} from 'rxjs';
@@ -42,7 +42,8 @@ import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.com
     FwBadgeComponent
   ],
   templateUrl: './student-detail.component.html',
-  styleUrl: './student-detail.component.scss'
+  styleUrl: './student-detail.component.scss',
+  encapsulation: ViewEncapsulation.None
 })
 export class StudentDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -130,7 +131,7 @@ export class StudentDetailComponent implements OnInit {
     dialogRef.afterClosed().subscribe(confirmed => {
       if (confirmed) {
         this.isActionLoading.set(true);
-        this.studentService.updateStudent(s.id, { status: newStatus }).pipe(
+        this.studentService.updateStudent(s.id, {status: newStatus}).pipe(
           finalize(() => this.isActionLoading.set(false))
         ).subscribe(() => {
           this.loadData(s.id);
@@ -151,11 +152,16 @@ export class StudentDetailComponent implements OnInit {
 
   getStatusType(status: string): 'success' | 'warning' | 'danger' | 'info' {
     switch (status) {
-      case 'ACTIVE': return 'success';
-      case 'SUSPENDED': return 'warning';
-      case 'LEFT': return 'danger';
-      case 'ARCHIVED': return 'info';
-      default: return 'info';
+      case 'ACTIVE':
+        return 'success';
+      case 'SUSPENDED':
+        return 'warning';
+      case 'LEFT':
+        return 'danger';
+      case 'ARCHIVED':
+        return 'info';
+      default:
+        return 'info';
     }
   }
 
