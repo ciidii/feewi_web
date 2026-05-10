@@ -22,7 +22,8 @@ import {
   XCircle,
   Globe,
   BookOpen,
-  Hash
+  Hash,
+  ListChecks
 } from 'lucide-angular';
 import {PeriodFormComponent} from './components/period-form/period-form.component';
 import {HolidayFormComponent} from './components/holiday-form/holiday-form.component';
@@ -193,21 +194,31 @@ export class YearDetailComponent implements OnInit {
 
   private getMilestoneDescription(type: string): string {
     switch (type) {
-      case 'ENROLLMENT': return 'Période d\'inscription des nouveaux élèves';
-      case 'RE_ENROLLMENT': return 'Campagne de réinscription des élèves actuels';
-      case 'LESSONS': return 'Période effective des cours';
-      case 'EXAMS': return 'Sessions d\'examens nationaux ou blancs';
-      default: return 'Jalon institutionnel';
+      case 'ENROLLMENT':
+        return 'Période d\'inscription des nouveaux élèves';
+      case 'RE_ENROLLMENT':
+        return 'Campagne de réinscription des élèves actuels';
+      case 'LESSONS':
+        return 'Période effective des cours';
+      case 'EXAMS':
+        return 'Sessions d\'examens nationaux ou blancs';
+      default:
+        return 'Jalon institutionnel';
     }
   }
 
   getMilestoneIcon(type: string): any {
     switch (type) {
-      case 'ENROLLMENT': return Globe;
-      case 'RE_ENROLLMENT': return RotateCcw;
-      case 'LESSONS': return BookOpen;
-      case 'EXAMS': return Hash;
-      default: return CheckCircle;
+      case 'ENROLLMENT':
+        return Globe;
+      case 'RE_ENROLLMENT':
+        return RotateCcw;
+      case 'LESSONS':
+        return BookOpen;
+      case 'EXAMS':
+        return Hash;
+      default:
+        return CheckCircle;
     }
   }
 

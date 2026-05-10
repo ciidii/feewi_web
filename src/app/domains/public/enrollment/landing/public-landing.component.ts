@@ -51,13 +51,16 @@ export class PublicLandingComponent implements OnInit {
 
   yearCards = computed(() => {
     const years = this.summary()?.availableYears ?? [];
-    return years.map(y => ({
-      ...y,
-      isAdminOnly: y.registrationMode === 'ADMIN_ONLY',
-      canNewEnrollment: y.allowedTypes.includes('NEW_ENROLLMENT'),
-      canReEnrollment: y.allowedTypes.includes('RE_ENROLLMENT'),
-      hasBothTypes: y.allowedTypes.length === 2
-    }));
+    return years.map(y => {
+      const types = y.allowedTypes || [];
+      return {
+        ...y,
+        isAdminOnly: y.registrationMode === 'ADMIN_ONLY',
+        canNewEnrollment: types.includes('NEW_ENROLLMENT'),
+        canReEnrollment: types.includes('RE_ENROLLMENT'),
+        hasBothTypes: types.length === 2
+      };
+    });
   });
 
   noYearsAvailable = computed(() =>
