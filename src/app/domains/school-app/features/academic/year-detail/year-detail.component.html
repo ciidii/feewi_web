@@ -73,7 +73,6 @@
   <div class="list-page-content animate-in slide-in-from-bottom-2 duration-500" [class.is-loading]="isActionLoading()">
     
     <!-- 🚀 HYBRID LOADING FEEDBACK -->
-    <fw-page-progress *ngIf="isActionLoading()"></fw-page-progress>
     <fw-block-loader *ngIf="isActionLoading()" [center]="true" message="Traitement en cours..."></fw-block-loader>
 
     <!-- Status Badge (Intégré discrètement) -->

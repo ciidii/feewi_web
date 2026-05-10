@@ -22,7 +22,6 @@
   <div class="decision-hub-layout" [class.is-loading]="isActionLoading()">
     
     <!-- 🚀 HYBRID LOADING FEEDBACK -->
-    <fw-page-progress *ngIf="isActionLoading()"></fw-page-progress>
     <fw-block-loader *ngIf="isActionLoading()" [center]="true" message="Mise à jour du programme..."></fw-block-loader>
 
     <main class="pillar-content-area">

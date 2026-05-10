@@ -88,9 +88,6 @@
       (tabChange)="activeTab.set($any($event))"
       density="compact"
     >
-      <!-- Indicateur de chargement / sauvegarde -->
-      <fw-page-progress *ngIf="isLoading() || isSaving()"></fw-page-progress>
-
       <div actions class="actions-zone">
         <!-- Scope GLOBAL : status portail + actions globales -->
         <ng-container *ngIf="currentScope() === 'GLOBAL'">

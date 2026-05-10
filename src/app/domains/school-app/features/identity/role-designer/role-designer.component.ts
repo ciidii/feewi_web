@@ -23,7 +23,7 @@ import {RoleFormComponent} from './components/role-form/role-form.component';
 import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
 import {FormsModule} from '@angular/forms';
-import {PageProgressComponent} from '../../../../../shared/components/loader/page-progress.component';
+import {SkeletonComponent} from '../../../../../shared/components/skeleton/skeleton.component';
 
 export interface Permission {
   id: string;
@@ -49,7 +49,7 @@ export interface PermissionGroup {
     FwPageShellComponent,
     FwButtonComponent,
     FormsModule,
-    PageProgressComponent
+    SkeletonComponent
   ],
   templateUrl: './role-designer.component.html',
   styleUrls: ['./role-designer.component.scss'],

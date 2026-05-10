@@ -50,7 +50,6 @@
        *ngIf="student(); let s; else skeletons">
 
     <!-- 🚀 HYBRID LOADING FEEDBACK -->
-    <fw-page-progress *ngIf="isActionLoading()"></fw-page-progress>
     <fw-block-loader *ngIf="isActionLoading()" [center]="true" message="Mise à jour..."></fw-block-loader>
 
     <!-- MAIN CONTENT AREA -->
