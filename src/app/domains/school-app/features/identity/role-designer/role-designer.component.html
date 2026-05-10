@@ -102,33 +102,33 @@
               <h3 class="group-title">{{ group.category }}</h3>
             </header>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div *ngFor="let perm of group.permissions" 
-                   class="permission-card"
+                   class="permission-row-card"
                    [class.granted]="perm.granted"
                    (click)="onPermissionToggle(perm.id, !perm.granted)">
                 
-                <div class="card-main">
-                  <div class="card-info">
-                    <span class="perm-label">{{ perm.label }}</span>
+                <div class="perm-content">
+                  <div class="perm-info">
+                    <div class="flex items-baseline gap-2">
+                      <span class="perm-label">{{ perm.label }}</span>
+                      <code class="perm-tech-id">{{ perm.id }}</code>
+                    </div>
                     <p class="perm-desc">{{ perm.description }}</p>
                   </div>
 
-                  <button
-                    role="switch"
-                    class="toggle-switch sm"
-                    [class.on]="perm.granted"
-                    [attr.aria-checked]="perm.granted"
-                    (click)="$event.stopPropagation(); onPermissionToggle(perm.id, !perm.granted)">
-                    <div class="track">
-                      <div class="thumb"></div>
-                    </div>
-                  </button>
-                </div>
-                
-                <!-- Technical Key Hint (vaporeux) -->
-                <div class="card-footer-tech">
-                   <code>{{ perm.id }}</code>
+                  <div class="perm-action">
+                    <button
+                      role="switch"
+                      class="toggle-switch sm"
+                      [class.on]="perm.granted"
+                      [attr.aria-checked]="perm.granted"
+                      (click)="$event.stopPropagation(); onPermissionToggle(perm.id, !perm.granted)">
+                      <div class="track">
+                        <div class="thumb"></div>
+                      </div>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

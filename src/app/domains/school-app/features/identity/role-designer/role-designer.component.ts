@@ -23,6 +23,7 @@ import {FwPageShellComponent} from '../../../../../shared/components/page-shell/
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
 import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.component';
 import {FormsModule} from '@angular/forms';
+import {PageProgressComponent} from '../../../../../shared/components/loader/page-progress.component';
 
 export interface Permission {
   id: string;
@@ -47,7 +48,8 @@ export interface PermissionGroup {
     MatButtonModule,
     FwPageShellComponent,
     FwButtonComponent,
-    FormsModule
+    FormsModule,
+    PageProgressComponent
   ],
   templateUrl: './role-designer.component.html',
   styleUrls: ['./role-designer.component.scss'],
