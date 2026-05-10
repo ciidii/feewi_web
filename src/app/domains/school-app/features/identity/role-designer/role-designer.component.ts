@@ -9,7 +9,7 @@ import {
   LucideAngularModule,
   Maximize2,
   Plus,
-  Save,
+  Save, Search,
   Shield,
   ShieldCheck,
   Sparkles,
@@ -22,6 +22,7 @@ import {RoleFormComponent} from './components/role-form/role-form.component';
 import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
 import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.component';
+import {FormsModule} from '@angular/forms';
 
 export interface Permission {
   id: string;
@@ -45,7 +46,8 @@ export interface PermissionGroup {
     LucideAngularModule,
     MatButtonModule,
     FwPageShellComponent,
-    FwButtonComponent
+    FwButtonComponent,
+    FormsModule
   ],
   templateUrl: './role-designer.component.html',
   styleUrls: ['./role-designer.component.scss'],
@@ -323,4 +325,6 @@ export class RoleDesignerComponent implements OnInit {
       this.isSaving.set(false);
     }
   }
+
+  protected readonly Search = Search;
 }
