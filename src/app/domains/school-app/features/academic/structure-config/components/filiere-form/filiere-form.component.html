@@ -1,53 +1,60 @@
 <app-fw-form-shell
-  [title]="isEditMode ? 'Modifier la Série' : 'Nouvelle Série / Filière'"
-  [subtitle]="isEditMode ? 'Rectifiez le nom ou le code technique.' : 'Créez une spécialisation (ex: S1, L1, G).'"
-  [icon]="BookOpen"
-  statusLabel="Référentiel"
-  [saveLabel]="isEditMode ? 'Enregistrer' : 'Créer la série'"
+  [title]="isEditMode ? 'Modifier la Filière' : 'Nouvelle Filière'"
+  [subtitle]="isEditMode ? 'Mise à jour des paramètres de spécialisation.' : 'Définissez une nouvelle spécialité pédagogique.'"
+  [icon]="Tag"
+  statusLabel="Optionnel"
+  [saveLabel]="isEditMode ? 'Enregistrer' : 'Créer la filière'"
   [isLoading]="isLoading()"
   [canSave]="filiereForm.valid"
   (save)="onSave()"
   (cancel)="onCancel()"
 >
-  <form [formGroup]="filiereForm" class="space-y-4">
-    
-    <!-- Nom de la Filière -->
-    <div class="fw-field">
-      <label class="fw-label">Nom complet <span class="required">*</span></label>
-      <input 
-        type="text" 
-        formControlName="name" 
-        placeholder="Ex: Sciences Exactes" 
-        class="fw-input"
-        [class.error]="isInvalid('name')"
-      />
-      <div *ngIf="isInvalid('name')" class="fw-error">
-        <lucide-icon [name]="Info" [size]="12"></lucide-icon>
-        <span>Champ obligatoire (min. 3 caractères).</span>
+  <form [formGroup]="filiereForm" class="space-y-10 py-2">
+
+    <!-- 1. Identification -->
+    <div class="space-y-6">
+      <header class="section-header">
+        <lucide-icon [name]="Tag" [size]="14"></lucide-icon>
+        <span class="label">Identification de la Série</span>
+      </header>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="fw-field">
+          <label class="fw-label">Nom de la filière</label>
+          <div class="fw-input-wrapper">
+            <input
+              type="text"
+              formControlName="name"
+              placeholder="Ex: Sciences"
+              class="fw-input"
+              [class.error]="isInvalid('name')"
+            />
+          </div>
+        </div>
+
+        <div class="fw-field">
+          <label class="fw-label">Code technique</label>
+          <div class="fw-input-wrapper">
+            <input
+              type="text"
+              formControlName="code"
+              placeholder="Ex: S1, L' ou G"
+              class="fw-input uppercase"
+              [class.error]="isInvalid('code')"
+            />
+          </div>
+          <p class="fw-hint">Utilisé pour les matricules et codes classes.</p>
+        </div>
       </div>
     </div>
 
-    <!-- Code technique -->
-    <div class="fw-field">
-      <label class="fw-label">Code court (Série) <span class="required">*</span></label>
-      <input 
-        type="text" 
-        formControlName="code" 
-        placeholder="Ex: S1" 
-        class="fw-input uppercase"
-        [class.error]="isInvalid('code')"
-      />
-      <p class="fw-hint">Ce code apparaîtra sur les bulletins et certificats.</p>
-    </div>
-
-    <!-- Info Box Standardisée -->
-    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex items-start gap-3 mt-6">
-      <lucide-icon [name]="Info" class="w-4 h-4 text-primary mt-0.5"></lucide-icon>
-      <p class="text-xs text-slate-500 leading-relaxed font-medium">
-        Les filières sont globales à l'établissement. Une fois créée, une série peut être rattachée à plusieurs niveaux (ex: Terminale S1, Première S1).
+    <!-- Info Box Minimalist -->
+    <div class="p-4 bg-surface-sunken rounded-xl border border-border flex items-start gap-3">
+      <lucide-icon [name]="Info" [size]="16" class="text-text-tertiary mt-0.5"></lucide-icon>
+      <p class="text-[11px] text-text-secondary leading-relaxed font-medium">
+        Les filières sont optionnelles. Elles permettent de spécialiser les niveaux (ex: Terminale S1 vs Terminale L).
       </p>
     </div>
 
   </form>
 </app-fw-form-shell>
-

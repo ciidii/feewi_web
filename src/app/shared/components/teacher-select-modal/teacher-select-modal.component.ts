@@ -3,9 +3,9 @@ import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {LucideAngularModule, Search, UserCheck, X} from 'lucide-angular';
-import {User} from '../../../../core/models/user.model';
 import {FwButtonComponent} from '../button/button.component';
 import {FwModalShellComponent} from '../modal-shell/modal-shell.component';
+import {User} from '../../../core/models/user.model';
 
 export interface TeacherSelectData {
   title: string;
@@ -35,10 +35,10 @@ export interface TeacherSelectData {
         <!-- Recherche -->
         <div class="relative group">
           <lucide-icon [name]="SearchIcon" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary group-focus-within:text-primary transition-colors"></lucide-icon>
-          <input 
-            type="text" 
-            [(ngModel)]="searchQuery" 
-            placeholder="Rechercher par nom..." 
+          <input
+            type="text"
+            [(ngModel)]="searchQuery"
+            placeholder="Rechercher par nom..."
             class="w-full h-11 pl-11 pr-4 bg-surface-sunken border border-border rounded-xl text-sm font-semibold outline-none focus:border-primary focus:bg-white transition-all"
           />
         </div>
@@ -46,12 +46,12 @@ export interface TeacherSelectData {
         <!-- Liste -->
         <div class="flex-1 overflow-y-auto custom-scrollbar pr-2">
           <div class="grid grid-cols-1 gap-2">
-            <button 
-              *ngFor="let teacher of filteredTeachers()" 
+            <button
+              *ngFor="let teacher of filteredTeachers()"
               (click)="onSelect(teacher)"
               class="flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all group"
               [class.border-primary]="data.currentTeacherId === teacher.id"
-              [class.bg-primary-alpha/5]="data.currentTeacherId === teacher.id"
+              [class.bg-primary-alpha]="data.currentTeacherId === teacher.id"
               [class.border-transparent]="data.currentTeacherId !== teacher.id"
               [class.hover:bg-surface-sunken]="data.currentTeacherId !== teacher.id"
             >
@@ -66,7 +66,7 @@ export interface TeacherSelectData {
                  <lucide-icon [name]="UserCheckIcon" [size]="14"></lucide-icon>
               </div>
             </button>
-            
+
             <div *ngIf="filteredTeachers().length === 0" class="py-12 text-center">
               <p class="text-xs text-text-tertiary italic">Aucun enseignant trouvé.</p>
             </div>
@@ -94,8 +94,8 @@ export class TeacherSelectModalComponent {
 
   filteredTeachers() {
     const q = this.searchQuery.toLowerCase();
-    return this.data.teachers.filter(t => 
-      `${t.firstName} ${t.lastName}`.toLowerCase().includes(q) || 
+    return this.data.teachers.filter(t =>
+      `${t.firstName} ${t.lastName}`.toLowerCase().includes(q) ||
       t.email?.toLowerCase().includes(q)
     );
   }

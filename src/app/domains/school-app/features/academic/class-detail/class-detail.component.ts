@@ -1,47 +1,44 @@
 import {Component, computed, inject, OnInit, signal, ViewEncapsulation} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ActivatedRoute, RouterModule, Router} from '@angular/router';
+import {ActivatedRoute, Router, RouterModule} from '@angular/router';
 import {firstValueFrom} from 'rxjs';
 import {
   BookOpen,
   Calendar,
   Download,
-  Edit,
   Eye,
   GraduationCap,
   History,
-  Info,
   LucideAngularModule,
   Plus,
   RefreshCw,
   School,
-  Search,
   Trash2,
   UserCheck,
   UserPlus,
-  Users,
-  XCircle
+  Users
 } from 'lucide-angular';
-import {AcademicService} from '../../../../../../core/services/academic.service';
-import {StudentRegistryService} from '../../../../../../core/services/student-registry.service';
-import {IdentityService} from '../../../../../../core/services/identity.service';
-import {NotificationService} from '../../../../../../shared/services/notification.service';
-import {SchoolClass, Teaching, Subject} from '../../../../../../core/models/academic.model';
-import {StudentSummary} from '../../../../../../core/models/student.model';
-import {User} from '../../../../../../core/models/user.model';
-import {FwPageShellComponent} from '../../../../../../shared/components/page-shell/page-shell.component';
-import {FwButtonComponent} from '../../../../../../shared/components/button/button.component';
-import {FwTab} from '../../../../../../shared/components/tabs/tabs.component';
-import {DataListComponent} from '../../../../../../shared/components/data-list/data-list.component';
-import {TableRow, RowAction} from '../../../../../../shared/models/data-list.models';
-import {BlockLoaderComponent} from '../../../../../../shared/components/loader/block-loader.component';
-import {PageProgressComponent} from '../../../../../../shared/components/loader/page-progress.component';
-import {FwBadgeComponent} from '../../../../../../shared/components/badge/badge.component';
-import {FwEmptyStateComponent} from '../../../../../../shared/components/empty-state/empty-state.component';
-import {FwListCommandBarComponent} from '../../../../../../shared/components/list-command-bar/list-command-bar.component';
-import {ConfirmDialogComponent} from '../../../../../../shared/components/confirm-dialog/confirm-dialog';
+import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
+import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
+import {DataListComponent} from '../../../../../shared/components/data-list/data-list.component';
+import {BlockLoaderComponent} from '../../../../../shared/components/loader/block-loader.component';
+import {PageProgressComponent} from '../../../../../shared/components/loader/page-progress.component';
+import {FwEmptyStateComponent} from '../../../../../shared/components/empty-state/empty-state.component';
+import {FwListCommandBarComponent} from '../../../../../shared/components/list-command-bar/list-command-bar.component';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
-import {TeacherSelectModalComponent} from '../../../../../../shared/components/teacher-select-modal/teacher-select-modal.component';
+import {AcademicService} from '../../../../../core/services/academic.service';
+import {StudentRegistryService} from '../../../../../core/services/student-registry.service';
+import {IdentityService} from '../../../../../core/services/identity.service';
+import {NotificationService} from '../../../../../shared/services/notification.service';
+import {SchoolClass, Subject, Teaching} from '../../../../../core/models/academic.model';
+import {StudentSummary} from '../../../../../core/models/student.model';
+import {User} from '../../../../../core/models/user.model';
+import {FwTab} from '../../../../../shared/components/tabs/tabs.component';
+import {RowAction, TableRow} from '../../../../../shared/models/data-list.models';
+import {
+  TeacherSelectModalComponent
+} from '../../../../../shared/components/teacher-select-modal/teacher-select-modal.component';
+import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 
 @Component({
   selector: 'app-class-detail',
@@ -52,7 +49,6 @@ import {TeacherSelectModalComponent} from '../../../../../../shared/components/t
     LucideAngularModule,
     FwPageShellComponent,
     FwButtonComponent,
-    FwBadgeComponent,
     DataListComponent,
     BlockLoaderComponent,
     PageProgressComponent,
@@ -102,20 +98,20 @@ export class ClassDetailComponent implements OnInit {
 
   // Configuration des Onglets
   readonly classTabs: FwTab[] = [
-    { id: 'students', label: 'Registre des Élèves', icon: Users },
-    { id: 'team', label: 'Équipe Pédagogique', icon: UserCheck },
-    { id: 'schedule', label: 'Emploi du temps', icon: Calendar }
+    {id: 'students', label: 'Registre des Élèves', icon: Users},
+    {id: 'team', label: 'Équipe Pédagogique', icon: UserCheck},
+    {id: 'schedule', label: 'Emploi du temps', icon: Calendar}
   ];
 
   // Actions pour les élèves
   readonly studentActions: RowAction[] = [
-    { id: 'view', label: 'Dossier élève', icon: Eye, type: 'primary' }
+    {id: 'view', label: 'Dossier élève', icon: Eye, type: 'primary'}
   ];
 
   // Actions pour l'équipe
   readonly teamActions: RowAction[] = [
-    { id: 'assign', label: 'Assigner Professeur', icon: UserCheck, type: 'primary' },
-    { id: 'remove', label: 'Retirer du programme', icon: Trash2, type: 'danger' }
+    {id: 'assign', label: 'Assigner Professeur', icon: UserCheck, type: 'primary'},
+    {id: 'remove', label: 'Retirer du programme', icon: Trash2, type: 'danger'}
   ];
 
   // Calculs réactifs
@@ -134,7 +130,10 @@ export class ClassDetailComponent implements OnInit {
         title: `${s.firstName} ${s.lastName}`,
         subtitle: `Matricule: ${s.registrationNumber}`,
         avatarLabel: s.firstName[0] + (s.lastName[0] || ''),
-        badges: [{ label: s.gender, type: 'info' }, { label: s.status, type: s.status === 'ACTIVE' ? 'success' : 'warning' }],
+        badges: [{label: s.gender, type: 'info'}, {
+          label: s.status,
+          type: s.status === 'ACTIVE' ? 'success' : 'warning'
+        }],
         rawData: s
       }));
   });
@@ -149,8 +148,8 @@ export class ClassDetailComponent implements OnInit {
         subtitle: t.teacherName ? `Professeur: ${t.teacherName}` : 'À pourvoir (Vacant)',
         avatarLabel: (t.subjectName || '??').substring(0, 2).toUpperCase(),
         badges: [
-          { label: `COEFF ${t.coefficient}`, type: 'info' },
-          { label: t.teacherId ? 'ASSIGNÉ' : 'LIBRE', type: t.teacherId ? 'success' : 'danger' }
+          {label: `COEFF ${t.coefficient}`, type: 'info'},
+          {label: t.teacherId ? 'ASSIGNÉ' : 'LIBRE', type: t.teacherId ? 'success' : 'danger'}
         ],
         rawData: t
       }));

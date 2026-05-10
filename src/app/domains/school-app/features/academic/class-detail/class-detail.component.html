@@ -9,36 +9,6 @@
   (tabChange)="setTab($event)"
   density="compact"
 >
-  <!-- ACTIONS -->
-  <div actions class="flex gap-2">
-    <app-fw-button
-      variant="tertiary"
-      size="sm"
-      [icon]="RefreshCw"
-      [loading]="isLoading()"
-      (click)="loadData(classId()!)"
-    >
-      Actualiser
-    </app-fw-button>
-    <div class="divider-v"></div>
-    <app-fw-button
-      *ngIf="activeTab() === 'students'"
-      variant="primary"
-      size="sm"
-      [icon]="UserPlus"
-    >
-      Inscrire un élève
-    </app-fw-button>
-    <app-fw-button
-      *ngIf="activeTab() === 'team'"
-      variant="primary"
-      size="sm"
-      [icon]="Plus"
-    >
-      Cours manuel
-    </app-fw-button>
-  </div>
-
   <!-- CONTENU DE PAGE ALIGNÉ -->
   <div class="list-page-content animate-in fade-in duration-500">
     
@@ -50,8 +20,36 @@
       (searchChange)="onSearch($event)"
       (clearSearch)="onSearch('')"
     >
+       <!-- ACTIONS PRIMAIRES -->
        <div primary-actions class="flex items-center gap-2">
          <app-fw-button variant="tertiary" size="sm" [icon]="Download" title="Exporter"></app-fw-button>
+         <app-fw-button
+           variant="tertiary"
+           size="sm"
+           [icon]="RefreshCw"
+           [loading]="isLoading()"
+           (click)="loadData(classId()!)"
+           title="Actualiser"
+         ></app-fw-button>
+         
+         <div class="divider-v"></div>
+
+         <app-fw-button
+           *ngIf="activeTab() === 'students'"
+           variant="primary"
+           size="sm"
+           [icon]="UserPlus"
+         >
+           Inscrire un élève
+         </app-fw-button>
+         <app-fw-button
+           *ngIf="activeTab() === 'team'"
+           variant="primary"
+           size="sm"
+           [icon]="Plus"
+         >
+           Cours manuel
+         </app-fw-button>
        </div>
     </app-fw-list-command-bar>
 

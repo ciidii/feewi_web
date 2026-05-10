@@ -109,10 +109,10 @@ export interface SharedFilterData {
     .fw-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--fw-text-tertiary); margin-left: 4px; }
     .fw-input-wrapper { position: relative; }
     .fw-input {
-      width: 100%; height: 3rem; background: white; border: 1.5px solid var(--fw-border);
+      width: 100%; height: 3rem; background: var(--fw-surface-sunken); border: 1.5px solid var(--fw-border-subtle);
       border-radius: 12px; padding: 0 1rem; font-size: 0.875rem; font-weight: 600;
       color: var(--fw-midnight); outline: none; transition: all 0.2s;
-      &:focus { border-color: var(--fw-primary); box-shadow: 0 0 0 4px var(--fw-primary-alpha); }
+      &:focus { background: white; border-color: var(--fw-primary); box-shadow: 0 0 0 4px var(--fw-primary-alpha); }
     }
   `]
 })

@@ -34,6 +34,9 @@ import {firstValueFrom} from 'rxjs';
 import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
 import {FwTab} from '../../../../../shared/components/tabs/tabs.component';
 import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.component';
+import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
+import {PageProgressComponent} from '../../../../../shared/components/loader/page-progress.component';
+import {BlockLoaderComponent} from '../../../../../shared/components/loader/block-loader.component';
 
 export interface TimelineEvent {
   id: string;
@@ -55,7 +58,10 @@ export interface TimelineEvent {
     MatDialogModule,
     DataListComponent,
     FwPageShellComponent,
-    FwBadgeComponent
+    FwBadgeComponent,
+    FwButtonComponent,
+    PageProgressComponent,
+    BlockLoaderComponent
   ],
   templateUrl: './year-detail.component.html',
   styleUrls: ['./year-detail.component.scss'],

@@ -2,7 +2,7 @@ import {Component, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
-import {Calendar, CheckCircle, Clock, Info, ListTodo, LucideAngularModule, Type} from 'lucide-angular';
+import {Calendar, CheckCircle, Clock, GraduationCap, Info, ListTodo, LucideAngularModule, Type} from 'lucide-angular';
 import {AcademicService} from '../../../../../../../core/services/academic.service';
 import {NotificationService} from '../../../../../../../shared/services/notification.service';
 import {FormShellComponent} from '../../../../../../../shared/components/form-shell/form-shell';
@@ -99,4 +99,6 @@ export class PeriodFormComponent implements OnInit {
     const control = this.periodForm.get(controlName);
     return !!(control && control.invalid && (control.dirty || control.touched));
   }
+
+  protected readonly GraduationCap = GraduationCap;
 }

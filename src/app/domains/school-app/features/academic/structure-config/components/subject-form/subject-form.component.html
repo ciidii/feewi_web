@@ -1,58 +1,83 @@
 <app-fw-form-shell
   [title]="isEditMode ? 'Modifier la Matière' : 'Nouvelle Matière'"
-  [subtitle]="isEditMode ? 'Rectifiez le nom ou le code technique.' : 'Créez un nouvel enseignement dans le catalogue global de l\'école.'"
-  [icon]="Tag"
-  statusLabel="Référentiel"
-  [saveLabel]="isEditMode ? 'Enregistrer les modifications' : 'Ajouter la matière'"
+  [subtitle]="'Référentiel global des disciplines d\\'enseignement.'"
+  [icon]="BookOpen"
+  [saveLabel]="isEditMode ? 'Enregistrer' : 'Créer la matière'"
   [isLoading]="isLoading()"
   [canSave]="subjectForm.valid"
   (save)="onSave()"
   (cancel)="onCancel()"
 >
-  <form [formGroup]="subjectForm" class="space-y-8">
+  <form [formGroup]="subjectForm" class="space-y-10 py-2">
 
+    <!-- 1. Identification -->
     <div class="space-y-6">
-      <!-- Nom de la Matière -->
-      <div class="space-y-2">
-        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Nom de l'enseignement</label>
-        <div class="relative group">
-          <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors">
-            <lucide-icon [name]="Type" class="w-4.5 h-4.5"></lucide-icon>
-          </div>
-          <input
-            type="text"
-            formControlName="name"
-            placeholder="Ex: Mathématiques"
-            class="fw-input"
-            [class.error]="isInvalid('name')"
-          />
-        </div>
-      </div>
+      <header class="section-header">
+        <lucide-icon [name]="Type" [size]="14"></lucide-icon>
+        <span class="label">Information Générale</span>
+      </header>
 
-      <!-- Code technique -->
-      <div class="space-y-2">
-        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Code court (Matière)</label>
-        <div class="relative group">
-          <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors">
-            <lucide-icon [name]="Tag" class="w-4.5 h-4.5"></lucide-icon>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="fw-field">
+          <label class="fw-label">Nom de la matière</label>
+          <div class="fw-input-wrapper">
+            <input
+              type="text"
+              formControlName="name"
+              placeholder="Ex: Mathématiques"
+              class="fw-input"
+              [class.error]="isInvalid('name')"
+            />
           </div>
-          <input
-            type="text"
-            formControlName="code"
-            placeholder="Ex: MATH"
-            class="fw-input uppercase"
-            [class.error]="isInvalid('code')"
-          />
         </div>
-        <p class="text-[10px] text-slate-400 font-medium ml-1 italic">Ce code sera utilisé pour l'affichage des emplois du temps.</p>
+
+        <div class="fw-field">
+          <label class="fw-label">Code technique</label>
+          <div class="fw-input-wrapper">
+            <input
+              type="text"
+              formControlName="code"
+              placeholder="Ex: MATH, SVT, PC"
+              class="fw-input uppercase"
+              [class.error]="isInvalid('code')"
+            />
+          </div>
+          <p class="fw-hint">Utilisé pour les exports et le stockage.</p>
+        </div>
       </div>
     </div>
 
-    <!-- Info Box -->
-    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 flex items-start gap-3">
-      <lucide-icon [name]="Info" class="w-4 h-4 text-slate-400 mt-0.5"></lucide-icon>
-      <p class="text-[11px] text-slate-500 leading-relaxed font-medium">
-        La bibliothèque des matières est unique par établissement. Vous pourrez ensuite définir des coefficients différents selon les niveaux (CP, 6ème, etc.).
+    <!-- 2. Configuration SaaS -->
+    <div class="space-y-6">
+      <header class="section-header">
+        <lucide-icon [name]="Layers" [size]="14"></lucide-icon>
+        <span class="label">Origine de la Donnée</span>
+      </header>
+
+      <div class="bg-surface-sunken rounded-2xl p-5 border border-border flex items-center justify-between group hover:bg-white hover:border-primary transition-all cursor-pointer" (click)="nationalToggle.toggle()">
+        <div class="flex items-center gap-4">
+          <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm text-text-tertiary group-hover:text-primary transition-colors">
+            <lucide-icon [name]="CheckCircle" [size]="18"></lucide-icon>
+          </div>
+          <div>
+            <p class="text-sm font-bold text-midnight">Matière Nationale</p>
+            <p class="text-[11px] text-text-secondary">Si activé, cette matière suit le programme officiel.</p>
+          </div>
+        </div>
+        <mat-slide-toggle 
+          #nationalToggle
+          color="primary" 
+          formControlName="isProvisioned"
+          (click)="$event.stopPropagation()"
+        ></mat-slide-toggle>
+      </div>
+    </div>
+
+    <!-- Info Box Minimalist -->
+    <div class="p-4 bg-surface-sunken rounded-xl border border-border flex items-start gap-3">
+      <lucide-icon [name]="Info" [size]="16" class="text-text-tertiary mt-0.5"></lucide-icon>
+      <p class="text-[11px] text-text-secondary leading-relaxed font-medium">
+        Une matière créée ici est disponible pour l'ensemble des niveaux et des classes de l'établissement.
       </p>
     </div>
 
