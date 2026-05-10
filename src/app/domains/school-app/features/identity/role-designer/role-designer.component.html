@@ -39,19 +39,7 @@
       </button>
     </div>
 
-    <!-- Actions de création -->
-    <div class="nav-divider"></div>
-    <div class="px-2">
-      <app-fw-button 
-        variant="tertiary" 
-        size="sm" 
-        class="w-full" 
-        [icon]="Plus" 
-        (click)="openAddRoleForm()"
-      >
-        Nouveau rôle
-      </app-fw-button>
-    </div>
+    <!-- Actions de création supprimées (déplacées vers le header) -->
 
   </aside>
 
@@ -78,6 +66,15 @@
         </div>
 
         <div class="divider-v"></div>
+
+        <app-fw-button 
+          variant="tertiary" 
+          size="sm" 
+          [icon]="Plus" 
+          (click)="openAddRoleForm()"
+        >
+          Nouveau rôle
+        </app-fw-button>
 
         <app-fw-button 
           variant="primary" 
