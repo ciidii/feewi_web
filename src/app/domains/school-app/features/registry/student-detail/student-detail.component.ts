@@ -5,10 +5,10 @@ import {finalize, forkJoin} from 'rxjs';
 import {
   AlertCircle,
   ArrowLeft,
-  Calendar,
+  Calendar, CheckCircle,
   Download,
-  Edit,
-  History,
+  Edit, GraduationCap,
+  History, Info,
   LucideAngularModule,
   Mail,
   MapPin,
@@ -17,7 +17,7 @@ import {
   RefreshCw,
   Stethoscope,
   User,
-  Users
+  Users, XCircle
 } from 'lucide-angular';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 
@@ -29,6 +29,10 @@ import {NotificationService} from '../../../../../shared/services/notification.s
 import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
 import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.component';
+import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
+import {CamelToLabelPipe} from '../../../../../shared/pipes/camel-to-label.pipe';
+import {PageProgressComponent} from '../../../../../shared/components/loader/page-progress.component';
+import {BlockLoaderComponent} from '../../../../../shared/components/loader/block-loader.component';
 
 @Component({
   selector: 'app-student-detail',
@@ -39,7 +43,11 @@ import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.com
     RouterModule,
     MatDialogModule,
     FwPageShellComponent,
-    FwBadgeComponent
+    FwBadgeComponent,
+    FwButtonComponent,
+    CamelToLabelPipe,
+    PageProgressComponent,
+    BlockLoaderComponent
   ],
   templateUrl: './student-detail.component.html',
   styleUrl: './student-detail.component.scss',
@@ -174,4 +182,9 @@ export class StudentDetailComponent implements OnInit {
     };
     return labels[status] || status;
   }
+
+  protected readonly XCircle = XCircle;
+  protected readonly Info = Info;
+  protected readonly GraduationCap = GraduationCap;
+  protected readonly CheckCircle = CheckCircle;
 }

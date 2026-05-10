@@ -1,80 +1,100 @@
-<div class="space-y-8 animate-in fade-in duration-700">
-  <!-- Page Header Standardisé -->
-  <app-fw-page-header
-    title="Tableau de bord global"
-    description="Console de pilotage de l'établissement • Année 2024-2025"
-    [icon]="LayoutDashboard">
-  </app-fw-page-header>
+<app-fw-page-shell
+  title="Tableau de bord global"
+  description="Console de pilotage • Année 2024-2025 • Analyse temps réel"
+  [icon]="LayoutDashboard"
+  density="compact"
+>
+  <!-- CONTENU DE PAGE -->
+  <div class="list-page-content animate-in fade-in duration-700">
 
-  <!-- Stats Grid -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-    <!-- Card: Total Élèves -->
-    <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hover:shadow-md transition-all group">
-      <div class="flex justify-between items-start mb-4">
-        <div class="p-2.5 bg-blue-50 text-blue-600 rounded-xl group-hover:scale-110 transition-transform">
-          <lucide-icon [name]="Users" class="w-6 h-6"></lucide-icon>
+    <!-- Stats Grid Minimalist -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+      <!-- Card: Total Élèves -->
+      <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hover:shadow-md transition-all group">
+        <div class="flex justify-between items-start mb-4">
+          <div class="w-10 h-10 bg-surface-sunken text-midnight rounded-xl flex items-center justify-center group-hover:bg-midnight group-hover:text-white transition-all">
+            <lucide-icon [name]="Users" [size]="18"></lucide-icon>
+          </div>
+          <app-fw-badge labelOverride="+12.5%" tokenOverride="success" size="xs"></app-fw-badge>
         </div>
-        <app-fw-badge labelOverride="+12.5%" tokenOverride="success" size="xs"></app-fw-badge>
+        <h3 class="text-[10px] font-black uppercase tracking-[0.1em] text-text-tertiary mb-1">Total Élèves</h3>
+        <div class="text-2xl font-display font-black text-midnight tracking-tight">1,248</div>
       </div>
-      <h3 class="text-xs font-bold uppercase tracking-wider text-slate-medium mb-1">Total Élèves</h3>
-      <div class="text-3xl font-display font-bold text-midnight">1,248</div>
-    </div>
 
-    <!-- Card: Admissions -->
-    <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hover:shadow-md transition-all group">
-      <div class="flex justify-between items-start mb-4">
-        <div class="p-2.5 bg-amber-50 text-amber-600 rounded-xl group-hover:scale-110 transition-transform">
-          <lucide-icon [name]="Activity" class="w-6 h-6"></lucide-icon>
+      <!-- Card: Admissions -->
+      <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hover:shadow-md transition-all group">
+        <div class="flex justify-between items-start mb-4">
+          <div class="w-10 h-10 bg-surface-sunken text-midnight rounded-xl flex items-center justify-center group-hover:bg-midnight group-hover:text-white transition-all">
+            <lucide-icon [name]="Activity" [size]="18"></lucide-icon>
+          </div>
+          <app-fw-badge labelOverride="En cours" tokenOverride="warning" size="xs"></app-fw-badge>
         </div>
-        <app-fw-badge labelOverride="En cours" tokenOverride="warning" size="xs"></app-fw-badge>
+        <h3 class="text-[10px] font-black uppercase tracking-[0.1em] text-text-tertiary mb-1">Admissions</h3>
+        <div class="text-2xl font-display font-black text-midnight tracking-tight">42</div>
       </div>
-      <h3 class="text-xs font-bold uppercase tracking-wider text-slate-medium mb-1">Admissions</h3>
-      <div class="text-3xl font-display font-bold text-midnight">42</div>
-    </div>
 
-    <!-- Card: Taux Présence -->
-    <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hover:shadow-md transition-all group">
-      <div class="flex justify-between items-start mb-4">
-        <div class="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl group-hover:scale-110 transition-transform">
-          <lucide-icon [name]="GraduationCap" class="w-6 h-6"></lucide-icon>
+      <!-- Card: Taux Présence -->
+      <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hover:shadow-md transition-all group">
+        <div class="flex justify-between items-start mb-4">
+          <div class="w-10 h-10 bg-surface-sunken text-midnight rounded-xl flex items-center justify-center group-hover:bg-midnight group-hover:text-white transition-all">
+            <lucide-icon [name]="GraduationCap" [size]="18"></lucide-icon>
+          </div>
+          <app-fw-badge labelOverride="Optimal" tokenOverride="success" size="xs"></app-fw-badge>
         </div>
-        <app-fw-badge labelOverride="Optimal" tokenOverride="success" size="xs"></app-fw-badge>
+        <h3 class="text-[10px] font-black uppercase tracking-[0.1em] text-text-tertiary mb-1">Taux Présence</h3>
+        <div class="text-2xl font-display font-black text-midnight tracking-tight">96.4%</div>
       </div>
-      <h3 class="text-xs font-bold uppercase tracking-wider text-slate-medium mb-1">Taux Présence</h3>
-      <div class="text-3xl font-display font-bold text-midnight">96.4%</div>
-    </div>
 
-    <!-- Card: Performance -->
-    <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hover:shadow-md transition-all group">
-      <div class="flex justify-between items-start mb-4">
-        <div class="p-2.5 bg-slate-50 text-slate-600 rounded-xl group-hover:scale-110 transition-transform">
-          <lucide-icon [name]="TrendingUp" class="w-6 h-6"></lucide-icon>
+      <!-- Card: Performance -->
+      <div class="bg-white p-6 rounded-2xl border border-border-subtle shadow-sm hover:shadow-md transition-all group">
+        <div class="flex justify-between items-start mb-4">
+          <div class="w-10 h-10 bg-surface-sunken text-midnight rounded-xl flex items-center justify-center group-hover:bg-midnight group-hover:text-white transition-all">
+            <lucide-icon [name]="TrendingUp" [size]="18"></lucide-icon>
+          </div>
+          <app-fw-badge labelOverride="Stable" tokenOverride="neutral" size="xs"></app-fw-badge>
         </div>
-        <app-fw-badge labelOverride="Stable" tokenOverride="neutral" size="xs"></app-fw-badge>
+        <h3 class="text-[10px] font-black uppercase tracking-[0.1em] text-text-tertiary mb-1">Performance</h3>
+        <div class="text-2xl font-display font-black text-midnight tracking-tight">A+</div>
       </div>
-      <h3 class="text-xs font-bold uppercase tracking-wider text-slate-medium mb-1">Performance</h3>
-      <div class="text-3xl font-display font-bold text-midnight">A+</div>
     </div>
-  </div>
 
-  <!-- Activity Section Placeholder -->
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <div class="lg:col-span-2 bg-white rounded-2xl border border-border-subtle shadow-sm p-6 h-80 flex flex-col items-center justify-center border-dashed group hover:border-primary/30 transition-colors">
-       <lucide-icon [name]="TrendingUp" class="w-12 h-12 text-slate-200 mb-4 group-hover:text-primary/20 transition-colors"></lucide-icon>
-       <span class="text-sm font-medium text-slate-400">Graphiques d'évolution en cours de préparation...</span>
-    </div>
-    
-    <div class="bg-white rounded-2xl border border-border-subtle shadow-sm p-6 h-80">
-      <h3 class="text-sm font-bold text-midnight uppercase tracking-wider mb-4">Activités Récentes</h3>
-      <div class="space-y-4">
-        <div *ngFor="let i of [1,2,3,4]" class="flex gap-3 items-center">
-          <div class="w-2 h-2 rounded-full bg-primary"></div>
-          <div class="flex-1">
-            <p class="text-xs font-bold text-midnight">Nouveau dossier d'admission</p>
-            <p class="text-[10px] text-slate-medium">Il y a 10 minutes</p>
+    <!-- Main Analytics Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      <!-- Charts Placeholder -->
+      <div class="lg:col-span-2 bg-white rounded-[2rem] border border-border-subtle shadow-sm p-10 h-[450px] flex flex-col items-center justify-center border-dashed group hover:border-primary transition-all">
+         <div class="w-20 h-20 bg-surface-sunken rounded-full flex items-center justify-center text-text-tertiary mb-6 group-hover:bg-primary-alpha group-hover:text-primary transition-all">
+           <lucide-icon [name]="TrendingUp" [size]="32"></lucide-icon>
+         </div>
+         <h4 class="text-lg font-bold text-midnight tracking-tight">Visualisation des tendances</h4>
+         <p class="text-sm text-text-tertiary mt-2 max-w-xs text-center font-medium">Le moteur d'analytics prédictif est en cours de déploiement sur votre instance.</p>
+      </div>
+      
+      <!-- Activity Feed -->
+      <div class="bg-white rounded-[2rem] border border-border-subtle shadow-sm p-8 flex flex-col">
+        <header class="section-header-minimal mb-8">
+          <lucide-icon [name]="History" [size]="14" class="text-text-tertiary"></lucide-icon>
+          <span class="label">Activités Récentes</span>
+        </header>
+        
+        <div class="space-y-8 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-px before:bg-border-subtle flex-1">
+          <div *ngFor="let i of [1,2,3,4,5]" class="flex gap-4 items-start relative z-1">
+            <div class="w-6 h-6 rounded-full bg-white border-2 border-border-subtle flex items-center justify-center shadow-sm">
+              <div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-xs font-black text-midnight tracking-tight mb-0.5">Nouveau dossier d'admission</p>
+              <p class="text-[10px] text-text-tertiary font-bold uppercase tracking-wider">Il y a 10 minutes</p>
+            </div>
           </div>
         </div>
+
+        <button class="mt-8 text-[10px] font-black uppercase text-primary tracking-widest hover:underline text-left">
+          Consulter le journal d'audit
+        </button>
       </div>
+
     </div>
+
   </div>
-</div>
+</app-fw-page-shell>

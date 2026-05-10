@@ -1,13 +1,13 @@
 import {Component, ViewEncapsulation} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {Activity, GraduationCap, LayoutDashboard, LucideAngularModule, TrendingUp, Users} from 'lucide-angular';
-import {FwPageHeaderComponent} from '../../../../../shared/components/page-header/page-header.component';
 import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.component';
+import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, FwPageHeaderComponent, FwBadgeComponent],
+  imports: [CommonModule, LucideAngularModule, FwPageShellComponent, FwBadgeComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
   encapsulation: ViewEncapsulation.None
@@ -18,4 +18,6 @@ export class DashboardComponent {
   readonly TrendingUp = TrendingUp;
   readonly Activity = Activity;
   readonly LayoutDashboard = LayoutDashboard;
+  readonly History = History;
+  readonly Search = Search;
 }

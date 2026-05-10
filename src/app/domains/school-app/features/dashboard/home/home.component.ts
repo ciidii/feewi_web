@@ -21,6 +21,7 @@ import {
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
 import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.component';
 import {AuthService} from '../../../../../core/services/auth.service';
+import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
 
 @Component({
   selector: 'app-home',
@@ -30,7 +31,8 @@ import {AuthService} from '../../../../../core/services/auth.service';
     RouterModule,
     LucideAngularModule,
     FwButtonComponent,
-    FwBadgeComponent
+    FwBadgeComponent,
+    FwPageShellComponent
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
@@ -54,12 +56,13 @@ export class HomeComponent {
   readonly Search = Search;
   readonly Activity = Activity;
   readonly ChevronRight = ChevronRight;
+  readonly PlusCircle = PlusCircle;
 
   favorites = [
-    { label: 'Admissions', icon: Activity, path: '/admin/admissions/list', color: 'text-blue-600', bg: 'bg-blue-50' },
-    { label: 'Répertoire', icon: Users, path: '/admin/registry/students', color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { label: 'Années', icon: Calendar, path: '/admin/academic/years', color: 'text-amber-600', bg: 'bg-amber-50' },
-    { label: 'Configuration', icon: Settings, path: '/admin/admissions/settings', color: 'text-slate-600', bg: 'bg-slate-50' }
+    { label: 'Admissions', icon: Activity, path: '/admin/admissions/list' },
+    { label: 'Répertoire', icon: Users, path: '/admin/registry/students' },
+    { label: 'Années', icon: Calendar, path: '/admin/academic/years' },
+    { label: 'Configuration', icon: Settings, path: '/admin/admissions/settings' }
   ];
 
   quickActions = [

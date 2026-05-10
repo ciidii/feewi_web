@@ -1,108 +1,109 @@
-<div class="launchpad-container animate-in fade-in duration-700">
-  
-  <!-- Section Accueil & Recherche Universelle -->
-  <header class="launchpad-header">
-    <div class="greeting-box">
-      <h1 class="text-3xl font-display font-extrabold text-midnight tracking-tight">
-        {{ getGreeting() }}, {{ (user()?.firstName || 'Utilisateur') }}
-      </h1>
-      <p class="text-slate-500 font-medium">Prêt pour piloter votre établissement aujourd'hui ?</p>
-    </div>
-
-    <div class="universal-search-box">
-      <div class="search-wrapper">
-        <lucide-icon [name]="Search" class="search-icon"></lucide-icon>
-        <input type="text" placeholder="Rechercher un élève, un matricule, un parent..." class="search-input">
-        <div class="search-shortcut">Ctrl + K</div>
-      </div>
-    </div>
-  </header>
-
-  <div class="launchpad-grid">
-    <!-- COLONNE GAUCHE : ACTIONS & FAVORIS -->
-    <div class="main-column space-y-8">
-      
-      <!-- Section Favoris -->
-      <section>
-        <div class="section-header">
-          <lucide-icon [name]="Star" class="w-4 h-4 text-amber-500"></lucide-icon>
-          <h2 class="section-title">Mes Favoris</h2>
-        </div>
-        <div class="favorites-grid">
-          <a *ngFor="let fav of favorites" [routerLink]="fav.path" class="favorite-card group">
-            <div class="icon-box" [ngClass]="fav.bg">
-              <lucide-icon [name]="fav.icon" [class]="fav.color" class="group-hover:scale-110 transition-transform"></lucide-icon>
-            </div>
-            <span class="label">{{ fav.label }}</span>
-          </a>
-        </div>
-      </section>
-
-      <!-- Section Actions Rapides -->
-      <section>
-        <div class="section-header">
-          <lucide-icon [name]="PlusCircle" class="w-4 h-4 text-primary"></lucide-icon>
-          <h2 class="section-title">Actions Rapides</h2>
-        </div>
-        <div class="quick-actions-grid">
-          <button *ngFor="let action of quickActions" [routerLink]="action.path" class="action-card">
-            <div class="action-content">
-              <div class="action-icon">
-                <lucide-icon [name]="action.icon"></lucide-icon>
-              </div>
-              <div class="action-text">
-                <span class="action-label">{{ action.label }}</span>
-                <span class="action-desc">{{ action.description }}</span>
-              </div>
-            </div>
-            <lucide-icon [name]="ChevronRight" class="chevron"></lucide-icon>
-          </button>
-        </div>
-      </section>
-    </div>
-
-    <!-- COLONNE DROITE : ACTIVITÉS & RÉSUMÉ -->
-    <div class="side-column space-y-8">
-      
-      <!-- Section Dernière Action -->
-      <section class="resume-card">
-        <div class="resume-header">
-          <div class="p-2 bg-primary-alpha rounded-lg text-primary">
-            <lucide-icon [name]="Clock" class="w-5 h-5"></lucide-icon>
-          </div>
-          <h3 class="font-bold text-midnight">Reprise d'activité</h3>
-        </div>
-        <div class="resume-body">
-          <p class="text-sm text-slate-600 mb-4">Vous travailliez sur le dossier d'admission de <strong>M. Diallo Alpha</strong>.</p>
-          <app-fw-button [variant]="'primary'" [size]="'sm'" class="w-full" [routerLink]="['/admin/admissions/list']" [icon]="ArrowRight" iconPosition="right">
-            Continuer l'édition
-          </app-fw-button>
-        </div>
-      </section>
-
-      <!-- Section Flux d'activité -->
-      <section class="activity-section">
-        <div class="section-header">
-          <lucide-icon [name]="Activity" class="w-4 h-4 text-slate-400"></lucide-icon>
-          <h2 class="section-title">Activité Récente</h2>
-        </div>
-        <div class="activity-feed">
-          <div *ngFor="let act of lastActions" class="activity-item">
-            <div class="activity-dot"></div>
-            <div class="activity-content">
-              <p class="activity-label">{{ act.label }}</p>
-              <div class="activity-meta">
-                <span>{{ act.time }} • Par {{ act.user }}</span>
-                <app-fw-badge [status]="act.status" size="xs"></app-fw-badge>
-              </div>
-            </div>
-          </div>
-        </div>
-        <button routerLink="/admin/identity/audit" class="view-all-btn">
-          Voir tout l'historique
-        </button>
-      </section>
-
+<app-fw-page-shell
+  [title]="getGreeting() + ', ' + (user()?.firstName || 'Utilisateur')"
+  description="Console de pilotage de votre établissement."
+  [icon]="LayoutDashboard"
+  density="compact"
+>
+  <!-- ACTIONS : RECHERCHE UNIVERSELLE -->
+  <div actions class="universal-search-hub">
+    <div class="search-wrapper">
+      <lucide-icon [name]="Search" [size]="16" class="search-icon"></lucide-icon>
+      <input type="text" placeholder="Rechercher partout (Ctrl+K)..." class="search-input">
     </div>
   </div>
-</div>
+
+  <!-- CONTENU DE PAGE -->
+  <div class="list-page-content animate-in fade-in duration-700">
+
+    <div class="launchpad-grid">
+      <!-- COLONNE GAUCHE : ACTIONS & FAVORIS -->
+      <div class="main-column space-y-10">
+        
+        <!-- Section Favoris (Style Dossier) -->
+        <section>
+          <header class="section-header-minimal">
+            <lucide-icon [name]="Star" [size]="14" class="text-amber-500"></lucide-icon>
+            <span class="label">Accès Prioritaires</span>
+          </header>
+
+          <div class="favorites-grid">
+            <a *ngFor="let fav of favorites" [routerLink]="fav.path" class="favorite-card group">
+              <div class="icon-box">
+                <lucide-icon [name]="fav.icon" [size]="20" class="group-hover:scale-110 transition-transform"></lucide-icon>
+              </div>
+              <span class="label">{{ fav.label }}</span>
+            </a>
+          </div>
+        </section>
+
+        <!-- Section Actions Rapides (Style Form) -->
+        <section>
+          <header class="section-header-minimal">
+            <lucide-icon [name]="PlusCircle" [size]="14" class="text-primary"></lucide-icon>
+            <span class="label">Actions Métier</span>
+          </header>
+
+          <div class="quick-actions-grid">
+            <button *ngFor="let action of quickActions" [routerLink]="action.path" class="action-card">
+              <div class="action-content">
+                <div class="action-icon">
+                  <lucide-icon [name]="action.icon" [size]="18"></lucide-icon>
+                </div>
+                <div class="action-text">
+                  <span class="action-label">{{ action.label }}</span>
+                  <span class="action-desc">{{ action.description }}</span>
+                </div>
+              </div>
+              <lucide-icon [name]="ChevronRight" [size]="16" class="chevron"></lucide-icon>
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <!-- COLONNE DROITE : ACTIVITÉS & RÉSUMÉ -->
+      <aside class="conformity-sidebar">
+        
+        <!-- Carte Reprise -->
+        <div class="compliance-card">
+          <lucide-icon [name]="Clock" [size]="20"></lucide-icon>
+          <div class="compliance-text">
+            <strong>Reprise d'activité</strong>
+            <span>Dossier de M. Diallo Alpha</span>
+          </div>
+        </div>
+
+        <!-- Section Flux d'activité -->
+        <section class="sidebar-card">
+          <div class="card-header">
+            <lucide-icon [name]="Activity" [size]="16"></lucide-icon>
+            <h4>Activité Récente</h4>
+          </div>
+          <div class="activity-feed">
+            <div *ngFor="let act of lastActions" class="activity-item">
+              <div class="activity-dot"></div>
+              <div class="activity-content">
+                <p class="activity-label">{{ act.label }}</p>
+                <div class="activity-meta">
+                  <span>{{ act.time }}</span>
+                  <app-fw-badge [status]="act.status" size="xs"></app-fw-badge>
+                </div>
+              </div>
+            </div>
+          </div>
+          <app-fw-button variant="ghost" size="sm" class="w-full mt-4" routerLink="/admin/identity/audit">
+            Tout l'historique
+          </app-fw-button>
+        </section>
+
+        <!-- Tip Box -->
+        <div class="p-4 bg-primary-alpha/5 rounded-2xl border border-primary-alpha">
+          <p class="text-[10px] text-primary font-bold uppercase tracking-widest leading-relaxed">
+            Astuce : Utilisez la recherche universelle en haut à droite pour accéder instantanément à n'importe quel élève.
+          </p>
+        </div>
+
+      </aside>
+    </div>
+
+  </div>
+</app-fw-page-shell>

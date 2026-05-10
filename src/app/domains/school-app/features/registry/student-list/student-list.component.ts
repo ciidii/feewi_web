@@ -31,6 +31,7 @@ import {FwPageShellComponent} from '../../../../../shared/components/page-shell/
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
 import {FwListCommandBarComponent} from '../../../../../shared/components/list-command-bar/list-command-bar.component';
 import {SharedFilterModalComponent} from '../../../../../shared/components/filter-modal/shared-filter-modal.component';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-student-list',
@@ -53,7 +54,7 @@ export class StudentListComponent implements OnInit, OnDestroy {
   private notificationService = inject(NotificationService);
   private dialog = inject(MatDialog);
   protected loadingService = inject(LoadingService);
-
+  private router = inject(Router);
   // --- ÉTATS ---
   activeTabId = signal('ACTIVE');
   searchQuery = signal('');
