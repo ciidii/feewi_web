@@ -25,40 +25,60 @@
     </app-fw-button>
   </div>
 
-  <!-- CONTENU -->
-  <div class="space-y-6 animate-in fade-in duration-700">
-    
-    <!-- Barre d'outils Intégrée -->
-    <div class="flex items-center justify-between gap-6 bg-white/50 backdrop-blur-sm p-4 rounded-2xl shadow-sm">
-      <div class="relative flex-1 max-w-lg group">
-        <lucide-icon [name]="Search"
-                    class="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400 group-focus-within:text-primary transition-colors"></lucide-icon>
-        <input
-          type="text"
-          placeholder="Rechercher un élève (nom, matricule, classe...)"
-          class="w-full pl-12 pr-4 py-3 bg-white rounded-xl text-sm font-bold text-midnight focus:outline-none focus:ring-4 focus:ring-primary-alpha focus:border-primary transition-all shadow-sm"
-          #searchInput
-          (input)="onSearch(searchInput.value)"
+  <!-- CONTENU DE PAGE ALIGNÉ -->
+  <div class="list-page-content animate-in fade-in duration-500">
+
+    <!-- BARRE DE COMMANDE UNIFIÉE -->
+    <app-fw-list-command-bar
+      [searchQuery]="searchQuery()"
+      [searchPlaceholder]="'Rechercher un élève...'"
+      [totalElements]="studentPage()?.totalElements || 0"
+      [activeFilters]="activeFilterChips()"
+      (searchChange)="onSearch($event)"
+      (clearSearch)="onSearch('')"
+      (removeFilter)="removeFilter($event)"
+      (clearAllFilters)="clearAllFilters()"
+    >
+      <!-- ACTIONS PRIMAIRES -->
+      <div primary-actions class="flex items-center gap-2">
+        <app-fw-button variant="tertiary" size="sm" [icon]="Download" title="Exporter"></app-fw-button>
+        <app-fw-button variant="tertiary" size="sm" [icon]="RefreshCw" [loading]="loadingService.isLoading()" (click)="loadStudents(searchQuery(), selectedStatus())" title="Actualiser"></app-fw-button>
+        <div class="divider-v"></div>
+        <app-fw-button
+          variant="primary"
+          size="sm"
+          [icon]="UserPlus"
         >
+          Inscrire un élève
+        </app-fw-button>
       </div>
 
-      <div class="flex items-center gap-3">
-        <app-fw-button [variant]="'tertiary'" [size]="'md'" [icon]="Filter">Filtres</app-fw-button>
+      <!-- FILTRES RAPIDES -->
+      <div quick-filters>
+        <button class="more-filters-trigger" (click)="openFilterModal()" [class.has-active]="selectedClassId()">
+          <lucide-icon [name]="Filter" [size]="14"></lucide-icon>
+          <span>Filtres</span>
+        </button>
       </div>
+    </app-fw-list-command-bar>
+
+    <!-- LISTE DES ÉLÈVES -->
+    <div class="list-container-integrated">
+      <app-data-list
+        [data]="studentRows()"
+        [tabs]="studentTabs()"
+        [activeTab]="activeTabId()"
+        [actions]="studentActions"
+        [total]="studentPage()?.totalElements || 0"
+        [isLoading]="loadingService.isLoading()"
+        [showSearch]="false"
+        [showFilterButton]="false"
+        [cardMode]="false"
+        defaultView="cards"
+        (onTabChange)="onTabChange($event)"
+        (onAction)="handleAction($event)"
+      ></app-data-list>
     </div>
-
-    <!-- Liste des données en mode intégré (pas de double toolbar) -->
-    <app-data-list
-      [data]="studentRows()"
-      [actions]="studentActions"
-      [total]="studentPage()?.totalElements || 0"
-      [isLoading]="loadingService.isLoading()"
-      [cardMode]="false"
-      [showSearch]="false"
-      [showFilterButton]="false"
-      defaultView="cards"
-      (onAction)="handleAction($event)"
-    ></app-data-list>
 
   </div>
 
