@@ -33,22 +33,24 @@
       </div>
 
       <!-- Liste réelle des rôles -->
-      <button 
-        *ngFor="let role of roles()"
-        class="scope-item" 
-        [class.active]="selectedRoleId() === role.id" 
-        (click)="selectRole(role.id)"
-      >
-        <div class="scope-icon">
-          <lucide-icon [name]="role.icon" [size]="15"></lucide-icon>
-        </div>
-        <div class="scope-label-wrap">
-          <span class="scope-name">{{ role.name }}</span>
-          <span class="scope-sub">{{ role.memberCount }} membre(s) rattaché(s)</span>
-        </div>
-        <!-- Dot if unsaved changes -->
-        <div class="override-dot" *ngIf="selectedRoleId() === role.id && hasUnsavedChanges()" title="Changements non publiés"></div>
-      </button>
+      <ng-container *ngIf="!isInitialLoading()">
+        <button 
+          *ngFor="let role of roles()"
+          class="scope-item" 
+          [class.active]="selectedRoleId() === role.id" 
+          (click)="selectRole(role.id)"
+        >
+          <div class="scope-icon">
+            <lucide-icon [name]="role.icon" [size]="15"></lucide-icon>
+          </div>
+          <div class="scope-label-wrap">
+            <span class="scope-name">{{ role.name }}</span>
+            <span class="scope-sub">{{ role.memberCount }} membre(s) rattaché(s)</span>
+          </div>
+          <!-- Dot if unsaved changes -->
+          <div class="override-dot" *ngIf="selectedRoleId() === role.id && hasUnsavedChanges()" title="Changements non publiés"></div>
+        </button>
+      </ng-container>
     </div>
 
     <!-- Actions de création supprimées (déplacées vers le header) -->
