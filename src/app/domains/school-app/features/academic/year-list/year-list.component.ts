@@ -1,6 +1,16 @@
 import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {Archive, Calendar, CalendarSearch, CheckCircle, Clock, LucideAngularModule, Play, Plus} from 'lucide-angular';
+import {
+  Archive,
+  Calendar,
+  CalendarSearch,
+  CheckCircle,
+  Clock,
+  LucideAngularModule,
+  Play,
+  Plus,
+  RefreshCw
+} from 'lucide-angular';
 import {DataListComponent} from '../../../../../shared/components/data-list/data-list.component';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {AcademicService} from '../../../../../core/services/academic.service';
@@ -13,6 +23,7 @@ import {Router} from '@angular/router';
 import {firstValueFrom} from 'rxjs';
 import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
+import {FwListCommandBarComponent} from '../../../../../shared/components/list-command-bar/list-command-bar.component';
 
 @Component({
   selector: 'app-year-list',
@@ -23,7 +34,8 @@ import {FwButtonComponent} from '../../../../../shared/components/button/button.
     DataListComponent,
     MatDialogModule,
     FwPageShellComponent,
-    FwButtonComponent
+    FwButtonComponent,
+    FwListCommandBarComponent
   ],
   templateUrl: './year-list.component.html',
   styleUrls: ['./year-list.component.scss']
@@ -37,6 +49,13 @@ export class YearListComponent implements OnInit {
   // Icônes
   readonly Calendar = Calendar;
   readonly Plus = Plus;
+  readonly RefreshCw = RefreshCw;
+
+  // États
+  years = signal<AcademicYear[]>([]);
+  isLoading = signal(true);
+  activeTab = signal('Tous');
+  searchQuery = signal('');
 
   // Actions dynamiques basées sur le statut de l'année
   readonly yearActions: RowAction[] = [
@@ -68,31 +87,43 @@ export class YearListComponent implements OnInit {
     { label: 'En préparation', icon: Clock, count: 0 }
   ];
 
-  // États
-  years = signal<AcademicYear[]>([]);
-  isLoading = signal(true);
-  activeTab = signal('Tous');
+  activeFilterChips = computed(() => {
+    const chips: any[] = [];
+    if (this.searchQuery()) {
+      chips.push({ key: 'q', label: 'Recherche', value: this.searchQuery() });
+    }
+    return chips;
+  });
 
   // Transformation des données pour le DataList
   displayYears = computed<TableRow[]>(() => {
-    return this.years().map(year => {
-      const isCurrent = year.status === 'ACTIVE';
-      const yearInitials = year.label.split('-').map(p => p.substring(2, 4)).join('/'); // "2025-2026" -> "25/26"
+    return this.years()
+      .filter(y => {
+        if (this.activeTab() === 'Active') return y.status === 'ACTIVE';
+        if (this.activeTab() === 'En préparation') return y.status === 'PLANNING';
+        return true;
+      })
+      .filter(y => {
+        if (!this.searchQuery()) return true;
+        return y.label.toLowerCase().includes(this.searchQuery().toLowerCase());
+      })
+      .map(year => {
+        const yearInitials = year.label.split('-').map(p => p.substring(2, 4)).join('/'); // "2025-2026" -> "25/26"
 
-      return {
-        id: year.id,
-        title: year.label,
-        subtitle: `${this.getSystemTypeLabel(year.systemType)} • ${new Date(year.adminStartDate).getFullYear()}-${new Date(year.adminEndDate).getFullYear()}`,
-        avatarLabel: yearInitials,
-        date: `Cours: ${new Date(year.lessonsStartDate).toLocaleDateString()} au ${new Date(year.lessonsEndDate).toLocaleDateString()}`,
-        badges: [{
-          label: year.status,
-          type: this.getBadgeType(year.status)
-        }],
-        metadata: { status: year.status },
-        rawData: year
-      };
-    });
+        return {
+          id: year.id,
+          title: year.label,
+          subtitle: `${this.getSystemTypeLabel(year.systemType)} • ${new Date(year.adminStartDate).getFullYear()}-${new Date(year.adminEndDate).getFullYear()}`,
+          avatarLabel: yearInitials,
+          date: `Cours: ${new Date(year.lessonsStartDate).toLocaleDateString()} au ${new Date(year.lessonsEndDate).toLocaleDateString()}`,
+          badges: [{
+            label: year.status,
+            type: this.getBadgeType(year.status)
+          }],
+          metadata: { status: year.status },
+          rawData: year
+        };
+      });
   });
 
   richDescription = computed(() => {
@@ -193,5 +224,13 @@ export class YearListComponent implements OnInit {
 
   onTabChange(tab: string) {
     this.activeTab.set(tab);
+  }
+
+  removeFilter(key: string) {
+    if (key === 'q') this.searchQuery.set('');
+  }
+
+  clearAllFilters() {
+    this.searchQuery.set('');
   }
 }

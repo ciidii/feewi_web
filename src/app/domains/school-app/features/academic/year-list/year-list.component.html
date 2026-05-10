@@ -4,20 +4,34 @@
   [icon]="Calendar"
   density="compact"
 >
-  <!-- ACTIONS -->
-  <div actions>
-    <app-fw-button 
-      (click)="openAddYearForm()"
-      variant="primary"
-      size="sm"
-      [icon]="Plus"
-    >
-      Préparer une rentrée
-    </app-fw-button>
-  </div>
+  <!-- BARRE DE COMMANDE UNIFIÉE -->
+  <app-fw-list-command-bar
+    [searchQuery]="searchQuery()"
+    [searchPlaceholder]="'Rechercher une année...'"
+    [totalElements]="years().length"
+    [activeFilters]="activeFilterChips()"
+    (searchChange)="searchQuery.set($event)"
+    (clearSearch)="searchQuery.set('')"
+    (removeFilter)="removeFilter($event)"
+    (clearAllFilters)="clearAllFilters()"
+  >
+    <!-- ACTIONS PRIMAIRES -->
+    <div primary-actions class="flex items-center gap-2">
+      <app-fw-button variant="tertiary" size="sm" [icon]="RefreshCw" [loading]="isLoading()" (click)="loadYears()" title="Actualiser"></app-fw-button>
+      <div class="divider-v"></div>
+      <app-fw-button 
+        (click)="openAddYearForm()"
+        variant="primary"
+        size="sm"
+        [icon]="Plus"
+      >
+        Préparer une rentrée
+      </app-fw-button>
+    </div>
+  </app-fw-list-command-bar>
 
   <!-- LISTE DES ANNÉES -->
-  <div class="relative min-h-[400px] animate-in fade-in duration-500">
+  <div class="list-container-integrated animate-in fade-in duration-500">
     <app-data-list
       [data]="displayYears()"
       [tabs]="tabs"
@@ -25,6 +39,9 @@
       [total]="displayYears().length"
       [actions]="yearActions"
       [isLoading]="isLoading()"
+      [showSearch]="false"
+      [showFilterButton]="false"
+      [cardMode]="false"
       defaultView="cards"
       (onTabChange)="onTabChange($event)"
       (onAction)="handleAction($event)"

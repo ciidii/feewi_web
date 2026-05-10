@@ -1,6 +1,6 @@
 import {Component, computed, inject, OnDestroy, OnInit, signal, ViewEncapsulation} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {Router} from '@angular/router';
+import {Router, RouterModule} from '@angular/router';
 import {
   ArrowRight,
   CheckCircle,
@@ -37,14 +37,14 @@ import {FormsModule} from '@angular/forms';
 import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
 import {FwListCommandBarComponent} from '../../../../../shared/components/list-command-bar/list-command-bar.component';
-
-import {AdmissionFilterModalComponent} from './components/admission-filter-modal/admission-filter-modal.component';
+import {SharedFilterModalComponent} from '../../../../../shared/components/filter-modal/shared-filter-modal.component';
 
 @Component({
   selector: 'app-admissions',
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule,
     DataListComponent,
     LucideAngularModule,
     MatMenuModule,
@@ -148,16 +148,53 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
   }
 
   openFilterModal() {
-    const dialogRef = this.dialog.open(AdmissionFilterModalComponent, {
+    const dialogRef = this.dialog.open(SharedFilterModalComponent, {
       width: '400px',
       data: {
-        selectedYear: this.selectedYear(),
-        selectedLevel: this.selectedLevel(),
-        selectedChannel: this.selectedChannel(),
-        selectedStartDate: this.selectedStartDate(),
-        selectedEndDate: this.selectedEndDate(),
-        groupedLevels: this.groupedLevels(),
-        years: this.years()
+        title: 'Filtrer les admissions',
+        fields: [
+          {
+            key: 'year',
+            label: 'Année Scolaire',
+            type: 'select',
+            options: this.years().map(y => ({ label: y.label, value: y.id }))
+          },
+          {
+            key: 'level',
+            label: 'Niveau demandé',
+            type: 'select',
+            groups: this.groupedLevels().map(g => ({
+              label: g.cycle.customName || g.cycle.systemName || 'Cycle',
+              options: g.levels.map(l => ({ label: l.name, value: l.id }))
+            }))
+          },
+          {
+            key: 'channel',
+            label: 'Canal de provenance',
+            type: 'select',
+            options: [
+              { label: '💻 Portail Parent (Digital)', value: 'DIGITAL' },
+              { label: '🏢 Saisie Guichet (Direct)', value: 'DIRECT' }
+            ]
+          },
+          {
+            key: 'start',
+            label: 'Date de début',
+            type: 'date'
+          },
+          {
+            key: 'end',
+            label: 'Date de fin',
+            type: 'date'
+          }
+        ],
+        initialValues: {
+          year: this.selectedYear(),
+          level: this.selectedLevel(),
+          channel: this.selectedChannel(),
+          start: this.selectedStartDate(),
+          end: this.selectedEndDate()
+        }
       }
     });
 
