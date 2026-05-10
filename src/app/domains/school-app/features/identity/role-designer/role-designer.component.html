@@ -53,15 +53,14 @@
             (click)="selectRole(role.id)"
             class="group relative flex items-center justify-between p-3 rounded-xl border-2 cursor-pointer transition-all duration-200"
             [class.border-transparent]="selectedRoleId() !== role.id"
-            [class.bg-white]="selectedRoleId() !== role.id"
-            [class.border-midnight]="selectedRoleId() === role.id"
-            [class.bg-midnight]="selectedRoleId() === role.id"
-            [class.text-white]="selectedRoleId() === role.id"
+            [class.bg-white/40]="selectedRoleId() !== role.id"
+            [class.border-primary]="selectedRoleId() === role.id"
+            [class.bg-white]="selectedRoleId() === role.id"
             [class.shadow-md]="selectedRoleId() === role.id"
           >
             <div class="flex items-center gap-3 min-w-0">
               <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-all"
-                   [class.bg-white/10]="selectedRoleId() === role.id"
+                   [class.bg-primary]="selectedRoleId() === role.id"
                    [class.bg-surface-sunken]="selectedRoleId() !== role.id"
                    [class.text-white]="selectedRoleId() === role.id"
                    [class.text-text-tertiary]="selectedRoleId() !== role.id"
@@ -69,11 +68,17 @@
                 <lucide-icon [name]="role.icon" [size]="16"></lucide-icon>
               </div>
               <div class="flex flex-col min-w-0">
-                <span class="text-xs font-bold truncate tracking-tight uppercase">{{ role.name }}</span>
-                <span class="text-[9px] font-medium opacity-60 uppercase">{{ role.memberCount }} membre(s)</span>
+                <span class="text-xs font-bold truncate tracking-tight uppercase"
+                      [class.text-primary]="selectedRoleId() === role.id"
+                      [class.text-midnight]="selectedRoleId() !== role.id">
+                  {{ role.name }}
+                </span>
+                <span class="text-[9px] font-medium opacity-60 uppercase tracking-widest">{{ role.memberCount }} membre(s)</span>
               </div>
             </div>
-            <lucide-icon [name]="ChevronRight" [size]="14" class="opacity-30"></lucide-icon>
+            <lucide-icon [name]="ChevronRight" [size]="14" class="opacity-30" 
+                        [class.text-primary]="selectedRoleId() === role.id"
+                        [class.opacity-100]="selectedRoleId() === role.id"></lucide-icon>
           </div>
         </div>
       </aside>
@@ -91,25 +96,38 @@
 
         <!-- Matrice Réelle -->
         <div *ngIf="!isInitialLoading() && selectedRole()" class="flex-1 flex flex-col bg-white rounded-2xl border border-border-subtle shadow-sm overflow-hidden">
-          <!-- En-tête du rôle -->
-          <div class="p-6 border-b border-border-subtle bg-surface-sunken/30">
-            <div class="flex items-center gap-4">
-              <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center border border-border-subtle shadow-sm">
-                <lucide-icon [name]="selectedRole()?.icon || Shield" [size]="24" class="text-midnight"></lucide-icon>
-              </div>
-              <div class="flex-1">
-                <div class="flex items-center gap-3">
-                  <h2 class="text-lg font-black text-midnight uppercase tracking-tight">{{ selectedRole()?.name }}</h2>
-                  <span *ngIf="hasUnsavedChanges()" class="px-2 py-0.5 bg-amber-100 text-amber-700 rounded text-[9px] font-bold uppercase tracking-widest border border-amber-200">Non publié</span>
+          
+          <!-- En-tête du rôle (STICKY) -->
+          <div class="role-matrix-header p-6 border-b border-border-subtle bg-surface-sunken/30">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center border border-border-subtle shadow-sm">
+                  <lucide-icon [name]="selectedRole()?.icon || Shield" [size]="24" class="text-midnight"></lucide-icon>
                 </div>
-                <p class="text-xs text-text-tertiary font-medium">{{ selectedRole()?.rawData?.description || 'Configuration des accès pour ce profil' }}</p>
+                <div class="flex-1">
+                  <div class="flex items-center gap-3">
+                    <h2 class="text-lg font-black text-midnight uppercase tracking-tight">{{ selectedRole()?.name }}</h2>
+                    <span *ngIf="hasUnsavedChanges()" class="px-2 py-0.5 bg-amber-100 text-amber-700 rounded text-[9px] font-bold uppercase tracking-widest border border-amber-200">Non publié</span>
+                  </div>
+                  <p class="text-xs text-text-tertiary font-medium">{{ selectedRole()?.rawData?.description || 'Configuration des accès pour ce profil' }}</p>
+                </div>
+              </div>
+
+              <!-- Quick Filter Permissions -->
+              <div class="relative group min-w-[280px]">
+                <lucide-icon [name]="Search" [size]="14" class="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary group-focus-within:text-primary transition-colors"></lucide-icon>
+                <input type="text" 
+                       [ngModel]="permissionQuery()"
+                       (ngModelChange)="permissionQuery.set($event)"
+                       placeholder="Filtrer les permissions..." 
+                       class="w-full h-10 pl-10 pr-4 bg-white border border-border-subtle rounded-xl text-xs font-bold text-midnight focus:border-primary focus:ring-4 focus:ring-primary-alpha transition-all">
               </div>
             </div>
           </div>
 
           <!-- Matrice des permissions -->
           <div class="flex-1 overflow-y-auto custom-scrollbar p-6">
-            <div *ngFor="let group of permissionGroups()" class="mb-10 last:mb-0">
+            <div *ngFor="let group of filteredPermissionGroups()" class="mb-10 last:mb-0">
               <header class="section-header-minimal mb-6">
                 <div class="w-1.5 h-4 bg-midnight rounded-full"></div>
                 <span class="label">{{ group.category }}</span>
@@ -117,21 +135,27 @@
               
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div *ngFor="let perm of group.permissions" 
-                     class="flex items-center justify-between p-4 bg-white rounded-xl border border-border-subtle hover:border-midnight transition-all group/perm">
+                     class="flex items-center justify-between p-4 bg-white rounded-xl border border-border-subtle hover:border-primary hover:shadow-md transition-all group/perm">
                   <div class="flex-1 pr-4">
-                    <p class="text-xs font-bold text-midnight tracking-tight">{{ perm.label }}</p>
+                    <p class="text-xs font-bold text-midnight tracking-tight group-hover/perm:text-primary transition-colors">{{ perm.label }}</p>
                     <p class="text-[10px] text-text-tertiary mt-1 leading-relaxed font-medium">{{ perm.description }}</p>
                   </div>
                   
                   <div class="relative inline-flex items-center cursor-pointer" (click)="onPermissionToggle(perm.id, !perm.granted)">
                     <div class="w-10 h-5 bg-slate-100 rounded-full transition-colors duration-200 border border-border"
-                         [class.bg-midnight]="perm.granted"
-                         [class.border-midnight]="perm.granted"></div>
+                         [class.bg-primary]="perm.granted"
+                         [class.border-primary]="perm.granted"></div>
                     <div class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-transform duration-200 shadow-sm"
                          [class.translate-x-5]="perm.granted"></div>
                   </div>
                 </div>
               </div>
+            </div>
+
+            <!-- Empty results -->
+            <div *ngIf="filteredPermissionGroups().length === 0" class="py-20 text-center">
+              <lucide-icon [name]="Search" [size]="32" class="mx-auto text-text-tertiary opacity-20 mb-4"></lucide-icon>
+              <p class="text-sm font-bold text-text-tertiary">Aucune permission ne correspond à votre recherche.</p>
             </div>
           </div>
         </div>

@@ -45,8 +45,7 @@ export interface PermissionGroup {
     LucideAngularModule,
     MatButtonModule,
     FwPageShellComponent,
-    FwButtonComponent,
-    FwBadgeComponent
+    FwButtonComponent
   ],
   templateUrl: './role-designer.component.html',
   styleUrls: ['./role-designer.component.scss'],
@@ -97,6 +96,21 @@ export class RoleDesignerComponent implements OnInit {
 
   // Groupes de permissions dynamiques
   permissionGroups = signal<PermissionGroup[]>([]);
+  permissionQuery = signal('');
+
+  filteredPermissionGroups = computed(() => {
+    const query = this.permissionQuery().toLowerCase();
+    if (!query) return this.permissionGroups();
+
+    return this.permissionGroups().map(group => ({
+      ...group,
+      permissions: group.permissions.filter(p =>
+        p.label.toLowerCase().includes(query) ||
+        p.description.toLowerCase().includes(query) ||
+        p.id.toLowerCase().includes(query)
+      )
+    })).filter(group => group.permissions.length > 0);
+  });
 
   ngOnInit() {
     this.loadInitialData();

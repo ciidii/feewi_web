@@ -2,7 +2,7 @@ import {Component, ViewEncapsulation} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {
   Activity,
-  GraduationCap,
+  GraduationCap, History,
   LayoutDashboard,
   LucideAngularModule,
   Search,
@@ -28,4 +28,5 @@ export class DashboardComponent {
   readonly LayoutDashboard = LayoutDashboard;
   readonly HistoryIcon = History;
   readonly Search = Search;
+  protected readonly History = History;
 }

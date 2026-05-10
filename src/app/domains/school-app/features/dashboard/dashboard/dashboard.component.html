@@ -60,7 +60,7 @@
 
     <!-- Main Analytics Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      
+
       <!-- Charts Placeholder -->
       <div class="lg:col-span-2 bg-white rounded-[2rem] border border-border-subtle shadow-sm p-10 h-[450px] flex flex-col items-center justify-center border-dashed group hover:border-primary transition-all">
          <div class="w-20 h-20 bg-surface-sunken rounded-full flex items-center justify-center text-text-tertiary mb-6 group-hover:bg-primary-alpha group-hover:text-primary transition-all">
@@ -69,14 +69,14 @@
          <h4 class="text-lg font-bold text-midnight tracking-tight">Visualisation des tendances</h4>
          <p class="text-sm text-text-tertiary mt-2 max-w-xs text-center font-medium">Le moteur d'analytics prédictif est en cours de déploiement sur votre instance.</p>
       </div>
-      
+
       <!-- Activity Feed -->
       <div class="bg-white rounded-[2rem] border border-border-subtle shadow-sm p-8 flex flex-col">
         <header class="section-header-minimal mb-8">
-          <lucide-icon [name]="HistoryIcon" [size]="14" class="text-text-tertiary"></lucide-icon>
+          <lucide-icon [name]="History" [size]="14" class="text-text-tertiary"></lucide-icon>
           <span class="label">Activités Récentes</span>
         </header>
-        
+
         <div class="space-y-8 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-px before:bg-border-subtle flex-1">
           <div *ngFor="let i of [1,2,3,4,5]" class="flex gap-4 items-start relative z-1">
             <div class="w-6 h-6 rounded-full bg-white border-2 border-border-subtle flex items-center justify-center shadow-sm">
