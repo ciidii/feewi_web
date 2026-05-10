@@ -12,6 +12,7 @@ import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-d
 import {Router} from '@angular/router';
 import {firstValueFrom} from 'rxjs';
 import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
+import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
 
 @Component({
   selector: 'app-year-list',
@@ -21,7 +22,8 @@ import {FwPageShellComponent} from '../../../../../shared/components/page-shell/
     LucideAngularModule,
     DataListComponent,
     MatDialogModule,
-    FwPageShellComponent
+    FwPageShellComponent,
+    FwButtonComponent
   ],
   templateUrl: './year-list.component.html',
   styleUrls: ['./year-list.component.scss']
@@ -73,22 +75,42 @@ export class YearListComponent implements OnInit {
 
   // Transformation des données pour le DataList
   displayYears = computed<TableRow[]>(() => {
-    return this.years().map(year => ({
-      id: year.id,
-      title: year.label,
-      subtitle: `${year.systemType} • ${new Date(year.adminStartDate).getFullYear()} - ${new Date(year.adminEndDate).getFullYear()}`,
-      avatarLabel: year.label.substring(0, 2),
-      date: `Cours: ${new Date(year.lessonsStartDate).toLocaleDateString()} au ${new Date(year.lessonsEndDate).toLocaleDateString()}`,
-      badges: [{
-        label: year.status,
-        type: this.getBadgeType(year.status)
-      }],
-      metadata: { status: year.status }
-    }));
+    return this.years().map(year => {
+      const isCurrent = year.status === 'ACTIVE';
+      const yearInitials = year.label.split('-').map(p => p.substring(2, 4)).join('/'); // "2025-2026" -> "25/26"
+
+      return {
+        id: year.id,
+        title: year.label,
+        subtitle: `${this.getSystemTypeLabel(year.systemType)} • ${new Date(year.adminStartDate).getFullYear()}-${new Date(year.adminEndDate).getFullYear()}`,
+        avatarLabel: yearInitials,
+        date: `Cours: ${new Date(year.lessonsStartDate).toLocaleDateString()} au ${new Date(year.lessonsEndDate).toLocaleDateString()}`,
+        badges: [{
+          label: year.status,
+          type: this.getBadgeType(year.status)
+        }],
+        metadata: { status: year.status },
+        rawData: year
+      };
+    });
+  });
+
+  richDescription = computed(() => {
+    const active = this.years().find(y => y.status === 'ACTIVE');
+    return `${this.years().length} Sessions enregistrées • Année active : ${active?.label || 'Aucune'}`;
   });
 
   ngOnInit() {
     this.loadYears();
+  }
+
+  private getSystemTypeLabel(type: string): string {
+    switch (type) {
+      case 'TRIMESTER': return 'Trimestriel';
+      case 'SEMESTER': return 'Semestriel';
+      case 'ANNUAL': return 'Annuel';
+      default: return type;
+    }
   }
 
   async loadYears() {

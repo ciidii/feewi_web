@@ -1,42 +1,34 @@
 <app-fw-form-shell
   title="Planifier une Rentrée"
-  subtitle="Initialisez le calendrier administratif et pédagogique pour la nouvelle année."
+  subtitle="Initialisation du calendrier administratif et pédagogique."
   [icon]="Calendar"
-  statusLabel="Planning"
   saveLabel="Créer l'année scolaire"
   [isLoading]="isLoading()"
   [canSave]="yearForm.valid"
   (save)="onSave()"
   (cancel)="onCancel()"
 >
-  <form [formGroup]="yearForm" class="space-y-8">
+  <form [formGroup]="yearForm" class="space-y-10 py-2">
     
     <!-- 1. Identification -->
-    <div class="space-y-5">
-      <div class="flex items-center gap-3">
-        <div class="flex items-center justify-center w-8 h-8 rounded-xl bg-primary-50 text-primary-600 font-bold text-xs">01</div>
-        <span class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Identification</span>
-        <div class="flex-1 h-px bg-slate-100"></div>
-      </div>
+    <div class="space-y-6">
+      <header class="section-header">
+        <lucide-icon [name]="Type" [size]="14"></lucide-icon>
+        <span class="label">Identification & Évaluation</span>
+      </header>
 
       <div class="grid grid-cols-2 gap-6">
-        <div class="space-y-2">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Libellé de l'année</label>
-          <div class="relative group">
-            <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors">
-              <lucide-icon [name]="Type" class="w-4.5 h-4.5"></lucide-icon>
-            </div>
+        <div class="fw-field">
+          <label class="fw-label">Libellé de l'année</label>
+          <div class="fw-input-wrapper">
             <input type="text" formControlName="label" placeholder="ex: 2025-2026" class="fw-input" [class.error]="isInvalid('label')"/>
           </div>
         </div>
 
-        <div class="space-y-2">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Système d'évaluation</label>
-          <div class="relative group">
-            <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors z-10">
-              <lucide-icon [name]="Clock" class="w-4.5 h-4.5"></lucide-icon>
-            </div>
-            <mat-select formControlName="systemType" class="fw-select">
+        <div class="fw-field">
+          <label class="fw-label">Système d'évaluation</label>
+          <div class="fw-input-wrapper">
+            <mat-select formControlName="systemType" class="fw-input">
               <mat-option value="TRIMESTER">Trimestriel (3 périodes)</mat-option>
               <mat-option value="SEMESTER">Semestriel (2 périodes)</mat-option>
               <mat-option value="ANNUAL">Annuel (1 période)</mat-option>
@@ -47,49 +39,56 @@
     </div>
 
     <!-- 2. Calendrier Administratif -->
-    <div class="space-y-5">
-      <div class="flex items-center gap-3">
-        <div class="flex items-center justify-center w-8 h-8 rounded-xl bg-primary-50 text-primary-600 font-bold text-xs">02</div>
-        <span class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Dates Administratives</span>
-        <div class="flex-1 h-px bg-slate-100"></div>
-      </div>
+    <div class="space-y-6">
+      <header class="section-header">
+        <lucide-icon [name]="Calendar" [size]="14"></lucide-icon>
+        <span class="label">Dates Administratives</span>
+      </header>
 
       <div class="grid grid-cols-2 gap-6">
-        <div class="space-y-2">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1 text-emerald-600">Début d'exercice</label>
-          <input type="date" formControlName="adminStartDate" class="fw-input" [class.error]="isInvalid('adminStartDate')"/>
+        <div class="fw-field">
+          <label class="fw-label">Début d'exercice</label>
+          <div class="fw-input-wrapper">
+            <input type="date" formControlName="adminStartDate" class="fw-input" [class.error]="isInvalid('adminStartDate')"/>
+          </div>
         </div>
-        <div class="space-y-2">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1 text-rose-600">Fin d'exercice</label>
-          <input type="date" formControlName="adminEndDate" class="fw-input" [class.error]="isInvalid('adminEndDate')"/>
+        <div class="fw-field">
+          <label class="fw-label">Fin d'exercice</label>
+          <div class="fw-input-wrapper">
+            <input type="date" formControlName="adminEndDate" class="fw-input" [class.error]="isInvalid('adminEndDate')"/>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- 3. Calendrier Pédagogique -->
-    <div class="space-y-5">
-      <div class="flex items-center gap-3">
-        <div class="flex items-center justify-center w-8 h-8 rounded-xl bg-primary-50 text-primary-600 font-bold text-xs">03</div>
-        <span class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Période des Cours</span>
-        <div class="flex-1 h-px bg-slate-100"></div>
-      </div>
+    <div class="space-y-6">
+      <header class="section-header">
+        <lucide-icon [name]="Clock" [size]="14"></lucide-icon>
+        <span class="label">Période des Cours</span>
+      </header>
 
       <div class="grid grid-cols-2 gap-6">
-        <div class="space-y-2">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Début des leçons</label>
-          <input type="date" formControlName="lessonsStartDate" class="fw-input"/>
+        <div class="fw-field">
+          <label class="fw-label">Début des leçons</label>
+          <div class="fw-input-wrapper">
+            <input type="date" formControlName="lessonsStartDate" class="fw-input"/>
+          </div>
         </div>
-        <div class="space-y-2">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Fin des leçons</label>
-          <input type="date" formControlName="lessonsEndDate" class="fw-input"/>
+        <div class="fw-field">
+          <label class="fw-label">Fin des leçons</label>
+          <div class="fw-input-wrapper">
+            <input type="date" formControlName="lessonsEndDate" class="fw-input"/>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="p-4 bg-blue-50 rounded-xl border border-blue-100 flex items-start gap-3">
-      <lucide-icon [name]="Info" class="w-4 h-4 text-blue-600 mt-0.5"></lucide-icon>
-      <p class="text-[11px] text-blue-800 leading-relaxed">
-        Une fois l'année créée, elle sera en état <span class="font-bold">PLANNING</span>. Vous devrez l'activer manuellement pour qu'elle devienne l'année de référence de l'école.
+    <!-- Info Box Minimalist -->
+    <div class="p-4 bg-surface-sunken rounded-xl border border-border flex items-start gap-3">
+      <lucide-icon [name]="Info" [size]="16" class="text-text-tertiary mt-0.5"></lucide-icon>
+      <p class="text-[11px] text-text-secondary leading-relaxed font-medium">
+        L'année sera créée en état <span class="text-midnight font-bold">PLANNING</span>. L'activation manuelle ultérieure archivera automatiquement la session précédente.
       </p>
     </div>
 

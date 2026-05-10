@@ -1,6 +1,6 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
-import {catchError, map, Observable, throwError} from 'rxjs';
+import {catchError, map, Observable, switchMap, throwError} from 'rxjs';
 import {EnvironmentService} from './environment.service';
 import {NotificationService} from '../../shared/services/notification.service';
 import {TenantContextService} from './tenant-context.service';

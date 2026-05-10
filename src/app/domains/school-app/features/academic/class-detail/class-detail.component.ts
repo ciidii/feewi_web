@@ -8,7 +8,8 @@ import {
   GraduationCap,
   History,
   LucideAngularModule,
-  Plus, RefreshCw,
+  Plus,
+  RefreshCw,
   School,
   UserCheck,
   UserPlus,
@@ -28,7 +29,6 @@ import {StudentSummary} from '../../../../../core/models/student.model';
 import {FwTab} from '../../../../../shared/components/tabs/tabs.component';
 import {TableRow} from '../../../../../shared/models/data-list.models';
 import {FwEmptyStateComponent} from '../../../../../shared/components/empty-state/empty-state.component';
-import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.component';
 
 @Component({
   selector: 'app-class-detail',
@@ -39,7 +39,6 @@ import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.com
     LucideAngularModule,
     FwPageShellComponent,
     FwButtonComponent,
-    FwBadgeComponent,
     DataListComponent,
     BlockLoaderComponent,
     PageProgressComponent,
