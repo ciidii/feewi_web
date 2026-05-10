@@ -10,7 +10,9 @@
   density="compact"
 >
   <!-- ACTIONS -->
-  <div actions>
+  <div actions class="flex items-center gap-2">
+    <app-fw-button variant="tertiary" size="sm" [icon]="RefreshCw" [loading]="loadingService.isLoading()" (click)="loadData(cycleId()!)" title="Actualiser"></app-fw-button>
+    <div class="divider-v"></div>
     <app-fw-button
       *ngIf="canEditStructure() && activeTab() === 'pilotage'"
       (click)="openEditLevel({id: '', name: '', rank: 0, cycleId: cycleId() || ''})"
@@ -20,108 +22,135 @@
     >
       Ajouter un niveau
     </app-fw-button>
+    <app-fw-button
+      *ngIf="canEditStructure() && activeTab() === 'filieres'"
+      (click)="openAddFiliere()"
+      variant="primary"
+      size="sm"
+      [icon]="Plus"
+    >
+      Nouvelle série
+    </app-fw-button>
   </div>
 
-  <!-- CONTENU DYNAMIQUE -->
-  <main class="relative min-h-[400px]">
+  <!-- CONTENU DE PAGE ALIGNÉ -->
+  <div class="list-page-content animate-in fade-in duration-500">
 
-    <!-- VUE PILOTAGE (Sections Niveaux > Classes) -->
-    <div *ngIf="activeTab() === 'pilotage' && !loadingService.isLoading()"
-         class="space-y-6 animate-in slide-in-from-bottom duration-500">
+    <!-- BARRE DE COMMANDE UNIFIÉE -->
+    <app-fw-list-command-bar
+      [searchQuery]="searchQuery()"
+      [searchPlaceholder]="activeTab() === 'pilotage' ? 'Rechercher un niveau ou une classe...' : 'Rechercher une série...'"
+      [totalElements]="activeTab() === 'pilotage' ? levelGroups().length : displayFilieres().length"
+      [activeFilters]="activeFilterChips()"
+      (searchChange)="onSearch($event)"
+      (clearSearch)="onSearch('')"
+      (removeFilter)="removeFilter($event)"
+      (clearAllFilters)="clearAllFilters()"
+    >
+    </app-fw-list-command-bar>
 
-      <div *ngFor="let group of levelGroups()" class="fw-standard-card">
-        <!-- Header du Niveau -->
-        <header class="card-header">
-          <div class="header-left">
-            <div class="level-rank">{{ group.level.rank }}</div>
-            <div class="pillar-title-group">
-              <h3>{{ group.level.name }}</h3>
-              <p>{{ group.classes.length }} classe(s) ouverte(s)</p>
-            </div>
-          </div>
+    <!-- CONTENU DYNAMIQUE -->
+    <main class="relative min-h-[400px]">
 
-          <div class="flex items-center gap-2">
-            <app-fw-button
-              (click)="openCurriculumManager(group.level)"
-              variant="tertiary"
-              size="sm"
-              [icon]="ListChecks"
-            >
-              Programme
-            </app-fw-button>
+      <!-- VUE PILOTAGE (Sections Niveaux > Classes) -->
+      <div *ngIf="activeTab() === 'pilotage' && !loadingService.isLoading()"
+           class="space-y-6 animate-in slide-in-from-bottom duration-500">
 
-            <app-fw-button
-              *ngIf="canEditStructure()"
-              (click)="openEditLevel(group.level)"
-              variant="ghost"
-              size="sm"
-              [icon]="Edit"
-            ></app-fw-button>
-          </div>
-        </header>
-
-        <!-- Grille de Classes -->
-        <div class="card-content">
-          <div class="class-grid">
-            <!-- Tuile Classe -->
-            <div
-              *ngFor="let cls of group.classes"
-              (click)="goToClassDetails(cls)"
-              class="class-tile"
-            >
-              <div class="tile-content">
-                <span class="tile-name">{{ cls.name }}</span>
-                <span class="tile-meta">{{ cls.capacity }} places disponibles</span>
-
-                <!-- Indicateur d'assignation -->
-                <div class="tile-indicator">
-                  <div class="dot"
-                       [ngClass]="cls.assignedTeachings === cls.totalTeachings ? 'bg-emerald-500' : 'bg-amber-400'">
-                  </div>
-                  <span class="label">
-                      {{ cls.assignedTeachings || 0 }}/{{ cls.totalTeachings || 0 }} Enseignants
-                    </span>
-                </div>
+        <div *ngFor="let group of levelGroups()" class="fw-standard-card">
+          <!-- Header du Niveau -->
+          <header class="card-header">
+            <div class="header-left">
+              <div class="level-rank">{{ group.level.rank }}</div>
+              <div class="pillar-title-group">
+                <h3>{{ group.level.name }}</h3>
+                <p>{{ group.classes.length }} classe(s) ouverte(s)</p>
               </div>
-              <lucide-icon [name]="Users" class="tile-bg-icon"></lucide-icon>
             </div>
 
-            <!-- Bouton Ajouter Classe -->
-            <button
-              (click)="openAddClass(group.level)"
-              class="add-class-btn"
-            >
-              <lucide-icon [name]="Plus" [size]="20"></lucide-icon>
-              <span>Ouvrir une classe</span>
-            </button>
+            <div class="flex items-center gap-2">
+              <app-fw-button
+                (click)="openCurriculumManager(group.level)"
+                variant="tertiary"
+                size="sm"
+                [icon]="ListChecks"
+              >
+                Programme
+              </app-fw-button>
+
+              <app-fw-button
+                *ngIf="canEditStructure()"
+                (click)="openEditLevel(group.level)"
+                variant="ghost"
+                size="sm"
+                [icon]="Edit"
+              ></app-fw-button>
+            </div>
+          </header>
+
+          <!-- Grille de Classes -->
+          <div class="card-content">
+            <div class="class-grid">
+              <!-- Tuile Classe -->
+              <div
+                *ngFor="let cls of group.classes"
+                (click)="goToClassDetails(cls)"
+                class="class-tile"
+              >
+                <div class="tile-content">
+                  <span class="tile-name">{{ cls.name }}</span>
+                  <span class="tile-meta">{{ cls.capacity }} places disponibles</span>
+
+                  <!-- Indicateur d'assignation -->
+                  <div class="tile-indicator">
+                    <div class="dot"
+                         [ngClass]="cls.assignedTeachings === cls.totalTeachings ? 'bg-emerald-500' : 'bg-amber-400'">
+                    </div>
+                    <span class="label">
+                        {{ cls.assignedTeachings || 0 }}/{{ cls.totalTeachings || 0 }} Enseignants
+                      </span>
+                  </div>
+                </div>
+                <lucide-icon [name]="Users" class="tile-bg-icon"></lucide-icon>
+              </div>
+
+              <!-- Bouton Ajouter Classe -->
+              <button
+                (click)="openAddClass(group.level)"
+                class="add-class-btn"
+              >
+                <lucide-icon [name]="Plus" [size]="20"></lucide-icon>
+                <span>Ouvrir une classe</span>
+              </button>
+            </div>
           </div>
+        </div>
+
+        <!-- État vide (Niveaux) -->
+        <div *ngIf="levelGroups().length === 0 && !loadingService.isLoading()" class="py-12">
+          <app-fw-empty-state
+            [icon]="GraduationCap"
+            title="Aucun résultat"
+            [description]="searchQuery() ? 'Aucun niveau ou classe ne correspond à votre recherche.' : 'Commencez par ajouter les niveaux pédagogiques de ce cycle (ex: 6ème, 5ème...)'"
+            [ctaLabel]="searchQuery() ? 'Effacer la recherche' : 'Ajouter mon premier niveau'"
+            (ctaClick)="searchQuery() ? clearAllFilters() : openEditLevel({id: '', name: '', rank: 1, cycleId: cycleId() || ''})"
+          ></app-fw-empty-state>
         </div>
       </div>
 
-      <!-- État vide (Niveaux) -->
-      <div *ngIf="levelGroups().length === 0 && !loadingService.isLoading()" class="py-12">
-        <app-fw-empty-state
-          [icon]="GraduationCap"
-          title="Aucun niveau défini"
-          description="Commencez par ajouter les niveaux pédagogiques de ce cycle (ex: 6ème, 5ème...)."
-          ctaLabel="Ajouter mon premier niveau"
-          (ctaClick)="openEditLevel({id: '', name: '', rank: 1, cycleId: cycleId() || ''})"
-        ></app-fw-empty-state>
+      <!-- VUE FILIÈRES (DataList Classique) -->
+      <div *ngIf="activeTab() === 'filieres' && !loadingService.isLoading()"
+           class="animate-in fade-in slide-in-from-right duration-300">
+        <app-data-list
+          [data]="displayFilieres()"
+          [total]="displayFilieres().length"
+          [actions]="filiereActions"
+          [isLoading]="loadingService.isLoading()"
+          [showSearch]="false"
+          [showFilterButton]="false"
+          (onAction)="handleFiliereAction($event)"
+        ></app-data-list>
       </div>
-    </div>
 
-    <!-- VUE FILIÈRES (DataList Classique) -->
-    <div *ngIf="activeTab() === 'filieres' && !loadingService.isLoading()"
-         class="animate-in fade-in slide-in-from-right duration-300">
-      <app-data-list
-        [data]="displayFilieres()"
-        [total]="displayFilieres().length"
-        [actions]="filiereActions"
-        [isLoading]="loadingService.isLoading()"
-        (onAction)="handleFiliereAction($event)"
-      ></app-data-list>
-    </div>
-
-  </main>
+    </main>
+  </div>
 </app-fw-page-shell>
-

@@ -5,38 +5,68 @@
   density="compact"
 >
   <!-- ACTIONS -->
-  <div actions>
+  <div actions class="flex items-center gap-2">
+    <app-fw-button variant="tertiary" size="sm" [icon]="RefreshCw" [loading]="loadingService.isLoading()" (click)="loadData()" title="Actualiser"></app-fw-button>
+    <div class="divider-v"></div>
     <app-fw-button
       *ngIf="canEditStructure()"
       (click)="openAddCycle()"
       variant="primary"
-      size="md"
+      size="sm"
       [icon]="Plus"
     >
       Nouveau Cycle
     </app-fw-button>
   </div>
 
-  <!-- CONTENU -->
-  <div class="space-y-8 animate-in fade-in duration-500">
-    <!-- BANNER INFO (Fondation) -->
-    <app-fw-alert-banner variant="info" [dismissible]="true">
-      Les cycles permettent de regrouper les niveaux (ex: Primaire regroupe du CP au CM2). Les modifications ici impactent la structure des bulletins et les frais de scolarité.
-    </app-fw-alert-banner>
+  <!-- CONTENU DE PAGE ALIGNÉ -->
+  <div class="list-page-content animate-in fade-in duration-500">
 
-    <!-- HUB : UTILISATION DE DATALIST (Mode Cards) -->
-    <main class="w-full relative">
-      <!-- DataList en mode Cards avec gestion automatique des Skeletons -->
-      <app-data-list
-        [data]="displayCycles()"
-        [total]="displayCycles().length"
-        [actions]="cycleActions()"
-        [isLoading]="loadingService.isLoading() && loadingService.context() === 'component'"
-        defaultView="cards"
-        (onAction)="handleCycleAction($event)"
-        (onRowClick)="goToCycle($event.id)"
-      ></app-data-list>
-    </main>
+    <!-- BARRE DE COMMANDE UNIFIÉE -->
+    <app-fw-list-command-bar
+      [searchQuery]="searchQuery()"
+      [searchPlaceholder]="'Rechercher un cycle...'"
+      [totalElements]="displayCycles().length"
+      [activeFilters]="activeFilterChips()"
+      (searchChange)="onSearch($event)"
+      (clearSearch)="onSearch('')"
+      (removeFilter)="removeFilter($event)"
+      (clearAllFilters)="clearAllFilters()"
+    >
+    </app-fw-list-command-bar>
+
+    <div class="space-y-8">
+      <!-- BANNER INFO (Fondation) -->
+      <app-fw-alert-banner variant="info" [dismissible]="true">
+        Les cycles permettent de regrouper les niveaux (ex: Primaire regroupe du CP au CM2). Les modifications ici impactent la structure des bulletins et les frais de scolarité.
+      </app-fw-alert-banner>
+
+      <!-- HUB : UTILISATION DE DATALIST (Mode Cards) -->
+      <main class="w-full relative">
+        <!-- DataList en mode Cards avec gestion automatique des Skeletons -->
+        <app-data-list
+          [data]="displayCycles()"
+          [total]="displayCycles().length"
+          [actions]="cycleActions()"
+          [isLoading]="loadingService.isLoading() && loadingService.context() === 'component'"
+          [showSearch]="false"
+          [showFilterButton]="false"
+          defaultView="cards"
+          (onAction)="handleCycleAction($event)"
+          (onRowClick)="goToCycle($event.id)"
+        ></app-data-list>
+      </main>
+
+      <!-- État vide (Recherche) -->
+      <div *ngIf="displayCycles().length === 0 && !loadingService.isLoading()" class="py-12">
+        <app-fw-empty-state
+          [icon]="Layers"
+          title="Aucun cycle trouvé"
+          [description]="searchQuery() ? 'Aucun cycle ne correspond à votre recherche.' : 'Commencez par définir la structure pédagogique de l\'établissement.'"
+          [ctaLabel]="searchQuery() ? 'Effacer la recherche' : 'Créer un cycle'"
+          (ctaClick)="searchQuery() ? clearAllFilters() : openAddCycle()"
+        ></app-fw-empty-state>
+      </div>
+    </div>
   </div>
 </app-fw-page-shell>
-

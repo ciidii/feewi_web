@@ -4,11 +4,13 @@ import {ActivatedRoute, Router, RouterModule} from '@angular/router';
 import {
   ArrowLeft,
   Edit,
+  Filter,
   GraduationCap,
   Layers,
   ListChecks,
   LucideAngularModule,
   Plus,
+  RefreshCw,
   Tag,
   Trash2,
   Users
@@ -31,6 +33,7 @@ import {FwButtonComponent} from '../../../../../../shared/components/button/butt
 import {FwEmptyStateComponent} from '../../../../../../shared/components/empty-state/empty-state.component';
 import {FwPageShellComponent} from '../../../../../../shared/components/page-shell/page-shell.component';
 import {FwTab} from '../../../../../../shared/components/tabs/tabs.component';
+import {FwListCommandBarComponent} from '../../../../../../shared/components/list-command-bar/list-command-bar.component';
 
 export interface LevelGroup {
   level: Level;
@@ -48,7 +51,8 @@ export interface LevelGroup {
     MatDialogModule,
     FwButtonComponent,
     FwEmptyStateComponent,
-    FwPageShellComponent
+    FwPageShellComponent,
+    FwListCommandBarComponent
   ],
   templateUrl: './cycle-detail.component.html',
   styleUrls: ['./cycle-detail.component.scss']
@@ -73,6 +77,8 @@ export class CycleDetailComponent implements OnInit {
   readonly GraduationCap = GraduationCap;
   readonly Tag = Tag;
   readonly Users = Users;
+  readonly RefreshCw = RefreshCw;
+  readonly Filter = Filter;
 
   // États
   cycleId = signal<string | null>(null);
@@ -82,6 +88,7 @@ export class CycleDetailComponent implements OnInit {
   classes = signal<SchoolClass[]>([]);
   filieres = signal<Filiere[]>([]);
   activeTab = signal('pilotage');
+  searchQuery = signal('');
 
   // Configuration des Onglets
   readonly cycleTabs = computed<FwTab[]>(() => {
@@ -113,23 +120,41 @@ export class CycleDetailComponent implements OnInit {
   levelGroups = computed<LevelGroup[]>(() => {
     const allLevels = [...this.levels()].sort((a, b) => a.rank - b.rank);
     const allClasses = this.classes();
+    const query = this.searchQuery().toLowerCase();
 
-    return allLevels.map(lvl => ({
-      level: lvl,
-      classes: allClasses.filter(cls => String(lvl.id) === String(cls.levelId))
-    }));
+    return allLevels
+      .map(lvl => ({
+        level: lvl,
+        classes: allClasses.filter(cls => String(lvl.id) === String(cls.levelId))
+      }))
+      .filter(group => {
+        if (!query) return true;
+        return group.level.name.toLowerCase().includes(query) ||
+               group.classes.some(cls => cls.name.toLowerCase().includes(query));
+      });
   });
 
   // Transformation des filières pour DataList
   displayFilieres = computed<TableRow[]>(() => {
-    return this.filieres().map(f => ({
-      id: f.id,
-      title: f.name,
-      subtitle: `Code série : ${f.code}`,
-      avatarLabel: f.code.substring(0, 2).toUpperCase(),
-      badges: [{label: 'SÉRIE', type: 'info'}],
-      rawData: f
-    }));
+    const query = this.searchQuery().toLowerCase();
+    return this.filieres()
+      .filter(f => !query || f.name.toLowerCase().includes(query) || f.code.toLowerCase().includes(query))
+      .map(f => ({
+        id: f.id,
+        title: f.name,
+        subtitle: `Code série : ${f.code}`,
+        avatarLabel: f.code.substring(0, 2).toUpperCase(),
+        badges: [{label: 'SÉRIE', type: 'info'}],
+        rawData: f
+      }));
+  });
+
+  activeFilterChips = computed(() => {
+    const chips: any[] = [];
+    if (this.searchQuery()) {
+      chips.push({ key: 'q', label: 'Recherche', value: this.searchQuery() });
+    }
+    return chips;
   });
 
   richDescription = computed(() => {
@@ -263,5 +288,17 @@ export class CycleDetailComponent implements OnInit {
 
   handleFiliereAction(event: { actionId: string, row: TableRow }) {
     this.notificationService.info("Action sur filière bientôt disponible.");
+  }
+
+  onSearch(query: string) {
+    this.searchQuery.set(query);
+  }
+
+  removeFilter(key: string) {
+    if (key === 'q') this.searchQuery.set('');
+  }
+
+  clearAllFilters() {
+    this.searchQuery.set('');
   }
 }

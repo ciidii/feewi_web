@@ -2,7 +2,17 @@ import {Component, computed, inject, OnInit, signal, ViewEncapsulation} from '@a
 import {CommonModule} from '@angular/common';
 import {Router} from '@angular/router';
 import {firstValueFrom} from 'rxjs';
-import {ArrowRight, Edit, Info, Layers, LucideAngularModule, Plus, Trash2} from 'lucide-angular';
+import {
+  ArrowRight,
+  Edit,
+  Filter,
+  Info,
+  Layers,
+  LucideAngularModule,
+  Plus,
+  RefreshCw,
+  Trash2
+} from 'lucide-angular';
 import {AcademicService} from '../../../../../core/services/academic.service';
 import {AuthService} from '../../../../../core/services/auth.service';
 import {NotificationService} from '../../../../../shared/services/notification.service';
@@ -16,6 +26,9 @@ import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-d
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
 import {FwAlertBannerComponent} from '../../../../../shared/components/alert-banner/alert-banner.component';
 import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
+import {FwListCommandBarComponent} from '../../../../../shared/components/list-command-bar/list-command-bar.component';
+import {FormsModule} from '@angular/forms';
+import {FwEmptyStateComponent} from '../../../../../shared/components/empty-state/empty-state.component';
 
 @Component({
   selector: 'app-structure-config',
@@ -27,7 +40,10 @@ import {FwPageShellComponent} from '../../../../../shared/components/page-shell/
     DataListComponent,
     FwButtonComponent,
     FwAlertBannerComponent,
-    FwPageShellComponent
+    FwPageShellComponent,
+    FwListCommandBarComponent,
+    FormsModule,
+    FwEmptyStateComponent
   ],
   templateUrl: './structure-config.component.html',
   styleUrls: ['./structure-config.component.scss'],
@@ -48,9 +64,12 @@ export class StructureConfigComponent implements OnInit {
   readonly Trash2 = Trash2;
   readonly ArrowRight = ArrowRight;
   readonly InfoIcon = Info;
+  readonly RefreshCw = RefreshCw;
+  readonly Filter = Filter;
 
   // États
   cycles = signal<Cycle[]>([]);
+  searchQuery = signal('');
 
   // Autorisations (Provisioning)
   readonly canEditStructure = computed(() => this.authService.hasRole('ROLE_SUPER_ADMIN'));
@@ -69,21 +88,37 @@ export class StructureConfigComponent implements OnInit {
 
   // Transformation des cycles pour le DataList
   displayCycles = computed<TableRow[]>(() => {
-    return this.cycles().map(c => ({
-      id: c.id,
-      title: c.customName || c.systemName || c.cycleCode || c.id,
-      subtitle: `Code Système : ${c.cycleCode ?? '—'}`,
-      avatarLabel: (c.cycleCode ?? c.id).substring(0, 2).toUpperCase(),
-      badges: [
-        {label: 'ACTIF', type: 'success'},
-        {label: `RANG ${c.rank}`, type: 'info'}
-      ],
-      metadata: {
-        domain: 'Éducation',
-        location: 'National'
-      },
-      rawData: c
-    }));
+    const query = this.searchQuery().toLowerCase();
+    return this.cycles()
+      .filter(c => {
+        if (!query) return true;
+        const name = (c.customName || c.systemName || '').toLowerCase();
+        const code = (c.cycleCode || '').toLowerCase();
+        return name.includes(query) || code.includes(query);
+      })
+      .map(c => ({
+        id: c.id,
+        title: c.customName || c.systemName || c.cycleCode || c.id,
+        subtitle: `Code Système : ${c.cycleCode ?? '—'}`,
+        avatarLabel: (c.cycleCode ?? c.id).substring(0, 2).toUpperCase(),
+        badges: [
+          {label: 'ACTIF', type: 'success'},
+          {label: `RANG ${c.rank}`, type: 'info'}
+        ],
+        metadata: {
+          domain: 'Éducation',
+          location: 'National'
+        },
+        rawData: c
+      }));
+  });
+
+  activeFilterChips = computed(() => {
+    const chips: any[] = [];
+    if (this.searchQuery()) {
+      chips.push({ key: 'q', label: 'Recherche', value: this.searchQuery() });
+    }
+    return chips;
   });
 
   ngOnInit() {
@@ -169,5 +204,16 @@ export class StructureConfigComponent implements OnInit {
       }
     });
   }
-}
 
+  onSearch(query: string) {
+    this.searchQuery.set(query);
+  }
+
+  removeFilter(key: string) {
+    if (key === 'q') this.searchQuery.set('');
+  }
+
+  clearAllFilters() {
+    this.searchQuery.set('');
+  }
+}

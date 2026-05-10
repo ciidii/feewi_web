@@ -6,6 +6,20 @@
   background: var(--fw-ice);
 }
 
+.list-page-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.divider-v {
+  width: 1px;
+  height: 24px;
+  background: var(--fw-border-subtle);
+  margin: 0 0.5rem;
+}
+
 // ── THE MINIMALIST DOSSIER CARD ─────────────────────────────────────────────
 .fw-standard-card {
   background: white;
