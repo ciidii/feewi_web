@@ -48,14 +48,35 @@
       <div class="grid grid-cols-2 gap-6">
         <div class="fw-field">
           <label class="fw-label">Date de début</label>
-          <div class="fw-input-wrapper">
-            <input type="date" formControlName="startDate" class="fw-input" [class.error]="isInvalid('startDate')"/>
+          <div class="fw-input-wrapper relative">
+            <input 
+              [matDatepicker]="startPicker"
+              formControlName="startDate"
+              class="fw-input cursor-pointer"
+              [class.error]="isInvalid('startDate')"
+              (click)="startPicker.open()"
+              placeholder="Sélectionner..."
+              readonly
+            />
+            <mat-datepicker-toggle matSuffix [for]="startPicker" class="absolute right-1 top-1/2 -translate-y-1/2"></mat-datepicker-toggle>
+            <mat-datepicker #startPicker startView="multi-year"></mat-datepicker>
           </div>
         </div>
+
         <div class="fw-field">
           <label class="fw-label">Date de fin</label>
-          <div class="fw-input-wrapper">
-            <input type="date" formControlName="endDate" class="fw-input" [class.error]="isInvalid('endDate')"/>
+          <div class="fw-input-wrapper relative">
+            <input 
+              [matDatepicker]="endPicker"
+              formControlName="endDate"
+              class="fw-input cursor-pointer"
+              [class.error]="isInvalid('endDate')"
+              (click)="endPicker.open()"
+              placeholder="Sélectionner..."
+              readonly
+            />
+            <mat-datepicker-toggle matSuffix [for]="endPicker" class="absolute right-1 top-1/2 -translate-y-1/2"></mat-datepicker-toggle>
+            <mat-datepicker #endPicker startView="multi-year"></mat-datepicker>
           </div>
         </div>
       </div>
