@@ -58,7 +58,7 @@
         </div>
         <div class="meta-item">
           <lucide-icon [name]="Calendar" class="w-3.5 h-3.5"></lucide-icon>
-          <span>{{ formatDate(row.date) }}</span>
+          <span>{{ row.date | fwDate }}</span>
         </div>
       </div>
     </div>

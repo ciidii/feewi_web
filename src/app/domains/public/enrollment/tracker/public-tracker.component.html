@@ -127,7 +127,7 @@
           <p class="dp-sub">Confirmez pour déclencher le processus de paiement des frais d'inscription.</p>
           <div class="dp-deadline" *ngIf="admissions()[0]?.admissionDeadline">
             <lucide-icon [name]="Clock" [size]="13"></lucide-icon>
-            <span>Offre valable jusqu'au {{ admissions()[0].admissionDeadline | date:'dd MMMM yyyy' }}</span>
+            <span>Offre valable jusqu'au {{ admissions()[0].admissionDeadline | fwDate:'full' }}</span>
           </div>
         </div>
         <div class="dp-actions">

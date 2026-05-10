@@ -60,6 +60,7 @@ import {
   AdmissionDetailSkeletonComponent
 } from '../../../../../shared/components/skeleton/admission-detail-skeleton.component';
 import {CamelToLabelPipe} from '../../../../../shared/pipes/camel-to-label.pipe';
+import {FwDatePipe} from '../../../../../shared/pipes/fw-date.pipe';
 
 @Component({
   selector: 'app-admission-detail',
@@ -76,7 +77,8 @@ import {CamelToLabelPipe} from '../../../../../shared/pipes/camel-to-label.pipe'
     CamelToLabelPipe,
     AdmissionDetailSkeletonComponent,
     BlockLoaderComponent,
-    PageProgressComponent
+    PageProgressComponent,
+    FwDatePipe
   ],
 
   templateUrl: './admission-detail.component.html',

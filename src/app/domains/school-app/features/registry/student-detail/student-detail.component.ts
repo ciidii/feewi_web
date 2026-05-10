@@ -33,6 +33,7 @@ import {FwButtonComponent} from '../../../../../shared/components/button/button.
 import {CamelToLabelPipe} from '../../../../../shared/pipes/camel-to-label.pipe';
 import {PageProgressComponent} from '../../../../../shared/components/loader/page-progress.component';
 import {BlockLoaderComponent} from '../../../../../shared/components/loader/block-loader.component';
+import {FwDatePipe} from '../../../../../shared/pipes/fw-date.pipe';
 
 @Component({
   selector: 'app-student-detail',
@@ -47,7 +48,8 @@ import {BlockLoaderComponent} from '../../../../../shared/components/loader/bloc
     FwButtonComponent,
     CamelToLabelPipe,
     PageProgressComponent,
-    BlockLoaderComponent
+    BlockLoaderComponent,
+    FwDatePipe
   ],
   templateUrl: './student-detail.component.html',
   styleUrl: './student-detail.component.scss',

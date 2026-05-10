@@ -12,7 +12,7 @@ import {formatDate} from '@angular/common';
 export class FwDatePipe implements PipeTransform {
   private locale = inject(LOCALE_ID);
 
-  transform(value: any, format: 'short' | 'full' | 'dateTime' | 'monthYear' = 'short'): string {
+  transform(value: any, format: 'short' | 'full' | 'dateTime' | 'monthYear' | 'dayMonth' | 'medium' = 'short'): string {
     if (!value) return '—';
 
     // Normalisation en objet Date si c'est une string ISO
@@ -22,6 +22,10 @@ export class FwDatePipe implements PipeTransform {
     switch (format) {
       case 'full':
         return formatDate(date, 'd MMMM yyyy', this.locale);
+      case 'medium':
+        return formatDate(date, 'd MMM yyyy', this.locale);
+      case 'dayMonth':
+        return formatDate(date, 'd MMM', this.locale);
       case 'dateTime':
         return formatDate(date, 'd MMMM yyyy à HH:mm', this.locale);
       case 'monthYear':

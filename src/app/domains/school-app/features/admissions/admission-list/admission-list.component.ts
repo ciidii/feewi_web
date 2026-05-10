@@ -1,5 +1,5 @@
-import {Component, computed, inject, OnDestroy, OnInit, signal, ViewEncapsulation} from '@angular/core';
-import {CommonModule} from '@angular/common';
+import {Component, computed, inject, LOCALE_ID, OnDestroy, OnInit, signal, ViewEncapsulation} from '@angular/core';
+import {CommonModule, formatDate} from '@angular/common';
 import {Router, RouterModule} from '@angular/router';
 import {
   ArrowRight,
@@ -64,6 +64,7 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
   private academicService = inject(AcademicService);
   private dialog = inject(MatDialog);
   private notificationService = inject(NotificationService);
+  private locale = inject(LOCALE_ID);
 
   // --- ÉTATS ---
   activeTab = signal('Tous');
@@ -382,7 +383,7 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
       title: candidateName,
       subtitle: `Dossier #${app.reference}`,
       avatarLabel: initials || '??',
-      date: new Date(app.createdAt).toLocaleDateString(),
+      date: formatDate(app.createdAt, 'dd/MM/yyyy', this.locale),
       metadata: {
         'Responsable': `${app.primaryGuardian?.firstName} ${app.primaryGuardian?.lastName} (${app.primaryGuardian?.relation})`,
         'Contact': `${app.primaryGuardian?.phone} • ${app.primaryGuardian?.email}`,

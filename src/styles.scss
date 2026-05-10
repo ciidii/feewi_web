@@ -1,11 +1,11 @@
 /* Configuration de Angular Material 3 */
 @use '@angular/material' as mat;
-
+@use "styles/tokens" as *;
+@use 'ngx-toastr/toastr';
 @include mat.core();
 
 /* IMPORT DES TOKENS DE DESIGN SYSTEM FEEWI */
-@use "styles/tokens" as *;
-@use 'ngx-toastr/toastr';
+
 
 /* --- THEMATISATION MATERIAL 3 (FEEWI Midnight Slate) --- */
 $feewi-primary: (
@@ -187,7 +187,7 @@ html { height: 100%; }
   justify-content: center;
   padding: var(--fw-space-xl);
   overflow-y: auto;
-  background-image: 
+  background-image:
     radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.04) 0px, transparent 50%),
     radial-gradient(at 100% 100%, rgba(15, 23, 42, 0.04) 0px, transparent 50%);
 }
@@ -199,7 +199,7 @@ html { height: 100%; }
   padding: 3rem 2.5rem;
   border-radius: 32px;
   border: 1px solid rgba(15, 23, 42, 0.05);
-  box-shadow: 
+  box-shadow:
     0 10px 15px -3px rgba(15, 23, 42, 0.08),
     0 40px 60px -15px rgba(15, 23, 42, 0.05);
   animation: fw-auth-entrance 0.6s cubic-bezier(0.16, 1, 0.3, 1);
@@ -390,7 +390,7 @@ html { height: 100%; }
     background: var(--fw-surface-card);
     border-color: var(--fw-primary);
     box-shadow: 0 0 0 4px var(--fw-primary-alpha);
-    
+
     .input-prefix {
       color: var(--fw-primary);
     }
@@ -400,7 +400,7 @@ html { height: 100%; }
   &:has(.ng-invalid.ng-touched) {
     border-color: var(--fw-error);
     background: var(--fw-error-bg);
-    
+
     .input-prefix { color: var(--fw-error); }
     &:focus-within { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1); }
   }
@@ -481,7 +481,7 @@ html { height: 100%; }
     &:checked {
       background: var(--fw-primary);
       border-color: var(--fw-primary);
-      
+
       &::after {
         content: "";
         position: absolute;

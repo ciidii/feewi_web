@@ -27,11 +27,12 @@ import {filter, finalize, take} from 'rxjs';
 import {PublicPortalSummary} from '../../../../core/models/enrollment';
 import {FwButtonComponent} from '../../../../shared/components/button/button.component';
 import {SplashScreenComponent} from '../../../../shared/components/loader/splash-screen.component';
+import {FwDatePipe} from '../../../../shared/pipes/fw-date.pipe';
 
 @Component({
   selector: 'app-public-landing',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule, FwButtonComponent, SplashScreenComponent],
+  imports: [CommonModule, RouterModule, LucideAngularModule, FwButtonComponent, SplashScreenComponent, FwDatePipe],
   templateUrl: './public-landing.component.html',
   styleUrls: ['./public-landing.component.scss']
 })

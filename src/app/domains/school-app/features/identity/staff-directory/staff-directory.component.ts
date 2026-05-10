@@ -1,5 +1,5 @@
-import {Component, computed, inject, OnInit, signal, ViewEncapsulation} from '@angular/core';
-import {CommonModule} from '@angular/common';
+import {Component, computed, inject, LOCALE_ID, OnInit, signal, ViewEncapsulation} from '@angular/core';
+import {CommonModule, formatDate} from '@angular/common';
 import {
   Archive,
   Download,
@@ -48,6 +48,7 @@ export class StaffDirectoryComponent implements OnInit {
   private identityService = inject(IdentityService);
   private authService = inject(AuthService);
   private dialog = inject(MatDialog);
+  private locale = inject(LOCALE_ID);
 
   // Icônes
   readonly UserPlus = UserPlus;
@@ -183,7 +184,7 @@ export class StaffDirectoryComponent implements OnInit {
       title: `${user.firstName} ${user.lastName}`,
       subtitle: `${user.roles[0]?.replace('ROLE_', '') || 'EMPLOYÉ'} • ${user.email}`,
       avatarLabel: `${user.firstName[0]}${user.lastName[0]}`,
-      date: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Date inconnue',
+      date: user.createdAt ? formatDate(user.createdAt, 'dd/MM/yyyy', this.locale) : 'Date inconnue',
       badges: user.roles.map(role => ({
         label: role.replace('ROLE_', ''),
         type: this.getBadgeTypeForRole(role)

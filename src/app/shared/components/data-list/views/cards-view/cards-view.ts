@@ -20,6 +20,7 @@ import {
 import {RowAction, TableRow} from '../../../../models/data-list.models';
 import {FwBadgeComponent} from '../../../badge/badge.component';
 import {FwButtonComponent} from '../../../button/button.component';
+import {FwDatePipe} from '../../../../pipes/fw-date.pipe';
 
 @Component({
   selector: 'app-cards-view',
@@ -29,7 +30,8 @@ import {FwButtonComponent} from '../../../button/button.component';
     MatCheckboxModule,
     LucideAngularModule,
     FwBadgeComponent,
-    FwButtonComponent
+    FwButtonComponent,
+    FwDatePipe
   ],
   templateUrl: './cards-view.html',
   styleUrls: ['./cards-view.scss']

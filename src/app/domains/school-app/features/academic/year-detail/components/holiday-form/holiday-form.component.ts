@@ -1,13 +1,14 @@
-import {Component, inject, OnInit, signal} from '@angular/core';
-import {CommonModule} from '@angular/common';
+import {Component, inject, LOCALE_ID, OnInit, signal} from '@angular/core';
+import {CommonModule, formatDate} from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
-import {MatSlideToggleModule} from '@angular/material/slide-toggle';
-import {Calendar, Home, Info, LucideAngularModule, Palmtree, ShieldCheck, Type, XCircle} from 'lucide-angular';
-import {AcademicService} from '../../../../../../../core/services/academic.service';
-import {NotificationService} from '../../../../../../../shared/services/notification.service';
-import {FormShellComponent} from '../../../../../../../shared/components/form-shell/form-shell';
-import {AcademicYear} from '../../../../../../../core/models/academic.model';
+import {MatSelectModule} from '@angular/material/select';
+import {AlertCircle, Clock, Info, LucideAngularModule, Palmtree, Type} from 'lucide-angular';
+import {AcademicService} from '../../../../../../../../core/services/academic.service';
+import {NotificationService} from '../../../../../../../../shared/services/notification.service';
+import {FormShellComponent} from '../../../../../../../../shared/components/form-shell/form-shell';
+import {AcademicYear, Holiday} from '../../../../../../../../core/models/academic.model';
+import {firstValueFrom} from 'rxjs';
 
 @Component({
   selector: 'app-holiday-form',
@@ -16,7 +17,7 @@ import {AcademicYear} from '../../../../../../../core/models/academic.model';
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,
-    MatSlideToggleModule,
+    MatSelectModule,
     LucideAngularModule,
     FormShellComponent
   ],
@@ -28,15 +29,15 @@ export class HolidayFormComponent implements OnInit {
   private dialogRef = inject(MatDialogRef<HolidayFormComponent>);
   private academicService = inject(AcademicService);
   private notificationService = inject(NotificationService);
-  private dialogData = inject(MAT_DIALOG_DATA);
+  private data: { year: AcademicYear; holiday?: Holiday } = inject(MAT_DIALOG_DATA);
+  private locale = inject(LOCALE_ID);
 
   // Icônes
   readonly Palmtree = Palmtree;
   readonly Type = Type;
-  readonly Calendar = Calendar;
   readonly Info = Info;
-  readonly Home = Home;
-  readonly XCircle = XCircle;
+  readonly Clock = Clock;
+  readonly AlertCircle = AlertCircle;
 
   holidayForm: FormGroup = this.fb.group({
     label: ['', [Validators.required, Validators.minLength(3)]],
@@ -45,16 +46,21 @@ export class HolidayFormComponent implements OnInit {
     schoolClosed: [true]
   });
 
-  year = signal<AcademicYear | null>(null);
   isLoading = signal(false);
-  isEditMode = !!this.dialogData?.holiday;
+  isEditMode = !!this.data.holiday;
 
   ngOnInit() {
-    this.year.set(this.dialogData.year);
-    if (this.isEditMode) {
-      this.holidayForm.patchValue(this.dialogData.holiday);
+    if (this.data.holiday) {
+      this.holidayForm.patchValue({
+        label: this.data.holiday.label,
+        startDate: this.data.holiday.startDate,
+        endDate: this.data.holiday.endDate,
+        schoolClosed: this.data.holiday.schoolClosed
+      });
     }
   }
+
+  year() { return this.data.year; }
 
   async onSave() {
     if (this.holidayForm.invalid) {
@@ -62,18 +68,14 @@ export class HolidayFormComponent implements OnInit {
       return;
     }
 
-    const y = this.year();
-    if (!y) return;
-
     this.isLoading.set(true);
     try {
       if (this.isEditMode) {
-        await this.academicService.updateHoliday(y.id, this.dialogData.holiday.id, this.holidayForm.value);
-        this.notificationService.success('Congé mis à jour.');
+        await firstValueFrom(this.academicService.updateHoliday(this.data.year.id, this.data.holiday!.id, this.holidayForm.value));
       } else {
-        await this.academicService.createHoliday(y.id, this.holidayForm.value);
-        this.notificationService.success('Congé ajouté au calendrier.');
+        await firstValueFrom(this.academicService.createHoliday(this.data.year.id, this.holidayForm.value));
       }
+      this.notificationService.success(this.isEditMode ? 'Congé mis à jour.' : 'Congé ajouté au calendrier.');
       this.dialogRef.close(true);
     } catch (error) {
       this.notificationService.error("Erreur lors de l'enregistrement du congé.");
@@ -86,19 +88,13 @@ export class HolidayFormComponent implements OnInit {
     this.dialogRef.close(false);
   }
 
-  formatDate(date?: string): string {
-    if (!date) return '—';
-    return new Date(date).toLocaleDateString('fr-FR', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
-  }
-
   isInvalid(controlName: string): boolean {
     const control = this.holidayForm.get(controlName);
     return !!(control && control.invalid && (control.dirty || control.touched));
   }
 
-  protected readonly ShieldCheck = ShieldCheck;
+  formatDate(date?: string): string {
+    if (!date) return '—';
+    return formatDate(date, 'd MMMM yyyy', this.locale);
+  }
 }

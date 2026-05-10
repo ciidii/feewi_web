@@ -1,19 +1,15 @@
-import {Component, computed, inject, OnInit, signal, ViewEncapsulation} from '@angular/core';
-import {CommonModule} from '@angular/common';
+import {Component, computed, inject, LOCALE_ID, OnInit, signal, ViewEncapsulation} from '@angular/core';
+import {CommonModule, formatDate} from '@angular/common';
 import {ActivatedRoute, RouterModule} from '@angular/router';
 import {
   Archive,
   ArrowLeft,
-  BookOpen,
   Calendar,
   CheckCircle,
   ChevronRight,
   Clock,
   Edit,
-  Globe,
-  Hash,
   LayoutDashboard,
-  ListChecks,
   ListTodo,
   LucideAngularModule,
   MoreVertical,
@@ -23,7 +19,11 @@ import {
   Printer,
   RotateCcw,
   Trash2,
-  XCircle
+  XCircle,
+  Globe,
+  BookOpen,
+  Hash,
+  ListChecks
 } from 'lucide-angular';
 import {PeriodFormComponent} from './components/period-form/period-form.component';
 import {HolidayFormComponent} from './components/holiday-form/holiday-form.component';
@@ -77,6 +77,7 @@ export class YearDetailComponent implements OnInit {
   private academicService = inject(AcademicService);
   private notificationService = inject(NotificationService);
   private dialog = inject(MatDialog);
+  private locale = inject(LOCALE_ID);
 
   // États
   year = signal<AcademicYear | null>(null);
@@ -194,31 +195,21 @@ export class YearDetailComponent implements OnInit {
 
   private getMilestoneDescription(type: string): string {
     switch (type) {
-      case 'ENROLLMENT':
-        return 'Période d\'inscription des nouveaux élèves';
-      case 'RE_ENROLLMENT':
-        return 'Campagne de réinscription des élèves actuels';
-      case 'LESSONS':
-        return 'Période effective des cours';
-      case 'EXAMS':
-        return 'Sessions d\'examens nationaux ou blancs';
-      default:
-        return 'Jalon institutionnel';
+      case 'ENROLLMENT': return 'Période d\'inscription des nouveaux élèves';
+      case 'RE_ENROLLMENT': return 'Campagne de réinscription des élèves actuels';
+      case 'LESSONS': return 'Période effective des cours';
+      case 'EXAMS': return 'Sessions d\'examens nationaux ou blancs';
+      default: return 'Jalon institutionnel';
     }
   }
 
   getMilestoneIcon(type: string): any {
     switch (type) {
-      case 'ENROLLMENT':
-        return Globe;
-      case 'RE_ENROLLMENT':
-        return RotateCcw;
-      case 'LESSONS':
-        return BookOpen;
-      case 'EXAMS':
-        return Hash;
-      default:
-        return CheckCircle;
+      case 'ENROLLMENT': return Globe;
+      case 'RE_ENROLLMENT': return RotateCcw;
+      case 'LESSONS': return BookOpen;
+      case 'EXAMS': return Hash;
+      default: return CheckCircle;
     }
   }
 
@@ -470,17 +461,10 @@ export class YearDetailComponent implements OnInit {
 
   formatDate(date?: string): string {
     if (!date) return '—';
-    return new Date(date).toLocaleDateString('fr-FR', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
+    return formatDate(date, 'd MMMM yyyy', this.locale);
   }
 
   formatDateShort(date: string): string {
-    return new Date(date).toLocaleDateString('fr-FR', {
-      day: 'numeric',
-      month: 'short'
-    });
+    return formatDate(date, 'd MMM', this.locale);
   }
 }

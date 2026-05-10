@@ -2,14 +2,14 @@ import {Component, computed, input, output} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 
-// Importer les icônes
-import {Calendar, CheckCircle, ChevronRight, Circle, Clock, Eye, LucideAngularModule, MapPin} from 'lucide-angular';
+// Importer les icônes nécessaires
+import {Calendar, CheckCircle, Clock, Eye, LucideAngularModule, MapPin, MoreHorizontal} from 'lucide-angular';
 import {RowAction, TableRow} from '../../../../models/data-list.models';
-import {FwButtonComponent} from '../../../button/button.component';
 import {FwBadgeComponent} from '../../../badge/badge.component';
+import {FwButtonComponent} from '../../../button/button.component';
+import {FwDatePipe} from '../../../../pipes/fw-date.pipe';
 
-
-export interface TimelineGroup {
+interface GroupedTimeline {
   date: string;
   items: TableRow[];
 }
@@ -21,14 +21,14 @@ export interface TimelineGroup {
     CommonModule,
     MatCheckboxModule,
     LucideAngularModule,
+    FwBadgeComponent,
     FwButtonComponent,
-    FwBadgeComponent
+    FwDatePipe
   ],
   templateUrl: './timeline-view.html',
   styleUrls: ['./timeline-view.scss']
 })
 export class TimelineViewComponent {
-
   // ===========================================
   // INPUTS
   // ===========================================
@@ -52,91 +52,50 @@ export class TimelineViewComponent {
   // OUTPUTS
   // ===========================================
 
-  /** Basculer la sélection d'un élément */
+  /** Basculer la sélection d'une ligne */
   toggleRow = output<string | number>();
 
-  /** Émettre un clic sur l'élément (Action primaire) */
+  /** Émettre un clic sur la ligne (Action primaire) */
   onRowClick = output<TableRow>();
 
   /** Émettre une action */
   onAction = output<{ actionId: string, row: TableRow }>();
 
   // ===========================================
-  // DONNÉES COMPUTÉES
+  // CALCULS
   // ===========================================
 
-  /** Grouper les données par date */
-  groupedData = computed<TimelineGroup[]>(() => {
-    const groups: { [key: string]: TableRow[] } = {};
-
+  /** Grouper les données par date pour l'affichage chronologique */
+  groupedData = computed<GroupedTimeline[]>(() => {
+    const groups: Record<string, TableRow[]> = {};
+    
     this.data().forEach(item => {
-      const date = item.date || 'Sans date';
+      const date = item.date || 'Inconnu';
       if (!groups[date]) {
         groups[date] = [];
       }
       groups[date].push(item);
     });
 
-    // Trier les groupes par date (plus récent d'abord)
-    return Object.keys(groups)
-      .sort((a, b) => {
-        if (a === 'Sans date') return 1;
-        if (b === 'Sans date') return -1;
-        return new Date(b).getTime() - new Date(a).getTime();
-      })
-      .map(date => ({
-        date,
-        items: groups[date].sort((x, y) => {
-          if (!x.date) return 1;
-          if (!y.date) return -1;
-          return new Date(y.date).getTime() - new Date(x.date).getTime();
-        })
-      }));
+    return Object.entries(groups).map(([date, items]) => ({
+      date,
+      items
+    })).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   });
 
   // ===========================================
-  // MÉTHODES
+  // MÉTHODES UTILITAIRES
   // ===========================================
 
-  /** Vérifier si un élément est sélectionné */
+  /** Vérifier si une ligne est sélectionnée */
   isSelected(id: string | number): boolean {
     return this.selectedIds().has(id);
   }
 
-  /** Formater la date pour l'affichage */
-  formatDate(date: string): string {
-    if (date === 'Sans date') return date;
-
-    const today = new Date().toDateString();
-    const yesterday = new Date(Date.now() - 86400000).toDateString();
-    const itemDate = new Date(date).toDateString();
-
-    if (itemDate === today) return "Aujourd'hui";
-    if (itemDate === yesterday) return "Hier";
-    return date;
-  }
-
-  /** Obtenir la couleur de la ligne temporelle */
+  /** Obtenir une couleur alternée pour les points de la timeline */
   getTimelineColor(index: number): string {
-    const colors = [
-      'border-primary-500',
-      'border-amber-500',
-      'border-green-500',
-      'border-purple-500',
-      'border-blue-500'
-    ];
+    const colors = ['bg-primary', 'bg-emerald-500', 'bg-amber-500', 'bg-rose-500', 'bg-indigo-500'];
     return colors[index % colors.length];
-  }
-
-  /** Obtenir la classe CSS d'une action */
-  getActionClass(action: RowAction): string {
-    switch (action.type) {
-      case 'primary': return 'primary';
-      case 'danger': return 'text-rose-600 border-rose-200 hover:bg-rose-50';
-      case 'success': return 'text-emerald-600 border-emerald-200 hover:bg-emerald-50';
-      case 'warning': return 'text-amber-600 border-amber-200 hover:bg-amber-50';
-      default: return '';
-    }
   }
 
   // ===========================================
@@ -145,9 +104,8 @@ export class TimelineViewComponent {
 
   protected readonly Eye = Eye;
   protected readonly CheckCircle = CheckCircle;
-  protected readonly Calendar = Calendar;
+  protected readonly MoreHorizontal = MoreHorizontal;
   protected readonly Clock = Clock;
-  protected readonly ChevronRight = ChevronRight;
-  protected readonly Circle = Circle;
   protected readonly MapPin = MapPin;
+  protected readonly Calendar = Calendar;
 }

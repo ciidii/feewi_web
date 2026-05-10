@@ -1,8 +1,16 @@
-import {APP_INITIALIZER, ApplicationConfig, importProvidersFrom, provideZoneChangeDetection} from '@angular/core';
+import {
+  APP_INITIALIZER,
+  ApplicationConfig,
+  importProvidersFrom,
+  LOCALE_ID,
+  provideZoneChangeDetection
+} from '@angular/core';
 import {provideRouter, TitleStrategy} from '@angular/router';
 import {provideAnimationsAsync} from '@angular/platform-browser/animations/async';
 import {provideHttpClient, withInterceptors} from '@angular/common/http';
 import {provideNativeDateAdapter} from '@angular/material/core';
+import {registerLocaleData} from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
 
 import {routes} from './app.routes';
 import {authInterceptor} from './core/interceptors/auth.interceptor';
@@ -18,6 +26,9 @@ import {catchError, of} from 'rxjs';
 import {ToastComponent} from './shared/components/toast/toast';
 import {TranslateLoader, TranslateModule, TranslateService} from '@ngx-translate/core';
 import {provideTranslateHttpLoader, TranslateHttpLoader} from '@ngx-translate/http-loader';
+
+// Enregistrement de la locale française
+registerLocaleData(localeFr);
 
 // Initialiseur pour charger la langue avant le rendu
 export function initTranslation(translate: TranslateService) {
@@ -35,6 +46,7 @@ export function initTranslation(translate: TranslateService) {
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({eventCoalescing: true}),
+    { provide: LOCALE_ID, useValue: 'fr-FR' },
     provideRouter(routes),
     provideAnimationsAsync(),
     provideNativeDateAdapter(),

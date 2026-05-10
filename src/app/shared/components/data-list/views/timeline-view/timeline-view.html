@@ -11,7 +11,7 @@
       <div class="flex items-center gap-6 mb-6">
         <div class="w-20 text-right">
           <span class="text-[10px] font-extrabold text-slate-medium bg-white border border-border-subtle px-3 py-1 rounded-lg shadow-sm uppercase tracking-widest">
-            {{ group.date }}
+            {{ group.date | fwDate:'short' }}
           </span>
         </div>
         <div class="flex-1 h-px bg-border-subtle/50"></div>
@@ -58,7 +58,7 @@
                     <div class="flex items-center gap-5 mt-4 text-[10px] font-bold text-slate-medium uppercase tracking-widest">
                       <span class="flex items-center gap-1.5">
                         <lucide-icon [name]="Clock" class="w-3.5 h-3.5"></lucide-icon>
-                        {{ item.date }}
+                        {{ item.date | fwDate }}
                       </span>
                       <span *ngIf="item.metadata?.['location']" class="flex items-center gap-1.5">
                         <lucide-icon [name]="MapPin" class="w-3.5 h-3.5"></lucide-icon>
@@ -94,6 +94,8 @@
                     </app-fw-button>
                   </ng-container>
                 </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

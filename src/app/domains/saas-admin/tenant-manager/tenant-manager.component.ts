@@ -1,169 +1,147 @@
-import {Component, computed, inject, OnInit, signal, ViewEncapsulation} from '@angular/core';
-import {CommonModule} from '@angular/common';
+import {Component, computed, inject, LOCALE_ID, OnInit, signal} from '@angular/core';
+import {CommonModule, formatDate} from '@angular/common';
+import {SchoolService} from '../../../../core/services/school.service';
+import {School} from '../../../../core/models/school.model';
+import {
+  Download,
+  Filter,
+  Globe,
+  LucideAngularModule,
+  Plus,
+  RefreshCw,
+  Search,
+  Settings,
+  ShieldCheck,
+  Trash2
+} from 'lucide-angular';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
-import {Router, RouterModule} from '@angular/router';
-import {DataListComponent} from '../../../shared/components/data-list/data-list.component';
-import {RowAction, TabItem, TableRow} from '../../../shared/models/data-list.models';
-import {Activity, Building2, Eye, Globe, LucideAngularModule, Plus, ShieldCheck, Trash2} from 'lucide-angular';
-import {TenantFormComponent} from '../tenant-form/tenant-form.component';
-import {TenantEditFormComponent} from '../tenant-edit-form/tenant-edit-form.component';
-import {SchoolService} from '../../../core/services/school.service';
-import {School} from '../../../core/models/school.model';
-import {NotificationService} from '../../../shared/services/notification.service';
+import {DataListComponent} from '../../../../shared/components/data-list/data-list.component';
+import {RowAction, TableRow} from '../../../../shared/models/data-list.models';
+import {SchoolFormComponent} from '../components/school-form/school-form.component';
+import {FwPageShellComponent} from '../../../../shared/components/page-shell/page-shell.component';
+import {FwButtonComponent} from '../../../../shared/components/button/button.component';
+import {FwListCommandBarComponent} from '../../../../shared/components/list-command-bar/list-command-bar.component';
+import {FwTab} from '../../../../shared/components/tabs/tabs.component';
 
 @Component({
   selector: 'app-tenant-manager',
   standalone: true,
-  imports: [CommonModule, DataListComponent, LucideAngularModule, MatDialogModule, RouterModule],
+  imports: [
+    CommonModule,
+    LucideAngularModule,
+    MatDialogModule,
+    DataListComponent,
+    FwPageShellComponent,
+    FwButtonComponent,
+    FwListCommandBarComponent
+  ],
   templateUrl: './tenant-manager.component.html',
-  styleUrl: './tenant-manager.component.scss',
-  encapsulation: ViewEncapsulation.None
+  styleUrls: ['./tenant-manager.component.scss']
 })
 export class TenantManagerComponent implements OnInit {
-  private dialog = inject(MatDialog);
   private schoolService = inject(SchoolService);
-  private notificationService = inject(NotificationService);
-  private router = inject(Router);
+  private dialog = inject(MatDialog);
+  private locale = inject(LOCALE_ID);
 
-  readonly ShieldCheck = ShieldCheck;
+  // Icônes
+  readonly Globe = Globe;
   readonly Plus = Plus;
+  readonly RefreshCw = RefreshCw;
 
-  activeTab = signal('Tous');
+  // États
+  schools = signal<School[]>([]);
+  isLoading = signal(true);
   searchQuery = signal('');
-  currentPage = signal(0);
-  readonly pageSize = 10;
 
-  // Actions dynamiques pour les établissements
-  readonly tenantActions: RowAction[] = [
-    { id: 'edit', label: 'Détails & Edition', icon: Eye, type: 'primary' },
+  activeTabId = signal('Tous');
+
+  activeFilterChips = computed(() => {
+    const chips: any[] = [];
+    if (this.searchQuery()) {
+      chips.push({ key: 'q', label: 'Recherche', value: this.searchQuery() });
+    }
+    return chips;
+  });
+
+  tabs = computed<FwTab[]>(() => [
+    { label: 'Tous', id: 'Tous', icon: Globe, count: this.schools().length },
+    { label: 'Actifs', id: 'Actifs', icon: ShieldCheck },
+    { label: 'En attente', id: 'Preparation', icon: Settings }
+  ]);
+
+  // Actions pour les écoles
+  readonly schoolActions: RowAction[] = [
+    { id: 'edit', label: 'Gérer', icon: Settings, type: 'primary' },
     { id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger' }
   ];
 
-  readonly schoolsPage = this.schoolService.schoolsPage;
-  readonly totalTenants = computed(() => this.schoolsPage()?.totalElements || 0);
-  readonly totalPages = computed(() => this.schoolsPage()?.totalPages || 1);
-  readonly isLoading = this.schoolService.loading;
+  // Transformation pour le DataList
+  displaySchools = computed<TableRow[]>(() => {
+    const query = this.searchQuery().toLowerCase();
+    const schools = this.schools().filter(s => 
+      !query || s.name.toLowerCase().includes(query) || s.id.toLowerCase().includes(query)
+    );
 
-  readonly tenantTabs = computed<TabItem[]>(() => {
-    const schools = this.schoolsPage()?.content || [];
-    const activeCount = schools.filter((school) => school.active !== false).length;
-    const pendingCount = schools.filter((school) => school.active === false).length;
-
-    return [
-      { label: 'Tous', icon: Building2, count: this.totalTenants() },
-      { label: 'Actifs', icon: Activity, count: activeCount },
-      { label: 'En attente', icon: Globe, count: pendingCount }
-    ];
+    return schools.map(school => ({
+      id: school.id,
+      title: school.name,
+      subtitle: `ID Technique : ${school.id}`,
+      avatarLabel: school.name.substring(0, 2).toUpperCase(),
+      date: school.createdAt ? `Créé le ${formatDate(school.createdAt, 'dd/MM/yyyy', this.locale)}` : 'Date inconnue',
+      badges: [
+        { label: 'PLATFORM', type: 'success' },
+        { label: 'SaaS', type: 'info' }
+      ],
+      rawData: school
+    }));
   });
 
-  readonly tenants = computed<TableRow[]>(() => {
-    const schools = this.filteredSchools();
-    return schools.map((school) => this.mapSchoolToRow(school));
-  });
-
-  readonly filteredSchools = computed<School[]>(() => {
-    const schools = this.schoolsPage()?.content || [];
-    const tab = this.activeTab();
-    if (tab === 'Actifs') {
-      return schools.filter((school) => school.active !== false);
-    }
-    if (tab === 'En attente') {
-      return schools.filter((school) => school.active === false);
-    }
-    return schools;
-  });
-
-  ngOnInit(): void {
+  ngOnInit() {
     this.loadSchools();
   }
 
-  loadSchools(search: string = this.searchQuery()): void {
-    this.searchQuery.set(search);
-    this.schoolService.getSchools(search, this.currentPage(), this.pageSize).subscribe();
-  }
-
-  openCreateModal() {
-    const dialogRef = this.dialog.open(TenantFormComponent, {
-      width: '850px',
-      maxWidth: '95vw',
-      panelClass: 'feewi-dialog-panel'
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.loadSchools(this.searchQuery());
-      }
+  async loadSchools() {
+    this.isLoading.set(true);
+    this.schoolService.getSchools().subscribe({
+      next: (data) => {
+        this.schools.set(data);
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false)
     });
   }
 
-  onTabChange(tab: string) {
-    this.activeTab.set(tab);
+  onTabChange(tabId: string) {
+    this.activeTabId.set(tabId);
   }
 
   onSearch(query: string) {
-    this.currentPage.set(0);
-    this.loadSchools(query);
-  }
-
-  onPageChange(page: number) {
-    this.currentPage.set(page);
-    this.loadSchools();
+    this.searchQuery.set(query);
   }
 
   handleAction(event: { actionId: string, row: TableRow }) {
-    switch (event.actionId) {
-      case 'edit':
-        // Navigation vers la page de détails au lieu de la modale pour une vue complète
-        this.router.navigate(['/saas/tenants', event.row.id]);
-        break;
-      case 'delete':
-        this.notificationService.info('La suppression sera disponible bientôt.', 'Fonctionnalité SaaS');
-        break;
+    if (event.actionId === 'edit') {
+      this.openSchoolForm(event.row.rawData);
     }
   }
 
-  private openEditModal(row: TableRow) {
-    const school = row.rawData as School | undefined;
-    if (!school) {
-      this.notificationService.error("Impossible d'ouvrir le formulaire de modification.");
-      return;
-    }
-
-    const dialogRef = this.dialog.open(TenantEditFormComponent, {
-      width: '580px',
-      maxWidth: '95vw',
+  openSchoolForm(school?: School) {
+    const dialogRef = this.dialog.open(SchoolFormComponent, {
+      width: '560px',
       panelClass: 'feewi-dialog-panel',
-      data: school
+      data: { school }
     });
 
-    dialogRef.afterClosed().subscribe((updated) => {
-      if (updated) {
-        this.loadSchools(this.searchQuery());
-      }
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) this.loadSchools();
     });
   }
 
-  private mapSchoolToRow(school: School): TableRow {
-    const isActive = school.active !== false;
-    return {
-      id: school.id || school.tenantId,
-      title: school.name,
-      subtitle: `${school.tenantId} • ${school.city}`,
-      avatarLabel: this.getAvatarLabel(school.name),
-      date: school.createdAt ? `Cree le ${new Date(school.createdAt).toLocaleDateString()}` : 'Date inconnue',
-      badges: [
-        {
-          label: isActive ? 'ACTIVE' : 'INACTIVE',
-          type: isActive ? 'info' : 'warning'
-        }
-      ],
-      rawData: school
-    };
+  removeFilter(key: string) {
+    if (key === 'q') this.searchQuery.set('');
   }
 
-  private getAvatarLabel(name: string): string {
-    const words = name.trim().split(/\s+/).slice(0, 2);
-    if (words.length === 0) return 'ET';
-    return words.map((word) => word.charAt(0).toUpperCase()).join('');
+  clearAllFilters() {
+    this.searchQuery.set('');
   }
 }

@@ -32,6 +32,7 @@ import {FwButtonComponent} from '../../../../shared/components/button/button.com
 import {FwBadgeComponent} from '../../../../shared/components/badge/badge.component';
 import {FwPublicHeaderComponent} from '../../../../shared/layout/public-header/public-header.component';
 import {BlockLoaderComponent} from '../../../../shared/components/loader/block-loader.component';
+import {FwDatePipe} from '../../../../shared/pipes/fw-date.pipe';
 
 type TrackerMode = 'bundle' | 'single' | 'search';
 type SearchTab  = 'code' | 'email';
@@ -40,7 +41,7 @@ type SearchTab  = 'code' | 'email';
   selector: 'app-public-tracker',
   standalone: true,
   imports: [CommonModule, RouterModule, LucideAngularModule, FormsModule,
-            FwButtonComponent, FwBadgeComponent, FwPublicHeaderComponent, BlockLoaderComponent],
+    FwButtonComponent, FwBadgeComponent, FwPublicHeaderComponent, BlockLoaderComponent, FwDatePipe],
   templateUrl: './public-tracker.component.html',
   styleUrls: ['./public-tracker.component.scss']
 })

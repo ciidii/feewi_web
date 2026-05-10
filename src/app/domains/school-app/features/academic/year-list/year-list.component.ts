@@ -1,5 +1,5 @@
-import {Component, computed, inject, OnInit, signal} from '@angular/core';
-import {CommonModule} from '@angular/common';
+import {Component, computed, inject, LOCALE_ID, OnInit, signal} from '@angular/core';
+import {CommonModule, formatDate} from '@angular/common';
 import {
   Archive,
   Calendar,
@@ -45,6 +45,7 @@ export class YearListComponent implements OnInit {
   private notificationService = inject(NotificationService);
   private dialog = inject(MatDialog);
   private router = inject(Router);
+  private locale = inject(LOCALE_ID);
 
   // Icônes
   readonly Calendar = Calendar;
@@ -113,7 +114,7 @@ export class YearListComponent implements OnInit {
         return {
           id: year.id,
           title: year.label,
-          subtitle: `${this.getSystemTypeLabel(year.systemType)} • Exercice du ${new Date(year.startDate).toLocaleDateString()} au ${new Date(year.endDate).toLocaleDateString()}`,
+          subtitle: `${this.getSystemTypeLabel(year.systemType)} • Exercice du ${formatDate(year.startDate, 'dd/MM/yyyy', this.locale)} au ${formatDate(year.endDate, 'dd/MM/yyyy', this.locale)}`,
           avatarLabel: yearInitials,
           date: `Statut: ${year.status}`,
           badges: [{
