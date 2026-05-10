@@ -1,6 +1,6 @@
 import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {BookOpen, Edit, Info, LucideAngularModule, Plus, Search, Tag, Trash2} from 'lucide-angular';
+import {BookOpen, Edit, Info, LucideAngularModule, Plus, Search, Tag, Trash2,RefreshCw} from 'lucide-angular';
 import {firstValueFrom} from 'rxjs';
 import {AcademicService} from '../../../../../core/services/academic.service';
 import {NotificationService} from '../../../../../shared/services/notification.service';
@@ -12,6 +12,9 @@ import {SubjectFormComponent} from '../structure-config/components/subject-form/
 import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 
 import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
+import {FwEmptyStateComponent} from '../../../../../shared/components/empty-state/empty-state.component';
+import {FwListCommandBarComponent} from '../../../../../shared/components/list-command-bar/list-command-bar.component';
+import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
 
 @Component({
   selector: 'app-subject-library',
@@ -21,7 +24,10 @@ import {FwPageShellComponent} from '../../../../../shared/components/page-shell/
     LucideAngularModule,
     DataListComponent,
     MatDialogModule,
-    FwPageShellComponent
+    FwPageShellComponent,
+    FwEmptyStateComponent,
+    FwListCommandBarComponent,
+    FwButtonComponent
   ],
   templateUrl: './subject-library.component.html',
   styleUrls: ['./subject-library.component.scss']

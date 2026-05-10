@@ -1,4 +1,4 @@
-import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {Component, computed, inject, OnInit, signal, ViewEncapsulation} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ActivatedRoute, RouterModule} from '@angular/router';
 import {
@@ -58,7 +58,8 @@ export interface TimelineEvent {
     FwBadgeComponent
   ],
   templateUrl: './year-detail.component.html',
-  styleUrls: ['./year-detail.component.scss']
+  styleUrls: ['./year-detail.component.scss'],
+  encapsulation: ViewEncapsulation.None
 })
 export class YearDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -71,25 +72,26 @@ export class YearDetailComponent implements OnInit {
   periods = signal<Period[]>([]);
   holidays = signal<Holiday[]>([]);
   isLoading = signal(true);
+  isActionLoading = signal(false);
   activeTabId = signal('timeline');
 
   // Configuration des Onglets
   readonly yearTabs: FwTab[] = [
-    { id: 'timeline', label: 'Vue Chronologique', icon: LayoutDashboard },
-    { id: 'periods', label: 'Découpage Pédagogique', icon: ListTodo },
-    { id: 'holidays', label: 'Congés & Vacances', icon: Palmtree }
+    {id: 'timeline', label: 'Vue Chronologique', icon: LayoutDashboard},
+    {id: 'periods', label: 'Découpage Pédagogique', icon: ListTodo},
+    {id: 'holidays', label: 'Congés & Vacances', icon: Palmtree}
   ];
 
   // Actions pour les périodes
   readonly periodActions: RowAction[] = [
-    { id: 'edit', label: 'Modifier', icon: Edit, type: 'primary' },
-    { id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger' }
+    {id: 'edit', label: 'Modifier', icon: Edit, type: 'primary'},
+    {id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger'}
   ];
 
   // Actions pour les vacances
   readonly holidayActions: RowAction[] = [
-    { id: 'edit', label: 'Modifier', icon: Edit, type: 'primary' },
-    { id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger' }
+    {id: 'edit', label: 'Modifier', icon: Edit, type: 'primary'},
+    {id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger'}
   ];
 
   // Transformation des périodes pour le DataList
@@ -101,8 +103,8 @@ export class YearDetailComponent implements OnInit {
       avatarLabel: p.label.substring(0, 2).toUpperCase(),
       date: `Cours: ${this.formatDateShort(p.startDate)} - ${this.formatDateShort(p.endDate)}`,
       badges: [
-        { label: 'Session de notes', type: 'info' },
-        { label: `Limite: ${this.formatDateShort(p.gradingDeadline)}`, type: 'warning' }
+        {label: 'Session de notes', type: 'info'},
+        {label: `Limite: ${this.formatDateShort(p.gradingDeadline)}`, type: 'warning'}
       ],
       rawData: p
     }));
@@ -117,7 +119,7 @@ export class YearDetailComponent implements OnInit {
       avatarLabel: 'VC',
       date: `${this.formatDateShort(h.startDate)} au ${this.formatDateShort(h.endDate)}`,
       badges: [
-        { label: 'CONGÉ', type: h.schoolClosed ? 'danger' : 'success' }
+        {label: 'CONGÉ', type: h.schoolClosed ? 'danger' : 'success'}
       ],
       rawData: h
     }));
@@ -318,12 +320,15 @@ export class YearDetailComponent implements OnInit {
     );
 
     if (confirmed) {
+      this.isActionLoading.set(true);
       try {
-        await this.academicService.activateYear(y.id);
+        await firstValueFrom(this.academicService.activateYear(y.id));
         this.notificationService.success(`L'année ${y.label} est désormais active.`);
         this.loadYearDetails(y.id);
       } catch (e) {
         this.notificationService.error("Échec de l'activation.");
+      } finally {
+        this.isActionLoading.set(false);
       }
     }
   }
@@ -340,12 +345,15 @@ export class YearDetailComponent implements OnInit {
     );
 
     if (confirmed) {
+      this.isActionLoading.set(true);
       try {
-        await this.academicService.closeYear(y.id);
+        await firstValueFrom(this.academicService.closeYear(y.id));
         this.notificationService.success(`Année ${y.label} en cours de clôture.`);
         this.loadYearDetails(y.id);
       } catch (e) {
         this.notificationService.error("Échec de la clôture.");
+      } finally {
+        this.isActionLoading.set(false);
       }
     }
   }
@@ -354,12 +362,15 @@ export class YearDetailComponent implements OnInit {
     const y = this.year();
     if (!y) return;
 
+    this.isActionLoading.set(true);
     try {
-      await this.academicService.reopenYear(y.id);
+      await firstValueFrom(this.academicService.reopenYear(y.id));
       this.notificationService.info(`L'année ${y.label} a été rouverte.`);
       this.loadYearDetails(y.id);
     } catch (e) {
       this.notificationService.error("Échec de la réouverture.");
+    } finally {
+      this.isActionLoading.set(false);
     }
   }
 
@@ -375,12 +386,15 @@ export class YearDetailComponent implements OnInit {
     );
 
     if (confirmed) {
+      this.isActionLoading.set(true);
       try {
-        await this.academicService.archiveYear(y.id);
+        await firstValueFrom(this.academicService.archiveYear(y.id));
         this.notificationService.success(`L'année ${y.label} est maintenant archivée.`);
         this.loadYearDetails(y.id);
       } catch (e) {
         this.notificationService.error("Échec de l'archivage.");
+      } finally {
+        this.isActionLoading.set(false);
       }
     }
   }
@@ -388,13 +402,9 @@ export class YearDetailComponent implements OnInit {
   private confirmAction(title: string, message: string, confirmLabel: string, type: 'info' | 'warning' | 'danger'): Promise<boolean> {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '450px',
-      data: { title, message, confirmLabel, type }
+      data: {title, message, confirmLabel, type}
     });
     return new Promise(resolve => dialogRef.afterClosed().subscribe(res => resolve(!!res)));
-  }
-
-  setTab(tab: string) {
-    this.activeTabId.set(tab);
   }
 
   formatDate(date?: string): string {

@@ -1,35 +1,30 @@
 <app-fw-form-shell
   [title]="isEditMode ? 'Modifier le Congé' : 'Ajouter un Congé'"
-  [subtitle]="isEditMode ? 'Rectifiez les dates de fermeture ou le libellé.' : 'Enregistrez des vacances ou un jour férié pour cet établissement.'"
+  [subtitle]="'Enregistrement des périodes de fermeture.'"
   [icon]="Palmtree"
-  statusLabel="Calendrier"
-  [saveLabel]="isEditMode ? 'Enregistrer les modifications' : 'Ajouter au calendrier'"
+  [saveLabel]="isEditMode ? 'Enregistrer' : 'Ajouter au calendrier'"
   [isLoading]="isLoading()"
   [canSave]="holidayForm.valid"
   (save)="onSave()"
   (cancel)="onCancel()"
 >
-  <form [formGroup]="holidayForm" class="space-y-8">
+  <form [formGroup]="holidayForm" class="space-y-10 py-2">
     
     <!-- 1. Identification -->
-    <div class="space-y-5">
-      <div class="flex items-center gap-3">
-        <div class="flex items-center justify-center w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 font-bold text-xs">01</div>
-        <span class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Information</span>
-        <div class="flex-1 h-px bg-slate-100"></div>
-      </div>
+    <div class="space-y-6">
+      <header class="section-header">
+        <lucide-icon [name]="Type" [size]="14"></lucide-icon>
+        <span class="label">Information</span>
+      </header>
 
-      <div class="space-y-2">
-        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Libellé du congé</label>
-        <div class="relative group">
-          <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-emerald-600 transition-colors">
-            <lucide-icon [name]="Type" class="w-4.5 h-4.5"></lucide-icon>
-          </div>
+      <div class="fw-field">
+        <label class="fw-label">Libellé du congé</label>
+        <div class="fw-input-wrapper">
           <input 
             type="text" 
             formControlName="label" 
             placeholder="Ex: Vacances de Noël" 
-            class="fw-input border-emerald-100 focus:border-emerald-500 focus:ring-emerald-50"
+            class="fw-input"
             [class.error]="isInvalid('label')"
           />
         </div>
@@ -37,41 +32,43 @@
     </div>
 
     <!-- 2. Période -->
-    <div class="space-y-5">
-      <div class="flex items-center gap-3">
-        <div class="flex items-center justify-center w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 font-bold text-xs">02</div>
-        <span class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Dates</span>
-        <div class="flex-1 h-px bg-slate-100"></div>
-      </div>
+    <div class="space-y-6">
+      <header class="section-header">
+        <lucide-icon [name]="Calendar" [size]="14"></lucide-icon>
+        <span class="label">Dates de fermeture</span>
+      </header>
 
       <div class="grid grid-cols-2 gap-6">
-        <div class="space-y-2">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Début</label>
-          <input type="date" formControlName="startDate" class="fw-input" [class.error]="isInvalid('startDate')"/>
+        <div class="fw-field">
+          <label class="fw-label">Début</label>
+          <div class="fw-input-wrapper">
+            <input type="date" formControlName="startDate" class="fw-input" [class.error]="isInvalid('startDate')"/>
+          </div>
         </div>
-        <div class="space-y-2">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Fin</label>
-          <input type="date" formControlName="endDate" class="fw-input" [class.error]="isInvalid('endDate')"/>
+        <div class="fw-field">
+          <label class="fw-label">Fin</label>
+          <div class="fw-input-wrapper">
+            <input type="date" formControlName="endDate" class="fw-input" [class.error]="isInvalid('endDate')"/>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- 3. Configuration SaaS -->
-    <div class="space-y-5">
-      <div class="flex items-center gap-3">
-        <div class="flex items-center justify-center w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 font-bold text-xs">03</div>
-        <span class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Impact sur l'école</span>
-        <div class="flex-1 h-px bg-slate-100"></div>
-      </div>
+    <div class="space-y-6">
+      <header class="section-header">
+        <lucide-icon [name]="ShieldCheck" [size]="14"></lucide-icon>
+        <span class="label">Impact Opérationnel</span>
+      </header>
 
-      <div class="bg-slate-50 rounded-2xl p-5 border border-slate-100 flex items-center justify-between group hover:bg-white hover:border-emerald-200 transition-all cursor-pointer" (click)="closedToggle.toggle()">
+      <div class="bg-surface-sunken rounded-2xl p-5 border border-border flex items-center justify-between group hover:bg-white hover:border-midnight transition-all cursor-pointer" (click)="closedToggle.toggle()">
         <div class="flex items-center gap-4">
-          <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm text-rose-500">
-            <lucide-icon [name]="XCircle" class="w-5 h-5"></lucide-icon>
+          <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm text-text-tertiary group-hover:text-rose-500 transition-colors">
+            <lucide-icon [name]="XCircle" [size]="18"></lucide-icon>
           </div>
           <div>
-            <p class="text-sm font-bold text-slate-900">Établissement fermé</p>
-            <p class="text-[11px] text-slate-500">Si activé, les cours seront suspendus pour tous.</p>
+            <p class="text-sm font-bold text-midnight">Établissement fermé</p>
+            <p class="text-[11px] text-text-secondary">Si activé, les cours seront suspendus pour tous.</p>
           </div>
         </div>
         <mat-slide-toggle 
@@ -83,11 +80,11 @@
       </div>
     </div>
 
-    <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-100 flex items-start gap-3">
-      <lucide-icon [name]="Info" class="w-4 h-4 text-emerald-600 mt-0.5"></lucide-icon>
-      <p class="text-[11px] text-emerald-800 leading-relaxed font-medium">
-        Vérifiez que le congé est inclus dans les dates administratives de l'année scolaire : <br/>
-        <span class="font-bold underline">{{ formatDate(year()?.adminStartDate) }} au {{ formatDate(year()?.adminEndDate) }}</span>
+    <div class="p-4 bg-surface-sunken rounded-xl border border-border flex items-start gap-3">
+      <lucide-icon [name]="Info" [size]="16" class="text-text-tertiary mt-0.5"></lucide-icon>
+      <p class="text-[11px] text-text-secondary leading-relaxed font-medium">
+        L'intervalle doit être inclus dans les dates administratives : <br/>
+        <span class="text-midnight font-bold">{{ formatDate(year()?.adminStartDate) }} au {{ formatDate(year()?.adminEndDate) }}</span>
       </p>
     </div>
 

@@ -1,5 +1,5 @@
 <app-fw-page-shell 
-  *ngIf="year() as y; else loader"
+  *ngIf="year() as y; else skeletons"
   [title]="'Année Scolaire ' + y.label"
   [description]="'Exercice du ' + formatDate(y.adminStartDate) + ' au ' + formatDate(y.adminEndDate)"
   [icon]="Calendar"
@@ -7,185 +7,221 @@
   [tabs]="yearTabs"
   [activeTabId]="activeTabId()"
   (tabChange)="activeTabId.set($event)"
+  density="compact"
 >
 
   <!-- ACTIONS DE PAGE -->
-  <div actions class="flex items-center gap-3">
+  <div actions class="flex items-center gap-2">
     <!-- Actions pour PLANNING -->
-    <button *ngIf="y.status === 'PLANNING'" (click)="onActivate()" class="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-200 active:scale-95">
-      <lucide-icon [name]="Play" class="w-4 h-4"></lucide-icon>
+    <app-fw-button 
+      *ngIf="y.status === 'PLANNING'" 
+      (click)="onActivate()" 
+      variant="primary"
+      size="sm"
+      [icon]="Play"
+      [loading]="isActionLoading()"
+    >
       Activer l'année
-    </button>
+    </app-fw-button>
 
     <!-- Actions pour ACTIVE -->
-    <button *ngIf="y.status === 'ACTIVE'" (click)="onClose()" class="flex items-center gap-2 px-5 py-2.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold hover:bg-rose-100 transition-all active:scale-95">
-      <lucide-icon [name]="XCircle" class="w-4 h-4"></lucide-icon>
+    <app-fw-button 
+      *ngIf="y.status === 'ACTIVE'" 
+      (click)="onClose()" 
+      variant="danger"
+      size="sm"
+      [icon]="XCircle"
+      [loading]="isActionLoading()"
+    >
       Clôturer l'exercice
-    </button>
+    </app-fw-button>
 
     <!-- Actions pour CLOSING -->
-    <div *ngIf="y.status === 'CLOSING'" class="flex gap-2">
-      <button (click)="onReopen()" class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-50 transition-all active:scale-95">
-        <lucide-icon [name]="RotateCcw" class="w-4 h-4 text-primary-600"></lucide-icon>
+    <ng-container *ngIf="y.status === 'CLOSING'">
+      <app-fw-button 
+        (click)="onReopen()" 
+        variant="tertiary"
+        size="sm"
+        [icon]="RotateCcw"
+        [loading]="isActionLoading()"
+      >
         Rouvrir
-      </button>
-      <button (click)="onArchive()" class="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition-all shadow-lg active:scale-95">
-        <lucide-icon [name]="Archive" class="w-4 h-4 text-amber-400"></lucide-icon>
-        Archiver définitivement
-      </button>
-    </div>
+      </app-fw-button>
+      <app-fw-button 
+        (click)="onArchive()" 
+        variant="primary"
+        size="sm"
+        [icon]="Archive"
+        [loading]="isActionLoading()"
+      >
+        Archiver
+      </app-fw-button>
+    </ng-container>
 
     <!-- Indicateur pour ARCHIVED -->
-    <div *ngIf="y.status === 'ARCHIVED'" class="px-4 py-2 bg-slate-100 text-slate-400 rounded-xl text-xs font-bold uppercase tracking-widest border border-slate-200 flex items-center gap-2 cursor-not-allowed">
-      <lucide-icon [name]="Archive" class="w-4 h-4"></lucide-icon>
+    <div *ngIf="y.status === 'ARCHIVED'" class="flex items-center gap-2 px-3 py-1.5 bg-surface-sunken text-text-tertiary rounded-lg text-[10px] font-bold uppercase tracking-widest border border-border">
+      <lucide-icon [name]="Archive" [size]="12"></lucide-icon>
       Lecture seule
     </div>
 
-    <div class="h-8 w-[1px] bg-slate-200 mx-1"></div>
+    <div class="divider-v"></div>
 
-    <button class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 transition-all">
-      <lucide-icon [name]="Printer" class="w-4 h-4"></lucide-icon>
-    </button>
+    <app-fw-button variant="tertiary" size="sm" [icon]="Printer" title="Imprimer"></app-fw-button>
   </div>
 
   <!-- CONTENU DE LA PAGE -->
-  <div class="space-y-8 animate-in slide-in-from-bottom-2 duration-500">
+  <div class="list-page-content animate-in slide-in-from-bottom-2 duration-500" [class.is-loading]="isActionLoading()">
     
-    <!-- Status Badge (Flottant ou intégré) -->
-    <div class="flex justify-start mb-4">
-      <app-fw-badge [status]="y.status" size="sm"></app-fw-badge>
+    <!-- 🚀 HYBRID LOADING FEEDBACK -->
+    <fw-page-progress *ngIf="isActionLoading()"></fw-page-progress>
+    <fw-block-loader *ngIf="isActionLoading()" [center]="true" message="Traitement en cours..."></fw-block-loader>
+
+    <!-- Status Badge (Intégré discrètement) -->
+    <div class="flex justify-start mb-2">
+      <app-fw-badge [status]="y.status" size="xs"></app-fw-badge>
     </div>
 
     <!-- CAS 1 : TIMELINE -->
-    <div *ngIf="activeTabId() === 'timeline'" class="space-y-8">
-      <!-- Carte Récapitulative -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-          <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
-            <lucide-icon [name]="Calendar" class="w-6 h-6"></lucide-icon>
-          </div>
-          <div>
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Durée</p>
-            <p class="text-base font-bold text-slate-900 italic">12 Mois</p>
-          </div>
-        </div>
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-          <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600">
-            <lucide-icon [name]="Clock" class="w-6 h-6"></lucide-icon>
-          </div>
-          <div>
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Rentrée</p>
-            <p class="text-base font-bold text-slate-900">{{ formatDate(y.lessonsStartDate) }}</p>
+    <div *ngIf="activeTabId() === 'timeline'" class="space-y-6">
+      <!-- Cartes Récapitulatives Minimalistes -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="fw-standard-card mb-0">
+          <div class="p-5 flex items-center gap-4">
+            <div class="w-10 h-10 bg-surface-sunken text-text-tertiary rounded-xl flex items-center justify-center">
+              <lucide-icon [name]="Calendar" [size]="20"></lucide-icon>
+            </div>
+            <div>
+              <p class="text-[9px] font-black text-text-tertiary uppercase tracking-widest mb-0.5">Durée</p>
+              <p class="text-sm font-bold text-midnight">12 Mois</p>
+            </div>
           </div>
         </div>
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-          <div class="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center text-primary-600">
-            <lucide-icon [name]="CheckCircle" class="w-6 h-6"></lucide-icon>
+        <div class="fw-standard-card mb-0">
+          <div class="p-5 flex items-center gap-4">
+            <div class="w-10 h-10 bg-surface-sunken text-text-tertiary rounded-xl flex items-center justify-center">
+              <lucide-icon [name]="Clock" [size]="20"></lucide-icon>
+            </div>
+            <div>
+              <p class="text-[9px] font-black text-text-tertiary uppercase tracking-widest mb-0.5">Rentrée</p>
+              <p class="text-sm font-bold text-midnight">{{ formatDate(y.lessonsStartDate) }}</p>
+            </div>
           </div>
-          <div>
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Périodicité</p>
-            <p class="text-base font-bold text-slate-900">{{ y.systemType }}</p>
+        </div>
+        <div class="fw-standard-card mb-0">
+          <div class="p-5 flex items-center gap-4">
+            <div class="w-10 h-10 bg-surface-sunken text-text-tertiary rounded-xl flex items-center justify-center">
+              <lucide-icon [name]="CheckCircle" [size]="20"></lucide-icon>
+            </div>
+            <div>
+              <p class="text-[9px] font-black text-text-tertiary uppercase tracking-widest mb-0.5">Périodicité</p>
+              <p class="text-sm font-bold text-midnight">{{ y.systemType }}</p>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- TIMELINE VISUELLE DYNAMIQUE -->
-      <div class="bg-white rounded-3xl border border-slate-200 p-8 sm:p-12 relative overflow-hidden min-h-[500px]">
-        <!-- Ligne verticale centrale -->
-        <div class="absolute left-12 sm:left-1/2 top-0 bottom-0 w-1 bg-slate-100 -translate-x-1/2 hidden sm:block"></div>
-        <div class="relative space-y-12">
+      <!-- TIMELINE VISUELLE ALIGNÉE -->
+      <div class="fw-standard-card p-8 md:p-12 relative overflow-hidden min-h-[400px]">
+        <div class="absolute left-12 md:left-1/2 top-0 bottom-0 w-px bg-border -translate-x-1/2 hidden md:block"></div>
+        <div class="relative space-y-10">
           <div *ngFor="let event of timelineEvents(); let i = index" 
-               class="relative flex flex-col sm:flex-row items-center gap-8 group"
-               [ngClass]="i % 2 === 0 ? 'sm:flex-row-reverse' : ''">
-            <div class="absolute left-12 sm:left-1/2 -translate-x-1/2 w-10 h-10 rounded-full border-4 border-white shadow-md z-10 flex items-center justify-center transition-transform group-hover:scale-110"
+               class="relative flex flex-col md:flex-row items-center gap-8 group"
+               [ngClass]="i % 2 === 0 ? 'md:flex-row-reverse' : ''">
+            <div class="absolute left-12 md:left-1/2 -translate-x-1/2 w-8 h-8 rounded-full border-2 border-white shadow-sm z-10 flex items-center justify-center transition-transform group-hover:scale-110"
                  [ngClass]="{
-                   'bg-primary-500 text-white': event.type === 'PERIOD',
+                   'bg-primary text-white': event.type === 'PERIOD',
                    'bg-amber-500 text-white': event.type === 'EXAM',
                    'bg-emerald-500 text-white': event.type === 'HOLIDAY'
                  }">
-              <lucide-icon [name]="event.type === 'PERIOD' ? ListTodo : (event.type === 'EXAM' ? CheckCircle : Palmtree)" class="w-5 h-5"></lucide-icon>
+              <lucide-icon [name]="event.type === 'PERIOD' ? ListTodo : (event.type === 'EXAM' ? CheckCircle : Palmtree)" [size]="14"></lucide-icon>
             </div>
-            <div class="w-full sm:w-[45%] flex flex-col" [ngClass]="i % 2 === 0 ? 'sm:items-start text-left' : 'sm:items-end sm:text-right'">
-              <span class="text-[10px] font-bold uppercase tracking-[0.2em] mb-1"
+            <div class="w-full md:w-[45%] flex flex-col" [ngClass]="i % 2 === 0 ? 'md:items-start text-left' : 'md:items-end md:text-right'">
+              <span class="text-[9px] font-black uppercase tracking-[0.2em] mb-2"
                     [ngClass]="{
-                      'text-primary-600': event.type === 'PERIOD',
+                      'text-primary': event.type === 'PERIOD',
                       'text-amber-600': event.type === 'EXAM',
                       'text-emerald-600': event.type === 'HOLIDAY'
                     }">
                 {{ formatDateShort(event.startDate) }} — {{ formatDateShort(event.endDate) }}
               </span>
-              <div class="p-5 rounded-2xl border border-slate-100 shadow-sm transition-all group-hover:shadow-md group-hover:border-slate-200 w-full"
-                   [ngClass]="event.type === 'EXAM' ? 'bg-amber-50/30' : 'bg-white'">
-                <h4 class="text-base font-bold text-slate-900">{{ event.label }}</h4>
-                <p class="text-xs text-slate-500 mt-1 leading-relaxed">{{ event.description || (event.type === 'HOLIDAY' ? 'Établissement fermé' : '') }}</p>
+              <div class="p-4 rounded-xl border border-border-subtle bg-white shadow-sm transition-all group-hover:shadow-md group-hover:border-border w-full">
+                <h4 class="text-sm font-bold text-midnight">{{ event.label }}</h4>
+                <p class="text-[11px] text-text-tertiary mt-1 leading-relaxed">{{ event.description || (event.type === 'HOLIDAY' ? 'Établissement fermé' : '') }}</p>
               </div>
             </div>
-            <div class="hidden sm:block sm:w-[45%]"></div>
+            <div class="hidden md:block md:w-[45%]"></div>
           </div>
           <div *ngIf="timelineEvents().length === 0" class="text-center py-12">
-            <p class="text-sm text-slate-400 italic">Aucun événement planifié pour le moment.</p>
+            <p class="text-xs text-text-tertiary italic">Aucun événement planifié.</p>
           </div>
         </div>
       </div>
     </div>
 
     <!-- CAS 2 : PÉRIODES -->
-    <div *ngIf="activeTabId() === 'periods'" class="space-y-6">
-      <div class="flex justify-between items-center px-2">
-        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-widest flex items-center gap-2">
-          <lucide-icon [name]="ListTodo" class="w-4 h-4 text-primary-600"></lucide-icon>
-          Découpage des Sessions
-        </h3>
-        <button 
+    <div *ngIf="activeTabId() === 'periods'" class="space-y-4">
+      <div class="flex justify-between items-center px-1">
+        <div class="section-header-minimal">
+          <lucide-icon [name]="ListTodo" [size]="14" class="text-primary"></lucide-icon>
+          <span class="label">Découpage Pédagogique</span>
+        </div>
+        <app-fw-button 
           (click)="openPeriodForm()"
           [disabled]="y.status === 'ARCHIVED'"
-          class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-xs font-bold hover:bg-primary-hover transition-all active:scale-95 disabled:opacity-50"
+          variant="primary"
+          size="sm"
+          [icon]="Plus"
         >
-          <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
           Ajouter une période
-        </button>
+        </app-fw-button>
       </div>
-      <app-data-list
-        [data]="displayPeriods()"
-        [total]="displayPeriods().length"
-        [actions]="periodActions"
-        defaultView="table"
-        (onAction)="handlePeriodAction($event)"
-      ></app-data-list>
+      <div class="list-container-integrated">
+        <app-data-list
+          [data]="displayPeriods()"
+          [total]="displayPeriods().length"
+          [actions]="periodActions"
+          defaultView="table"
+          (onAction)="handlePeriodAction($event)"
+        ></app-data-list>
+      </div>
     </div>
 
     <!-- CAS 3 : VACANCES -->
-    <div *ngIf="activeTabId() === 'holidays'" class="space-y-6">
-      <div class="flex justify-between items-center px-2">
-        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-widest flex items-center gap-2">
-          <lucide-icon [name]="Palmtree" class="w-4 h-4 text-emerald-600"></lucide-icon>
-          Calendrier des Congés
-        </h3>
-        <button 
+    <div *ngIf="activeTabId() === 'holidays'" class="space-y-4">
+      <div class="flex justify-between items-center px-1">
+        <div class="section-header-minimal">
+          <lucide-icon [name]="Palmtree" [size]="14" class="text-emerald-600"></lucide-icon>
+          <span class="label">Calendrier des Congés</span>
+        </div>
+        <app-fw-button 
           (click)="openHolidayForm()"
           [disabled]="y.status === 'ARCHIVED'"
-          class="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition-all active:scale-95 disabled:opacity-50"
+          variant="primary"
+          size="sm"
+          [icon]="Plus"
         >
-          <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
           Ajouter un congé
-        </button>
+        </app-fw-button>
       </div>
-      <app-data-list
-        [data]="displayHolidays()"
-        [total]="displayHolidays().length"
-        [actions]="holidayActions"
-        defaultView="table"
-        (onAction)="handleHolidayAction($event)"
-      ></app-data-list>
+      <div class="list-container-integrated">
+        <app-data-list
+          [data]="displayHolidays()"
+          [total]="displayHolidays().length"
+          [actions]="holidayActions"
+          defaultView="table"
+          (onAction)="handleHolidayAction($event)"
+        ></app-data-list>
+      </div>
     </div>
   </div>
 
 </app-fw-page-shell>
 
-<!-- Loader global -->
-<ng-template #loader>
-  <div class="flex flex-col items-center justify-center h-full gap-4">
-    <div class="w-12 h-12 border-4 border-primary-100 border-t-primary-600 rounded-full animate-spin"></div>
-    <span class="text-sm font-bold text-slate-500 uppercase tracking-widest animate-pulse italic">Chargement du calendrier...</span>
+<ng-template #skeletons>
+  <div class="list-page-content">
+    <div class="skeleton-layout">
+       <div class="skeleton-content h-[200px] rounded-2xl mb-6"></div>
+       <div class="skeleton-content h-[400px] rounded-2xl"></div>
+    </div>
   </div>
 </ng-template>
