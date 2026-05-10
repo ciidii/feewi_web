@@ -3,12 +3,23 @@ import {CommonModule, formatDate} from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {MatSelectModule} from '@angular/material/select';
-import {AlertCircle, Clock, Info, LucideAngularModule, Palmtree, Type} from 'lucide-angular';
-import {AcademicService} from '../../../../../../../../core/services/academic.service';
-import {NotificationService} from '../../../../../../../../shared/services/notification.service';
-import {FormShellComponent} from '../../../../../../../../shared/components/form-shell/form-shell';
-import {AcademicYear, Holiday} from '../../../../../../../../core/models/academic.model';
+import {
+  AlertCircle,
+  Calendar,
+  Clock,
+  Info,
+  LucideAngularModule,
+  Palmtree,
+  ShieldCheck,
+  Type,
+  XCircle
+} from 'lucide-angular';
 import {firstValueFrom} from 'rxjs';
+import {AcademicService} from '../../../../../../../core/services/academic.service';
+import {NotificationService} from '../../../../../../../shared/services/notification.service';
+import {AcademicYear, Holiday} from '../../../../../../../core/models/academic.model';
+import {FormShellComponent} from '../../../../../../../shared/components/form-shell/form-shell';
+import {MatSlideToggle} from '@angular/material/slide-toggle';
 
 @Component({
   selector: 'app-holiday-form',
@@ -19,7 +30,8 @@ import {firstValueFrom} from 'rxjs';
     MatDialogModule,
     MatSelectModule,
     LucideAngularModule,
-    FormShellComponent
+    FormShellComponent,
+    MatSlideToggle
   ],
   templateUrl: './holiday-form.component.html',
   styleUrls: ['./holiday-form.component.scss']
@@ -97,4 +109,8 @@ export class HolidayFormComponent implements OnInit {
     if (!date) return '—';
     return formatDate(date, 'd MMMM yyyy', this.locale);
   }
+
+  protected readonly XCircle = XCircle;
+  protected readonly Calendar = Calendar;
+  protected readonly ShieldCheck = ShieldCheck;
 }

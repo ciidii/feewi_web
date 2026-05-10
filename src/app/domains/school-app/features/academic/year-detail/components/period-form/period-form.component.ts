@@ -3,12 +3,12 @@ import {CommonModule, formatDate} from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {MatSelectModule} from '@angular/material/select';
-import {AlertCircle, Clock, Info, ListTodo, LucideAngularModule, Type} from 'lucide-angular';
-import {AcademicService} from '../../../../../../../../core/services/academic.service';
-import {NotificationService} from '../../../../../../../../shared/services/notification.service';
-import {FormShellComponent} from '../../../../../../../../shared/components/form-shell/form-shell';
-import {AcademicYear, Period} from '../../../../../../../../core/models/academic.model';
+import {AlertCircle, Calendar, Clock, GraduationCap, Info, ListTodo, LucideAngularModule, Type} from 'lucide-angular';
 import {firstValueFrom} from 'rxjs';
+import {FormShellComponent} from '../../../../../../../shared/components/form-shell/form-shell';
+import {AcademicService} from '../../../../../../../core/services/academic.service';
+import {NotificationService} from '../../../../../../../shared/services/notification.service';
+import {AcademicYear, Period} from '../../../../../../../core/models/academic.model';
 
 @Component({
   selector: 'app-period-form',
@@ -101,4 +101,7 @@ export class PeriodFormComponent implements OnInit {
     if (!date) return '—';
     return formatDate(date, 'd MMMM yyyy', this.locale);
   }
+
+  protected readonly GraduationCap = GraduationCap;
+  protected readonly Calendar = Calendar;
 }

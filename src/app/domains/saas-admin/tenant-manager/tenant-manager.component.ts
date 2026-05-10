@@ -1,27 +1,12 @@
-import {Component, computed, inject, LOCALE_ID, OnInit, signal} from '@angular/core';
+import {Component, computed, inject, LOCALE_ID, OnInit, signal, ViewEncapsulation} from '@angular/core';
 import {CommonModule, formatDate} from '@angular/common';
-import {SchoolService} from '../../../../core/services/school.service';
-import {School} from '../../../../core/models/school.model';
-import {
-  Download,
-  Filter,
-  Globe,
-  LucideAngularModule,
-  Plus,
-  RefreshCw,
-  Search,
-  Settings,
-  ShieldCheck,
-  Trash2
-} from 'lucide-angular';
+import {RouterModule} from '@angular/router';
+import {Globe, LucideAngularModule, Plus, RefreshCw, Settings, ShieldCheck, Trash2, Search} from 'lucide-angular';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
-import {DataListComponent} from '../../../../shared/components/data-list/data-list.component';
-import {RowAction, TableRow} from '../../../../shared/models/data-list.models';
-import {SchoolFormComponent} from '../components/school-form/school-form.component';
-import {FwPageShellComponent} from '../../../../shared/components/page-shell/page-shell.component';
-import {FwButtonComponent} from '../../../../shared/components/button/button.component';
-import {FwListCommandBarComponent} from '../../../../shared/components/list-command-bar/list-command-bar.component';
-import {FwTab} from '../../../../shared/components/tabs/tabs.component';
+import {RowAction, TableRow, TabItem} from '../../../shared/models/data-list.models';
+import {DataListComponent} from '../../../shared/components/data-list/data-list.component';
+import {SchoolService} from '../../../core/services/school.service';
+import {School} from '../../../core/models/school.model';
 
 @Component({
   selector: 'app-tenant-manager',
@@ -31,12 +16,11 @@ import {FwTab} from '../../../../shared/components/tabs/tabs.component';
     LucideAngularModule,
     MatDialogModule,
     DataListComponent,
-    FwPageShellComponent,
-    FwButtonComponent,
-    FwListCommandBarComponent
+    RouterModule
   ],
   templateUrl: './tenant-manager.component.html',
-  styleUrls: ['./tenant-manager.component.scss']
+  styleUrls: ['./tenant-manager.component.scss'],
+  encapsulation: ViewEncapsulation.None
 })
 export class TenantManagerComponent implements OnInit {
   private schoolService = inject(SchoolService);
@@ -47,49 +31,53 @@ export class TenantManagerComponent implements OnInit {
   readonly Globe = Globe;
   readonly Plus = Plus;
   readonly RefreshCw = RefreshCw;
+  readonly ShieldCheck = ShieldCheck;
+  readonly Search = Search;
 
   // États
   schools = signal<School[]>([]);
   isLoading = signal(true);
   searchQuery = signal('');
+  activeTab = signal('Tous');
+  currentPage = signal(0);
+  totalPages = signal(1);
+  totalTenants = signal(0);
 
-  activeTabId = signal('Tous');
-
-  activeFilterChips = computed(() => {
-    const chips: any[] = [];
-    if (this.searchQuery()) {
-      chips.push({ key: 'q', label: 'Recherche', value: this.searchQuery() });
-    }
-    return chips;
-  });
-
-  tabs = computed<FwTab[]>(() => [
-    { label: 'Tous', id: 'Tous', icon: Globe, count: this.schools().length },
-    { label: 'Actifs', id: 'Actifs', icon: ShieldCheck },
-    { label: 'En attente', id: 'Preparation', icon: Settings }
+  // Configuration des onglets pour le DataList
+  tenantTabs = computed<TabItem[]>(() => [
+    { label: 'Tous', icon: Globe, count: this.totalTenants() },
+    { label: 'Actifs', icon: ShieldCheck },
+    { label: 'En préparation', icon: Settings }
   ]);
 
-  // Actions pour les écoles
-  readonly schoolActions: RowAction[] = [
+  // Actions pour les lignes
+  readonly tenantActions: RowAction[] = [
     { id: 'edit', label: 'Gérer', icon: Settings, type: 'primary' },
     { id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger' }
   ];
 
-  // Transformation pour le DataList
-  displaySchools = computed<TableRow[]>(() => {
+  // Transformation pour le DataList (renommé en tenants pour le template)
+  tenants = computed<TableRow[]>(() => {
     const query = this.searchQuery().toLowerCase();
-    const schools = this.schools().filter(s => 
-      !query || s.name.toLowerCase().includes(query) || s.id.toLowerCase().includes(query)
-    );
+    const schools = this.schools().filter(s => {
+      const matchQuery = !query || 
+                        (s.name || '').toLowerCase().includes(query) || 
+                        (s.id || '').toLowerCase().includes(query);
+      
+      if (this.activeTab() === 'Actifs') return matchQuery && s.active;
+      if (this.activeTab() === 'En préparation') return matchQuery && !s.active;
+      
+      return matchQuery;
+    });
 
     return schools.map(school => ({
-      id: school.id,
-      title: school.name,
+      id: school.id || Math.random().toString(),
+      title: school.name || 'Établissement Sans Nom',
       subtitle: `ID Technique : ${school.id}`,
-      avatarLabel: school.name.substring(0, 2).toUpperCase(),
-      date: school.createdAt ? `Créé le ${formatDate(school.createdAt, 'dd/MM/yyyy', this.locale)}` : 'Date inconnue',
+      avatarLabel: (school.name || '??').substring(0, 2).toUpperCase(),
+      date: school.createdAt ? formatDate(school.createdAt, 'dd/MM/yyyy', this.locale) : 'Date inconnue',
       badges: [
-        { label: 'PLATFORM', type: 'success' },
+        { label: school.active ? 'ACTIF' : 'PRÉPARATION', type: school.active ? 'success' : 'warning' },
         { label: 'SaaS', type: 'info' }
       ],
       rawData: school
@@ -104,44 +92,42 @@ export class TenantManagerComponent implements OnInit {
     this.isLoading.set(true);
     this.schoolService.getSchools().subscribe({
       next: (data) => {
-        this.schools.set(data);
+        // Le service renvoie un tableau de School, pas une Page pour le moment selon AcademicService pattern
+        // Mais l'erreur disait "Argument of type Page<School> is not assignable to parameter of type School[]"
+        // Donc le backend semble renvoyer une Page.
+        const page = data as any;
+        if (page && page.content) {
+          this.schools.set(page.content);
+          this.totalTenants.set(page.totalElements || page.content.length);
+          this.totalPages.set(page.totalPages || 1);
+        } else if (Array.isArray(data)) {
+          this.schools.set(data);
+          this.totalTenants.set(data.length);
+          this.totalPages.set(1);
+        }
         this.isLoading.set(false);
       },
       error: () => this.isLoading.set(false)
     });
   }
 
-  onTabChange(tabId: string) {
-    this.activeTabId.set(tabId);
+  onTabChange(tabLabel: string) {
+    this.activeTab.set(tabLabel);
   }
 
   onSearch(query: string) {
     this.searchQuery.set(query);
   }
 
+  onPageChange(page: number) {
+    this.currentPage.set(page);
+    this.loadSchools();
+  }
+
   handleAction(event: { actionId: string, row: TableRow }) {
     if (event.actionId === 'edit') {
-      this.openSchoolForm(event.row.rawData);
+      // Navigation vers le détail pour la gestion
+      // this.router.navigate(['/saas/tenants', event.row.id]);
     }
-  }
-
-  openSchoolForm(school?: School) {
-    const dialogRef = this.dialog.open(SchoolFormComponent, {
-      width: '560px',
-      panelClass: 'feewi-dialog-panel',
-      data: { school }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) this.loadSchools();
-    });
-  }
-
-  removeFilter(key: string) {
-    if (key === 'q') this.searchQuery.set('');
-  }
-
-  clearAllFilters() {
-    this.searchQuery.set('');
   }
 }
