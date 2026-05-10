@@ -33,7 +33,7 @@
       </app-fw-button>
 
       <app-fw-button 
-        [variant]="s.status === 'ACTIVE' ? 'danger' : 'success'" 
+        [variant]="s.status === 'ACTIVE' ? 'danger' : 'primary'" 
         size="sm" 
         [icon]="s.status === 'ACTIVE' ? XCircle : CheckCircle" 
         [loading]="isActionLoading()"
@@ -201,7 +201,7 @@
       <!-- Historique Scolaire -->
       <section class="sidebar-card">
         <div class="card-header">
-          <lucide-icon [name]="History" [size]="16"></lucide-icon>
+          <lucide-icon [name]="HistoryIcon" [size]="16"></lucide-icon>
           <h4>Parcours Scolaire</h4>
         </div>
         <div class="history-timeline">

@@ -29,6 +29,7 @@ import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-d
 import {SchoolClass} from '../../../../../core/models/academic.model';
 import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
+import {FwTab} from '../../../../../shared/components/tabs/tabs.component';
 import {FwListCommandBarComponent} from '../../../../../shared/components/list-command-bar/list-command-bar.component';
 import {SharedFilterModalComponent} from '../../../../../shared/components/filter-modal/shared-filter-modal.component';
 import {Router} from '@angular/router';
@@ -92,7 +93,7 @@ export class StudentListComponent implements OnInit, OnDestroy {
     });
   });
 
-  studentTabs = computed<TabItem[]>(() => [
+  studentTabs = computed<FwTab[]>(() => [
     { label: 'Tous', id: 'ALL', icon: Users, count: this.studentPage()?.totalElements || 0 },
     { label: 'Actifs', id: 'ACTIVE', icon: Users },
     { label: 'Suspendus', id: 'SUSPENDED', icon: XCircle },

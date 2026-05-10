@@ -77,7 +77,7 @@ export class TenantDetailComponent implements OnInit {
   readonly Activity = Activity;
   readonly Users = Users;
   readonly CreditCard = CreditCard;
-  readonly History = History;
+  readonly HistoryIcon = History;
   readonly ChevronRight = ChevronRight;
   readonly User = User;
   readonly ExternalLink = ExternalLink;

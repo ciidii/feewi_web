@@ -84,6 +84,4 @@ export class HomeComponent {
     if (hour < 18) return 'Bon après-midi';
     return 'Bonsoir';
   }
-
-  protected readonly PlusCircle = PlusCircle;
 }

@@ -54,7 +54,8 @@
         <span class="label">Origine de la Donnée</span>
       </header>
 
-      <div class="bg-surface-sunken rounded-2xl p-5 border border-border flex items-center justify-between group hover:bg-white hover:border-primary transition-all cursor-pointer" (click)="nationalToggle.toggle()">
+      <div class="bg-surface-sunken rounded-2xl p-5 border border-border flex items-center justify-between group hover:bg-white hover:border-primary transition-all cursor-pointer" 
+           (click)="subjectForm.get('isProvisioned')?.setValue(!subjectForm.get('isProvisioned')?.value)">
         <div class="flex items-center gap-4">
           <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm text-text-tertiary group-hover:text-primary transition-colors">
             <lucide-icon [name]="CheckCircle" [size]="18"></lucide-icon>
@@ -64,13 +65,13 @@
             <p class="text-[11px] text-text-secondary">Si activé, cette matière suit le programme officiel.</p>
           </div>
         </div>
-        <mat-slide-toggle
-          #nationalToggle
-          color="primary"
+        <mat-slide-toggle 
+          color="primary" 
           formControlName="isProvisioned"
           (click)="$event.stopPropagation()"
         ></mat-slide-toggle>
       </div>
+
     </div>
 
     <!-- Info Box Minimalist -->

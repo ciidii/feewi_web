@@ -15,7 +15,7 @@ import {AuditLog} from '../../../core/models/audit.model';
 export class GlobalAuditComponent implements OnInit {
   private schoolService = inject(SchoolService);
 
-  readonly History = History;
+  readonly HistoryIcon = History;
   readonly Search = Search;
   readonly Filter = Filter;
   readonly Download = Download;

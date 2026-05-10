@@ -67,7 +67,7 @@ export class StudentDetailComponent implements OnInit {
   readonly Phone = Phone;
   readonly MapPin = MapPin;
   readonly Calendar = Calendar;
-  readonly History = History;
+  readonly HistoryIcon = History;
   readonly Edit = Edit;
   readonly Printer = Printer;
   readonly Download = Download;

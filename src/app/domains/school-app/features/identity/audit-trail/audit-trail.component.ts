@@ -18,7 +18,7 @@ import {AuditLog} from '../../../../../core/models/audit.model';
 export class AuditTrailComponent implements OnInit {
   private identityService = inject(IdentityService);
 
-  readonly History = History;
+  readonly HistoryIcon = History;
 
   activeTab = signal('Tous');
   totalLogs = signal(0);

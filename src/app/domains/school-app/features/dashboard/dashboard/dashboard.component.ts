@@ -1,6 +1,14 @@
 import {Component, ViewEncapsulation} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {Activity, GraduationCap, LayoutDashboard, LucideAngularModule, TrendingUp, Users} from 'lucide-angular';
+import {
+  Activity,
+  GraduationCap,
+  LayoutDashboard,
+  LucideAngularModule,
+  Search,
+  TrendingUp,
+  Users
+} from 'lucide-angular';
 import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.component';
 import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
 
@@ -18,6 +26,6 @@ export class DashboardComponent {
   readonly TrendingUp = TrendingUp;
   readonly Activity = Activity;
   readonly LayoutDashboard = LayoutDashboard;
-  readonly History = History;
+  readonly HistoryIcon = History;
   readonly Search = Search;
 }
