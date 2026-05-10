@@ -1,11 +1,14 @@
 import {Component, computed, inject, OnInit, signal, ViewEncapsulation} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {
+  Archive,
   Download,
   Edit,
   Eye,
   Filter,
   LucideAngularModule,
+  RefreshCw,
+  Search,
   Shield,
   Trash2,
   UserCheck,
@@ -15,16 +18,28 @@ import {
 } from 'lucide-angular';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {DataListComponent} from '../../../../../shared/components/data-list/data-list.component';
-import {RowAction, TabItem, TableRow} from '../../../../../shared/models/data-list.models';
+import {RowAction, TableRow} from '../../../../../shared/models/data-list.models';
 import {IdentityService} from '../../../../../core/services/identity.service';
 import {AuthService} from '../../../../../core/services/auth.service';
 import {User} from '../../../../../core/models/user.model';
 import {StaffFormComponent} from './components/staff-form/staff-form.component';
+import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
+import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
+import {FwListCommandBarComponent} from '../../../../../shared/components/list-command-bar/list-command-bar.component';
+import {FwTab} from '../../../../../shared/components/tabs/tabs.component';
 
 @Component({
   selector: 'app-staff-directory',
   standalone: true,
-  imports: [CommonModule, DataListComponent, LucideAngularModule, MatDialogModule],
+  imports: [
+    CommonModule,
+    DataListComponent,
+    LucideAngularModule,
+    MatDialogModule,
+    FwPageShellComponent,
+    FwButtonComponent,
+    FwListCommandBarComponent
+  ],
   templateUrl: './staff-directory.component.html',
   styleUrl: './staff-directory.component.scss',
   encapsulation: ViewEncapsulation.None
@@ -34,11 +49,18 @@ export class StaffDirectoryComponent implements OnInit {
   private authService = inject(AuthService);
   private dialog = inject(MatDialog);
 
+  // Icônes
   readonly UserPlus = UserPlus;
   readonly Filter = Filter;
   readonly Download = Download;
+  readonly RefreshCw = RefreshCw;
+  readonly Users = Users;
+  readonly Shield = Shield;
+  readonly UserCheck = UserCheck;
+  readonly UserX = UserX;
 
-  activeTab = signal('Tous');
+  activeTabId = signal('Tous');
+  searchQuery = signal('');
 
   // Actions dynamiques pour le personnel
   readonly staffActions: RowAction[] = [
@@ -48,7 +70,6 @@ export class StaffDirectoryComponent implements OnInit {
       label: 'Modifier',
       icon: Edit,
       type: 'primary',
-      // Interdiction d'auto-modification (API V2)
       disableIf: (row) => row.metadata?.['isSelf'] === true
     },
     {
@@ -56,7 +77,6 @@ export class StaffDirectoryComponent implements OnInit {
       label: 'Désactiver',
       icon: Trash2,
       type: 'danger',
-      // Interdiction d'auto-désactivation (API V2)
       disableIf: (row) => row.metadata?.['isSelf'] === true
     }
   ];
@@ -66,18 +86,34 @@ export class StaffDirectoryComponent implements OnInit {
     const page = this.identityService.staffPage();
     const currentUser = this.authService.currentUser();
     if (!page) return [];
-    return page.content.map(user => this.mapUserToRow(user, currentUser?.id));
+    
+    return page.content
+      .filter(user => {
+        if (this.activeTabId() === 'Administrateurs') return user.roles.some(r => r.includes('ADMIN'));
+        if (this.activeTabId() === 'Enseignants') return user.roles.some(r => r.includes('TEACHER'));
+        if (this.activeTabId() === 'Inactifs') return user.active === false;
+        return true;
+      })
+      .map(user => this.mapUserToRow(user, currentUser?.id));
   });
 
   totalStaff = computed(() => this.identityService.staffPage()?.totalElements || 0);
   isLoading = this.identityService.loading;
 
-  staffTabs: TabItem[] = [
-    { label: 'Tous', icon: Users, count: 0 },
-    { label: 'Administrateurs', icon: Shield, count: 0 },
-    { label: 'Enseignants', icon: UserCheck, count: 0 },
-    { label: 'Inactifs', icon: UserX, count: 0 }
-  ];
+  staffTabs = computed<FwTab[]>(() => [
+    { label: 'Tous', id: 'Tous', icon: Users, count: this.totalStaff() },
+    { label: 'Administrateurs', id: 'Administrateurs', icon: Shield },
+    { label: 'Enseignants', id: 'Enseignants', icon: UserCheck },
+    { label: 'Inactifs', id: 'Inactifs', icon: UserX }
+  ]);
+
+  activeFilterChips = computed(() => {
+    const chips: any[] = [];
+    if (this.searchQuery()) {
+      chips.push({ key: 'q', label: 'Recherche', value: this.searchQuery() });
+    }
+    return chips;
+  });
 
   ngOnInit() {
     this.loadStaff();
@@ -87,24 +123,28 @@ export class StaffDirectoryComponent implements OnInit {
     this.identityService.getStaff(search).subscribe();
   }
 
-  onTabChange(tab: string) {
-    this.activeTab.set(tab);
+  onTabChange(tabId: string) {
+    this.activeTabId.set(tabId);
   }
 
   onSearch(query: string) {
+    this.searchQuery.set(query);
     this.loadStaff(query);
   }
 
   handleAction(event: { actionId: string, row: TableRow }) {
     switch (event.actionId) {
       case 'view':
-        console.log('Visualisation du profil', event.row.id);
+        this.dialog.open(StaffFormComponent, {
+          width: '640px',
+          data: { user: event.row.rawData, isReadOnly: true }
+        });
         break;
       case 'edit':
-        console.log('Edition du membre', event.row.id);
-        break;
-      case 'delete':
-        console.log('Désactivation du membre', event.row.id);
+        this.dialog.open(StaffFormComponent, {
+          width: '640px',
+          data: { user: event.row.rawData }
+        });
         break;
     }
   }
@@ -113,7 +153,7 @@ export class StaffDirectoryComponent implements OnInit {
     const dialogRef = this.dialog.open(StaffFormComponent, {
       width: '640px',
       maxWidth: '95vw',
-      panelClass: 'staff-form-dialog'
+      panelClass: 'feewi-dialog-panel'
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -121,6 +161,18 @@ export class StaffDirectoryComponent implements OnInit {
         this.loadStaff();
       }
     });
+  }
+
+  removeFilter(key: string) {
+    if (key === 'q') {
+      this.searchQuery.set('');
+      this.loadStaff('');
+    }
+  }
+
+  clearAllFilters() {
+    this.searchQuery.set('');
+    this.loadStaff('');
   }
 
   private mapUserToRow(user: User, currentUserId?: string): TableRow {
@@ -140,7 +192,8 @@ export class StaffDirectoryComponent implements OnInit {
         isSelf: isSelf,
         lastLoginAt: user.lastLoginAt,
         connectionCount: user.connectionCount
-      }
+      },
+      rawData: user
     };
   }
 

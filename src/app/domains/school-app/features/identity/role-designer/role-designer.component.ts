@@ -1,4 +1,4 @@
-import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {Component, computed, inject, OnInit, signal, ViewEncapsulation} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {firstValueFrom} from 'rxjs';
 import {
@@ -19,6 +19,9 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatDialog} from '@angular/material/dialog';
 import {IdentityService} from '../../../../../core/services/identity.service';
 import {RoleFormComponent} from './components/role-form/role-form.component';
+import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
+import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
+import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.component';
 
 export interface Permission {
   id: string;
@@ -37,9 +40,17 @@ export interface PermissionGroup {
 @Component({
   selector: 'app-role-designer',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, MatButtonModule],
+  imports: [
+    CommonModule,
+    LucideAngularModule,
+    MatButtonModule,
+    FwPageShellComponent,
+    FwButtonComponent,
+    FwBadgeComponent
+  ],
   templateUrl: './role-designer.component.html',
-  styleUrls: ['./role-designer.component.scss']
+  styleUrls: ['./role-designer.component.scss'],
+  encapsulation: ViewEncapsulation.None
 })
 export class RoleDesignerComponent implements OnInit {
   private identityService = inject(IdentityService);
@@ -192,7 +203,7 @@ export class RoleDesignerComponent implements OnInit {
   openAddRoleForm() {
     const dialogRef = this.dialog.open(RoleFormComponent, {
       width: '560px',
-      panelClass: 'role-form-dialog'
+      panelClass: 'feewi-dialog-panel'
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -292,7 +303,6 @@ export class RoleDesignerComponent implements OnInit {
       }));
       await this.loadRoles();
       this.unsavedChanges.set(new Set());
-      console.log('✅ Permissions sauvegardées');
     } catch (err) {
       console.error('❌ Erreur de sauvegarde', err);
     } finally {

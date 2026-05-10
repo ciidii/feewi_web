@@ -1,31 +1,26 @@
 <app-fw-form-shell
   title="Ajouter un membre"
-  subtitle="Creez un nouveau compte pour un employe ou un enseignant de l'etablissement."
+  subtitle="Initialisation du compte collaborateur."
   [icon]="UserPlus"
-  statusLabel="Personnel"
-  saveLabel="Creer le profil"
+  saveLabel="Créer le profil"
   [isLoading]="isLoading()"
   [canSave]="staffForm.valid"
   (save)="onSave()"
   (cancel)="onCancel()"
 >
-  <form [formGroup]="staffForm" class="space-y-8">
+  <form [formGroup]="staffForm" class="space-y-10 py-2">
     
     <!-- 1. Identification -->
-    <div class="space-y-5">
-      <div class="flex items-center gap-3">
-        <div class="flex items-center justify-center w-8 h-8 rounded-xl bg-primary-50 text-primary-600 font-bold text-xs">01</div>
-        <span class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Identification</span>
-        <div class="flex-1 h-px bg-slate-100"></div>
-      </div>
+    <div class="space-y-6">
+      <header class="section-header">
+        <lucide-icon [name]="User" [size]="14"></lucide-icon>
+        <span class="label">Identité</span>
+      </header>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="space-y-2">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Prenom</label>
-          <div class="relative group">
-            <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors">
-              <lucide-icon [name]="User" class="w-4.5 h-4.5"></lucide-icon>
-            </div>
+        <div class="fw-field">
+          <label class="fw-label">Prénom</label>
+          <div class="fw-input-wrapper">
             <input 
               type="text" 
               formControlName="firstName" 
@@ -34,15 +29,11 @@
               [class.error]="isInvalid('firstName')"
             />
           </div>
-          <span *ngIf="isInvalid('firstName')" class="text-[10px] text-rose-500 font-bold ml-1 uppercase">{{ getErrorMessage('firstName') }}</span>
         </div>
 
-        <div class="space-y-2">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Nom</label>
-          <div class="relative group">
-            <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors">
-              <lucide-icon [name]="User" class="w-4.5 h-4.5"></lucide-icon>
-            </div>
+        <div class="fw-field">
+          <label class="fw-label">Nom</label>
+          <div class="fw-input-wrapper">
             <input 
               type="text" 
               formControlName="lastName" 
@@ -51,26 +42,21 @@
               [class.error]="isInvalid('lastName')"
             />
           </div>
-          <span *ngIf="isInvalid('lastName')" class="text-[10px] text-rose-500 font-bold ml-1 uppercase">{{ getErrorMessage('lastName') }}</span>
         </div>
       </div>
     </div>
 
     <!-- 2. Contact -->
-    <div class="space-y-5">
-      <div class="flex items-center gap-3">
-        <div class="flex items-center justify-center w-8 h-8 rounded-xl bg-primary-50 text-primary-600 font-bold text-xs">02</div>
-        <span class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Coordonnees</span>
-        <div class="flex-1 h-px bg-slate-100"></div>
-      </div>
+    <div class="space-y-6">
+      <header class="section-header">
+        <lucide-icon [name]="Mail" [size]="14"></lucide-icon>
+        <span class="label">Coordonnées</span>
+      </header>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="space-y-2">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Adresse Email Professionnelle</label>
-          <div class="relative group">
-            <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors">
-              <lucide-icon [name]="Mail" class="w-4.5 h-4.5"></lucide-icon>
-            </div>
+        <div class="fw-field">
+          <label class="fw-label">Email Professionnel</label>
+          <div class="fw-input-wrapper">
             <input 
               type="email" 
               formControlName="email" 
@@ -79,15 +65,11 @@
               [class.error]="isInvalid('email')"
             />
           </div>
-          <span *ngIf="isInvalid('email')" class="text-[10px] text-rose-500 font-bold ml-1 uppercase">{{ getErrorMessage('email') }}</span>
         </div>
 
-        <div class="space-y-2">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Telephone</label>
-          <div class="relative group">
-            <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors">
-              <lucide-icon [name]="Phone" class="w-4.5 h-4.5"></lucide-icon>
-            </div>
+        <div class="fw-field">
+          <label class="fw-label">Téléphone</label>
+          <div class="fw-input-wrapper">
             <input 
               type="tel" 
               formControlName="phone" 
@@ -96,55 +78,38 @@
               [class.error]="isInvalid('phone')"
             />
           </div>
-          <span *ngIf="isInvalid('phone')" class="text-[10px] text-rose-500 font-bold ml-1 uppercase">{{ getErrorMessage('phone') }}</span>
         </div>
       </div>
     </div>
 
     <!-- 3. Droits & Catégorie -->
-    <div class="space-y-5">
-      <div class="flex items-center gap-3">
-        <div class="flex items-center justify-center w-8 h-8 rounded-xl bg-primary-50 text-primary-600 font-bold text-xs">03</div>
-        <span class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Droits & Catégorie</span>
-        <div class="flex-1 h-px bg-slate-100"></div>
-      </div>
+    <div class="space-y-6">
+      <header class="section-header">
+        <lucide-icon [name]="Shield" [size]="14"></lucide-icon>
+        <span class="label">Droits & Accès</span>
+      </header>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Type d'Utilisateur -->
-        <div class="space-y-2">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Type de compte</label>
-          <div class="relative group">
-            <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors z-10">
-              <lucide-icon [name]="UserCog" class="w-4.5 h-4.5"></lucide-icon>
-            </div>
-            <mat-select formControlName="userTypeCode" class="fw-select" [class.error]="isInvalid('userTypeCode')">
+        <div class="fw-field">
+          <label class="fw-label">Type de compte</label>
+          <div class="fw-input-wrapper">
+            <mat-select formControlName="userTypeCode" class="fw-input" [class.error]="isInvalid('userTypeCode')">
               <mat-option *ngFor="let type of userTypes()" [value]="type.code">{{ type.name }}</mat-option>
             </mat-select>
           </div>
         </div>
 
-        <!-- Roles (Multi-select) -->
-        <div class="space-y-2">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Roles assignes</label>
-          <div class="relative group">
-            <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors z-10">
-              <lucide-icon [name]="Shield" class="w-4.5 h-4.5"></lucide-icon>
-            </div>
-            <mat-select formControlName="roles" multiple class="fw-select" [class.error]="isInvalid('roles')">
+        <div class="fw-field">
+          <label class="fw-label">Rôles assignés</label>
+          <div class="fw-input-wrapper">
+            <mat-select formControlName="roles" multiple class="fw-input" [class.error]="isInvalid('roles')">
               <mat-select-trigger>
-                <div class="flex items-center gap-2">
-                  <span class="text-xs font-bold text-slate-700">{{ getSelectedRolesDisplay() }}</span>
-                </div>
+                <span class="text-xs font-bold text-midnight">{{ getSelectedRolesDisplay() }}</span>
               </mat-select-trigger>
-              <mat-option *ngFor="let role of roles()" [value]="role.name" class="py-3">
-                <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400">
-                    <lucide-icon [name]="getRoleIcon(role.name)" class="w-4 h-4"></lucide-icon>
-                  </div>
-                  <div class="flex flex-col">
-                    <span class="text-xs font-bold text-slate-700">{{ formatRoleName(role.name) }}</span>
-                    <span class="text-[10px] text-slate-400 leading-none">{{ role.description }}</span>
-                  </div>
+              <mat-option *ngFor="let role of roles()" [value]="role.name">
+                <div class="flex flex-col py-1">
+                  <span class="text-xs font-bold">{{ formatRoleName(role.name) }}</span>
+                  <span class="text-[10px] text-text-tertiary leading-none">{{ role.description }}</span>
                 </div>
               </mat-option>
             </mat-select>
@@ -154,14 +119,11 @@
     </div>
 
     <!-- Security Note -->
-    <div class="p-4 bg-amber-50 rounded-2xl border border-amber-100 flex items-start gap-3">
-      <lucide-icon [name]="Sparkles" class="w-4 h-4 text-amber-600 mt-0.5"></lucide-icon>
-      <div class="space-y-1">
-        <p class="text-[11px] text-amber-900 leading-tight font-bold">Generation automatique du mot de passe</p>
-        <p class="text-[10px] text-amber-800/70 leading-relaxed font-medium">
-          Un email de bienvenue sera envoye a l'utilisateur avec ses identifiants temporaires et un lien de connexion securise.
-        </p>
-      </div>
+    <div class="p-4 bg-surface-sunken rounded-xl border border-border flex items-start gap-3">
+      <lucide-icon [name]="Sparkles" [size]="16" class="text-primary mt-0.5"></lucide-icon>
+      <p class="text-[11px] text-text-secondary leading-relaxed font-medium">
+        Un email de bienvenue sera envoyé à l'utilisateur avec ses <span class="text-midnight font-bold">identifiants temporaires</span>.
+      </p>
     </div>
 
   </form>
