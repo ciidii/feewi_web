@@ -13,6 +13,7 @@ import {
   Shield,
   ShieldCheck,
   Sparkles,
+  Trash2,
   Users
 } from 'lucide-angular';
 import {MatButtonModule} from '@angular/material/button';
@@ -21,7 +22,6 @@ import {IdentityService} from '../../../../../core/services/identity.service';
 import {RoleFormComponent} from './components/role-form/role-form.component';
 import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
-import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.component';
 import {FormsModule} from '@angular/forms';
 import {PageProgressComponent} from '../../../../../shared/components/loader/page-progress.component';
 
@@ -78,6 +78,7 @@ export class RoleDesignerComponent implements OnInit {
   readonly Info = Info;
   readonly Sparkles = Sparkles;
   readonly Maximize2 = Maximize2;
+  readonly Trash2 = Trash2;
 
   // Rôles transformés
   roles = computed(() => {
@@ -233,6 +234,14 @@ export class RoleDesignerComponent implements OnInit {
     this.selectedRoleId.set(id);
     this.syncPermissionsWithSelectedRole();
     this.unsavedChanges.set(new Set());
+  }
+
+  async deleteRole() {
+    const role = this.selectedRole();
+    if (!role || role.rawData.isSystemRole) return;
+    
+    // Pour l'instant, on se contente d'un log. La suppression sera raccordée à l'API.
+    console.log('Suppression du rôle:', role.name);
   }
 
   // ===========================================

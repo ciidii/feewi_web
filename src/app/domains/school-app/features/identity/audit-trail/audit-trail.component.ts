@@ -1,16 +1,36 @@
-import {Component, inject, OnInit, signal, ViewEncapsulation} from '@angular/core';
+import {Component, computed, inject, OnInit, signal, ViewEncapsulation} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {Activity, CreditCard, GraduationCap, History, LucideAngularModule, ShieldAlert} from 'lucide-angular';
+import {
+  Activity,
+  CreditCard,
+  Download,
+  GraduationCap,
+  History,
+  LucideAngularModule,
+  RefreshCw,
+  Search,
+  ShieldAlert
+} from 'lucide-angular';
 import {firstValueFrom} from 'rxjs';
 import {DataListComponent} from '../../../../../shared/components/data-list/data-list.component';
 import {TabItem, TableRow} from '../../../../../shared/models/data-list.models';
 import {IdentityService} from '../../../../../core/services/identity.service';
 import {AuditLog} from '../../../../../core/models/audit.model';
+import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
+import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
+import {FwListCommandBarComponent} from '../../../../../shared/components/list-command-bar/list-command-bar.component';
 
 @Component({
   selector: 'app-audit-trail',
   standalone: true,
-  imports: [CommonModule, DataListComponent, LucideAngularModule],
+  imports: [
+    CommonModule,
+    DataListComponent,
+    LucideAngularModule,
+    FwPageShellComponent,
+    FwButtonComponent,
+    FwListCommandBarComponent
+  ],
   templateUrl: './audit-trail.component.html',
   styleUrl: './audit-trail.component.scss',
   encapsulation: ViewEncapsulation.None
@@ -19,12 +39,23 @@ export class AuditTrailComponent implements OnInit {
   private identityService = inject(IdentityService);
 
   readonly HistoryIcon = History;
+  readonly RefreshCw = RefreshCw;
+  readonly Download = Download;
 
   activeTab = signal('Tous');
   totalLogs = signal(0);
   isLoading = signal(false);
+  searchQuery = signal('');
 
   auditLogs = signal<TableRow[]>([]);
+
+  activeFilterChips = computed(() => {
+    const chips: any[] = [];
+    if (this.searchQuery()) {
+      chips.push({ key: 'q', label: 'Recherche', value: this.searchQuery() });
+    }
+    return chips;
+  });
 
   auditTabs: TabItem[] = [
     { label: 'Tous', icon: Activity, count: 0 },

@@ -1,3 +1,19 @@
+@use '../../../../../../styles/tokens' as *;
+
 :host {
   display: block;
+  height: 100%;
+  background: var(--fw-ice);
+}
+
+.list-page-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.list-container-integrated {
+  flex: 1;
+  overflow: hidden;
 }

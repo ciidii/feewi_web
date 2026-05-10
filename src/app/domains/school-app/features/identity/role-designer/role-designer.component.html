@@ -5,7 +5,7 @@
     
     <!-- Brand header -->
     <div class="sidebar-header">
-      <div class="sidebar-brand-icon">
+      <div class="sidebar-brand-icon-alt">
         <lucide-icon [name]="ShieldCheck" [size]="14"></lucide-icon>
       </div>
       <div class="sidebar-brand-text">
@@ -77,6 +77,16 @@
         </app-fw-button>
 
         <app-fw-button 
+          *ngIf="selectedRole() && !selectedRole()?.rawData?.isSystemRole"
+          variant="danger" 
+          size="sm" 
+          [icon]="Trash2" 
+          (click)="deleteRole()"
+        >
+          Supprimer
+        </app-fw-button>
+
+        <app-fw-button 
           variant="primary" 
           size="md" 
           [icon]="Save" 
@@ -90,12 +100,21 @@
 
       <main class="editor-container custom-scrollbar">
 
+        <!-- CONTEXT BANNER -->
+        <div class="context-banner">
+          <lucide-icon [name]="ShieldCheck" [size]="16"></lucide-icon>
+          <div class="banner-text">
+            <span class="scope-chip">Politique de Sécurité</span>
+            <p>Ces permissions définissent les capacités d'action des membres rattachés à ce profil.</p>
+          </div>
+        </div>
+
         <!-- Matrice des permissions par groupes -->
         <div class="space-y-10 py-6">
           
           <div *ngFor="let group of filteredPermissionGroups()" class="permission-group-section">
             <header class="group-header">
-              <div class="w-1.5 h-4 bg-midnight rounded-full"></div>
+              <div class="w-1 h-3.5 bg-primary rounded-full"></div>
               <h3 class="group-title">{{ group.category }}</h3>
             </header>
 

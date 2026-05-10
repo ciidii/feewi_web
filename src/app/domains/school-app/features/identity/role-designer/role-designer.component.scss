@@ -45,10 +45,10 @@
     margin-bottom: 1rem;
     border-bottom: 1px solid var(--fw-border-subtle);
 
-    .sidebar-brand-icon {
+    .sidebar-brand-icon-alt {
       width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0;
       display: grid; place-items: center;
-      background: var(--fw-midnight); color: white;
+      background: var(--fw-primary-alpha); color: var(--fw-primary);
     }
 
     .sidebar-brand-text {
@@ -138,13 +138,26 @@
 
 .divider-v { width: 1px; height: 24px; background: var(--fw-border-subtle); margin: 0 0.25rem; }
 
+// ─── CONTEXT BANNER (Mirroring Admission) ────────────────────────────────────
+.context-banner {
+  display: flex; align-items: center; gap: 1rem;
+  padding: 1.25rem; background: white; border-radius: 20px;
+  box-shadow: var(--fw-shadow-sm); border: 1px solid var(--fw-border-subtle);
+  border-left: 4px solid var(--fw-primary);
+  margin-top: 2rem; margin-bottom: 1rem;
+
+  .scope-chip { font-size: 10px; font-weight: 850; text-transform: uppercase; color: var(--fw-primary); letter-spacing: 0.1em; display: block; }
+  p { font-size: 0.875rem; color: var(--fw-text-tertiary); font-weight: 500; margin: 2px 0 0; }
+  .banner-text { display: flex; flex-direction: column; }
+}
+
 // ─── PERMISSION MATRIX UI ────────────────────────────────────────────────────
 .permission-group-section {
   .group-header {
-    display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;
+    display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem;
     .group-title {
-      font-family: var(--fw-font-ui); font-size: 0.75rem; font-weight: 800;
-      text-transform: uppercase; letter-spacing: 0.08em; color: var(--fw-text-primary);
+      font-family: var(--fw-font-ui); font-size: 0.75rem; font-weight: 850;
+      text-transform: uppercase; letter-spacing: 0.1em; color: var(--fw-text-tertiary);
     }
   }
 }
