@@ -8,8 +8,8 @@ export interface AvailableYearSummary {
   id: string;
   label: string;
   state: AcademicYearState;
-  registrationStartDate: string;
-  registrationEndDate: string;
+  startDate: string;
+  endDate: string;
   active: boolean;
   allowedTypes: AdmissionType[];
   registrationMode: RegistrationMode;
