@@ -4,12 +4,16 @@ import {ActivatedRoute, RouterModule} from '@angular/router';
 import {
   Archive,
   ArrowLeft,
+  BookOpen,
   Calendar,
   CheckCircle,
   ChevronRight,
   Clock,
   Edit,
+  Globe,
+  Hash,
   LayoutDashboard,
+  ListChecks,
   ListTodo,
   LucideAngularModule,
   MoreVertical,
@@ -19,11 +23,7 @@ import {
   Printer,
   RotateCcw,
   Trash2,
-  XCircle,
-  Globe,
-  BookOpen,
-  Hash,
-  ListChecks
+  XCircle
 } from 'lucide-angular';
 import {PeriodFormComponent} from './components/period-form/period-form.component';
 import {HolidayFormComponent} from './components/holiday-form/holiday-form.component';

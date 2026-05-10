@@ -1,6 +1,8 @@
 /* Configuration de Angular Material 3 */
 @use '@angular/material' as mat;
 
+@include mat.core();
+
 /* IMPORT DES TOKENS DE DESIGN SYSTEM FEEWI */
 @use "styles/tokens" as *;
 @use 'ngx-toastr/toastr';
@@ -101,6 +103,21 @@ html { height: 100%; }
 .feewi-dialog-panel .mat-mdc-dialog-surface {
   border-radius: 28px !important;
   background: white !important;
+}
+
+/* DATEPICKER FIX (REMOVES TRANSPARENCY) */
+.mat-datepicker-content,
+.mat-mdc-datepicker-content {
+  background-color: var(--fw-white) !important;
+  color: var(--fw-midnight) !important;
+  box-shadow: var(--fw-shadow-lg) !important;
+  border-radius: 16px !important;
+  border: 1px solid var(--fw-border-subtle) !important;
+
+  .mat-calendar {
+    font-family: var(--fw-font-sans) !important;
+    background-color: var(--fw-white) !important;
+  }
 }
 
 /* GLOBAL MATERIAL MENU FIX (REMOVES TRANSPARENCY) */
