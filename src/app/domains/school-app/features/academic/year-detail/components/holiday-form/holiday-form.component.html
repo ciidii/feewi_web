@@ -61,7 +61,8 @@
         <span class="label">Impact Opérationnel</span>
       </header>
 
-      <div class="bg-surface-sunken rounded-2xl p-5 border border-border flex items-center justify-between group hover:bg-white hover:border-midnight transition-all cursor-pointer" (click)="closedToggle.toggle()">
+      <div class="bg-surface-sunken rounded-2xl p-5 border border-border flex items-center justify-between group hover:bg-white hover:border-midnight transition-all cursor-pointer" 
+           (click)="holidayForm.get('schoolClosed')?.setValue(!holidayForm.get('schoolClosed')?.value)">
         <div class="flex items-center gap-4">
           <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm text-text-tertiary group-hover:text-rose-500 transition-colors">
             <lucide-icon [name]="XCircle" [size]="18"></lucide-icon>
@@ -72,7 +73,6 @@
           </div>
         </div>
         <mat-slide-toggle 
-          #closedToggle
           color="warn" 
           formControlName="schoolClosed"
           (click)="$event.stopPropagation()"

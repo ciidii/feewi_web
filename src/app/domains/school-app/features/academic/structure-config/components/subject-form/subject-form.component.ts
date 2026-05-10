@@ -36,7 +36,8 @@ export class SubjectFormComponent implements OnInit {
 
   subjectForm: FormGroup = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(3)]],
-    code: ['', [Validators.required, Validators.maxLength(10)]]
+    code: ['', [Validators.required, Validators.maxLength(10)]],
+    isProvisioned: [false]
   });
 
   isLoading = signal(false);
