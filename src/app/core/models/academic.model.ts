@@ -158,3 +158,26 @@ export interface CreateYearRequest {
   startDate: string;
   endDate: string;
 }
+
+// ===========================================
+// AFFECTATION DES ÉLÈVES (STUDENT ASSIGNMENT)
+// ===========================================
+
+export type AssignmentStatus = 'WAITING' | 'ASSIGNED';
+
+export interface StudentAssignment {
+  id: string;
+  studentId: string;
+  academicYearId: string;
+  levelId: string;
+  status: AssignmentStatus;
+  schoolClassId: string | null;
+  assignedAt?: string;
+
+  // Champs enrichis (pour l'affichage en liste)
+  studentFirstName?: string;
+  studentLastName?: string;
+  studentGender?: string;
+  levelName?: string;
+  classFullName?: string;
+}

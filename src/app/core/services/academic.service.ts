@@ -434,4 +434,34 @@ export class AcademicService {
       catchError(this.handleError('Erreur lors de la suppression de l\'enseignement'))
     );
   }
+
+  // ===========================================
+  // AFFECTATION DES ÉLÈVES (ASSIGNMENTS)
+  // ===========================================
+
+  getWaitingAssignments(yearId: string, levelId: string): Observable<StudentAssignment[]> {
+    let params = new HttpParams().set('yearId', yearId).set('levelId', levelId);
+    return this.http.get<StudentAssignment[]>(`${this.API_URL}/assignments/waiting`, { params, headers: this.getHeaders() }).pipe(
+      catchError(this.handleError('Erreur lors du chargement des élèves en attente'))
+    );
+  }
+
+  assignStudent(assignmentId: string, classId: string): Observable<void> {
+    const params = new HttpParams().set('classId', classId);
+    return this.http.post<void>(`${this.API_URL}/assignments/${assignmentId}/assign`, {}, { params, headers: this.getHeaders(true) }).pipe(
+      catchError(this.handleError('Erreur lors de l\'affectation de l\'élève'))
+    );
+  }
+
+  unassignStudent(assignmentId: string): Observable<void> {
+    return this.http.post<void>(`${this.API_URL}/assignments/${assignmentId}/unassign`, {}, { headers: this.getHeaders(true) }).pipe(
+      catchError(this.handleError('Erreur lors du retrait de la classe'))
+    );
+  }
+
+  getAssignmentsByClass(classId: string): Observable<StudentAssignment[]> {
+    return this.http.get<StudentAssignment[]>(`${this.API_URL}/assignments/class/${classId}`, { headers: this.getHeaders() }).pipe(
+      catchError(this.handleError('Erreur lors du chargement des élèves de la classe'))
+    );
+  }
 }

@@ -10,6 +10,7 @@ import {
   Edit,
   LayoutDashboard,
   LucideAngularModule,
+  ChevronRight,
   MoreVertical,
   Play,
   Plus,
@@ -274,8 +275,8 @@ export class YearDetailComponent implements OnInit {
 
     const confirmed = await this.confirmAction(
       strategy === 'TEMPLATE' ? 'Importer le calendrier officiel ?' : 'Générer automatiquement ?',
-      strategy === 'TEMPLATE' 
-        ? 'Cela copiera les dates officielles (Sénégal) pour cette année scolaire. Les jalons existants seront conservés.' 
+      strategy === 'TEMPLATE'
+        ? 'Cela copiera les dates officielles (Sénégal) pour cette année scolaire. Les jalons existants seront conservés.'
         : 'Cela découpera l\'année en périodes égales selon votre système (Trimestre/Semestre).',
       'Confirmer la génération',
       'info'

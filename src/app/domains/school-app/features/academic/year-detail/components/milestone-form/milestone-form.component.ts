@@ -4,11 +4,11 @@ import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {MatSelectModule} from '@angular/material/select';
 import {AlertCircle, Calendar, Clock, Info, LucideAngularModule, Type} from 'lucide-angular';
-import {AcademicService} from '../../../../../../../../core/services/academic.service';
-import {NotificationService} from '../../../../../../../../shared/services/notification.service';
-import {FormShellComponent} from '../../../../../../../../shared/components/form-shell/form-shell';
-import {AcademicMilestone, AcademicYear, MilestoneType} from '../../../../../../../../core/models/academic.model';
 import {firstValueFrom} from 'rxjs';
+import {FormShellComponent} from '../../../../../../../shared/components/form-shell/form-shell';
+import {AcademicService} from '../../../../../../../core/services/academic.service';
+import {NotificationService} from '../../../../../../../shared/services/notification.service';
+import {AcademicMilestone, AcademicYear, MilestoneType} from '../../../../../../../core/models/academic.model';
 
 @Component({
   selector: 'app-milestone-form',
@@ -84,7 +84,7 @@ export class MilestoneFormComponent implements OnInit {
     this.isLoading.set(true);
     try {
       if (this.isEditMode) {
-        // Le backend V2 ne propose pas encore d'update explicite par jalon, 
+        // Le backend V2 ne propose pas encore d'update explicite par jalon,
         // on suit le pattern delete + create ou on attend l'endpoint PUT.
         // Pour l'instant, on simule l'ajout.
         await firstValueFrom(this.academicService.createMilestone(this.data.year.id, this.milestoneForm.value));
