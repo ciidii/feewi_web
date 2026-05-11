@@ -6,14 +6,11 @@ import {
   ArrowLeft,
   Calendar,
   CheckCircle,
-  ChevronRight,
   Clock,
   Edit,
   LayoutDashboard,
-  ListTodo,
   LucideAngularModule,
   MoreVertical,
-  Palmtree,
   Play,
   Plus,
   Printer,
@@ -25,12 +22,12 @@ import {
   Hash,
   ListChecks,
   Sparkles,
-  Zap
+  Zap,
+  CalendarDays
 } from 'lucide-angular';
-import {PeriodFormComponent} from './components/period-form/period-form.component';
-import {HolidayFormComponent} from './components/holiday-form/holiday-form.component';
+import {MilestoneFormComponent} from './components/milestone-form/milestone-form.component';
 import {RowAction, TableRow} from '../../../../../shared/models/data-list.models';
-import {AcademicMilestone, AcademicYear, Holiday, Period} from '../../../../../core/models/academic.model';
+import {AcademicMilestone, AcademicYear} from '../../../../../core/models/academic.model';
 import {AcademicService} from '../../../../../core/services/academic.service';
 import {NotificationService} from '../../../../../shared/services/notification.service';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
@@ -83,117 +80,74 @@ export class YearDetailComponent implements OnInit {
 
   // États
   year = signal<AcademicYear | null>(null);
-  periods = signal<Period[]>([]);
-  holidays = signal<Holiday[]>([]);
   milestones = signal<AcademicMilestone[]>([]);
   isLoading = signal(true);
   isActionLoading = signal(false);
   activeTabId = signal('timeline');
 
-  // Configuration des Onglets
+  // Configuration des Onglets (Architecture V2)
   readonly yearTabs: FwTab[] = [
     {id: 'timeline', label: 'Vue Chronologique', icon: LayoutDashboard},
-    {id: 'periods', label: 'Découpage Pédagogique', icon: ListTodo},
-    {id: 'holidays', label: 'Congés & Vacances', icon: Palmtree}
+    {id: 'calendar', label: 'Gestion du Calendrier', icon: CalendarDays}
   ];
 
-  // Actions pour les périodes
-  readonly periodActions: RowAction[] = [
+  // Actions pour les jalons
+  readonly milestoneActions: RowAction[] = [
     {id: 'edit', label: 'Modifier', icon: Edit, type: 'primary'},
     {id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger'}
   ];
 
-  // Actions pour les vacances
-  readonly holidayActions: RowAction[] = [
-    {id: 'edit', label: 'Modifier', icon: Edit, type: 'primary'},
-    {id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger'}
-  ];
-
-  // Transformation des périodes pour le DataList
-  displayPeriods = computed<TableRow[]>(() => {
-    return this.periods().map(p => ({
-      id: p.id,
-      title: p.label,
-      subtitle: `Examens du ${this.formatDateShort(p.examStartDate)} au ${this.formatDateShort(p.examEndDate)}`,
-      avatarLabel: p.label.substring(0, 2).toUpperCase(),
-      date: `Cours: ${this.formatDateShort(p.startDate)} - ${this.formatDateShort(p.endDate)}`,
+  // Transformation des Jalons pour le DataList
+  displayMilestones = computed<TableRow[]>(() => {
+    return this.milestones().map(m => ({
+      id: m.id,
+      title: m.label,
+      subtitle: this.getMilestoneDescription(m.type),
+      avatarLabel: m.type.substring(0, 2).toUpperCase(),
+      date: `${this.formatDateShort(m.startDate)} - ${this.formatDateShort(m.endDate)}`,
       badges: [
-        {label: 'Session de notes', type: 'info'},
-        {label: `Limite: ${this.formatDateShort(p.gradingDeadline)}`, type: 'warning'}
+        {label: this.getMilestoneLabel(m.type), type: this.getMilestoneBadgeType(m.type)}
       ],
-      rawData: p
+      rawData: m
     }));
   });
 
-  // Transformation des vacances pour le DataList
-  displayHolidays = computed<TableRow[]>(() => {
-    return this.holidays().map(h => ({
-      id: h.id,
-      title: h.label,
-      subtitle: h.schoolClosed ? 'Établissement fermé' : 'Établissement ouvert',
-      avatarLabel: 'VC',
-      date: `${this.formatDateShort(h.startDate)} au ${this.formatDateShort(h.endDate)}`,
-      badges: [
-        {label: 'CONGÉ', type: h.schoolClosed ? 'danger' : 'success'}
-      ],
-      rawData: h
-    }));
-  });
-
-  // Construction de la Timeline (Intègre désormais les Milestones V2)
+  // Construction de la Timeline (V2)
   timelineEvents = computed<TimelineEvent[]>(() => {
-    const events: TimelineEvent[] = [];
-
-    // 1. Ajouter les périodes de cours
-    this.periods().forEach(p => {
-      events.push({
-        id: p.id,
-        type: 'PERIOD',
-        label: p.label,
-        startDate: p.startDate,
-        endDate: p.endDate,
-        description: 'Session d\'enseignement régulier'
-      });
-
-      if (p.examStartDate) {
-        events.push({
-          id: `exam-${p.id}`,
-          type: 'EXAM',
-          label: `Examens : ${p.label}`,
-          startDate: p.examStartDate,
-          endDate: p.examEndDate,
-          description: `Date limite de saisie des notes : ${this.formatDateShort(p.gradingDeadline)}`
-        });
-      }
-    });
-
-    // 2. Ajouter les vacances
-    this.holidays().forEach(h => {
-      events.push({
-        id: h.id,
-        type: 'HOLIDAY',
-        label: h.label,
-        startDate: h.startDate,
-        endDate: h.endDate,
-        isClosed: h.schoolClosed
-      });
-    });
-
-    // 3. Ajouter les Jalons V2 (ENROLLMENT, LESSONS, etc.)
-    this.milestones().forEach(m => {
-      events.push({
+    return this.milestones()
+      .map(m => ({
         id: m.id,
-        type: 'MILESTONE',
+        type: 'MILESTONE' as const,
         label: m.label,
         startDate: m.startDate,
         endDate: m.endDate,
         milestoneType: m.type,
         description: this.getMilestoneDescription(m.type)
-      });
-    });
-
-    return events.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+      }))
+      .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
   });
+
+  private getMilestoneLabel(type: string): string {
+    switch (type) {
+      case 'ENROLLMENT': return 'Admission';
+      case 'RE_ENROLLMENT': return 'Réinscription';
+      case 'LESSONS': return 'Enseignement';
+      case 'EXAMS': return 'Examens';
+      case 'VACATION': return 'Vacances';
+      default: return type;
+    }
+  }
+
+  private getMilestoneBadgeType(type: string): any {
+    switch (type) {
+      case 'LESSONS': return 'info';
+      case 'ENROLLMENT':
+      case 'RE_ENROLLMENT': return 'success';
+      case 'EXAMS': return 'warning';
+      case 'VACATION': return 'danger';
+      default: return 'default';
+    }
+  }
 
   private getMilestoneDescription(type: string): string {
     switch (type) {
@@ -201,6 +155,7 @@ export class YearDetailComponent implements OnInit {
       case 'RE_ENROLLMENT': return 'Campagne de réinscription des élèves actuels';
       case 'LESSONS': return 'Période effective des cours';
       case 'EXAMS': return 'Sessions d\'examens nationaux ou blancs';
+      case 'VACATION': return 'Période de fermeture de l\'établissement';
       default: return 'Jalon institutionnel';
     }
   }
@@ -211,6 +166,7 @@ export class YearDetailComponent implements OnInit {
       case 'RE_ENROLLMENT': return RotateCcw;
       case 'LESSONS': return BookOpen;
       case 'EXAMS': return Hash;
+      case 'VACATION': return Calendar;
       default: return CheckCircle;
     }
   }
@@ -222,8 +178,7 @@ export class YearDetailComponent implements OnInit {
   readonly CheckCircle = CheckCircle;
   readonly Plus = Plus;
   readonly LayoutDashboard = LayoutDashboard;
-  readonly ListTodo = ListTodo;
-  readonly Palmtree = Palmtree;
+  readonly CalendarDays = CalendarDays;
   readonly ChevronRight = ChevronRight;
   readonly MoreVertical = MoreVertical;
   readonly Edit = Edit;
@@ -248,16 +203,12 @@ export class YearDetailComponent implements OnInit {
   async loadYearDetails(id: string) {
     this.isLoading.set(true);
     try {
-      const [yearData, periodsData, holidaysData, milestonesData] = await Promise.all([
+      const [yearData, milestonesData] = await Promise.all([
         firstValueFrom(this.academicService.getYearById(id)),
-        firstValueFrom(this.academicService.getPeriods(id)),
-        firstValueFrom(this.academicService.getHolidays(id)),
         firstValueFrom(this.academicService.getMilestones(id))
       ]);
 
       this.year.set(yearData);
-      this.periods.set(periodsData);
-      this.holidays.set(holidaysData);
       this.milestones.set(milestonesData);
     } catch (error) {
       this.notificationService.error("Erreur lors du chargement des détails de l'année.");
@@ -266,24 +217,24 @@ export class YearDetailComponent implements OnInit {
     }
   }
 
-  // --- ACTIONS VACANCES ---
+  // --- ACTIONS JALONS (V2) ---
 
-  handleHolidayAction(event: { actionId: string, row: TableRow }) {
+  handleMilestoneAction(event: { actionId: string, row: TableRow }) {
     if (event.actionId === 'edit') {
-      this.openHolidayForm(event.row.rawData);
+      this.openMilestoneForm(event.row.rawData);
     } else if (event.actionId === 'delete') {
-      this.confirmDeleteHoliday(event.row.id as string, event.row.title);
+      this.confirmDeleteMilestone(event.row.id as string, event.row.title);
     }
   }
 
-  openHolidayForm(holiday?: Holiday) {
-    const dialogRef = this.dialog.open(HolidayFormComponent, {
-      width: '500px',
+  openMilestoneForm(milestone?: AcademicMilestone) {
+    const dialogRef = this.dialog.open(MilestoneFormComponent, {
+      width: '560px',
       maxWidth: '95vw',
       panelClass: 'feewi-dialog-panel',
       data: {
         year: this.year(),
-        holiday: holiday
+        milestone: milestone
       }
     });
 
@@ -294,68 +245,21 @@ export class YearDetailComponent implements OnInit {
     });
   }
 
-  private async confirmDeleteHoliday(id: string, name: string) {
+  private async confirmDeleteMilestone(id: string, name: string) {
     const confirmed = await this.confirmAction(
-      'Supprimer le congé ?',
-      `Voulez-vous supprimer les vacances "${name}" du calendrier ?`,
+      'Supprimer le jalon ?',
+      `Voulez-vous supprimer "${name}" du calendrier ?`,
       'Oui, supprimer',
       'danger'
     );
 
     if (confirmed && this.year()) {
       try {
-        await this.academicService.deleteHoliday(this.year()!.id, id);
-        this.notificationService.success('Congé supprimé.');
+        await firstValueFrom(this.academicService.deleteMilestone(this.year()!.id, id));
+        this.notificationService.success('Jalon supprimé.');
         this.loadYearDetails(this.year()!.id);
       } catch (e) {
         this.notificationService.error("Échec de la suppression.");
-      }
-    }
-  }
-
-  // --- ACTIONS PÉRIODES ---
-
-  handlePeriodAction(event: { actionId: string, row: TableRow }) {
-    if (event.actionId === 'edit') {
-      this.openPeriodForm(event.row.rawData);
-    } else if (event.actionId === 'delete') {
-      this.confirmDeletePeriod(event.row.id as string, event.row.title);
-    }
-  }
-
-  openPeriodForm(period?: Period) {
-    const dialogRef = this.dialog.open(PeriodFormComponent, {
-      width: '600px',
-      maxWidth: '95vw',
-      panelClass: 'feewi-dialog-panel',
-      data: {
-        year: this.year(),
-        period: period
-      }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result && this.year()) {
-        this.loadYearDetails(this.year()!.id);
-      }
-    });
-  }
-
-  private async confirmDeletePeriod(id: string, name: string) {
-    const confirmed = await this.confirmAction(
-      'Supprimer la période ?',
-      `Voulez-vous supprimer le "${name}" ? Les dates d'examens associées seront également perdues.`,
-      'Oui, supprimer',
-      'danger'
-    );
-
-    if (confirmed && this.year()) {
-      try {
-        await this.academicService.deletePeriod(this.year()!.id, id);
-        this.notificationService.success('Période supprimée.');
-        this.loadYearDetails(this.year()!.id);
-      } catch (e) {
-        this.notificationService.error("Impossible de supprimer cette période.");
       }
     }
   }

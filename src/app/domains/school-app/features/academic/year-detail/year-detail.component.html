@@ -154,7 +154,7 @@
                    'bg-emerald-500 text-white': event.type === 'HOLIDAY',
                    'bg-slate-700 text-white': event.type === 'MILESTONE'
                  }">
-              <lucide-icon *ngIf="event.type !== 'MILESTONE'" [name]="event.type === 'PERIOD' ? ListTodo : (event.type === 'EXAM' ? CheckCircle : Palmtree)" [size]="14"></lucide-icon>
+              <lucide-icon *ngIf="event.type !== 'MILESTONE'" [name]="event.type === 'PERIOD' ? ListChecks : (event.type === 'EXAM' ? CheckCircle : Calendar)" [size]="14"></lucide-icon>
               <lucide-icon *ngIf="event.type === 'MILESTONE'" [name]="getMilestoneIcon(event.milestoneType!)" [size]="14"></lucide-icon>
             </div>
             <div class="w-full md:w-[45%] flex flex-col" [ngClass]="i % 2 === 0 ? 'md:items-start text-left' : 'md:items-end md:text-right'">
@@ -169,7 +169,7 @@
               </span>
               <div class="p-4 rounded-xl border border-border-subtle bg-white shadow-sm transition-all group-hover:shadow-md group-hover:border-border w-full">
                 <h4 class="text-sm font-bold text-midnight">{{ event.label }}</h4>
-                <p class="text-[11px] text-text-tertiary mt-1 leading-relaxed">{{ event.description || (event.type === 'HOLIDAY' ? 'Établissement fermé' : '') }}</p>
+                <p class="text-[11px] text-text-tertiary mt-1 leading-relaxed">{{ event.description }}</p>
               </div>
             </div>
             <div class="hidden md:block md:w-[45%]"></div>
@@ -181,58 +181,30 @@
       </div>
     </div>
 
-    <!-- CAS 2 : PÉRIODES -->
-    <div *ngIf="activeTabId() === 'periods'" class="space-y-4">
+    <!-- CAS 2 : GESTION DU CALENDRIER (DYNAMIC MILESTONES) -->
+    <div *ngIf="activeTabId() === 'calendar'" class="space-y-4">
       <div class="flex justify-between items-center px-1">
         <div class="section-header-minimal">
-          <lucide-icon [name]="ListTodo" [size]="14" class="text-primary"></lucide-icon>
-          <span class="label">Découpage Pédagogique</span>
+          <lucide-icon [name]="CalendarDays" [size]="14" class="text-primary"></lucide-icon>
+          <span class="label">Jalons institutionnels</span>
         </div>
         <app-fw-button 
-          (click)="openPeriodForm()"
+          (click)="openMilestoneForm()"
           [disabled]="y.status === 'ARCHIVED'"
           variant="primary"
           size="sm"
           [icon]="Plus"
         >
-          Ajouter une période
+          Ajouter un jalon
         </app-fw-button>
       </div>
       <div class="list-container-integrated">
         <app-data-list
-          [data]="displayPeriods()"
-          [total]="displayPeriods().length"
-          [actions]="periodActions"
+          [data]="displayMilestones()"
+          [total]="displayMilestones().length"
+          [actions]="milestoneActions"
           defaultView="table"
-          (onAction)="handlePeriodAction($event)"
-        ></app-data-list>
-      </div>
-    </div>
-
-    <!-- CAS 3 : VACANCES -->
-    <div *ngIf="activeTabId() === 'holidays'" class="space-y-4">
-      <div class="flex justify-between items-center px-1">
-        <div class="section-header-minimal">
-          <lucide-icon [name]="Palmtree" [size]="14" class="text-emerald-600"></lucide-icon>
-          <span class="label">Calendrier des Congés</span>
-        </div>
-        <app-fw-button 
-          (click)="openHolidayForm()"
-          [disabled]="y.status === 'ARCHIVED'"
-          variant="primary"
-          size="sm"
-          [icon]="Plus"
-        >
-          Ajouter un congé
-        </app-fw-button>
-      </div>
-      <div class="list-container-integrated">
-        <app-data-list
-          [data]="displayHolidays()"
-          [total]="displayHolidays().length"
-          [actions]="holidayActions"
-          defaultView="table"
-          (onAction)="handleHolidayAction($event)"
+          (onAction)="handleMilestoneAction($event)"
         ></app-data-list>
       </div>
     </div>
