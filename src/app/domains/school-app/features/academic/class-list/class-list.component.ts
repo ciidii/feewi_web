@@ -1,6 +1,6 @@
 import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {BookOpenCheck, Filter, LucideAngularModule, Plus, RefreshCw, School, Users} from 'lucide-angular';
+import {BookOpenCheck, Filter, LucideAngularModule, Plus, RefreshCw, School, UserCheck, Users} from 'lucide-angular';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {firstValueFrom} from 'rxjs';
 import {ClassFormComponent} from './components/class-form/class-form.component';
@@ -47,6 +47,7 @@ export class ClassListComponent implements OnInit {
   // États
   currentYear = signal<AcademicYear | null>(null);
   classes = signal<SchoolClass[]>([]);
+  totalElements = computed(() => this.classes().length);
   groupedLevels = signal<CycleGroup[]>([]);
   isLoading = signal(true);
   searchQuery = signal('');
@@ -215,4 +216,6 @@ export class ClassListComponent implements OnInit {
     this.selectedLevel.set('');
     this.loadClasses(this.selectedYear());
   }
+
+  protected readonly UserCheck = UserCheck;
 }

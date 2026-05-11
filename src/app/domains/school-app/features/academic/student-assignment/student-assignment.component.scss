@@ -1,4 +1,4 @@
-@use "styles/tokens" as *;
+@use "../../../../../../styles/tokens" as *;
 
 :host {
   display: block;
@@ -20,12 +20,12 @@
   background: var(--fw-surface-sunken);
   border-right: 1px solid var(--fw-border-subtle);
   padding: 1.5rem 0 0;
-  
+
   .section-header-minimal {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    
+
     .label {
       font-family: var(--fw-font-ui);
       font-size: 0.75rem;
@@ -34,7 +34,7 @@
       letter-spacing: 0.05em;
       color: var(--fw-text-primary);
     }
-    
+
     .badge-technical {
       background: var(--fw-primary);
       color: white;
@@ -53,9 +53,9 @@
   padding: 0.75rem 1rem;
   cursor: grab;
   box-shadow: var(--fw-shadow-sm);
-  
+
   &:active { cursor: grabbing; }
-  
+
   &.cdk-drag-preview {
     box-shadow: var(--fw-shadow-xl);
     border-color: var(--fw-primary);
@@ -78,7 +78,7 @@
 // ─── CLASSES AREA (RIGHT) ──────────────────────────────────────────────────
 .classes-area {
   background: white;
-  
+
   .section-header-minimal {
     .label {
       font-family: var(--fw-font-ui);

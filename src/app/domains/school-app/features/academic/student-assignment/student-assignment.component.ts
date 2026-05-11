@@ -1,6 +1,6 @@
 import {Component, computed, inject, OnInit, signal, ViewEncapsulation} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ActivatedRoute, RouterModule} from '@angular/router';
+import {ActivatedRoute, RouterLink, RouterModule} from '@angular/router';
 import {
   Users,
   Search,
@@ -16,7 +16,7 @@ import {
   X,
   History,
   GraduationCap,
-  Calendar
+  Calendar, Plus
 } from 'lucide-angular';
 import {firstValueFrom} from 'rxjs';
 import {AcademicService} from '../../../../../core/services/academic.service';
@@ -38,10 +38,10 @@ import {CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem} from '@
     LucideAngularModule,
     FwPageShellComponent,
     FwButtonComponent,
-    FwBadgeComponent,
     FormsModule,
     SkeletonComponent,
-    DragDropModule
+    DragDropModule,
+    RouterLink
   ],
   templateUrl: './student-assignment.component.html',
   styleUrls: ['./student-assignment.component.scss'],
@@ -59,7 +59,7 @@ export class StudentAssignmentComponent implements OnInit {
   // Données de référence
   years = signal<AcademicYear[]>([]);
   levels = signal<Level[]>([]);
-  
+
   // États de sélection (Filtres)
   selectedYearId = signal<string>('');
   selectedLevelId = signal<string>('');
@@ -68,6 +68,7 @@ export class StudentAssignmentComponent implements OnInit {
   // Données opérationnelles
   waitingList = signal<StudentAssignment[]>([]);
   targetClasses = signal<SchoolClass[]>([]);
+  emptyArray: any[] = [];
 
   // Icônes
   readonly Users = Users;
@@ -178,7 +179,7 @@ export class StudentAssignmentComponent implements OnInit {
   filteredWaitingList = computed(() => {
     const query = this.searchQuery().toLowerCase();
     if (!query) return this.waitingList();
-    return this.waitingList().filter(a => 
+    return this.waitingList().filter(a =>
       `${a.studentFirstName} ${a.studentLastName}`.toLowerCase().includes(query)
     );
   });
@@ -191,4 +192,6 @@ export class StudentAssignmentComponent implements OnInit {
     if (!cls.capacity) return 0;
     return Math.min(100, (this.getClassFillRate(cls) / cls.capacity) * 100);
   }
+
+  protected readonly Plus = Plus;
 }

@@ -12,7 +12,7 @@ import {
   Plus,
   RefreshCw,
   Tag,
-  Trash2,
+  Trash2, UserCheck,
   Users
 } from 'lucide-angular';
 import {firstValueFrom} from 'rxjs';
@@ -301,4 +301,6 @@ export class CycleDetailComponent implements OnInit {
   clearAllFilters() {
     this.searchQuery.set('');
   }
+
+  protected readonly UserCheck = UserCheck;
 }

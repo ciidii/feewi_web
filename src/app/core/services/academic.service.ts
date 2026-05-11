@@ -16,7 +16,7 @@ import {
   Holiday,
   Level,
   Period,
-  SchoolClass,
+  SchoolClass, StudentAssignment,
   Subject,
   SyllabusDomain,
   Teaching
