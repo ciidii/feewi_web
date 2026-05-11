@@ -113,6 +113,11 @@ export const SCHOOL_APP_ROUTES: Routes = [
         path: 'classes/:id',
         title: 'Détail de la Classe',
         loadComponent: () => import('./features/academic/class-detail/class-detail.component').then(m => m.ClassDetailComponent)
+      },
+      {
+        path: 'assignments',
+        title: 'Affectations & Classes',
+        loadComponent: () => import('./features/academic/student-assignment/student-assignment.component').then(m => m.StudentAssignmentComponent)
       }
     ]
   },

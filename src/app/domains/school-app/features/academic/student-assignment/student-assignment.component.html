@@ -1,0 +1,184 @@
+<app-fw-page-shell
+  title="Affectations & Placement"
+  description="Placez les élèves admis dans leurs classes physiques respectives."
+  [icon]="UserCheck"
+  density="compact"
+>
+  <!-- ACTIONS : Sélection de Contexte -->
+  <div actions class="flex items-center gap-3">
+    <div class="flex items-center gap-2 bg-white border border-border-subtle rounded-xl px-3 h-10">
+      <lucide-icon [name]="Calendar" [size]="14" class="text-slate-400"></lucide-icon>
+      <select 
+        [(ngModel)]="selectedYearId" 
+        (ngModelChange)="loadOperationalData()"
+        class="bg-transparent border-none text-xs font-bold text-midnight focus:ring-0 cursor-pointer outline-none">
+        <option *ngFor="let y of years()" [value]="y.id">{{ y.label }}</option>
+      </select>
+    </div>
+
+    <div class="flex items-center gap-2 bg-white border border-border-subtle rounded-xl px-3 h-10">
+      <lucide-icon [name]="GraduationCap" [size]="14" class="text-slate-400"></lucide-icon>
+      <select 
+        [(ngModel)]="selectedLevelId" 
+        (ngModelChange)="loadOperationalData()"
+        class="bg-transparent border-none text-xs font-bold text-midnight focus:ring-0 cursor-pointer outline-none">
+        <option *ngFor="let l of levels()" [value]="l.id">{{ l.name }}</option>
+      </select>
+    </div>
+
+    <div class="divider-v"></div>
+
+    <app-fw-button 
+      variant="tertiary" 
+      size="sm" 
+      [icon]="RefreshCw" 
+      [loading]="isLoading()" 
+      (click)="loadOperationalData()"
+    ></app-fw-button>
+  </div>
+
+  <div class="assignment-dashboard-layout animate-in fade-in duration-700">
+
+    <!-- COLONNE GAUCHE : FILE D'ATTENTE (Master) -->
+    <aside class="waiting-area flex flex-col">
+      <header class="section-header-minimal px-4 mb-4">
+        <div class="flex items-center gap-2">
+          <lucide-icon [name]="Users" [size]="14" class="text-primary"></lucide-icon>
+          <span class="label">Élèves à affecter</span>
+        </div>
+        <span class="badge-technical">{{ filteredWaitingList().length }}</span>
+      </header>
+
+      <!-- Recherche dense -->
+      <div class="px-4 mb-4">
+        <div class="relative group">
+          <lucide-icon [name]="Search" [size]="14" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors"></lucide-icon>
+          <input 
+            type="text" 
+            [(ngModel)]="searchQuery" 
+            placeholder="Rechercher un élève..." 
+            class="w-full h-9 pl-9 pr-4 bg-surface-sunken border border-transparent rounded-lg text-xs font-bold text-midnight focus:bg-white focus:border-primary transition-all outline-none">
+        </div>
+      </div>
+
+      <!-- Liste des élèves -->
+      <div class="flex-1 overflow-y-auto custom-scrollbar px-4 space-y-2 pb-6">
+        <!-- SKELETONS -->
+        <div *ngIf="isLoading()" class="space-y-2">
+           <div *ngFor="let i of [1,2,3,4,5]" class="p-3 bg-white rounded-xl border border-border-subtle animate-pulse flex items-center gap-3">
+              <fw-skeleton shape="circle" width="28px" height="28px"></fw-skeleton>
+              <div class="flex-1 space-y-1.5">
+                <fw-skeleton width="60%" height="9px"></fw-skeleton>
+                <fw-skeleton width="40%" height="7px"></fw-skeleton>
+              </div>
+           </div>
+        </div>
+
+        <div 
+          *ngFor="let student of filteredWaitingList()" 
+          class="student-assignment-card group hover:border-primary transition-all duration-200"
+          draggable="true">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-surface-sunken flex items-center justify-center text-[10px] font-black text-text-tertiary">
+              {{ (student.studentFirstName?.[0] || '') + (student.studentLastName?.[0] || '') }}
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-xs font-bold text-midnight truncate">{{ student.studentFirstName }} {{ student.studentLastName }}</p>
+              <p class="text-[10px] text-text-tertiary font-medium uppercase tracking-widest">{{ student.studentGender === 'M' ? 'Garçon' : 'Fille' }}</p>
+            </div>
+            <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+               <lucide-icon [name]="ChevronRight" [size]="14" class="text-primary"></lucide-icon>
+            </div>
+          </div>
+        </div>
+
+        <!-- État vide -->
+        <div *ngIf="!isLoading() && waitingList().length === 0" class="py-12 text-center">
+           <lucide-icon [name]="CheckCircle" [size]="32" class="mx-auto text-emerald-500 opacity-20 mb-4"></lucide-icon>
+           <p class="text-xs font-bold text-text-tertiary px-4">Tous les élèves de ce niveau ont été affectés.</p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ZONE DROITE : CLASSES (Detail Viewport) -->
+    <main class="classes-area flex-1 overflow-y-auto custom-scrollbar p-6">
+      <header class="section-header-minimal mb-6">
+        <div class="flex items-center gap-2">
+          <lucide-icon [name]="School" [size]="14" class="text-primary"></lucide-icon>
+          <span class="label">Classes de destination</span>
+        </div>
+      </header>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- SKELETONS -->
+        <div *ngIf="isLoading()" class="contents">
+           <div *ngFor="let i of [1,2,3]" class="h-40 bg-white rounded-2xl border border-border-subtle animate-pulse p-5 space-y-4">
+              <fw-skeleton width="40%" height="14px"></fw-skeleton>
+              <fw-skeleton width="100%" height="8px" radius="4px"></fw-skeleton>
+              <div class="pt-4 grid grid-cols-2 gap-3">
+                 <fw-skeleton width="100%" height="32px" radius="10px"></fw-skeleton>
+                 <fw-skeleton width="100%" height="32px" radius="10px"></fw-skeleton>
+              </div>
+           </div>
+        </div>
+
+        <div *ngFor="let cls of targetClasses()" class="class-placement-card bg-white border border-border-subtle rounded-2xl p-5 shadow-sm hover:shadow-md transition-all">
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <h3 class="text-base font-black text-midnight uppercase tracking-tight">{{ cls.name }}</h3>
+              <p class="text-[10px] text-text-tertiary font-bold uppercase tracking-widest">{{ cls.levelName || 'Standard' }}</p>
+            </div>
+            <lucide-icon [name]="School" [size]="18" class="text-slate-200"></lucide-icon>
+          </div>
+
+          <!-- Jauge de capacité -->
+          <div class="space-y-2 mb-6">
+            <div class="flex justify-between items-center text-[10px] font-black uppercase">
+               <span class="text-text-tertiary">Occupation</span>
+               <span [class.text-rose-600]="(cls.assignedTeachings || 0) >= cls.capacity">
+                  {{ cls.assignedTeachings || 0 }} / {{ cls.capacity }}
+               </span>
+            </div>
+            <div class="h-2 bg-surface-sunken rounded-full overflow-hidden">
+               <div 
+                 class="h-full bg-primary transition-all duration-500" 
+                 [style.width.%]="((cls.assignedTeachings || 0) / cls.capacity) * 100"
+                 [class.bg-rose-500]="(cls.assignedTeachings || 0) >= cls.capacity">
+               </div>
+            </div>
+          </div>
+
+          <div class="flex gap-2">
+            <app-fw-button 
+              variant="secondary" 
+              size="sm" 
+              class="flex-1" 
+              [icon]="Users" 
+              [routerLink]="['/admin/academic/classes', cls.id]">
+              Liste
+            </app-fw-button>
+            <app-fw-button 
+              variant="primary" 
+              size="sm" 
+              class="flex-1" 
+              [icon]="Plus"
+              [disabled]="(cls.assignedTeachings || 0) >= cls.capacity">
+              Placer
+            </app-fw-button>
+          </div>
+        </div>
+
+        <!-- État vide (Aucune classe ouverte) -->
+        <div *ngIf="!isLoading() && targetClasses().length === 0" class="col-span-full py-20 text-center bg-white border-2 border-dashed border-border-subtle rounded-2xl">
+           <lucide-icon [name]="School" [size]="48" class="mx-auto text-slate-200 mb-6"></lucide-icon>
+           <h4 class="text-lg font-bold text-midnight">Aucune classe physique</h4>
+           <p class="text-sm text-text-tertiary max-w-sm mx-auto mt-2">Vous devez d'abord ouvrir des classes pour ce niveau avant de pouvoir y affecter des élèves.</p>
+           <div class="mt-8">
+              <app-fw-button variant="primary" [icon]="Plus" [routerLink]="['/admin/academic/classes']">Ouvrir une classe</app-fw-button>
+           </div>
+        </div>
+      </div>
+    </main>
+
+  </div>
+</app-fw-page-shell>
