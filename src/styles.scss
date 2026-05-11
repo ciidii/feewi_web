@@ -123,6 +123,31 @@ html { height: 100%; }
 }
 
 /* GLOBAL MATERIAL MENU FIX (REMOVES TRANSPARENCY) */
+.mat-mdc-select-panel {
+  background-color: white !important;
+  border-radius: 12px !important;
+  box-shadow: var(--fw-shadow-lg) !important;
+  padding: 4px 0 !important;
+}
+
+.mat-mdc-option {
+  min-height: 40px !important;
+  .mdc-list-item__primary-text {
+    font-size: 0.8125rem !important;
+    font-weight: 600 !important;
+    color: var(--fw-text-secondary) !important;
+  }
+  
+  &:hover:not(.mdc-list-item--disabled) {
+    background-color: var(--fw-surface-sunken) !important;
+  }
+  
+  &.mdc-list-item--selected:not(.mdc-list-item--disabled) {
+    background-color: var(--fw-primary-alpha) !important;
+    .mdc-list-item__primary-text { color: var(--fw-primary) !important; }
+  }
+}
+
 .mat-mdc-menu-panel.feewi-mat-menu {
   background-color: var(--fw-white) !important;
   border: 1px solid var(--fw-border) !important;
