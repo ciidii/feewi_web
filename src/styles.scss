@@ -98,11 +98,13 @@ html { height: 100%; }
 .mat-mdc-dialog-container .mdc-dialog__surface {
   border-radius: 28px !important;
   padding: 0 !important;
+  background-color: white !important;
 }
 
-.feewi-dialog-panel .mat-mdc-dialog-surface {
+.feewi-dialog-panel .mdc-dialog__surface {
   border-radius: 28px !important;
-  background: white !important;
+  background-color: white !important;
+  box-shadow: var(--fw-shadow-xl) !important;
 }
 
 /* DATEPICKER FIX (REMOVES TRANSPARENCY) */
