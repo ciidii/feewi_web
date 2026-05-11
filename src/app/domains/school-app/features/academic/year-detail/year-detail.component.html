@@ -36,6 +36,27 @@
       Clôturer l'exercice
     </app-fw-button>
 
+    <!-- FACTORY (V2) -->
+    <app-fw-button
+      *ngIf="y.status === 'PLANNING' || y.status === 'ACTIVE'"
+      [matMenuTriggerFor]="factoryMenu"
+      variant="tertiary"
+      size="sm"
+      [icon]="Sparkles"
+    >
+      Générer
+    </app-fw-button>
+    <mat-menu #factoryMenu="matMenu" class="feewi-mat-menu">
+       <button mat-menu-item (click)="onGenerateCalendar('TEMPLATE')">
+          <lucide-icon [name]="Globe" [size]="14" class="mr-2"></lucide-icon>
+          <span>Importer calendrier officiel</span>
+       </button>
+       <button mat-menu-item (click)="onGenerateCalendar('AUTO')">
+          <lucide-icon [name]="Zap" [size]="14" class="mr-2"></lucide-icon>
+          <span>Calcul automatique (Factory)</span>
+       </button>
+    </mat-menu>
+
     <!-- Actions pour CLOSING -->
     <ng-container *ngIf="y.status === 'CLOSING'">
       <app-fw-button 

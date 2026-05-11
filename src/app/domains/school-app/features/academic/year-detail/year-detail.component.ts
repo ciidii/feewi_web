@@ -23,7 +23,9 @@ import {
   Globe,
   BookOpen,
   Hash,
-  ListChecks
+  ListChecks,
+  Sparkles,
+  Zap
 } from 'lucide-angular';
 import {PeriodFormComponent} from './components/period-form/period-form.component';
 import {HolidayFormComponent} from './components/holiday-form/holiday-form.component';
@@ -39,8 +41,8 @@ import {FwPageShellComponent} from '../../../../../shared/components/page-shell/
 import {FwTab} from '../../../../../shared/components/tabs/tabs.component';
 import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.component';
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
-import {PageProgressComponent} from '../../../../../shared/components/loader/page-progress.component';
 import {BlockLoaderComponent} from '../../../../../shared/components/loader/block-loader.component';
+import {MatMenuModule} from '@angular/material/menu';
 
 export interface TimelineEvent {
   id: string;
@@ -61,6 +63,7 @@ export interface TimelineEvent {
     LucideAngularModule,
     RouterModule,
     MatDialogModule,
+    MatMenuModule,
     DataListComponent,
     FwPageShellComponent,
     FwBadgeComponent,
@@ -232,6 +235,8 @@ export class YearDetailComponent implements OnInit {
   readonly XCircle = XCircle;
   readonly Globe = Globe;
   readonly ListChecks = ListChecks;
+  readonly Sparkles = Sparkles;
+  readonly Zap = Zap;
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -351,6 +356,37 @@ export class YearDetailComponent implements OnInit {
         this.loadYearDetails(this.year()!.id);
       } catch (e) {
         this.notificationService.error("Impossible de supprimer cette période.");
+      }
+    }
+  }
+
+  // ===========================================
+  // FACTORY AUTOMATION (V2)
+  // ===========================================
+
+  async onGenerateCalendar(strategy: 'TEMPLATE' | 'AUTO') {
+    const y = this.year();
+    if (!y) return;
+
+    const confirmed = await this.confirmAction(
+      strategy === 'TEMPLATE' ? 'Importer le calendrier officiel ?' : 'Générer automatiquement ?',
+      strategy === 'TEMPLATE' 
+        ? 'Cela copiera les dates officielles (Sénégal) pour cette année scolaire. Les jalons existants seront conservés.' 
+        : 'Cela découpera l\'année en périodes égales selon votre système (Trimestre/Semestre).',
+      'Confirmer la génération',
+      'info'
+    );
+
+    if (confirmed) {
+      this.isActionLoading.set(true);
+      try {
+        await firstValueFrom(this.academicService.generateCalendar(y.id, strategy, strategy === 'TEMPLATE' ? 'SN_OFFICIAL' : undefined));
+        this.notificationService.success('Le calendrier a été généré avec succès.');
+        this.loadYearDetails(y.id);
+      } catch (e) {
+        this.notificationService.error("Échec de la génération automatique.");
+      } finally {
+        this.isActionLoading.set(false);
       }
     }
   }

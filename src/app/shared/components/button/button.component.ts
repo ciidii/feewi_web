@@ -3,7 +3,7 @@ import {Loader2, LucideAngularModule} from 'lucide-angular';
 import {Component, computed, Input, ViewEncapsulation} from '@angular/core';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'accent' | 'destructive' | 'tertiary';
-export type ButtonSize = 'sm' | 'md' | 'lg';
+export type ButtonSize = 'xs' | 'sm' | 'md' | 'lg';
 
 @Component({
   selector: 'app-fw-button',
@@ -70,6 +70,8 @@ export class FwButtonComponent {
         return 14;
       case 'lg':
         return 18;
+      case 'xs':
+        return 16;
       default:
         return 16;
     }

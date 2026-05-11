@@ -136,6 +136,18 @@ export class AcademicService {
     );
   }
 
+  /**
+   * Génération automatique du calendrier (FACTORY V2)
+   */
+  generateCalendar(yearId: string, strategy: 'TEMPLATE' | 'AUTO', templateCode?: string): Observable<void> {
+    let params = new HttpParams().set('strategy', strategy);
+    if (templateCode) params = params.set('templateCode', templateCode);
+
+    return this.http.post<void>(`${this.API_URL}/years/${yearId}/generate-calendar`, {}, { params, headers: this.getHeaders(true) }).pipe(
+      catchError(this.handleError('Erreur lors de la génération du calendrier'))
+    );
+  }
+
   // ===========================================
   // PÉRIODES & CONGÉS (Anciens, gardés pour compatibilité ou migration)
   // ===========================================
