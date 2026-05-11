@@ -47,7 +47,6 @@ import {FwDatePipe} from '../../../../../shared/pipes/fw-date.pipe';
     FwBadgeComponent,
     FwButtonComponent,
     CamelToLabelPipe,
-    PageProgressComponent,
     BlockLoaderComponent,
     FwDatePipe
   ],

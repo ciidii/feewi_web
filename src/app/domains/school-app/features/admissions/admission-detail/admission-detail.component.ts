@@ -77,7 +77,6 @@ import {FwDatePipe} from '../../../../../shared/pipes/fw-date.pipe';
     CamelToLabelPipe,
     AdmissionDetailSkeletonComponent,
     BlockLoaderComponent,
-    PageProgressComponent,
     FwDatePipe
   ],
 

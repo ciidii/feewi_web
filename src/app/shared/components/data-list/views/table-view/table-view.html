@@ -1,10 +1,10 @@
 <div class="overflow-x-auto custom-scrollbar">
   <table class="w-full border-collapse table-fixed">
     <!-- EN-TÊTE DU TABLEAU -->
-    <thead class="bg-slate-50/50">
+    <thead class="bg-slate-50/30">
     <tr>
       <!-- Checkbox (colonne fixe) -->
-      <th class="w-16 py-1.5 px-3 text-left">
+      <th class="w-14 py-2 px-3 text-left">
         <mat-checkbox
           color="primary"
           [checked]="isAllSelected()"
@@ -15,11 +15,11 @@
       </th>
 
       <!-- Colonnes de données -->
-      <th class="py-1.5 px-2 text-left cursor-pointer group/header relative"
+      <th class="py-2 px-2 text-left cursor-pointer group/header relative"
           [style.width.px]="columnWidths['title']"
           (mouseenter)="hoveredColumn = 'title'"
           (mouseleave)="hoveredColumn = null">
-        <div class="flex items-center gap-2 text-[10px] font-bold text-slate-medium uppercase tracking-widest"
+        <div class="flex items-center gap-2 text-[9px] font-black text-slate-400 uppercase tracking-widest"
              (click)="handleSort('title')">
           <span>Élément</span>
           <lucide-icon
@@ -32,11 +32,11 @@
         <div class="column-resizer" (mousedown)="startResizing($event, 'title')"></div>
       </th>
 
-      <th class="py-1.5 px-2 text-left cursor-pointer group/header relative"
+      <th class="py-2 px-2 text-left cursor-pointer group/header relative"
           [style.width.px]="columnWidths['subtitle']"
           (mouseenter)="hoveredColumn = 'subtitle'"
           (mouseleave)="hoveredColumn = null">
-        <div class="flex items-center gap-2 text-[10px] font-bold text-slate-medium uppercase tracking-widest"
+        <div class="flex items-center gap-2 text-[9px] font-black text-slate-400 uppercase tracking-widest"
              (click)="handleSort('subtitle')">
           <span>Détails</span>
           <lucide-icon
@@ -49,15 +49,15 @@
         <div class="column-resizer" (mousedown)="startResizing($event, 'subtitle')"></div>
       </th>
 
-      <th class="py-1.5 px-2 text-left w-32">
-        <span class="text-[10px] font-bold text-slate-medium uppercase tracking-widest">Statut</span>
+      <th class="py-2 px-2 text-left w-32">
+        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Statut</span>
       </th>
 
-      <th class="py-1.5 px-2 text-left cursor-pointer group/header relative"
+      <th class="py-2 px-2 text-left cursor-pointer group/header relative"
           [style.width.px]="columnWidths['date']"
           (mouseenter)="hoveredColumn = 'date'"
           (mouseleave)="hoveredColumn = null">
-        <div class="flex items-center gap-2 text-[10px] font-bold text-slate-medium uppercase tracking-widest"
+        <div class="flex items-center gap-2 text-[9px] font-black text-slate-400 uppercase tracking-widest"
              (click)="handleSort('date')">
           <span>Dernière MAJ</span>
           <lucide-icon
@@ -70,8 +70,8 @@
         <div class="column-resizer" (mousedown)="startResizing($event, 'date')"></div>
       </th>
 
-      <th class="w-24 py-1.5 px-3 text-right">
-        <span class="text-[10px] font-bold text-slate-medium uppercase tracking-widest">Actions</span>
+      <th class="w-24 py-2 px-3 text-right">
+        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Actions</span>
       </th>
     </tr>
     </thead>
@@ -80,28 +80,28 @@
     <tbody class="">
     <!-- SKELETONS -->
     <ng-container *ngIf="isLoading() && data().length === 0">
-      <tr *ngFor="let i of [1,2,3,4,5]" class="animate-pulse bg-white">
-        <td class="w-16 py-1.5 px-3"><fw-skeleton shape="rect" width="18px" height="18px" radius="4px"></fw-skeleton></td>
-        <td class="py-1.5 px-2">
+      <tr *ngFor="let i of [1,2,3,4,5,6,7,8]" class="animate-pulse bg-white border-b border-slate-50">
+        <td class="w-14 py-2 px-3"><fw-skeleton shape="rect" width="16px" height="16px" radius="4px"></fw-skeleton></td>
+        <td class="py-2 px-2">
           <div class="flex items-center gap-3">
-            <fw-skeleton shape="rect" width="32px" height="32px" radius="10px"></fw-skeleton>
-            <fw-skeleton width="120px" height="14px"></fw-skeleton>
+            <fw-skeleton shape="rect" width="28px" height="28px" radius="8px"></fw-skeleton>
+            <fw-skeleton width="110px" height="10px"></fw-skeleton>
           </div>
         </td>
-        <td class="py-1.5 px-2"><fw-skeleton width="140px" height="12px"></fw-skeleton></td>
-        <td class="py-1.5 px-2"><fw-skeleton shape="pill" width="60px" height="20px"></fw-skeleton></td>
-        <td class="py-1.5 px-2"><fw-skeleton width="80px" height="12px"></fw-skeleton></td>
-        <td class="py-1.5 px-3 text-right"><fw-skeleton width="24px" height="24px" class="ml-auto"></fw-skeleton></td>
+        <td class="py-2 px-2"><fw-skeleton width="130px" height="9px"></fw-skeleton></td>
+        <td class="py-2 px-2"><fw-skeleton shape="pill" width="56px" height="18px"></fw-skeleton></td>
+        <td class="py-2 px-2"><fw-skeleton width="70px" height="9px"></fw-skeleton></td>
+        <td class="py-2 px-3 text-right"><fw-skeleton width="20px" height="20px" class="ml-auto"></fw-skeleton></td>
       </tr>
     </ng-container>
 
     <tr *ngFor="let row of data()"
-        class="group hover:bg-slate-50 transition-all cursor-pointer"
+        class="group hover:bg-slate-50 transition-all cursor-pointer border-b border-slate-50 last:border-0"
         [class.is-selected]="isSelected(row.id)"
         (click)="onRowClick.emit(row)">
 
       <!-- Checkbox -->
-      <td class="w-16 py-1.5 px-3" (click)="$event.stopPropagation()">
+      <td class="w-14 py-2 px-3" (click)="$event.stopPropagation()">
         <mat-checkbox
           color="primary"
           [checked]="isSelected(row.id)"
@@ -112,7 +112,7 @@
       </td>
 
       <!-- Titre avec avatar -->
-      <td class="py-1.5 px-2 overflow-hidden">
+      <td class="py-2 px-2 overflow-hidden">
         <div class="flex items-center gap-3">
           <div class="table-avatar flex-shrink-0">
             <img *ngIf="row.avatarUrl" [src]="row.avatarUrl" [alt]="row.title" class="avatar-img" />
@@ -120,17 +120,17 @@
               {{ row.avatarLabel || row.title.charAt(0) || '?' }}
             </span>
           </div>
-          <span class="font-bold text-midnight fw-truncate">{{ row.title }}</span>
+          <span class="text-[13px] font-bold text-midnight fw-truncate">{{ row.title }}</span>
         </div>
       </td>
 
       <!-- Sous-titre -->
-      <td class="py-1.5 px-2 text-slate-600 overflow-hidden">
-        <span class="text-sm font-medium text-slate-medium fw-truncate block">{{ row.subtitle || '—' }}</span>
+      <td class="py-2 px-2 text-slate-600 overflow-hidden">
+        <span class="text-xs font-medium text-slate-medium fw-truncate block">{{ row.subtitle || '—' }}</span>
       </td>
 
       <!-- Badges -->
-      <td class="py-1.5 px-2">
+      <td class="py-2 px-2">
         <div class="flex gap-2 flex-wrap">
           <app-fw-badge 
             *ngFor="let badge of row.badges?.slice(0, 1)" 
@@ -138,17 +138,17 @@
             [tokenOverride]="$any(badge.type)" 
             size="xs">
           </app-fw-badge>
-          <span *ngIf="row.badges && row.badges.length > 1" class="text-[10px] font-extrabold text-primary">+{{ row.badges.length - 1 }}</span>
+          <span *ngIf="row.badges && row.badges.length > 1" class="text-[9px] font-black text-primary uppercase">+{{ row.badges.length - 1 }}</span>
         </div>
       </td>
 
       <!-- Date -->
-      <td class="py-1.5 px-2 text-xs font-bold text-slate-medium uppercase tracking-wider">
+      <td class="py-2 px-2 text-[10px] font-bold text-slate-medium uppercase tracking-tight">
         {{ row.date | fwDate }}
       </td>
 
       <!-- Actions -->
-      <td class="py-1.5 px-3 text-right" (click)="$event.stopPropagation()">
+      <td class="py-2 px-3 text-right" (click)="$event.stopPropagation()">
         <div class="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
           <ng-container *ngFor="let action of actions().slice(0, 3)">
             <app-fw-button
@@ -156,7 +156,7 @@
               (click)="onAction.emit({ actionId: action.id, row: row })"
               [disabled]="!!(action.disableIf && action.disableIf(row))"
               [variant]="'tertiary'"
-              size="sm"
+              size="xs"
               [icon]="action.icon"
               [title]="action.label"
             ></app-fw-button>

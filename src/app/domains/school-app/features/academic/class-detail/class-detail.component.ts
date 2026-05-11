@@ -51,7 +51,6 @@ import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-d
     FwButtonComponent,
     DataListComponent,
     BlockLoaderComponent,
-    PageProgressComponent,
     FwEmptyStateComponent,
     FwListCommandBarComponent,
     MatDialogModule

@@ -137,6 +137,12 @@ export class DataListComponent {
   /** Données périmées (Impératif 3) */
   isStale = input<boolean>(false);
 
+  /** Masquer la barre d'outils interne (recherche, onglets, vues) */
+  hideToolbar = input<boolean>(false);
+
+  /** Masquer la barre de sélection groupée */
+  hideSelectionBar = input<boolean>(false);
+
   /** Mode carte (bordures, fond blanc) ou intégré */
   cardMode = input<boolean>(true);
 

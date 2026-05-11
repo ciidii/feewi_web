@@ -1,21 +1,28 @@
+@use "styles/tokens" as *;
+
 :host {
   display: block;
 }
 
-/* TOOLBAR */
-.tab-button {
+/* ==========================================================================
+   TOOLBAR REFINEMENT (TECHNICAL STYLE)
+   ========================================================================== */
+.tab-button-technical {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.625rem 1.25rem;
-  border-radius: 12px;
-  font-size: 0.8125rem;
-  font-weight: 700;
+  gap: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  border-radius: 10px;
+  font-family: var(--fw-font-ui);
+  font-size: 0.75rem;
+  font-weight: 750;
   color: var(--fw-text-tertiary);
-  transition: all var(--fw-transition);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   border: none;
   background: transparent;
   cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 
   &:hover {
     color: var(--fw-text-secondary);
@@ -27,11 +34,12 @@
     background: var(--fw-primary-alpha);
   }
 
-  .badge {
-    padding: 2px 6px;
-    border-radius: 6px;
+  .badge-technical {
+    padding: 1px 5px;
+    border-radius: 20px;
     background: var(--fw-surface-sunken);
-    font-size: 10px;
+    font-size: 9px;
+    font-weight: 800;
     color: var(--fw-text-tertiary);
 
     &.active {
@@ -41,25 +49,29 @@
   }
 }
 
-/* SEARCH INPUT */
-.search-input {
-  height: 40px;
+/* SEARCH INPUT (MINIMAL TECHNICAL) */
+.search-input-technical {
+  height: 36px;
   background: var(--fw-surface-sunken);
   border: 1.5px solid transparent;
-  border-radius: 12px;
-  padding: 0 1rem 0 2.5rem;
-  font-size: 0.875rem;
-  font-weight: 600;
+  border-radius: 10px;
+  padding: 0 1rem 0 2.25rem;
+  font-size: 0.75rem;
+  font-weight: 700;
   color: var(--fw-text-primary);
-  width: 240px;
-  transition: all var(--fw-transition);
+  width: 160px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
 
   &::placeholder {
     color: var(--fw-text-placeholder);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 9px;
   }
 
   &:focus, &.has-value {
-    width: 320px;
+    width: 220px;
     background: white;
     border-color: var(--fw-primary);
     box-shadow: 0 0 0 4px var(--fw-primary-alpha);
@@ -68,11 +80,11 @@
 
 .search-clear {
   position: absolute;
-  right: 0.75rem;
+  right: 0.5rem;
   top: 50%;
   transform: translateY(-50%);
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   display: grid;
   place-items: center;
@@ -87,49 +99,49 @@
   }
 }
 
-/* ACTIONS GROUPÉES */
-.action-button {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  display: grid;
-  place-items: center;
-  border: none;
-  background: white;
-  color: var(--fw-text-secondary);
-  box-shadow: var(--fw-shadow-sm);
-  cursor: pointer;
-  transition: all var(--fw-transition);
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--fw-shadow-md);
-    color: var(--fw-primary);
-  }
-
-  &.delete:hover {
-    color: var(--fw-error);
-  }
+.divider-v {
+  width: 1px;
+  height: 20px;
+  background: var(--fw-border-subtle);
+  margin: 0 0.5rem;
 }
 
-/* MENU VUE */
+/* SELECTION CHIP */
+.selection-count-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--fw-primary-alpha);
+  color: var(--fw-primary);
+  padding: 0.375rem 0.75rem;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ==========================================================================
+   MENU VUE
+   ========================================================================== */
 .view-menu {
   border-radius: 16px !important;
-  border: none !important;
+  border: 1px solid var(--fw-border-subtle) !important;
   box-shadow: var(--fw-shadow-xl) !important;
   overflow: hidden;
 
   .menu-header {
-    padding: 1rem 1.25rem;
-    font-size: 10px;
-    font-weight: 800;
+    padding: 0.875rem 1.25rem;
+    font-size: 9px;
+    font-weight: 850;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     color: var(--fw-text-tertiary);
     background: var(--fw-surface-sunken);
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.625rem;
+    border-bottom: 1px solid var(--fw-border-subtle);
   }
 
   .view-menu-item {
@@ -150,50 +162,41 @@
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        font-weight: 700;
-        color: var(--fw-text-primary);
-        font-size: 0.875rem;
+        font-weight: 800;
+        color: var(--fw-midnight);
+        font-size: 0.8125rem;
       }
 
       .menu-item-description {
-        font-size: 0.75rem;
+        font-size: 11px;
         color: var(--fw-text-tertiary);
         font-weight: 500;
       }
     }
   }
-
-  .menu-footer {
-    padding: 0.75rem 1.25rem;
-    font-size: 9px;
-    font-weight: 600;
-    color: var(--fw-text-tertiary);
-    border-top: none;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: var(--fw-surface-sunken);
-  }
 }
 
-.new_badge {
-  padding: 1px 4px;
+.new-badge {
+  padding: 1px 5px;
   background: var(--fw-primary);
   color: white;
   border-radius: 4px;
   font-size: 8px;
-  font-weight: 800;
+  font-weight: 850;
   text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
-/* FOOTER ACADEMIC */
+/* ==========================================================================
+   FOOTER ACADEMIC
+   ========================================================================== */
 .list-footer-academic {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 1.5rem;
   background: white;
-  border-top: 1.5px solid var(--fw-surface-sunken);
+  border-top: 1px solid var(--fw-border-subtle);
   z-index: 10;
 }
 
@@ -201,15 +204,15 @@
   display: flex;
   align-items: center;
   gap: 0.375rem;
+  font-family: var(--fw-font-mono);
   font-size: 10px;
-  font-weight: 850;
+  font-weight: 800;
   color: var(--fw-text-tertiary);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
 
-  .count, .total { color: var(--fw-midnight); }
+  .count, .total { color: var(--fw-midnight); font-weight: 900; }
   .separator { opacity: 0.4; }
-  .label { font-weight: 700; opacity: 0.8; }
 }
 
 .pagination-academic {
@@ -225,8 +228,8 @@
   }
 
   .page-number-item {
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
     display: grid;
     place-items: center;
     border-radius: 8px;
@@ -244,10 +247,24 @@
     }
 
     &.active {
-      background: var(--fw-primary);
+      background: var(--fw-midnight);
       color: white;
-      box-shadow: 0 4px 10px var(--fw-primary-alpha);
-      transform: scale(1.05);
+      box-shadow: var(--fw-shadow-sm);
     }
   }
+}
+
+.animate-in {
+  animation-duration: 0.3s;
+  animation-fill-mode: both;
+}
+
+@keyframes slide-in-from-left {
+  from { transform: translateX(-10px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slide-in-from-top {
+  from { transform: translateY(-10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }

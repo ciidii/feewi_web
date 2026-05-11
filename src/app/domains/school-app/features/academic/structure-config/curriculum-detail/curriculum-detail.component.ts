@@ -40,7 +40,6 @@ import {BlockLoaderComponent} from '../../../../../../shared/components/loader/b
     MatDialogModule,
     FwButtonComponent,
     FwPageShellComponent,
-    PageProgressComponent,
     BlockLoaderComponent
   ],
   templateUrl: './curriculum-detail.component.html',

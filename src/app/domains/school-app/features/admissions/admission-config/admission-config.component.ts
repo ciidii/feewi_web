@@ -77,7 +77,6 @@ export type ConfigScope = 'GLOBAL' | 'LEVEL' | 'YEAR' | 'CYCLE';
     FwPageShellComponent,
     FwButtonComponent,
     FwTabsComponent,
-    PageProgressComponent,
     BlockLoaderComponent
   ],
   templateUrl: './admission-config.component.html',

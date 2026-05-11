@@ -11,12 +11,14 @@ import {
   Eye,
   LucideAngularModule,
   Mail,
-  Printer
+  Printer,
+  X
 } from 'lucide-angular';
 import {RowAction, TableRow} from '../../../../models/data-list.models';
 import {SkeletonComponent} from '../../../skeleton/skeleton.component';
 import {FwButtonComponent} from '../../../button/button.component';
 import {FwBadgeComponent} from '../../../badge/badge.component';
+import {FwDatePipe} from '../../../../pipes/fw-date.pipe';
 
 @Component({
   selector: 'app-expandable-view',
@@ -27,7 +29,8 @@ import {FwBadgeComponent} from '../../../badge/badge.component';
     LucideAngularModule,
     SkeletonComponent,
     FwButtonComponent,
-    FwBadgeComponent
+    FwBadgeComponent,
+    FwDatePipe
   ],
   templateUrl: './expandable-view.html',
   styleUrls: ['./expandable-view.scss']
@@ -37,10 +40,10 @@ export class ExpandableViewComponent {
   // INPUTS
   // ===========================================
 
-  /** Les donn├®es ├á afficher */
+  /** Les données à afficher */
   data = input<TableRow[]>([]);
 
-  /** ├ëtat de chargement */
+  /** État de chargement */
   isLoading = input<boolean>(false);
 
   /** IDs des éléments sélectionnés */
@@ -85,6 +88,11 @@ export class ExpandableViewComponent {
     return this.expandedIds().has(id);
   }
 
+  /** Mappe les types de badges legacy vers les nouveaux tokens */
+  badgeTypeMap(type: string): string {
+    return type === 'primary' ? 'info' : type;
+  }
+
   /** Obtenir la liste des métadonnées affichables */
   getDisplayableMetadata(row: TableRow): { key: string, value: any }[] {
     const meta = row.metadata || {};
@@ -124,4 +132,5 @@ export class ExpandableViewComponent {
   protected readonly Printer = Printer;
   protected readonly Download = Download;
   protected readonly Mail = Mail;
+  protected readonly X = X;
 }

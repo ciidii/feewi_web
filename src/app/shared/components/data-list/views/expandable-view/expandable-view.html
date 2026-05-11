@@ -1,27 +1,27 @@
 <div class="space-y-px">
   <!-- SKELETONS (SI CHARGEMENT) -->
   <ng-container *ngIf="isLoading() && data().length === 0">
-    <div *ngFor="let i of [1,2,3,4,5]" class="flex items-center px-6 py-5 animate-pulse bg-white">
-      <div class="flex items-center gap-4 w-20">
-        <fw-skeleton shape="rect" width="18px" height="18px" radius="4px"></fw-skeleton>
+    <div *ngFor="let i of [1,2,3,4,5,6]" class="flex items-center px-4 py-3 animate-pulse bg-white border-b border-slate-50">
+      <div class="flex items-center gap-3 w-16">
         <fw-skeleton shape="rect" width="16px" height="16px" radius="4px"></fw-skeleton>
+        <fw-skeleton shape="rect" width="14px" height="14px" radius="3px"></fw-skeleton>
       </div>
-      <div class="flex-1 grid grid-cols-12 gap-6 items-center">
+      <div class="flex-1 grid grid-cols-12 gap-4 items-center">
         <div class="col-span-5 flex items-center gap-3">
-          <fw-skeleton shape="rect" width="40px" height="40px" radius="12px"></fw-skeleton>
+          <fw-skeleton shape="rect" width="32px" height="32px" radius="10px"></fw-skeleton>
           <div class="flex flex-col gap-1.5 w-full">
-            <fw-skeleton width="60%" height="14px"></fw-skeleton>
-            <fw-skeleton width="40%" height="10px"></fw-skeleton>
+            <fw-skeleton width="55%" height="11px"></fw-skeleton>
+            <fw-skeleton width="35%" height="8px"></fw-skeleton>
           </div>
         </div>
         <div class="col-span-3">
-          <fw-skeleton shape="pill" width="80px" height="24px"></fw-skeleton>
+          <fw-skeleton shape="pill" width="64px" height="18px"></fw-skeleton>
         </div>
         <div class="col-span-2">
-          <fw-skeleton width="80px" height="12px"></fw-skeleton>
+          <fw-skeleton width="70px" height="9px"></fw-skeleton>
         </div>
         <div class="col-span-2 flex justify-end gap-2">
-          <fw-skeleton shape="circle" width="36px" height="36px"></fw-skeleton>
+          <fw-skeleton shape="circle" width="28px" height="28px"></fw-skeleton>
         </div>
       </div>
     </div>
@@ -54,9 +54,9 @@
       </div>
 
       <!-- Contenu principal -->
-      <div class="content-area grid grid-cols-12 gap-6 items-center flex-1">
+      <div class="content-area grid grid-cols-12 gap-4 items-center flex-1">
         <!-- Avatar + Titre -->
-        <div class="col-span-5 flex items-center gap-4">
+        <div class="col-span-5 flex items-center gap-3">
           <div class="row-avatar">
             <img *ngIf="row.avatarUrl" [src]="row.avatarUrl" [alt]="row.title" class="avatar-img" />
             <span *ngIf="!row.avatarUrl" class="avatar-fallback">
@@ -65,18 +65,18 @@
           </div>
           <div class="flex flex-col min-w-0">
             <span class="row-title">{{ row.title }}</span>
-            <span class="row-subtitle">{{ row.subtitle }}</span>
+            <span class="row-subtitle truncate">{{ row.subtitle }}</span>
           </div>
         </div>
 
         <!-- Statut (Badge) -->
         <div class="col-span-3">
-          <app-fw-badge *ngIf="row.badges?.[0] as b" [status]="b.label" [tokenOverride]="$any(b.type)" size="xs"></app-fw-badge>
+          <app-fw-badge *ngIf="row.badges?.[0] as b" [status]="b.label" [tokenOverride]="$any(badgeTypeMap(b.type))" size="xs"></app-fw-badge>
         </div>
 
         <!-- Date / Metadata -->
-        <div class="col-span-2 text-xs font-bold text-slate-medium uppercase tracking-wider">
-          {{ row.date || '—' }}
+        <div class="col-span-2 text-[10px] font-bold text-slate-medium uppercase tracking-tight">
+          {{ row.date | fwDate }}
         </div>
 
         <!-- Actions rapides -->
@@ -86,8 +86,8 @@
               *ngIf="!action.hideIf || !action.hideIf(row)"
               (click)="onAction.emit({ actionId: action.id, row: row })"
               [disabled]="!!(action.disableIf && action.disableIf(row))"
-              [variant]="'tertiary'"
-              size="sm"
+              variant="tertiary"
+              size="xs"
               [icon]="action.icon"
               [title]="action.label"
             ></app-fw-button>
@@ -107,17 +107,17 @@
               <div class="meta-group">
                 <h5 class="group-title">Scolarité & Origine</h5>
                 <div class="meta-items-list">
-                  <div class="meta-item-academic">
+                  <div class="meta-item-academic" *ngIf="row.metadata?.['Niveau']">
                     <span class="m-label">Niveau visé</span>
-                    <span class="m-val highlight">{{ row.metadata?.['Niveau'] || '—' }}</span>
+                    <span class="m-val highlight">{{ row.metadata?.['Niveau'] }}</span>
                   </div>
-                  <div class="meta-item-academic">
+                  <div class="meta-item-academic" *ngIf="row.metadata?.['Type']">
                     <span class="m-label">Type d'admission</span>
-                    <span class="m-val">{{ row.metadata?.['Type'] || '—' }}</span>
+                    <span class="m-val">{{ row.metadata?.['Type'] }}</span>
                   </div>
-                  <div class="meta-item-academic">
+                  <div class="meta-item-academic" *ngIf="row.metadata?.['Origine']">
                     <span class="m-label">École d'origine</span>
-                    <span class="m-val">{{ row.metadata?.['Origine'] || '—' }}</span>
+                    <span class="m-val">{{ row.metadata?.['Origine'] }}</span>
                   </div>
                 </div>
               </div>
@@ -126,34 +126,36 @@
               <div class="meta-group">
                 <h5 class="group-title">Responsable & Contact</h5>
                 <div class="meta-items-list">
-                  <div class="meta-item-academic">
+                  <div class="meta-item-academic" *ngIf="row.metadata?.['Responsable']">
                     <span class="m-label">Tuteur légal</span>
-                    <span class="m-val font-bold text-midnight">{{ row.metadata?.['Responsable'] || '—' }}</span>
+                    <span class="m-val font-bold text-midnight">{{ row.metadata?.['Responsable'] }}</span>
                   </div>
-                  <div class="meta-item-academic">
+                  <div class="meta-item-academic" *ngIf="row.metadata?.['Contact']">
                     <span class="m-label">Coordonnées</span>
-                    <span class="m-val text-primary">{{ row.metadata?.['Contact'] || '—' }}</span>
+                    <span class="m-val text-primary">{{ row.metadata?.['Contact'] }}</span>
                   </div>
-                  <div class="meta-item-academic">
+                  <div class="meta-item-academic" *ngIf="row.metadata?.['Documents']">
                     <span class="m-label">Dossier numérique</span>
-                    <span class="m-val">{{ row.metadata?.['Documents'] || '—' }}</span>
+                    <span class="m-val">{{ row.metadata?.['Documents'] }}</span>
                   </div>
                 </div>
               </div>
             </div>
 
             <!-- Données brutes techniques (Optionnel) -->
-            <details *ngIf="row.rawData" class="debug-details">
-              <summary>Identifiants système & Métadonnées brutes</summary>
-              <pre>{{ row.rawData | json }}</pre>
+            <details *ngIf="row.rawData" class="debug-details mt-4">
+              <summary class="text-[9px] font-black uppercase text-slate-400 cursor-pointer hover:text-primary transition-colors">Identifiants système</summary>
+              <div class="mt-2 p-3 bg-slate-50 rounded-lg border border-slate-100 overflow-x-auto">
+                 <pre class="text-[9px] font-mono text-slate-500">{{ row.rawData | json }}</pre>
+              </div>
             </details>
           </div>
         </div>
 
         <!-- Colonne Actions : Opérations directes -->
         <div class="actions-column">
-          <h4 class="details-title">Actions rapides</h4>
-          <div class="flex flex-col gap-2">
+          <h4 class="details-title">Opérations</h4>
+          <div class="grid grid-cols-1 gap-2">
             <ng-container *ngFor="let action of actions()">
               <app-fw-button
                 *ngIf="!action.hideIf || !action.hideIf(row)"

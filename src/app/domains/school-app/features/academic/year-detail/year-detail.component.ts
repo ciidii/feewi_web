@@ -65,7 +65,6 @@ export interface TimelineEvent {
     FwPageShellComponent,
     FwBadgeComponent,
     FwButtonComponent,
-    PageProgressComponent,
     BlockLoaderComponent
   ],
   templateUrl: './year-detail.component.html',

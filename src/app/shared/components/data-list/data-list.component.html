@@ -3,73 +3,70 @@
   <!-- ======================================= -->
   <!-- TOOLBAR (Tabs + Sélecteur de vues + Recherche) -->
   <!-- ======================================= -->
-  <div class="flex items-center justify-between bg-white px-6 h-14" *ngIf="cardMode()">
+  <div class="flex items-center justify-between bg-white px-6 h-14" *ngIf="cardMode() && !hideToolbar()">
 
     <!-- Mode Sélection (quand des éléments sont sélectionnés) -->
-    <div *ngIf="selectionState().count > 0" class="flex items-center gap-4 animate-in slide-in-from-left">
+    <div *ngIf="selectionState().count > 0 && !hideSelectionBar()" class="flex items-center gap-4 animate-in slide-in-from-left">
       <!-- Compteur de sélection -->
       <div class="flex items-center gap-3 bg-primary-50/50 px-3 py-1.5 rounded-xl">
-        <span class="text-sm font-semibold text-primary-700">
+        <span class="text-xs font-extrabold text-primary-700 uppercase tracking-tight">
           {{ selectionState().count }} sélectionné(s)
         </span>
         <button
           (click)="clearSelection()"
-          class="w-6 h-6 rounded-full hover:bg-primary-100 flex items-center justify-center"
+          class="w-5 h-5 rounded-full hover:bg-primary-100 flex items-center justify-center transition-colors"
           title="Effacer la sélection"
         >
-          <lucide-icon [name]="X" class="w-3.5 h-3.5 text-primary-600"></lucide-icon>
+          <lucide-icon [name]="X" class="w-3 h-3 text-primary-600"></lucide-icon>
         </button>
       </div>
 
       <!-- Séparateur -->
-      <div class="h-5 w-px bg-slate-200"></div>
+      <div class="h-4 w-px bg-slate-200"></div>
 
       <!-- Actions groupées -->
       <div class="flex items-center gap-1">
-        <button
+        <app-fw-button
           (click)="onBulkValidate.emit(getSelectedIdsArray())"
-          class="action-button validate"
+          variant="tertiary"
+          size="sm"
+          [icon]="CheckCircle"
           title="Valider la sélection"
-        >
-          <lucide-icon [name]="CheckCircle" class="w-4 h-4"></lucide-icon>
-        </button>
-        <button class="action-button archive" title="Archiver">
-          <lucide-icon [name]="Archive" class="w-4 h-4"></lucide-icon>
-        </button>
-        <button class="action-button delete" title="Supprimer">
-          <lucide-icon [name]="Trash2" class="w-4 h-4"></lucide-icon>
-        </button>
-        <button class="action-button export" title="Exporter">
-          <lucide-icon [name]="Download" class="w-4 h-4"></lucide-icon>
-        </button>
+        ></app-fw-button>
+        <app-fw-button variant="tertiary" size="sm" [icon]="Archive" title="Archiver"></app-fw-button>
+        <app-fw-button variant="danger" size="sm" [icon]="Trash2" title="Supprimer"></app-fw-button>
+        
+        <div class="divider-v" *ngIf="selectionState().count > 0"></div>
+        
+        <app-fw-button variant="tertiary" size="sm" [icon]="Download" title="Exporter"></app-fw-button>
       </div>
     </div>
 
     <!-- Mode Normal (pas de sélection) -->
     <div *ngIf="selectionState().count === 0" class="flex items-center gap-4 flex-1">
-      <!-- Checkbox "Tout sélectionner" -->
+      <!-- Checkbox "Tout sélectionner" (Subtile) -->
       <mat-checkbox
         color="primary"
         [checked]="selectionState().isAllSelected"
         [indeterminate]="selectionState().isPartiallySelected"
         (change)="toggleAll()"
-        class="select-checkbox"
+        class="select-checkbox opacity-40 hover:opacity-100 transition-opacity"
         title="Tout sélectionner"
       ></mat-checkbox>
 
-      <!-- Onglets -->
+      <!-- Onglets (Technical Style) -->
       <nav class="flex gap-1" role="tablist">
         <button
           *ngFor="let tab of tabs()"
           (click)="onTabChange.emit(tab.label)"
           role="tab"
           [attr.aria-selected]="activeTab() === tab.label"
-          class="tab-button"
+          class="tab-button-technical"
           [class.active]="activeTab() === tab.label"
         >
-          <lucide-icon *ngIf="tab.icon" [name]="tab.icon" class="w-4 h-4"></lucide-icon>
+          <lucide-icon *ngIf="tab.icon" [name]="tab.icon" class="w-3.5 h-3.5"></lucide-icon>
           <span>{{ tab.label }}</span>
-          <span *ngIf="tab.count" class="badge" [class.active]="activeTab() === tab.label">
+          <span *ngIf="tab.count" class="badge-technical" [class.active]="activeTab() === tab.label">
             {{ tab.count }}
           </span>
         </button>
@@ -79,10 +76,10 @@
       <button
         *ngIf="showFilterButton()"
         (click)="toggleFilters()"
-        class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
+        class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-tight transition-all"
         [ngClass]="isFiltersOpen() ? 'bg-primary-50 text-primary-700 border border-primary-200' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'"
       >
-        <lucide-icon [name]="Filter" class="w-4 h-4"></lucide-icon>
+        <lucide-icon [name]="Filter" class="w-3.5 h-3.5"></lucide-icon>
         <span>Filtres</span>
       </button>
 
@@ -92,11 +89,11 @@
         <div class="view-switcher">
           <button
             [matMenuTriggerFor]="viewMenu"
-            class="flex items-center gap-2 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm font-medium transition-colors"
+            class="flex items-center gap-2 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors"
           >
-            <lucide-icon [name]="getCurrentViewIcon()" class="w-4 h-4 text-primary-600"></lucide-icon>
+            <lucide-icon [name]="getCurrentViewIcon()" class="w-3.5 h-3.5 text-primary-600"></lucide-icon>
             <span class="hidden sm:inline">{{ getCurrentViewLabel() }}</span>
-            <lucide-icon [name]="ChevronDown" class="w-3.5 h-3.5 text-slate-500"></lucide-icon>
+            <lucide-icon [name]="ChevronDown" class="w-3 h-3 text-slate-500"></lucide-icon>
           </button>
           <mat-menu #viewMenu="matMenu" class="view-menu" xPosition="before" yPosition="below">
             <!-- En-tête -->
@@ -115,7 +112,7 @@
             >
               <div class="menu-item-content">
                 <div class="menu-item-left">
-                  <lucide-icon [name]="view.icon" class="w-5 h-5" [class.text-primary-600]="viewMode() === view.id"></lucide-icon>
+                  <lucide-icon [name]="view.icon" class="w-4.5 h-4.5" [class.text-primary-600]="viewMode() === view.id"></lucide-icon>
                 </div>
 
                 <div class="menu-item-center">
@@ -128,30 +125,24 @@
 
                 <!-- Checkmark pour la vue active -->
                 <div class="menu-item-right" *ngIf="viewMode() === view.id">
-                  <lucide-icon [name]="Check" class="w-4 h-4 text-primary-600"></lucide-icon>
+                  <lucide-icon [name]="Check" class="w-3.5 h-3.5 text-primary-600"></lucide-icon>
                 </div>
               </div>
             </button>
-
-            <!-- Footer -->
-            <div class="menu-footer">
-              <lucide-icon [name]="Sparkles" class="w-3.5 h-3.5"></lucide-icon>
-              <span>Préférence sauvegardée automatiquement</span>
-            </div>
           </mat-menu>
         </div>
 
         <!-- RECHERCHE -->
         <div class="relative" *ngIf="showSearch()">
           <div class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-            <lucide-icon [name]="Search" class="w-4 h-4"></lucide-icon>
+            <lucide-icon [name]="Search" class="w-3.5 h-3.5"></lucide-icon>
           </div>
           <input
             type="text"
             [ngModel]="searchQuery()"
             (ngModelChange)="updateSearch($event)"
-            placeholder="Rechercher..."
-            class="search-input"
+            placeholder="Filtrer..."
+            class="search-input-technical"
             [class.has-value]="searchState().isActive"
           />
           <button
@@ -160,7 +151,7 @@
             class="search-clear"
             aria-label="Effacer la recherche"
           >
-            <lucide-icon [name]="X" class="w-3.5 h-3.5"></lucide-icon>
+            <lucide-icon [name]="X" class="w-3 h-3"></lucide-icon>
           </button>
         </div>
       </div>
