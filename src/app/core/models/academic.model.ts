@@ -142,6 +142,7 @@ export interface SchoolClass {
   // Statistiques V4 (Calculées par le backend ou enrichies en front)
   totalTeachings?: number;    // Nombre total de matières prévues
   assignedTeachings?: number; // Nombre de matières avec un prof assigné
+  currentStudentCount?: number; // Nouveau: Nombre d'élèves déjà affectés
 }
 
 export interface CreateClassRequest {

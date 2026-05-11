@@ -11,7 +11,7 @@
     <app-fw-list-command-bar
       [searchQuery]="searchQuery()"
       [searchPlaceholder]="'Rechercher une classe...'"
-      [totalElements]="classes().length"
+      [totalElements]="displayClasses().length"
       [activeFilters]="activeFilterChips()"
       (searchChange)="searchQuery.set($event)"
       (clearSearch)="searchQuery.set('')"
@@ -20,8 +20,17 @@
     >
       <!-- ACTIONS PRIMAIRES -->
       <div primary-actions class="flex items-center gap-2">
-        <app-fw-button variant="tertiary" size="sm" [icon]="RefreshCw" [loading]="isLoading()" (click)="loadClasses(selectedYear())" title="Actualiser"></app-fw-button>
+        <app-fw-button 
+          variant="tertiary" 
+          size="sm" 
+          [icon]="UserCheck" 
+          routerLink="/admin/academic/assignments"
+        >
+          Affectations
+        </app-fw-button>
+
         <div class="divider-v"></div>
+
         <app-fw-button 
           (click)="openAddClassForm()"
           variant="primary"
@@ -31,21 +40,13 @@
           Ouvrir une classe
         </app-fw-button>
       </div>
-
-      <!-- FILTRES RAPIDES -->
-      <div quick-filters>
-        <button class="more-filters-trigger" (click)="openFilterModal()" [class.has-active]="selectedLevel() || selectedYear() !== currentYear()?.id">
-          <lucide-icon [name]="Filter" [size]="14"></lucide-icon>
-          <span>Filtres</span>
-        </button>
-      </div>
     </app-fw-list-command-bar>
 
     <!-- LISTE DES CLASSES -->
     <div class="list-container-integrated">
       <app-data-list
         [data]="displayClasses()"
-        [total]="displayClasses().length"
+        [total]="totalElements()"
         [actions]="classActions"
         [isLoading]="isLoading()"
         [showSearch]="false"

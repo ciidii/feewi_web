@@ -1,5 +1,6 @@
 import {Component, computed, inject, OnInit, signal, ViewEncapsulation} from '@angular/core';
 import {CommonModule} from '@angular/common';
+import {ActivatedRoute, RouterModule} from '@angular/router';
 import {
   Users,
   Search,
@@ -14,7 +15,8 @@ import {
   ChevronLeft,
   X,
   History,
-  GraduationCap
+  GraduationCap,
+  Calendar
 } from 'lucide-angular';
 import {firstValueFrom} from 'rxjs';
 import {AcademicService} from '../../../../../core/services/academic.service';
@@ -26,6 +28,7 @@ import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.com
 import {FormsModule} from '@angular/forms';
 import {SkeletonComponent} from '../../../../../shared/components/skeleton/skeleton.component';
 import {LucideAngularModule} from 'lucide-angular';
+import {CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem} from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-student-assignment',
@@ -37,7 +40,8 @@ import {LucideAngularModule} from 'lucide-angular';
     FwButtonComponent,
     FwBadgeComponent,
     FormsModule,
-    SkeletonComponent
+    SkeletonComponent,
+    DragDropModule
   ],
   templateUrl: './student-assignment.component.html',
   styleUrls: ['./student-assignment.component.scss'],
@@ -46,6 +50,7 @@ import {LucideAngularModule} from 'lucide-angular';
 export class StudentAssignmentComponent implements OnInit {
   private academicService = inject(AcademicService);
   private notificationService = inject(NotificationService);
+  private route = inject(ActivatedRoute);
 
   // États de chargement
   isLoading = signal(true);
@@ -79,8 +84,13 @@ export class StudentAssignmentComponent implements OnInit {
   readonly X = X;
   readonly History = History;
   readonly GraduationCap = GraduationCap;
+  readonly Calendar = Calendar;
 
   ngOnInit() {
+    this.route.queryParamMap.subscribe(params => {
+      const levelId = params.get('levelId');
+      if (levelId) this.selectedLevelId.set(levelId);
+    });
     this.loadFoundationData();
   }
 
@@ -150,6 +160,19 @@ export class StudentAssignmentComponent implements OnInit {
     }
   }
 
+  // --- DRAG & DROP LOGIC ---
+
+  onDrop(event: CdkDragDrop<any[]>, targetClassId?: string) {
+    if (event.previousContainer === event.container) {
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+    } else {
+      const assignment = event.item.data as StudentAssignment;
+      if (targetClassId) {
+        this.onAssign(assignment.id, targetClassId);
+      }
+    }
+  }
+
   // --- CALCULS ---
 
   filteredWaitingList = computed(() => {
@@ -161,8 +184,11 @@ export class StudentAssignmentComponent implements OnInit {
   });
 
   getClassFillRate(cls: SchoolClass): number {
-    // Dans une V2 réelle, ces données viendraient de l'API /assignments/class/{id}
-    // Pour le prototype, on simule ou on utilise les stats du modèle SchoolClass si dispo
-    return 0; // TODO: Connecter au count réel du backend
+    return cls.currentStudentCount || 0;
+  }
+
+  getClassGaugeWidth(cls: SchoolClass): number {
+    if (!cls.capacity) return 0;
+    return Math.min(100, (this.getClassFillRate(cls) / cls.capacity) * 100);
   }
 }

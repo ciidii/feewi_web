@@ -69,6 +69,16 @@
 
             <div class="flex items-center gap-2">
               <app-fw-button
+                variant="tertiary"
+                size="sm"
+                [icon]="UserCheck"
+                [routerLink]="['/admin/academic/assignments']"
+                [queryParams]="{ levelId: group.level.id }"
+              >
+                Affecter
+              </app-fw-button>
+
+              <app-fw-button
                 (click)="openCurriculumManager(group.level)"
                 variant="tertiary"
                 size="sm"

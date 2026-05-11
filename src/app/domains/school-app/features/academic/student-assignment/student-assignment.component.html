@@ -37,7 +37,7 @@
     ></app-fw-button>
   </div>
 
-  <div class="assignment-dashboard-layout animate-in fade-in duration-700">
+  <div class="assignment-dashboard-layout animate-in fade-in duration-700" cdkDropListGroup>
 
     <!-- COLONNE GAUCHE : FILE D'ATTENTE (Master) -->
     <aside class="waiting-area flex flex-col">
@@ -61,8 +61,14 @@
         </div>
       </div>
 
-      <!-- Liste des élèves -->
-      <div class="flex-1 overflow-y-auto custom-scrollbar px-4 space-y-2 pb-6">
+      <!-- Liste des élèves (Drop List) -->
+      <div 
+        id="waiting-list"
+        cdkDropList
+        [cdkDropListData]="waitingList()"
+        (cdkDropListDropped)="onDrop($event)"
+        class="flex-1 overflow-y-auto custom-scrollbar px-4 space-y-2 pb-6 min-h-[100px]">
+        
         <!-- SKELETONS -->
         <div *ngIf="isLoading()" class="space-y-2">
            <div *ngFor="let i of [1,2,3,4,5]" class="p-3 bg-white rounded-xl border border-border-subtle animate-pulse flex items-center gap-3">
@@ -76,8 +82,13 @@
 
         <div 
           *ngFor="let student of filteredWaitingList()" 
-          class="student-assignment-card group hover:border-primary transition-all duration-200"
-          draggable="true">
+          [cdkDragData]="student"
+          cdkDrag
+          class="student-assignment-card group hover:border-primary transition-all duration-200">
+          
+          <!-- Drag Preview -->
+          <div *cdkDragPlaceholder class="card-placeholder"></div>
+
           <div class="flex items-center gap-3">
             <div class="w-8 h-8 rounded-lg bg-surface-sunken flex items-center justify-center text-[10px] font-black text-text-tertiary">
               {{ (student.studentFirstName?.[0] || '') + (student.studentLastName?.[0] || '') }}
@@ -87,7 +98,7 @@
               <p class="text-[10px] text-text-tertiary font-medium uppercase tracking-widest">{{ student.studentGender === 'M' ? 'Garçon' : 'Fille' }}</p>
             </div>
             <div class="opacity-0 group-hover:opacity-100 transition-opacity">
-               <lucide-icon [name]="ChevronRight" [size]="14" class="text-primary"></lucide-icon>
+               <lucide-icon [name]="ArrowRight" [size]="14" class="text-primary"></lucide-icon>
             </div>
           </div>
         </div>
@@ -122,7 +133,14 @@
            </div>
         </div>
 
-        <div *ngFor="let cls of targetClasses()" class="class-placement-card bg-white border border-border-subtle rounded-2xl p-5 shadow-sm hover:shadow-md transition-all">
+        <div 
+          *ngFor="let cls of targetClasses()" 
+          cdkDropList
+          [id]="cls.id"
+          [cdkDropListData]="[]"
+          (cdkDropListDropped)="onDrop($event, cls.id)"
+          class="class-placement-card bg-white border border-border-subtle rounded-2xl p-5 shadow-sm hover:shadow-md transition-all">
+          
           <div class="flex justify-between items-start mb-4">
             <div>
               <h3 class="text-base font-black text-midnight uppercase tracking-tight">{{ cls.name }}</h3>
@@ -135,15 +153,15 @@
           <div class="space-y-2 mb-6">
             <div class="flex justify-between items-center text-[10px] font-black uppercase">
                <span class="text-text-tertiary">Occupation</span>
-               <span [class.text-rose-600]="(cls.assignedTeachings || 0) >= cls.capacity">
-                  {{ cls.assignedTeachings || 0 }} / {{ cls.capacity }}
+               <span [class.text-rose-600]="getClassFillRate(cls) >= cls.capacity">
+                  {{ getClassFillRate(cls) }} / {{ cls.capacity }}
                </span>
             </div>
             <div class="h-2 bg-surface-sunken rounded-full overflow-hidden">
                <div 
                  class="h-full bg-primary transition-all duration-500" 
-                 [style.width.%]="((cls.assignedTeachings || 0) / cls.capacity) * 100"
-                 [class.bg-rose-500]="(cls.assignedTeachings || 0) >= cls.capacity">
+                 [style.width.%]="getClassGaugeWidth(cls)"
+                 [class.bg-rose-500]="getClassFillRate(cls) >= cls.capacity">
                </div>
             </div>
           </div>
@@ -162,7 +180,8 @@
               size="sm" 
               class="flex-1" 
               [icon]="Plus"
-              [disabled]="(cls.assignedTeachings || 0) >= cls.capacity">
+              [loading]="isAssigning()"
+              [disabled]="getClassFillRate(cls) >= cls.capacity">
               Placer
             </app-fw-button>
           </div>
