@@ -16,7 +16,8 @@ import {
   Trash2,
   UserCheck,
   UserPlus,
-  Users
+  Users,
+  X
 } from 'lucide-angular';
 import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
@@ -30,8 +31,7 @@ import {AcademicService} from '../../../../../core/services/academic.service';
 import {StudentRegistryService} from '../../../../../core/services/student-registry.service';
 import {IdentityService} from '../../../../../core/services/identity.service';
 import {NotificationService} from '../../../../../shared/services/notification.service';
-import {SchoolClass, Subject, Teaching} from '../../../../../core/models/academic.model';
-import {StudentSummary} from '../../../../../core/models/student.model';
+import {SchoolClass, StudentAssignment, Subject, Teaching} from '../../../../../core/models/academic.model';
 import {User} from '../../../../../core/models/user.model';
 import {FwTab} from '../../../../../shared/components/tabs/tabs.component';
 import {RowAction, TableRow} from '../../../../../shared/models/data-list.models';
@@ -82,11 +82,12 @@ export class ClassDetailComponent implements OnInit {
   readonly Eye = Eye;
   readonly Trash2 = Trash2;
   readonly Download = Download;
+  readonly X = X;
 
   // États
   classId = signal<string | null>(null);
   schoolClass = signal<SchoolClass | null>(null);
-  students = signal<StudentSummary[]>([]);
+  assignments = signal<StudentAssignment[]>([]);
   teachings = signal<Teaching[]>([]);
   allSubjects = signal<Subject[]>([]);
   staffList = signal<User[]>([]);
@@ -104,7 +105,8 @@ export class ClassDetailComponent implements OnInit {
 
   // Actions pour les élèves
   readonly studentActions: RowAction[] = [
-    {id: 'view', label: 'Dossier élève', icon: Eye, type: 'primary'}
+    {id: 'view', label: 'Dossier élève', icon: Eye, type: 'primary'},
+    {id: 'unassign', label: 'Retirer de la classe', icon: X, type: 'danger'}
   ];
 
   // Actions pour l'équipe
@@ -117,24 +119,27 @@ export class ClassDetailComponent implements OnInit {
   richDescription = computed(() => {
     const c = this.schoolClass();
     if (!c) return 'Chargement...';
-    return `${c.levelName || 'Niveau'} • ${this.students().length}/${c.capacity} Élèves • ${this.teachings().length} Matières`;
+    return `${c.levelName || 'Niveau'} • ${this.assignments().length}/${c.capacity} Élèves • ${this.teachings().length} Matières`;
   });
 
-  // Transformation des élèves pour DataList
+  // Transformation des élèves pour DataList (Affectations)
   displayStudents = computed<TableRow[]>(() => {
-    return this.students()
-      .filter(s => !this.searchQuery() || `${s.firstName} ${s.lastName}`.toLowerCase().includes(this.searchQuery().toLowerCase()))
-      .map(s => ({
-        id: s.id,
-        title: `${s.firstName} ${s.lastName}`,
-        subtitle: `Matricule: ${s.registrationNumber}`,
-        avatarLabel: s.firstName[0] + (s.lastName[0] || ''),
-        badges: [{label: s.gender, type: 'info'}, {
-          label: s.status,
-          type: s.status === 'ACTIVE' ? 'success' : 'warning'
-        }],
-        rawData: s
-      }));
+    return this.assignments()
+      .filter(a => !this.searchQuery() || `${a.studentFirstName} ${a.studentLastName}`.toLowerCase().includes(this.searchQuery().toLowerCase()))
+      .map(a => {
+        const initials = (a.studentFirstName?.[0] || '') + (a.studentLastName?.[0] || '');
+        return {
+          id: a.id, // ID de l'affectation
+          title: `${a.studentFirstName || 'Inconnu'} ${a.studentLastName || ''}`,
+          subtitle: `Dossier affecté le ${a.assignedAt ? new Date(a.assignedAt).toLocaleDateString() : '—'}`,
+          avatarLabel: initials || '??',
+          badges: [
+            {label: a.studentGender === 'MALE' ? 'GARÇON' : 'FILLE', type: 'info'},
+            {label: 'AFFECTÉ', type: 'success'}
+          ],
+          rawData: a
+        };
+      });
   });
 
   // Transformation de l'équipe pour DataList
@@ -167,15 +172,15 @@ export class ClassDetailComponent implements OnInit {
   async loadData(id: string) {
     this.isLoading.set(true);
     try {
-      const [cls, studentsPage, teachings, subjects] = await Promise.all([
+      const [cls, assignments, teachings, subjects] = await Promise.all([
         firstValueFrom(this.academicService.getClassById(id)),
-        firstValueFrom(this.studentService.getStudents('', undefined, id, 0, 100)),
+        firstValueFrom(this.academicService.getAssignmentsByClass(id)),
         firstValueFrom(this.academicService.getTeachingsByClass(id)),
         firstValueFrom(this.academicService.getSubjects())
       ]);
 
       this.schoolClass.set(cls);
-      this.students.set(studentsPage.content);
+      this.assignments.set(assignments);
       this.teachings.set(teachings);
       this.allSubjects.set(subjects);
 
@@ -198,7 +203,32 @@ export class ClassDetailComponent implements OnInit {
 
   handleStudentAction(event: { actionId: string, row: TableRow }) {
     if (event.actionId === 'view') {
-      this.router.navigate(['/admin/registry/students', event.row.id]);
+      const assignment = event.row.rawData as StudentAssignment;
+      this.router.navigate(['/admin/registry/students', assignment.studentId]);
+    } else if (event.actionId === 'unassign') {
+      this.handleUnassignStudent(event.row.rawData as StudentAssignment);
+    }
+  }
+
+  private async handleUnassignStudent(a: StudentAssignment) {
+    const confirmed = await this.confirmAction(
+      'Retirer de la classe ?',
+      `Voulez-vous retirer l'élève ${a.studentFirstName} ${a.studentLastName} de cette classe ? Il retournera en file d'attente.`,
+      'Oui, retirer',
+      'danger'
+    );
+
+    if (confirmed && this.classId()) {
+      this.isActionLoading.set(true);
+      try {
+        await firstValueFrom(this.academicService.unassignStudent(a.id));
+        this.notificationService.success('Élève retiré de la classe.');
+        this.loadData(this.classId()!);
+      } catch (e) {
+        this.notificationService.error("Impossible de retirer l'élève.");
+      } finally {
+        this.isActionLoading.set(false);
+      }
     }
   }
 
@@ -263,6 +293,14 @@ export class ClassDetailComponent implements OnInit {
         }
       }
     });
+  }
+
+  private confirmAction(title: string, message: string, confirmLabel: string, type: 'info' | 'warning' | 'danger'): Promise<boolean> {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '450px',
+      data: {title, message, confirmLabel, type}
+    });
+    return new Promise(resolve => dialogRef.afterClosed().subscribe(res => resolve(!!res)));
   }
 
   onSearch(query: string) {

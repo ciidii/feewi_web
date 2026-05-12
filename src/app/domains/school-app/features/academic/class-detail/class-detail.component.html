@@ -16,7 +16,7 @@
     <app-fw-list-command-bar
       [searchQuery]="searchQuery()"
       [searchPlaceholder]="activeTab() === 'students' ? 'Rechercher un élève...' : 'Rechercher une matière...'"
-      [totalElements]="activeTab() === 'students' ? students().length : teachings().length"
+      [totalElements]="activeTab() === 'students' ? assignments().length : teachings().length"
       (searchChange)="onSearch($event)"
       (clearSearch)="onSearch('')"
     >
@@ -39,8 +39,9 @@
            variant="primary"
            size="sm"
            [icon]="UserPlus"
+           routerLink="/admin/academic/assignments"
          >
-           Inscrire un élève
+           Affecter
          </app-fw-button>
          <app-fw-button
            *ngIf="activeTab() === 'team'"
@@ -76,12 +77,13 @@
             ></app-data-list>
             
             <!-- État vide -->
-            <div *ngIf="students().length === 0" class="py-12">
+            <div *ngIf="assignments().length === 0" class="py-12">
               <app-fw-empty-state
                 [icon]="Users"
                 title="Aucun élève inscrit"
                 description="Cette classe est actuellement vide pour la session en cours."
-                ctaLabel="Inscrire mon premier élève"
+                ctaLabel="Démarrer les affectations"
+                routerLink="/admin/academic/assignments"
               ></app-fw-empty-state>
             </div>
           </div>
@@ -119,7 +121,7 @@
           <lucide-icon [name]="Users" [size]="20"></lucide-icon>
           <div class="compliance-text">
             <strong>Taux d'occupation</strong>
-            <span>{{ students().length }} / {{ cls.capacity }} places utilisées</span>
+            <span>{{ assignments().length }} / {{ cls.capacity }} places utilisées</span>
           </div>
         </div>
 

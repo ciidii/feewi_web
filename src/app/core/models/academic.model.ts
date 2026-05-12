@@ -169,16 +169,16 @@ export type AssignmentStatus = 'WAITING' | 'ASSIGNED';
 export interface StudentAssignment {
   id: string;
   studentId: string;
+  studentFirstName: string;
+  studentLastName: string;
+  studentGender: 'MALE' | 'FEMALE';
   academicYearId: string;
   levelId: string;
   status: AssignmentStatus;
   schoolClassId: string | null;
   assignedAt?: string;
 
-  // Champs enrichis (pour l'affichage en liste)
-  studentFirstName?: string;
-  studentLastName?: string;
-  studentGender?: string;
+  // Autres champs enrichis optionnels
   levelName?: string;
   classFullName?: string;
 }

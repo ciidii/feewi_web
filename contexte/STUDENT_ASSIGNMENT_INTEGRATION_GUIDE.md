@@ -51,6 +51,9 @@ Retire l'élève de sa classe et le remet en file d'attente.
 | Champ | Type | Description |
 | :--- | :--- | :--- |
 | `studentId` | UUID | Pivot vers le Registre des Élèves. |
+| `studentFirstName`| String | Prénom de l'élève (Dénormalisé pour affichage). |
+| `studentLastName` | String | Nom de l'élève (Dénormalisé pour affichage). |
+| `studentGender` | String | Sexe de l'élève (MALE/FEMALE). |
 | `status` | Enum | `WAITING` (En attente), `ASSIGNED` (Affecté). |
 | `schoolClassId` | UUID | ID de la classe finale (null si WAITING). |
 | `assignedAt` | Timestamp | Date et heure du placement en classe. |
