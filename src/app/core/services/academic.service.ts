@@ -1,6 +1,6 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
-import {catchError, map, Observable, switchMap, throwError} from 'rxjs';
+import {catchError, forkJoin, map, Observable, switchMap, throwError} from 'rxjs';
 import {EnvironmentService} from './environment.service';
 import {NotificationService} from '../../shared/services/notification.service';
 import {TenantContextService} from './tenant-context.service';
@@ -214,15 +214,21 @@ export class AcademicService {
     const directUrl = `${this.API_URL}/classes/${id}`;
     return this.http.get<SchoolClass>(directUrl, { headers: this.getHeaders() }).pipe(
       catchError(err => {
-        // Fallback: Rechercher dans la liste de l'année si le GET direct n'est pas autorisé (405)
+        // Fallback: Si le GET direct n'est pas autorisé (405), on cherche dans les listes par année
         if (err.status === 405) {
-          console.warn(`[AcademicService] Direct GET on ${directUrl} not allowed (405). Falling back to search in list.`);
-          return this.getCurrentYear().pipe(
-            switchMap(year => this.getClassesByYear(year.id)),
-            map(classes => {
-              const found = classes.find(c => String(c.id) === String(id));
-              if (!found) throw err; // Relancer l'erreur originale si non trouvé
-              return found;
+          console.warn(`[AcademicService] Direct GET on ${directUrl} not allowed (405). Searching in all academic years...`);
+          return this.getYears().pipe(
+            switchMap(years => {
+              // On crée un tableau d'observables pour chercher dans chaque année
+              const searchTasks = years.map(y => this.getClassesByYear(y.id));
+              return forkJoin(searchTasks).pipe(
+                map(allClassesGroups => {
+                  const flattened = allClassesGroups.flat();
+                  const found = flattened.find(c => String(c.id) === String(id));
+                  if (!found) throw err;
+                  return found;
+                })
+              );
             })
           );
         }
