@@ -1,6 +1,5 @@
 <app-fw-page-shell
-  *ngIf="cycle() as c"
-  [title]="c.customName || c.systemName || 'Cycle'"
+  [title]="cycle()?.customName || cycle()?.systemName || 'Cycle'"
   [description]="richDescription() || 'Gestion du cycle'"
   [icon]="Layers"
   [backLink]="['/admin/classes']"
@@ -10,8 +9,8 @@
   density="compact"
 >
   <!-- ACTIONS -->
-  <div actions class="flex items-center gap-2">
-    <app-fw-button variant="tertiary" size="sm" [icon]="RefreshCw" [loading]="loadingService.isLoading()" (click)="loadData(cycleId()!)" title="Actualiser"></app-fw-button>
+  <div actions class="flex items-center gap-2" *ngIf="cycle()">
+    <app-fw-button variant="tertiary" size="sm" [icon]="RefreshCw" [loading]="loadingService.isLoading()" (click)="refresh()" title="Actualiser"></app-fw-button>
     <div class="divider-v"></div>
     <app-fw-button
       *ngIf="canEditStructure() && activeTab() === 'pilotage'"
@@ -34,7 +33,7 @@
   </div>
 
   <!-- CONTENU DE PAGE ALIGNÉ -->
-  <div class="list-page-content animate-in fade-in duration-500">
+  <div class="list-page-content animate-in fade-in duration-500" *ngIf="cycle(); else skeletons">
 
     <!-- BARRE DE COMMANDE UNIFIÉE -->
     <app-fw-list-command-bar
@@ -53,8 +52,10 @@
     <main class="relative min-h-[400px]">
 
       <!-- VUE PILOTAGE (Sections Niveaux > Classes) -->
-      <div *ngIf="activeTab() === 'pilotage' && !loadingService.isLoading()"
+      <div *ngIf="activeTab() === 'pilotage'"
            class="space-y-6 animate-in slide-in-from-bottom duration-500">
+        <!-- ... rest of pilotage view ... -->
+
 
         <div *ngFor="let group of levelGroups()" class="fw-standard-card">
           <!-- Header du Niveau -->
@@ -148,7 +149,7 @@
       </div>
 
       <!-- VUE FILIÈRES (DataList Classique) -->
-      <div *ngIf="activeTab() === 'filieres' && !loadingService.isLoading()"
+      <div *ngIf="activeTab() === 'filieres'"
            class="animate-in fade-in slide-in-from-right duration-300">
         <app-data-list
           [data]="displayFilieres()"
@@ -164,3 +165,9 @@
     </main>
   </div>
 </app-fw-page-shell>
+
+<ng-template #skeletons>
+  <div class="list-page-content">
+    <app-cycle-detail-skeleton></app-cycle-detail-skeleton>
+  </div>
+</ng-template>

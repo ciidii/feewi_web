@@ -1,6 +1,8 @@
-import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {Component, computed, effect, inject, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ActivatedRoute, Router, RouterModule} from '@angular/router';
+import {toObservable, toSignal} from '@angular/core/rxjs-interop';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {
   ArrowLeft,
   Edit,
@@ -12,28 +14,45 @@ import {
   Plus,
   RefreshCw,
   Tag,
-  Trash2, UserCheck,
+  Trash2,
+  UserCheck,
   Users
 } from 'lucide-angular';
-import {firstValueFrom} from 'rxjs';
+import {
+  BehaviorSubject,
+  catchError,
+  combineLatest,
+  filter,
+  finalize,
+  forkJoin,
+  map,
+  of,
+  switchMap,
+  tap
+} from 'rxjs';
+
+// Services
 import {AcademicService} from '../../../../../../core/services/academic.service';
 import {AuthService} from '../../../../../../core/services/auth.service';
 import {NavigationStateService} from '../../../../../../core/services/navigation-state.service';
 import {NotificationService} from '../../../../../../shared/services/notification.service';
 import {LoadingService} from '../../../../../../shared/services/loading.service';
+
+// Models
 import {AcademicYear, Cycle, Filiere, Level, SchoolClass} from '../../../../../../core/models/academic.model';
-import {DataListComponent} from '../../../../../../shared/components/data-list/data-list.component';
 import {RowAction, TableRow} from '../../../../../../shared/models/data-list.models';
-import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+
+// Components
+import {DataListComponent} from '../../../../../../shared/components/data-list/data-list.component';
 import {LevelFormComponent} from '../components/level-form/level-form.component';
 import {FiliereFormComponent} from '../components/filiere-form/filiere-form.component';
-import {CurriculumManagerComponent} from '../components/curriculum-manager/curriculum-manager';
 import {ClassFormComponent} from '../../class-list/components/class-form/class-form.component';
 import {FwButtonComponent} from '../../../../../../shared/components/button/button.component';
 import {FwEmptyStateComponent} from '../../../../../../shared/components/empty-state/empty-state.component';
 import {FwPageShellComponent} from '../../../../../../shared/components/page-shell/page-shell.component';
 import {FwTab} from '../../../../../../shared/components/tabs/tabs.component';
 import {FwListCommandBarComponent} from '../../../../../../shared/components/list-command-bar/list-command-bar.component';
+import {CycleDetailSkeletonComponent} from '../../../../shared/components/skeleton/cycle-detail-skeleton.component';
 
 export interface LevelGroup {
   level: Level;
@@ -52,12 +71,14 @@ export interface LevelGroup {
     FwButtonComponent,
     FwEmptyStateComponent,
     FwPageShellComponent,
-    FwListCommandBarComponent
+    FwListCommandBarComponent,
+    CycleDetailSkeletonComponent
   ],
   templateUrl: './cycle-detail.component.html',
   styleUrls: ['./cycle-detail.component.scss']
 })
-export class CycleDetailComponent implements OnInit {
+export class CycleDetailComponent {
+  // --- Services ---
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private academicService = inject(AcademicService);
@@ -67,56 +88,56 @@ export class CycleDetailComponent implements OnInit {
   protected loadingService = inject(LoadingService);
   private dialog = inject(MatDialog);
 
-  // Icons
-  readonly ArrowLeft = ArrowLeft;
-  readonly Layers = Layers;
-  readonly Plus = Plus;
-  readonly ListChecks = ListChecks;
-  readonly Edit = Edit;
-  readonly Trash2 = Trash2;
-  readonly GraduationCap = GraduationCap;
-  readonly Tag = Tag;
-  readonly Users = Users;
-  readonly RefreshCw = RefreshCw;
-  readonly Filter = Filter;
+  // --- RxJS Triggers ---
+  private refresh$ = new BehaviorSubject<void>(undefined);
 
-  // États
-  cycleId = signal<string | null>(null);
-  cycle = signal<Cycle | null>(null);
-  currentYear = signal<AcademicYear | null>(null);
-  levels = signal<Level[]>([]);
-  classes = signal<SchoolClass[]>([]);
-  filieres = signal<Filiere[]>([]);
-  activeTab = signal('pilotage');
-  searchQuery = signal('');
+  // --- UI State (Signals) ---
+  readonly activeTab = signal<'pilotage' | 'filieres'>('pilotage');
+  readonly searchQuery = signal('');
 
-  // Configuration des Onglets
+  // --- Reactive Data (Signals) ---
+  readonly cycleId = toSignal(this.route.paramMap.pipe(map(p => p.get('id'))));
+
+  private readonly state$ = combineLatest([
+    toObservable(this.cycleId),
+    this.refresh$
+  ]).pipe(
+    filter(([id]) => !!id),
+    tap(() => this.loadingService.start('component')),
+    switchMap(([id]) => this.fetchCycleData(id!).pipe(
+      finalize(() => this.loadingService.stop())
+    ))
+  );
+
+  private readonly state = toSignal(this.state$);
+
+  // --- Derived Signals (Public API) ---
+  readonly cycle = computed(() => this.state()?.cycle || null);
+  readonly currentYear = computed(() => this.state()?.year || null);
+  readonly levels = computed(() => this.state()?.levels || []);
+  readonly classes = computed(() => this.state()?.classes || []);
+  readonly filieres = computed(() => this.state()?.filieres || []);
+
   readonly cycleTabs = computed<FwTab[]>(() => {
-    const tabs: FwTab[] = [
-      { id: 'pilotage', label: 'Pilotage & Classes', icon: GraduationCap }
-    ];
+    const tabs: FwTab[] = [{ id: 'pilotage', label: 'Pilotage & Classes', icon: GraduationCap }];
     if (this.hasFilieres()) {
       tabs.push({ id: 'filieres', label: 'Séries & Filières', icon: Tag });
     }
     return tabs;
   });
 
-  // Permission de modification (Provisioning)
   readonly canEditStructure = computed(() => this.authService.hasRole('ROLE_SUPER_ADMIN'));
 
-  // Déterminer si les filières sont pertinentes pour ce cycle (ex: Lycée)
   readonly hasFilieres = computed(() => {
     const code = this.cycle()?.cycleCode;
     return code === 'HIGH_SCHOOL' || code === 'TECHNICAL_SCHOOL' || code === 'UNIVERSITY';
   });
 
-  // Actions pour les filières
   readonly filiereActions: RowAction[] = [
     {id: 'edit', label: 'Modifier', icon: Edit, type: 'primary'},
     {id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger'}
   ];
 
-  // Groupement des classes par niveau pour la vue "Pilotage"
   levelGroups = computed<LevelGroup[]>(() => {
     const allLevels = [...this.levels()].sort((a, b) => a.rank - b.rank);
     const allClasses = this.classes();
@@ -134,7 +155,6 @@ export class CycleDetailComponent implements OnInit {
       });
   });
 
-  // Transformation des filières pour DataList
   displayFilieres = computed<TableRow[]>(() => {
     const query = this.searchQuery().toLowerCase();
     return this.filieres()
@@ -163,71 +183,73 @@ export class CycleDetailComponent implements OnInit {
     return `${this.levels().length} Niveaux • ${this.classes().length} Classes ouvertes • Session ${this.currentYear()?.label || '...'}`;
   });
 
-  ngOnInit() {
-    this.route.paramMap.subscribe(params => {
-      const id = params.get('id');
-      if (id) {
-        this.cycleId.set(id);
-        this.loadData(id);
+  // --- Lifecycle ---
+  constructor() {
+    effect(() => {
+      const c = this.cycle();
+      if (c) {
+        const cycleName = c.customName || c.systemName || c.cycleCode || c.id;
+        this.navState.setBreadcrumb(['Accueil', 'Structure', cycleName]);
       }
     });
   }
 
-  async loadData(id: string) {
-    await this.loadingService.execute(async () => {
-      try {
-        // 1. CHARGEMENT DE LA STRUCTURE (Obligatoire)
-        const [allCycles, allLevels, allFilieres] = await Promise.all([
-          firstValueFrom(this.academicService.getCycles()),
-          firstValueFrom(this.academicService.getLevels()),
-          firstValueFrom(this.academicService.getFilieres())
-        ]);
+  // --- Private Data Methods ---
 
-        const currentCycle = allCycles.find(c => String(c.id) === String(id));
-
-        if (currentCycle) {
-          this.cycle.set(currentCycle);
-          const cycleName = currentCycle.customName || currentCycle.systemName || currentCycle.cycleCode || currentCycle.id;
-          this.navState.setBreadcrumb(['Accueil', 'Structure', cycleName]);
-
-          const cycleLevels = allLevels.filter(l => {
-            const levelCycleId = l.cycleId || (l as any).cycle?.id;
-            const levelCycleCode = (l as any).cycle?.code || (l as any).cycle?.cycleCode;
-            return String(levelCycleId) === String(id) || (levelCycleCode && levelCycleCode === currentCycle.cycleCode);
-          });
-          this.levels.set(cycleLevels);
-        } else {
+  private fetchCycleData(id: string) {
+    return forkJoin({
+      cycles: this.academicService.getCycles(),
+      levels: this.academicService.getLevels(),
+      filieres: this.academicService.getFilieres(),
+      year: this.academicService.getCurrentYear().pipe(catchError(() => of(null)))
+    }).pipe(
+      switchMap(res => {
+        const currentCycle = res.cycles.find(c => String(c.id) === String(id));
+        
+        if (!currentCycle) {
           this.notificationService.error("Cycle non trouvé.");
-        }
-        this.filieres.set(allFilieres);
-
-        // 2. CHARGEMENT OPÉRATIONNEL (Résilient)
-        try {
-          const year = await firstValueFrom(this.academicService.getCurrentYear());
-          this.currentYear.set(year);
-
-          if (year) {
-            const yearClasses = await firstValueFrom(this.academicService.getClassesByYear(year.id));
-            this.classes.set(yearClasses);
-          }
-        } catch (yearError) {
-          console.warn("[CycleDetail] Aucune année académique active trouvée. Mode structure uniquement.");
-          this.currentYear.set(null);
-          this.classes.set([]);
+          return of({ cycle: null, levels: [], filieres: [], year: null, classes: [] });
         }
 
-      } catch (error) {
-        console.error("[CycleDetail] Erreur fatale lors du chargement de la structure:", error);
+        // Filtrage manuel des niveaux comme dans l'ancienne version
+        const cycleLevels = res.levels.filter(l => {
+          const levelCycleId = l.cycleId || (l as any).cycle?.id;
+          const levelCycleCode = (l as any).cycle?.code || (l as any).cycle?.cycleCode;
+          return String(levelCycleId) === String(id) || (levelCycleCode && levelCycleCode === currentCycle.cycleCode);
+        });
+
+        const base = {
+          cycle: currentCycle,
+          levels: cycleLevels,
+          filieres: res.filieres,
+          year: res.year
+        };
+
+        if (base.year) {
+          return this.academicService.getClassesByYear(base.year.id).pipe(
+            map(classes => ({ ...base, classes })),
+            catchError(() => of({ ...base, classes: [] }))
+          );
+        }
+        return of({ ...base, classes: [] });
+      }),
+      catchError(error => {
+        console.error("[CycleDetail] Erreur lors du chargement:", error);
         this.notificationService.error("Impossible de charger la structure du cycle.");
-      }
-    }, 'component');
+        return of({ cycle: null, levels: [], filieres: [], year: null, classes: [] });
+      })
+    );
+  }
+
+  // --- Public Action Methods ---
+
+  refresh() {
+    this.refresh$.next();
   }
 
   setTab(tab: 'pilotage' | 'filieres') {
     this.activeTab.set(tab);
   }
-
-  // --- GESTION DES NIVEAUX & PROGRAMMES ---
 
   openCurriculumManager(level: Level) {
     this.router.navigate(['/admin/classes/levels', level.id, 'curriculum']);
@@ -242,11 +264,9 @@ export class CycleDetailComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result && this.cycleId()) this.loadData(this.cycleId()!);
+      if (result) this.refresh();
     });
   }
-
-  // --- GESTION DES CLASSES ---
 
   openAddClass(level: Level) {
     const currentCycle = this.cycle();
@@ -256,24 +276,19 @@ export class CycleDetailComponent implements OnInit {
       panelClass: 'feewi-dialog-panel',
       data: {
         year: this.currentYear(),
-        groupedLevels: [{
-          cycle: currentCycle,
-          levels: this.levels()
-        }],
+        groupedLevels: [{ cycle: currentCycle, levels: this.levels() }],
         levelId: level.id
       }
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result && this.cycleId()) this.loadData(this.cycleId()!);
+      if (result) this.refresh();
     });
   }
 
   goToClassDetails(cls: SchoolClass) {
     this.router.navigate(['/admin/academic/classes', cls.id]);
   }
-
-  // --- GESTION DES FILIÈRES ---
 
   openAddFiliere() {
     const dialogRef = this.dialog.open(FiliereFormComponent, {
@@ -282,7 +297,7 @@ export class CycleDetailComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result && this.cycleId()) this.loadData(this.cycleId()!);
+      if (result) this.refresh();
     });
   }
 
@@ -302,5 +317,17 @@ export class CycleDetailComponent implements OnInit {
     this.searchQuery.set('');
   }
 
-  protected readonly UserCheck = UserCheck;
+  // --- Icons ---
+  readonly ArrowLeft = ArrowLeft;
+  readonly Layers = Layers;
+  readonly Plus = Plus;
+  readonly ListChecks = ListChecks;
+  readonly Edit = Edit;
+  readonly Trash2 = Trash2;
+  readonly GraduationCap = GraduationCap;
+  readonly Tag = Tag;
+  readonly Users = Users;
+  readonly RefreshCw = RefreshCw;
+  readonly Filter = Filter;
+  readonly UserCheck = UserCheck;
 }

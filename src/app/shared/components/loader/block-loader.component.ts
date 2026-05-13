@@ -1,13 +1,14 @@
 import {Component, Input} from '@angular/core';
 import {CommonModule} from '@angular/common';
+import {SpinnerComponent} from './spinner.component';
 
 @Component({
   selector: 'fw-block-loader',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, SpinnerComponent],
   template: `
     <div class="block-loader" [class.absolute-center]="center">
-      <div class="spinner-dot"></div>
+      <fw-spinner size="32px" stroke="2px" variant="primary"></fw-spinner>
       <p *ngIf="message" class="loader-message">{{ message }}</p>
     </div>
   `,
@@ -29,24 +30,11 @@ import {CommonModule} from '@angular/common';
       z-index: 100;
     }
 
-    .spinner-dot {
-      width: 32px;
-      height: 32px;
-      border: 2px solid var(--fw-border);
-      border-top-color: var(--fw-primary);
-      border-radius: 50%;
-      animation: fw-spin 0.6s linear infinite;
-    }
-
     .loader-message {
       font-size: 0.75rem;
       font-weight: 600;
       color: var(--fw-text-secondary);
       letter-spacing: 0.02em;
-    }
-
-    @keyframes fw-spin {
-      to { transform: rotate(360deg); }
     }
   `]
 })
