@@ -177,7 +177,7 @@ export class ClassDetailComponent {
   readonly richDescription = computed(() => {
     const cls = this.schoolClass();
     if (!cls) return 'Chargement...';
-    return `${cls.levelName || 'Niveau inconnu'} • ${this.assignments().length} élèves • Capacité: ${cls.capacity}`;
+    return `${cls.levelName || 'Niveau inconnu'} • ${cls.currentOccupancy ?? this.assignments().length} élèves • Capacité: ${cls.capacity}`;
   });
 
   // --- Data Fetching Logic ---

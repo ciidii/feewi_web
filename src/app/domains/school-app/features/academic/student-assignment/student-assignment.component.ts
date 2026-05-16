@@ -211,11 +211,10 @@ export class StudentAssignmentComponent {
   }
 
   getClassFillRate(cls: SchoolClass): number {
-    return cls.currentStudentCount || 0;
+    return cls.currentOccupancy ?? 0;
   }
 
   getClassGaugeWidth(cls: SchoolClass): number {
-    if (!cls.capacity) return 0;
-    return Math.min(100, (this.getClassFillRate(cls) / cls.capacity) * 100);
+    return cls.occupancyRate ?? 0;
   }
 }
