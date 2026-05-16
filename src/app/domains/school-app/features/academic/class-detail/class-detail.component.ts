@@ -1,44 +1,64 @@
-import {Component, computed, inject, OnInit, signal, ViewEncapsulation} from '@angular/core';
+import {Component, computed, inject, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ActivatedRoute, Router, RouterModule} from '@angular/router';
-import {firstValueFrom} from 'rxjs';
+import {toObservable, toSignal} from '@angular/core/rxjs-interop';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {
-  BookOpen,
+  ArrowLeft,
   Calendar,
-  Download,
-  Eye,
+  ClipboardList,
   GraduationCap,
-  History,
+  Layers,
   LucideAngularModule,
   Plus,
   RefreshCw,
-  School,
-  Trash2,
+  Search,
   UserCheck,
-  UserPlus,
   Users,
-  X
+  Settings,
+  MoreVertical,
+  Trash2,
+  Edit,
+  UserPlus,
+  Download,
+  BookOpen,
+  School,
+  Activity
 } from 'lucide-angular';
-import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
-import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
-import {DataListComponent} from '../../../../../shared/components/data-list/data-list.component';
-import {BlockLoaderComponent} from '../../../../../shared/components/loader/block-loader.component';
-import {PageProgressComponent} from '../../../../../shared/components/loader/page-progress.component';
-import {FwEmptyStateComponent} from '../../../../../shared/components/empty-state/empty-state.component';
-import {FwListCommandBarComponent} from '../../../../../shared/components/list-command-bar/list-command-bar.component';
-import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import {
+  BehaviorSubject,
+  catchError,
+  combineLatest,
+  filter,
+  finalize,
+  forkJoin,
+  map,
+  of,
+  switchMap,
+  tap
+} from 'rxjs';
+
+// Services
 import {AcademicService} from '../../../../../core/services/academic.service';
-import {StudentRegistryService} from '../../../../../core/services/student-registry.service';
 import {IdentityService} from '../../../../../core/services/identity.service';
+import {NavigationStateService} from '../../../../../core/services/navigation-state.service';
 import {NotificationService} from '../../../../../shared/services/notification.service';
-import {SchoolClass, StudentAssignment, Subject, Teaching} from '../../../../../core/models/academic.model';
+import {LoadingService} from '../../../../../shared/services/loading.service';
+
+// Models
+import {Level, SchoolClass, StudentAssignment, Subject, Teaching} from '../../../../../core/models/academic.model';
 import {User} from '../../../../../core/models/user.model';
 import {FwTab} from '../../../../../shared/components/tabs/tabs.component';
 import {RowAction, TableRow} from '../../../../../shared/models/data-list.models';
-import {
-  TeacherSelectModalComponent
-} from '../../../../../shared/components/teacher-select-modal/teacher-select-modal.component';
-import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
+
+// Components
+import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
+import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
+import {FwEmptyStateComponent} from '../../../../../shared/components/empty-state/empty-state.component';
+import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.component';
+import {DataListComponent} from '../../../../../shared/components/data-list/data-list.component';
+import {FwListCommandBarComponent} from '../../../../../shared/components/list-command-bar/list-command-bar.component';
+import {BlockLoaderComponent} from '../../../../../shared/components/loader/block-loader.component';
 
 @Component({
   selector: 'app-class-detail',
@@ -47,263 +67,210 @@ import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-d
     CommonModule,
     RouterModule,
     LucideAngularModule,
-    FwPageShellComponent,
+    MatDialogModule,
     FwButtonComponent,
-    DataListComponent,
-    BlockLoaderComponent,
+    FwPageShellComponent,
     FwEmptyStateComponent,
+    DataListComponent,
     FwListCommandBarComponent,
-    MatDialogModule
+    BlockLoaderComponent
   ],
   templateUrl: './class-detail.component.html',
-  styleUrls: ['./class-detail.component.scss'],
-  encapsulation: ViewEncapsulation.None
+  styleUrls: ['./class-detail.component.scss']
 })
-export class ClassDetailComponent implements OnInit {
+export class ClassDetailComponent {
+  // --- Services ---
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private academicService = inject(AcademicService);
-  private studentService = inject(StudentRegistryService);
   private identityService = inject(IdentityService);
+  private navState = inject(NavigationStateService);
   private notificationService = inject(NotificationService);
-  private dialog = inject(MatDialog);
+  protected loadingService = inject(LoadingService);
 
-  // Icônes
-  readonly School = School;
-  readonly Users = Users;
-  readonly BookOpen = BookOpen;
-  readonly Calendar = Calendar;
-  readonly Plus = Plus;
-  readonly GraduationCap = GraduationCap;
-  readonly History = History;
-  readonly UserCheck = UserCheck;
-  readonly UserPlus = UserPlus;
-  readonly RefreshCw = RefreshCw;
-  readonly Eye = Eye;
-  readonly Trash2 = Trash2;
-  readonly Download = Download;
-  readonly X = X;
 
-  // États
-  classId = signal<string | null>(null);
-  schoolClass = signal<SchoolClass | null>(null);
-  assignments = signal<StudentAssignment[]>([]);
-  teachings = signal<Teaching[]>([]);
-  allSubjects = signal<Subject[]>([]);
-  staffList = signal<User[]>([]);
-  isLoading = signal(true);
-  isActionLoading = signal(false);
-  activeTab = signal('students');
-  searchQuery = signal('');
 
-  // Configuration des Onglets
+  // --- Triggers ---
+  private refresh$ = new BehaviorSubject<void>(undefined);
+
+  // --- UI State ---
+  readonly activeTab = signal<'students' | 'teachings' | 'schedule'>('students');
+  readonly searchQuery = signal('');
+  readonly isActionLoading = signal(false);
+
+  // --- Reactive Data (State Management) ---
+  readonly classId = toSignal(this.route.paramMap.pipe(map(p => p.get('id'))));
+
+  private readonly state$ = combineLatest([
+    toObservable(this.classId),
+    this.refresh$
+  ]).pipe(
+    filter(([id]) => !!id),
+    tap(() => this.loadingService.start('component')),
+    switchMap(([id]) => this.fetchClassData(id!).pipe(
+      finalize(() => this.loadingService.stop())
+    ))
+  );
+
+  private readonly state = toSignal(this.state$);
+
+  // --- Derived Signals (Public API for Template) ---
+  readonly schoolClass = computed(() => this.state()?.schoolClass || null);
+  readonly assignments = computed(() => this.state()?.assignments || []);
+  readonly teachings = computed(() => this.state()?.teachings || []);
+  readonly allSubjects = computed(() => this.state()?.subjects || []);
+  readonly staffList = computed(() => this.state()?.staff || []);
+
+  readonly isLoading = computed(() => this.loadingService.isLoading());
+
   readonly classTabs: FwTab[] = [
-    {id: 'students', label: 'Registre des Élèves', icon: Users},
-    {id: 'team', label: 'Équipe Pédagogique', icon: UserCheck},
-    {id: 'schedule', label: 'Emploi du temps', icon: Calendar}
+    { id: 'students', label: 'Élèves', icon: Users },
+    { id: 'teachings', label: 'Enseignements', icon: GraduationCap },
+    { id: 'schedule', label: 'Emploi du temps', icon: Calendar }
   ];
 
-  // Actions pour les élèves
+  // Actions
   readonly studentActions: RowAction[] = [
-    {id: 'view', label: 'Dossier élève', icon: Eye, type: 'primary'},
-    {id: 'unassign', label: 'Retirer de la classe', icon: X, type: 'danger'}
+    { id: 'view', label: 'Voir fiche', icon: Search, type: 'primary' },
+    { id: 'remove', label: 'Désaffecter', icon: Trash2, type: 'danger' }
   ];
 
-  // Actions pour l'équipe
   readonly teamActions: RowAction[] = [
-    {id: 'assign', label: 'Assigner Professeur', icon: UserCheck, type: 'primary'},
-    {id: 'remove', label: 'Retirer du programme', icon: Trash2, type: 'danger'}
+    { id: 'edit', label: 'Modifier', icon: Edit, type: 'primary' },
+    { id: 'remove', label: 'Supprimer', icon: Trash2, type: 'danger' }
   ];
 
-  // Calculs réactifs
-  richDescription = computed(() => {
-    const c = this.schoolClass();
-    if (!c) return 'Chargement...';
-    return `${c.levelName || 'Niveau'} • ${this.assignments().length}/${c.capacity} Élèves • ${this.teachings().length} Matières`;
-  });
-
-  // Transformation des élèves pour DataList (Affectations)
-  displayStudents = computed<TableRow[]>(() => {
+  // DataList Transformations
+  readonly displayStudents = computed<TableRow[]>(() => {
+    const query = this.searchQuery().toLowerCase();
     return this.assignments()
-      .filter(a => !this.searchQuery() || `${a.studentFirstName} ${a.studentLastName}`.toLowerCase().includes(this.searchQuery().toLowerCase()))
-      .map(a => {
-        const initials = (a.studentFirstName?.[0] || '') + (a.studentLastName?.[0] || '');
-        return {
-          id: a.id, // ID de l'affectation
-          title: `${a.studentFirstName || 'Inconnu'} ${a.studentLastName || ''}`,
-          subtitle: `Dossier affecté le ${a.assignedAt ? new Date(a.assignedAt).toLocaleDateString() : '—'}`,
-          avatarLabel: initials || '??',
-          badges: [
-            {label: a.studentGender === 'MALE' ? 'GARÇON' : 'FILLE', type: 'info'},
-            {label: 'AFFECTÉ', type: 'success'}
-          ],
-          rawData: a
-        };
-      });
+      .filter(a => !query ||
+        a.studentFirstName?.toLowerCase().includes(query) ||
+        a.studentLastName?.toLowerCase().includes(query))
+      .map(a => ({
+        id: a.id,
+        title: `${a.studentFirstName} ${a.studentLastName}`,
+        subtitle: `Inscrit le ${new Date(a.assignedAt || '').toLocaleDateString()}`,
+        avatarLabel: this.getAvatarLabel(a.studentFirstName, a.studentLastName),
+        badges: [{ label: 'ACTIF', type: 'success' }],
+        rawData: a
+      }));
   });
 
-  // Transformation de l'équipe pour DataList
-  displayTeam = computed<TableRow[]>(() => {
+  readonly displayTeam = computed<TableRow[]>(() => {
+    const query = this.searchQuery().toLowerCase();
     return this.teachings()
-      .filter(t => !this.searchQuery() || (t.subjectName || '').toLowerCase().includes(this.searchQuery().toLowerCase()))
+      .filter(t => !query || t.subjectName?.toLowerCase().includes(query) || t.teacherName?.toLowerCase().includes(query))
       .map(t => ({
         id: t.id,
-        title: t.subjectName || 'Matière',
-        subtitle: t.teacherName ? `Professeur: ${t.teacherName}` : 'À pourvoir (Vacant)',
-        avatarLabel: (t.subjectName || '??').substring(0, 2).toUpperCase(),
+        title: t.subjectName || this.getSubjectName(t.subjectId),
+        subtitle: t.teacherName || this.getTeacherName(t.teacherId),
+        avatarLabel: t.subjectName?.substring(0, 2).toUpperCase() || '??',
         badges: [
-          {label: `COEFF ${t.coefficient}`, type: 'info'},
-          {label: t.teacherId ? 'ASSIGNÉ' : 'LIBRE', type: t.teacherId ? 'success' : 'danger'}
+          { label: `Coef. ${t.coefficient}`, type: 'info' },
+          { label: t.teacherId ? 'ASSIGNÉ' : 'À POURVOIR', type: t.teacherId ? 'success' : 'warning' }
         ],
         rawData: t
       }));
   });
 
-  ngOnInit() {
-    this.route.paramMap.subscribe(params => {
-      const id = params.get('id');
-      if (id) {
-        this.classId.set(id);
-        this.loadData(id);
-      }
-    });
+  readonly richDescription = computed(() => {
+    const cls = this.schoolClass();
+    if (!cls) return 'Chargement...';
+    return `${cls.levelName || 'Niveau inconnu'} • ${this.assignments().length} élèves • Capacité: ${cls.capacity}`;
+  });
+
+  // --- Data Fetching Logic ---
+  private fetchClassData(id: string) {
+    return forkJoin({
+      schoolClass: this.academicService.getClassById(id),
+      assignments: this.academicService.getAssignmentsByClass(id),
+      teachings: this.academicService.getTeachingsByClass(id),
+      subjects: this.academicService.getSubjects(),
+      staffPage: this.identityService.getStaff('', 0, 100, 'TEACHER')
+    }).pipe(
+      map(data => ({
+        schoolClass: data.schoolClass,
+        assignments: data.assignments,
+        teachings: data.teachings,
+        subjects: data.subjects,
+        staff: data.staffPage.content
+      })),
+      tap(data => {
+        const className = data.schoolClass?.fullName || data.schoolClass?.name || 'Classe';
+        this.navState.setBreadcrumb(['Accueil', 'Classes', className]);
+      }),
+      catchError(error => {
+        console.error("[ClassDetail] Error loading data:", error);
+        this.notificationService.error("Impossible de charger les détails de la classe.");
+        return of({
+          schoolClass: null,
+          assignments: [],
+          teachings: [],
+          subjects: [],
+          staff: []
+        });
+      })
+    );
   }
 
-  async loadData(id: string) {
-    this.isLoading.set(true);
-    try {
-      const [cls, assignments, teachings, subjects] = await Promise.all([
-        firstValueFrom(this.academicService.getClassById(id)),
-        firstValueFrom(this.academicService.getAssignmentsByClass(id)),
-        firstValueFrom(this.academicService.getTeachingsByClass(id)),
-        firstValueFrom(this.academicService.getSubjects())
-      ]);
-
-      this.schoolClass.set(cls);
-      this.assignments.set(assignments);
-      this.teachings.set(teachings);
-      this.allSubjects.set(subjects);
-
-      // Charger le personnel (ENSEIGNANTS)
-      await this.identityService.getStaff('', 0, 100, 'TEACHER');
-      const staffPage = this.identityService.staffPage();
-      if (staffPage) this.staffList.set(staffPage.content);
-
-    } catch (error) {
-      this.notificationService.error("Impossible de charger les détails de la classe.");
-    } finally {
-      this.isLoading.set(false);
-    }
+  // --- Action Methods ---
+  refresh() {
+    this.refresh$.next();
   }
 
-  setTab(tab: string) {
+  setTab(tab: any) {
     this.activeTab.set(tab);
-    this.searchQuery.set('');
+  }
+
+  onSearch(query: string) {
+    this.searchQuery.set(query);
   }
 
   handleStudentAction(event: { actionId: string, row: TableRow }) {
     if (event.actionId === 'view') {
       const assignment = event.row.rawData as StudentAssignment;
       this.router.navigate(['/admin/registry/students', assignment.studentId]);
-    } else if (event.actionId === 'unassign') {
-      this.handleUnassignStudent(event.row.rawData as StudentAssignment);
-    }
-  }
-
-  private async handleUnassignStudent(a: StudentAssignment) {
-    const confirmed = await this.confirmAction(
-      'Retirer de la classe ?',
-      `Voulez-vous retirer l'élève ${a.studentFirstName} ${a.studentLastName} de cette classe ? Il retournera en file d'attente.`,
-      'Oui, retirer',
-      'danger'
-    );
-
-    if (confirmed && this.classId()) {
-      this.isActionLoading.set(true);
-      try {
-        await firstValueFrom(this.academicService.unassignStudent(a.id));
-        this.notificationService.success('Élève retiré de la classe.');
-        this.loadData(this.classId()!);
-      } catch (e) {
-        this.notificationService.error("Impossible de retirer l'élève.");
-      } finally {
-        this.isActionLoading.set(false);
-      }
-    }
-  }
-
-  async handleTeamAction(event: { actionId: string, row: TableRow }) {
-    const teaching = event.row.rawData as Teaching;
-    if (event.actionId === 'assign') {
-      this.openTeacherAssignment(teaching);
     } else if (event.actionId === 'remove') {
-      this.confirmRemoveTeaching(teaching);
+      this.notificationService.info("Désaffectation bientôt disponible.");
     }
   }
 
-  private openTeacherAssignment(teaching: Teaching) {
-    const dialogRef = this.dialog.open(TeacherSelectModalComponent, {
-      width: '480px',
-      panelClass: 'feewi-dialog-panel',
-      data: {
-        title: `Assigner à : ${teaching.subjectName}`,
-        teachers: this.staffList(),
-        currentTeacherId: teaching.teacherId
-      }
-    });
-
-    dialogRef.afterClosed().subscribe(async (teacherId) => {
-      if (teacherId && this.classId()) {
-        this.isActionLoading.set(true);
-        try {
-          await firstValueFrom(this.academicService.assignTeacher(this.classId()!, teaching.id, teacherId));
-          this.notificationService.success('Enseignant assigné avec succès.');
-          this.loadData(this.classId()!);
-        } catch (e) {
-          this.notificationService.error("Échec de l'assignation.");
-        } finally {
-          this.isActionLoading.set(false);
-        }
-      }
-    });
+  handleTeamAction(event: { actionId: string, row: TableRow }) {
+    this.notificationService.info("Gestion d'enseignement bientôt disponible.");
   }
 
-  private async confirmRemoveTeaching(t: Teaching) {
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '400px',
-      data: {
-        title: 'Retirer cet enseignement ?',
-        message: `Voulez-vous retirer "${t.subjectName}" de cette classe ? Cette action supprimera également l'assignation du professeur.`,
-        confirmLabel: 'Oui, retirer',
-        type: 'danger'
-      }
-    });
-
-    dialogRef.afterClosed().subscribe(async (confirmed) => {
-      if (confirmed && this.classId()) {
-        this.isActionLoading.set(true);
-        try {
-          await firstValueFrom(this.academicService.removeTeachingFromClass(this.classId()!, t.id));
-          this.notificationService.success('Enseignement retiré.');
-          this.loadData(this.classId()!);
-        } catch (error) {
-          this.notificationService.error("Impossible de retirer ce cours.");
-        } finally {
-          this.isActionLoading.set(false);
-        }
-      }
-    });
+  getSubjectName(subjectId: string): string {
+    return this.allSubjects().find(s => s.id === subjectId)?.name || 'Matière inconnue';
   }
 
-  private confirmAction(title: string, message: string, confirmLabel: string, type: 'info' | 'warning' | 'danger'): Promise<boolean> {
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '450px',
-      data: {title, message, confirmLabel, type}
-    });
-    return new Promise(resolve => dialogRef.afterClosed().subscribe(res => resolve(!!res)));
+  getTeacherName(teacherId: string): string {
+    const teacher = this.staffList().find(s => s.id === teacherId);
+    return teacher ? `${teacher.firstName} ${teacher.lastName}` : 'Non assigné';
   }
 
-  onSearch(query: string) {
-    this.searchQuery.set(query);
+  getAvatarLabel(firstName?: string, lastName?: string): string {
+    return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
   }
+
+  // --- Icons ---
+  readonly ArrowLeft = ArrowLeft;
+  readonly Layers = Layers;
+  readonly Users = Users;
+  readonly GraduationCap = GraduationCap;
+  readonly ClipboardList = ClipboardList;
+  readonly Calendar = Calendar;
+  readonly Search = Search;
+  readonly Plus = Plus;
+  readonly RefreshCw = RefreshCw;
+  readonly UserCheck = UserCheck;
+  readonly Settings = Settings;
+  readonly MoreVertical = MoreVertical;
+  readonly Trash2 = Trash2;
+  readonly Edit = Edit;
+  readonly UserPlus = UserPlus;
+  readonly Download = Download;
+  readonly BookOpen = BookOpen;
+  readonly School = School;
+  readonly Activity = Activity;
 }

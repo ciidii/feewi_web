@@ -9,8 +9,8 @@
     <div class="flex items-center gap-2 bg-white border border-border-subtle rounded-xl px-3 h-10">
       <lucide-icon [name]="Calendar" [size]="14" class="text-slate-400"></lucide-icon>
       <select
-        [(ngModel)]="selectedYearId"
-        (ngModelChange)="loadOperationalData()"
+        [ngModel]="selectedYearId()"
+        (ngModelChange)="selectedYearId.set($event)"
         class="bg-transparent border-none text-xs font-bold text-midnight focus:ring-0 cursor-pointer outline-none">
         <option *ngFor="let y of years()" [value]="y.id">{{ y.label }}</option>
       </select>
@@ -19,8 +19,8 @@
     <div class="flex items-center gap-2 bg-white border border-border-subtle rounded-xl px-3 h-10">
       <lucide-icon [name]="GraduationCap" [size]="14" class="text-slate-400"></lucide-icon>
       <select
-        [(ngModel)]="selectedLevelId"
-        (ngModelChange)="loadOperationalData()"
+        [ngModel]="selectedLevelId()"
+        (ngModelChange)="selectedLevelId.set($event)"
         class="bg-transparent border-none text-xs font-bold text-midnight focus:ring-0 cursor-pointer outline-none">
         <option *ngFor="let l of levels()" [value]="l.id">{{ l.name }}</option>
       </select>
@@ -33,7 +33,7 @@
       size="sm"
       [icon]="RefreshCw"
       [loading]="isLoading()"
-      (click)="loadOperationalData()"
+      (click)="refresh()"
     ></app-fw-button>
   </div>
 
@@ -97,10 +97,15 @@
               {{ (student.studentFirstName?.[0] || '') + (student.studentLastName?.[0] || '') }}
             </div>
             <div class="flex-1 min-w-0">
-              <p
-                class="text-xs font-bold text-midnight truncate">{{ student.studentFirstName }} {{ student.studentLastName }}</p>
-              <p
-                class="text-[10px] text-text-tertiary font-medium uppercase tracking-widest">{{ student.studentGender === 'MALE' ? 'Garçon' : 'Fille' }}</p>
+              <p class="text-xs font-bold text-midnight truncate">{{ student.studentFirstName }} {{ student.studentLastName }}</p>
+              <div class="flex items-center gap-2 mt-0.5">
+                <span class="text-[9px] font-black bg-primary/10 text-primary px-1.5 py-0.5 rounded uppercase tracking-tighter">
+                  {{ student.registrationNumber || 'Sans matricule' }}
+                </span>
+                <span class="text-[10px] text-text-tertiary font-medium uppercase tracking-widest">
+                  {{ student.studentGender === 'MALE' ? 'Garçon' : 'Fille' }}
+                </span>
+              </div>
             </div>
             <div class="opacity-0 group-hover:opacity-100 transition-opacity">
               <lucide-icon [name]="ArrowRight" [size]="14" class="text-primary"></lucide-icon>

@@ -51,20 +51,30 @@ Retire l'élève de sa classe et le remet en file d'attente.
 | Champ | Type | Description |
 | :--- | :--- | :--- |
 | `studentId` | UUID | Pivot vers le Registre des Élèves. |
-| `studentFirstName`| String | Prénom de l'élève (Dénormalisé pour affichage). |
-| `studentLastName` | String | Nom de l'élève (Dénormalisé pour affichage). |
+| `registrationNumber`| String | Matricule de l'élève (Dénormalisé). |
+| `studentFirstName`| String | Prénom de l'élève (Dénormalisé). |
+| `studentLastName` | String | Nom de l'élève (Dénormalisé). |
 | `studentGender` | String | Sexe de l'élève (MALE/FEMALE). |
+| `birthDate` | Date | Date de naissance (Dénormalisée). |
 | `status` | Enum | `WAITING` (En attente), `ASSIGNED` (Affecté). |
 | `schoolClassId` | UUID | ID de la classe finale (null si WAITING). |
 | `assignedAt` | Timestamp | Date et heure du placement en classe. |
 
 ---
 
-## 5. Guide UI (Angular)
+## 5. Synchronisation et Cohérence
+Pour garantir que le dossier de l'élève reste la Source de Vérité, le système applique les règles suivantes :
+
+1.  **Mise à jour Identité** : Si un nom ou le matricule change dans le `student-registry-service`, il émet un événement `STUDENT_UPDATED`. Le module Académique met alors à jour ses copies dénormalisées.
+2.  **Mise à jour Cursus** : Lorsque l'action `/assign` ou `/unassign` est effectuée, le module Académique émet un événement `STUDENT_ASSIGNED`. Le Registre écoute cet événement pour remplir automatiquement l'historique scolaire de l'élève (Schooling History).
+
+---
+
+## 6. Guide UI (Angular)
 Pour une expérience utilisateur optimale, il est recommandé d'implémenter un écran de type **Tableau de Répartition** :
-1.  **Colonne Gauche** : Liste des élèves `WAITING` pour un niveau donné.
-2.  **Zone Droite** : Cartes représentant les classes (`SchoolClass`) avec leur jauge de remplissage (`count / capacity`).
-3.  **Action** : Glisser l'élève vers une classe appelle l'endpoint `/assign`.
+1.  **Colonne Gauche** : Liste des élèves `WAITING` pour un niveau donné (Affiche Matricule, Nom, Prénom, Sexe).
+2.  **Zone Droite** : Cartes représentant les classes (`SchoolClass`) avec leur **Taux d'occupation** (`currentOccupancy / capacity`).
+3.  **Action** : Glisser l'élève vers une classe appelle l'endpoint `/assign`. Le système bloque automatiquement si le taux atteint 100%.
 
 ---
 *Validé par l'Architecture Feewi - Mai 2026*

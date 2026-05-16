@@ -28,7 +28,7 @@
            size="sm"
            [icon]="RefreshCw"
            [loading]="isLoading()"
-           (click)="loadData(classId()!)"
+           (click)="refresh()"
            title="Actualiser"
          ></app-fw-button>
          
@@ -44,7 +44,7 @@
            Affecter
          </app-fw-button>
          <app-fw-button
-           *ngIf="activeTab() === 'team'"
+           *ngIf="activeTab() === 'teachings'"
            variant="primary"
            size="sm"
            [icon]="Plus"
@@ -89,7 +89,7 @@
           </div>
 
           <!-- TAB 2: ÉQUIPE PÉDAGOGIQUE -->
-          <div *ngIf="activeTab() === 'team' && !isLoading()" class="animate-in fade-in duration-500">
+          <div *ngIf="activeTab() === 'teachings' && !isLoading()" class="animate-in fade-in duration-500">
             <app-data-list
               [data]="displayTeam()"
               [total]="displayTeam().length"

@@ -1,6 +1,9 @@
-import {Component, computed, inject, OnInit, signal, ViewEncapsulation} from '@angular/core';
+import {Component, computed, inject, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ActivatedRoute, RouterLink, RouterModule} from '@angular/router';
+import {ActivatedRoute, RouterLink} from '@angular/router';
+import {FormsModule} from '@angular/forms';
+import {toObservable, toSignal} from '@angular/core/rxjs-interop';
+import {CdkDragDrop, DragDropModule, moveItemInArray} from '@angular/cdk/drag-drop';
 import {
   Users,
   Search,
@@ -16,19 +19,36 @@ import {
   X,
   History,
   GraduationCap,
-  Calendar, Plus
+  Calendar,
+  Plus
 } from 'lucide-angular';
-import {firstValueFrom} from 'rxjs';
+import {
+  BehaviorSubject,
+  catchError,
+  combineLatest,
+  filter,
+  finalize,
+  firstValueFrom,
+  forkJoin,
+  map,
+  of,
+  switchMap,
+  tap
+} from 'rxjs';
+
+// Services
 import {AcademicService} from '../../../../../core/services/academic.service';
 import {NotificationService} from '../../../../../shared/services/notification.service';
+import {LoadingService} from '../../../../../shared/services/loading.service';
+
+// Models
 import {AcademicYear, Level, SchoolClass, StudentAssignment} from '../../../../../core/models/academic.model';
+
+// Components
 import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
-import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.component';
-import {FormsModule} from '@angular/forms';
 import {SkeletonComponent} from '../../../../../shared/components/skeleton/skeleton.component';
 import {LucideAngularModule} from 'lucide-angular';
-import {CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem} from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-student-assignment',
@@ -44,33 +64,16 @@ import {CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem} from '@
     RouterLink
   ],
   templateUrl: './student-assignment.component.html',
-  styleUrls: ['./student-assignment.component.scss'],
-  encapsulation: ViewEncapsulation.None
+  styleUrls: ['./student-assignment.component.scss']
 })
-export class StudentAssignmentComponent implements OnInit {
+export class StudentAssignmentComponent {
+  // --- Services ---
   private academicService = inject(AcademicService);
   private notificationService = inject(NotificationService);
   private route = inject(ActivatedRoute);
+  protected loadingService = inject(LoadingService);
 
-  // États de chargement
-  isLoading = signal(true);
-  isAssigning = signal(false);
-
-  // Données de référence
-  years = signal<AcademicYear[]>([]);
-  levels = signal<Level[]>([]);
-
-  // États de sélection (Filtres)
-  selectedYearId = signal<string>('');
-  selectedLevelId = signal<string>('');
-  searchQuery = signal('');
-
-  // Données opérationnelles
-  waitingList = signal<StudentAssignment[]>([]);
-  targetClasses = signal<SchoolClass[]>([]);
-  emptyArray: any[] = [];
-
-  // Icônes
+  // --- Icons ---
   readonly Users = Users;
   readonly Search = Search;
   readonly ArrowRight = ArrowRight;
@@ -86,62 +89,97 @@ export class StudentAssignmentComponent implements OnInit {
   readonly History = History;
   readonly GraduationCap = GraduationCap;
   readonly Calendar = Calendar;
+  readonly Plus = Plus;
 
-  ngOnInit() {
-    this.route.queryParamMap.subscribe(params => {
-      const levelId = params.get('levelId');
-      if (levelId) this.selectedLevelId.set(levelId);
-    });
-    this.loadFoundationData();
-  }
+  // --- Triggers ---
+  private refresh$ = new BehaviorSubject<void>(undefined);
 
-  async loadFoundationData() {
-    this.isLoading.set(true);
-    try {
-      const [allYears, allLevels] = await Promise.all([
-        firstValueFrom(this.academicService.getYears()),
-        firstValueFrom(this.academicService.getLevels())
-      ]);
+  // --- UI State (Signals) ---
+  readonly selectedYearId = signal<string>('');
+  readonly selectedLevelId = signal<string>('');
+  readonly searchQuery = signal('');
+  readonly isAssigning = signal(false);
 
-      this.years.set(allYears);
-      this.levels.set(allLevels);
-
-      // Sélectionner l'année active par défaut
-      const active = allYears.find(y => y.status === 'ACTIVE') || allYears[0];
-      if (active) this.selectedYearId.set(active.id);
-
-      // Sélectionner le premier niveau par défaut
-      if (allLevels.length > 0) {
-        this.selectedLevelId.set(allLevels[0].id);
-        this.loadOperationalData();
+  // --- Foundation Data (Signals) ---
+  private readonly foundation$ = combineLatest([
+    this.academicService.getYears(),
+    this.route.queryParamMap
+  ]).pipe(
+    switchMap(([years, params]) => forkJoin({
+      years: of(years),
+      levels: this.academicService.getLevels(),
+      queryParamLevelId: of(params.get('levelId'))
+    })),
+    tap(data => {
+      // 1. Initialiser l'année active si pas déjà fait
+      if (!this.selectedYearId()) {
+        const activeYear = data.years.find(y => y.status === 'ACTIVE') || data.years[0];
+        if (activeYear) this.selectedYearId.set(activeYear.id);
       }
-    } catch (error) {
-      this.notificationService.error("Impossible de charger les données de fondation.");
-    } finally {
-      this.isLoading.set(false);
-    }
-  }
+      
+      // 2. Initialiser le niveau (Priorité : QueryParam > Premier de la liste)
+      if (data.queryParamLevelId) {
+        this.selectedLevelId.set(data.queryParamLevelId);
+      } else if (data.levels.length > 0 && !this.selectedLevelId()) {
+        this.selectedLevelId.set(data.levels[0].id);
+      }
+    }),
+    catchError(err => {
+      this.notificationService.error("Impossible de charger les données de base.");
+      return of({ years: [] as AcademicYear[], levels: [] as Level[] });
+    })
+  );
 
-  async loadOperationalData() {
-    const yearId = this.selectedYearId();
-    const levelId = this.selectedLevelId();
-    if (!yearId || !levelId) return;
+  readonly foundation = toSignal(this.foundation$, { initialValue: { years: [], levels: [] } });
+  readonly years = computed(() => this.foundation().years);
+  readonly levels = computed(() => this.foundation().levels);
 
-    this.isLoading.set(true);
-    try {
-      const [waiting, classes] = await Promise.all([
-        firstValueFrom(this.academicService.getWaitingAssignments(yearId, levelId)),
-        firstValueFrom(this.academicService.getClassesByYear(yearId))
-      ]);
-
-      this.waitingList.set(waiting);
-      // Filtrer les classes pour ne garder que celles du niveau sélectionné
-      this.targetClasses.set(classes.filter(c => String(c.levelId) === String(levelId)));
-    } catch (error) {
+  // --- Operational Data (Signals) ---
+  private readonly operational$ = combineLatest([
+    toObservable(this.selectedYearId),
+    toObservable(this.selectedLevelId),
+    this.refresh$
+  ]).pipe(
+    filter(([yearId, levelId]) => !!yearId && !!levelId),
+    tap(() => this.loadingService.start('component')),
+    switchMap(([yearId, levelId]) => forkJoin({
+      waiting: this.academicService.getWaitingAssignments(yearId, levelId),
+      classes: this.academicService.getClassesByYear(yearId)
+    }).pipe(
+      map(data => ({
+        waiting: data.waiting,
+        // Filtrer les classes pour ne garder que celles du niveau sélectionné
+        targetClasses: data.classes.filter(c => String(c.levelId) === String(levelId))
+      })),
+      finalize(() => this.loadingService.stop())
+    )),
+    catchError(err => {
       this.notificationService.error("Erreur lors du chargement de la répartition.");
-    } finally {
-      this.isLoading.set(false);
-    }
+      return of({ waiting: [] as StudentAssignment[], targetClasses: [] as SchoolClass[] });
+    })
+  );
+
+  readonly operational = toSignal(this.operational$, { initialValue: { waiting: [], targetClasses: [] } });
+  readonly waitingList = computed(() => this.operational().waiting);
+  readonly targetClasses = computed(() => this.operational().targetClasses);
+  readonly emptyArray: any[] = [];
+
+  // --- Derived Calculations ---
+  readonly filteredWaitingList = computed(() => {
+    const query = this.searchQuery().toLowerCase();
+    const list = this.waitingList();
+    if (!query) return list;
+    return list.filter(a =>
+      `${a.studentFirstName} ${a.studentLastName}`.toLowerCase().includes(query) ||
+      (a.registrationNumber && a.registrationNumber.toLowerCase().includes(query))
+    );
+  });
+
+  readonly isLoading = computed(() => this.loadingService.isLoading());
+
+  // --- Actions ---
+  refresh() {
+    this.refresh$.next();
   }
 
   async onAssign(assignmentId: string, classId: string) {
@@ -149,7 +187,7 @@ export class StudentAssignmentComponent implements OnInit {
     try {
       await firstValueFrom(this.academicService.assignStudent(assignmentId, classId));
       this.notificationService.success("Élève affecté avec succès.");
-      this.loadOperationalData(); // Rafraîchir pour voir les nouvelles jauges
+      this.refresh();
     } catch (error: any) {
       if (error.status === 409) {
         this.notificationService.error("La classe est déjà complète.");
@@ -160,8 +198,6 @@ export class StudentAssignmentComponent implements OnInit {
       this.isAssigning.set(false);
     }
   }
-
-  // --- DRAG & DROP LOGIC ---
 
   onDrop(event: CdkDragDrop<any[]>, targetClassId?: string) {
     if (event.previousContainer === event.container) {
@@ -174,16 +210,6 @@ export class StudentAssignmentComponent implements OnInit {
     }
   }
 
-  // --- CALCULS ---
-
-  filteredWaitingList = computed(() => {
-    const query = this.searchQuery().toLowerCase();
-    if (!query) return this.waitingList();
-    return this.waitingList().filter(a =>
-      `${a.studentFirstName} ${a.studentLastName}`.toLowerCase().includes(query)
-    );
-  });
-
   getClassFillRate(cls: SchoolClass): number {
     return cls.currentStudentCount || 0;
   }
@@ -192,6 +218,4 @@ export class StudentAssignmentComponent implements OnInit {
     if (!cls.capacity) return 0;
     return Math.min(100, (this.getClassFillRate(cls) / cls.capacity) * 100);
   }
-
-  protected readonly Plus = Plus;
 }

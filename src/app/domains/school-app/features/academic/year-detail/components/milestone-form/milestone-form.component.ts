@@ -1,5 +1,5 @@
 import {Component, inject, OnInit, signal} from '@angular/core';
-import {CommonModule, formatDate} from '@angular/common';
+import {CommonModule} from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {MatSelectModule} from '@angular/material/select';
@@ -49,11 +49,11 @@ export class MilestoneFormComponent implements OnInit {
   isEditMode = !!this.data.milestone;
 
   readonly milestoneTypes: { value: MilestoneType; label: string; icon: any }[] = [
-    { value: 'LESSONS', label: 'Cours & Enseignements', icon: Clock },
-    { value: 'ENROLLMENT', label: 'Campagne d\'Admission', icon: Calendar },
-    { value: 'RE_ENROLLMENT', label: 'Réinscriptions', icon: Calendar },
-    { value: 'EXAMS', label: 'Sessions d\'Examens', icon: AlertCircle },
-    { value: 'VACATION', label: 'Vacances & Congés', icon: Calendar }
+    {value: 'LESSONS', label: 'Cours & Enseignements', icon: Clock},
+    {value: 'ENROLLMENT', label: 'Campagne d\'Admission', icon: Calendar},
+    {value: 'RE_ENROLLMENT', label: 'Réinscriptions', icon: Calendar},
+    {value: 'EXAMS', label: 'Sessions d\'Examens', icon: AlertCircle},
+    {value: 'VACATION', label: 'Vacances & Congés', icon: Calendar}
   ];
 
   ngOnInit() {
@@ -67,7 +67,9 @@ export class MilestoneFormComponent implements OnInit {
     }
   }
 
-  year() { return this.data.year; }
+  year() {
+    return this.data.year;
+  }
 
   async onSave() {
     if (this.milestoneForm.invalid) {
@@ -75,7 +77,7 @@ export class MilestoneFormComponent implements OnInit {
       return;
     }
 
-    const { startDate, endDate } = this.milestoneForm.value;
+    const {startDate, endDate} = this.milestoneForm.value;
     if (new Date(startDate) >= new Date(endDate)) {
       this.notificationService.error("La date de fin doit être après le début.");
       return;

@@ -169,9 +169,11 @@ export type AssignmentStatus = 'WAITING' | 'ASSIGNED';
 export interface StudentAssignment {
   id: string;
   studentId: string;
+  registrationNumber?: string; // Matricule (Dénormalisé)
   studentFirstName?: string;
   studentLastName?: string;
   studentGender?: 'MALE' | 'FEMALE';
+  birthDate?: string; // Date de naissance (Dénormalisée)
   academicYearId: string;
   levelId: string;
   status: AssignmentStatus;

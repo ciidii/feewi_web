@@ -1,6 +1,6 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
-import {catchError, forkJoin, map, Observable, switchMap, throwError} from 'rxjs';
+import {catchError, forkJoin, map, Observable, of, switchMap, throwError} from 'rxjs';
 import {EnvironmentService} from './environment.service';
 import {NotificationService} from '../../shared/services/notification.service';
 import {TenantContextService} from './tenant-context.service';
@@ -211,30 +211,46 @@ export class AcademicService {
   }
 
   getClassById(id: string): Observable<SchoolClass> {
-    const directUrl = `${this.API_URL}/classes/${id}`;
-    return this.http.get<SchoolClass>(directUrl, { headers: this.getHeaders() }).pipe(
-      catchError(err => {
-        // Fallback: Si le GET direct n'est pas autorisé (405), on cherche dans les listes par année
-        if (err.status === 405) {
-          console.warn(`[AcademicService] Direct GET on ${directUrl} not allowed (405). Searching in all academic years...`);
-          return this.getYears().pipe(
-            switchMap(years => {
-              // On crée un tableau d'observables pour chercher dans chaque année
-              const searchTasks = years.map(y => this.getClassesByYear(y.id));
-              return forkJoin(searchTasks).pipe(
-                map(allClassesGroups => {
-                  const flattened = allClassesGroups.flat();
-                  const found = flattened.find(c => String(c.id) === String(id));
-                  if (!found) throw err;
-                  return found;
-                })
-              );
+    // Le backend ne supporte pas le GET direct sur /classes/{id} (renvoie 405).
+    // On implémente une stratégie de recherche exhaustive à travers les années.
+    return this.getCurrentYear().pipe(
+      catchError(() => of(null)), // Résilient si aucune année n'est active
+      switchMap(currentYear => {
+        if (currentYear) {
+          // 1. On cherche d'abord dans l'année en cours (Cas le plus fréquent)
+          return this.getClassesByYear(currentYear.id).pipe(
+            map(classes => classes.find(c => String(c.id) === String(id))),
+            switchMap(found => {
+              if (found) return of(found);
+              // 2. Si non trouvé, on cherche dans TOUTES les années
+              return this.searchClassInAllYears(id);
             })
           );
         }
-        return throwError(() => err);
+        return this.searchClassInAllYears(id);
       }),
       catchError(this.handleError('Erreur lors du chargement des détails de la classe'))
+    );
+  }
+
+  /**
+   * Recherche profonde d'une classe dans l'historique complet
+   */
+  private searchClassInAllYears(classId: string): Observable<SchoolClass> {
+    return this.getYears().pipe(
+      switchMap(years => {
+        if (years.length === 0) throw new Error("Aucune année académique trouvée.");
+
+        // On lance la recherche en parallèle sur toutes les années
+        const searchTasks = years.map(y => this.getClassesByYear(y.id));
+        return forkJoin(searchTasks).pipe(
+          map(allClassesGroups => {
+            const found = allClassesGroups.flat().find(c => String(c.id) === String(classId));
+            if (!found) throw new Error("Classe introuvable dans le système.");
+            return found;
+          })
+        );
+      })
     );
   }
 
