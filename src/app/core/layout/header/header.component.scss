@@ -76,6 +76,11 @@
       animation: pulse-blue 2s infinite;
     }
   }
+
+  .notification-wrapper {
+    display: flex;
+    align-items: center;
+  }
 }
 
 @keyframes pulse-blue {

@@ -31,7 +31,7 @@
         <lucide-icon [name]="Home" [size]="18"></lucide-icon>
         <span class="rail-label">Accueil</span>
       </a>
-      <a (click)="onSelectService('enrollment')" routerLink="/admin/admissions" class="rail-link" [class.active]="navService.activeService() === 'enrollment'" [attr.data-label]="'Inscriptions'">
+      <a (click)="onSelectService('enrollment')" routerLink="/admin/enrollment" class="rail-link" [class.active]="navService.activeService() === 'enrollment'" [attr.data-label]="'Inscriptions'">
         <lucide-icon [name]="Briefcase" [size]="18"></lucide-icon>
         <span class="rail-label">Inscriptions</span>
       </a>
@@ -52,9 +52,9 @@
 
   <div class="rail-footer">
     <!-- Settings & Profile Trigger -->
-    <a (click)="onSelectService('settings')" 
-       class="rail-link settings-trigger" 
-       [class.active]="navService.activeService() === 'settings'" 
+    <a (click)="onSelectService('settings')"
+       class="rail-link settings-trigger"
+       [class.active]="navService.activeService() === 'settings'"
        [attr.data-label]="'Mon Profil & Réglages'">
       <lucide-icon [name]="Settings" [size]="18"></lucide-icon>
       <span class="rail-label">Profil & Réglages</span>

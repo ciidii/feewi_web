@@ -1,0 +1,99 @@
+<div class="notification-popover-container animate-in fade-in zoom-in duration-200">
+  
+  <!-- Header -->
+  <header class="popover-header">
+    <div class="header-left">
+      <h3 class="title">Notifications</h3>
+      <span *ngIf="unreadCount() > 0" class="unread-badge">{{ unreadCount() }}</span>
+    </div>
+    <button 
+      (click)="markAllAsRead()"
+      class="btn-mark-read"
+    >
+      Tout marquer lu
+    </button>
+  </header>
+
+  <!-- List Area -->
+  <main 
+    class="notifications-list custom-scrollbar"
+    (scroll)="onScroll($event)"
+  >
+    <!-- Skeleton Loading -->
+    <div *ngIf="isLoading() && notifications().length === 0" class="loading-state">
+      <div *ngFor="let i of [1,2,3]" class="skeleton-item">
+        <fw-skeleton shape="circle" width="36px" height="32px"></fw-skeleton>
+        <div class="skeleton-text">
+          <fw-skeleton width="80%" height="10px"></fw-skeleton>
+          <fw-skeleton width="60%" height="8px"></fw-skeleton>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!isLoading() && notifications().length === 0" class="empty-state">
+      <div class="empty-icon-wrap">
+        <lucide-icon [name]="Bell" [size]="28"></lucide-icon>
+      </div>
+      <p class="empty-title">Aucune notification</p>
+      <p class="empty-desc">Nous vous tiendrons informé des événements importants.</p>
+    </div>
+
+    <!-- Items -->
+    <div 
+      *ngFor="let n of notifications()" 
+      (click)="handleAction(n)"
+      class="notification-item group"
+      [class.is-unread]="n.status !== 'READ'"
+    >
+      <!-- Icon with visual meta -->
+      <div 
+        class="type-icon-wrap"
+        [ngClass]="getMeta(n.type).bgClass"
+      >
+        <lucide-icon 
+          [name]="getMeta(n.type).icon" 
+          [size]="18" 
+          [ngClass]="getMeta(n.type).colorClass"
+        ></lucide-icon>
+      </div>
+
+      <!-- Content -->
+      <div class="item-body">
+        <div class="item-header">
+          <h4 class="subject" [title]="n.subject">{{ n.subject }}</h4>
+          <span class="time">{{ n.createdAt | date:'HH:mm' }}</span>
+        </div>
+        <div class="content line-clamp-2" [innerHTML]="n.content"></div>
+        
+        <div class="item-footer">
+          <div class="date-wrap">
+            <lucide-icon [name]="Clock" [size]="10"></lucide-icon>
+            {{ n.createdAt | date:'dd MMM' }}
+          </div>
+          <div *ngIf="n.link" class="action-hint">
+            <lucide-icon [name]="ExternalLink" [size]="10"></lucide-icon>
+            Détails
+          </div>
+        </div>
+      </div>
+
+      <!-- Unread Dot -->
+      <div *ngIf="n.status !== 'READ'" class="unread-dot-wrap">
+        <div class="pulse-dot"></div>
+      </div>
+    </div>
+
+    <!-- Infinite Loading Spinner -->
+    <div *ngIf="isLoading() && notifications().length > 0" class="infinite-loader">
+      <div class="spinner"></div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="popover-footer">
+    <button class="btn-full-history">
+      Voir tout l'historique
+    </button>
+  </footer>
+</div>

@@ -56,13 +56,6 @@ export class AppRailComponent {
   readonly GraduationCap = GraduationCap;
   readonly LayoutGrid = LayoutGrid;
   readonly ShieldCheck = ShieldCheck;
-  readonly ArrowLeftRight = ArrowLeftRight;
-  readonly BarChart3 = BarChart3;
-  readonly Sun = Sun;
-  readonly Moon = Moon;
-  readonly Monitor = Monitor;
-  readonly Maximize = Maximize;
-  readonly Minimize = Minimize;
   protected readonly Shield = Shield;
   protected readonly Building2 = Building2;
   protected readonly School = School;

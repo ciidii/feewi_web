@@ -12,37 +12,37 @@ export const SCHOOL_APP_ROUTES: Routes = [
     loadComponent: () => import('./features/dashboard/dashboard/dashboard.component').then(m => m.DashboardComponent)
   },
   {
-    path: 'admissions',
+    path: 'enrollment',
     children: [
       {
         path: '',
         title: 'Tableau de Bord Admissions',
-        loadComponent: () => import('./features/admissions/admission-dashboard/admission-dashboard.component').then(m => m.AdmissionDashboardComponent)
+        loadComponent: () => import('./features/enrollment/enrollment-dashboard/admission-dashboard.component').then(m => m.AdmissionDashboardComponent)
       },
       {
         path: 'list',
         title: 'Liste des Admissions',
-        loadComponent: () => import('./features/admissions/admission-list/admission-list.component').then(m => m.AdmissionsComponent)
+        loadComponent: () => import('./features/enrollment/enrollment-list/admission-list.component').then(m => m.AdmissionsComponent)
       },
       {
         path: 'direct',
         title: 'Saisie Guichet',
-        loadComponent: () => import('./features/admissions/admission-direct-entry/admission-direct-entry.component').then(m => m.AdmissionDirectEntryComponent)
+        loadComponent: () => import('./features/enrollment/enrollment-direct-entry/admission-direct-entry.component').then(m => m.AdmissionDirectEntryComponent)
       },
       {
         path: 're-enrollment',
         title: 'Réinscription Administrative',
-        loadComponent: () => import('./features/admissions/re-enrollment/re-enrollment.component').then(m => m.SecretaryReEnrollmentComponent)
+        loadComponent: () => import('./features/enrollment/re-enrollment/re-enrollment.component').then(m => m.SecretaryReEnrollmentComponent)
       },
       {
         path: 'settings',
         title: 'Configuration Portail',
-        loadComponent: () => import('./features/admissions/admission-config/admission-config.component').then(m => m.AdmissionConfigComponent)
+        loadComponent: () => import('./features/enrollment/enrollment-config/enrollment-config.component').then(m => m.EnrollmentConfigComponent)
       },
       {
         path: ':id',
         title: 'Dossier d’Admission',
-        loadComponent: () => import('./features/admissions/admission-detail/admission-detail.component').then(m => m.AdmissionDetailComponent)
+        loadComponent: () => import('./features/enrollment/enrollment-detail/admission-detail.component').then(m => m.AdmissionDetailComponent)
       }
     ]
   },

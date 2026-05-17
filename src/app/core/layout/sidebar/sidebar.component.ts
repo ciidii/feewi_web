@@ -65,10 +65,10 @@ export class SidebarComponent {
 
   // --- 1. ENROLLMENT SERVICE ---
   enrollmentItems = [
-    { label: 'Tableau de bord', icon: BarChart3, route: '/admin/admissions' },
-    { label: 'Liste des dossiers', icon: Briefcase, route: '/admin/admissions/list' },
-    { label: 'Réinscription', icon: UserPlus, route: '/admin/admissions/re-enrollment' },
-    { label: 'Paramètres Portail', icon: Globe, route: '/admin/admissions/settings' },
+    { label: 'Tableau de bord', icon: BarChart3, route: '/admin/enrollment' },
+    { label: 'Liste des dossiers', icon: Briefcase, route: '/admin/enrollment/list' },
+    { label: 'Réinscription', icon: UserPlus, route: '/admin/enrollment/re-enrollment' },
+    { label: 'Paramètres Portail', icon: Globe, route: '/admin/enrollment/settings' },
   ];
 
   // --- 2. STUDENT REGISTRY ---

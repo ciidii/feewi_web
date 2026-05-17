@@ -10,7 +10,7 @@ export const API_ENDPOINTS = {
       SUMMARY: '/public/config/summary',
       DEFAULT_CONFIG: '/public/config/default',
       EFFECTIVE_CONFIG: (levelId: string) => `/public/config/${levelId}`,
-      
+
       // Admissons / Bundles
       CREATE_BUNDLE: '/public/admissions/bundles',
       GET_BUNDLE: (id: string) => `/public/admissions/bundles/${id}`,
@@ -37,7 +37,7 @@ export const API_ENDPOINTS = {
       CYCLE_OVERRIDE: (cycleType: string) => `/admin/config/cycle-overrides/${cycleType}`,
       LEVEL_OVERRIDE: (levelId: string) => `/admin/config/level-overrides/${levelId}`,
       CONFIG_RESET: '/admin/config/reset',
-      
+
       // Admissions
       ADMISSIONS: '/admin/admissions',
       ADMISSION_DETAILS: (id: string) => `/admin/admissions/${id}/details`,
@@ -46,7 +46,7 @@ export const API_ENDPOINTS = {
       RECEIVE_DOCUMENT: (id: string, docCode: string) => `/admin/admissions/${id}/documents/${docCode}/receive`,
       VERIFY: (id: string) => `/admin/admissions/${id}/verify`,
       CANCEL: (id: string) => `/admin/admissions/${id}/cancel`,
-      
+
       // Direction
       ADMIT: (id: string) => `/admin/direction/admissions/${id}/admit`,
       VALIDATE: (id: string) => `/admin/direction/admissions/${id}/validate`,
@@ -56,7 +56,7 @@ export const API_ENDPOINTS = {
       BULK_VALIDATE: '/admin/direction/admissions/bulk-validate',
     }
   },
-  
+
   ACADEMIC: {
     YEARS: '/years',
     CURRENT_YEAR: '/years/current',

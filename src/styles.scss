@@ -596,3 +596,16 @@ html { height: 100%; }
     }
   }
 }
+
+/* --- NOTIFICATION POPOVER OVERRIDES --- */
+.notification-menu-panel {
+  margin-top: 12px;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+  max-width: none !important;
+
+  .mat-mdc-menu-content {
+    padding: 0 !important;
+  }
+}

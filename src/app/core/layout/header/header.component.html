@@ -36,10 +36,22 @@
     <div class="v-divider"></div>
 
     <!-- Notifications -->
-    <button class="header-btn notification-trigger" title="Centre de notifications">
-      <lucide-icon [name]="Bell" [size]="16"></lucide-icon>
-      <span class="notification-pulse"></span>
-    </button>
+    <div class="notification-wrapper">
+      <button 
+        class="header-btn notification-trigger" 
+        title="Centre de notifications"
+        [matMenuTriggerFor]="notificationMenu"
+      >
+        <lucide-icon [name]="Bell" [size]="16"></lucide-icon>
+        <span *ngIf="unreadCount() > 0" class="notification-pulse"></span>
+      </button>
+
+      <mat-menu #notificationMenu="matMenu" class="notification-menu-panel" xPosition="before" [overlapTrigger]="false">
+        <div (click)="$event.stopPropagation()" class="popover-wrapper">
+          <app-notification-popover></app-notification-popover>
+        </div>
+      </mat-menu>
+    </div>
   </div>
 
 </header>

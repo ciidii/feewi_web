@@ -79,10 +79,10 @@ export type ConfigScope = 'GLOBAL' | 'LEVEL' | 'YEAR' | 'CYCLE';
     FwTabsComponent,
     BlockLoaderComponent
   ],
-  templateUrl: './admission-config.component.html',
-  styleUrls: ['./admission-config.component.scss']
+  templateUrl: './enrollment-config.component.html',
+  styleUrls: ['./enrollment-config.component.scss']
 })
-export class AdmissionConfigComponent implements OnInit {
+export class EnrollmentConfigComponent implements OnInit {
   private enrollmentService = inject(EnrollmentAdminService);
   private academicService = inject(AcademicService);
   private notificationService = inject(NotificationService);

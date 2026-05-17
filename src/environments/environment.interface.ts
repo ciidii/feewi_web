@@ -15,6 +15,7 @@ export interface Environment {
     school: string;
     documents: string;
     student: string;
+    notifications: string;
   };
   features: {
     enableAnalytics: boolean;
