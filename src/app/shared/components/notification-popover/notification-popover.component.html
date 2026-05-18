@@ -46,41 +46,51 @@
       class="notification-item group"
       [class.is-unread]="n.status !== 'READ'"
     >
-      <!-- Icon with visual meta -->
-      <div 
-        class="type-icon-wrap"
-        [ngClass]="getMeta(n.type).bgClass"
-      >
-        <lucide-icon 
-          [name]="getMeta(n.type).icon" 
-          [size]="18" 
-          [ngClass]="getMeta(n.type).colorClass"
-        ></lucide-icon>
+      <!-- Visual Identity -->
+      <div class="item-visual">
+        <div 
+          class="type-icon-wrap"
+          [ngClass]="getMeta(n.type).bgClass"
+        >
+          <lucide-icon 
+            [name]="getMeta(n.type).icon" 
+            [size]="16" 
+            [ngClass]="getMeta(n.type).colorClass"
+          ></lucide-icon>
+        </div>
       </div>
 
       <!-- Content -->
       <div class="item-body">
-        <div class="item-header">
-          <h4 class="subject" [title]="n.subject">{{ n.subject }}</h4>
+        <div class="item-top">
+          <!-- Type Badge -->
+          <span 
+            class="type-badge"
+            [ngClass]="[getMeta(n.type).bgClass, getMeta(n.type).colorClass]"
+          >
+            {{ getMeta(n.type).label }}
+          </span>
           <span class="time">{{ n.createdAt | date:'HH:mm' }}</span>
         </div>
-        <div class="content line-clamp-2" [innerHTML]="n.content"></div>
+
+        <h4 class="subject" [title]="n.subject">{{ n.subject }}</h4>
+        <div class="summary line-clamp-1" [innerHTML]="n.content"></div>
         
-        <div class="item-footer">
+        <div class="item-bottom">
           <div class="date-wrap">
             <lucide-icon [name]="Clock" [size]="10"></lucide-icon>
             {{ n.createdAt | date:'dd MMM' }}
           </div>
-          <div *ngIf="n.link" class="action-hint">
-            <lucide-icon [name]="ExternalLink" [size]="10"></lucide-icon>
+          <div *ngIf="getMeta(n.type).routePattern && n.targetId" class="action-hint">
             Détails
+            <lucide-icon [name]="ExternalLink" [size]="10"></lucide-icon>
           </div>
         </div>
       </div>
 
-      <!-- Unread Dot -->
-      <div *ngIf="n.status !== 'READ'" class="unread-dot-wrap">
-        <div class="pulse-dot"></div>
+      <!-- Unread Indicator -->
+      <div *ngIf="n.status !== 'READ'" class="unread-mark">
+        <div class="dot"></div>
       </div>
     </div>
 

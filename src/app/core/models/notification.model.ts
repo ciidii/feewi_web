@@ -17,14 +17,16 @@ export interface NotificationResponse {
   subject: string;
   content: string;
   status: 'PENDING' | 'SENT' | 'FAILED' | 'READ';
-  link?: string;
+  targetId?: string; // ID de la ressource concernée
   createdAt: string;
   sentAt?: string;
   readAt?: string | null;
 }
 
 export interface NotificationMetadata {
+  label: string; // Human readable label (e.g., 'Admission')
   icon: any; // Lucide icon
   colorClass: string; // CSS class for color (e.g., 'text-emerald-500')
   bgClass: string; // CSS class for background (e.g., 'bg-emerald-50')
+  routePattern?: string; // Angular route pattern (e.g., '/admin/enrollment/admissions/:id')
 }

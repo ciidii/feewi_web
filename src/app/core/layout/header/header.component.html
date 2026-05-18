@@ -41,6 +41,7 @@
         class="header-btn notification-trigger" 
         title="Centre de notifications"
         [matMenuTriggerFor]="notificationMenu"
+        #notificationMenuTrigger="matMenuTrigger"
       >
         <lucide-icon [name]="Bell" [size]="16"></lucide-icon>
         <span *ngIf="unreadCount() > 0" class="notification-pulse"></span>
@@ -48,9 +49,10 @@
 
       <mat-menu #notificationMenu="matMenu" class="notification-menu-panel" xPosition="before" [overlapTrigger]="false">
         <div (click)="$event.stopPropagation()" class="popover-wrapper">
-          <app-notification-popover></app-notification-popover>
+          <app-notification-popover (actionTaken)="notificationMenuTrigger.closeMenu()"></app-notification-popover>
         </div>
       </mat-menu>
+
     </div>
   </div>
 

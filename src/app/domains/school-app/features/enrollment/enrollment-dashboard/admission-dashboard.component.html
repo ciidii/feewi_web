@@ -10,14 +10,14 @@
       <lucide-icon [name]="Clock" class="w-3.5 h-3.5"></lucide-icon>
       <span>Session 2026/2027</span>
     </div>
-    <app-fw-button variant="primary" size="sm" [icon]="Plus" routerLink="/admin/admissions/direct">
+    <app-fw-button variant="primary" size="sm" [icon]="Plus" routerLink="/admin/enrollment/direct">
       Nouvelle Inscription
     </app-fw-button>
   </div>
 
   <!-- DASHBOARD BODY -->
   <div class="animate-in fade-in duration-700 space-y-6" *ngIf="!isLoading(); else skeletons">
-    
+
     <!-- COUCHE 1 : TOP METRICS (STRIP) -->
     <section class="stats-strip">
       <div class="stat-metric-card">
@@ -75,12 +75,12 @@
       <section class="work-section main-col">
         <header class="section-header">
           <h3>Actions Prioritaires</h3>
-          <app-fw-button variant="tertiary" size="sm" [icon]="ArrowRight" routerLink="/admin/admissions/list">Liste complète</app-fw-button>
+          <app-fw-button variant="tertiary" size="sm" [icon]="ArrowRight" routerLink="/admin/enrollment/list">Liste complète</app-fw-button>
         </header>
         <div class="section-body">
           <table class="compact-action-table">
             <tbody>
-              <tr [routerLink]="['/admin/admissions/list']" [queryParams]="{status: 'SUBMITTED'}" class="cursor-pointer group">
+              <tr [routerLink]="['/admin/enrollment/list']" [queryParams]="{status: 'SUBMITTED'}" class="cursor-pointer group">
                 <td class="action-cell">
                   <div class="icon-box-smart verify">
                     <lucide-icon [name]="ClipboardCheck"></lucide-icon>
@@ -90,7 +90,7 @@
                 </td>
                 <td class="chevron-cell"><lucide-icon [name]="ArrowRight" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all"></lucide-icon></td>
               </tr>
-              <tr [routerLink]="['/admin/admissions/list']" [queryParams]="{status: 'VERIFIED'}" class="cursor-pointer group">
+              <tr [routerLink]="['/admin/enrollment/list']" [queryParams]="{status: 'VERIFIED'}" class="cursor-pointer group">
                 <td class="action-cell">
                   <div class="icon-box-smart evaluate">
                     <lucide-icon [name]="GraduationCap"></lucide-icon>
@@ -100,7 +100,7 @@
                 </td>
                 <td class="chevron-cell"><lucide-icon [name]="ArrowRight" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all"></lucide-icon></td>
               </tr>
-              <tr [routerLink]="['/admin/admissions/list']" [queryParams]="{incomplete: true}" class="cursor-pointer group">
+              <tr [routerLink]="['/admin/enrollment/list']" [queryParams]="{incomplete: true}" class="cursor-pointer group">
                 <td class="action-cell">
                   <div class="icon-box-smart incomplete">
                     <lucide-icon [name]="XCircle"></lucide-icon>
@@ -110,7 +110,7 @@
                 </td>
                 <td class="chevron-cell"><lucide-icon [name]="ArrowRight" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all"></lucide-icon></td>
               </tr>
-              <tr [routerLink]="['/admin/admissions/list']" [queryParams]="{status: 'ADMITTED'}" class="cursor-pointer group">
+              <tr [routerLink]="['/admin/enrollment/list']" [queryParams]="{status: 'ADMITTED'}" class="cursor-pointer group">
                 <td class="action-cell">
                   <div class="icon-box-smart decision">
                     <lucide-icon [name]="ShieldCheck"></lucide-icon>
@@ -128,7 +128,7 @@
       <!-- Taux d'Occupation (Aligné en hauteur) -->
       <section class="monitoring-card side-col h-full flex flex-col">
         <h3 class="card-title"><lucide-icon [name]="School" class="w-4 h-4"></lucide-icon> Taux d'Occupation</h3>
-        
+
         <div class="flex-1 space-y-5">
           <div *ngFor="let lvl of levelStats().slice(0, 4)" class="level-filling-item">
             <div class="info"><span class="name">{{ lvl.name }}</span><span class="pct">{{ lvl.occupancyRate }}%</span></div>

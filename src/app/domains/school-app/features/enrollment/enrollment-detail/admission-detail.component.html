@@ -1,5 +1,5 @@
 <app-fw-page-shell
-  [backLink]="['/admin/admissions/list']"
+  [backLink]="['/admin/enrollment/list']"
   density="compact"
 >
   <!-- STICKY HEADER ACTIONS -->
@@ -61,7 +61,7 @@
   </div>
 
   <!-- MAIN LAYOUT -->
-  <div class="decision-hub-layout animate-in fade-in duration-700" 
+  <div class="decision-hub-layout animate-in fade-in duration-700"
        [class.is-loading]="isActionLoading()"
        *ngIf="application(); let app; else skeletons">
 

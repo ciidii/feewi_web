@@ -34,10 +34,10 @@ export interface WorkflowStep {
   selector: 'app-admission-workflow',
   standalone: true,
   imports: [CommonModule, LucideAngularModule],
-  templateUrl: './admission-workflow.component.html',
-  styleUrls: ['./admission-workflow.component.scss']
+  templateUrl: './enrollment-workflow.component.html',
+  styleUrls: ['./enrollment-workflow.component.scss']
 })
-export class AdmissionWorkflowComponent {
+export class EnrollmentWorkflowComponent {
   /** État actuel du dossier d'admission */
   state = input.required<AdmissionState>();
 

@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, EventEmitter, inject, Output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { 
@@ -23,6 +23,8 @@ import { SkeletonComponent } from '../skeleton/skeleton.component';
 export class NotificationPopoverComponent {
   private notificationService = inject(InAppNotificationService);
   private router = inject(Router);
+
+  @Output() actionTaken = new EventEmitter<void>();
 
   // Icons
   readonly Bell = Bell;
@@ -53,12 +55,21 @@ export class NotificationPopoverComponent {
    * Marque une notification comme lue et redirige si lien présent
    */
   handleAction(notification: NotificationResponse) {
+    // 1. Marquer comme lu (Optimiste)
     if (notification.status !== 'READ') {
       this.notificationService.markAsRead(notification.id).subscribe();
     }
 
-    if (notification.link) {
-      this.router.navigateByUrl(notification.link);
+    // 2. Notifier le parent pour fermer le menu
+    this.actionTaken.emit();
+
+    // 3. Rediriger avec un léger délai
+    // Le délai permet au menu de se fermer proprement sans interrompre le routeur
+    const url = this.notificationService.getNotificationUrl(notification);
+    if (url) {
+      setTimeout(() => {
+        this.router.navigateByUrl(url);
+      }, 50);
     }
   }
 

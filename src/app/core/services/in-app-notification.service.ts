@@ -1,5 +1,6 @@
 import {inject, Injectable, OnDestroy, signal} from '@angular/core';
 import {HttpClient, HttpParams} from '@angular/common/http';
+import {Router} from '@angular/router';
 import {catchError, finalize, map, Observable, of, tap} from 'rxjs';
 import {AlertTriangle, Bell, CheckCircle, CreditCard, FilePlus, Info, UserPlus} from 'lucide-angular';
 
@@ -13,6 +14,7 @@ import {NotificationMetadata, NotificationResponse, NotificationType} from '../m
 })
 export class InAppNotificationService implements OnDestroy {
   private http = inject(HttpClient);
+  private router = inject(Router);
   private envService = inject(EnvironmentService);
   private authService = inject(AuthService);
   private toastService = inject(ToastService);
@@ -33,36 +35,48 @@ export class InAppNotificationService implements OnDestroy {
   // --- Registry of Notification Types ---
   private readonly METADATA_REGISTRY: Record<NotificationType, NotificationMetadata> = {
     'ADMISSION_SUBMITTED': {
+      label: 'Admission',
       icon: FilePlus,
       colorClass: 'text-indigo-500',
-      bgClass: 'bg-indigo-50'
+      bgClass: 'bg-indigo-50',
+      routePattern: '/admin/enrollment/:id'
     },
     'ADMISSION_VALIDATED': {
+      label: 'Admission',
       icon: CheckCircle,
       colorClass: 'text-emerald-500',
-      bgClass: 'bg-emerald-50'
+      bgClass: 'bg-emerald-50',
+      routePattern: '/admin/enrollment/:id'
     },
     'PAYMENT_RECEIVED': {
+      label: 'Paiement',
       icon: CreditCard,
       colorClass: 'text-blue-500',
-      bgClass: 'bg-blue-50'
+      bgClass: 'bg-blue-50',
+      routePattern: '/admin/finances/payments/:id'
     },
     'PAYMENT_REQUESTED': {
+      label: 'Facturation',
       icon: CreditCard,
       colorClass: 'text-amber-500',
-      bgClass: 'bg-amber-50'
+      bgClass: 'bg-amber-50',
+      routePattern: '/admin/finances/invoices/:id'
     },
     'CLASS_ASSIGNED': {
+      label: 'Classe',
       icon: UserPlus,
       colorClass: 'text-indigo-500',
-      bgClass: 'bg-indigo-50'
+      bgClass: 'bg-indigo-50',
+      routePattern: '/admin/academic/classes/:id'
     },
     'GENERAL_INFO': {
+      label: 'Info',
       icon: Info,
       colorClass: 'text-slate-500',
       bgClass: 'bg-slate-50'
     },
     'URGENT_ALERT': {
+      label: 'Alerte',
       icon: AlertTriangle,
       colorClass: 'text-rose-500',
       bgClass: 'bg-rose-50'
@@ -72,6 +86,23 @@ export class InAppNotificationService implements OnDestroy {
   constructor() {
     // Initialisation du compteur
     this.refreshUnreadCount();
+  }
+
+  /**
+   * Construit l'URL finale à partir du pattern et du targetId
+   */
+  getNotificationUrl(notification: NotificationResponse): string | null {
+    const meta = this.getMetadata(notification.type);
+    console.log('[NotificationService] Generating URL for type:', notification.type, 'with targetId:', notification.targetId);
+    
+    if (meta.routePattern && notification.targetId) {
+      const url = meta.routePattern.replace(':id', notification.targetId);
+      console.log('[NotificationService] Resulting URL:', url);
+      return url;
+    }
+    
+    console.warn('[NotificationService] No route pattern or targetId found for notification');
+    return null;
   }
 
   ngOnDestroy(): void {
@@ -92,13 +123,12 @@ export class InAppNotificationService implements OnDestroy {
     this.abortController = new AbortController();
 
     try {
-      console.log('[NotificationService] 🛰️ Connecting to stream via Fetch...');
-
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Accept': 'text/event-stream'
+          'Accept': 'text/event-stream',
+          'Cache-Control': 'no-cache'
         },
         signal: this.abortController.signal
       });
@@ -107,7 +137,7 @@ export class InAppNotificationService implements OnDestroy {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      console.log('[NotificationService] ✅ Stream connected');
+      console.log('[NotificationService] 🛰️ Stream connected (Fetch)');
 
       const reader = response.body?.getReader();
       if (!reader) return;
@@ -116,12 +146,11 @@ export class InAppNotificationService implements OnDestroy {
       let buffer = '';
 
       while (true) {
-        const {value, done} = await reader.read();
+        const { value, done } = await reader.read();
         if (done) break;
 
-        buffer += decoder.decode(value, {stream: true});
+        buffer += decoder.decode(value, { stream: true });
 
-        // Split par double newline (format SSE standard)
         const parts = buffer.split('\n\n');
         buffer = parts.pop() || '';
 
@@ -131,13 +160,21 @@ export class InAppNotificationService implements OnDestroy {
       }
     } catch (error: any) {
       if (error.name === 'AbortError') {
-        console.log('[NotificationService] Stream connection closed.');
+        console.log('[NotificationService] Stream connection intentionally closed.');
       } else {
-        console.error('[NotificationService] Stream error:', error);
-        // Tentative de reconnexion automatique après 5 secondes
-        setTimeout(() => this.connect(), 5000);
+        // En cas d'erreur de flux (timeout serveur, coupure réseau), on reconnecte silencieusement
+        console.warn('[NotificationService] Stream interrupted, reconnecting in 5s...', error.message);
+        this.cleanupAndReconnect();
       }
     }
+  }
+
+  /**
+   * Nettoie proprement et relance la connexion
+   */
+  private cleanupAndReconnect(): void {
+    this.disconnect();
+    setTimeout(() => this.connect(), 5000);
   }
 
   private parseEvent(rawEvent: string): void {
@@ -146,14 +183,18 @@ export class InAppNotificationService implements OnDestroy {
     let data = '';
 
     for (const line of lines) {
-      if (line.startsWith('event:')) {
-        eventType = line.replace('event:', '').trim();
-      } else if (line.startsWith('data:')) {
-        data = line.replace('data:', '').trim();
+      const trimmed = line.trim();
+      if (trimmed.startsWith('event:')) {
+        eventType = trimmed.replace('event:', '').trim();
+      } else if (trimmed.startsWith('data:')) {
+        data = trimmed.replace('data:', '').trim();
       }
     }
 
-    if (eventType === 'NOTIFICATION' && data) {
+    // On gère l'INIT pour le debug, et NOTIFICATION pour les données
+    if (eventType === 'INIT') {
+      console.log('[NotificationService] 🔔 Channel initialized:', data);
+    } else if (eventType === 'NOTIFICATION' && data) {
       try {
         const notification = JSON.parse(data) as NotificationResponse;
         this.pushNewNotification(notification);
@@ -162,6 +203,7 @@ export class InAppNotificationService implements OnDestroy {
       }
     }
   }
+
 
   /**
    * Ferme la connexion
@@ -253,6 +295,18 @@ export class InAppNotificationService implements OnDestroy {
     this._unreadCount.update(c => c + 1);
 
     // Alerte visuelle via Toastr
-    this.toastService.info(notification.subject, 'Notification');
+    const toast = this.toastService.info(notification.subject, 'Notification');
+    
+    // Si l'utilisateur clique sur le toast, on redirige et on marque comme lu
+    toast.onTap.subscribe(() => {
+      if (notification.status !== 'READ') {
+        this.markAsRead(notification.id).subscribe();
+      }
+      
+      const url = this.getNotificationUrl(notification);
+      if (url) {
+        this.router.navigateByUrl(url);
+      }
+    });
   }
 }

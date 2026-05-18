@@ -45,7 +45,7 @@ import {AcademicService} from '../../../../../core/services/academic.service';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {NotificationService} from '../../../../../shared/services/notification.service';
 import {AcademicYear, Filiere, Level} from '../../../../../core/models/academic.model';
-import {AdmissionWorkflowComponent} from '../components/admission-workflow/admission-workflow.component';
+import {EnrollmentWorkflowComponent} from '../components/admission-workflow/enrollment-workflow.component';
 import {FormsModule} from '@angular/forms';
 import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
 import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
@@ -69,7 +69,7 @@ import {FwDatePipe} from '../../../../../shared/pipes/fw-date.pipe';
     CommonModule,
     LucideAngularModule,
     RouterModule,
-    AdmissionWorkflowComponent,
+    EnrollmentWorkflowComponent,
     FormsModule,
     MatDialogModule,
     FwPageShellComponent,

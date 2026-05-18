@@ -22,6 +22,7 @@ Lorsqu'une notification est renvoyée par l'API, elle respecte la structure suiv
   "type": "ADMISSION_VALIDATED", // Type métier (ex: PAYMENT_REQUESTED, GENERAL_INFO)
   "subject": "[Feewi] Félicitations ! Votre enfant est admis",
   "content": "<p>Contenu HTML ou texte de la notification...</p>",
+  "targetId": "8dac21a7-15f9-4847-8cf8-c375fdcfb809", // ID de la ressource concernée
   "status": "SENT", // PENDING, SENT, FAILED, READ
   "createdAt": "2026-05-13T10:00:00Z",
   "sentAt": "2026-05-13T10:00:02Z",
@@ -31,7 +32,17 @@ Lorsqu'une notification est renvoyée par l'API, elle respecte la structure suiv
 
 ---
 
-## 3. Endpoints REST (Frontend Integration)
+## 3. Stratégie de Routage (Découplage)
+Le Backend ne génère **aucune URL codée en dur**. À la place, il fournit le champ `targetId`. 
+
+**Responsabilité du Frontend :**
+Le frontend doit mapper le `type` de la notification à une route Angular et y injecter le `targetId`. 
+*   Exemple : Si `type === 'ADMISSION_SUBMITTED'`, naviguer vers `/admin/enrollment/admissions/{{targetId}}`.
+*   Cela permet de changer les routes du frontend sans jamais impacter le backend.
+
+---
+
+## 4. Endpoints REST (Frontend Integration)
 
 ### 3.1. Récupérer l'historique de mes notifications
 *   **URL :** `GET /mine`
@@ -61,7 +72,9 @@ Le frontend doit ouvrir une connexion persistante vers cet endpoint dès que l'u
 
 *   **URL :** `/api/v1/notifications/stream` (via Gateway)
 *   **Protocole :** HTTP `text/event-stream`
-*   **Authentification :** JWT requis (passé via les cookies ou un paramètre si EventSource natif, ou via un header avec une lib comme `microsoft-fetch-event-source`).
+*   **Authentification :** JWT requis. 
+    *   **Note importante :** Comme l'API native `EventSource` des navigateurs ne permet pas de passer des headers, vous pouvez passer le token via le paramètre d'URL `access_token`.
+    *   Exemple : `/api/v1/notifications/stream?access_token=YOUR_JWT_TOKEN`
 
 ### 4.2. Événements reçus
 Une fois connecté, le frontend peut recevoir les événements suivants :
