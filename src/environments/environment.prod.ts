@@ -2,7 +2,7 @@ import {Environment} from './environment.interface';
 
 export const environment: Environment = {
   production: true,
-  apiUrl: 'https://api.feewi.com',
+  apiUrl: 'https://api-feewi.salaamcenter.cloud',
   apiVersion: 'v1',
   appName: 'Feewi Education',
   logLevel: 'error',

@@ -1,0 +1,15 @@
+services:
+  feewi-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: feewi-web
+    restart: unless-stopped
+    ports:
+      - "4201:80"
+    networks:
+      - feewi-network
+
+networks:
+  feewi-network:
+    driver: bridge
