@@ -4,7 +4,3 @@ dist
 .git
 .idea
 .vscode
-Dockerfile
-docker-compose.yml
-nginx.conf
-README.md
