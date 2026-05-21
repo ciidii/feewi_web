@@ -1,6 +1,6 @@
-import {Component, computed, inject, LOCALE_ID, OnInit, signal, ViewEncapsulation} from '@angular/core';
+import {Component, computed, inject, LOCALE_ID, OnInit, signal} from '@angular/core';
 import {CommonModule, formatDate} from '@angular/common';
-import {RouterModule} from '@angular/router';
+import {Router, RouterModule} from '@angular/router';
 import {Globe, LucideAngularModule, Plus, RefreshCw, Settings, ShieldCheck, Trash2, Search} from 'lucide-angular';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {RowAction, TableRow, TabItem} from '../../../shared/models/data-list.models';
@@ -19,12 +19,11 @@ import {School} from '../../../core/models/school.model';
     RouterModule
   ],
   templateUrl: './tenant-manager.component.html',
-  styleUrls: ['./tenant-manager.component.scss'],
-  encapsulation: ViewEncapsulation.None
+  styleUrls: ['./tenant-manager.component.scss']
 })
 export class TenantManagerComponent implements OnInit {
   private schoolService = inject(SchoolService);
-  private dialog = inject(MatDialog);
+  private router = inject(Router);
   private locale = inject(LOCALE_ID);
 
   // Icônes
@@ -43,42 +42,31 @@ export class TenantManagerComponent implements OnInit {
   totalPages = signal(1);
   totalTenants = signal(0);
 
-  // Configuration des onglets pour le DataList
+  // Configuration des onglets
   tenantTabs = computed<TabItem[]>(() => [
     { label: 'Tous', icon: Globe, count: this.totalTenants() },
     { label: 'Actifs', icon: ShieldCheck },
     { label: 'En préparation', icon: Settings }
   ]);
 
-  // Actions pour les lignes
+  // Actions
   readonly tenantActions: RowAction[] = [
-    { id: 'edit', label: 'Gérer', icon: Settings, type: 'primary' },
-    { id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger' }
+    { id: 'view', label: 'Détails', icon: Search, type: 'primary' },
+    { id: 'edit', label: 'Modifier', icon: Settings, type: 'default' }
   ];
 
-  // Transformation pour le DataList (renommé en tenants pour le template)
+  // Transformation des données pour DataList
   tenants = computed<TableRow[]>(() => {
-    const query = this.searchQuery().toLowerCase();
-    const schools = this.schools().filter(s => {
-      const matchQuery = !query || 
-                        (s.name || '').toLowerCase().includes(query) || 
-                        (s.id || '').toLowerCase().includes(query);
-      
-      if (this.activeTab() === 'Actifs') return matchQuery && s.active;
-      if (this.activeTab() === 'En préparation') return matchQuery && !s.active;
-      
-      return matchQuery;
-    });
-
-    return schools.map(school => ({
-      id: school.id || Math.random().toString(),
+    return this.schools().map(school => ({
+      id: school.id || '',
       title: school.name || 'Établissement Sans Nom',
-      subtitle: `ID Technique : ${school.id}`,
+      subtitle: school.tenantId ? `${school.tenantId}.feewi.io` : 'ID non défini',
       avatarLabel: (school.name || '??').substring(0, 2).toUpperCase(),
       date: school.createdAt ? formatDate(school.createdAt, 'dd/MM/yyyy', this.locale) : 'Date inconnue',
       badges: [
-        { label: school.active ? 'ACTIF' : 'PRÉPARATION', type: school.active ? 'success' : 'warning' },
-        { label: 'SaaS', type: 'info' }
+        { label: (school.status === 'ACTIVE' || school.active !== false) ? 'ACTIF' : 'SUSPENDU', 
+          type: (school.status === 'ACTIVE' || school.active !== false) ? 'success' : 'warning' },
+        { label: school.educationTemplate || 'SaaS', type: 'info' }
       ],
       rawData: school
     }));
@@ -88,23 +76,13 @@ export class TenantManagerComponent implements OnInit {
     this.loadSchools();
   }
 
-  async loadSchools() {
+  loadSchools() {
     this.isLoading.set(true);
-    this.schoolService.getSchools().subscribe({
-      next: (data) => {
-        // Le service renvoie un tableau de School, pas une Page pour le moment selon AcademicService pattern
-        // Mais l'erreur disait "Argument of type Page<School> is not assignable to parameter of type School[]"
-        // Donc le backend semble renvoyer une Page.
-        const page = data as any;
-        if (page && page.content) {
-          this.schools.set(page.content);
-          this.totalTenants.set(page.totalElements || page.content.length);
-          this.totalPages.set(page.totalPages || 1);
-        } else if (Array.isArray(data)) {
-          this.schools.set(data);
-          this.totalTenants.set(data.length);
-          this.totalPages.set(1);
-        }
+    this.schoolService.getSchools(this.searchQuery(), this.currentPage()).subscribe({
+      next: (page) => {
+        this.schools.set(page.content);
+        this.totalTenants.set(page.totalElements);
+        this.totalPages.set(page.totalPages);
         this.isLoading.set(false);
       },
       error: () => this.isLoading.set(false)
@@ -113,10 +91,14 @@ export class TenantManagerComponent implements OnInit {
 
   onTabChange(tabLabel: string) {
     this.activeTab.set(tabLabel);
+    // Note: Si le backend supporte le filtrage par status, on pourrait recharger ici.
+    // Pour l'instant on garde le filtrage simple ou on recharge tout.
   }
 
   onSearch(query: string) {
     this.searchQuery.set(query);
+    this.currentPage.set(0);
+    this.loadSchools();
   }
 
   onPageChange(page: number) {
@@ -125,9 +107,8 @@ export class TenantManagerComponent implements OnInit {
   }
 
   handleAction(event: { actionId: string, row: TableRow }) {
-    if (event.actionId === 'edit') {
-      // Navigation vers le détail pour la gestion
-      // this.router.navigate(['/saas/tenants', event.row.id]);
+    if (event.actionId === 'view' || event.actionId === 'edit') {
+      this.router.navigate(['/saas/tenants', event.row.id]);
     }
   }
 }

@@ -6,7 +6,7 @@
 >
   <!-- CONTENU DE PAGE ALIGNÉ -->
   <div class="list-page-content animate-in fade-in duration-500">
-    
+
     <!-- BARRE DE COMMANDE UNIFIÉE (Composant Partagé) -->
     <app-fw-list-command-bar
       [searchQuery]="searchQuery()"
@@ -27,10 +27,10 @@
     >
       <!-- ACTIONS DE MASSE (Nouveau slot) -->
       <div bulk-actions>
-        <app-fw-button 
-          variant="danger" 
-          size="sm" 
-          [icon]="Trash2" 
+        <app-fw-button
+          variant="danger"
+          size="sm"
+          [icon]="Trash2"
           (click)="handleBulkDelete()"
           [loading]="isLoading()">
           Supprimer la sélection
@@ -42,7 +42,7 @@
         <app-fw-button variant="tertiary" size="sm" [icon]="Download" title="Exporter"></app-fw-button>
         <app-fw-button variant="tertiary" size="sm" [icon]="RefreshCw" [loading]="isLoading()" (click)="loadAdmissions()" title="Actualiser"></app-fw-button>
         <div class="divider-v"></div>
-        <app-fw-button variant="primary" size="sm" [icon]="UserPlus" routerLink="/admin/admissions/direct">
+        <app-fw-button variant="primary" size="sm" [icon]="UserPlus" routerLink="/admin/enrollment/direct">
           Nouveau Dossier
         </app-fw-button>
       </div>
