@@ -7,6 +7,7 @@ import {RowAction, TableRow, TabItem} from '../../../shared/models/data-list.mod
 import {DataListComponent} from '../../../shared/components/data-list/data-list.component';
 import {SchoolService} from '../../../core/services/school.service';
 import {School} from '../../../core/models/school.model';
+import {HasPermissionDirective} from '../../../shared/directives/has-permission.directive';
 
 @Component({
   selector: 'app-tenant-manager',
@@ -16,7 +17,8 @@ import {School} from '../../../core/models/school.model';
     LucideAngularModule,
     MatDialogModule,
     DataListComponent,
-    RouterModule
+    RouterModule,
+    HasPermissionDirective
   ],
   templateUrl: './tenant-manager.component.html',
   styleUrls: ['./tenant-manager.component.scss']

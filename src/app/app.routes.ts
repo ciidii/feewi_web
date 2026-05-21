@@ -15,7 +15,7 @@ export const routes: Routes = [
     path: 'saas',
     component: ShellComponent,
     canActivate: [authGuard],
-    data: {roles: ['ROLE_SUPER_ADMIN']},
+    data: {permissions: ['identity:school:read']},
     loadChildren: () => import('./domains/saas-admin/saas-admin.routes').then(m => m.SAAS_ADMIN_ROUTES)
   },
 

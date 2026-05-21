@@ -186,6 +186,18 @@ export class AuthService {
     return user ? user.permissions.includes(permission) : false;
   }
 
+  hasAnyPermission(permissions: string[]): boolean {
+    const user = this._currentUser();
+    if (!user) return false;
+    return permissions.some(p => user.permissions.includes(p));
+  }
+
+  hasAllPermissions(permissions: string[]): boolean {
+    const user = this._currentUser();
+    if (!user) return false;
+    return permissions.every(p => user.permissions.includes(p));
+  }
+
   hasRole(role: string): boolean {
     const user = this._currentUser();
     return user ? user.roles.includes(role) : false;

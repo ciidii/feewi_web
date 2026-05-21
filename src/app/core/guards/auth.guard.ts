@@ -16,7 +16,17 @@ export const authGuard: CanActivateFn = (route, state) => {
     });
   }
 
-  // 2. Check Roles (Optional)
+  // 2. Check Permissions (Primary)
+  const requiredPermissions = route.data['permissions'] as string[];
+  if (requiredPermissions && requiredPermissions.length > 0) {
+    if (!authService.hasAllPermissions(requiredPermissions)) {
+      console.warn(`[authGuard] Access denied for ${state.url}. Missing permissions: ${requiredPermissions}`);
+      return router.createUrlTree(['/403']);
+    }
+    return true;
+  }
+
+  // 3. Check Roles (Optional / Fallback)
   const requiredRoles = route.data['roles'] as string[];
   if (requiredRoles && requiredRoles.length > 0) {
     const user = authService.currentUser();
