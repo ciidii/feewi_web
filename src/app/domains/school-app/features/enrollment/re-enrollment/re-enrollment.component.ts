@@ -22,7 +22,7 @@ import {EnrollmentPublicService} from '../../../../../core/services/enrollment-p
 import {TenantContextService} from '../../../../../core/services/tenant-context.service';
 import {NotificationService} from '../../../../../shared/services/notification.service';
 import {AcademicService} from '../../../../../core/services/academic.service';
-import {User as StudentUser} from '../../../../../core/models/user.model';
+import {Staff} from '../../../../../core/models/user.model';
 import {Filiere, Level} from '../../../../../core/models/academic.model';
 
 import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
@@ -55,7 +55,7 @@ export class SecretaryReEnrollmentComponent implements OnInit, OnDestroy {
   isLoading = signal(false);
   isSaving = signal(false);
   selectedStudent = signal<any>(null);
-  searchResults = signal<StudentUser[]>([]);
+  searchResults = signal<Staff[]>([]);
 
   // Référentiels
   levels = signal<Level[]>([]);
@@ -105,8 +105,7 @@ export class SecretaryReEnrollmentComponent implements OnInit, OnDestroy {
 
     this.isLoading.set(true);
     try {
-      await firstValueFrom(this.identityService.getStaff(query, 0, 10, 'STUDENT'));
-      const page = this.identityService.staffPage();
+      const page = await firstValueFrom(this.identityService.getStaff(query, 0, 10, 'STUDENT'));
       this.searchResults.set(page?.content || []);
     } catch (e) {
       this.notificationService.error('Erreur lors de la recherche des élèves.');
@@ -116,7 +115,7 @@ export class SecretaryReEnrollmentComponent implements OnInit, OnDestroy {
   }
 
   // Sélectionner un élève
-  async selectStudent(student: StudentUser) {
+  async selectStudent(student: Staff) {
     this.isLoading.set(true);
     try {
       const year = await firstValueFrom(this.academicService.getCurrentYear());
@@ -163,7 +162,7 @@ export class SecretaryReEnrollmentComponent implements OnInit, OnDestroy {
       const res: any = await firstValueFrom(this.enrollmentService.reEnroll(payload));
       if (res) {
         this.notificationService.success(`Réinscription initiée pour ${student.name}.`);
-        this.router.navigate(['/admin/admissions', res.id]);
+        this.router.navigate(['/admin/enrollment', res.id]);
       }
     } catch (e) {
       this.notificationService.error('Erreur lors de l\'enregistrement de la réinscription.');

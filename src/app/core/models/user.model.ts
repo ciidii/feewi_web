@@ -4,11 +4,32 @@ export interface UserType {
   name: string;
 }
 
+export interface Staff {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  staffType: 'TEACHER' | 'ADMINISTRATION' | 'SUPPORT' | 'OTHER';
+  matricule?: string;
+  createdAt?: string;
+  hasUserAccount?: boolean;
+}
+
+export interface StaffCreateRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  staffType: string;
+  matricule?: string;
+}
+
 export interface User {
   id?: string;
   email: string;
-  firstName: string;
-  lastName: string;
+  firstName?: string; // Legacy or derived from staff
+  lastName?: string;  // Legacy or derived from staff
   userType?: string;
   tenantId?: string;
   active?: boolean;
@@ -20,14 +41,13 @@ export interface User {
   lastLoginAt?: string;
   connectionCount?: number;
   lastDeviceType?: string;
+  staff?: Staff; // New vision: user is linked to a staff member
 }
 
 export interface UserCreateRequest {
   email: string;
   password?: string;
-  firstName: string;
-  lastName: string;
-  userTypeCode: string; // TEACHER, STAFF, etc.
-  phone?: string;
+  staffId: string; // Mandatory in new vision
+  userTypeCode: string; // TEACHER, ADMIN, etc.
   roles: string[];
 }

@@ -1,7 +1,7 @@
 import {inject, Injectable, signal} from '@angular/core';
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {catchError, finalize, Observable, tap, throwError} from 'rxjs';
-import {User, UserCreateRequest, UserType} from '../models/user.model';
+import {Staff, StaffCreateRequest, User, UserCreateRequest, UserType} from '../models/user.model';
 import {Permission, Role} from '../models/role.model';
 import {Page} from '../models/school.model';
 import {AuditLog} from '../models/audit.model';
@@ -19,8 +19,11 @@ export class IdentityService {
   private readonly API_URL = this.envService.getServiceUrl('identity');
 
   // State
-  private _staffPage = signal<Page<User> | null>(null);
+  private _staffPage = signal<Page<Staff> | null>(null);
   readonly staffPage = this._staffPage.asReadonly();
+
+  private _userPage = signal<Page<User> | null>(null);
+  readonly userPage = this._userPage.asReadonly();
 
   private _roles = signal<Role[]>([]);
   readonly roles = this._roles.asReadonly();
@@ -37,9 +40,9 @@ export class IdentityService {
   }
 
   /**
-   * Liste les membres du personnel (Staff)
+   * Liste les membres du personnel (Staff - Identité physique RH)
    */
-  getStaff(search: string = '', page: number = 0, size: number = 10, type?: string): Observable<Page<User>> {
+  getStaff(search: string = '', page: number = 0, size: number = 10, type?: string): Observable<Page<Staff>> {
     this._loading.set(true);
     let params = new HttpParams()
       .set('search', search)
@@ -48,9 +51,48 @@ export class IdentityService {
 
     if (type) params = params.set('type', type);
 
-    return this.http.get<Page<User>>(`${this.API_URL}/users`, { params }).pipe(
+    return this.http.get<Page<Staff>>(`${this.API_URL}/staffs`, { params }).pipe(
       tap(response => this._staffPage.set(response)),
-      catchError(this.handleError('Erreur lors de la récupération des utilisateurs')),
+      catchError(this.handleError('Erreur lors de la récupération du personnel')),
+      finalize(() => this._loading.set(false))
+    );
+  }
+
+  /**
+   * Crée un nouveau membre du personnel (RH)
+   */
+  createStaff(request: StaffCreateRequest): Observable<Staff> {
+    this._loading.set(true);
+    return this.http.post<Staff>(`${this.API_URL}/staffs`, request).pipe(
+      catchError(this.handleError('Erreur lors de la création du membre du personnel')),
+      finalize(() => this._loading.set(false))
+    );
+  }
+
+  /**
+   * Liste les comptes utilisateurs (Accès système)
+   */
+  getUsers(search: string = '', page: number = 0, size: number = 10): Observable<Page<User>> {
+    this._loading.set(true);
+    const params = new HttpParams()
+      .set('search', search)
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    return this.http.get<Page<User>>(`${this.API_URL}/users`, { params }).pipe(
+      tap(response => this._userPage.set(response)),
+      catchError(this.handleError('Erreur lors de la récupération des comptes utilisateurs')),
+      finalize(() => this._loading.set(false))
+    );
+  }
+
+  /**
+   * Crée un compte utilisateur lié à un Staff
+   */
+  createUserAccount(request: UserCreateRequest): Observable<User> {
+    this._loading.set(true);
+    return this.http.post<User>(`${this.API_URL}/users`, request).pipe(
+      catchError(this.handleError('Erreur lors de la création du compte utilisateur')),
       finalize(() => this._loading.set(false))
     );
   }
@@ -65,22 +107,11 @@ export class IdentityService {
   }
 
   /**
-   * Récupère le profil complet d'un utilisateur (Vue Administrative)
+   * Récupère le profil complet d'un utilisateur
    */
   getUserProfile(id: string): Observable<User> {
     return this.http.get<User>(`${this.API_URL}/users/${id}/profile`).pipe(
       catchError(this.handleError('Impossible de charger le profil utilisateur'))
-    );
-  }
-
-  /**
-   * Crée un nouvel employé
-   */
-  createStaff(request: UserCreateRequest): Observable<User> {
-    this._loading.set(true);
-    return this.http.post<User>(`${this.API_URL}/users`, request).pipe(
-      catchError(this.handleError('Erreur lors de la création de l\'utilisateur')),
-      finalize(() => this._loading.set(false))
     );
   }
 

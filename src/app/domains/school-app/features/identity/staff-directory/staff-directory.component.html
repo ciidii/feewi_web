@@ -27,6 +27,7 @@
         <app-fw-button variant="tertiary" size="sm" [icon]="RefreshCw" [loading]="isLoading()" (click)="loadStaff(searchQuery())" title="Actualiser"></app-fw-button>
         <div class="divider-v"></div>
         <app-fw-button 
+          *fwHasPermission="'identity:user:write'"
           (click)="openAddStaffForm()"
           variant="primary"
           size="sm"

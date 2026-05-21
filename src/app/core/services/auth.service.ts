@@ -6,6 +6,7 @@ import {TenantContextService} from './tenant-context.service';
 import {SchoolService} from './school.service';
 import {NavigationContextService} from './navigation-context.service';
 import {EnvironmentService} from './environment.service';
+import {Staff} from '../models/user.model';
 
 export interface UserProfile {
   id: string;
@@ -18,6 +19,7 @@ export interface UserProfile {
   permissions: string[];
   allowedCycles: string[];
   educationTemplate: string;
+  staff?: Staff;
 }
 
 interface LoginResponse {

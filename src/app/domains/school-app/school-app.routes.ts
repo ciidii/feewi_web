@@ -52,16 +52,19 @@ export const SCHOOL_APP_ROUTES: Routes = [
       {
         path: 'staff',
         title: 'Répertoire du Personnel',
+        data: {permissions: ['identity:user:read']},
         loadComponent: () => import('./features/identity/staff-directory/staff-directory.component').then(m => m.StaffDirectoryComponent)
       },
       {
         path: 'roles',
         title: 'Gestion des Rôles',
+        data: {permissions: ['identity:role:read']},
         loadComponent: () => import('./features/identity/role-designer/role-designer.component').then(m => m.RoleDesignerComponent)
       },
       {
         path: 'audit',
         title: 'Piste d’Audit',
+        data: {permissions: ['identity:audit:read']},
         loadComponent: () => import('./features/identity/audit-trail/audit-trail.component').then(m => m.AuditTrailComponent)
       }
     ]

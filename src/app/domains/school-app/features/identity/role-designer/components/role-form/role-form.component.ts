@@ -55,18 +55,18 @@ export class RoleFormComponent implements OnInit {
   async onSave() {
     if (this.roleForm.invalid) {
       this.roleForm.markAllAsTouched();
-      this.notificationService.warning('Verifiez les champs avant de continuer.', 'Formulaire incomplet');
+      this.notificationService.warning('Vérifiez les champs avant de continuer.', 'Formulaire incomplet');
       return;
     }
 
     try {
       const roleData = this.roleForm.value;
       await firstValueFrom(this.identityService.createRole(roleData));
-      this.notificationService.success('Role cree avec succes.', 'Creation terminee');
+      this.notificationService.success('Rôle créé avec succès.', 'Création terminée');
       this.dialogRef.close(true);
     } catch (err: any) {
-      const message = err?.error?.message || err?.message || 'Echec lors de la creation du role.';
-      this.notificationService.error(message, 'Echec de creation');
+      const message = err?.error?.message || err?.message || 'Échec lors de la création du rôle.';
+      this.notificationService.error(message, 'Échec de création');
       console.error('Failed to create role', err);
     }
   }
@@ -88,7 +88,7 @@ export class RoleFormComponent implements OnInit {
   getErrorMessage(controlName: string): string {
     const control = this.roleForm.get(controlName);
     if (control?.hasError('required')) return 'Ce champ est obligatoire';
-    if (control?.hasError('minlength')) return `Minimum ${control.errors?.['minlength'].requiredLength} caracteres`;
+    if (control?.hasError('minlength')) return `Minimum ${control.errors?.['minlength'].requiredLength} caractères`;
     if (control?.hasError('pattern')) return 'Le nom doit commencer par ROLE_ (ex: ROLE_SURVEILLANT)';
     return 'Champ invalide';
   }

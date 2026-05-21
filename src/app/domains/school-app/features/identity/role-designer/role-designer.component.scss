@@ -1,78 +1,123 @@
 @use '../../../../../../styles/tokens' as *;
 
+// 1. Mise en page globale
 :host { 
   display: block; 
-  height: 100vh; 
+  height: 100%; 
   background-color: var(--fw-surface-page);
-  overflow: hidden;
 }
 
 .config-feature-root {
   display: grid;
   grid-template-columns: 280px 1fr;
-  gap: 0;
-  height: 100vh;
+  height: calc(100vh - 110px);
+  background-color: var(--fw-surface-card);
+  border: 1px solid var(--fw-border);
+  border-radius: var(--fw-radius-lg);
+  overflow: hidden;
 }
 
 .config-viewport {
   height: 100%;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
-// ─── SCOPE SIDEBAR (Flat Design) ──────────────────────────────────────
+// 2. Sidebar (Navigation des rôles)
 .scope-sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: var(--fw-space-md) var(--fw-space-sm);
   background-color: var(--fw-surface-card);
   border-right: 1px solid var(--fw-border);
-  padding: var(--fw-space-md) var(--fw-space-sm);
-  display: flex; flex-direction: column;
-  height: 100vh;
+  overflow: hidden;
 
   .sidebar-header {
-    display: flex; align-items: center; gap: var(--fw-space-sm);
-    padding-bottom: var(--fw-space-md); 
-    margin-bottom: var(--fw-space-sm);
+    display: flex;
+    align-items: center;
+    gap: var(--fw-space-sm);
+    padding-bottom: var(--fw-space-md);
+    margin-bottom: var(--fw-space-md);
     border-bottom: 1px solid var(--fw-border);
 
     .sidebar-brand-icon-alt {
-      width: 28px; height: 28px; border-radius: var(--fw-radius-md); flex-shrink: 0;
-      display: grid; place-items: center;
-      background-color: var(--fw-surface-sunken); color: var(--fw-primary);
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      color: var(--fw-primary);
+      background-color: var(--fw-surface-sunken);
+      border-radius: var(--fw-radius-md);
     }
 
-    .sidebar-brand-text {
-      display: flex; flex-direction: column;
-      .sidebar-brand-name { font-size: 0.75rem; font-weight: 800; color: var(--fw-text-primary); line-height: 1.1; }
-      .sidebar-brand-year { font-size: 9px; color: var(--fw-text-tertiary); font-weight: 600; }
+    .sidebar-brand-name {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: var(--fw-text-primary);
+    }
+    
+    .sidebar-brand-year {
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--fw-text-tertiary);
     }
   }
 
   .nav-section-title {
-    font-size: 9px; font-weight: 850; text-transform: uppercase;
-    color: var(--fw-text-tertiary); letter-spacing: 0.05em;
-    padding: 0 var(--fw-space-sm); 
     margin-bottom: var(--fw-space-sm);
+    padding: 0 var(--fw-space-sm);
+    font-size: 9px;
+    font-weight: 850;
+    color: var(--fw-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .levels-scroll {
+    flex: 1;
+    overflow-y: auto;
   }
 
   .scope-item {
-    display: flex; align-items: center; gap: var(--fw-space-sm);
-    padding: var(--fw-space-sm) var(--fw-space-sm); 
-    border-radius: var(--fw-radius-md); 
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: var(--fw-space-sm);
+    padding: var(--fw-space-sm);
+    margin-bottom: 2px;
     border: none;
-    background-color: transparent; cursor: pointer; width: 100%;
+    border-radius: var(--fw-radius-md);
+    background-color: transparent;
+    cursor: pointer;
     transition: background-color var(--fw-transition-fast);
 
     .scope-icon {
-      width: 28px; height: 28px; border-radius: var(--fw-radius-sm); 
-      display: grid; place-items: center;
-      background-color: var(--fw-surface-sunken); color: var(--fw-text-tertiary);
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      color: var(--fw-text-tertiary);
+      background-color: var(--fw-surface-sunken);
+      border-radius: var(--fw-radius-sm);
     }
 
-    .scope-label-wrap {
-      display: flex; flex-direction: column; text-align: left;
-      .scope-name { font-size: 0.8125rem; font-weight: 750; color: var(--fw-text-primary); }
-      .scope-sub  { font-size: 9px; color: var(--fw-text-tertiary); font-weight: 500; }
+    .scope-name {
+      display: block;
+      font-size: 0.8125rem;
+      font-weight: 750;
+      color: var(--fw-text-primary);
+      text-align: left;
+    }
+
+    .scope-sub {
+      display: block;
+      font-size: 9px;
+      font-weight: 500;
+      color: var(--fw-text-tertiary);
+      text-align: left;
     }
 
     &:hover { background-color: var(--fw-surface-sunken); }
@@ -83,50 +128,60 @@
       .scope-name { color: var(--fw-primary); }
     }
   }
-
-  .levels-scroll { flex: 1; overflow-y: auto; }
 }
 
-.editor-container {
-  flex: 1; overflow-y: auto;
-  &::-webkit-scrollbar { width: 4px; }
-  &::-webkit-scrollbar-thumb { background-color: var(--fw-border); border-radius: var(--fw-radius-full); }
+// 3. Matrice de Permissions (Tabulaire)
+.pbac-matrix-container {
+  padding-bottom: var(--fw-space-4xl);
 }
 
-.search-input-technical {
-  width: 100%; height: 36px; padding: 0 var(--fw-space-md) 0 2.5rem;
-  background-color: var(--fw-surface-card); border: 1px solid var(--fw-border);
-  border-radius: var(--fw-radius-md); font-size: 0.75rem; font-weight: 600;
-  color: var(--fw-text-primary); outline: none;
-  &::placeholder { color: var(--fw-text-tertiary); text-transform: uppercase; font-size: 9px; }
-  &:focus { border-color: var(--fw-primary); }
-}
-
-.divider-v { width: 1px; height: 20px; background-color: var(--fw-border); margin: 0 var(--fw-space-sm); }
-
-// ─── PBAC MATRIX UI (Tabular) ──────────────────────────────────────────────
 .domain-title {
-  font-family: var(--fw-font-ui); font-size: 0.75rem; font-weight: 850;
-  text-transform: uppercase; letter-spacing: 0.1em; color: var(--fw-text-primary);
+  margin-bottom: var(--fw-space-md);
+  font-family: var(--fw-font-ui);
+  font-size: 0.75rem;
+  font-weight: 850;
+  color: var(--fw-text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 
 .resource-table {
-  background-color: var(--fw-surface-card); 
-  border: 1px solid var(--fw-border); 
+  margin-bottom: var(--fw-space-xl);
+  background-color: var(--fw-surface-card);
+  border: 1px solid var(--fw-border);
   border-radius: var(--fw-radius-md);
   overflow: hidden;
 }
 
 .resource-row {
-  display: grid; grid-template-columns: 220px 1fr;
+  display: grid;
+  grid-template-columns: 220px 1fr;
   border-bottom: 1px solid var(--fw-surface-page);
-  
-  &.header { background-color: var(--fw-surface-sunken); height: 36px; align-items: center; }
+
+  &.header {
+    height: 36px;
+    background-color: var(--fw-surface-sunken);
+    align-items: center;
+  }
 
   .res-info-col {
-    padding: var(--fw-space-sm) var(--fw-space-md); 
+    padding: var(--fw-space-sm) var(--fw-space-md);
     border-right: 1px solid var(--fw-surface-page);
-    .res-name { font-size: 0.75rem; font-weight: 750; color: var(--fw-text-primary); display: block; }
+
+    .res-name {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 750;
+      color: var(--fw-text-primary);
+    }
+    .res-code {
+      display: block;
+      margin-top: 2px;
+      font-size: 9px;
+      font-family: var(--fw-font-mono);
+      color: var(--fw-text-tertiary);
+      text-transform: uppercase;
+    }
   }
 }
 
@@ -136,4 +191,66 @@
   align-items: center;
 }
 
-@keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+// 4. Éléments d'interface (Toggle)
+.toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--fw-space-sm);
+  padding: var(--fw-space-xs) var(--fw-space-sm);
+  border-radius: var(--fw-radius-md);
+  cursor: pointer;
+  transition: background-color var(--fw-transition-fast);
+
+  &:hover { background-color: var(--fw-surface-sunken); }
+
+  .toggle-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--fw-text-tertiary);
+    text-transform: uppercase;
+    &.on { color: var(--fw-text-primary); }
+  }
+}
+
+.dot-spacer {
+  width: 2px;
+  height: 2px;
+  background-color: var(--fw-border);
+  border-radius: 50%;
+}
+
+.search-input-technical {
+  width: 100%;
+  height: 36px;
+  padding: 0 var(--fw-space-md) 0 2.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--fw-text-primary);
+  background-color: var(--fw-surface-card);
+  border: 1px solid var(--fw-border);
+  border-radius: var(--fw-radius-md);
+  outline: none;
+
+  &::placeholder {
+    font-size: 9px;
+    color: var(--fw-text-tertiary);
+    text-transform: uppercase;
+  }
+  &:focus { border-color: var(--fw-primary); }
+}
+
+.divider-v {
+  width: 1px;
+  height: 20px;
+  margin: 0 var(--fw-space-sm);
+  background-color: var(--fw-border);
+}
+
+.custom-scrollbar {
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--fw-border);
+    border-radius: var(--fw-radius-full);
+  }
+}

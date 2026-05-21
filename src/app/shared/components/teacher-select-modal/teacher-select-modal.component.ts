@@ -5,11 +5,11 @@ import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/
 import {LucideAngularModule, Search, UserCheck, X} from 'lucide-angular';
 import {FwButtonComponent} from '../button/button.component';
 import {FwModalShellComponent} from '../modal-shell/modal-shell.component';
-import {User} from '../../../core/models/user.model';
+import {Staff} from '../../../core/models/user.model';
 
 export interface TeacherSelectData {
   title: string;
-  teachers: User[];
+  teachers: Staff[];
   currentTeacherId?: string;
 }
 
@@ -56,7 +56,7 @@ export interface TeacherSelectData {
               [class.hover:bg-surface-sunken]="data.currentTeacherId !== teacher.id"
             >
               <div class="w-10 h-10 rounded-full bg-midnight text-white flex items-center justify-center font-bold text-sm shrink-0">
-                {{ teacher.firstName[0] }}{{ teacher.lastName[0] }}
+                {{ (teacher.firstName || '?')[0] }}{{ (teacher.lastName || '?')[0] }}
               </div>
               <div class="flex-1 min-w-0">
                 <p class="text-sm font-bold text-midnight truncate">{{ teacher.firstName }} {{ teacher.lastName }}</p>
@@ -100,7 +100,7 @@ export class TeacherSelectModalComponent {
     );
   }
 
-  onSelect(teacher: User) {
+  onSelect(teacher: Staff) {
     this.dialogRef.close(teacher.id);
   }
 

@@ -19,6 +19,7 @@ import {AuditLog} from '../../../../../core/models/audit.model';
 import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
 import {FwListCommandBarComponent} from '../../../../../shared/components/list-command-bar/list-command-bar.component';
+import {HasPermissionDirective} from '../../../../../shared/directives/has-permission.directive';
 
 @Component({
   selector: 'app-audit-trail',
