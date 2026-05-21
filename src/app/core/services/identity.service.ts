@@ -70,6 +70,15 @@ export class IdentityService {
   }
 
   /**
+   * Récupère un membre du personnel par son ID
+   */
+  getStaffById(id: string): Observable<Staff> {
+    return this.http.get<Staff>(`${this.API_URL}/staffs/${id}`).pipe(
+      catchError(this.handleError('Erreur lors de la récupération du membre du personnel'))
+    );
+  }
+
+  /**
    * Liste les comptes utilisateurs (Accès système)
    */
   getUsers(search: string = '', page: number = 0, size: number = 10): Observable<Page<User>> {

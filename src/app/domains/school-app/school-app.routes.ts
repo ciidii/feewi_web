@@ -56,6 +56,12 @@ export const SCHOOL_APP_ROUTES: Routes = [
         loadComponent: () => import('./features/identity/staff-directory/staff-directory.component').then(m => m.StaffDirectoryComponent)
       },
       {
+        path: 'staff/:id',
+        title: 'Dossier Collaborateur',
+        data: {permissions: ['identity:user:read']},
+        loadComponent: () => import('./features/identity/staff-detail/staff-detail.component').then(m => m.StaffDetailComponent)
+      },
+      {
         path: 'roles',
         title: 'Gestion des Rôles',
         data: {permissions: ['identity:role:read']},

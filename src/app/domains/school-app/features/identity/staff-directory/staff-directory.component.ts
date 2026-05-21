@@ -1,5 +1,6 @@
 import {Component, computed, inject, LOCALE_ID, OnInit, signal, ViewEncapsulation} from '@angular/core';
 import {CommonModule, formatDate} from '@angular/common';
+import {Router} from '@angular/router';
 import {
   Download,
   Edit,
@@ -13,7 +14,7 @@ import {
   Trash2,
   UserCheck,
   UserPlus,
-  Users, UserX
+  Users,
 } from 'lucide-angular';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {DataListComponent} from '../../../../../shared/components/data-list/data-list.component';
@@ -49,6 +50,7 @@ export class StaffDirectoryComponent implements OnInit {
   private identityService = inject(IdentityService);
   private authService = inject(AuthService);
   private dialog = inject(MatDialog);
+  private router = inject(Router);
   private locale = inject(LOCALE_ID);
 
   // Icônes
@@ -57,11 +59,7 @@ export class StaffDirectoryComponent implements OnInit {
   readonly Download = Download;
   readonly RefreshCw = RefreshCw;
   readonly Users = Users;
-  readonly Shield = Shield;
   readonly UserCheck = UserCheck;
-  readonly UserX = UserX;
-  readonly Key = Key;
-  readonly ShieldAlert = ShieldAlert;
 
   activeTabId = signal('ALL');
   searchQuery = signal('');
@@ -142,18 +140,20 @@ export class StaffDirectoryComponent implements OnInit {
   handleAction(event: { actionId: string, row: TableRow }) {
     switch (event.actionId) {
       case 'view':
+        this.router.navigate(['/admin/identity/staff', event.row.id]);
+        break;
       case 'edit':
         this.dialog.open(StaffFormComponent, {
           width: '640px',
           panelClass: 'feewi-dialog-panel',
-          data: {staff: event.row.rawData, isReadOnly: event.actionId === 'view'}
+          data: { staff: event.row.rawData }
         });
         break;
       case 'create-account':
         this.dialog.open(StaffFormComponent, {
           width: '640px',
           panelClass: 'feewi-dialog-panel',
-          data: {staff: event.row.rawData, forceAccountMode: true}
+          data: { staff: event.row.rawData, forceAccountMode: true }
         });
         break;
     }

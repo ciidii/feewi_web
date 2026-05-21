@@ -1,0 +1,86 @@
+@use '../../../../../../styles/tokens' as *;
+
+:host {
+  display: block;
+  height: 100%;
+  background: var(--fw-surface-page);
+}
+
+.staff-detail-content {
+  padding: var(--fw-space-lg);
+}
+
+// ─── DOSSIER CARD (Standard Feewi) ─────────────────────────────────────────
+.dossier-card {
+  background: var(--fw-surface-card);
+  border-radius: var(--fw-radius-2xl);
+  border: 1px solid var(--fw-border-subtle);
+  box-shadow: var(--fw-shadow-sm);
+  overflow: hidden;
+  transition: all var(--fw-transition-normal);
+
+  &:hover { box-shadow: var(--fw-shadow-md); border-color: var(--fw-border); }
+
+  .card-header {
+    padding: var(--fw-space-md) var(--fw-space-lg);
+    background: var(--fw-surface-card);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--fw-space-sm);
+
+    .header-left { display: flex; align-items: center; gap: var(--fw-space-sm); }
+    .header-icon { color: var(--fw-text-tertiary); flex-shrink: 0; }
+    .card-title {
+      font-family: var(--fw-font-ui);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--fw-text-primary);
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  }
+
+  .card-body { padding: var(--fw-space-xl); }
+
+  // Variante si compte actif
+  &.account-active { border-top: 4px solid var(--fw-primary); }
+}
+
+// ─── LABELS & VALUES ───────────────────────────────────────────────────────
+.info-label {
+  display: block;
+  font-size: 9px;
+  font-weight: 850;
+  text-transform: uppercase;
+  color: var(--fw-text-tertiary);
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.info-value {
+  font-size: 0.875rem;
+  font-weight: 650;
+  color: var(--fw-midnight);
+  margin: 0;
+}
+
+// ─── UTILS ─────────────────────────────────────────────────────────
+.empty-placeholder {
+  background: var(--fw-surface-sunken);
+  border: 2px dashed var(--fw-border-subtle);
+  border-radius: var(--fw-radius-xl);
+  margin: var(--fw-space-md);
+}
+
+.divider-v {
+  width: 1px;
+  height: 24px;
+  background: var(--fw-border-subtle);
+  margin: 0 var(--fw-space-sm);
+}
+
+@keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.animate-in { animation: fade-in 0.3s ease-out; }
