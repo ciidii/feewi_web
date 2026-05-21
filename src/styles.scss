@@ -201,6 +201,68 @@ html { height: 100%; }
     background-color: var(--fw-ice) !important;
   }
 }
+
+/* --- SHARED UI COMPONENTS --- */
+
+/* TOGGLE SWITCH (FEEWI STANDARD) */
+.fw-toggle-switch {
+  position: relative;
+  flex-shrink: 0;
+  width: 36px;
+  height: 20px;
+  border-radius: 999px;
+  background-color: var(--fw-border);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: background-color var(--fw-transition-fast);
+
+  .track {
+    width: 100%;
+    height: 100%;
+    border-radius: 999px;
+  }
+
+  .thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: white;
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    transition: transform var(--fw-transition-fast);
+  }
+
+  &.on {
+    background-color: var(--fw-primary);
+    .thumb { transform: translateX(16px); }
+  }
+
+  &.sm {
+    width: 32px;
+    height: 18px;
+    .thumb { width: 12px; height: 12px; }
+    &.on .thumb { transform: translateX(14px); }
+  }
+
+  /* Color variants when ON */
+  &.on.variant-primary { background-color: var(--fw-primary); }
+  &.on.variant-secondary { background-color: var(--fw-raw-slate-600); }
+  &.on.variant-danger { background-color: var(--fw-error); }
+  &.on.variant-accent { background-color: var(--fw-warning); }
+
+  &:focus-visible {
+    outline: 2px solid var(--fw-primary);
+    outline-offset: 3px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
 /* --- AUTHENTIFICATION SHELL (PREMIUM) --- */
 
 .fw-auth-container {

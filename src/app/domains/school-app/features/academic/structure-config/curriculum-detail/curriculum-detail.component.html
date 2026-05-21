@@ -7,15 +7,17 @@
 >
   <!-- ACTIONS -->
   <div actions>
-    <app-fw-button
-      *ngIf="!isAdding()"
-      (click)="isAdding.set(true)"
-      variant="primary"
-      size="sm"
-      [icon]="Plus"
-    >
-      Ajouter une matière
-    </app-fw-button>
+    <ng-container *fwHasPermission="'academic:structure:write'">
+      <app-fw-button
+        *ngIf="!isAdding()"
+        (click)="isAdding.set(true)"
+        variant="primary"
+        size="sm"
+        [icon]="Plus"
+      >
+        Ajouter une matière
+      </app-fw-button>
+    </ng-container>
   </div>
 
   <!-- CONTENU -->

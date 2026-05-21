@@ -16,15 +16,17 @@
   <div class="space-y-6">
     <div class="flex items-center justify-between">
       <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Matières enseignées</span>
-      <app-fw-button 
-        *ngIf="!isAdding()"
-        (click)="isAdding.set(true)"
-        variant="primary"
-        size="sm"
-        [icon]="Plus"
-      >
-        Ajouter une matière
-      </app-fw-button>
+      <ng-container *fwHasPermission="'academic:structure:write'">
+        <app-fw-button 
+          *ngIf="!isAdding()"
+          (click)="isAdding.set(true)"
+          variant="primary"
+          size="sm"
+          [icon]="Plus"
+        >
+          Ajouter une matière
+        </app-fw-button>
+      </ng-container>
     </div>
 
     <!-- DataList du Programme -->

@@ -14,6 +14,8 @@ import {Router} from '@angular/router';
 import {FwListCommandBarComponent} from '../../../../../shared/components/list-command-bar/list-command-bar.component';
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
 import {SharedFilterModalComponent} from '../../../../../shared/components/filter-modal/shared-filter-modal.component';
+import {AuthService} from '../../../../../core/services/auth.service';
+import {HasPermissionDirective} from '../../../../../shared/directives/has-permission.directive';
 
 @Component({
   selector: 'app-class-list',
@@ -25,13 +27,15 @@ import {SharedFilterModalComponent} from '../../../../../shared/components/filte
     MatDialogModule,
     FwPageShellComponent,
     FwListCommandBarComponent,
-    FwButtonComponent
+    FwButtonComponent,
+    HasPermissionDirective
   ],
   templateUrl: './class-list.component.html',
   styleUrls: ['./class-list.component.scss']
 })
 export class ClassListComponent implements OnInit {
   private academicService = inject(AcademicService);
+  private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
   private dialog = inject(MatDialog);
   private router = inject(Router);
@@ -56,11 +60,13 @@ export class ClassListComponent implements OnInit {
   selectedLevel = signal('');
   selectedYear = signal('');
 
+  readonly canEditClasses = computed(() => this.authService.hasPermission('academic:structure:write'));
+
   // Actions pour les classes
   readonly classActions: RowAction[] = [
-    { id: 'view', label: 'Détails classe', icon: School, type: 'primary' },
-    { id: 'teachings', label: 'Gérer les cours', icon: BookOpenCheck, type: 'success' },
-    { id: 'view-students', label: 'Liste des élèves', icon: Users, type: 'default' }
+    { id: 'view', label: 'Détails classe', icon: School, type: 'primary', permission: 'academic:structure:read' },
+    { id: 'teachings', label: 'Gérer les cours', icon: BookOpenCheck, type: 'success', permission: 'academic:structure:write' },
+    { id: 'view-students', label: 'Liste des élèves', icon: Users, type: 'default', permission: 'academic:structure:read' }
   ];
 
   activeFilterChips = computed(() => {

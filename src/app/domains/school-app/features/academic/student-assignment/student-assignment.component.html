@@ -85,6 +85,7 @@
         <div
           *ngFor="let student of filteredWaitingList()"
           [cdkDragData]="student"
+          [cdkDragDisabled]="!canAssign()"
           cdkDrag
           class="student-assignment-card group hover:border-primary transition-all duration-200">
 
@@ -107,7 +108,7 @@
                 </span>
               </div>
             </div>
-            <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+            <div class="opacity-0 group-hover:opacity-100 transition-opacity" *ngIf="canAssign()">
               <lucide-icon [name]="ArrowRight" [size]="14" class="text-primary"></lucide-icon>
             </div>
           </div>

@@ -53,6 +53,7 @@ import {FwPageShellComponent} from '../../../../../../shared/components/page-she
 import {FwTab} from '../../../../../../shared/components/tabs/tabs.component';
 import {FwListCommandBarComponent} from '../../../../../../shared/components/list-command-bar/list-command-bar.component';
 import {CycleDetailSkeletonComponent} from '../../../../shared/components/skeleton/cycle-detail-skeleton.component';
+import {HasPermissionDirective} from '../../../../../../shared/directives/has-permission.directive';
 
 export interface LevelGroup {
   level: Level;
@@ -72,7 +73,8 @@ export interface LevelGroup {
     FwEmptyStateComponent,
     FwPageShellComponent,
     FwListCommandBarComponent,
-    CycleDetailSkeletonComponent
+    CycleDetailSkeletonComponent,
+    HasPermissionDirective
   ],
   templateUrl: './cycle-detail.component.html',
   styleUrls: ['./cycle-detail.component.scss']
@@ -126,7 +128,7 @@ export class CycleDetailComponent {
     return tabs;
   });
 
-  readonly canEditStructure = computed(() => this.authService.hasRole('ROLE_SUPER_ADMIN'));
+  readonly canEditStructure = computed(() => this.authService.hasPermission('academic:structure:write'));
 
   readonly hasFilieres = computed(() => {
     const code = this.cycle()?.cycleCode;
@@ -134,8 +136,8 @@ export class CycleDetailComponent {
   });
 
   readonly filiereActions: RowAction[] = [
-    {id: 'edit', label: 'Modifier', icon: Edit, type: 'primary'},
-    {id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger'}
+    {id: 'edit', label: 'Modifier', icon: Edit, type: 'primary', permission: 'academic:structure:write'},
+    {id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger', permission: 'academic:structure:write'}
   ];
 
   levelGroups = computed<LevelGroup[]>(() => {

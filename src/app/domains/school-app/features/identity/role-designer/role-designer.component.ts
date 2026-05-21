@@ -3,6 +3,9 @@ import {CommonModule} from '@angular/common';
 import {firstValueFrom} from 'rxjs';
 import {
   ChevronRight,
+  Edit3,
+  Eye,
+  FilePlus,
   Info,
   Key,
   Loader2,
@@ -10,33 +13,47 @@ import {
   Maximize2,
   Plus,
   Save, Search,
+  Settings,
   Shield,
   ShieldCheck,
   Sparkles,
   Trash2,
-  Users
+  Users,
+  Zap
 } from 'lucide-angular';
 import {MatButtonModule} from '@angular/material/button';
 import {MatDialog} from '@angular/material/dialog';
 import {IdentityService} from '../../../../../core/services/identity.service';
 import {RoleFormComponent} from './components/role-form/role-form.component';
 import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
-import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
+import {ButtonVariant, FwButtonComponent} from '../../../../../shared/components/button/button.component';
 import {FormsModule} from '@angular/forms';
 import {SkeletonComponent} from '../../../../../shared/components/skeleton/skeleton.component';
 
-export interface Permission {
-  id: string;
-  label: string;
-  description: string;
+export interface PermissionAction {
+  id: string; // academic:structure:read
+  actionCode: string; // read
+  label: string; // Consulter
+  description?: string;
   granted: boolean;
-  isSystemRole?: boolean;
-  dependencies?: string[];
+  icon: any;
+  variant: ButtonVariant;
 }
 
-export interface PermissionGroup {
-  category: string;
-  permissions: Permission[];
+export interface PermissionResourceRow {
+  resourceCode: string; // structure
+  resourceName: string; // Structure Éducative
+  // Slots fixes pour la matrice
+  read?: PermissionAction;
+  write?: PermissionAction;
+  delete?: PermissionAction;
+  special?: PermissionAction;
+}
+
+export interface PermissionDomainGroup {
+  domainCode: string; // academic
+  domainName: string; // Pédagogie & Structure
+  resources: PermissionResourceRow[];
 }
 
 @Component({
@@ -59,9 +76,44 @@ export class RoleDesignerComponent implements OnInit {
   private identityService = inject(IdentityService);
   private dialog = inject(MatDialog);
 
+  // Dictionnaires de traduction
+  private readonly DOMAIN_LABELS: Record<string, string> = {
+    'identity': 'Administration & Sécurité',
+    'academic': 'Pédagogie & Structure',
+    'enrollment': 'Inscriptions & Scolarité',
+    'finance': 'Gestion Financière',
+    'notification': 'Communication & Alertes'
+  };
+
+  private readonly RESOURCE_LABELS: Record<string, string> = {
+    'school': 'Établissement (SaaS)',
+    'user': 'Utilisateurs & Staff',
+    'role': 'Rôles & Permissions',
+    'audit': 'Journal d\'audit',
+    'structure': 'Cycles & Niveaux',
+    'subject': 'Matières & Syllabus',
+    'year': 'Calendrier Académique',
+    'class': 'Classes Physiques',
+    'teaching': 'Affectation Enseignants',
+    'assignment': 'Affectation Élèves',
+    'exam': 'Examens & Notes',
+    'attendance': 'Présences (Appel)',
+    'admission': 'Dossiers d\'admission',
+    'session': 'Sessions d\'inscription'
+  };
+
+  private readonly ACTION_LABELS: Record<string, string> = {
+    'read': 'Lecture',
+    'write': 'Écriture',
+    'delete': 'Suppression',
+    'lifecycle': 'Vie',
+    'manage': 'Gestion',
+    'create': 'Ajout'
+  };
+
   // États
   isLoading = this.identityService.loading;
-  isInitialLoading = signal(true); // Pour le skeleton screen
+  isInitialLoading = signal(true); 
   isSaving = signal(false);
   selectedRoleId = signal<string | null>(null);
   unsavedChanges = signal<Set<string>>(new Set());
@@ -79,6 +131,11 @@ export class RoleDesignerComponent implements OnInit {
   readonly Sparkles = Sparkles;
   readonly Maximize2 = Maximize2;
   readonly Trash2 = Trash2;
+  readonly Eye = Eye;
+  readonly Edit3 = Edit3;
+  readonly Zap = Zap;
+  readonly SettingsIcon = Settings;
+  readonly FilePlus = FilePlus;
 
   // Rôles transformés
   roles = computed(() => {
@@ -99,22 +156,24 @@ export class RoleDesignerComponent implements OnInit {
     return currentRoles.find(r => r.id === this.selectedRoleId()) || currentRoles[0];
   });
 
-  // Groupes de permissions dynamiques
-  permissionGroups = signal<PermissionGroup[]>([]);
+  // Groupes de permissions PBAC
+  permissionGroups = signal<PermissionDomainGroup[]>([]);
   permissionQuery = signal('');
 
   filteredPermissionGroups = computed(() => {
     const query = this.permissionQuery().toLowerCase();
-    if (!query) return this.permissionGroups();
+    const groups = this.permissionGroups();
+    if (!query) return groups;
 
-    return this.permissionGroups().map(group => ({
+    return groups.map(group => ({
       ...group,
-      permissions: group.permissions.filter(p =>
-        p.label.toLowerCase().includes(query) ||
-        p.description.toLowerCase().includes(query) ||
-        p.id.toLowerCase().includes(query)
+      resources: group.resources.map(res => ({
+        ...res
+      })).filter(res => 
+        res.resourceName.toLowerCase().includes(query) ||
+        res.resourceCode.toLowerCase().includes(query)
       )
-    })).filter(group => group.permissions.length > 0);
+    })).filter(group => group.resources.length > 0);
   });
 
   ngOnInit() {
@@ -124,10 +183,8 @@ export class RoleDesignerComponent implements OnInit {
   async loadInitialData() {
     this.isInitialLoading.set(true);
     try {
-      await Promise.all([
-        this.loadRoles(),
-        this.loadPermissions()
-      ]);
+      await this.loadRoles();
+      await this.loadPermissions();
     } finally {
       this.isInitialLoading.set(false);
     }
@@ -136,52 +193,94 @@ export class RoleDesignerComponent implements OnInit {
   async loadPermissions() {
     try {
       const permissions = await firstValueFrom(this.identityService.getAvailablePermissions());
-      const groups = this.groupPermissions(permissions);
+      const groups = this.groupPermissionsToMatrix(permissions);
       this.permissionGroups.set(groups);
     } catch (err) {
       console.error('Failed to load permissions', err);
     }
   }
 
-  private groupPermissions(apiPermissions: any[]): PermissionGroup[] {
-    const groupsMap = new Map<string, Permission[]>();
+  private groupPermissionsToMatrix(apiPermissions: any[]): PermissionDomainGroup[] {
+    const domainMap = new Map<string, Map<string, PermissionResourceRow>>();
 
     apiPermissions.forEach(p => {
-      const category = this.inferCategory(p.name);
-      if (!groupsMap.has(category)) {
-        groupsMap.set(category, []);
+      const parts = p.name.split(':');
+      if (parts.length < 3) return; 
+
+      const domain = parts[0];
+      const resource = parts[1];
+      const action = parts[2];
+
+      if (!domainMap.has(domain)) domainMap.set(domain, new Map());
+      const resourceMap = domainMap.get(domain)!;
+
+      if (!resourceMap.has(resource)) {
+        resourceMap.set(resource, {
+          resourceCode: resource,
+          resourceName: this.RESOURCE_LABELS[resource] || resource.toUpperCase()
+        });
       }
-      groupsMap.get(category)?.push({
-        id: p.name, // L'ID pour le toggle est le nom technique (ex: student:read)
-        label: this.formatPermissionLabel(p.name),
+
+      const row = resourceMap.get(resource)!;
+      const actionObj: PermissionAction = {
+        id: p.name,
+        actionCode: action,
+        label: this.formatActionLabel(action),
         description: p.description,
-        granted: false
-      });
+        granted: false,
+        icon: this.getSemanticIcon(action),
+        variant: 'tertiary'
+      };
+
+      // Assigner au bon slot de la matrice
+      if (action === 'read') row.read = actionObj;
+      else if (['write', 'create', 'add'].includes(action)) row.write = actionObj;
+      else if (['delete', 'remove'].includes(action)) row.delete = actionObj;
+      else row.special = actionObj;
     });
 
-    return Array.from(groupsMap.entries()).map(([category, permissions]) => ({
-      category,
-      permissions
-    }));
+    return Array.from(domainMap.entries()).map(([domainCode, resourceMap]) => ({
+      domainCode,
+      domainName: this.DOMAIN_LABELS[domainCode] || domainCode.toUpperCase(),
+      resources: Array.from(resourceMap.values()).sort((a, b) => a.resourceName.localeCompare(b.resourceName))
+    })).sort((a, b) => a.domainName.localeCompare(b.domainName));
   }
 
-  private inferCategory(name: string): string {
-    const prefix = name.split(':')[0];
-    switch (prefix) {
-      case 'student': return 'Scolarité & Workflow';
-      case 'admission': return 'Inscriptions';
-      case 'finance': return 'Gestion Financière';
-      case 'user':
-      case 'audit':
-      case 'role':
-      case 'permission': return 'Système & Sécurité';
-      default: return 'Autres';
+  private formatActionLabel(action: string): string {
+    switch (action) {
+      case 'read': return 'Lire';
+      case 'write': return 'Modifier';
+      case 'create': return 'Ajouter';
+      case 'delete': return 'Supprimer';
+      case 'lifecycle': return 'Cycle';
+      case 'manage': return 'Gérer';
+      default: return action;
     }
   }
 
-  private formatPermissionLabel(name: string): string {
-    const suffix = name.split(':')[1] || name;
-    return suffix.charAt(0).toUpperCase() + suffix.slice(1).replace(/_/g, ' ');
+  private getSemanticIcon(action: string): any {
+    switch (action) {
+      case 'read': return Eye;
+      case 'write': return Edit3;
+      case 'create': return FilePlus;
+      case 'delete': return Trash2;
+      case 'lifecycle': return Zap;
+      case 'manage': return Settings;
+      default: return Shield;
+    }
+  }
+
+  private getSemanticVariant(action: string, granted: boolean): ButtonVariant {
+    if (!granted) return 'tertiary'; // État "Éteint"
+    switch (action) {
+      case 'read': return 'secondary'; // Gris bleu soutenu
+      case 'write':
+      case 'create': return 'primary'; // Bleu Feewi
+      case 'delete': return 'danger';  // Rouge
+      case 'lifecycle':
+      case 'manage': return 'accent';  // Ambre
+      default: return 'primary';
+    }
   }
 
   // ===========================================
@@ -190,17 +289,6 @@ export class RoleDesignerComponent implements OnInit {
 
   formatRoleName(roleName: string): string {
     return roleName.replace('ROLE_', '').replace(/_/g, ' ');
-  }
-
-  getTotalPermissions(): number {
-    return this.permissionGroups().reduce((acc, g) => acc + g.permissions.length, 0);
-  }
-
-  getGrantedPermissionsCount(): number {
-    return this.permissionGroups().reduce(
-      (acc, g) => acc + g.permissions.filter(p => p.granted).length,
-      0
-    );
   }
 
   hasUnsavedChanges(): boolean {
@@ -239,8 +327,6 @@ export class RoleDesignerComponent implements OnInit {
   async deleteRole() {
     const role = this.selectedRole();
     if (!role || role.rawData.isSystemRole) return;
-    
-    // Pour l'instant, on se contente d'un log. La suppression sera raccordée à l'API.
     console.log('Suppression du rôle:', role.name);
   }
 
@@ -256,59 +342,48 @@ export class RoleDesignerComponent implements OnInit {
 
     const updatedGroups = this.permissionGroups().map(group => ({
       ...group,
-      permissions: group.permissions.map(p => ({
-        ...p,
-        granted: grantedPermissions.includes(p.id)
-      }))
+      resources: group.resources.map(res => {
+        const updateAction = (act?: PermissionAction) => {
+          if (!act) return undefined;
+          const granted = grantedPermissions.includes(act.id);
+          return { ...act, granted, variant: this.getSemanticVariant(act.actionCode, granted) };
+        };
+        return {
+          ...res,
+          read: updateAction(res.read),
+          write: updateAction(res.write),
+          delete: updateAction(res.delete),
+          special: updateAction(res.special)
+        };
+      })
     }));
 
     this.permissionGroups.set(updatedGroups);
   }
 
   onPermissionToggle(permissionId: string, granted: boolean) {
-    // Mettre à jour l'état local
     const updatedGroups = this.permissionGroups().map(group => ({
       ...group,
-      permissions: group.permissions.map(p =>
-        p.id === permissionId ? {...p, granted} : p
-      )
+      resources: group.resources.map(res => {
+        const updateAction = (act?: PermissionAction) => {
+          if (!act || act.id !== permissionId) return act;
+          return { ...act, granted, variant: this.getSemanticVariant(act.actionCode, granted) };
+        };
+        return {
+          ...res,
+          read: updateAction(res.read),
+          write: updateAction(res.write),
+          delete: updateAction(res.delete),
+          special: updateAction(res.special)
+        };
+      })
     }));
     this.permissionGroups.set(updatedGroups);
 
-    // Marquer comme modifié
     const updated = new Set(this.unsavedChanges());
-    updated.add(permissionId);
+    if (updated.has(permissionId)) updated.delete(permissionId);
+    else updated.add(permissionId);
     this.unsavedChanges.set(updated);
-
-    // Gérer les dépendances si nécessaire
-    this.handleDependencies(permissionId, granted);
-  }
-
-  private handleDependencies(permissionId: string, granted: boolean) {
-    if (!granted) return;
-
-    const permission = this.findPermission(permissionId);
-    if (permission?.dependencies) {
-      const updatedGroups = this.permissionGroups().map(group => ({
-        ...group,
-        permissions: group.permissions.map(p =>
-          permission.dependencies?.includes(p.id) ? {...p, granted: true} : p
-        )
-      }));
-      this.permissionGroups.set(updatedGroups);
-    }
-  }
-
-  private findPermission(id: string): Permission | undefined {
-    for (const group of this.permissionGroups()) {
-      const found = group.permissions.find(p => p.id === id);
-      if (found) return found;
-    }
-    return undefined;
-  }
-
-  expandAllGroups() {
-    console.log('Expand all groups');
   }
 
   // ===========================================
@@ -321,8 +396,10 @@ export class RoleDesignerComponent implements OnInit {
 
     this.isSaving.set(true);
 
-    const allPermissions = this.permissionGroups().flatMap(g => g.permissions);
-    const grantedIds = allPermissions.filter(p => p.granted).map(p => p.id);
+    const allActions = this.permissionGroups().flatMap(g => 
+      g.resources.flatMap(r => [r.read, r.write, r.delete, r.special].filter(Boolean) as PermissionAction[])
+    );
+    const grantedIds = allActions.filter(a => a.granted).map(a => a.id);
 
     try {
       await firstValueFrom(this.identityService.updateRole(role.rawData.id, {

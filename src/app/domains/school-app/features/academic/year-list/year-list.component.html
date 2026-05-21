@@ -23,6 +23,7 @@
         <app-fw-button variant="tertiary" size="sm" [icon]="RefreshCw" [loading]="isLoading()" (click)="loadYears()" title="Actualiser"></app-fw-button>
         <div class="divider-v"></div>
         <app-fw-button 
+          *fwHasPermission="'academic:year:write'"
           (click)="openAddYearForm()"
           variant="primary"
           size="sm"

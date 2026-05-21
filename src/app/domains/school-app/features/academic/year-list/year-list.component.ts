@@ -24,6 +24,8 @@ import {firstValueFrom} from 'rxjs';
 import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
 import {FwListCommandBarComponent} from '../../../../../shared/components/list-command-bar/list-command-bar.component';
+import {AuthService} from '../../../../../core/services/auth.service';
+import {HasPermissionDirective} from '../../../../../shared/directives/has-permission.directive';
 
 @Component({
   selector: 'app-year-list',
@@ -35,13 +37,15 @@ import {FwListCommandBarComponent} from '../../../../../shared/components/list-c
     MatDialogModule,
     FwPageShellComponent,
     FwButtonComponent,
-    FwListCommandBarComponent
+    FwListCommandBarComponent,
+    HasPermissionDirective
   ],
   templateUrl: './year-list.component.html',
   styleUrls: ['./year-list.component.scss']
 })
 export class YearListComponent implements OnInit {
   private academicService = inject(AcademicService);
+  private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
   private dialog = inject(MatDialog);
   private router = inject(Router);
@@ -58,19 +62,23 @@ export class YearListComponent implements OnInit {
   activeTab = signal('Tous');
   searchQuery = signal('');
 
+  readonly canEditYears = computed(() => this.authService.hasPermission('academic:year:write'));
+
   // Actions dynamiques basées sur le statut de l'année
   readonly yearActions: RowAction[] = [
     {
       id: 'view',
       label: 'Calendrier détaillé',
       icon: CalendarSearch,
-      type: 'primary'
+      type: 'primary',
+      permission: 'academic:year:read'
     },
     {
       id: 'activate',
       label: 'Activer l\'année',
       icon: Play,
       type: 'success',
+      permission: 'academic:year:lifecycle',
       hideIf: (row) => row.metadata?.['status'] !== 'PLANNING'
     },
     {
@@ -78,6 +86,7 @@ export class YearListComponent implements OnInit {
       label: 'Archiver',
       icon: Archive,
       type: 'warning',
+      permission: 'academic:year:lifecycle',
       hideIf: (row) => row.metadata?.['status'] !== 'ACTIVE'
     }
   ];

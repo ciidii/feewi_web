@@ -49,6 +49,8 @@ import {FwPageShellComponent} from '../../../../../shared/components/page-shell/
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
 import {SkeletonComponent} from '../../../../../shared/components/skeleton/skeleton.component';
 import {LucideAngularModule} from 'lucide-angular';
+import {AuthService} from '../../../../../core/services/auth.service';
+import {HasPermissionDirective} from '../../../../../shared/directives/has-permission.directive';
 
 @Component({
   selector: 'app-student-assignment',
@@ -61,7 +63,7 @@ import {LucideAngularModule} from 'lucide-angular';
     FormsModule,
     SkeletonComponent,
     DragDropModule,
-    RouterLink
+    RouterLink,
   ],
   templateUrl: './student-assignment.component.html',
   styleUrls: ['./student-assignment.component.scss']
@@ -69,6 +71,7 @@ import {LucideAngularModule} from 'lucide-angular';
 export class StudentAssignmentComponent {
   // --- Services ---
   private academicService = inject(AcademicService);
+  private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
   private route = inject(ActivatedRoute);
   protected loadingService = inject(LoadingService);
@@ -100,6 +103,8 @@ export class StudentAssignmentComponent {
   readonly searchQuery = signal('');
   readonly isAssigning = signal(false);
 
+  readonly canAssign = computed(() => this.authService.hasPermission('academic:assignment:write'));
+
   // --- Foundation Data (Signals) ---
   private readonly foundation$ = combineLatest([
     this.academicService.getYears(),
@@ -116,7 +121,7 @@ export class StudentAssignmentComponent {
         const activeYear = data.years.find(y => y.status === 'ACTIVE') || data.years[0];
         if (activeYear) this.selectedYearId.set(activeYear.id);
       }
-      
+
       // 2. Initialiser le niveau (Priorité : QueryParam > Premier de la liste)
       if (data.queryParamLevelId) {
         this.selectedLevelId.set(data.queryParamLevelId);

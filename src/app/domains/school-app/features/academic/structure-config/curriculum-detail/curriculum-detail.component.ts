@@ -15,6 +15,7 @@ import {
   X
 } from 'lucide-angular';
 import {AcademicService} from '../../../../../../core/services/academic.service';
+import {AuthService} from '../../../../../../core/services/auth.service';
 import {CurriculumItem, Level, Subject} from '../../../../../../core/models/academic.model';
 import {NotificationService} from '../../../../../../shared/services/notification.service';
 import {DataListComponent} from '../../../../../../shared/components/data-list/data-list.component';
@@ -25,8 +26,8 @@ import {ConfirmDialogComponent} from '../../../../../../shared/components/confir
 import {SyllabusViewerComponent} from '../components/syllabus-viewer/syllabus-viewer';
 import {FwButtonComponent} from '../../../../../../shared/components/button/button.component';
 import {FwPageShellComponent} from '../../../../../../shared/components/page-shell/page-shell.component';
-import {PageProgressComponent} from '../../../../../../shared/components/loader/page-progress.component';
 import {BlockLoaderComponent} from '../../../../../../shared/components/loader/block-loader.component';
+import {HasPermissionDirective} from '../../../../../../shared/directives/has-permission.directive';
 
 @Component({
   selector: 'app-curriculum-detail',
@@ -40,7 +41,8 @@ import {BlockLoaderComponent} from '../../../../../../shared/components/loader/b
     MatDialogModule,
     FwButtonComponent,
     FwPageShellComponent,
-    BlockLoaderComponent
+    BlockLoaderComponent,
+    HasPermissionDirective
   ],
   templateUrl: './curriculum-detail.component.html',
   styleUrls: ['./curriculum-detail.component.scss'],
@@ -49,6 +51,7 @@ import {BlockLoaderComponent} from '../../../../../../shared/components/loader/b
 export class CurriculumDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private academicService = inject(AcademicService);
+  private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
   private dialog = inject(MatDialog);
   private fb = inject(FormBuilder);
@@ -81,6 +84,8 @@ export class CurriculumDetailComponent implements OnInit {
   mandatoryCount = computed(() => this.curriculumItems().filter(i => !i.optional).length);
   optionalCount = computed(() => this.curriculumItems().filter(i => i.optional).length);
 
+  readonly canEditStructure = computed(() => this.authService.hasPermission('academic:structure:write'));
+
   // Formulaire d'ajout rapide
   addForm: FormGroup = this.fb.group({
     subjectId: ['', [Validators.required]],
@@ -92,9 +97,9 @@ export class CurriculumDetailComponent implements OnInit {
 
   // Actions
   readonly curriculumActions: RowAction[] = [
-    { id: 'syllabus', label: 'Voir le Syllabus', icon: BookOpen, type: 'primary' },
-    { id: 'edit', label: 'Modifier', icon: Edit, type: 'primary' },
-    { id: 'delete', label: 'Retirer du programme', icon: Trash2, type: 'danger' }
+    { id: 'syllabus', label: 'Voir le Syllabus', icon: BookOpen, type: 'primary', permission: 'academic:structure:read' },
+    { id: 'edit', label: 'Modifier', icon: Edit, type: 'primary', permission: 'academic:structure:write' },
+    { id: 'delete', label: 'Retirer du programme', icon: Trash2, type: 'danger', permission: 'academic:structure:write' }
   ];
 
   // Données transformées pour l'affichage

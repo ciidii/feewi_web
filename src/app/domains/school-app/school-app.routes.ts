@@ -68,6 +68,7 @@ export const SCHOOL_APP_ROUTES: Routes = [
   },
   {
     path: 'classes',
+    data: {permissions: ['academic:structure:read']},
     children: [
       {
         path: '',
@@ -92,31 +93,37 @@ export const SCHOOL_APP_ROUTES: Routes = [
       {
         path: 'library',
         title: 'Bibliothèque des Matières',
+        data: {permissions: ['academic:structure:read']},
         loadComponent: () => import('./features/academic/subject-library/subject-library.component').then(m => m.SubjectLibraryComponent)
       },
       {
         path: 'years',
         title: 'Années Académiques',
+        data: {permissions: ['academic:year:read']},
         loadComponent: () => import('./features/academic/year-list/year-list.component').then(m => m.YearListComponent)
       },
       {
         path: 'years/:id',
         title: 'Détails de l’Année',
+        data: {permissions: ['academic:year:read']},
         loadComponent: () => import('./features/academic/year-detail/year-detail.component').then(m => m.YearDetailComponent)
       },
       {
         path: 'classes',
         title: 'Liste des Classes',
+        data: {permissions: ['academic:structure:read']},
         loadComponent: () => import('./features/academic/class-list/class-list.component').then(m => m.ClassListComponent)
       },
       {
         path: 'classes/:id',
         title: 'Détail de la Classe',
+        data: {permissions: ['academic:structure:read']},
         loadComponent: () => import('./features/academic/class-detail/class-detail.component').then(m => m.ClassDetailComponent)
       },
       {
         path: 'assignments',
         title: 'Affectations & Classes',
+        data: {permissions: ['academic:assignment:read']},
         loadComponent: () => import('./features/academic/student-assignment/student-assignment.component').then(m => m.StudentAssignmentComponent)
       }
     ]

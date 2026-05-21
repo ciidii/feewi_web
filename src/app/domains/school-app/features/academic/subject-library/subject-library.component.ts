@@ -15,6 +15,8 @@ import {FwPageShellComponent} from '../../../../../shared/components/page-shell/
 import {FwEmptyStateComponent} from '../../../../../shared/components/empty-state/empty-state.component';
 import {FwListCommandBarComponent} from '../../../../../shared/components/list-command-bar/list-command-bar.component';
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
+import {AuthService} from '../../../../../core/services/auth.service';
+import {HasPermissionDirective} from '../../../../../shared/directives/has-permission.directive';
 
 @Component({
   selector: 'app-subject-library',
@@ -27,13 +29,15 @@ import {FwButtonComponent} from '../../../../../shared/components/button/button.
     FwPageShellComponent,
     FwEmptyStateComponent,
     FwListCommandBarComponent,
-    FwButtonComponent
+    FwButtonComponent,
+    HasPermissionDirective
   ],
   templateUrl: './subject-library.component.html',
   styleUrls: ['./subject-library.component.scss']
 })
 export class SubjectLibraryComponent implements OnInit {
   private academicService = inject(AcademicService);
+  private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
   private dialog = inject(MatDialog);
 
@@ -52,6 +56,8 @@ export class SubjectLibraryComponent implements OnInit {
   isLoading = signal(true);
   searchQuery = signal('');
 
+  readonly canEditLibrary = computed(() => this.authService.hasPermission('academic:structure:write'));
+
   activeFilterChips = computed(() => {
     const chips: any[] = [];
     if (this.searchQuery()) {
@@ -62,8 +68,8 @@ export class SubjectLibraryComponent implements OnInit {
 
   // Actions pour les matières
   readonly subjectActions: RowAction[] = [
-    {id: 'edit', label: 'Modifier', icon: Edit, type: 'primary'},
-    {id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger'}
+    {id: 'edit', label: 'Modifier', icon: Edit, type: 'primary', permission: 'academic:structure:write'},
+    {id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger', permission: 'academic:structure:write'}
   ];
 
   // Transformation des matières pour le DataList avec filtrage

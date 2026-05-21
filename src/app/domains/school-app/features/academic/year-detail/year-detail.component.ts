@@ -41,6 +41,8 @@ import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.com
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
 import {BlockLoaderComponent} from '../../../../../shared/components/loader/block-loader.component';
 import {MatMenuModule} from '@angular/material/menu';
+import {AuthService} from '../../../../../core/services/auth.service';
+import {HasPermissionDirective} from '../../../../../shared/directives/has-permission.directive';
 
 export interface TimelineEvent {
   id: string;
@@ -66,7 +68,8 @@ export interface TimelineEvent {
     FwPageShellComponent,
     FwBadgeComponent,
     FwButtonComponent,
-    BlockLoaderComponent
+    BlockLoaderComponent,
+    HasPermissionDirective
   ],
   templateUrl: './year-detail.component.html',
   styleUrls: ['./year-detail.component.scss'],
@@ -75,6 +78,7 @@ export interface TimelineEvent {
 export class YearDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private academicService = inject(AcademicService);
+  private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
   private dialog = inject(MatDialog);
   private locale = inject(LOCALE_ID);
@@ -86,6 +90,9 @@ export class YearDetailComponent implements OnInit {
   isActionLoading = signal(false);
   activeTabId = signal('timeline');
 
+  readonly canManageLifecycle = computed(() => this.authService.hasPermission('academic:year:lifecycle'));
+  readonly canEditCalendar = computed(() => this.authService.hasPermission('academic:year:write'));
+
   // Configuration des Onglets (Architecture V2)
   readonly yearTabs: FwTab[] = [
     {id: 'timeline', label: 'Vue Chronologique', icon: LayoutDashboard},
@@ -94,8 +101,8 @@ export class YearDetailComponent implements OnInit {
 
   // Actions pour les jalons
   readonly milestoneActions: RowAction[] = [
-    {id: 'edit', label: 'Modifier', icon: Edit, type: 'primary'},
-    {id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger'}
+    {id: 'edit', label: 'Modifier', icon: Edit, type: 'primary', permission: 'academic:year:write'},
+    {id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger', permission: 'academic:year:write'}
   ];
 
   // Transformation des Jalons pour le DataList

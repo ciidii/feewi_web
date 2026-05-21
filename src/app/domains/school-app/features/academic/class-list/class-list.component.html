@@ -32,6 +32,7 @@
         <div class="divider-v"></div>
 
         <app-fw-button 
+          *fwHasPermission="'academic:structure:write'"
           (click)="openAddClassForm()"
           variant="primary"
           size="sm"

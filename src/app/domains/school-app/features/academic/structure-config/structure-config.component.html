@@ -9,7 +9,7 @@
     <app-fw-button variant="tertiary" size="sm" [icon]="RefreshCw" [loading]="loadingService.isLoading()" (click)="loadData()" title="Actualiser"></app-fw-button>
     <div class="divider-v"></div>
     <app-fw-button
-      *ngIf="canEditStructure()"
+      *fwHasPermission="'academic:structure:write'"
       (click)="openAddCycle()"
       variant="primary"
       size="sm"

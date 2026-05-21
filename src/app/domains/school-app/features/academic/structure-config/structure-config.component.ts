@@ -29,6 +29,7 @@ import {FwPageShellComponent} from '../../../../../shared/components/page-shell/
 import {FwListCommandBarComponent} from '../../../../../shared/components/list-command-bar/list-command-bar.component';
 import {FormsModule} from '@angular/forms';
 import {FwEmptyStateComponent} from '../../../../../shared/components/empty-state/empty-state.component';
+import {HasPermissionDirective} from '../../../../../shared/directives/has-permission.directive';
 
 @Component({
   selector: 'app-structure-config',
@@ -43,7 +44,8 @@ import {FwEmptyStateComponent} from '../../../../../shared/components/empty-stat
     FwPageShellComponent,
     FwListCommandBarComponent,
     FormsModule,
-    FwEmptyStateComponent
+    FwEmptyStateComponent,
+    HasPermissionDirective
   ],
   templateUrl: './structure-config.component.html',
   styleUrls: ['./structure-config.component.scss'],
@@ -72,16 +74,16 @@ export class StructureConfigComponent implements OnInit {
   searchQuery = signal('');
 
   // Autorisations (Provisioning)
-  readonly canEditStructure = computed(() => this.authService.hasRole('ROLE_SUPER_ADMIN'));
+  readonly canEditStructure = computed(() => this.authService.hasPermission('academic:structure:write'));
 
   // Actions pour les cycles
   readonly cycleActions = computed<RowAction[]>(() => {
     const actions: RowAction[] = [
-      {id: 'open', label: 'Gérer le cycle', icon: ArrowRight, type: 'primary'}
+      {id: 'open', label: 'Gérer le cycle', icon: ArrowRight, type: 'primary', permission: 'academic:structure:read'}
     ];
     if (this.canEditStructure()) {
-      actions.push({id: 'edit', label: 'Personnaliser', icon: Edit, type: 'primary'});
-      actions.push({id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger'});
+      actions.push({id: 'edit', label: 'Personnaliser', icon: Edit, type: 'primary', permission: 'academic:structure:write'});
+      actions.push({id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger', permission: 'academic:structure:write'});
     }
     return actions;
   });

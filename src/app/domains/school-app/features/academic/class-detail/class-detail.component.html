@@ -34,23 +34,28 @@
          
          <div class="divider-v"></div>
 
-         <app-fw-button
-           *ngIf="activeTab() === 'students'"
-           variant="primary"
-           size="sm"
-           [icon]="UserPlus"
-           routerLink="/admin/academic/assignments"
-         >
-           Affecter
-         </app-fw-button>
-         <app-fw-button
-           *ngIf="activeTab() === 'teachings'"
-           variant="primary"
-           size="sm"
-           [icon]="Plus"
-         >
-           Cours manuel
-         </app-fw-button>
+         <ng-container *fwHasPermission="'academic:assignment:write'">
+           <app-fw-button
+             *ngIf="activeTab() === 'students'"
+             variant="primary"
+             size="sm"
+             [icon]="UserPlus"
+             routerLink="/admin/academic/assignments"
+           >
+             Affecter
+           </app-fw-button>
+         </ng-container>
+
+         <ng-container *fwHasPermission="'academic:teaching:write'">
+           <app-fw-button
+             *ngIf="activeTab() === 'teachings'"
+             variant="primary"
+             size="sm"
+             [icon]="Plus"
+           >
+             Cours manuel
+           </app-fw-button>
+         </ng-container>
        </div>
     </app-fw-list-command-bar>
 

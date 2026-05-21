@@ -12,24 +12,26 @@
   <div actions class="flex items-center gap-2" *ngIf="cycle()">
     <app-fw-button variant="tertiary" size="sm" [icon]="RefreshCw" [loading]="loadingService.isLoading()" (click)="refresh()" title="Actualiser"></app-fw-button>
     <div class="divider-v"></div>
-    <app-fw-button
-      *ngIf="canEditStructure() && activeTab() === 'pilotage'"
-      (click)="openEditLevel({id: '', name: '', rank: 0, cycleId: cycleId() || ''})"
-      variant="primary"
-      size="sm"
-      [icon]="Plus"
-    >
-      Ajouter un niveau
-    </app-fw-button>
-    <app-fw-button
-      *ngIf="canEditStructure() && activeTab() === 'filieres'"
-      (click)="openAddFiliere()"
-      variant="primary"
-      size="sm"
-      [icon]="Plus"
-    >
-      Nouvelle série
-    </app-fw-button>
+    <ng-container *fwHasPermission="'academic:structure:write'">
+      <app-fw-button
+        *ngIf="activeTab() === 'pilotage'"
+        (click)="openEditLevel({id: '', name: '', rank: 0, cycleId: cycleId() || ''})"
+        variant="primary"
+        size="sm"
+        [icon]="Plus"
+      >
+        Ajouter un niveau
+      </app-fw-button>
+      <app-fw-button
+        *ngIf="activeTab() === 'filieres'"
+        (click)="openAddFiliere()"
+        variant="primary"
+        size="sm"
+        [icon]="Plus"
+      >
+        Nouvelle série
+      </app-fw-button>
+    </ng-container>
   </div>
 
   <!-- CONTENU DE PAGE ALIGNÉ -->
@@ -89,7 +91,7 @@
               </app-fw-button>
 
               <app-fw-button
-                *ngIf="canEditStructure()"
+                *fwHasPermission="'academic:structure:write'"
                 (click)="openEditLevel(group.level)"
                 variant="ghost"
                 size="sm"

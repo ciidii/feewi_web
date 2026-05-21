@@ -3,18 +3,15 @@
 :host { 
   display: block; 
   height: 100vh; 
-  background: var(--fw-ice);
+  background-color: var(--fw-surface-page);
   overflow: hidden;
 }
 
-// ─── ROOT LAYOUT (Mirroring Admission Config) ──────────────────────────────
 .config-feature-root {
   display: grid;
   grid-template-columns: 280px 1fr;
   gap: 0;
   height: 100vh;
-  background: var(--fw-ice);
-  overflow: hidden;
 }
 
 .config-viewport {
@@ -22,221 +19,121 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  background: var(--fw-ice);
-  animation: fade-in 0.4s ease-out;
-
-  app-fw-page-shell { height: 100%; }
 }
 
-// ─── SCOPE SIDEBAR (Refined for Roles) ──────────────────────────────────────
+// ─── SCOPE SIDEBAR (Flat Design) ──────────────────────────────────────
 .scope-sidebar {
-  background: white;
-  border-right: 1px solid var(--fw-border-subtle);
-  padding: 1rem 0.75rem;
+  background-color: var(--fw-surface-card);
+  border-right: 1px solid var(--fw-border);
+  padding: var(--fw-space-md) var(--fw-space-sm);
   display: flex; flex-direction: column;
   height: 100vh;
-  overflow: hidden;
-  position: relative;
-  z-index: 10;
 
   .sidebar-header {
-    display: flex; align-items: center; gap: 0.5rem;
-    padding-bottom: 0.75rem;
-    margin-bottom: 0.75rem;
-    border-bottom: 1px solid var(--fw-border-subtle);
+    display: flex; align-items: center; gap: var(--fw-space-sm);
+    padding-bottom: var(--fw-space-md); 
+    margin-bottom: var(--fw-space-sm);
+    border-bottom: 1px solid var(--fw-border);
 
     .sidebar-brand-icon-alt {
-      width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+      width: 28px; height: 28px; border-radius: var(--fw-radius-md); flex-shrink: 0;
       display: grid; place-items: center;
-      background: var(--fw-primary-alpha); color: var(--fw-primary);
+      background-color: var(--fw-surface-sunken); color: var(--fw-primary);
     }
 
     .sidebar-brand-text {
-      display: flex; flex-direction: column; min-width: 0;
-      .sidebar-brand-name { font-size: 0.75rem; font-weight: 800; color: var(--fw-midnight); line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      .sidebar-brand-year { font-size: 9px; color: var(--fw-text-tertiary); font-weight: 600; margin-top: 1px; }
+      display: flex; flex-direction: column;
+      .sidebar-brand-name { font-size: 0.75rem; font-weight: 800; color: var(--fw-text-primary); line-height: 1.1; }
+      .sidebar-brand-year { font-size: 9px; color: var(--fw-text-tertiary); font-weight: 600; }
     }
   }
 
   .nav-section-title {
     font-size: 9px; font-weight: 850; text-transform: uppercase;
-    color: var(--fw-text-tertiary); letter-spacing: 0.1em;
-    padding: 0 0.5rem; margin-bottom: 0.5rem;
-    display: flex; align-items: center; gap: 0.5rem;
-
-    .level-count {
-      display: inline-flex; align-items: center; justify-content: center;
-      padding: 1px 5px; border-radius: 20px;
-      background: var(--fw-surface-sunken); font-size: 8px; color: var(--fw-text-tertiary);
-    }
+    color: var(--fw-text-tertiary); letter-spacing: 0.05em;
+    padding: 0 var(--fw-space-sm); 
+    margin-bottom: var(--fw-space-sm);
   }
 
-  .nav-divider { height: 1px; background: var(--fw-border-subtle); margin: 0.75rem 0.25rem; }
-
-  // ── Role items ─────────────────────────────────────────────────────────────
   .scope-item {
-    display: flex; align-items: center; gap: 0.625rem;
-    padding: 0.625rem 0.75rem; border-radius: 12px; border: none;
-    background: transparent; cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    width: 100%; margin-bottom: 0.25rem;
-    position: relative;
+    display: flex; align-items: center; gap: var(--fw-space-sm);
+    padding: var(--fw-space-sm) var(--fw-space-sm); 
+    border-radius: var(--fw-radius-md); 
+    border: none;
+    background-color: transparent; cursor: pointer; width: 100%;
+    transition: background-color var(--fw-transition-fast);
 
     .scope-icon {
-      width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; flex-shrink: 0;
-      background: var(--fw-surface-sunken); color: var(--fw-text-tertiary);
-      transition: all 0.25s;
+      width: 28px; height: 28px; border-radius: var(--fw-radius-sm); 
+      display: grid; place-items: center;
+      background-color: var(--fw-surface-sunken); color: var(--fw-text-tertiary);
     }
 
     .scope-label-wrap {
-      display: flex; flex-direction: column; text-align: left; min-width: 0;
-      .scope-name { font-size: 0.8125rem; font-weight: 800; color: var(--fw-midnight); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      .scope-sub  { font-size: 9px; color: var(--fw-text-tertiary); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      display: flex; flex-direction: column; text-align: left;
+      .scope-name { font-size: 0.8125rem; font-weight: 750; color: var(--fw-text-primary); }
+      .scope-sub  { font-size: 9px; color: var(--fw-text-tertiary); font-weight: 500; }
     }
 
-    .override-dot { 
-      position: absolute; right: 8px; top: 8px;
-      width: 5px; height: 5px; border-radius: 50%; background: var(--fw-warning); 
-    }
-
-    &:hover { background: var(--fw-surface-sunken); transform: translateX(2px); }
+    &:hover { background-color: var(--fw-surface-sunken); }
 
     &.active {
-      background: var(--fw-midnight);
-      transform: translateX(2px);
-      box-shadow: var(--fw-shadow-md);
-      .scope-icon  { background: rgb(255 255 255 / 12%); color: white; }
-      .scope-name  { color: white; }
-      .scope-sub   { color: rgb(255 255 255 / 40%); }
+      background-color: var(--fw-surface-page);
+      .scope-icon { background-color: var(--fw-surface-card); color: var(--fw-primary); border: 1px solid var(--fw-border); }
+      .scope-name { color: var(--fw-primary); }
     }
   }
 
-  .levels-scroll {
-    flex: 1; overflow-y: auto; overflow-x: hidden; padding-right: 2px;
-    &::-webkit-scrollbar { width: 3px; }
-    &::-webkit-scrollbar-thumb { background: var(--fw-border); border-radius: 10px; }
-  }
+  .levels-scroll { flex: 1; overflow-y: auto; }
 }
 
-// ─── EDITOR CONTAINER ────────────────────────────────────────────────────────
 .editor-container {
-  flex: 1; overflow-y: auto; padding: 0 1.5rem 1.5rem;
-  &::-webkit-scrollbar { width: 6px; }
-  &::-webkit-scrollbar-thumb { background: var(--fw-border-strong); border-radius: 10px; }
+  flex: 1; overflow-y: auto;
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-thumb { background-color: var(--fw-border); border-radius: var(--fw-radius-full); }
 }
-
-.actions-zone { display: flex; align-items: center; gap: 0.75rem; }
 
 .search-input-technical {
-  width: 100%; height: 36px; padding: 0 1rem 0 2.5rem;
-  background: white; border: 1.5px solid var(--fw-border-subtle);
-  border-radius: 12px; font-size: 0.75rem; font-weight: 700;
-  color: var(--fw-midnight); outline: none; transition: all 0.2s;
-  &::placeholder { color: var(--fw-text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; font-size: 9px; }
-  &:focus { border-color: var(--fw-primary); box-shadow: 0 0 0 4px var(--fw-primary-alpha); width: 320px; }
+  width: 100%; height: 36px; padding: 0 var(--fw-space-md) 0 2.5rem;
+  background-color: var(--fw-surface-card); border: 1px solid var(--fw-border);
+  border-radius: var(--fw-radius-md); font-size: 0.75rem; font-weight: 600;
+  color: var(--fw-text-primary); outline: none;
+  &::placeholder { color: var(--fw-text-tertiary); text-transform: uppercase; font-size: 9px; }
+  &:focus { border-color: var(--fw-primary); }
 }
 
-.divider-v { width: 1px; height: 24px; background: var(--fw-border-subtle); margin: 0 0.25rem; }
+.divider-v { width: 1px; height: 20px; background-color: var(--fw-border); margin: 0 var(--fw-space-sm); }
 
-// ─── CONTEXT BANNER (Mirroring Admission) ────────────────────────────────────
-.context-banner {
-  display: flex; align-items: center; gap: 0.75rem;
-  padding: 0.875rem 1.25rem; background: white; border-radius: 16px;
-  box-shadow: var(--fw-shadow-sm); border: 1px solid var(--fw-border-subtle);
-  border-left: 4px solid var(--fw-primary);
-  margin-top: 1.5rem; margin-bottom: 0.5rem;
-
-  .scope-chip { font-size: 9px; font-weight: 850; text-transform: uppercase; color: var(--fw-primary); letter-spacing: 0.1em; display: block; }
-  p { font-size: 0.8125rem; color: var(--fw-text-tertiary); font-weight: 500; margin: 1px 0 0; }
-  .banner-text { display: flex; flex-direction: column; }
+// ─── PBAC MATRIX UI (Tabular) ──────────────────────────────────────────────
+.domain-title {
+  font-family: var(--fw-font-ui); font-size: 0.75rem; font-weight: 850;
+  text-transform: uppercase; letter-spacing: 0.1em; color: var(--fw-text-primary);
 }
 
-// ─── PERMISSION MATRIX UI ────────────────────────────────────────────────────
-.permission-group-section {
-  .group-header {
-    display: flex; align-items: center; gap: 0.625rem; margin-bottom: 0.875rem;
-    .group-title {
-      font-family: var(--fw-font-ui); font-size: 0.75rem; font-weight: 850;
-      text-transform: uppercase; letter-spacing: 0.1em; color: var(--fw-text-tertiary);
-    }
-  }
+.resource-table {
+  background-color: var(--fw-surface-card); 
+  border: 1px solid var(--fw-border); 
+  border-radius: var(--fw-radius-md);
+  overflow: hidden;
 }
 
-.permission-row-card {
-  background: white;
-  border: 1px solid var(--fw-border-subtle);
-  border-radius: 10px;
-  padding: 0.625rem 1rem;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: var(--fw-shadow-sm);
+.resource-row {
+  display: grid; grid-template-columns: 220px 1fr;
+  border-bottom: 1px solid var(--fw-surface-page);
+  
+  &.header { background-color: var(--fw-surface-sunken); height: 36px; align-items: center; }
 
-  &:hover {
-    border-color: var(--fw-primary);
-    transform: translateX(3px);
-    box-shadow: var(--fw-shadow-md);
-    .perm-label { color: var(--fw-primary); }
-  }
-
-  &.granted {
-    border-color: var(--fw-primary-alpha);
-    background: white;
-  }
-
-  .perm-content {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1.5rem;
-  }
-
-  .perm-info {
-    flex: 1;
-    min-width: 0;
-    
-    .perm-label {
-      font-size: 0.8125rem;
-      font-weight: 800;
-      color: var(--fw-midnight);
-      transition: color 0.2s;
-    }
-
-    .perm-tech-id {
-      font-family: var(--fw-font-mono);
-      font-size: 9px;
-      font-weight: 700;
-      color: var(--fw-text-tertiary);
-      opacity: 0.5;
-      background: var(--fw-surface-sunken);
-      padding: 1px 6px;
-      border-radius: 4px;
-    }
-
-    .perm-desc {
-      font-size: 11px;
-      color: var(--fw-text-tertiary);
-      font-weight: 500;
-      line-height: 1.4;
-      margin-top: 1px;
-    }
+  .res-info-col {
+    padding: var(--fw-space-sm) var(--fw-space-md); 
+    border-right: 1px solid var(--fw-surface-page);
+    .res-name { font-size: 0.75rem; font-weight: 750; color: var(--fw-text-primary); display: block; }
   }
 }
 
-// ─── TOGGLE SWITCH AS BUTTON (WCAG) ──────────────────────────────────────────
-.toggle-switch {
-  position: relative; flex-shrink: 0;
-  width: 32px; height: 18px; border-radius: 999px;
-  background: var(--fw-border); border: none; padding: 0; cursor: pointer;
-  transition: background 0.22s;
-
-  .track { width: 100%; height: 100%; border-radius: 999px; }
-  .thumb {
-    width: 12px; height: 12px; border-radius: 50%;
-    background: white; position: absolute; top: 3px; left: 3px;
-    transition: transform 0.22s;
-  }
-
-  &.on { background: var(--fw-primary); .thumb { transform: translateX(14px); } }
+.res-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  align-items: center;
 }
 
 @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }

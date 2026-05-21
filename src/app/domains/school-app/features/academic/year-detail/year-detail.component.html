@@ -14,7 +14,8 @@
   <div actions class="flex items-center gap-2">
     <!-- Actions pour PLANNING -->
     <app-fw-button 
-      *ngIf="y.status === 'PLANNING'" 
+      *fwHasPermission="'academic:year:lifecycle'"
+      [hidden]="y.status !== 'PLANNING'" 
       (click)="onActivate()" 
       variant="primary"
       size="sm"
@@ -26,7 +27,8 @@
 
     <!-- Actions pour ACTIVE -->
     <app-fw-button 
-      *ngIf="y.status === 'ACTIVE'" 
+      *fwHasPermission="'academic:year:lifecycle'"
+      [hidden]="y.status !== 'ACTIVE'" 
       (click)="onClose()" 
       variant="danger"
       size="sm"
@@ -38,7 +40,8 @@
 
     <!-- FACTORY (V2) -->
     <app-fw-button
-      *ngIf="y.status === 'PLANNING' || y.status === 'ACTIVE'"
+      *fwHasPermission="'academic:year:write'"
+      [hidden]="y.status !== 'PLANNING' && y.status !== 'ACTIVE'"
       [matMenuTriggerFor]="factoryMenu"
       variant="tertiary"
       size="sm"
@@ -58,8 +61,9 @@
     </mat-menu>
 
     <!-- Actions pour CLOSING -->
-    <ng-container *ngIf="y.status === 'CLOSING'">
+    <ng-container *fwHasPermission="'academic:year:lifecycle'">
       <app-fw-button 
+        *ngIf="y.status === 'CLOSING'"
         (click)="onReopen()" 
         variant="tertiary"
         size="sm"
@@ -69,6 +73,7 @@
         Rouvrir
       </app-fw-button>
       <app-fw-button 
+        *ngIf="y.status === 'CLOSING'"
         (click)="onArchive()" 
         variant="primary"
         size="sm"

@@ -59,6 +59,8 @@ import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.com
 import {DataListComponent} from '../../../../../shared/components/data-list/data-list.component';
 import {FwListCommandBarComponent} from '../../../../../shared/components/list-command-bar/list-command-bar.component';
 import {BlockLoaderComponent} from '../../../../../shared/components/loader/block-loader.component';
+import {AuthService} from '../../../../../core/services/auth.service';
+import {HasPermissionDirective} from '../../../../../shared/directives/has-permission.directive';
 
 @Component({
   selector: 'app-class-detail',
@@ -73,7 +75,8 @@ import {BlockLoaderComponent} from '../../../../../shared/components/loader/bloc
     FwEmptyStateComponent,
     DataListComponent,
     FwListCommandBarComponent,
-    BlockLoaderComponent
+    BlockLoaderComponent,
+    HasPermissionDirective
   ],
   templateUrl: './class-detail.component.html',
   styleUrls: ['./class-detail.component.scss']
@@ -84,6 +87,7 @@ export class ClassDetailComponent {
   private router = inject(Router);
   private academicService = inject(AcademicService);
   private identityService = inject(IdentityService);
+  private authService = inject(AuthService);
   private navState = inject(NavigationStateService);
   private notificationService = inject(NotificationService);
   protected loadingService = inject(LoadingService);
@@ -131,13 +135,13 @@ export class ClassDetailComponent {
 
   // Actions
   readonly studentActions: RowAction[] = [
-    { id: 'view', label: 'Voir fiche', icon: Search, type: 'primary' },
-    { id: 'remove', label: 'Désaffecter', icon: Trash2, type: 'danger' }
+    { id: 'view', label: 'Voir fiche', icon: Search, type: 'primary', permission: 'identity:user:read' },
+    { id: 'remove', label: 'Désaffecter', icon: Trash2, type: 'danger', permission: 'academic:assignment:write' }
   ];
 
   readonly teamActions: RowAction[] = [
-    { id: 'edit', label: 'Modifier', icon: Edit, type: 'primary' },
-    { id: 'remove', label: 'Supprimer', icon: Trash2, type: 'danger' }
+    { id: 'edit', label: 'Modifier', icon: Edit, type: 'primary', permission: 'academic:teaching:write' },
+    { id: 'remove', label: 'Supprimer', icon: Trash2, type: 'danger', permission: 'academic:teaching:write' }
   ];
 
   // DataList Transformations

@@ -23,6 +23,7 @@
         <app-fw-button variant="tertiary" size="sm" [icon]="RefreshCw" [loading]="isLoading()" (click)="loadData()" title="Actualiser"></app-fw-button>
         <div class="divider-v"></div>
         <app-fw-button 
+          *fwHasPermission="'academic:structure:write'"
           (click)="openSubjectForm()"
           variant="primary"
           size="sm"
@@ -52,7 +53,7 @@
           [icon]="BookOpen"
           title="Aucune matière trouvée"
           description="Enrichissez votre catalogue global pour construire vos programmes scolaires."
-          ctaLabel="Créer ma première matière"
+          [ctaLabel]="canEditLibrary() ? 'Créer ma première matière' : ''"
           (ctaClick)="openSubjectForm()"
         ></app-fw-empty-state>
       </div>

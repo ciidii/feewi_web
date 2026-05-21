@@ -13,6 +13,8 @@ import {ConfirmDialogComponent} from '../../../../../../../shared/components/con
 import {SyllabusViewerComponent} from '../syllabus-viewer/syllabus-viewer';
 import {FwModalShellComponent} from '../../../../../../../shared/components/modal-shell/modal-shell.component';
 import {FwButtonComponent} from '../../../../../../../shared/components/button/button.component';
+import {AuthService} from '../../../../../../../core/services/auth.service';
+import {HasPermissionDirective} from '../../../../../../../shared/directives/has-permission.directive';
 
 @Component({
   selector: 'app-curriculum-manager',
@@ -24,13 +26,15 @@ import {FwButtonComponent} from '../../../../../../../shared/components/button/b
     DataListComponent,
     ReactiveFormsModule,
     FwModalShellComponent,
-    FwButtonComponent
+    FwButtonComponent,
+    HasPermissionDirective
   ],
   templateUrl: './curriculum-manager.html',
   styleUrls: ['./curriculum-manager.scss']
 })
 export class CurriculumManagerComponent implements OnInit {
   private academicService = inject(AcademicService);
+  private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
   private dialogRef = inject(MatDialogRef<CurriculumManagerComponent>);
   private dialog = inject(MatDialog);
@@ -68,9 +72,9 @@ export class CurriculumManagerComponent implements OnInit {
 
   // Actions
   readonly curriculumActions: RowAction[] = [
-    { id: 'syllabus', label: 'Voir le Syllabus', icon: BookOpen, type: 'primary' },
-    { id: 'edit', label: 'Modifier', icon: Edit, type: 'primary' },
-    { id: 'delete', label: 'Retirer du programme', icon: Trash2, type: 'danger' }
+    { id: 'syllabus', label: 'Voir le Syllabus', icon: BookOpen, type: 'primary', permission: 'academic:structure:read' },
+    { id: 'edit', label: 'Modifier', icon: Edit, type: 'primary', permission: 'academic:structure:write' },
+    { id: 'delete', label: 'Retirer du programme', icon: Trash2, type: 'danger', permission: 'academic:structure:write' }
   ];
 
   // Données transformées pour l'affichage
