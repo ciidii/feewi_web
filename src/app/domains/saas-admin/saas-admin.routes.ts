@@ -24,6 +24,7 @@ export const SAAS_ADMIN_ROUTES: Routes = [
   {
     path: 'audit',
     title: 'Audit Système',
+    data: {permissions: ['identity:audit:read']},
     loadComponent: () => import('./global-audit/global-audit.component').then(m => m.GlobalAuditComponent)
   },
   {

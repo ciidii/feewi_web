@@ -24,8 +24,6 @@ import {
   Trash2,
   X
 } from 'lucide-angular';
-
-// Importer les modèles
 import {
   RowAction,
   SearchState,
@@ -35,8 +33,6 @@ import {
   ViewConfig,
   ViewMode
 } from '../../models/data-list.models';
-
-// Importer les composants
 import {ExpandableViewComponent} from './views/expandable-view/expandable-view';
 import {CardsViewComponent} from './views/cards-view/cards-view';
 import {SortState, TableViewComponent} from './views/table-view/table-view';
@@ -46,9 +42,8 @@ import {BlockLoaderComponent} from '../loader/block-loader.component';
 import {FwEmptyStateComponent} from '../empty-state/empty-state.component';
 import {FwRefreshBannerComponent} from '../refresh-banner/refresh-banner.component';
 import {FwButtonComponent} from '../button/button.component';
-
-// Importer les services
 import {ViewPreferenceService} from '../../services/view-preference.service';
+import {AuthService} from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-data-list',
@@ -74,16 +69,13 @@ import {ViewPreferenceService} from '../../services/view-preference.service';
   styleUrls: ['./data-list.component.scss']
 })
 export class DataListComponent {
-  // ===========================================
-  // CONSTRUCTEUR
-  // ===========================================
-
-  constructor(private viewPreferenceService: ViewPreferenceService) {
-    // La vue sera initialisée dans ngOnInit pour prendre en compte les inputs
+  constructor(
+    private viewPreferenceService: ViewPreferenceService,
+    private authService: AuthService
+  ) {
   }
 
   ngOnInit() {
-    // Charger la préférence de vue au démarrage ou utiliser la vue par défaut
     const savedView = this.viewPreferenceService.getPreferredView()();
 
     // Priorité :
@@ -105,7 +97,7 @@ export class DataListComponent {
   data = input<TableRow[]>([]);
 
   /** Vue par défaut (si aucune préférence n'est enregistrée) */
-  defaultView = input<ViewMode>('expandable');
+  defaultView = input<ViewMode>('table');
 
   /** Les onglets disponibles */
   tabs = input<TabItem[]>([]);
@@ -130,6 +122,17 @@ export class DataListComponent {
 
   /** Actions disponibles sur chaque ligne */
   actions = input<RowAction[]>([]);
+
+  /** Actions filtrées par permissions */
+  filteredActions = computed(() => {
+    return this.actions().filter(action => {
+      if (!action.permission) return true;
+      if (Array.isArray(action.permission)) {
+        return this.authService.hasAllPermissions(action.permission);
+      }
+      return this.authService.hasPermission(action.permission);
+    });
+  });
 
   /** État de chargement */
   isLoading = input<boolean>(false);

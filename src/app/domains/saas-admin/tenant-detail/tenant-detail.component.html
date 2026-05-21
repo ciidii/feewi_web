@@ -29,19 +29,19 @@
 
       <!-- Droite : Actions -->
       <div class="flex items-center gap-3">
-        <button (click)="onImpersonate()" [disabled]="isActionLoading()" class="flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-700 border border-amber-200 rounded-xl text-xs font-bold hover:bg-amber-100 transition-all shadow-sm active:scale-95 disabled:opacity-50">
+        <button *fwHasPermission="'identity:school:write'" (click)="onImpersonate()" [disabled]="isActionLoading()" class="flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-700 border border-amber-200 rounded-xl text-xs font-bold hover:bg-amber-100 transition-all shadow-sm active:scale-95 disabled:opacity-50">
           <lucide-icon [name]="ExternalLink" class="w-4 h-4"></lucide-icon>
           Impersonnaliser
         </button>
         
-        <div class="h-8 w-px bg-slate-200 mx-1"></div>
+        <div class="h-8 w-px bg-slate-200 mx-1" *fwHasPermission="'identity:school:write'"></div>
 
-        <button (click)="onEdit()" [disabled]="isActionLoading()" class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-50 transition-all shadow-sm active:scale-95 disabled:opacity-50">
+        <button *fwHasPermission="'identity:school:write'" (click)="onEdit()" [disabled]="isActionLoading()" class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-50 transition-all shadow-sm active:scale-95 disabled:opacity-50">
           <lucide-icon [name]="Edit" class="w-4 h-4 text-primary-600"></lucide-icon>
           Modifier
         </button>
 
-        <button (click)="onChangeStatus()" [disabled]="isActionLoading()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-rose-50 border border-rose-100 text-rose-600 hover:bg-rose-100 transition-all active:scale-95 disabled:opacity-50" [title]="(school()?.status === 'ACTIVE' || school()?.active !== false) ? 'Suspendre l\'accès' : 'Réactiver l\'accès'">
+        <button *fwHasPermission="'identity:school:write'" (click)="onChangeStatus()" [disabled]="isActionLoading()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-rose-50 border border-rose-100 text-rose-600 hover:bg-rose-100 transition-all active:scale-95 disabled:opacity-50" [title]="(school()?.status === 'ACTIVE' || school()?.active !== false) ? 'Suspendre l\'accès' : 'Réactiver l\'accès'">
           <lucide-icon *ngIf="!isActionLoading()" [name]="(school()?.status === 'ACTIVE' || school()?.active !== false) ? XCircle : CheckCircle" class="w-5 h-5"></lucide-icon>
           <lucide-icon *ngIf="isActionLoading()" [name]="RefreshCw" class="w-5 h-5 animate-spin"></lucide-icon>
         </button>

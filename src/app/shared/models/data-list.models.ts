@@ -57,6 +57,8 @@ export interface RowAction {
   icon: any;
   /** Type visuel (détermine la couleur) */
   type?: 'primary' | 'danger' | 'success' | 'warning' | 'default';
+  /** Permission requise pour afficher cette action */
+  permission?: string | string[];
   /** Si l'action est critique (demande confirmation par exemple) */
   isCritical?: boolean;
   /** Condition de visibilité basée sur les métadonnées de la ligne */

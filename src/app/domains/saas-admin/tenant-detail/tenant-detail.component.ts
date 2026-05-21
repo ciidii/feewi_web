@@ -37,11 +37,12 @@ import {ConfirmDialogComponent} from '../../../shared/components/confirm-dialog/
 import {finalize} from 'rxjs';
 import {EnrollmentPublicService} from '../../../core/services/enrollment-public.service';
 import {PublicPortalSummary} from '../../../core/models/enrollment/dtos';
+import {HasPermissionDirective} from '../../../shared/directives/has-permission.directive';
 
 @Component({
   selector: 'app-tenant-detail',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, RouterModule, MatDialogModule],
+  imports: [CommonModule, LucideAngularModule, RouterModule, MatDialogModule, HasPermissionDirective],
   templateUrl: './tenant-detail.component.html',
   styleUrls: ['./tenant-detail.component.scss']
 })
