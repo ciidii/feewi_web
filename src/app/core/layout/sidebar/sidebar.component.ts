@@ -23,7 +23,7 @@ import {
   Maximize,
   Minimize,
   Moon,
-  Plus,
+  Plus, Shield,
   ShieldCheck,
   Sun,
   User,
@@ -89,6 +89,7 @@ export class SidebarComponent {
   // --- 4. IDENTITY SERVICE ---
   identityItems = [
     { label: 'Personnel (Staff)', icon: Users, route: '/admin/identity/staff', permission: 'identity:user:read' },
+    { label: 'Comptes d’Accès', icon: Shield, route: '/admin/identity/accounts', permission: 'identity:user:read' },
     { label: 'Rôles & Droits', icon: ShieldCheck, route: '/admin/identity/roles', permission: 'identity:role:read' },
     { label: 'Journal d\'audit', icon: History, route: '/admin/identity/audit', permission: 'identity:audit:read' },
   ];

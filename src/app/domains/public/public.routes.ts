@@ -23,7 +23,12 @@ export const PUBLIC_ROUTES: Routes = [
         title: 'auth.reset_password.title',
         loadComponent: () => import('./auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent)
       },
-      // Redirection par d├®faut : /auth -> /auth/login
+      {
+        path: 'force-password-change',
+        title: 'Sécurisation du compte',
+        loadComponent: () => import('./features/auth/force-password-change/force-password-change.component').then(m => m.ForcePasswordChangeComponent)
+      },
+      // Redirection par défaut : /auth -> /auth/login
 
       {
         path: '',

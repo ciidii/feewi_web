@@ -24,6 +24,7 @@
     <ng-container *fwHasPermission="'identity:user:write'">
       <app-fw-button 
         *ngIf="!s.hasUserAccount"
+        (click)="onManageAccount()"
         variant="primary" 
         size="sm" 
         [icon]="Key"
@@ -156,6 +157,19 @@
                   </div>
                 </div>
               </div>
+
+              <div class="card-actions-row pt-6 mt-6 border-t border-slate-50">
+                <app-fw-button
+                  *fwHasPermission="'identity:user:write'"
+                  (click)="onManageAccount()"
+                  variant="tertiary"
+                  size="sm"
+                  class="w-full"
+                  [icon]="UserCog"
+                >
+                  Gérer les privilèges
+                </app-fw-button>
+              </div>
             </div>
 
             <ng-template #noAccount>
@@ -163,6 +177,7 @@
                 <p class="text-xs text-slate-500 leading-relaxed">Ce membre du personnel n'a pas encore de compte utilisateur pour se connecter à la plateforme.</p>
                 <app-fw-button 
                   *fwHasPermission="'identity:user:write'"
+                  (click)="onManageAccount()"
                   variant="primary" 
                   size="sm" 
                   class="w-full" 

@@ -1,0 +1,76 @@
+<app-fw-form-shell
+  [title]="isEditMode ? 'Modifier les Accès' : 'Ouvrir un Accès'"
+  [subtitle]="isEditMode ? 'Ajustement des privilèges système.' : 'Création d\'un compte utilisateur lié à la fiche RH.'"
+  [icon]="Shield"
+  [saveLabel]="isEditMode ? 'Enregistrer les modifications' : 'Activer l\'accès'"
+  [isLoading]="isLoading()"
+  [canSave]="accountForm.valid"
+  (save)="onSave()"
+  (cancel)="onCancel()"
+>
+  <form [formGroup]="accountForm" class="space-y-10 py-2">
+    
+    <!-- 1. Identification -->
+    <div class="space-y-6">
+      <header class="section-header">
+        <lucide-icon [name]="Mail" [size]="14"></lucide-icon>
+        <span class="label">Identifiants de Connexion</span>
+      </header>
+
+      <div class="fw-field">
+        <label class="fw-label">Email Professionnel (Login)</label>
+        <div class="fw-input-wrapper">
+          <input type="email" formControlName="email" class="fw-input" placeholder="nom.prenom@ecole.com" />
+        </div>
+        <p class="fw-hint" *ngIf="isEditMode">L'identifiant ne peut pas être modifié après création.</p>
+      </div>
+    </div>
+
+    <!-- 2. Autorisations PBAC -->
+    <div class="space-y-6">
+      <header class="section-header">
+        <lucide-icon [name]="ShieldCheck" [size]="14"></lucide-icon>
+        <span class="label">Profils & Rôles</span>
+      </header>
+
+      <div class="fw-field">
+        <label class="fw-label">Rôles Assignés</label>
+        <div class="fw-input-wrapper">
+          <mat-select formControlName="roles" multiple class="fw-input" placeholder="Sélectionner les rôles">
+            <mat-option *ngFor="let role of availableRoles()" [value]="role.name">
+              {{ role.name.replace('ROLE_', '').replace('_', ' ') }}
+            </mat-option>
+          </mat-select>
+        </div>
+        <p class="fw-hint">Les permissions sont cumulatives selon les rôles sélectionnés.</p>
+      </div>
+    </div>
+
+    <!-- 3. État du compte -->
+    <div class="space-y-6">
+        <header class="section-header">
+          <lucide-icon [name]="AlertCircle" [size]="14"></lucide-icon>
+          <span class="label">Contrôle de l'accès</span>
+        </header>
+
+        <div class="p-4 bg-surface-sunken rounded-xl border border-border flex items-center justify-between">
+            <div class="flex items-start gap-3">
+                <div class="w-8 h-8 rounded-lg bg-white border border-border flex items-center justify-center shrink-0">
+                    <lucide-icon [name]="Shield" [size]="14" [class.text-emerald-500]="accountForm.get('active')?.value" [class.text-slate-300]="!accountForm.get('active')?.value"></lucide-icon>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-xs font-bold text-midnight">Compte Activé</span>
+                    <span class="text-[10px] text-text-tertiary">Si décoché, l'utilisateur ne pourra plus se connecter.</span>
+                </div>
+            </div>
+            
+            <div class="fw-toggle-wrap" (click)="accountForm.get('active')?.setValue(!accountForm.get('active')?.value)">
+                <button type="button" class="fw-toggle-switch sm" [class.on]="accountForm.get('active')?.value">
+                    <div class="track"><div class="thumb"></div></div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+  </form>
+</app-fw-form-shell>

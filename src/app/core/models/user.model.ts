@@ -42,6 +42,7 @@ export interface User {
   connectionCount?: number;
   lastDeviceType?: string;
   staff?: Staff; // New vision: user is linked to a staff member
+  forceChangePassword?: boolean; // Lifecycle management
 }
 
 export interface UserCreateRequest {

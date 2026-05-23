@@ -21,18 +21,18 @@ import {
   BookOpen,
   GraduationCap
 } from 'lucide-angular';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {IdentityService} from '../../../../../core/services/identity.service';
-import {AcademicService} from '../../../../../core/services/academic.service';
 import {NotificationService} from '../../../../../shared/services/notification.service';
 import {LoadingService} from '../../../../../shared/services/loading.service';
 import {Staff, User as UserAccount} from '../../../../../core/models/user.model';
 import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
 import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.component';
-import {BlockLoaderComponent} from '../../../../../shared/components/loader/block-loader.component';
 import {HasPermissionDirective} from '../../../../../shared/directives/has-permission.directive';
 import {firstValueFrom} from 'rxjs';
 import {SkeletonComponent} from '../../../../../shared/components/skeleton/skeleton.component';
+import {AccountFormComponent} from '../user-accounts/components/account-form/account-form.component';
 
 @Component({
   selector: 'app-staff-detail',
@@ -41,6 +41,7 @@ import {SkeletonComponent} from '../../../../../shared/components/skeleton/skele
     CommonModule,
     RouterModule,
     LucideAngularModule,
+    MatDialogModule,
     FwPageShellComponent,
     FwButtonComponent,
     FwBadgeComponent,
@@ -56,6 +57,7 @@ export class StaffDetailComponent implements OnInit {
   private identityService = inject(IdentityService);
   private notificationService = inject(NotificationService);
   protected loadingService = inject(LoadingService);
+  private dialog = inject(MatDialog);
 
   // --- États ---
   staffId = signal<string | null>(null);
@@ -98,13 +100,12 @@ export class StaffDetailComponent implements OnInit {
 
       // 2. Charger le compte utilisateur si existant
       if (staff.hasUserAccount) {
-        // Pour l'instant, on récupère le profil complet (vue admin)
-        // Note: L'ID de l'user n'est pas forcément l'ID du staff,
-        // mais souvent ils sont liés ou on peut chercher l'utilisateur par email.
         const userPage = await firstValueFrom(this.identityService.getUsers(staff.email, 0, 1));
         if (userPage.content.length > 0) {
           this.userAccount.set(userPage.content[0]);
         }
+      } else {
+          this.userAccount.set(null);
       }
     } catch (error) {
       this.notificationService.error("Impossible de charger le dossier collaborateur.");
@@ -135,7 +136,21 @@ export class StaffDetailComponent implements OnInit {
   }
 
   onManageAccount() {
-    this.notificationService.info("La gestion du compte sera bientôt disponible.");
+    const s = this.staff();
+    const user = this.userAccount();
+    if (!s) return;
+
+    const dialogRef = this.dialog.open(AccountFormComponent, {
+      width: '560px',
+      panelClass: 'feewi-dialog-panel',
+      data: { staff: s, user: user }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && this.staffId()) {
+        this.loadStaffData(this.staffId()!);
+      }
+    });
   }
 
   protected readonly User = User;

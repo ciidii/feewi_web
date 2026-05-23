@@ -138,6 +138,12 @@ export class AuthService {
         console.log('[AuthService] Profile fetched successfully for:', profile.email);
         this._currentUser.set(profile);
         this.updateTenantContext(profile);
+
+        // Interception du changement de mot de passe forcé
+        if (profile.forceChangePassword) {
+            console.warn('[AuthService] Force password change required.');
+            this.router.navigate(['/auth/force-password-change']);
+        }
       }),
       catchError(error => {
         console.error('[AuthService] Error fetching profile:', error);

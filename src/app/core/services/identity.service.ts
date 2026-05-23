@@ -170,6 +170,24 @@ export class IdentityService {
   }
 
   /**
+   * Active ou désactive un compte utilisateur
+   */
+  toggleUserActive(id: string, active: boolean): Observable<void> {
+    return this.http.patch<void>(`${this.API_URL}/users/${id}/active`, { active }).pipe(
+      catchError(this.handleError(active ? "Erreur lors de l'activation" : "Erreur lors de la suspension"))
+    );
+  }
+
+  /**
+   * Change le mot de passe de l'utilisateur connecté
+   */
+  changePassword(payload: any): Observable<void> {
+    return this.http.post<void>(`${this.API_URL}/auth/change-password`, payload).pipe(
+      catchError(this.handleError("Ancien mot de passe incorrect ou erreur système"))
+    );
+  }
+
+  /**
    * Met à jour un rôle existant
    */
   updateRole(id: string, role: Partial<Role>): Observable<Role> {

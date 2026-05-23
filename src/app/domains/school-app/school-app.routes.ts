@@ -62,6 +62,12 @@ export const SCHOOL_APP_ROUTES: Routes = [
         loadComponent: () => import('./features/identity/staff-detail/staff-detail.component').then(m => m.StaffDetailComponent)
       },
       {
+        path: 'accounts',
+        title: 'Comptes d’Accès',
+        data: {permissions: ['identity:user:read']},
+        loadComponent: () => import('./features/identity/user-accounts/user-account-list.component').then(m => m.UserAccountListComponent)
+      },
+      {
         path: 'roles',
         title: 'Gestion des Rôles',
         data: {permissions: ['identity:role:read']},
