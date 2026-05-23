@@ -18,7 +18,13 @@ export const authGuard: CanActivateFn = (route, state) => {
 
   // 2. Check Permissions (Primary)
   const requiredPermissions = route.data['permissions'] as string[];
+  const user = authService.currentUser();
+  const isMasterAdmin = user?.roles.some(r => ['ROLE_ADMIN', 'ROLE_SUPER_ADMIN'].includes(r));
+
   if (requiredPermissions && requiredPermissions.length > 0) {
+    // Si c'est un administrateur maître, on le laisse passer le garde (l'API fera la validation finale)
+    if (isMasterAdmin) return true;
+
     if (!authService.hasAllPermissions(requiredPermissions)) {
       console.warn(`[authGuard] Access denied for ${state.url}. Missing permissions: ${requiredPermissions}`);
       return router.createUrlTree(['/403']);

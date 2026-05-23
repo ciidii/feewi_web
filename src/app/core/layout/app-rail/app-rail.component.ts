@@ -31,11 +31,12 @@ import {TenantContextService} from '../../services/tenant-context.service';
 import {UiPreferenceService} from '../../../shared/services/ui-preference.service';
 import {TranslateModule} from '@ngx-translate/core';
 import {MatMenuModule} from '@angular/material/menu';
+import {HasPermissionDirective} from '../../../shared/directives/has-permission.directive';
 
 @Component({
   selector: 'app-rail',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, RouterModule, TranslateModule, MatMenuModule],
+  imports: [CommonModule, LucideAngularModule, RouterModule, TranslateModule, MatMenuModule, HasPermissionDirective],
   templateUrl: './app-rail.component.html',
   styleUrl: './app-rail.component.scss',
   encapsulation: ViewEncapsulation.None

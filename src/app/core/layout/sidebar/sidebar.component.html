@@ -25,14 +25,16 @@
     </div>
 
     <nav class="nav-scroll">
-      <a *ngFor="let item of saasItems"
-         [routerLink]="item.route"
-         routerLinkActive="active-link"
-         [attr.data-label]="item.label"
-         class="sidebar-link">
-        <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
-        <span class="label">{{ item.label }}</span>
-      </a>
+      <ng-container *ngFor="let item of saasItems">
+        <a *fwHasPermission="item.permission"
+           [routerLink]="item.route"
+           routerLinkActive="active-link"
+           [attr.data-label]="item.label"
+           class="sidebar-link">
+          <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
+          <span class="label">{{ item.label }}</span>
+        </a>
+      </ng-container>
     </nav>
   </ng-container>
 
@@ -63,57 +65,65 @@
       <!-- ENROLLMENT -->
       <ng-container *ngIf="navService.activeService() === 'enrollment'">
         <span class="nav-section-title">Inscriptions</span>
-        <a *ngFor="let item of enrollmentItems; let i = index"
-           [routerLink]="item.route"
-           routerLinkActive="active-link"
-           [routerLinkActiveOptions]="i === 0 ? {exact: true} : {exact: false}"
-           class="sidebar-link"
-           [attr.data-label]="item.label">
-          <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
-          <span class="label">{{ item.label }}</span>
-        </a>
+        <ng-container *ngFor="let item of enrollmentItems; let i = index">
+          <a *fwHasPermission="item.permission"
+             [routerLink]="item.route"
+             routerLinkActive="active-link"
+             [routerLinkActiveOptions]="i === 0 ? {exact: true} : {exact: false}"
+             class="sidebar-link"
+             [attr.data-label]="item.label">
+            <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
+            <span class="label">{{ item.label }}</span>
+          </a>
+        </ng-container>
       </ng-container>
 
       <!-- REGISTRY -->
       <ng-container *ngIf="navService.activeService() === 'registry'">
         <span class="nav-section-title">Registre Élèves</span>
-        <a *ngFor="let item of registryItems; let i = index"
-           [routerLink]="item.route"
-           routerLinkActive="active-link"
-           [routerLinkActiveOptions]="i === 0 ? {exact: true} : {exact: false}"
-           class="sidebar-link"
-           [attr.data-label]="item.label">
-          <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
-          <span class="label">{{ item.label }}</span>
-        </a>
+        <ng-container *ngFor="let item of registryItems; let i = index">
+          <a *fwHasPermission="item.permission"
+             [routerLink]="item.route"
+             routerLinkActive="active-link"
+             [routerLinkActiveOptions]="i === 0 ? {exact: true} : {exact: false}"
+             class="sidebar-link"
+             [attr.data-label]="item.label">
+            <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
+            <span class="label">{{ item.label }}</span>
+          </a>
+        </ng-container>
       </ng-container>
 
       <!-- ACADEMIC -->
       <ng-container *ngIf="navService.activeService() === 'academic'">
         <span class="nav-section-title">Pilotage</span>
-        <a *ngFor="let item of academicItems; let i = index"
-           [routerLink]="item.route"
-           routerLinkActive="active-link"
-           [routerLinkActiveOptions]="i === 0 ? {exact: true} : {exact: false}"
-           class="sidebar-link"
-           [attr.data-label]="item.label">
-          <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
-          <span class="label">{{ item.label }}</span>
-        </a>
+        <ng-container *ngFor="let item of academicItems; let i = index">
+          <a *fwHasPermission="item.permission"
+             [routerLink]="item.route"
+             routerLinkActive="active-link"
+             [routerLinkActiveOptions]="i === 0 ? {exact: true} : {exact: false}"
+             class="sidebar-link"
+             [attr.data-label]="item.label">
+            <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
+            <span class="label">{{ item.label }}</span>
+          </a>
+        </ng-container>
       </ng-container>
 
       <!-- IDENTITY -->
       <ng-container *ngIf="navService.activeService() === 'identity'">
         <span class="nav-section-title">Sécurité & Staff</span>
-        <a *ngFor="let item of identityItems; let i = index"
-           [routerLink]="item.route"
-           routerLinkActive="active-link"
-           [routerLinkActiveOptions]="i === 0 ? {exact: true} : {exact: false}"
-           class="sidebar-link"
-           [attr.data-label]="item.label">
-          <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
-          <span class="label">{{ item.label }}</span>
-        </a>
+        <ng-container *ngFor="let item of identityItems; let i = index">
+          <a *fwHasPermission="item.permission"
+             [routerLink]="item.route"
+             routerLinkActive="active-link"
+             [routerLinkActiveOptions]="i === 0 ? {exact: true} : {exact: false}"
+             class="sidebar-link"
+             [attr.data-label]="item.label">
+            <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
+            <span class="label">{{ item.label }}</span>
+          </a>
+        </ng-container>
       </ng-container>
 
       <!-- SETTINGS (SYSTEM) -->

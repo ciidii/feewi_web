@@ -38,8 +38,7 @@ export class AcademicService {
   // ===========================================
 
   private getHeaders(skipLoader = false): HttpHeaders {
-    const tenantId = this.tenantContext.activeTenant()?.id || 'default';
-    let headers = new HttpHeaders().set('X-Tenant-Id', tenantId);
+    let headers = new HttpHeaders();
     if (skipLoader) {
       headers = headers.set('x-skip-loader', 'true');
     }

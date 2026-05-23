@@ -120,6 +120,7 @@ export class ClassDetailComponent {
 
   // --- Derived Signals (Public API for Template) ---
   readonly schoolClass = computed(() => this.state()?.schoolClass || null);
+  readonly level = computed(() => this.state()?.level || null);
   readonly assignments = computed(() => this.state()?.assignments || []);
   readonly teachings = computed(() => this.state()?.teachings || []);
   readonly allSubjects = computed(() => this.state()?.subjects || []);
@@ -186,15 +187,22 @@ export class ClassDetailComponent {
 
   // --- Data Fetching Logic ---
   private fetchClassData(id: string) {
-    return forkJoin({
-      schoolClass: this.academicService.getClassById(id),
-      assignments: this.academicService.getAssignmentsByClass(id),
-      teachings: this.academicService.getTeachingsByClass(id),
-      subjects: this.academicService.getSubjects(),
-      staffPage: this.identityService.getStaff('', 0, 100, 'TEACHER')
-    }).pipe(
+    return this.academicService.getClassById(id).pipe(
+      switchMap(schoolClass => {
+        return forkJoin({
+          schoolClass: of(schoolClass),
+          level: this.academicService.getLevels().pipe(
+            map(levels => levels.find(l => String(l.id) === String(schoolClass.levelId)))
+          ),
+          assignments: this.academicService.getAssignmentsByClass(id),
+          teachings: this.academicService.getTeachingsByClass(id),
+          subjects: this.academicService.getSubjects(),
+          staffPage: this.identityService.getStaff('', 0, 100, 'TEACHER')
+        });
+      }),
       map(data => ({
         schoolClass: data.schoolClass,
+        level: data.level,
         assignments: data.assignments,
         teachings: data.teachings,
         subjects: data.subjects,
@@ -209,6 +217,7 @@ export class ClassDetailComponent {
         this.notificationService.error("Impossible de charger les détails de la classe.");
         return of({
           schoolClass: null,
+          level: null,
           assignments: [],
           teachings: [],
           subjects: [],

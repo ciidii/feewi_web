@@ -113,7 +113,7 @@ export class RoleDesignerComponent implements OnInit {
 
   // États
   isLoading = this.identityService.loading;
-  isInitialLoading = signal(true); 
+  isInitialLoading = signal(true);
   isSaving = signal(false);
   selectedRoleId = signal<string | null>(null);
   unsavedChanges = signal<Set<string>>(new Set());
@@ -169,7 +169,7 @@ export class RoleDesignerComponent implements OnInit {
       ...group,
       resources: group.resources.map(res => ({
         ...res
-      })).filter(res => 
+      })).filter(res =>
         res.resourceName.toLowerCase().includes(query) ||
         res.resourceCode.toLowerCase().includes(query)
       )
@@ -183,8 +183,10 @@ export class RoleDesignerComponent implements OnInit {
   async loadInitialData() {
     this.isInitialLoading.set(true);
     try {
-      await this.loadRoles();
+      // Charger les permissions d'abord pour construire la matrice
       await this.loadPermissions();
+      // Ensuite charger les rôles (ce qui va déclencher la sélection et la synchro)
+      await this.loadRoles();
     } finally {
       this.isInitialLoading.set(false);
     }
@@ -204,12 +206,21 @@ export class RoleDesignerComponent implements OnInit {
     const domainMap = new Map<string, Map<string, PermissionResourceRow>>();
 
     apiPermissions.forEach(p => {
+      if (!p.name) return;
       const parts = p.name.split(':');
-      if (parts.length < 3) return; 
+      let domain, resource, action;
 
-      const domain = parts[0];
-      const resource = parts[1];
-      const action = parts[2];
+      if (parts.length === 2) {
+        domain = parts[0];
+        resource = parts[0]; // On utilise le domaine comme ressource
+        action = parts[1];
+      } else if (parts.length >= 3) {
+        domain = parts[0];
+        resource = parts[1];
+        action = parts[2];
+      } else {
+        return; // Format inconnu
+      }
 
       if (!domainMap.has(domain)) domainMap.set(domain, new Map());
       const resourceMap = domainMap.get(domain)!;
@@ -236,7 +247,10 @@ export class RoleDesignerComponent implements OnInit {
       if (action === 'read') row.read = actionObj;
       else if (['write', 'create', 'add'].includes(action)) row.write = actionObj;
       else if (['delete', 'remove'].includes(action)) row.delete = actionObj;
-      else row.special = actionObj;
+      else {
+        // Si le slot spécial est déjà pris, on évite d'écraser (très rare)
+        if (!row.special) row.special = actionObj;
+      }
     });
 
     return Array.from(domainMap.entries()).map(([domainCode, resourceMap]) => ({
@@ -396,7 +410,7 @@ export class RoleDesignerComponent implements OnInit {
 
     this.isSaving.set(true);
 
-    const allActions = this.permissionGroups().flatMap(g => 
+    const allActions = this.permissionGroups().flatMap(g =>
       g.resources.flatMap(r => [r.read, r.write, r.delete, r.special].filter(Boolean) as PermissionAction[])
     );
     const grantedIds = allActions.filter(a => a.granted).map(a => a.id);

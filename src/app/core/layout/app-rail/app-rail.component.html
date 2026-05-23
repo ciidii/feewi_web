@@ -18,7 +18,7 @@
 
   <div class="rail-items-wrapper">
     <!-- SAAS ADMIN -->
-    <ng-container *ngIf="auth.currentUser()?.roles?.includes('ROLE_SUPER_ADMIN')">
+    <ng-container *fwHasPermission="'identity:school:read'">
       <a (click)="onSelectService('saas')" routerLink="/saas/tenants" class="rail-link group saas-link" [class.active]="navService.activeService() === 'saas'" [attr.data-label]="'SaaS System'">
         <lucide-icon [name]="Building2"></lucide-icon>
         <span class="rail-label">SaaS System</span>
@@ -31,19 +31,19 @@
         <lucide-icon [name]="Home" [size]="18"></lucide-icon>
         <span class="rail-label">Accueil</span>
       </a>
-      <a (click)="onSelectService('enrollment')" routerLink="/admin/enrollment" class="rail-link" [class.active]="navService.activeService() === 'enrollment'" [attr.data-label]="'Inscriptions'">
+      <a *fwHasPermission="'enrollment:admission:read'" (click)="onSelectService('enrollment')" routerLink="/admin/enrollment" class="rail-link" [class.active]="navService.activeService() === 'enrollment'" [attr.data-label]="'Inscriptions'">
         <lucide-icon [name]="Briefcase" [size]="18"></lucide-icon>
         <span class="rail-label">Inscriptions</span>
       </a>
-      <a (click)="onSelectService('registry')" routerLink="/admin/registry/students" class="rail-link" [class.active]="navService.activeService() === 'registry'" [attr.data-label]="'Registre'">
+      <a *fwHasPermission="'academic:assignment:read'" (click)="onSelectService('registry')" routerLink="/admin/registry/students" class="rail-link" [class.active]="navService.activeService() === 'registry'" [attr.data-label]="'Registre'">
         <lucide-icon [name]="Users" [size]="18"></lucide-icon>
         <span class="rail-label">Registre</span>
       </a>
-      <a (click)="onSelectService('academic')" routerLink="/admin/classes" class="rail-link" [class.active]="navService.activeService() === 'academic'" [attr.data-label]="'Académique'">
+      <a *fwHasPermission="'academic:structure:read'" (click)="onSelectService('academic')" routerLink="/admin/classes" class="rail-link" [class.active]="navService.activeService() === 'academic'" [attr.data-label]="'Académique'">
         <lucide-icon [name]="School" [size]="18"></lucide-icon>
         <span class="rail-label">Académique</span>
       </a>
-      <a (click)="onSelectService('identity')" routerLink="/admin/identity/staff" class="rail-link" [class.active]="navService.activeService() === 'identity'" [attr.data-label]="'Sécurité'">
+      <a *fwHasPermission="'identity:user:read'" (click)="onSelectService('identity')" routerLink="/admin/identity/staff" class="rail-link" [class.active]="navService.activeService() === 'identity'" [attr.data-label]="'Sécurité'">
         <lucide-icon [name]="ShieldCheck" [size]="18"></lucide-icon>
         <span class="rail-label">Sécurité</span>
       </a>

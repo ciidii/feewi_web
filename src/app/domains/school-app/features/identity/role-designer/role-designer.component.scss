@@ -3,28 +3,29 @@
 // 1. Mise en page globale
 :host { 
   display: block; 
-  height: 100%; 
+  height: 100%; /* S'adapte au conteneur parent */
   background-color: var(--fw-surface-page);
 }
 
 .config-feature-root {
   display: grid;
   grid-template-columns: 280px 1fr;
-  height: calc(100vh - 110px);
+  height: 100%; /* Remplace le calc() problématique */
   background-color: var(--fw-surface-card);
   border: 1px solid var(--fw-border);
   border-radius: var(--fw-radius-lg);
-  overflow: hidden;
+  overflow: hidden; /* Empêche le scroll global du composant */
 }
 
 .config-viewport {
   height: 100%;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  min-width: 0;
+  min-height: 0; /* Important pour le scroll Flexbox */
 }
 
-// 2. Sidebar (Navigation des rôles)
+// 2. Sidebar (Fixe à gauche)
 .scope-sidebar {
   display: flex;
   flex-direction: column;
@@ -32,41 +33,19 @@
   padding: var(--fw-space-md) var(--fw-space-sm);
   background-color: var(--fw-surface-card);
   border-right: 1px solid var(--fw-border);
-  overflow: hidden;
 
   .sidebar-header {
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     gap: var(--fw-space-sm);
     padding-bottom: var(--fw-space-md);
     margin-bottom: var(--fw-space-md);
     border-bottom: 1px solid var(--fw-border);
-
-    .sidebar-brand-icon-alt {
-      display: grid;
-      place-items: center;
-      width: 28px;
-      height: 28px;
-      color: var(--fw-primary);
-      background-color: var(--fw-surface-sunken);
-      border-radius: var(--fw-radius-md);
-    }
-
-    .sidebar-brand-name {
-      display: block;
-      font-size: 0.75rem;
-      font-weight: 800;
-      color: var(--fw-text-primary);
-    }
-    
-    .sidebar-brand-year {
-      font-size: 9px;
-      font-weight: 600;
-      color: var(--fw-text-tertiary);
-    }
   }
 
   .nav-section-title {
+    flex-shrink: 0;
     margin-bottom: var(--fw-space-sm);
     padding: 0 var(--fw-space-sm);
     font-size: 9px;
@@ -130,9 +109,16 @@
   }
 }
 
-// 3. Matrice de Permissions (Tabulaire)
+// 3. Matrice de Permissions (Scrollable)
+.editor-container {
+  flex: 1;
+  overflow-y: auto; /* ICI se passe le scroll */
+  padding: var(--fw-space-lg);
+  background-color: var(--fw-surface-page);
+}
+
 .pbac-matrix-container {
-  padding-bottom: var(--fw-space-4xl);
+  padding-bottom: var(--fw-space-4xl); /* Espace vital en bas */
 }
 
 .domain-title {
@@ -191,7 +177,7 @@
   align-items: center;
 }
 
-// 4. Éléments d'interface (Toggle)
+// 4. Éléments d'interface
 .toggle-wrap {
   display: flex;
   align-items: center;
@@ -219,35 +205,8 @@
   border-radius: 50%;
 }
 
-.search-input-technical {
-  width: 100%;
-  height: 36px;
-  padding: 0 var(--fw-space-md) 0 2.5rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--fw-text-primary);
-  background-color: var(--fw-surface-card);
-  border: 1px solid var(--fw-border);
-  border-radius: var(--fw-radius-md);
-  outline: none;
-
-  &::placeholder {
-    font-size: 9px;
-    color: var(--fw-text-tertiary);
-    text-transform: uppercase;
-  }
-  &:focus { border-color: var(--fw-primary); }
-}
-
-.divider-v {
-  width: 1px;
-  height: 20px;
-  margin: 0 var(--fw-space-sm);
-  background-color: var(--fw-border);
-}
-
 .custom-scrollbar {
-  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar { width: 6px; }
   &::-webkit-scrollbar-track { background: transparent; }
   &::-webkit-scrollbar-thumb {
     background-color: var(--fw-border);

@@ -93,6 +93,11 @@ export const SCHOOL_APP_ROUTES: Routes = [
         path: 'levels/:id/curriculum',
         title: 'Programme du Niveau',
         loadComponent: () => import('./features/academic/structure-config/curriculum-detail/curriculum-detail.component').then(m => m.CurriculumDetailComponent)
+      },
+      {
+        path: 'detail/:id',
+        title: 'Détail de la Classe',
+        loadComponent: () => import('./features/academic/class-detail/class-detail.component').then(m => m.ClassDetailComponent)
       }
     ]
   },
@@ -116,18 +121,6 @@ export const SCHOOL_APP_ROUTES: Routes = [
         title: 'Détails de l’Année',
         data: {permissions: ['academic:year:read']},
         loadComponent: () => import('./features/academic/year-detail/year-detail.component').then(m => m.YearDetailComponent)
-      },
-      {
-        path: 'classes',
-        title: 'Liste des Classes',
-        data: {permissions: ['academic:structure:read']},
-        loadComponent: () => import('./features/academic/class-list/class-list.component').then(m => m.ClassListComponent)
-      },
-      {
-        path: 'classes/:id',
-        title: 'Détail de la Classe',
-        data: {permissions: ['academic:structure:read']},
-        loadComponent: () => import('./features/academic/class-detail/class-detail.component').then(m => m.ClassDetailComponent)
       },
       {
         path: 'assignments',

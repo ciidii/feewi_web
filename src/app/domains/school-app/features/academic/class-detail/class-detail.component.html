@@ -3,7 +3,7 @@
   [title]="'Classe : ' + cls.fullName"
   [description]="richDescription()"
   [icon]="School"
-  [backLink]="['/admin/academic/classes']"
+  [backLink]="['/admin/classes/cycles', level()?.cycleId]"
   [tabs]="classTabs"
   [activeTabId]="activeTab()"
   (tabChange)="setTab($event)"
@@ -40,7 +40,8 @@
              variant="primary"
              size="sm"
              [icon]="UserPlus"
-             routerLink="/admin/academic/assignments"
+             [routerLink]="['/admin/academic/assignments']"
+             [queryParams]="{ levelId: cls.levelId, classId: cls.id }"
            >
              Affecter
            </app-fw-button>

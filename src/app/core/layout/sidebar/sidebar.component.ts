@@ -33,11 +33,12 @@ import {
 } from 'lucide-angular';
 
 import {UiPreferenceService} from '../../../shared/services/ui-preference.service';
+import {HasPermissionDirective} from '../../../shared/directives/has-permission.directive';
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, MatMenuModule, LucideAngularModule, RouterModule],
+  imports: [CommonModule, MatMenuModule, LucideAngularModule, RouterModule, HasPermissionDirective],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss',
   encapsulation: ViewEncapsulation.None
@@ -47,7 +48,7 @@ export class SidebarComponent {
   auth = inject(AuthService);
   uiService = inject(UiPreferenceService);
 
-  // Ic├┤nes pour le template
+  // Icônes pour le template
   readonly Plus = Plus;
   readonly UserPlus = UserPlus;
   readonly UserCheck = UserCheck;
@@ -65,38 +66,38 @@ export class SidebarComponent {
 
   // --- 1. ENROLLMENT SERVICE ---
   enrollmentItems = [
-    { label: 'Tableau de bord', icon: BarChart3, route: '/admin/enrollment' },
-    { label: 'Liste des dossiers', icon: Briefcase, route: '/admin/enrollment/list' },
-    { label: 'Réinscription', icon: UserPlus, route: '/admin/enrollment/re-enrollment' },
-    { label: 'Paramètres Portail', icon: Globe, route: '/admin/enrollment/settings' },
+    { label: 'Tableau de bord', icon: BarChart3, route: '/admin/enrollment', permission: 'enrollment:admission:read' },
+    { label: 'Liste des dossiers', icon: Briefcase, route: '/admin/enrollment/list', permission: 'enrollment:admission:read' },
+    { label: 'Réinscription', icon: UserPlus, route: '/admin/enrollment/re-enrollment', permission: 'enrollment:admission:write' },
+    { label: 'Paramètres Portail', icon: Globe, route: '/admin/enrollment/settings', permission: 'enrollment:session:write' },
   ];
 
   // --- 2. STUDENT REGISTRY ---
   registryItems = [
-    { label: 'Liste des élèves', icon: Users, route: '/admin/registry/students' },
-    { label: 'Dossiers scolaires', icon: FileText, route: '/admin/registry/students/records' },
+    { label: 'Liste des élèves', icon: Users, route: '/admin/registry/students', permission: 'academic:assignment:read' },
+    { label: 'Dossiers scolaires', icon: FileText, route: '/admin/registry/students/records', permission: 'academic:assignment:read' },
   ];
 
   // --- 3. ACADEMIC STRUCTURE ---
   academicItems = [
-    { label: 'Architecture & Cycles', icon: Layers, route: '/admin/classes' },
-    { label: 'Gestion des Classes', icon: Users, route: '/admin/academic/classes' },
-    { label: 'Bibliothèque Matières', icon: BookOpen, route: '/admin/academic/library' },
-    { label: 'Calendrier Scolaire', icon: Calendar, route: '/admin/academic/years' },
+    { label: 'Structure & Classes', icon: Layers, route: '/admin/classes', permission: 'academic:structure:read' },
+    { label: 'Affectations Élèves', icon: UserCheck, route: '/admin/academic/assignments', permission: 'academic:assignment:read' },
+    { label: 'Bibliothèque Matières', icon: BookOpen, route: '/admin/academic/library', permission: 'academic:structure:read' },
+    { label: 'Calendrier Scolaire', icon: Calendar, route: '/admin/academic/years', permission: 'academic:year:read' },
   ];
 
   // --- 4. IDENTITY SERVICE ---
   identityItems = [
-    { label: 'Personnel (Staff)', icon: Users, route: '/admin/identity/staff' },
-    { label: 'Rôles & Droits', icon: ShieldCheck, route: '/admin/identity/roles' },
-    { label: 'Journal d\'audit', icon: History, route: '/admin/identity/audit' },
+    { label: 'Personnel (Staff)', icon: Users, route: '/admin/identity/staff', permission: 'identity:user:read' },
+    { label: 'Rôles & Droits', icon: ShieldCheck, route: '/admin/identity/roles', permission: 'identity:role:read' },
+    { label: 'Journal d\'audit', icon: History, route: '/admin/identity/audit', permission: 'identity:audit:read' },
   ];
 
   // --- CONFIGURATION SAAS ADMIN ---
   saasItems = [
-    { label: 'Établissements', icon: Building2, route: '/saas/tenants' },
-    { label: 'Statistiques Globales', icon: BarChart3, route: '/saas/stats' },
-    { label: 'Audit Système', icon: FileText, route: '/saas/audit' },
+    { label: 'Établissements', icon: Building2, route: '/saas/tenants', permission: 'identity:school:read' },
+    { label: 'Statistiques Globales', icon: BarChart3, route: '/saas/stats', permission: 'identity:school:read' },
+    { label: 'Audit Système', icon: FileText, route: '/saas/audit', permission: 'identity:audit:read' },
   ];
 
   getActiveServiceLabel(): string {
