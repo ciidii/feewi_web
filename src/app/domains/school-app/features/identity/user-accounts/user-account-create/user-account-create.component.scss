@@ -1,0 +1,110 @@
+@use '../../../../../../../styles/tokens' as *;
+
+:host {
+  display: block;
+  height: 100%;
+  background: var(--fw-surface-page);
+}
+
+.user-create-container {
+  padding: var(--fw-space-lg);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+// ─── DOSSIER CARD (Standard Feewi) ─────────────────────────────────────────
+.dossier-card {
+  background: var(--fw-surface-card);
+  border-radius: var(--fw-radius-2xl);
+  border: 1px solid var(--fw-border-subtle);
+  box-shadow: var(--fw-shadow-sm);
+  overflow: hidden;
+  transition: all var(--fw-transition-normal);
+
+  &:hover { box-shadow: var(--fw-shadow-md); border-color: var(--fw-border); }
+
+  .card-header {
+    padding: var(--fw-space-md) var(--fw-space-lg);
+    background: var(--fw-surface-card);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--fw-space-sm);
+
+    .header-left { display: flex; align-items: center; gap: var(--fw-space-sm); }
+    .header-icon { color: var(--fw-text-tertiary); flex-shrink: 0; }
+    .card-title {
+      font-family: var(--fw-font-ui);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--fw-text-primary);
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .step-badge {
+        width: 18px;
+        height: 18px;
+        border-radius: 6px;
+        background: var(--fw-surface-sunken);
+        color: var(--fw-text-tertiary);
+        display: grid;
+        place-items: center;
+        font-size: 10px;
+        font-weight: 800;
+        margin-right: 4px;
+    }
+  }
+
+  .card-body { padding: var(--fw-space-xl); }
+}
+
+.selected-staff-preview {
+  padding: var(--fw-space-md);
+  background: var(--fw-surface-sunken);
+  border: 1px dashed var(--fw-border);
+  border-radius: var(--fw-radius-lg);
+}
+
+.onboarding-promo-card {
+    background: var(--fw-primary-alpha);
+    border: 1px solid var(--fw-primary-light);
+    border-radius: var(--fw-radius-xl);
+    padding: var(--fw-space-lg);
+}
+
+// ─── FORM ELEMENTS ─────────────────────────────────────────────────────────
+::ng-deep .fw-input {
+  background: var(--fw-surface-sunken);
+  border: 1px solid var(--fw-border-subtle);
+  border-radius: 12px;
+  height: 3.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s;
+  width: 100%;
+  padding: 0 1rem;
+  outline: none;
+
+  &:focus, &.mat-mdc-select-focused {
+    background: white;
+    border-color: var(--fw-primary);
+    box-shadow: 0 0 0 4px var(--fw-primary-alpha);
+  }
+
+  &.error {
+    border-color: var(--fw-error);
+    background: var(--fw-error-bg);
+  }
+}
+
+.divider-h {
+    height: 1px;
+    background: var(--fw-border-subtle);
+    margin: var(--fw-space-md) 0;
+}
+
+@keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.animate-in { animation: fade-in 0.3s ease-out; }

@@ -68,6 +68,12 @@ export const SCHOOL_APP_ROUTES: Routes = [
         loadComponent: () => import('./features/identity/user-accounts/user-account-list.component').then(m => m.UserAccountListComponent)
       },
       {
+        path: 'accounts/new',
+        title: 'Ouvrir un Accès',
+        data: {permissions: ['identity:user:write']},
+        loadComponent: () => import('./features/identity/user-accounts/user-account-create/user-account-create.component').then(m => m.UserAccountCreateComponent)
+      },
+      {
         path: 'accounts/:id',
         title: 'Fiche de Sécurité',
         data: {permissions: ['identity:user:read']},

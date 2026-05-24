@@ -1,0 +1,168 @@
+<app-fw-page-shell
+  title="Ouvrir un Accès"
+  description="Activation d'un compte utilisateur lié à l'annuaire institutionnel."
+  [icon]="UserPlus"
+  [backLink]="['/admin/identity/accounts']"
+  density="compact"
+>
+  <!-- ACTIONS DE PAGE -->
+  <div actions class="flex items-center gap-2">
+    <app-fw-button variant="tertiary" size="sm" (click)="onCancel()">Annuler</app-fw-button>
+    <app-fw-button
+        variant="primary"
+        size="md"
+        [icon]="ShieldCheck"
+        [loading]="isLoading()"
+        [disabled]="accountForm.invalid"
+        (click)="onSave()"
+    >
+        Activer le compte
+    </app-fw-button>
+  </div>
+
+  <div class="user-create-container animate-in">
+    <form [formGroup]="accountForm" class="grid grid-cols-12 gap-8">
+
+      <!-- COLONNE GAUCHE : IDENTITÉ (7/12) -->
+      <div class="col-span-12 lg:col-span-7 space-y-6">
+
+        <!-- STEP 1 : CHOIX COLLABORATEUR -->
+        <section class="dossier-card">
+          <header class="card-header">
+            <div class="header-left">
+              <div class="step-badge">1</div>
+              <lucide-icon [name]="UserIcon" class="header-icon" [size]="16"></lucide-icon>
+              <h3 class="card-title">Choix du collaborateur</h3>
+            </div>
+          </header>
+
+          <div class="card-body space-y-6">
+            <div class="fw-field">
+              <label class="fw-label">Membre du personnel (RH)</label>
+              <div class="fw-input-wrapper">
+                <mat-select formControlName="staffId" class="fw-input" placeholder="Rechercher un membre..." (selectionChange)="onStaffSelect($event.value)">
+                  <mat-option *ngFor="let s of availableStaff()" [value]="s.id">
+                    {{ s.firstName }} {{ s.lastName }} <span class="text-[9px] font-black text-text-tertiary ml-2 uppercase tracking-widest">[{{ s.staffType }}]</span>
+                  </mat-option>
+                </mat-select>
+              </div>
+              <p class="fw-hint">Seuls les membres n'ayant pas encore d'accès système sont listés ici.</p>
+            </div>
+
+            <div *ngIf="selectedStaff() as staff" class="selected-staff-preview animate-in">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-midnight text-white flex items-center justify-center font-bold text-sm">
+                        {{ staff.firstName[0] }}{{ staff.lastName[0] }}
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold text-midnight">{{ staff.firstName }} {{ staff.lastName }}</p>
+                        <p class="text-[10px] text-text-tertiary uppercase tracking-wider font-medium">{{ staff.email }}</p>
+                    </div>
+                </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- STEP 2 : IDENTIFIANTS -->
+        <section class="dossier-card">
+          <header class="card-header">
+            <div class="header-left">
+              <div class="step-badge">2</div>
+              <lucide-icon [name]="Mail" class="header-icon" [size]="16"></lucide-icon>
+              <h3 class="card-title">Identifiants Système</h3>
+            </div>
+          </header>
+
+          <div class="card-body space-y-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Email / Login -->
+                <div class="fw-field">
+                    <label class="fw-label">Login (Email Pro)</label>
+                    <div class="fw-input-wrapper">
+                        <input type="email" formControlName="email" class="fw-input" placeholder="nom.prenom@ecole.sn" [class.error]="isInvalid('email')" />
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="fw-field">
+                    <label class="fw-label">Mot de passe initial</label>
+                    <div class="fw-input-wrapper">
+                        <lucide-icon [name]="Lock" [size]="14" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></lucide-icon>
+                        <input [type]="showPassword() ? 'text' : 'password'" formControlName="password" class="fw-input pl-10" placeholder="password123" [class.error]="isInvalid('password')" />
+                        <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors outline-none" (click)="showPassword.set(!showPassword())">
+                            <lucide-icon [name]="showPassword() ? EyeOff : Eye" [size]="14"></lucide-icon>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 bg-surface-sunken rounded-xl border border-border flex items-start gap-3">
+              <lucide-icon [name]="Info" [size]="14" class="text-text-tertiary mt-0.5"></lucide-icon>
+              <p class="text-[11px] text-text-secondary leading-relaxed font-medium">
+                Par mesure de sécurité, un **changement de mot de passe obligatoire** sera demandé lors de la première connexion.
+              </p>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- COLONNE DROITE : DROITS (5/12) -->
+      <div class="col-span-12 lg:col-span-5 space-y-6">
+
+        <!-- STEP 3 : AUTORISATIONS -->
+        <section class="dossier-card">
+          <header class="card-header">
+            <div class="header-left">
+              <div class="step-badge">3</div>
+              <lucide-icon [name]="ShieldCheck" class="header-icon" [size]="16"></lucide-icon>
+              <h3 class="card-title">Profils & Autorisations</h3>
+            </div>
+          </header>
+
+          <div class="card-body space-y-8">
+            <div class="fw-field">
+              <label class="fw-label">Rôles PBAC assignés</label>
+              <div class="fw-input-wrapper">
+                <mat-select formControlName="roles" multiple class="fw-input" placeholder="Sélectionner les rôles...">
+                  <mat-option *ngFor="let role of availableRoles()" [value]="role.name">
+                    {{ role.name.replace('ROLE_', '').replace('_', ' ') }}
+                  </mat-option>
+                </mat-select>
+              </div>
+              <p class="fw-hint">Les permissions sont cumulatives selon les profils choisis.</p>
+            </div>
+
+            <div class="divider-h"></div>
+
+            <div class="flex items-center justify-between">
+                <div class="flex flex-col">
+                    <span class="text-xs font-bold text-midnight">Activer l'accès</span>
+                    <span class="text-[10px] text-text-tertiary font-medium">Autoriser la connexion dès maintenant</span>
+                </div>
+                <div class="fw-toggle-wrap" (click)="accountForm.get('active')?.setValue(!accountForm.get('active')?.value)">
+                    <button type="button" class="fw-toggle-switch sm" [class.on]="accountForm.get('active')?.value">
+                        <div class="track"><div class="thumb"></div></div>
+                    </button>
+                </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PROMO CARD -->
+        <div class="onboarding-promo-card flex gap-4">
+            <div class="w-10 h-10 rounded-xl bg-white border border-primary-light flex items-center justify-center shrink-0 text-primary shadow-sm">
+                <lucide-icon [name]="Zap" [size]="18"></lucide-icon>
+            </div>
+            <div>
+                <h4 class="text-xs font-bold text-primary uppercase tracking-wider">Onboarding Rapide</h4>
+                <p class="text-[11px] text-primary/80 leading-relaxed mt-1 font-medium">
+                    Une invitation automatique sera envoyée par email au collaborateur pour l'inviter à configurer son espace.
+                </p>
+            </div>
+        </div>
+
+      </div>
+    </form>
+  </div>
+</app-fw-page-shell>

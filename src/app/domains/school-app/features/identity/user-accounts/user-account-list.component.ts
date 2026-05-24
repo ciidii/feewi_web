@@ -43,7 +43,9 @@ import {AccountFormComponent} from './components/account-form/account-form.compo
     FwPageShellComponent,
     FwButtonComponent,
     FwListCommandBarComponent,
-    DataListComponent  ],
+    DataListComponent,
+    HasPermissionDirective
+  ],
   templateUrl: './user-account-list.component.html',
   styleUrl: './user-account-list.component.scss'
 })
@@ -150,15 +152,21 @@ export class UserAccountListComponent implements OnInit {
   }
 
   openAccountForm(user?: User) {
-      const dialogRef = this.dialog.open(AccountFormComponent, {
-          width: '560px',
-          panelClass: 'feewi-dialog-panel',
-          data: { user: user }
-      });
-
-      dialogRef.afterClosed().subscribe(result => {
-          if (result) this.loadUsers(this.searchQuery());
-      });
+      if (user) {
+          // Pour l'édition on garde la modale car c'est une action chirurgicale
+          const dialogRef = this.dialog.open(AccountFormComponent, {
+              width: '560px',
+              panelClass: 'feewi-dialog-panel',
+              data: { user: user }
+          });
+    
+          dialogRef.afterClosed().subscribe(result => {
+              if (result) this.loadUsers(this.searchQuery());
+          });
+      } else {
+          // Pour la création, on va sur la nouvelle page dédiée
+          this.router.navigate(['/admin/identity/accounts/new']);
+      }
   }
 
   private mapUserToRow(user: User, currentUserId?: string): TableRow {
