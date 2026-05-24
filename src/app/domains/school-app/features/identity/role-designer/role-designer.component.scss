@@ -185,9 +185,15 @@
   padding: var(--fw-space-xs) var(--fw-space-sm);
   border-radius: var(--fw-radius-md);
   cursor: pointer;
-  transition: background-color var(--fw-transition-fast);
+  transition: all var(--fw-transition-fast);
 
-  &:hover { background-color: var(--fw-surface-sunken); }
+  &:hover:not(.is-disabled) { background-color: var(--fw-surface-sunken); }
+
+  &.is-disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    filter: grayscale(0.5);
+  }
 
   .toggle-label {
     font-size: 10px;

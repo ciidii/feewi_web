@@ -48,6 +48,8 @@ export interface User {
 export interface UserCreateRequest {
   email: string;
   password?: string;
+  firstName: string;
+  lastName: string;
   staffId: string; // Mandatory in new vision
   userTypeCode: string; // TEACHER, ADMIN, etc.
   roles: string[];

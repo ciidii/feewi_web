@@ -156,6 +156,8 @@ export class RoleDesignerComponent implements OnInit {
     return currentRoles.find(r => r.id === this.selectedRoleId()) || currentRoles[0];
   });
 
+  isReadOnly = computed(() => this.selectedRole()?.rawData?.isSystemRole || false);
+
   // Groupes de permissions PBAC
   permissionGroups = signal<PermissionDomainGroup[]>([]);
   permissionQuery = signal('');

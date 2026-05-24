@@ -71,6 +71,7 @@ export class TenantFormComponent implements OnInit {
     adminEmail: ['', [Validators.required, Validators.email]],
     adminFirstName: ['', Validators.required],
     adminLastName: ['', Validators.required],
+    adminStaffType: ['ADMINISTRATION', Validators.required],
     adminPassword: ['', [Validators.required, Validators.minLength(8)]],
     confirmAdminPassword: ['', Validators.required]
   }, { validators: this.passwordMatchValidator });
@@ -79,6 +80,13 @@ export class TenantFormComponent implements OnInit {
     { code: 'SN_FR', label: 'Sénégal (Français)' },
     { code: 'GMB_EN', label: 'Gambie (Anglais)' },
     { code: 'GUI_FR', label: 'Guinée (Français)' }
+  ];
+
+  staffTypes = [
+    { code: 'ADMINISTRATION', label: 'Personnel Administratif' },
+    { code: 'TEACHER', label: 'Corps Enseignant' },
+    { code: 'SUPPORT', label: 'Personnel Support' },
+    { code: 'OTHER', label: 'Autre' }
   ];
 
   cycleOptions = [

@@ -33,7 +33,7 @@ Ce document détaille les points d'entrée (endpoints) du service d'identité po
 *   **Entrée :** `{"email": "user@email.com"}`
 *   **Description :** Envoie un code à 6 chiffres par email.
 
-### Réinitialisation du mot de passe
+### Réinitialisation du mot de passe (via OTP)
 *   **Endpoint :** `POST /auth/reset-password`
 *   **Entrée :**
     ```json
@@ -43,6 +43,18 @@ Ce document détaille les points d'entrée (endpoints) du service d'identité po
       "newPassword": "NewSecurePassword123!"
     }
     ```
+
+### Changement de mot de passe (Connecté)
+*   **Endpoint :** `POST /auth/change-password`
+*   **Sécurité :** `isAuthenticated()`
+*   **Entrée :**
+    ```json
+    {
+      "oldPassword": "CurrentPassword123",
+      "newPassword": "NewSecurePassword123!"
+    }
+    ```
+*   **Note :** Réinitialise également le flag `forceChangePassword` à `false`.
 
 ---
 
@@ -63,9 +75,11 @@ Ce document détaille les points d'entrée (endpoints) du service d'identité po
       "adminEmail": "directeur@gspm.sn",
       "adminFirstName": "Jean",
       "adminLastName": "Dupont",
-      "adminPassword": "TemporaryPassword123"
+      "adminPassword": "TemporaryPassword123",
+      "adminStaffType": "ADMINISTRATION | TEACHER | SUPPORT | OTHER"
     }
     ```
+*   **Note :** Si `adminStaffType` n'est pas fourni, la valeur par défaut est `ADMINISTRATION`.
 
 ### Lister les écoles
 *   **Endpoint :** `GET /schools?search=gspm&page=0&size=10`

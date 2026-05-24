@@ -202,6 +202,8 @@ export class StaffFormComponent implements OnInit {
         const userReq = {
           email: formVal.email,
           staffId: staffId,
+          firstName: formVal.firstName || this.data?.staff?.firstName,
+          lastName: formVal.lastName || this.data?.staff?.lastName,
           userTypeCode: formVal.staffType, 
           roles: formVal.roles,
           password: formVal.password

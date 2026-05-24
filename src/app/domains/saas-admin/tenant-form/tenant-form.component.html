@@ -166,6 +166,12 @@
                 <input type="text" formControlName="adminLastName" class="fw-input-clean bg-white"/>
               </div>
               <div class="md:col-span-2 space-y-1.5">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Type de poste *</label>
+                <select formControlName="adminStaffType" class="fw-input-clean bg-white h-9 px-2">
+                  <option *ngFor="let type of staffTypes" [value]="type.code">{{ type.label }}</option>
+                </select>
+              </div>
+              <div class="md:col-span-2 space-y-1.5">
                 <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Email (Login) *</label>
                 <input type="email" formControlName="adminEmail" class="fw-input-clean bg-white"/>
               </div>

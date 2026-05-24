@@ -49,6 +49,7 @@ export class AccountFormComponent implements OnInit {
 
   availableRoles = this.identityService.roles;
   availableStaff = signal<Staff[]>([]);
+  selectedStaff = signal<Staff | null>(null);
   isLoading = signal(false);
   isEditMode = !!this.data.user;
 
@@ -82,7 +83,6 @@ export class AccountFormComponent implements OnInit {
   async loadStaffWithoutAccount() {
       try {
           const res = await firstValueFrom(this.identityService.getStaff('', 0, 100));
-          // Filtrer ceux qui n'ont pas de compte (simulation si l'API ne le fait pas déjà)
           this.availableStaff.set(res.content.filter(s => !s.hasUserAccount));
       } catch (e) {
           console.error("Failed to load staff", e);
@@ -90,6 +90,7 @@ export class AccountFormComponent implements OnInit {
   }
 
   onStaffSelect(staff: Staff) {
+      this.selectedStaff.set(staff);
       this.accountForm.patchValue({
           email: staff.email,
           userTypeCode: staff.staffType === 'TEACHER' ? 'TEACHER' : 'ADMIN'
@@ -105,16 +106,23 @@ export class AccountFormComponent implements OnInit {
     this.isLoading.set(true);
     try {
       const formData = this.accountForm.getRawValue();
-      
+      const staff = this.data.staff || this.selectedStaff();
+
       if (this.isEditMode) {
+        // Mise à jour
         await firstValueFrom(this.identityService.updateUser(this.data.user!.id!, { 
             roles: formData.roles,
             active: formData.active
         }));
       } else {
+        // Création
+        if (!staff) throw new Error("Aucun collaborateur sélectionné");
+
         await firstValueFrom(this.identityService.createUserAccount({
           email: formData.email,
           staffId: formData.staffId,
+          firstName: staff.firstName,
+          lastName: staff.lastName,
           userTypeCode: formData.userTypeCode,
           roles: formData.roles
         }));

@@ -157,7 +157,20 @@ export class IdentityService {
   }
 
   /**
-   * Récupère les logs d'audit
+   * Récupère les logs d'audit globaux (SaaS - Super Admin uniquement)
+   */
+  getGlobalAuditLogs(page: number = 0, size: number = 20): Observable<Page<AuditLog>> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    return this.http.get<Page<AuditLog>>(`${this.API_URL}/audit`, { params }).pipe(
+      catchError(this.handleError('Erreur lors du chargement des journaux d\'audit globaux'))
+    );
+  }
+
+  /**
+   * Récupère les logs d'audit d'établissement (Admin Local)
    */
   getTenantAuditLogs(page: number = 0, size: number = 20): Observable<Page<AuditLog>> {
     const params = new HttpParams()
