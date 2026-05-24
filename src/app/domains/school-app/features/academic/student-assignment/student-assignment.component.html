@@ -188,15 +188,17 @@
               [routerLink]="['/admin/academic/classes', cls.id]">
               Liste
             </app-fw-button>
-            <app-fw-button
-              variant="primary"
-              size="sm"
-              class="flex-1"
-              [icon]="Plus"
-              [loading]="isAssigning()"
-              [disabled]="getClassFillRate(cls) >= cls.capacity">
-              Placer
-            </app-fw-button>
+            <ng-container *fwHasPermission="'academic:assignment:write'">
+              <app-fw-button
+                variant="primary"
+                size="sm"
+                class="flex-1"
+                [icon]="Plus"
+                [loading]="isAssigning()"
+                [disabled]="getClassFillRate(cls) >= cls.capacity">
+                Placer
+              </app-fw-button>
+            </ng-container>
           </div>
         </div>
 
@@ -208,9 +210,11 @@
           <p class="text-sm text-text-tertiary max-w-sm mx-auto mt-2">Vous devez d'abord ouvrir des classes pour ce
             niveau avant de pouvoir y affecter des élèves.</p>
           <div class="mt-8">
-            <app-fw-button variant="primary" [icon]="Plus" [routerLink]="['/admin/academic/classes']">Ouvrir une
-              classe
-            </app-fw-button>
+            <ng-container *fwHasPermission="'academic:structure:write'">
+              <app-fw-button variant="primary" [icon]="Plus" [routerLink]="['/admin/classes']">Ouvrir une
+                classe
+              </app-fw-button>
+            </ng-container>
           </div>
         </div>
       </div>

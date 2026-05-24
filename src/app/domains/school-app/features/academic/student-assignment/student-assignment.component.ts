@@ -64,6 +64,7 @@ import {HasPermissionDirective} from '../../../../../shared/directives/has-permi
     SkeletonComponent,
     DragDropModule,
     RouterLink,
+    HasPermissionDirective,
   ],
   templateUrl: './student-assignment.component.html',
   styleUrls: ['./student-assignment.component.scss']
@@ -205,6 +206,10 @@ export class StudentAssignmentComponent {
   }
 
   onDrop(event: CdkDragDrop<any[]>, targetClassId?: string) {
+    if (!this.canAssign()) {
+        this.notificationService.warning("Vous n'avez pas les droits pour affecter des élèves.");
+        return;
+    }
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
     } else {

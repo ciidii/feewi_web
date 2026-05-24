@@ -17,19 +17,23 @@ export class HasPermissionDirective {
 
   // Input accepte une string ou un tableau de strings
   permissions = input.required<string | string[]>({ alias: 'fwHasPermission' });
+  
+  // Opérateur logique pour les tableaux : 'ALL' (toutes) ou 'ANY' (au moins une)
+  op = input<'ALL' | 'ANY'>('ALL', { alias: 'fwHasPermissionOp' });
 
   constructor() {
     effect(() => {
       const required = this.permissions();
+      const operator = this.op();
       const user = this.authService.currentUser();
       
       let hasAccess = false;
 
       if (user) {
         if (Array.isArray(required)) {
-          // Si c'est un tableau, on vérifie si l'utilisateur possède TOUTES les permissions par défaut
-          // (On pourrait ajouter un paramètre pour changer en "ANY")
-          hasAccess = this.authService.hasAllPermissions(required);
+          hasAccess = operator === 'ANY' 
+            ? required.some(p => this.authService.hasPermission(p))
+            : this.authService.hasAllPermissions(required);
         } else {
           hasAccess = this.authService.hasPermission(required);
         }

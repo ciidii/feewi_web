@@ -30,76 +30,78 @@
       <div class="pillar-scroll-wrapper custom-scrollbar">
 
         <!-- 📝 FORMULAIRE D'AJOUT / ÉDITION -->
-        <section class="fw-standard-card animate-in slide-in-from-top duration-300" *ngIf="isAdding()">
-          <header class="card-header">
-            <div class="header-left">
-              <lucide-icon [name]="editingItem() ? Edit : Plus" [size]="16" class="header-icon"></lucide-icon>
-              <div class="pillar-title-group">
-                <h3>{{ editingItem() ? 'Modifier la matière' : 'Ajouter une matière au programme' }}</h3>
-                <p>Définissez les paramètres pédagogiques pour ce niveau.</p>
+        <ng-container *fwHasPermission="'academic:structure:write'">
+          <section class="fw-standard-card animate-in slide-in-from-top duration-300" *ngIf="isAdding()">
+            <header class="card-header">
+              <div class="header-left">
+                <lucide-icon [name]="editingItem() ? Edit : Plus" [size]="16" class="header-icon"></lucide-icon>
+                <div class="pillar-title-group">
+                  <h3>{{ editingItem() ? 'Modifier la matière' : 'Ajouter une matière au programme' }}</h3>
+                  <p>Définissez les paramètres pédagogiques pour ce niveau.</p>
+                </div>
               </div>
+              <button (click)="cancelForm()" class="text-slate-400 hover:text-midnight transition-colors">
+                <lucide-icon [name]="X" [size]="18"></lucide-icon>
+              </button>
+            </header>
+
+            <div class="card-content">
+              <form [formGroup]="addForm" (ngSubmit)="onSave()" class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+                <!-- Matière -->
+                <div class="fw-field md:col-span-2">
+                  <label class="fw-label">Matière / Discipline</label>
+                  <div class="fw-input-wrapper">
+                    <select formControlName="subjectId" class="fw-input">
+                      <option value="">Sélectionner une matière...</option>
+                      <option *ngFor="let s of availableSubjects()" [value]="s.id">{{ s.name }} ({{ s.code }})</option>
+                      <option *ngIf="editingItem()" [value]="editingItem()?.subjectId" disabled>{{ editingItem()?.subjectName }}</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Coeff -->
+                <div class="fw-field">
+                  <label class="fw-label">Coefficient</label>
+                  <div class="fw-input-wrapper">
+                    <input type="number" formControlName="defaultCoefficient" class="fw-input" step="0.5" min="0.5">
+                  </div>
+                </div>
+
+                <!-- Heures -->
+                <div class="fw-field">
+                  <label class="fw-label">Volume Horaire (H)</label>
+                  <div class="fw-input-wrapper">
+                    <input type="number" formControlName="weeklyHours" class="fw-input" step="0.5" min="0">
+                  </div>
+                </div>
+
+                <!-- Max Score -->
+                <div class="fw-field">
+                  <label class="fw-label">Note Max (Barème)</label>
+                  <div class="fw-input-wrapper">
+                    <input type="number" formControlName="maxScore" class="fw-input" min="1">
+                  </div>
+                </div>
+
+                <!-- Optionnelle -->
+                <div class="fw-field flex items-center h-[3rem]">
+                  <label class="flex items-center gap-3 cursor-pointer group">
+                    <input type="checkbox" formControlName="optional" class="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary">
+                    <span class="text-xs font-bold text-slate-600 uppercase tracking-wider group-hover:text-midnight transition-colors">Optionnelle</span>
+                  </label>
+                </div>
+
+                <!-- Submit -->
+                <div class="md:col-span-2 flex justify-end gap-3">
+                  <app-fw-button (click)="cancelForm()" variant="ghost" size="md">Annuler</app-fw-button>
+                  <app-fw-button type="submit" variant="primary" size="md" [icon]="Save" [disabled]="addForm.invalid" [loading]="isActionLoading()">
+                    {{ editingItem() ? 'Mettre à jour' : 'Ajouter au programme' }}
+                  </app-fw-button>
+                </div>
+              </form>
             </div>
-            <button (click)="cancelForm()" class="text-slate-400 hover:text-midnight transition-colors">
-              <lucide-icon [name]="X" [size]="18"></lucide-icon>
-            </button>
-          </header>
-
-          <div class="card-content">
-            <form [formGroup]="addForm" (ngSubmit)="onSave()" class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
-              <!-- Matière -->
-              <div class="fw-field md:col-span-2">
-                <label class="fw-label">Matière / Discipline</label>
-                <div class="fw-input-wrapper">
-                  <select formControlName="subjectId" class="fw-input">
-                    <option value="">Sélectionner une matière...</option>
-                    <option *ngFor="let s of availableSubjects()" [value]="s.id">{{ s.name }} ({{ s.code }})</option>
-                    <option *ngIf="editingItem()" [value]="editingItem()?.subjectId" disabled>{{ editingItem()?.subjectName }}</option>
-                  </select>
-                </div>
-              </div>
-
-              <!-- Coeff -->
-              <div class="fw-field">
-                <label class="fw-label">Coefficient</label>
-                <div class="fw-input-wrapper">
-                  <input type="number" formControlName="defaultCoefficient" class="fw-input" step="0.5" min="0.5">
-                </div>
-              </div>
-
-              <!-- Heures -->
-              <div class="fw-field">
-                <label class="fw-label">Volume Horaire (H)</label>
-                <div class="fw-input-wrapper">
-                  <input type="number" formControlName="weeklyHours" class="fw-input" step="0.5" min="0">
-                </div>
-              </div>
-
-              <!-- Max Score -->
-              <div class="fw-field">
-                <label class="fw-label">Note Max (Barème)</label>
-                <div class="fw-input-wrapper">
-                  <input type="number" formControlName="maxScore" class="fw-input" min="1">
-                </div>
-              </div>
-
-              <!-- Optionnelle -->
-              <div class="fw-field flex items-center h-[3rem]">
-                <label class="flex items-center gap-3 cursor-pointer group">
-                  <input type="checkbox" formControlName="optional" class="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary">
-                  <span class="text-xs font-bold text-slate-600 uppercase tracking-wider group-hover:text-midnight transition-colors">Optionnelle</span>
-                </label>
-              </div>
-
-              <!-- Submit -->
-              <div class="md:col-span-2 flex justify-end gap-3">
-                <app-fw-button (click)="cancelForm()" variant="ghost" size="md">Annuler</app-fw-button>
-                <app-fw-button type="submit" variant="primary" size="md" [icon]="Save" [disabled]="addForm.invalid" [loading]="isActionLoading()">
-                  {{ editingItem() ? 'Mettre à jour' : 'Ajouter au programme' }}
-                </app-fw-button>
-              </div>
-            </form>
-          </div>
-        </section>
+          </section>
+        </ng-container>
 
         <!-- 📊 LISTE DU PROGRAMME -->
         <div class="animate-in fade-in duration-500">
