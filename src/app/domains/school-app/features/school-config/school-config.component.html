@@ -1,0 +1,163 @@
+<app-fw-page-shell
+  title="Paramètres de l'établissement"
+  description="Gérez l'identité visuelle et les coordonnées officielles de votre école."
+  [icon]="Building2"
+  density="compact"
+>
+  <!-- ACTIONS DE PAGE -->
+  <div actions class="flex items-center gap-2">
+    <app-fw-button 
+        *fwHasPermission="'identity:school:update'"
+        variant="primary" 
+        size="md" 
+        [icon]="Save" 
+        [loading]="isSaving()"
+        [disabled]="schoolForm.invalid"
+        (click)="onSave()"
+    >
+        Enregistrer les modifications
+    </app-fw-button>
+  </div>
+
+  <div class="school-config-container animate-in">
+    <form [formGroup]="schoolForm" class="grid grid-cols-12 gap-8">
+      
+      <!-- COLONNE GAUCHE : IDENTITÉ & CONTACT (8/12) -->
+      <div class="col-span-12 lg:col-span-8 space-y-6">
+        
+        <!-- Carte : Identité & Branding -->
+        <section class="dossier-card">
+          <header class="card-header">
+            <div class="header-left">
+              <lucide-icon [name]="Type" class="header-icon" [size]="16"></lucide-icon>
+              <h3 class="card-title">Identité & Branding</h3>
+            </div>
+          </header>
+          
+          <div class="card-body space-y-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="fw-field">
+                <label class="fw-label">Dénomination Officielle</label>
+                <div class="fw-input-wrapper">
+                  <input type="text" formControlName="name" class="fw-input" placeholder="Ex: Groupe Scolaire Moderne" [class.error]="isInvalid('name')"/>
+                </div>
+              </div>
+              <div class="fw-field">
+                <label class="fw-label">Slogan / Devise</label>
+                <div class="fw-input-wrapper">
+                  <input type="text" formControlName="slogan" class="fw-input" placeholder="Ex: Excellence et Réussite"/>
+                </div>
+              </div>
+            </div>
+
+            <div class="fw-field">
+                <label class="fw-label">Identité Visuelle (Logo)</label>
+                <div class="flex items-center gap-6">
+                    <div class="logo-upload-box">
+                        <img *ngIf="schoolForm.get('logoUrl')?.value" [src]="schoolForm.get('logoUrl')?.value" alt="Logo preview" />
+                        <lucide-icon *ngIf="!schoolForm.get('logoUrl')?.value" [name]="Camera" [size]="24" class="text-slate-300"></lucide-icon>
+                    </div>
+                    <div class="flex-1 space-y-2">
+                        <div class="fw-input-wrapper">
+                            <input type="text" formControlName="logoUrl" class="fw-input" placeholder="URL de l'image (PNG, SVG)..." />
+                        </div>
+                        <p class="text-[10px] text-text-tertiary font-medium">Recommandé : Image carrée avec fond transparent.</p>
+                    </div>
+                </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Carte : Coordonnées -->
+        <section class="dossier-card">
+          <header class="card-header">
+            <div class="header-left">
+              <lucide-icon [name]="Globe" class="header-icon" [size]="16"></lucide-icon>
+              <h3 class="card-title">Coordonnées & Localisation</h3>
+            </div>
+          </header>
+          
+          <div class="card-body space-y-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="fw-field">
+                <label class="fw-label">Email de contact</label>
+                <div class="fw-input-wrapper">
+                  <lucide-icon [name]="Mail" [size]="14" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></lucide-icon>
+                  <input type="email" formControlName="email" class="fw-input pl-12" placeholder="contact@ecole.sn" [class.error]="isInvalid('email')"/>
+                </div>
+              </div>
+              <div class="fw-field">
+                <label class="fw-label">Téléphone officiel</label>
+                <div class="fw-input-wrapper">
+                  <lucide-icon [name]="Phone" [size]="14" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></lucide-icon>
+                  <input type="text" formControlName="phone" class="fw-input pl-12" placeholder="+221 ..." [class.error]="isInvalid('phone')"/>
+                </div>
+              </div>
+            </div>
+
+            <div class="fw-field">
+              <label class="fw-label">Adresse physique</label>
+              <div class="fw-input-wrapper">
+                <input type="text" formControlName="streetAddress" class="fw-input" placeholder="Rue, Quartier..."/>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-6">
+                <div class="fw-field">
+                    <label class="fw-label">Ville</label>
+                    <div class="fw-input-wrapper">
+                        <input type="text" formControlName="city" class="fw-input" placeholder="Ex: Dakar"/>
+                    </div>
+                </div>
+                <div class="fw-field">
+                    <label class="fw-label">Pays</label>
+                    <div class="fw-input-wrapper">
+                        <input type="text" formControlName="country" class="fw-input" />
+                    </div>
+                </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- COLONNE DROITE : INFOS SYSTÈME (4/12) -->
+      <div class="col-span-12 lg:col-span-4 space-y-6">
+        
+        <section class="dossier-card system-card">
+          <header class="card-header bg-transparent border-none">
+            <div class="header-left">
+              <lucide-icon [name]="Info" class="header-icon text-primary" [size]="16"></lucide-icon>
+              <h3 class="card-title text-primary">Informations Système</h3>
+            </div>
+          </header>
+          
+          <div class="card-body space-y-4 pt-0">
+            <div class="system-item">
+              <span class="label">Identifiant Réseau (Tenant)</span>
+              <span class="value font-mono">{{ school()?.tenantId }}</span>
+            </div>
+            <div class="system-item">
+              <span class="label">Modèle Éducatif</span>
+              <span class="value uppercase">{{ school()?.educationTemplate || 'Standard' }}</span>
+            </div>
+            <div class="system-item">
+              <span class="label">Statut de la Licence</span>
+              <div class="flex items-center gap-2 mt-1">
+                <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                <span class="value font-bold">{{ school()?.status || 'ACTIVE' }}</span>
+              </div>
+            </div>
+
+            <div class="p-4 bg-white rounded-xl border border-border mt-6">
+              <p class="text-[10px] text-text-tertiary leading-relaxed font-medium">
+                Ces données techniques sont verrouillées. Pour toute modification structurelle (ex: changement de tenant), veuillez contacter le support **Feewi Platform**.
+              </p>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </form>
+  </div>
+</app-fw-page-shell>

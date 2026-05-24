@@ -53,8 +53,8 @@ export class TenantManagerComponent implements OnInit {
 
   // Actions
   readonly tenantActions: RowAction[] = [
-    { id: 'view', label: 'Détails', icon: Search, type: 'primary', permission: 'identity:school:read' },
-    { id: 'edit', label: 'Modifier', icon: Settings, type: 'default', permission: 'identity:school:write' }
+    { id: 'view', label: 'Détails', icon: Search, type: 'primary', permission: 'identity:saas:school:list' },
+    { id: 'edit', label: 'Gérer', icon: Settings, type: 'default', permission: 'identity:saas:school:manage' }
   ];
 
   // Transformation des données pour DataList

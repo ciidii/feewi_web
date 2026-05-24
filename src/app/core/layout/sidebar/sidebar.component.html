@@ -147,6 +147,20 @@
           <span class="label">{{ uiService.density() === 'compact' ? 'Mode Confortable' : 'Mode Compact' }}</span>
         </button>
 
+        <ng-container *ngIf="schoolSettingsItems.length > 0">
+            <span class="nav-section-title">Paramètres École</span>
+            <ng-container *ngFor="let item of schoolSettingsItems">
+                <a *fwHasPermission="item.permission"
+                   [routerLink]="item.route"
+                   routerLinkActive="active-link"
+                   class="sidebar-link"
+                   [attr.data-label]="item.label">
+                    <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
+                    <span class="label">{{ item.label }}</span>
+                </a>
+            </ng-container>
+        </ng-container>
+
         <span class="nav-section-title">Localisation</span>
 
         <a class="sidebar-link" [attr.data-label]="'Langue'">

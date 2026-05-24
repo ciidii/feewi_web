@@ -7,6 +7,7 @@ import {Page} from '../models/school.model';
 import {AuditLog} from '../models/audit.model';
 import {EnvironmentService} from './environment.service';
 import {NotificationService} from '../../shared/services/notification.service';
+import {TenantContextService} from './tenant-context.service';
 
 @Injectable({
   providedIn: 'root',
@@ -15,6 +16,7 @@ export class IdentityService {
   private http = inject(HttpClient);
   private envService = inject(EnvironmentService);
   private notificationService = inject(NotificationService);
+  private tenantContext = inject(TenantContextService);
 
   private readonly API_URL = this.envService.getServiceUrl('identity');
 
@@ -135,12 +137,20 @@ export class IdentityService {
     );
   }
 
+  private getHeaders(): { [header: string]: string } {
+    const tenantId = this.tenantContext.activeTenant()?.id;
+    if (tenantId) {
+      return { 'X-Tenant-Id': tenantId };
+    }
+    return {};
+  }
+
   /**
    * Liste les rôles disponibles
    */
   getRoles(): Observable<Role[]> {
     this._loading.set(true);
-    return this.http.get<Role[]>(`${this.API_URL}/roles`).pipe(
+    return this.http.get<Role[]>(`${this.API_URL}/roles`, { headers: this.getHeaders() }).pipe(
       tap(roles => this._roles.set(roles)),
       catchError(this.handleError('Erreur lors du chargement des rôles')),
       finalize(() => this._loading.set(false))
@@ -151,7 +161,7 @@ export class IdentityService {
    * Liste toutes les permissions disponibles
    */
   getAvailablePermissions(): Observable<Permission[]> {
-    return this.http.get<Permission[]>(`${this.API_URL}/permissions`).pipe(
+    return this.http.get<Permission[]>(`${this.API_URL}/permissions`, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Impossible de charger les permissions'))
     );
   }

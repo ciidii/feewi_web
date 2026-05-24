@@ -33,7 +33,45 @@ export class SchoolService {
   }
 
   /**
-   * Liste les écoles avec pagination et recherche
+   * ==========================================================================
+   * 1. GESTION LOCALE (ADMIN ÉCOLE)
+   * Utilise l'endpoint /my-school basé sur le tenantId du JWT.
+   * ==========================================================================
+   */
+
+  /**
+   * Récupère les informations de l'établissement actuel (Admin Local)
+   */
+  getMySchool(): Observable<School> {
+    this._loading.set(true);
+    return this.http.get<School>(`${this.API_URL}/my-school`).pipe(
+      catchError(this.handleError('Impossible de charger les paramètres de votre établissement')),
+      finalize(() => this._loading.set(false))
+    );
+  }
+
+  /**
+   * Met à jour les informations de son propre établissement (Admin Local)
+   * Champs modifiables : name, slogan, phone, email, logoUrl, adresse...
+   */
+  updateMySchool(school: Partial<School>): Observable<School> {
+    this._loading.set(true);
+    return this.http.patch<School>(`${this.API_URL}/my-school`, school).pipe(
+      tap(() => this.notificationService.success('Informations de l\'établissement mises à jour')),
+      catchError(this.handleError('Erreur lors de la mise à jour')),
+      finalize(() => this._loading.set(false))
+    );
+  }
+
+  /**
+   * ==========================================================================
+   * 2. GESTION SAAS (SUPER ADMIN)
+   * Utilise les endpoints /schools classiques avec ID.
+   * ==========================================================================
+   */
+
+  /**
+   * Liste toutes les écoles de la plateforme (Super Admin)
    */
   getSchools(search: string = '', page: number = 0, size: number = 10): Observable<Page<School>> {
     this._loading.set(true);

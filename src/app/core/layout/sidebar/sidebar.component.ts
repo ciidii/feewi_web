@@ -96,9 +96,13 @@ export class SidebarComponent {
 
   // --- CONFIGURATION SAAS ADMIN ---
   saasItems = [
-    { label: 'Établissements', icon: Building2, route: '/saas/tenants', permission: 'identity:school:read' },
-    { label: 'Statistiques Globales', icon: BarChart3, route: '/saas/stats', permission: 'identity:school:read' },
+    { label: 'Établissements', icon: Building2, route: '/saas/tenants', permission: 'identity:saas:school:list' },
+    { label: 'Statistiques Globales', icon: BarChart3, route: '/saas/stats', permission: 'identity:saas:school:list' },
     { label: 'Audit Système', icon: FileText, route: '/saas/audit', permission: 'identity:audit:read' },
+  ];
+
+  schoolSettingsItems = [
+    { label: 'Mon Établissement', icon: Building2, route: '/admin/settings/school', permission: 'identity:school:read' },
   ];
 
   getActiveServiceLabel(): string {

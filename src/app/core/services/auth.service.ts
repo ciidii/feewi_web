@@ -156,7 +156,8 @@ export class AuthService {
 
   private updateTenantContext(profile: UserProfile): void {
     if (profile.tenantId && !this.navContext.isSaasDomain()) {
-      this.schoolService.getPublicSchoolInfo(profile.tenantId).subscribe({
+      // Pour les utilisateurs d'école connectés, on récupère les infos complètes via /my-school
+      this.schoolService.getMySchool().subscribe({
         next: (school) => {
           this.tenantService.setTenant({
             id: school.tenantId,
@@ -166,11 +167,23 @@ export class AuthService {
           });
         },
         error: () => {
-          console.warn('[AuthService] Could not fetch school details, using fallback');
-          this.tenantService.setTenant({
-            id: profile.tenantId,
-            name: 'Mon Établissement',
-            allowedCycles: profile.allowedCycles
+          console.warn('[AuthService] Could not fetch private school details, trying public endpoint');
+          this.schoolService.getPublicSchoolInfo(profile.tenantId).subscribe({
+            next: (school) => {
+              this.tenantService.setTenant({
+                id: school.tenantId,
+                name: school.name,
+                logoUrl: school.logoUrl,
+                allowedCycles: profile.allowedCycles
+              });
+            },
+            error: () => {
+              this.tenantService.setTenant({
+                id: profile.tenantId,
+                name: 'Mon Établissement',
+                allowedCycles: profile.allowedCycles
+              });
+            }
           });
         }
       });

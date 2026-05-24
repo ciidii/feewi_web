@@ -6,6 +6,9 @@ Ce document détaille les points d'entrée (endpoints) du service d'identité po
 **Format :** JSON (UTF-8)
 **Authentification :** Bearer Token (JWT) dans le header `Authorization`.
 
+> ⚠️ **IMPORTANT (Architecture Hybride) :** Le JWT est désormais allégé pour la performance. Il contient l'identité et les rôles, mais **pas les permissions**. Pour l'affichage dynamique de l'UI, vous devez impérativement utiliser l'objet `permissions` renvoyé par l'endpoint `/users/me`. 
+> Consultez le [Guide RBAC pour le Frontend](../RBAC_GUIDE_FOR_FRONTEND.md) pour plus de détails.
+
 ---
 
 ## 1. Authentification & Sécurité (`/auth`)

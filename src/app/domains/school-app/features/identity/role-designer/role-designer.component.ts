@@ -82,11 +82,14 @@ export class RoleDesignerComponent implements OnInit {
     'academic': 'Pédagogie & Structure',
     'enrollment': 'Inscriptions & Scolarité',
     'finance': 'Gestion Financière',
-    'notification': 'Communication & Alertes'
+    'notification': 'Communication & Alertes',
+    'student': 'Registre & Scolarité'
   };
 
   private readonly RESOURCE_LABELS: Record<string, string> = {
     'school': 'Établissement (SaaS)',
+    'saas:school': 'Gestion des Écoles (SaaS)',
+    'saas:audit': 'Audit Plateforme (SaaS)',
     'user': 'Utilisateurs & Staff',
     'role': 'Rôles & Permissions',
     'audit': 'Journal d\'audit',
@@ -99,7 +102,9 @@ export class RoleDesignerComponent implements OnInit {
     'exam': 'Examens & Notes',
     'attendance': 'Présences (Appel)',
     'admission': 'Dossiers d\'admission',
-    'session': 'Sessions d\'inscription'
+    'session': 'Sessions d\'inscription',
+    'registry': 'Fiches Élèves',
+    'discipline': 'Discipline & Suivi'
   };
 
   private readonly ACTION_LABELS: Record<string, string> = {
@@ -108,7 +113,9 @@ export class RoleDesignerComponent implements OnInit {
     'delete': 'Suppression',
     'lifecycle': 'Vie',
     'manage': 'Gestion',
-    'create': 'Ajout'
+    'create': 'Ajout',
+    'validate': 'Validation',
+    'list': 'Lister'
   };
 
   // États
@@ -214,12 +221,17 @@ export class RoleDesignerComponent implements OnInit {
 
       if (parts.length === 2) {
         domain = parts[0];
-        resource = parts[0]; // On utilise le domaine comme ressource
+        resource = parts[0];
         action = parts[1];
-      } else if (parts.length >= 3) {
+      } else if (parts.length === 3) {
         domain = parts[0];
         resource = parts[1];
         action = parts[2];
+      } else if (parts.length === 4) {
+        // Cas spécial SaaS : identity:saas:school:list
+        domain = parts[0];
+        resource = `${parts[1]}:${parts[2]}`; // ex: saas:school
+        action = parts[3];
       } else {
         return; // Format inconnu
       }
@@ -246,11 +258,11 @@ export class RoleDesignerComponent implements OnInit {
       };
 
       // Assigner au bon slot de la matrice
-      if (action === 'read') row.read = actionObj;
+      if (action === 'read' || action === 'list') row.read = actionObj;
       else if (['write', 'create', 'add'].includes(action)) row.write = actionObj;
       else if (['delete', 'remove'].includes(action)) row.delete = actionObj;
       else {
-        // Si le slot spécial est déjà pris, on évite d'écraser (très rare)
+        // Toutes les autres actions (lifecycle, validate, manage, etc.) vont dans Spécial
         if (!row.special) row.special = actionObj;
       }
     });
@@ -265,23 +277,27 @@ export class RoleDesignerComponent implements OnInit {
   private formatActionLabel(action: string): string {
     switch (action) {
       case 'read': return 'Lire';
+      case 'list': return 'Lister';
       case 'write': return 'Modifier';
       case 'create': return 'Ajouter';
       case 'delete': return 'Supprimer';
       case 'lifecycle': return 'Cycle';
       case 'manage': return 'Gérer';
+      case 'validate': return 'Valider';
       default: return action;
     }
   }
 
   private getSemanticIcon(action: string): any {
     switch (action) {
-      case 'read': return Eye;
+      case 'read':
+      case 'list': return Eye;
       case 'write': return Edit3;
       case 'create': return FilePlus;
       case 'delete': return Trash2;
       case 'lifecycle': return Zap;
       case 'manage': return Settings;
+      case 'validate': return ShieldCheck;
       default: return Shield;
     }
   }
@@ -289,12 +305,14 @@ export class RoleDesignerComponent implements OnInit {
   private getSemanticVariant(action: string, granted: boolean): ButtonVariant {
     if (!granted) return 'tertiary'; // État "Éteint"
     switch (action) {
-      case 'read': return 'secondary'; // Gris bleu soutenu
+      case 'read':
+      case 'list': return 'secondary'; // Gris bleu soutenu
       case 'write':
       case 'create': return 'primary'; // Bleu Feewi
       case 'delete': return 'danger';  // Rouge
       case 'lifecycle':
-      case 'manage': return 'accent';  // Ambre
+      case 'manage':
+      case 'validate': return 'accent';  // Ambre
       default: return 'primary';
     }
   }

@@ -169,6 +169,17 @@ export const SCHOOL_APP_ROUTES: Routes = [
     ]
   },
   {
+    path: 'settings',
+    children: [
+      {
+        path: 'school',
+        title: 'Paramètres École',
+        data: {permissions: ['identity:school:read']},
+        loadComponent: () => import('./features/school-config/school-config.component').then(m => m.SchoolConfigComponent)
+      }
+    ]
+  },
+  {
     path: '',
     redirectTo: 'home',
     pathMatch: 'full'

@@ -18,7 +18,7 @@
 
   <div class="rail-items-wrapper">
     <!-- SAAS ADMIN -->
-    <ng-container *fwHasPermission="'identity:school:read'">
+    <ng-container *fwHasPermission="'identity:saas:school:list'">
       <a (click)="onSelectService('saas')" routerLink="/saas/tenants" class="rail-link group saas-link" [class.active]="navService.activeService() === 'saas'" [attr.data-label]="'SaaS System'">
         <lucide-icon [name]="Building2"></lucide-icon>
         <span class="rail-label">SaaS System</span>

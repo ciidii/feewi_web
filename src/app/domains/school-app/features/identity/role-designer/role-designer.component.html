@@ -150,10 +150,10 @@
 
                       <div class="flex justify-center">
                         <div *ngIf="res.special" class="toggle-wrap" [class.is-disabled]="isReadOnly()" (click)="!isReadOnly() && onPermissionToggle(res.special.id, !res.special.granted)">
+                          <button role="switch" class="fw-toggle-switch sm variant-accent" [class.on]="res.special.granted" [disabled]="isReadOnly()"><div class="track"><div class="thumb"></div></div></button>
                         </div>
                         <div *ngIf="!res.special" class="dot-spacer"></div>
-                      </div>
-                    </div>
+                      </div>                    </div>
                   </div>
                 </div>
               </div>

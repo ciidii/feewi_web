@@ -31,50 +31,57 @@ Cela permet au Frontend de masquer/afficher des boutons précisément.
 
 ---
 
-## 3. Consommation dans le Frontend (JWT)
+## 3. Consommation dans le Frontend (Approche Hybride)
 
-Lors du login, le JWT reçu contient deux claims importants :
+Suite à l'allègement du token pour la performance, la source de vérité est divisée :
 
-1.  `roles` : Liste des codes de rôles (ex: `["ROLE_ADMIN", "Secrétariat"]`).
-2.  `permissions` : Liste plate de toutes les autorités (ex: `["identity:user:read", "academic:structure:write", ...]`).
+1.  **Le JWT (Statique)** : Contient uniquement l'identité et les **Rôles** (ex: `["ROLE_ADMIN", "Comptable"]`).
+2.  **L'API `/me` (Dynamique)** : Contient la liste exhaustive et temps réel des **Permissions**.
 
-### Stratégie d'affichage (UI)
-Il est fortement recommandé de baser la logique d'affichage sur le claim `permissions` :
+### Flux de Chargement Recommandé :
+1.  **Login** -> Récupération du JWT.
+2.  **Initialisation de l'App** -> Appel à `GET /api/v1/users/me`.
+3.  **Store (Pinia/Redux)** -> Stocker l'objet complet incluant le tableau `permissions`.
+
+### Pourquoi ce changement ?
+- **Performance** : Évite d'avoir un token JWT trop volumineux (bugs de headers HTTP).
+- **Réactivité** : Permet de mettre à jour les droits d'un utilisateur (via F5) sans forcer une reconnexion.
+
+### Exemple d'usage dans Angular :
 ```typescript
-// Exemple de Guard ou Directive
-if (user.hasPermission('academic:exam:write')) {
-  showAddNoteButton = true;
-}
+// Guard ou Directive
+const canWrite = store.user.permissions.includes('academic:structure:write');
 ```
 
 ---
 
-## 4. Catalogue des Permissions Initiales
+## 4. Catalogue des Permissions Initiales (PBAC)
 
 ### Identity Service (IAM)
 *   `identity:user:read` / `identity:user:write` / `identity:user:delete`
 *   `identity:role:read` / `identity:role:write` / `identity:role:delete`
 *   `identity:audit:read`
-*   `identity:school:create` / `identity:school:read` / `identity:school:write` (SaaS Admin)
+*   `identity:school:read` / `identity:school:write` (Paramètres établissement)
 
 ### Academic Service
 *   `academic:structure:read` / `academic:structure:write` (Classes, Matières)
 *   `academic:year:read` / `academic:year:write` / `academic:year:lifecycle`
-*   `academic:teaching:read` / `academic:teaching:write` (Affectation Profs)
-*   `academic:assignment:read` / `academic:assignment:write` (Affectation Élèves)
-*   `academic:attendance:read` / `academic:attendance:write` (Appel)
+*   `academic:teaching:read` / `academic:teaching:write`
+*   `academic:assignment:read` / `academic:assignment:write`
+*   `academic:attendance:read` / `academic:attendance:write`
 *   `academic:discipline:read` / `academic:discipline:write`
 *   `academic:exam:read` / `academic:exam:write`
 
 ---
 
 ## 5. Mécanisme d'Auto-Déclaration
-Le système est **dynamique**. Si un nouveau microservice est ajouté (ex: `canteen-service`), il enregistrera ses propres permissions. 
-Le Frontend doit donc être capable de récupérer dynamiquement la liste des permissions disponibles via l'Identity Service pour l'écran de gestion des rôles :
+Le système est **dynamique**. Si un nouveau microservice est ajouté, il enregistre ses propres permissions. 
+Pour l'écran de **Gestion des Rôles**, récupérez toujours la liste fraîche des permissions disponibles :
 **Endpoint :** `GET /api/v1/permissions`
 
 ---
 
 ## 6. Bonnes Pratiques Frontend
-1.  **Ne jamais coder en dur un accès sur un nom de rôle custom** (Niveau 3), car l'école peut le renommer. Toujours tester la **Permission**.
-2.  **Badge "Système"** : Pour les rôles du Niveau 2 (`ROLE_ADMIN`), le champ `isSystemRole: true` est renvoyé par l'API. Le Frontend doit désactiver les boutons "Éditer" et "Supprimer" pour ces rôles.
+1.  **Testez toujours la Permission**, jamais le nom d'un rôle personnalisé (Niveau 3).
+2.  **Verrouillage UI** : Si un rôle a `isSystemRole: true`, désactivez les boutons "Éditer" et "Supprimer" dans votre tableau des rôles.
+3.  **Auto-Modification** : Un Administrateur peut modifier ses propres rôles, mais le système l'empêchera de se désactiver ou de se retirer son propre accès `ROLE_ADMIN` s'il est le seul.
