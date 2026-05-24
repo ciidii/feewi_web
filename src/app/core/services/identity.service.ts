@@ -107,6 +107,17 @@ export class IdentityService {
   }
 
   /**
+   * Met à jour les informations d'un compte utilisateur
+   */
+  updateUser(id: string, user: Partial<User>): Observable<User> {
+    this._loading.set(true);
+    return this.http.put<User>(`${this.API_URL}/users/${id}`, user).pipe(
+      catchError(this.handleError('Erreur lors de la mise à jour du compte')),
+      finalize(() => this._loading.set(false))
+    );
+  }
+
+  /**
    * Récupère le référentiel des types d'utilisateurs
    */
   getUserTypes(): Observable<UserType[]> {

@@ -17,6 +17,16 @@
       (click)="loadUsers(searchQuery())"
       title="Actualiser la liste"
     ></app-fw-button>
+    <div class="divider-v"></div>
+    <app-fw-button
+      *fwHasPermission="'identity:user:write'"
+      variant="primary"
+      size="sm"
+      [icon]="Plus"
+      (click)="openAccountForm()"
+    >
+      Nouveau compte
+    </app-fw-button>
   </div>
 
   <div class="list-page-content animate-in fade-in duration-500">

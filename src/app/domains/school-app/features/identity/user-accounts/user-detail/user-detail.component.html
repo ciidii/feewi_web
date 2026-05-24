@@ -1,0 +1,143 @@
+<app-fw-page-shell
+  *ngIf="user() as u; else skeletons"
+  [title]="u.email"
+  [description]="'Compte ' + (u.userType || 'ADMIN') + ' • Statut ' + (u.active ? 'Actif' : 'Suspendu')"
+  [icon]="Shield"
+  [backLink]="['/admin/identity/accounts']"
+  [tabs]="detailTabs"
+  [activeTabId]="activeTabId()"
+  (tabChange)="activeTabId.set($any($event))"
+  density="compact"
+>
+  <!-- ACTIONS -->
+  <div actions class="flex items-center gap-2">
+    <app-fw-button variant="tertiary" size="sm" [icon]="Key" (click)="onResetPassword()">Réinitialiser mot de passe</app-fw-button>
+    <div class="divider-v"></div>
+    <app-fw-button 
+        *fwHasPermission="'identity:user:write'"
+        [variant]="u.active ? 'danger' : 'primary'" 
+        size="sm" 
+        [icon]="u.active ? ShieldAlert : ShieldCheck"
+        (click)="toggleStatus()"
+    >
+        {{ u.active ? 'Suspendre l\'accès' : 'Activer l\'accès' }}
+    </app-fw-button>
+    <app-fw-button 
+        *fwHasPermission="'identity:user:write'"
+        variant="primary" 
+        size="sm" 
+        [icon]="Settings" 
+        (click)="onEditAccess()"
+    >
+        Modifier les droits
+    </app-fw-button>
+  </div>
+
+  <div class="user-detail-container animate-in fade-in duration-500">
+    
+    <!-- TAB 1 : VUE D'ENSEMBLE -->
+    <div *ngIf="activeTabId() === 'overview'" class="grid grid-cols-12 gap-6">
+      
+      <!-- Colonne Gauche : Stats & Appareils -->
+      <div class="col-span-12 lg:col-span-8 space-y-6">
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="stat-card">
+                <div class="stat-icon bg-blue-50 text-blue-500"><lucide-icon [name]="Activity" [size]="16"></lucide-icon></div>
+                <div class="stat-content">
+                    <span class="label">Sessions totales</span>
+                    <span class="value">{{ u.connectionCount || 0 }}</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon bg-emerald-50 text-emerald-500"><lucide-icon [name]="Clock" [size]="16"></lucide-icon></div>
+                <div class="stat-content">
+                    <span class="label">Dernière activité</span>
+                    <span class="value">{{ (u.lastLoginAt | date:'short') || 'Jamais' }}</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon bg-slate-50 text-slate-500"><lucide-icon [name]="Monitor" [size]="16"></lucide-icon></div>
+                <div class="stat-content">
+                    <span class="label">Dernier appareil</span>
+                    <span class="value">{{ u.lastDeviceType || 'Navigateur Web' }}</span>
+                </div>
+            </div>
+        </div>
+
+        <section class="detail-card">
+          <header class="card-header">
+            <lucide-icon [name]="Fingerprint" [size]="16"></lucide-icon>
+            <h3>Identité Liée</h3>
+          </header>
+          <div class="card-body">
+            <div *ngIf="u.staff; else noStaff" class="flex items-center justify-between p-4 bg-surface-sunken rounded-2xl border border-border">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-midnight text-white flex items-center justify-center font-bold text-lg">
+                        {{ u.staff.firstName[0] }}{{ u.staff.lastName[0] }}
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-midnight text-sm">{{ u.staff.firstName }} {{ u.staff.lastName }}</h4>
+                        <p class="text-[10px] text-text-tertiary uppercase tracking-wider font-bold">{{ u.staff.staffType }} • MATRICULE {{ u.staff.matricule || 'NON DÉFINI' }}</p>
+                    </div>
+                </div>
+                <app-fw-button variant="tertiary" size="sm" [icon]="ExternalLink" [routerLink]="['/admin/identity/staff', u.staff.id]">Voir le dossier RH</app-fw-button>
+            </div>
+            <ng-template #noStaff>
+                <div class="p-8 text-center border-2 border-dashed border-border rounded-2xl">
+                    <p class="text-xs text-text-tertiary font-medium">Ce compte est un compte système pur (non lié à un membre du personnel).</p>
+                </div>
+            </ng-template>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- Colonne Droite : Rôles Actifs -->
+      <div class="col-span-12 lg:col-span-4 space-y-6">
+        <section class="detail-card">
+            <header class="card-header">
+                <lucide-icon [name]="ShieldCheck" [size]="16"></lucide-icon>
+                <h3>Rôles Actifs</h3>
+            </header>
+            <div class="card-body space-y-3">
+                <div *ngFor="let role of u.roles" class="role-item">
+                    <lucide-icon [name]="Shield" [size]="14" class="text-primary"></lucide-icon>
+                    <span class="role-name">{{ role.replace('ROLE_', '').replace('_', ' ') }}</span>
+                </div>
+                <div *ngIf="u.roles.length === 0" class="text-center py-4 italic text-slate-400 text-xs">Aucun rôle assigné.</div>
+            </div>
+        </section>
+      </div>
+
+    </div>
+
+    <!-- TAB 2 : PERMISSIONS (Matrix Preview) -->
+    <div *ngIf="activeTabId() === 'permissions'" class="animate-in slide-in-from-bottom duration-500">
+        <div class="p-20 text-center bg-white rounded-3xl border-2 border-dashed border-border">
+            <lucide-icon [name]="Lock" [size]="48" class="mx-auto mb-6 text-slate-200"></lucide-icon>
+            <h3 class="text-lg font-bold text-midnight">Matrice des droits effectifs</h3>
+            <p class="text-sm text-text-tertiary mt-2 max-w-md mx-auto">Cette vue permet de visualiser l'ensemble des permissions cumulées de l'utilisateur à travers ses différents rôles.</p>
+            <app-fw-button variant="ghost" size="sm" class="mt-6" [icon]="Zap">Générer le rapport de sécurité</app-fw-button>
+        </div>
+    </div>
+
+  </div>
+</app-fw-page-shell>
+
+<ng-template #skeletons>
+    <div class="p-8">
+        <fw-skeleton width="300px" height="24px" radius="6px" class="mb-8"></fw-skeleton>
+        <div class="grid grid-cols-12 gap-6">
+            <div class="col-span-8 space-y-6">
+                <div class="grid grid-cols-3 gap-4">
+                    <fw-skeleton *ngFor="let i of [1,2,3]" width="100%" height="80px" radius="16px"></fw-skeleton>
+                </div>
+                <fw-skeleton width="100%" height="300px" radius="24px"></fw-skeleton>
+            </div>
+            <div class="col-span-4">
+                <fw-skeleton width="100%" height="400px" radius="24px"></fw-skeleton>
+            </div>
+        </div>
+    </div>
+</ng-template>

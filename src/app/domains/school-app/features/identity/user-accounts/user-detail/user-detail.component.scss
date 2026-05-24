@@ -1,0 +1,87 @@
+@use '../../../../../../../styles/tokens' as *;
+
+:host {
+  display: block;
+  height: 100%;
+}
+
+.user-detail-container {
+    padding: var(--fw-space-lg);
+}
+
+// Stats Cards
+.stat-card {
+    background: white;
+    padding: var(--fw-space-md);
+    border-radius: var(--fw-radius-xl);
+    border: 1px solid var(--fw-border-subtle);
+    display: flex;
+    align-items: center;
+    gap: var(--fw-space-md);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+
+    .stat-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+    }
+
+    .stat-content {
+        display: flex;
+        flex-direction: column;
+        .label { font-size: 9px; font-weight: 800; color: var(--fw-text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; }
+        .value { font-size: 0.8125rem; font-weight: 700; color: var(--fw-midnight); margin-top: 1px; }
+    }
+}
+
+// Cards Design
+.detail-card {
+    background: white;
+    border-radius: 24px;
+    border: 1px solid var(--fw-border-subtle);
+    overflow: hidden;
+
+    .card-header {
+        padding: var(--fw-space-md) var(--fw-space-lg);
+        background: var(--fw-surface-sunken);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        border-bottom: 1px solid var(--fw-border-subtle);
+
+        lucide-icon { color: var(--fw-text-tertiary); }
+        h3 { font-size: 0.75rem; font-weight: 800; color: var(--fw-midnight); text-transform: uppercase; letter-spacing: 0.05em; }
+    }
+
+    .card-body {
+        padding: var(--fw-space-lg);
+    }
+}
+
+// Role Items
+.role-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: var(--fw-space-sm) var(--fw-space-md);
+    background: var(--fw-surface-sunken);
+    border-radius: var(--fw-radius-md);
+
+    .role-name {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--fw-midnight);
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+}
+
+.divider-v {
+    width: 1px;
+    height: 20px;
+    background: var(--fw-border-subtle);
+    margin: 0 var(--fw-space-xs);
+}

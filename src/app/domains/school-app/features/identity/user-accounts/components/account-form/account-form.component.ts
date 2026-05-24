@@ -40,13 +40,15 @@ export class AccountFormComponent implements OnInit {
   readonly AlertCircle = AlertCircle;
 
   accountForm: FormGroup = this.fb.group({
+    staffId: [null, [Validators.required]],
     email: ['', [Validators.required, Validators.email]],
     roles: [[], [Validators.required, Validators.minLength(1)]],
     active: [true],
-    userTypeCode: ['ADMIN'] // Par défaut
+    userTypeCode: ['ADMIN']
   });
 
   availableRoles = this.identityService.roles;
+  availableStaff = signal<Staff[]>([]);
   isLoading = signal(false);
   isEditMode = !!this.data.user;
 
@@ -55,19 +57,43 @@ export class AccountFormComponent implements OnInit {
 
     if (this.isEditMode && this.data.user) {
       this.accountForm.patchValue({
+        staffId: this.data.user.staff?.id || null,
         email: this.data.user.email,
         roles: this.data.user.roles,
         active: this.data.user.active,
         userTypeCode: this.data.user.userType || 'ADMIN'
       });
-      this.accountForm.get('email')?.disable(); // L'email (login) est immuable
+      this.accountForm.get('email')?.disable();
+      this.accountForm.get('staffId')?.disable();
     } else if (this.data.staff) {
-      // Pré-remplissage depuis la fiche RH
+      // Pré-remplissage depuis le dossier RH
       this.accountForm.patchValue({
+        staffId: this.data.staff.id,
         email: this.data.staff.email,
         userTypeCode: this.data.staff.staffType === 'TEACHER' ? 'TEACHER' : 'ADMIN'
       });
+      this.accountForm.get('staffId')?.disable();
+    } else {
+        // Mode création "à blanc" depuis la liste : charger le staff sans compte
+        this.loadStaffWithoutAccount();
     }
+  }
+
+  async loadStaffWithoutAccount() {
+      try {
+          const res = await firstValueFrom(this.identityService.getStaff('', 0, 100));
+          // Filtrer ceux qui n'ont pas de compte (simulation si l'API ne le fait pas déjà)
+          this.availableStaff.set(res.content.filter(s => !s.hasUserAccount));
+      } catch (e) {
+          console.error("Failed to load staff", e);
+      }
+  }
+
+  onStaffSelect(staff: Staff) {
+      this.accountForm.patchValue({
+          email: staff.email,
+          userTypeCode: staff.staffType === 'TEACHER' ? 'TEACHER' : 'ADMIN'
+      });
   }
 
   async onSave() {
@@ -81,15 +107,14 @@ export class AccountFormComponent implements OnInit {
       const formData = this.accountForm.getRawValue();
       
       if (this.isEditMode) {
-        // Mise à jour (Rôles et Status)
-        // Note: L'API peut varier, ici on suit le guide
-        await firstValueFrom(this.identityService.toggleUserActive(this.data.user!.id!, formData.active));
-        await firstValueFrom(this.identityService.updateRole(this.data.user!.id!, { roles: formData.roles }));
+        await firstValueFrom(this.identityService.updateUser(this.data.user!.id!, { 
+            roles: formData.roles,
+            active: formData.active
+        }));
       } else {
-        // Création (lié au staff)
         await firstValueFrom(this.identityService.createUserAccount({
           email: formData.email,
-          staffId: this.data.staff!.id,
+          staffId: formData.staffId,
           userTypeCode: formData.userTypeCode,
           roles: formData.roles
         }));

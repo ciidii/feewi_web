@@ -20,6 +20,7 @@ export interface UserProfile {
   allowedCycles: string[];
   educationTemplate: string;
   staff?: Staff;
+  forceChangePassword?: boolean;
 }
 
 interface LoginResponse {

@@ -1,5 +1,6 @@
 import {Component, computed, inject, LOCALE_ID, OnInit, signal} from '@angular/core';
 import {CommonModule, formatDate} from '@angular/common';
+import {Router} from '@angular/router';
 import {
   Download,
   Edit,
@@ -22,7 +23,7 @@ import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {IdentityService} from '../../../../../core/services/identity.service';
 import {AuthService} from '../../../../../core/services/auth.service';
 import {User} from '../../../../../core/models/user.model';
-import {RowAction, TableRow} from '../../../../../shared/models/data-list.models';
+import {Badge, RowAction, TableRow} from '../../../../../shared/models/data-list.models';
 import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
 import {FwListCommandBarComponent} from '../../../../../shared/components/list-command-bar/list-command-bar.component';
@@ -30,6 +31,7 @@ import {DataListComponent} from '../../../../../shared/components/data-list/data
 import {HasPermissionDirective} from '../../../../../shared/directives/has-permission.directive';
 import {FwTab} from '../../../../../shared/components/tabs/tabs.component';
 import {NotificationService} from '../../../../../shared/services/notification.service';
+import {AccountFormComponent} from './components/account-form/account-form.component';
 
 @Component({
   selector: 'app-user-account-list',
@@ -41,8 +43,7 @@ import {NotificationService} from '../../../../../shared/services/notification.s
     FwPageShellComponent,
     FwButtonComponent,
     FwListCommandBarComponent,
-    DataListComponent
-  ],
+    DataListComponent  ],
   templateUrl: './user-account-list.component.html',
   styleUrl: './user-account-list.component.scss'
 })
@@ -51,6 +52,7 @@ export class UserAccountListComponent implements OnInit {
   private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
   private dialog = inject(MatDialog);
+  private router = inject(Router);
   private locale = inject(LOCALE_ID);
 
   // Icônes
@@ -71,15 +73,9 @@ export class UserAccountListComponent implements OnInit {
 
   // Actions PBAC
   readonly accountActions: RowAction[] = [
+    { id: 'view', label: 'Voir fiche', icon: Search, type: 'primary', permission: 'identity:user:read' },
     { id: 'edit', label: 'Modifier accès', icon: Edit, type: 'default', permission: 'identity:user:write' },
-    {
-        id: 'toggle-active',
-        label: (row) => row.metadata?.['active'] ? 'Suspendre' : 'Réactiver',
-        icon: (row) => row.metadata?.['active'] ? UserX : UserCheck,
-        type: (row) => row.metadata?.['active'] ? 'danger' : 'success',
-        permission: 'identity:user:write',
-        disableIf: (row) => row.metadata?.['isSelf'] === true
-    },
+    { id: 'toggle-active', label: 'Activer/Suspendre', icon: Zap, type: 'default', permission: 'identity:user:write' },
     { id: 'reset-pwd', label: 'Réinitialiser mot de passe', icon: Key, type: 'default', permission: 'identity:user:write' },
     { id: 'audit', label: 'Voir logs', icon: History, type: 'default', permission: 'identity:audit:read' }
   ];
@@ -131,14 +127,21 @@ export class UserAccountListComponent implements OnInit {
     const user = event.row.rawData as User;
 
     switch (event.actionId) {
+      case 'view':
+        this.router.navigate(['/admin/identity/accounts', user.id]);
+        break;
       case 'toggle-active':
+        if (user.id === this.authService.currentUser()?.id) {
+            this.notificationService.warning("Vous ne pouvez pas suspendre votre propre compte.");
+            return;
+        }
         this.identityService.toggleUserActive(user.id!, !user.active).subscribe(() => {
           this.notificationService.success(user.active ? 'Compte suspendu' : 'Compte réactivé');
           this.loadUsers(this.searchQuery());
         });
         break;
       case 'edit':
-        // TODO: Ouvrir AccountForm
+        this.openAccountForm(user);
         break;
       case 'reset-pwd':
         this.notificationService.info('Fonctionnalité en cours de déploiement');
@@ -146,9 +149,32 @@ export class UserAccountListComponent implements OnInit {
     }
   }
 
+  openAccountForm(user?: User) {
+      const dialogRef = this.dialog.open(AccountFormComponent, {
+          width: '560px',
+          panelClass: 'feewi-dialog-panel',
+          data: { user: user }
+      });
+
+      dialogRef.afterClosed().subscribe(result => {
+          if (result) this.loadUsers(this.searchQuery());
+      });
+  }
+
   private mapUserToRow(user: User, currentUserId?: string): TableRow {
     const isSelf = user.id === currentUserId;
     const staffName = user.staff ? `${user.staff.firstName} ${user.staff.lastName}` : 'Compte Système';
+
+    const badges: Badge[] = [
+        {
+            label: user.active ? 'ACTIF' : 'SUSPENDU',
+            type: user.active ? 'success' : 'danger'
+        }
+    ];
+
+    if (user.forceChangePassword) {
+        badges.push({ label: 'PWD REQUIS', type: 'warning' });
+    }
 
     return {
       id: user.id || '',
@@ -156,17 +182,7 @@ export class UserAccountListComponent implements OnInit {
       subtitle: `${staffName} • ${user.roles.join(', ').replace(/ROLE_/g, '')}`,
       avatarLabel: user.email.substring(0, 2).toUpperCase(),
       date: user.lastLoginAt ? formatDate(user.lastLoginAt, 'short', this.locale) : 'Jamais connecté',
-      badges: [
-        {
-            label: user.active ? 'ACTIF' : 'SUSPENDU',
-            type: user.active ? 'success' : 'danger'
-        },
-        {
-            label: user.forceChangePassword ? 'PWD REQUIS' : '',
-            type: 'warning',
-            hide: !user.forceChangePassword
-        }
-      ],
+      badges: badges,
       metadata: {
         isSelf: isSelf,
         active: user.active
@@ -174,4 +190,6 @@ export class UserAccountListComponent implements OnInit {
       rawData: user
     };
   }
+
+  protected readonly Plus = Plus;
 }
