@@ -81,7 +81,7 @@
 
         <!-- Actions rapides -->
         <div class="col-span-2 flex justify-end gap-1" (click)="$event.stopPropagation()">
-          <ng-container *ngFor="let action of actions().slice(0, 2)">
+          <ng-container *ngFor="let action of filteredActions().slice(0, 2)">
             <app-fw-button
               *ngIf="!action.hideIf || !action.hideIf(row)"
               (click)="onAction.emit({ actionId: action.id, row: row })"
@@ -156,7 +156,7 @@
         <div class="actions-column">
           <h4 class="details-title">Opérations</h4>
           <div class="grid grid-cols-1 gap-2">
-            <ng-container *ngFor="let action of actions()">
+            <ng-container *ngFor="let action of filteredActions()">
               <app-fw-button
                 *ngIf="!action.hideIf || !action.hideIf(row)"
                 (click)="onAction.emit({ actionId: action.id, row: row })"

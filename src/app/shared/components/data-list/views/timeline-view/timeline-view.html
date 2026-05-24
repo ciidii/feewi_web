@@ -80,18 +80,19 @@
 
                 <!-- Actions Dynamiques -->
                 <div class="flex gap-2 mt-6 pt-4 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                  <ng-container *ngFor="let action of actions()">
-                    <app-fw-button
-                      *ngIf="!action.hideIf || !action.hideIf(item)"
-                      (click)="onAction.emit({ actionId: action.id, row: item })"
-                      [disabled]="!!(action.disableIf && action.disableIf(item))"
-                      [variant]="'tertiary'"
-                      [size]="'sm'"
-                      [icon]="action.icon"
-                      [title]="action.label"
-                    >
-                      {{ action.label }}
-                    </app-fw-button>
+                  <ng-container *ngFor="let action of filteredActions()">
+                    <ng-container *ngIf="!action.hideIf || !action.hideIf(item)">
+                          <app-fw-button
+                            (click)="onAction.emit({ actionId: action.id, row: item })"
+                            [disabled]="!!(action.disableIf && action.disableIf(item))"
+                            [variant]="'tertiary'"
+                            [size]="'sm'"
+                            [icon]="action.icon"
+                            [title]="action.label"
+                          >
+                            {{ action.label }}
+                          </app-fw-button>
+                    </ng-container>
                   </ng-container>
                 </div>
               </div>

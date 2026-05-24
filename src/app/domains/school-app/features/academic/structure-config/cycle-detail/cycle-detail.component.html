@@ -12,26 +12,28 @@
   <div actions class="flex items-center gap-2" *ngIf="cycle()">
     <app-fw-button variant="tertiary" size="sm" [icon]="RefreshCw" [loading]="loadingService.isLoading()" (click)="refresh()" title="Actualiser"></app-fw-button>
     <div class="divider-v"></div>
-    <ng-container *fwHasPermission="'academic:structure:write'">
-      <app-fw-button
-        *ngIf="activeTab() === 'pilotage'"
-        (click)="openEditLevel({id: '', name: '', rank: 0, cycleId: cycleId() || ''})"
-        variant="primary"
-        size="sm"
-        [icon]="Plus"
-      >
-        Ajouter un niveau
-      </app-fw-button>
-      <app-fw-button
-        *ngIf="activeTab() === 'filieres'"
-        (click)="openAddFiliere()"
-        variant="primary"
-        size="sm"
-        [icon]="Plus"
-      >
-        Nouvelle série
-      </app-fw-button>
-    </ng-container>
+    <app-fw-button
+      *ngIf="activeTab() === 'pilotage'"
+      (click)="openEditLevel({id: '', name: '', rank: 0, cycleId: cycleId() || ''})"
+      variant="primary"
+      size="sm"
+      [icon]="Plus"
+      [disabled]="!canEditStructure()"
+      [title]="!canEditStructure() ? 'Permissions insuffisantes pour ajouter un niveau' : ''"
+    >
+      Ajouter un niveau
+    </app-fw-button>
+    <app-fw-button
+      *ngIf="activeTab() === 'filieres'"
+      (click)="openAddFiliere()"
+      variant="primary"
+      size="sm"
+      [icon]="Plus"
+      [disabled]="!canEditStructure()"
+      [title]="!canEditStructure() ? 'Permissions insuffisantes pour ajouter une série' : ''"
+    >
+      Nouvelle série
+    </app-fw-button>
   </div>
 
   <!-- CONTENU DE PAGE ALIGNÉ -->
@@ -95,37 +97,33 @@
               </div>
 
               <div class="flex items-center gap-2">
-                <ng-container *fwHasPermission="'academic:assignment:write'">
-                  <app-fw-button
-                    variant="tertiary"
-                    size="sm"
-                    [icon]="UserCheck"
-                    [routerLink]="['/admin/academic/assignments']"
-                    [queryParams]="{ levelId: group.level.id }"
-                  >
-                    Affecter
-                  </app-fw-button>
-                </ng-container>
+                <app-fw-button
+                  variant="tertiary"
+                  size="sm"
+                  [icon]="UserCheck"
+                  [routerLink]="['/admin/academic/assignments']"
+                  [queryParams]="{ levelId: group.level.id }"
+                >
+                  Affecter
+                </app-fw-button>
 
-                <ng-container *fwHasPermission="'academic:structure:read'">
-                  <app-fw-button
-                    (click)="openCurriculumManager(group.level)"
-                    variant="tertiary"
-                    size="sm"
-                    [icon]="ListChecks"
-                  >
-                    Programme
-                  </app-fw-button>
-                </ng-container>
+                <app-fw-button
+                  (click)="openCurriculumManager(group.level)"
+                  variant="tertiary"
+                  size="sm"
+                  [icon]="ListChecks"
+                >
+                  Programme
+                </app-fw-button>
 
-                <ng-container *fwHasPermission="'academic:structure:write'">
-                  <app-fw-button
-                    (click)="openEditLevel(group.level)"
-                    variant="ghost"
-                    size="sm"
-                    [icon]="Edit"
-                  ></app-fw-button>
-                </ng-container>
+                <app-fw-button
+                  (click)="openEditLevel(group.level)"
+                  variant="ghost"
+                  size="sm"
+                  [icon]="Edit"
+                  [disabled]="!canEditStructure()"
+                  [title]="!canEditStructure() ? 'Permissions insuffisantes pour modifier le niveau' : ''"
+                ></app-fw-button>
               </div>
             </header>
 
@@ -144,7 +142,12 @@
                   <lucide-icon [name]="Users" class="tile-bg-icon"></lucide-icon>
                 </div>
 
-                <button (click)="openAddClass(group.level)" *fwHasPermission="'academic:structure:write'" class="add-class-btn">
+                <button 
+                  (click)="canEditStructure() && openAddClass(group.level)" 
+                  class="add-class-btn"
+                  [class.is-disabled]="!canEditStructure()"
+                  [title]="!canEditStructure() ? 'Permissions insuffisantes pour ouvrir une classe' : ''"
+                >
                   <lucide-icon [name]="Plus" [size]="20"></lucide-icon>
                   <span>Ouvrir une classe</span>
                 </button>

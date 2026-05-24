@@ -123,15 +123,9 @@ export class DataListComponent {
   /** Actions disponibles sur chaque ligne */
   actions = input<RowAction[]>([]);
 
-  /** Actions filtrées par permissions */
+  /** Actions filtrées par permissions (Désactivé pour afficher les actions inactives) */
   filteredActions = computed(() => {
-    return this.actions().filter(action => {
-      if (!action.permission) return true;
-      if (Array.isArray(action.permission)) {
-        return this.authService.hasAllPermissions(action.permission);
-      }
-      return this.authService.hasPermission(action.permission);
-    });
+    return this.actions();
   });
 
   /** État de chargement */

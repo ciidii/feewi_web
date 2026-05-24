@@ -47,6 +47,9 @@ export class TimelineViewComponent {
 
   /** Actions disponibles */
   actions = input<RowAction[]>([]);
+  
+  /** Actions filtrées */
+  filteredActions = input<RowAction[]>([]);
 
   // ===========================================
   // OUTPUTS

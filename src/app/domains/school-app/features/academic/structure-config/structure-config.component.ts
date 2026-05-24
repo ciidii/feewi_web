@@ -78,14 +78,11 @@ export class StructureConfigComponent implements OnInit {
 
   // Actions pour les cycles
   readonly cycleActions = computed<RowAction[]>(() => {
-    const actions: RowAction[] = [
-      {id: 'open', label: 'Gérer le cycle', icon: ArrowRight, type: 'primary', permission: 'academic:structure:read'}
+    return [
+      {id: 'open', label: 'Gérer le cycle', icon: ArrowRight, type: 'primary', permission: 'academic:structure:read'},
+      {id: 'edit', label: 'Personnaliser', icon: Edit, type: 'primary', permission: 'academic:structure:write'},
+      {id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger', permission: 'academic:structure:write'}
     ];
-    if (this.canEditStructure()) {
-      actions.push({id: 'edit', label: 'Personnaliser', icon: Edit, type: 'primary', permission: 'academic:structure:write'});
-      actions.push({id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger', permission: 'academic:structure:write'});
-    }
-    return actions;
   });
 
   // Transformation des cycles pour le DataList
