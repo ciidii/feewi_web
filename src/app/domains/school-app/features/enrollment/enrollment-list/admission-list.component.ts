@@ -283,9 +283,9 @@ export class AdmissionsComponent implements OnInit, OnDestroy {
 
   // --- CONFIGURATION UI ---
   readonly admissionActions: RowAction[] = [
-    {id: 'view', label: 'Voir le dossier', icon: Eye, type: 'primary'},
-    {id: 'validate', label: 'Approuver', icon: CheckCircle, type: 'success'},
-    {id: 'reject', label: 'Rejeter', icon: XCircle, type: 'danger'}
+    {id: 'view', label: 'Voir le dossier', icon: Eye, type: 'primary', permission: 'enrollment:admission:view'},
+    {id: 'validate', label: 'Approuver', icon: CheckCircle, type: 'success', permission: 'enrollment:admission:decide'},
+    {id: 'reject', label: 'Rejeter', icon: XCircle, type: 'danger', permission: 'enrollment:admission:decide'}
   ];
 
   admissionTabs = computed<TabItem[]>(() => {

@@ -58,6 +58,9 @@ export class ExpandableViewComponent {
   /** Actions disponibles */
   actions = input<RowAction[]>([]);
 
+  /** Actions filtrées (PBAC) */
+  filteredActions = input<RowAction[]>([]);
+
   // ===========================================
   // OUTPUTS
   // ===========================================

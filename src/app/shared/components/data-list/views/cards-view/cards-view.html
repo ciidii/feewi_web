@@ -70,20 +70,16 @@
       </span>
 
       <div class="action-group flex gap-1" (click)="$event.stopPropagation()">
-        <ng-container *ngFor="let action of actions().slice(0, 3)">
-          <ng-container *ngIf="!action.hideIf || !action.hideIf(row)">
-            <!-- Wrapper avec la directive (Opérateur ANY) -->
-            <ng-container *fwHasPermission="action.permission || []; op 'ANY'">
-               <app-fw-button
-                 (click)="onAction.emit({ actionId: action.id, row: row })"
-                 [disabled]="!!(action.disableIf && action.disableIf(row))"
-                 [variant]="'tertiary'"
-                 [size]="'sm'"
-                 [icon]="action.icon"
-                 [title]="action.label"
-               ></app-fw-button>
-            </ng-container>
-          </ng-container>
+        <ng-container *ngFor="let action of filteredActions().slice(0, 3)">
+          <app-fw-button
+            *ngIf="!action.hideIf || !action.hideIf(row)"
+            (click)="onAction.emit({ actionId: action.id, row: row })"
+            [disabled]="!!(action.disableIf && action.disableIf(row))"
+            [variant]="'tertiary'"
+            [size]="'sm'"
+            [icon]="action.icon"
+            [title]="action.label"
+          ></app-fw-button>
         </ng-container>
       </div>
     </div>

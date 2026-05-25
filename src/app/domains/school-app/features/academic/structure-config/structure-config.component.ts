@@ -44,8 +44,7 @@ import {HasPermissionDirective} from '../../../../../shared/directives/has-permi
     FwPageShellComponent,
     FwListCommandBarComponent,
     FormsModule,
-    FwEmptyStateComponent,
-    HasPermissionDirective
+    FwEmptyStateComponent
   ],
   templateUrl: './structure-config.component.html',
   styleUrls: ['./structure-config.component.scss'],

@@ -7,12 +7,12 @@
   <!-- ACTIONS DE PAGE -->
   <div actions class="flex items-center gap-2">
     <app-fw-button 
-        *fwHasPermission="'identity:school:update'"
         variant="primary" 
         size="md" 
         [icon]="Save" 
         [loading]="isSaving()"
-        [disabled]="schoolForm.invalid"
+        [disabled]="schoolForm.invalid || !canUpdate()"
+        [title]="!canUpdate() ? 'Permissions insuffisantes pour modifier l\'établissement' : ''"
         (click)="onSave()"
     >
         Enregistrer les modifications

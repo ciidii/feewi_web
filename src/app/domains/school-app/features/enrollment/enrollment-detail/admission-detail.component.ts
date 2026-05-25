@@ -61,6 +61,7 @@ import {
 } from '../../../../../shared/components/skeleton/admission-detail-skeleton.component';
 import {CamelToLabelPipe} from '../../../../../shared/pipes/camel-to-label.pipe';
 import {FwDatePipe} from '../../../../../shared/pipes/fw-date.pipe';
+import {AuthService} from '../../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-admission-detail',
@@ -92,6 +93,7 @@ export class AdmissionDetailComponent implements OnInit {
   private dialog = inject(MatDialog);
   private notificationService = inject(NotificationService);
   private sanitizer = inject(DomSanitizer);
+  private authService = inject(AuthService);
 
   // --- ÉTATS ---
   application = signal<Admission | null>(null);
@@ -113,12 +115,19 @@ export class AdmissionDetailComponent implements OnInit {
   minPassingGrade = signal<number>(10);
   servicesConfig = signal<ServiceConfig[]>([]);
 
-  // --- CALCULS RÉACTIFS ---
+  // --- CALCULS RÉACTIFS (PBAC) ---
+  readonly canVerifyAction = computed(() => this.authService.hasPermission('enrollment:admission:verify'));
+  readonly canAssessAction = computed(() => this.authService.hasPermission('enrollment:admission:assess'));
+  readonly canDecideAction = computed(() => this.authService.hasPermission('enrollment:admission:decide'));
+  readonly canCancelAction = computed(() => this.authService.hasPermission('enrollment:admission:cancel'));
+
+  // --- CALCULS RÉACTIFS (Workflow Logic) ---
   canVerify = computed(() => this.application()?.status === 'SUBMITTED');
 
   canAssess = computed(() => {
     const status = this.application()?.status;
-    return status === 'VERIFIED' || status === 'TESTING';
+    const isAssessableState = status === 'VERIFIED' || status === 'TESTING';
+    return isAssessableState && this.canAssessAction();
   });
 
   canValidate = computed(() => {

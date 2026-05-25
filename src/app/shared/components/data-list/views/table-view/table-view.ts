@@ -62,6 +62,9 @@ export class TableViewComponent {
   /** Actions disponibles */
   actions = input<RowAction[]>([]);
 
+  /** Actions filtrées (PBAC) */
+  filteredActions = input<RowAction[]>([]);
+
   // ===========================================
   // OUTPUTS
   // ===========================================

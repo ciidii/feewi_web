@@ -1,6 +1,6 @@
 import {Component, computed, inject, OnInit, signal, ViewEncapsulation} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {firstValueFrom} from 'rxjs';
+import {forkJoin, finalize, switchMap} from 'rxjs';
 import {
   ChevronRight,
   Edit3,
@@ -8,18 +8,17 @@ import {
   FilePlus,
   Info,
   Key,
-  Loader2,
   LucideAngularModule,
-  Maximize2,
   Plus,
-  Save, Search,
-  Settings,
+  Save,
+  Search,
   Shield,
   ShieldCheck,
   Sparkles,
   Trash2,
   Users,
-  Zap
+  Zap,
+  Settings
 } from 'lucide-angular';
 import {MatButtonModule} from '@angular/material/button';
 import {MatDialog} from '@angular/material/dialog';
@@ -29,6 +28,8 @@ import {FwPageShellComponent} from '../../../../../shared/components/page-shell/
 import {ButtonVariant, FwButtonComponent} from '../../../../../shared/components/button/button.component';
 import {FormsModule} from '@angular/forms';
 import {SkeletonComponent} from '../../../../../shared/components/skeleton/skeleton.component';
+import {NotificationService} from '../../../../../shared/services/notification.service';
+import {Permission, Role} from '../../../../../core/models/role.model';
 
 export interface PermissionAction {
   id: string; // academic:structure:read
@@ -74,13 +75,14 @@ export interface PermissionDomainGroup {
 })
 export class RoleDesignerComponent implements OnInit {
   private identityService = inject(IdentityService);
+  private notificationService = inject(NotificationService);
   private dialog = inject(MatDialog);
 
   // Dictionnaires de traduction
   private readonly DOMAIN_LABELS: Record<string, string> = {
     'identity': 'Administration & Sécurité',
     'academic': 'Pédagogie & Structure',
-    'enrollment': 'Inscriptions & Scolarité',
+    'enrollment': 'Admissions & Inscriptions',
     'finance': 'Gestion Financière',
     'notification': 'Communication & Alertes',
     'student': 'Registre & Scolarité'
@@ -101,21 +103,27 @@ export class RoleDesignerComponent implements OnInit {
     'assignment': 'Affectation Élèves',
     'exam': 'Examens & Notes',
     'attendance': 'Présences (Appel)',
-    'admission': 'Dossiers d\'admission',
-    'session': 'Sessions d\'inscription',
+    'admission': 'Gestion des Candidatures',
+    'config': 'Paramètres du Portail',
     'registry': 'Fiches Élèves',
     'discipline': 'Discipline & Suivi'
   };
 
   private readonly ACTION_LABELS: Record<string, string> = {
-    'read': 'Lecture',
-    'write': 'Écriture',
-    'delete': 'Suppression',
+    'read': 'Lire',
+    'write': 'Modifier',
+    'delete': 'Supprimer',
     'lifecycle': 'Vie',
-    'manage': 'Gestion',
-    'create': 'Ajout',
-    'validate': 'Validation',
-    'list': 'Lister'
+    'manage': 'Gérer',
+    'create': 'Ajouter',
+    'validate': 'Valider',
+    'list': 'Lister',
+    'view': 'Consulter',
+    'submit': 'Soumettre',
+    'verify': 'Vérifier',
+    'assess': 'Évaluer',
+    'decide': 'Décider',
+    'cancel': 'Annuler'
   };
 
   // États
@@ -124,25 +132,6 @@ export class RoleDesignerComponent implements OnInit {
   isSaving = signal(false);
   selectedRoleId = signal<string | null>(null);
   unsavedChanges = signal<Set<string>>(new Set());
-
-  // Icônes
-  readonly ShieldCheck = ShieldCheck;
-  readonly Shield = Shield;
-  readonly Save = Save;
-  readonly Plus = Plus;
-  readonly ChevronRight = ChevronRight;
-  readonly Loader2 = Loader2;
-  readonly Users = Users;
-  readonly Key = Key;
-  readonly Info = Info;
-  readonly Sparkles = Sparkles;
-  readonly Maximize2 = Maximize2;
-  readonly Trash2 = Trash2;
-  readonly Eye = Eye;
-  readonly Edit3 = Edit3;
-  readonly Zap = Zap;
-  readonly SettingsIcon = Settings;
-  readonly FilePlus = FilePlus;
 
   // Rôles transformés
   roles = computed(() => {
@@ -189,29 +178,32 @@ export class RoleDesignerComponent implements OnInit {
     this.loadInitialData();
   }
 
-  async loadInitialData() {
+  loadInitialData() {
     this.isInitialLoading.set(true);
-    try {
-      // Charger les permissions d'abord pour construire la matrice
-      await this.loadPermissions();
-      // Ensuite charger les rôles (ce qui va déclencher la sélection et la synchro)
-      await this.loadRoles();
-    } finally {
-      this.isInitialLoading.set(false);
-    }
+
+    forkJoin({
+      permissions: this.identityService.getAvailablePermissions(),
+      roles: this.identityService.getRoles()
+    }).pipe(
+      finalize(() => this.isInitialLoading.set(false))
+    ).subscribe({
+      next: ({ permissions }) => {
+        const groups = this.groupPermissionsToMatrix(permissions);
+        this.permissionGroups.set(groups);
+
+        const firstRole = this.roles()[0];
+        if (firstRole && !this.selectedRoleId()) {
+          this.selectRole(firstRole.id);
+        }
+      },
+      error: (err) => {
+        console.error('Failed to load initial data', err);
+        this.notificationService.error('Impossible de charger les données de sécurité.');
+      }
+    });
   }
 
-  async loadPermissions() {
-    try {
-      const permissions = await firstValueFrom(this.identityService.getAvailablePermissions());
-      const groups = this.groupPermissionsToMatrix(permissions);
-      this.permissionGroups.set(groups);
-    } catch (err) {
-      console.error('Failed to load permissions', err);
-    }
-  }
-
-  private groupPermissionsToMatrix(apiPermissions: any[]): PermissionDomainGroup[] {
+  private groupPermissionsToMatrix(apiPermissions: Permission[]): PermissionDomainGroup[] {
     const domainMap = new Map<string, Map<string, PermissionResourceRow>>();
 
     apiPermissions.forEach(p => {
@@ -228,12 +220,11 @@ export class RoleDesignerComponent implements OnInit {
         resource = parts[1];
         action = parts[2];
       } else if (parts.length === 4) {
-        // Cas spécial SaaS : identity:saas:school:list
         domain = parts[0];
-        resource = `${parts[1]}:${parts[2]}`; // ex: saas:school
+        resource = `${parts[1]}:${parts[2]}`;
         action = parts[3];
       } else {
-        return; // Format inconnu
+        return;
       }
 
       if (!domainMap.has(domain)) domainMap.set(domain, new Map());
@@ -257,12 +248,13 @@ export class RoleDesignerComponent implements OnInit {
         variant: 'tertiary'
       };
 
-      // Assigner au bon slot de la matrice
-      if (action === 'read' || action === 'list') row.read = actionObj;
-      else if (['write', 'create', 'add'].includes(action)) row.write = actionObj;
-      else if (['delete', 'remove'].includes(action)) row.delete = actionObj;
-      else {
-        // Toutes les autres actions (lifecycle, validate, manage, etc.) vont dans Spécial
+      if (['read', 'list', 'view'].includes(action)) {
+        row.read = actionObj;
+      } else if (['write', 'create', 'add', 'submit', 'assess'].includes(action)) {
+        row.write = actionObj;
+      } else if (['delete', 'remove', 'cancel'].includes(action)) {
+        row.delete = actionObj;
+      } else {
         if (!row.special) row.special = actionObj;
       }
     });
@@ -275,51 +267,49 @@ export class RoleDesignerComponent implements OnInit {
   }
 
   private formatActionLabel(action: string): string {
-    switch (action) {
-      case 'read': return 'Lire';
-      case 'list': return 'Lister';
-      case 'write': return 'Modifier';
-      case 'create': return 'Ajouter';
-      case 'delete': return 'Supprimer';
-      case 'lifecycle': return 'Cycle';
-      case 'manage': return 'Gérer';
-      case 'validate': return 'Valider';
-      default: return action;
-    }
+    return this.ACTION_LABELS[action] || action;
   }
 
   private getSemanticIcon(action: string): any {
     switch (action) {
       case 'read':
-      case 'list': return Eye;
-      case 'write': return Edit3;
+      case 'list':
+      case 'view': return Eye;
+      case 'write':
+      case 'submit':
+      case 'assess': return Edit3;
       case 'create': return FilePlus;
-      case 'delete': return Trash2;
+      case 'delete':
+      case 'cancel': return Trash2;
       case 'lifecycle': return Zap;
       case 'manage': return Settings;
-      case 'validate': return ShieldCheck;
+      case 'validate':
+      case 'verify':
+      case 'decide': return ShieldCheck;
       default: return Shield;
     }
   }
 
   private getSemanticVariant(action: string, granted: boolean): ButtonVariant {
-    if (!granted) return 'tertiary'; // État "Éteint"
+    if (!granted) return 'tertiary';
     switch (action) {
       case 'read':
-      case 'list': return 'secondary'; // Gris bleu soutenu
+      case 'list':
+      case 'view': return 'secondary';
       case 'write':
-      case 'create': return 'primary'; // Bleu Feewi
-      case 'delete': return 'danger';  // Rouge
+      case 'create':
+      case 'submit':
+      case 'assess': return 'primary';
+      case 'delete':
+      case 'cancel': return 'danger';
       case 'lifecycle':
       case 'manage':
-      case 'validate': return 'accent';  // Ambre
+      case 'validate':
+      case 'verify':
+      case 'decide': return 'accent';
       default: return 'primary';
     }
   }
-
-  // ===========================================
-  // MÉTHODES UTILITAIRES
-  // ===========================================
 
   formatRoleName(roleName: string): string {
     return roleName.replace('ROLE_', '').replace(/_/g, ' ');
@@ -329,18 +319,6 @@ export class RoleDesignerComponent implements OnInit {
     return this.unsavedChanges().size > 0;
   }
 
-  // ===========================================
-  // GESTION DES RÔLES
-  // ===========================================
-
-  async loadRoles() {
-    await firstValueFrom(this.identityService.getRoles());
-    const firstRole = this.roles()[0];
-    if (firstRole && !this.selectedRoleId()) {
-      this.selectRole(firstRole.id);
-    }
-  }
-
   openAddRoleForm() {
     const dialogRef = this.dialog.open(RoleFormComponent, {
       width: '560px',
@@ -348,7 +326,7 @@ export class RoleDesignerComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result) this.loadRoles();
+      if (result) this.identityService.getRoles().subscribe();
     });
   }
 
@@ -361,12 +339,8 @@ export class RoleDesignerComponent implements OnInit {
   async deleteRole() {
     const role = this.selectedRole();
     if (!role || role.rawData.isSystemRole) return;
-    console.log('Suppression du rôle:', role.name);
+    // Logique de suppression à implémenter
   }
-
-  // ===========================================
-  // GESTION DES PERMISSIONS
-  // ===========================================
 
   private syncPermissionsWithSelectedRole() {
     const role = this.selectedRole();
@@ -420,11 +394,7 @@ export class RoleDesignerComponent implements OnInit {
     this.unsavedChanges.set(updated);
   }
 
-  // ===========================================
-  // SAUVEGARDE
-  // ===========================================
-
-  async savePermissions() {
+  savePermissions() {
     const role = this.selectedRole();
     if (!role?.rawData?.id || !this.hasUnsavedChanges()) return;
 
@@ -435,18 +405,37 @@ export class RoleDesignerComponent implements OnInit {
     );
     const grantedIds = allActions.filter(a => a.granted).map(a => a.id);
 
-    try {
-      await firstValueFrom(this.identityService.updateRole(role.rawData.id, {
-        permissions: grantedIds
-      }));
-      await this.loadRoles();
-      this.unsavedChanges.set(new Set());
-    } catch (err) {
-      console.error('❌ Erreur de sauvegarde', err);
-    } finally {
-      this.isSaving.set(false);
-    }
+    this.identityService.updateRole(role.rawData.id, { permissions: grantedIds }).pipe(
+      switchMap(() => this.identityService.getRoles()),
+      finalize(() => this.isSaving.set(false))
+    ).subscribe({
+      next: () => {
+        this.unsavedChanges.set(new Set());
+        this.notificationService.success('Permissions mises à jour avec succès.');
+        this.syncPermissionsWithSelectedRole();
+      },
+      error: (err) => {
+        console.error('❌ Erreur de sauvegarde', err);
+        this.notificationService.error('Échec de la sauvegarde des permissions.');
+      }
+    });
   }
 
+  // Icônes
+  readonly ShieldCheck = ShieldCheck;
+  readonly Shield = Shield;
+  readonly Save = Save;
+  readonly Plus = Plus;
+  readonly ChevronRight = ChevronRight;
+  readonly Users = Users;
+  readonly Key = Key;
+  readonly Info = Info;
+  readonly Sparkles = Sparkles;
+  readonly Trash2 = Trash2;
+  readonly Eye = Eye;
+  readonly Edit3 = Edit3;
+  readonly Zap = Zap;
+  readonly Settings = Settings;
   protected readonly Search = Search;
+
 }

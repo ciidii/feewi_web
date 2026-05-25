@@ -31,20 +31,36 @@
     <!-- Actions primaires -->
     <div class="action-buttons-group">
       @if (canVerify()) {
-        <app-fw-button variant="primary" size="sm" [icon]="ClipboardCheck" [loading]="isActionLoading()"
-                       (click)="verifyApplication()">
+        <app-fw-button 
+            variant="primary" 
+            size="sm" 
+            [icon]="ClipboardCheck" 
+            [loading]="isActionLoading()"
+            [disabled]="!canVerifyAction()"
+            [title]="!canVerifyAction() ? 'Permissions insuffisantes pour vérifier le dossier' : ''"
+            (click)="verifyApplication()">
           Vérifier
         </app-fw-button>
       }
 
       @if (canValidate()) {
-        <app-fw-button *ngIf="isReadyForFinalValidation()" variant="primary" size="sm" [icon]="GraduationCap"
-                       [loading]="isActionLoading()" (click)="validateFinal()">
+        <app-fw-button *ngIf="isReadyForFinalValidation()" 
+                       variant="primary" 
+                       size="sm" 
+                       [icon]="GraduationCap"
+                       [loading]="isActionLoading()" 
+                       [disabled]="!canDecideAction()"
+                       [title]="!canDecideAction() ? 'Permissions insuffisantes pour prendre la décision finale' : ''"
+                       (click)="validateFinal()">
           Validation Finale
         </app-fw-button>
-        <app-fw-button *ngIf="!isReadyForFinalValidation() && application()?.status !== 'VALIDATED'" size="sm"
+        <app-fw-button *ngIf="!isReadyForFinalValidation() && application()?.status !== 'VALIDATED'" 
+                       size="sm"
                        [icon]="ShieldCheck"
-                       [loading]="isActionLoading()" (click)="overruleFinal()">
+                       [loading]="isActionLoading()" 
+                       [disabled]="!canDecideAction()"
+                       [title]="!canDecideAction() ? 'Permissions insuffisantes pour passer outre' : ''"
+                       (click)="overruleFinal()">
           Dérogation
         </app-fw-button>
       }
@@ -52,7 +68,12 @@
 
     @if (!['VALIDATED', 'REJECTED', 'CANCELLED'].includes(app.status)) {
       <div class="danger-zone">
-        <app-fw-button variant="danger" size="sm" [icon]="XCircle" [loading]="isActionLoading()"
+        <app-fw-button variant="danger" 
+                       size="sm" 
+                       [icon]="XCircle" 
+                       [loading]="isActionLoading()"
+                       [disabled]="!canDecideAction() && !canCancelAction()"
+                       [title]="(!canDecideAction() && !canCancelAction()) ? 'Permissions insuffisantes pour rejeter' : ''"
                        (click)="rejectFinal()">
           Rejeter
         </app-fw-button>
@@ -319,8 +340,9 @@
               </div>
 
               <app-fw-button variant="primary" size="lg" class="w-full mt-4"
-                             *ngIf="canAssess()"
+                             [disabled]="!canAssess()"
                              [loading]="isActionLoading()"
+                             [title]="!canAssess() ? 'Permissions insuffisantes pour enregistrer une décision' : ''"
                              (click)="submitPedagogicalDecision()">
                 Enregistrer la décision finale
               </app-fw-button>
@@ -358,7 +380,7 @@
               <span class="document-name">{{ doc.name }}</span>
               <span class="document-status">{{ doc.status === 'MISSING' ? 'Manquant' : 'Reçu' }}</span>
             </div>
-            <button class="upload-btn" (click)="$event.stopPropagation(); adminFileInput.click()">
+            <button class="upload-btn" (click)="$event.stopPropagation(); adminFileInput.click()" [disabled]="!canVerifyAction()" [title]="!canVerifyAction() ? 'Permissions insuffisantes pour uploader' : ''">
               <lucide-icon [name]="Upload" [size]="14"></lucide-icon>
             </button>
             <input type="file" #adminFileInput hidden (change)="onAdminFileSelected(doc.code, $event)">

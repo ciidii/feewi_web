@@ -150,17 +150,16 @@
       <!-- Actions -->
       <td class="py-2 px-3 text-right" (click)="$event.stopPropagation()">
         <div class="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
-          <ng-container *ngFor="let action of actions().slice(0, 3)">
-            <ng-container *ngIf="!action.hideIf || !action.hideIf(row)">
-                  <app-fw-button
-                    (click)="onAction.emit({ actionId: action.id, row: row })"
-                    [disabled]="!!(action.disableIf && action.disableIf(row))"
-                    [variant]="'tertiary'"
-                    size="xs"
-                    [icon]="action.icon"
-                    [title]="action.label"
-                  ></app-fw-button>
-            </ng-container>
+          <ng-container *ngFor="let action of filteredActions().slice(0, 3)">
+            <app-fw-button
+              *ngIf="!action.hideIf || !action.hideIf(row)"
+              (click)="onAction.emit({ actionId: action.id, row: row })"
+              [disabled]="!!(action.disableIf && action.disableIf(row))"
+              [variant]="'tertiary'"
+              size="xs"
+              [icon]="action.icon"
+              [title]="action.label"
+            ></app-fw-button>
           </ng-container>
         </div>
       </td>

@@ -77,8 +77,7 @@ export interface LevelGroup {
     FwEmptyStateComponent,
     FwPageShellComponent,
     FwListCommandBarComponent,
-    CycleDetailSkeletonComponent,
-    HasPermissionDirective
+    CycleDetailSkeletonComponent
   ],
   templateUrl: './cycle-detail.component.html',
   styleUrls: ['./cycle-detail.component.scss']

@@ -52,23 +52,25 @@ export class RoleFormComponent implements OnInit {
 
   ngOnInit() {}
 
-  async onSave() {
+  onSave() {
     if (this.roleForm.invalid) {
       this.roleForm.markAllAsTouched();
       this.notificationService.warning('Vérifiez les champs avant de continuer.', 'Formulaire incomplet');
       return;
     }
 
-    try {
-      const roleData = this.roleForm.value;
-      await firstValueFrom(this.identityService.createRole(roleData));
-      this.notificationService.success('Rôle créé avec succès.', 'Création terminée');
-      this.dialogRef.close(true);
-    } catch (err: any) {
-      const message = err?.error?.message || err?.message || 'Échec lors de la création du rôle.';
-      this.notificationService.error(message, 'Échec de création');
-      console.error('Failed to create role', err);
-    }
+    const roleData = this.roleForm.value;
+    this.identityService.createRole(roleData).subscribe({
+      next: () => {
+        this.notificationService.success('Rôle créé avec succès.', 'Création terminée');
+        this.dialogRef.close(true);
+      },
+      error: (err: any) => {
+        const message = err?.error?.message || err?.message || 'Échec lors de la création du rôle.';
+        this.notificationService.error(message, 'Échec de création');
+        console.error('Failed to create role', err);
+      }
+    });
   }
 
   onCancel() {

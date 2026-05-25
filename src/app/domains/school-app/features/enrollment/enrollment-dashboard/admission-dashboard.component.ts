@@ -64,6 +64,7 @@ export class AdmissionDashboardComponent implements OnInit {
   isLoading = signal(true);
 
   currentUser = this.authService.currentUser;
+  canSubmit = computed(() => this.authService.hasPermission('enrollment:admission:submit'));
 
   // --- LOGIQUE MODALE ---
   openCapacityReport() {

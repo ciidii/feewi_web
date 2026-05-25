@@ -1,4 +1,4 @@
-import {Component, inject, OnInit, signal} from '@angular/core';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {
@@ -20,6 +20,7 @@ import {School} from '../../../../core/models/school.model';
 import {FwPageShellComponent} from '../../../../shared/components/page-shell/page-shell.component';
 import {FwButtonComponent} from '../../../../shared/components/button/button.component';
 import {firstValueFrom} from 'rxjs';
+import {AuthService} from '../../../../core/services/auth.service';
 import {HasPermissionDirective} from '../../../../shared/directives/has-permission.directive';
 
 @Component({
@@ -30,8 +31,7 @@ import {HasPermissionDirective} from '../../../../shared/directives/has-permissi
     ReactiveFormsModule,
     LucideAngularModule,
     FwPageShellComponent,
-    FwButtonComponent,
-    HasPermissionDirective
+    FwButtonComponent
   ],
   templateUrl: './school-config.component.html',
   styleUrls: ['./school-config.component.scss']
@@ -39,6 +39,7 @@ import {HasPermissionDirective} from '../../../../shared/directives/has-permissi
 export class SchoolConfigComponent implements OnInit {
   private fb = inject(FormBuilder);
   private schoolService = inject(SchoolService);
+  private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
 
   // Icônes
@@ -57,15 +58,17 @@ export class SchoolConfigComponent implements OnInit {
   isLoading = signal(true);
   isSaving = signal(false);
 
+  readonly canUpdate = computed(() => this.authService.hasPermission('identity:school:update'));
+
   schoolForm: FormGroup = this.fb.group({
-    name: ['', [Validators.required, Validators.minLength(3)]],
-    slogan: [''],
-    email: ['', [Validators.required, Validators.email]],
-    phone: ['', [Validators.required]],
-    logoUrl: [''],
-    streetAddress: [''],
-    city: [''],
-    country: ['Sénégal']
+    name: [{value: '', disabled: !this.canUpdate()}, [Validators.required, Validators.minLength(3)]],
+    slogan: [{value: '', disabled: !this.canUpdate()}],
+    email: [{value: '', disabled: !this.canUpdate()}, [Validators.required, Validators.email]],
+    phone: [{value: '', disabled: !this.canUpdate()}, [Validators.required]],
+    logoUrl: [{value: '', disabled: !this.canUpdate()}],
+    streetAddress: [{value: '', disabled: !this.canUpdate()}],
+    city: [{value: '', disabled: !this.canUpdate()}],
+    country: [{value: 'Sénégal', disabled: !this.canUpdate()}]
   });
 
   ngOnInit() {

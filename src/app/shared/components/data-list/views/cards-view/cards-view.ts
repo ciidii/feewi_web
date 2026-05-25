@@ -21,6 +21,7 @@ import {RowAction, TableRow} from '../../../../models/data-list.models';
 import {FwBadgeComponent} from '../../../badge/badge.component';
 import {FwButtonComponent} from '../../../button/button.component';
 import {FwDatePipe} from '../../../../pipes/fw-date.pipe';
+import {HasPermissionDirective} from '../../../../directives/has-permission.directive';
 
 @Component({
   selector: 'app-cards-view',
@@ -52,6 +53,9 @@ export class CardsViewComponent {
 
   /** Actions disponibles */
   actions = input<RowAction[]>([]);
+
+  /** Actions filtrées (PBAC) */
+  filteredActions = input<RowAction[]>([]);
 
 // Ajouter cette méthode
   getInitials(title: string): string {
