@@ -37,7 +37,14 @@
     ></app-fw-button>
   </div>
 
-  <div class="assignment-dashboard-layout animate-in fade-in duration-700" cdkDropListGroup>
+  <app-fw-tabs
+    *ngIf="canSupervise()"
+    [tabs]="tabs()"
+    [activeTabId]="activeTab()"
+    (tabChange)="onTabChange($event)"
+  ></app-fw-tabs>
+
+  <div class="assignment-dashboard-layout animate-in fade-in duration-700" cdkDropListGroup *ngIf="activeTab() === 'secretariat'">
 
     <!-- COLONNE GAUCHE : FILE D'ATTENTE (Master) -->
     <aside class="waiting-area flex flex-col">
@@ -220,5 +227,41 @@
       </div>
     </main>
 
+  </div>
+
+  <!-- VUE DIRECTION : SUPERVISION DES AFFECTATIONS -->
+  <div class="supervision-layout animate-in fade-in duration-700" *ngIf="activeTab() === 'direction'">
+    <p *ngIf="isSummaryLoading()" class="py-10 text-center text-sm text-text-tertiary">Chargement de la supervision...</p>
+
+    <div *ngIf="!isSummaryLoading()" class="supervision-grid">
+      <div *ngFor="let lvl of summary()" class="supervision-card">
+        <header class="flex items-center justify-between mb-3">
+          <span class="text-sm font-bold text-midnight">{{ lvl.levelName || 'Niveau sans classe' }}</span>
+          <span class="text-[10px] font-black uppercase tracking-widest text-text-tertiary">
+            {{ lvl.assigned }} / {{ lvl.totalCapacity }} places
+          </span>
+        </header>
+
+        <div class="track h-2 rounded-full bg-surface-sunken overflow-hidden mb-3">
+          <div
+            class="fill h-full rounded-full"
+            [class.warning]="lvl.totalCapacity > 0 && (lvl.assigned / lvl.totalCapacity) >= 0.75 && (lvl.assigned / lvl.totalCapacity) < 0.9"
+            [class.danger]="lvl.totalCapacity > 0 && (lvl.assigned / lvl.totalCapacity) >= 0.9"
+            [style.width.%]="lvl.totalCapacity > 0 ? (lvl.assigned / lvl.totalCapacity) * 100 : 0"
+          ></div>
+        </div>
+
+        <div class="flex items-center justify-between text-xs text-text-tertiary">
+          <span>{{ lvl.waiting }} en attente</span>
+          <span>{{ lvl.remainingCapacity }} places restantes</span>
+        </div>
+      </div>
+
+      <div *ngIf="summary().length === 0" class="col-span-full py-20 text-center bg-white border-2 border-dashed border-border-subtle rounded-2xl">
+        <lucide-icon [name]="ShieldCheck" [size]="48" class="mx-auto text-slate-200 mb-6"></lucide-icon>
+        <h4 class="text-lg font-bold text-midnight">Aucune donnée d'affectation</h4>
+        <p class="text-sm text-text-tertiary max-w-sm mx-auto mt-2">Aucun niveau n'a encore de classe ou d'élève en attente pour cette année.</p>
+      </div>
+    </div>
   </div>
 </app-fw-page-shell>

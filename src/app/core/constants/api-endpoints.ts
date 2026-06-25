@@ -19,6 +19,7 @@ export const API_ENDPOINTS = {
       UPDATE_PILLAR: (id: string, pillarKey: string) => `/public/admissions/${id}/pillars/${pillarKey}`,
       UPDATE_BUNDLE_PILLAR: (bundleId: string, pillarKey: string) => `/public/admissions/bundles/${bundleId}/pillars/${pillarKey}`,
       RE_ENROLL: '/public/admissions/re-enroll',
+      RE_ENROLL_ELIGIBILITY: '/public/admissions/re-enroll/eligibility',
       SUBSCRIPTIONS: (id: string) => `/public/admissions/${id}/subscriptions`,
       DOCUMENTS: (id: string, docCode: string) => `/public/admissions/${id}/documents/${docCode}`,
       MINE: '/public/admissions/mine',

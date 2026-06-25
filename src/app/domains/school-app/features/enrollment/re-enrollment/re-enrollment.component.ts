@@ -152,8 +152,19 @@ export class SecretaryReEnrollmentComponent implements OnInit, OnDestroy {
 
     this.isSaving.set(true);
     try {
+      const tenantId = this.tenantContext.activeTenant()?.id ?? '';
+
+      const eligibility = await firstValueFrom(
+        this.enrollmentService.checkReEnrollEligibility(tenantId, student.id, student.academicYearId)
+      );
+      if (!eligibility.eligible) {
+        this.notificationService.warning(eligibility.reason || 'Cet élève n\'est pas éligible à la réinscription.');
+        this.isSaving.set(false);
+        return;
+      }
+
       const payload = {
-        tenantId: this.tenantContext.activeTenant()?.id ?? '',
+        tenantId,
         studentId: student.id,
         academicYearId: student.academicYearId,
         nextLevelId: student.nextLevelId

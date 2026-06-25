@@ -80,6 +80,11 @@ export interface ReEnrollRequest {
   nextLevelId: string;
 }
 
+export interface ReEnrollEligibilityResponse {
+  eligible: boolean;
+  reason?: string;
+}
+
 // --- REQUESTS ADMIN ---
 
 export interface AssessmentRequest {

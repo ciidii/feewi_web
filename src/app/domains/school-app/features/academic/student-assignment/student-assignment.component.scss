@@ -105,3 +105,29 @@
 /* CUSTOM SCROLLBAR */
 .custom-scrollbar::-webkit-scrollbar { width: 4px; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--fw-border-strong); border-radius: 10px; }
+
+/* VUE DIRECTION : SUPERVISION DES AFFECTATIONS */
+.supervision-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.supervision-card {
+  background: var(--fw-surface-card);
+  border: 1px solid var(--fw-border-subtle);
+  border-radius: 1rem;
+  padding: 1.25rem;
+
+  .track {
+    background: var(--fw-surface-sunken);
+
+    .fill {
+      background: var(--fw-midnight);
+      transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+
+      &.warning { background: var(--fw-warning); }
+      &.danger { background: var(--fw-error); }
+    }
+  }
+}

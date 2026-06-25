@@ -1,4 +1,4 @@
-import {Component, computed, inject, signal} from '@angular/core';
+import {Component, computed, effect, inject, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ActivatedRoute, RouterLink} from '@angular/router';
 import {FormsModule} from '@angular/forms';
@@ -20,7 +20,8 @@ import {
   History,
   GraduationCap,
   Calendar,
-  Plus
+  Plus,
+  ShieldCheck
 } from 'lucide-angular';
 import {
   BehaviorSubject,
@@ -42,12 +43,13 @@ import {NotificationService} from '../../../../../shared/services/notification.s
 import {LoadingService} from '../../../../../shared/services/loading.service';
 
 // Models
-import {AcademicYear, Level, SchoolClass, StudentAssignment} from '../../../../../core/models/academic.model';
+import {AssignmentSummary, AcademicYear, Level, SchoolClass, StudentAssignment} from '../../../../../core/models/academic.model';
 
 // Components
 import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
 import {SkeletonComponent} from '../../../../../shared/components/skeleton/skeleton.component';
+import {FwTabsComponent, FwTab} from '../../../../../shared/components/tabs/tabs.component';
 import {LucideAngularModule} from 'lucide-angular';
 import {AuthService} from '../../../../../core/services/auth.service';
 import {HasPermissionDirective} from '../../../../../shared/directives/has-permission.directive';
@@ -65,6 +67,7 @@ import {HasPermissionDirective} from '../../../../../shared/directives/has-permi
     DragDropModule,
     RouterLink,
     HasPermissionDirective,
+    FwTabsComponent,
   ],
   templateUrl: './student-assignment.component.html',
   styleUrls: ['./student-assignment.component.scss']
@@ -76,6 +79,38 @@ export class StudentAssignmentComponent {
   private notificationService = inject(NotificationService);
   private route = inject(ActivatedRoute);
   protected loadingService = inject(LoadingService);
+
+  // --- Vue Direction (supervision) ---
+  readonly canSupervise = computed(() => this.authService.hasPermission('academic:assignment:supervise'));
+  readonly activeTab = signal<'secretariat' | 'direction'>('secretariat');
+  readonly tabs = computed<FwTab[]>(() => [
+    {id: 'secretariat', label: 'Affectation', icon: this.UserCheck},
+    {id: 'direction', label: 'Vue Direction', icon: this.ShieldCheck, disabled: !this.canSupervise()}
+  ]);
+
+  readonly summary = signal<AssignmentSummary[]>([]);
+  readonly isSummaryLoading = signal(false);
+
+  onTabChange(tabId: string) {
+    this.activeTab.set(tabId as 'secretariat' | 'direction');
+  }
+
+  loadSummary() {
+    const yearId = this.selectedYearId();
+    if (!yearId) return;
+    this.isSummaryLoading.set(true);
+    this.academicService.getAssignmentSummary(yearId).subscribe({
+      next: (data) => this.summary.set(data),
+      error: () => this.notificationService.error('Impossible de charger la supervision des affectations.'),
+      complete: () => this.isSummaryLoading.set(false)
+    });
+  }
+
+  private readonly reloadSummaryOnYearChange = effect(() => {
+    if (this.activeTab() === 'direction' && this.selectedYearId()) {
+      this.loadSummary();
+    }
+  });
 
   // --- Icons ---
   readonly Users = Users;
@@ -94,6 +129,7 @@ export class StudentAssignmentComponent {
   readonly GraduationCap = GraduationCap;
   readonly Calendar = Calendar;
   readonly Plus = Plus;
+  readonly ShieldCheck = ShieldCheck;
 
   // --- Triggers ---
   private refresh$ = new BehaviorSubject<void>(undefined);

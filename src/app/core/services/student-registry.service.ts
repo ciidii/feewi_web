@@ -80,4 +80,16 @@ export class StudentRegistryService {
       finalize(() => this._loading.set(false))
     );
   }
+
+  /**
+   * Archive le dossier scolaire (élève au statut LEFT uniquement)
+   */
+  archiveStudent(id: string): Observable<void> {
+    this._loading.set(true);
+    return this.http.patch<void>(`${this.API_URL}/${id}/archive`, {}).pipe(
+      tap(() => this.notificationService.success('Dossier élève archivé')),
+      catchError(this.handleError('Erreur lors de l\'archivage du dossier')),
+      finalize(() => this._loading.set(false))
+    );
+  }
 }

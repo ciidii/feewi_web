@@ -185,3 +185,12 @@ export interface StudentAssignment {
   levelName?: string;
   classFullName?: string;
 }
+
+export interface AssignmentSummary {
+  levelId: string;
+  levelName: string | null;
+  assigned: number;
+  waiting: number;
+  totalCapacity: number;
+  remainingCapacity: number;
+}

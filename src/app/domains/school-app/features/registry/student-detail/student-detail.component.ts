@@ -4,6 +4,7 @@ import {ActivatedRoute, RouterModule} from '@angular/router';
 import {finalize, forkJoin} from 'rxjs';
 import {
   AlertCircle,
+  Archive,
   ArrowLeft,
   Calendar, CheckCircle,
   Download,
@@ -26,6 +27,7 @@ import {StudentResponse} from '../../../../../core/models/student.model';
 import {AcademicService} from '../../../../../core/services/academic.service';
 import {Level} from '../../../../../core/models/academic.model';
 import {NotificationService} from '../../../../../shared/services/notification.service';
+import {AuthService} from '../../../../../core/services/auth.service';
 import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
 import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.component';
@@ -60,6 +62,7 @@ export class StudentDetailComponent implements OnInit {
   private academicService = inject(AcademicService);
   private dialog = inject(MatDialog);
   private notificationService = inject(NotificationService);
+  private authService = inject(AuthService);
 
   // --- ICONS ---
   readonly ArrowLeft = ArrowLeft;
@@ -76,6 +79,7 @@ export class StudentDetailComponent implements OnInit {
   readonly Stethoscope = Stethoscope;
   readonly Users = Users;
   readonly RefreshCw = RefreshCw;
+  readonly Archive = Archive;
 
   // --- ÉTATS ---
   student = signal<StudentResponse | null>(null);
@@ -94,6 +98,11 @@ export class StudentDetailComponent implements OnInit {
     if (!s || s.history.length === 0) return 'Non affecté';
     const lastHistory = s.history[s.history.length - 1];
     return lastHistory.levelName || this.levels().find(l => l.id === lastHistory.levelId)?.name || 'Niveau inconnu';
+  });
+
+  canArchive = computed(() => {
+    const s = this.student();
+    return !!s && s.status === 'LEFT' && this.authService.hasPermission('student:registry:archive');
   });
 
   ngOnInit() {
@@ -141,6 +150,32 @@ export class StudentDetailComponent implements OnInit {
       if (confirmed) {
         this.isActionLoading.set(true);
         this.studentService.updateStudent(s.id, {status: newStatus}).pipe(
+          finalize(() => this.isActionLoading.set(false))
+        ).subscribe(() => {
+          this.loadData(s.id);
+        });
+      }
+    });
+  }
+
+  archiveStudent() {
+    const s = this.student();
+    if (!s) return;
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Archiver le dossier',
+        message: `Voulez-vous vraiment archiver le dossier de ${s.firstName} ${s.lastName} ? Cette action est définitive.`,
+        confirmLabel: 'Archiver',
+        type: 'warning'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.isActionLoading.set(true);
+        this.studentService.archiveStudent(s.id).pipe(
           finalize(() => this.isActionLoading.set(false))
         ).subscribe(() => {
           this.loadData(s.id);

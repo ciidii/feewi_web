@@ -32,14 +32,25 @@
         Modifier le dossier
       </app-fw-button>
 
-      <app-fw-button 
-        [variant]="s.status === 'ACTIVE' ? 'danger' : 'primary'" 
-        size="sm" 
-        [icon]="s.status === 'ACTIVE' ? XCircle : CheckCircle" 
+      <app-fw-button
+        [variant]="s.status === 'ACTIVE' ? 'danger' : 'primary'"
+        size="sm"
+        [icon]="s.status === 'ACTIVE' ? XCircle : CheckCircle"
         [loading]="isActionLoading()"
         (click)="toggleStatus()"
       >
         {{ s.status === 'ACTIVE' ? 'Suspendre' : 'Réactiver' }}
+      </app-fw-button>
+
+      <app-fw-button
+        *ngIf="canArchive()"
+        variant="danger"
+        size="sm"
+        [icon]="Archive"
+        [loading]="isActionLoading()"
+        (click)="archiveStudent()"
+      >
+        Archiver le dossier
       </app-fw-button>
     </div>
   </div>

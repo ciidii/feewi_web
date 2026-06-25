@@ -7,6 +7,7 @@ import {TenantContextService} from './tenant-context.service';
 import {
   AcademicMilestone,
   AcademicYear,
+  AssignmentSummary,
   CreateClassRequest,
   CreateYearRequest,
   CurriculumItem,
@@ -483,6 +484,13 @@ export class AcademicService {
   getAssignmentsByClass(classId: string): Observable<StudentAssignment[]> {
     return this.http.get<StudentAssignment[]>(`${this.API_URL}/assignments/class/${classId}`, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors du chargement des élèves de la classe'))
+    );
+  }
+
+  getAssignmentSummary(academicYearId: string): Observable<AssignmentSummary[]> {
+    const params = new HttpParams().set('academicYearId', academicYearId);
+    return this.http.get<AssignmentSummary[]>(`${this.API_URL}/assignments/summary`, { params, headers: this.getHeaders() }).pipe(
+      catchError(this.handleError('Erreur lors du chargement de la supervision des affectations'))
     );
   }
 }

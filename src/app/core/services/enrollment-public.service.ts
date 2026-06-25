@@ -9,6 +9,7 @@ import {
   DefaultConfigResponse,
   LevelConfigResponse,
   PublicPortalSummary,
+  ReEnrollEligibilityResponse,
   ReEnrollRequest,
   ServiceSubscriptionRequest,
 } from '../models/enrollment/dtos';
@@ -196,5 +197,16 @@ export class EnrollmentPublicService {
     return this.http
       .post<Admission>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.RE_ENROLL), request, { headers: this.getHeaders(true) })
       .pipe(catchError(this.handleError('Erreur lors de la réinscription')));
+  }
+
+  /** Vérifie l'éligibilité à la réinscription avant de créer le dossier */
+  checkReEnrollEligibility(tenantId: string, studentId: string, academicYearId: string): Observable<ReEnrollEligibilityResponse> {
+    const params = new HttpParams()
+      .set('tenantId', tenantId)
+      .set('studentId', studentId)
+      .set('academicYearId', academicYearId);
+    return this.http
+      .get<ReEnrollEligibilityResponse>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.RE_ENROLL_ELIGIBILITY), { params, headers: this.getHeaders(true) })
+      .pipe(catchError(this.handleError('Erreur lors de la vérification d\'éligibilité')));
   }
 }
