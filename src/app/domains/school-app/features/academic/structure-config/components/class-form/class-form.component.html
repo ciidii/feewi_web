@@ -1,0 +1,83 @@
+<app-fw-form-shell
+  title="Ouvrir une Classe"
+  subtitle="Configuration de l'instance physique pour l'année en cours."
+  [icon]="School"
+  saveLabel="Ouvrir la classe"
+  [isLoading]="isLoading()"
+  [canSave]="classForm.valid"
+  (save)="onSave()"
+  (cancel)="onCancel()"
+>
+  <form [formGroup]="classForm" class="space-y-10 py-2">
+    
+    <!-- 1. Structure -->
+    <div class="space-y-6">
+      <header class="section-header">
+        <lucide-icon [name]="Layers" [size]="14"></lucide-icon>
+        <span class="label">Structure Pédagogique</span>
+      </header>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Niveau -->
+        <div class="fw-field">
+          <label class="fw-label">Niveau d'enseignement</label>
+          <div class="fw-input-wrapper">
+            <mat-select formControlName="levelId" placeholder="Choisir le niveau" class="fw-input" [class.error]="isInvalid('levelId')">
+              <mat-optgroup *ngFor="let group of groupedLevels()" [label]="group.cycle.name || group.cycle.systemName || 'Cycle'">
+                <mat-option *ngFor="let level of group.levels" [value]="level.id">
+                  {{ level.name }}
+                </mat-option>
+              </mat-optgroup>
+            </mat-select>
+          </div>
+        </div>
+
+        <!-- Filière (Optionnel) -->
+        <div class="fw-field">
+          <label class="fw-label">Série / Filière (Optionnel)</label>
+          <div class="fw-input-wrapper">
+            <mat-select formControlName="filiereId" placeholder="Tronc Commun" class="fw-input">
+              <mat-option [value]="null">Aucune (Tronc Commun)</mat-option>
+              <mat-option *ngFor="let f of filieres()" [value]="f.id">{{ f.name }} ({{ f.code }})</mat-option>
+            </mat-select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Configuration Physique -->
+    <div class="space-y-6">
+      <header class="section-header">
+        <lucide-icon [name]="Type" [size]="14"></lucide-icon>
+        <span class="label">Détails de l'Instance</span>
+      </header>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Nom / Suffixe -->
+        <div class="fw-field">
+          <label class="fw-label">Suffixe (Ex: A, B ou Bleue)</label>
+          <div class="fw-input-wrapper">
+            <input type="text" formControlName="name" placeholder="Nom de la classe" class="fw-input" [class.error]="isInvalid('name')"/>
+          </div>
+        </div>
+
+        <!-- Capacité -->
+        <div class="fw-field">
+          <label class="fw-label">Capacité Max (Élèves)</label>
+          <div class="fw-input-wrapper">
+            <input type="number" formControlName="capacity" class="fw-input" [class.error]="isInvalid('capacity')"/>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info Box Minimalist -->
+    <div class="p-4 bg-surface-sunken rounded-xl border border-border flex items-start gap-3">
+      <lucide-icon [name]="Info" [size]="16" class="text-text-tertiary mt-0.5"></lucide-icon>
+      <p class="text-[11px] text-text-secondary leading-relaxed font-medium">
+        L'ouverture d'une classe crée une instance physique pour l'année en cours. Le nom complet sera automatiquement généré (ex: <span class="text-midnight font-bold">CM2 A</span>).
+      </p>
+    </div>
+
+  </form>
+</app-fw-form-shell>

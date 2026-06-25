@@ -5,11 +5,11 @@ export interface Role {
   permissions: string[];
   tenantId?: string;
   memberCount?: number;
-  isSystem?: boolean;
+  isSystemRole?: boolean;
 }
 
 export interface Permission {
-  code: string;
+  id: string;
+  name: string;
   description: string;
-  module: string;
 }

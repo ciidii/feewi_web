@@ -1,0 +1,64 @@
+<app-fw-page-shell
+  title="Comptes d'Accès"
+  description="Gestion de la sécurité et des privilèges système pour l'établissement."
+  [icon]="Shield"
+  [tabs]="accountTabs()"
+  [activeTabId]="activeTabId()"
+  (tabChange)="onTabChange($event)"
+  density="compact"
+>
+  <!-- ACTIONS GLOBALES -->
+  <div actions class="flex items-center gap-2">
+    <app-fw-button
+      variant="tertiary"
+      size="sm"
+      [icon]="RefreshCw"
+      [loading]="isLoading()"
+      (click)="loadUsers(searchQuery())"
+      title="Actualiser la liste"
+    ></app-fw-button>
+    <div class="divider-v"></div>
+    <app-fw-button
+      *fwHasPermission="'identity:user:write'"
+      variant="primary"
+      size="sm"
+      [icon]="Plus"
+      (click)="openAccountForm()"
+    >
+      Nouveau compte
+    </app-fw-button>
+  </div>
+
+  <div class="list-page-content animate-in fade-in duration-500">
+    <!-- BARRE DE RECHERCHE & FILTRES -->
+    <app-fw-list-command-bar
+      [searchQuery]="searchQuery()"
+      searchPlaceholder="Rechercher par email, nom ou rôle..."
+      [totalElements]="totalUsers()"
+      (searchChange)="onSearch($event)"
+      (clearSearch)="onSearch('')"
+    >
+    </app-fw-list-command-bar>
+
+    <!-- LISTE DES COMPTES -->
+    <main class="mt-2">
+      <app-data-list
+        [data]="users()"
+        [total]="totalUsers()"
+        [actions]="accountActions"
+        [isLoading]="isLoading()"
+        [showSearch]="false"
+        [showFilterButton]="false"
+        defaultView="table"
+        (onAction)="handleAction($event)"
+      ></app-data-list>
+
+      <!-- ÉTAT VIDE -->
+      <div *ngIf="users().length === 0 && !isLoading()" class="py-20 text-center">
+        <lucide-icon [name]="Search" [size]="48" class="text-slate-100 mx-auto mb-4"></lucide-icon>
+        <p class="text-sm font-bold text-slate-400">Aucun compte trouvé pour cette sélection.</p>
+        <app-fw-button variant="ghost" size="sm" class="mt-4" [icon]="Zap" (click)="activeTabId.set('ALL')">Voir tous les comptes</app-fw-button>
+      </div>
+    </main>
+  </div>
+</app-fw-page-shell>

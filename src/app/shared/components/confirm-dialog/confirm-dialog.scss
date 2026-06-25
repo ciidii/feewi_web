@@ -1,0 +1,30 @@
+.confirm-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--fw-space-md) 0;
+}
+
+.icon-indicator {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--fw-radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--fw-space-lg);
+
+  &.info { background: var(--fw-info-bg); color: var(--fw-info); }
+  &.success { background: var(--fw-success-bg); color: var(--fw-success); }
+  &.warning { background: var(--fw-warning-bg); color: var(--fw-warning); }
+  &.destructive { background: var(--fw-destructive-bg); color: var(--fw-destructive); }
+}
+
+.confirm-message {
+  font-size: 1rem;
+  color: var(--fw-text-secondary);
+  line-height: 1.6;
+  margin: 0;
+  max-width: 360px;
+}

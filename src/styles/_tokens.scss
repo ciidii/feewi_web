@@ -1,50 +1,222 @@
 :root {
-  /* --- COULEURS (Midnight Slate) --- */
-  --fw-primary: #2563eb;
-  --fw-primary-hover: #1d4ed8;
-  --fw-primary-alpha: rgba(37, 99, 235, 0.1);
-  
-  --fw-midnight: #0f172a;
-  --fw-slate-medium: #64748b;
-  --fw-ice: #f8fafc;
-  --fw-white: #ffffff;
-  --fw-border: #e2e8f0;
+  /* ==========================================================================
+     1. PRIMITIFS (Source de Vérité)
+     ========================================================================== */
+  --fw-raw-blue-600: #2563eb;
+  --fw-raw-slate-50: #f8fafc;
+  --fw-raw-slate-100: #f1f5f9;
+  --fw-raw-slate-200: #e2e8f0;
+  --fw-raw-slate-400: #94a3b8;
+  --fw-raw-slate-600: #475569;
+  --fw-raw-slate-800: #1e293b;
+  --fw-raw-slate-900: #0f172a;
+  --fw-raw-slate-950: #020617;
+  --fw-raw-white: #ffffff;
 
-  /* --- TYPOGRAPHIE --- */
-  --fw-font-display: "Lexend", sans-serif;
-  --fw-font-sans: "Inter", sans-serif;
+  /* Statuts & Actions */
+  --fw-raw-red-600: #dc2626;
+  --fw-raw-red-700: #b91c1c;
+  --fw-raw-red-50: #fef2f2;
+  --fw-raw-green-600: #16a34a;
+  --fw-raw-amber-600: #d97706;
 
-  /* --- ESPACEMENTS --- */
-  --fw-space-xs: 4px;
-  --fw-space-sm: 8px;
-  --fw-space-md: 16px;
-  --fw-space-lg: 24px;
-  --fw-space-xl: 32px;
-  --fw-space-2xl: 48px;
-  --fw-space-3xl: 64px;
+  /* ==========================================================================
+     2. TYPOGRAPHIE
+     ========================================================================== */
+  --fw-font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --fw-font-display: 'Lexend', system-ui, sans-serif;
+  --fw-font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
-  /* --- ARRONDIS (Radii) --- */
+  /* ==========================================================================
+     3. GÉOMÉTRIE DYNAMIQUE (DENSITÉ)
+     ========================================================================== */
+  /* Valeurs par défaut : Comfortable */
+  --fw-space-multiplier: 1;
+  --fw-space-xs: calc(4px * var(--fw-space-multiplier));
+  --fw-space-sm: calc(8px * var(--fw-space-multiplier));
+  --fw-space-md: calc(16px * var(--fw-space-multiplier));
+  --fw-space-lg: calc(24px * var(--fw-space-multiplier));
+  --fw-space-xl: calc(32px * var(--fw-space-multiplier));
+  --fw-space-2xl: calc(40px * var(--fw-space-multiplier));
+  --fw-space-3xl: calc(48px * var(--fw-space-multiplier));
+  --fw-space-4xl: calc(64px * var(--fw-space-multiplier));
+
   --fw-radius-sm: 4px;
   --fw-radius-md: 8px;
   --fw-radius-lg: 16px;
   --fw-radius-xl: 24px;
   --fw-radius-full: 9999px;
+  --fw-font-size-base: 0.875rem;
 
-  /* --- OMBRES (Shadows) --- */
-  --fw-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --fw-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --fw-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  /* ==========================================================================
+     4. THÈME CLAIR (Valeurs Sémantiques)
+     ========================================================================== */
 
-  /* --- TRANSITIONS --- */
-  --fw-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Aliases legacy (utilisés dans styles.scss) */
+  --fw-ice: var(--fw-raw-slate-50);
+  --fw-white: var(--fw-raw-white);
+
+  /* Ombres — Système d'élévation 4 niveaux */
+  --fw-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --fw-shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -1px rgba(15, 23, 42, 0.04);
+  --fw-shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.10), 0 4px 6px -2px rgba(15, 23, 42, 0.05);
+  --fw-shadow-xl: 0 20px 25px -5px rgba(15, 23, 42, 0.10), 0 10px 10px -5px rgba(15, 23, 42, 0.04);
+
+  --fw-primary: var(--fw-raw-blue-600);
+  --fw-primary-alpha: rgba(37, 99, 235, 0.1);
+  
+  /* Destructive Actions (Impératif 4) */
+  --fw-destructive: var(--fw-raw-red-600);
+  --fw-destructive-hover: var(--fw-raw-red-700);
+  --fw-destructive-bg: var(--fw-raw-red-50);
+
+  --fw-surface-page: var(--fw-raw-slate-50);
+  --fw-surface-card: var(--fw-raw-white);
+  --fw-surface-sunken: var(--fw-raw-slate-100);
+  --fw-surface-inverse: var(--fw-raw-slate-900);
+  --fw-midnight: var(--fw-raw-slate-900); /* Ajout du token manquant */
+  
+  --fw-text-primary: var(--fw-raw-slate-900);
+  --fw-text-secondary: #475569;
+  --fw-text-tertiary: #94a3b8;
+  --fw-text-placeholder: #94a3b8;
+  --fw-text-inverse: #ffffff;
+  --fw-text-link: var(--fw-primary);
+
+  --fw-border: var(--fw-raw-slate-200);
+  --fw-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+
+  /* --- MOUVEMENTS (Impératif 6) --- */
+  --fw-transition-fast: 150ms ease;
+  --fw-transition: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --fw-transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Statuts Métier */
+  --fw-success: var(--fw-raw-green-600);
+  --fw-success-bg: #ecfdf5;
+  --fw-success-text: #065f46;
+  --fw-success-border: #a7f3d0;
+
+  --fw-warning: var(--fw-raw-amber-600);
+  --fw-warning-bg: #fffbeb;
+  --fw-warning-text: #92400e;
+  --fw-warning-border: #fde68a;
+
+  --fw-error: var(--fw-raw-red-600);
+  --fw-error-bg: #fef2f2;
+  --fw-error-text: #991b1b;
+  --fw-error-border: #fecaca;
+
+  --fw-info: var(--fw-raw-blue-600);
+  --fw-info-bg: #eff6ff;
+  --fw-info-text: #1e40af;
+  --fw-info-border: #bfdbfe;
+
+  --fw-neutral-bg: var(--fw-raw-slate-100);
+  --fw-neutral-text: var(--fw-raw-slate-600);
+  --fw-neutral-border: var(--fw-raw-slate-200);
+
+  /* --- SKELETONS (Mode Clair) --- */
+  --fw-skeleton-bg: var(--fw-raw-slate-100);
+  --fw-skeleton-shimmer: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+
+  /* ==========================================================================
+     LAYOUT DIMENSIONS (Z├®ro Layout Shift)
+     ========================================================================== */
+  --fw-header-height: 64px;
+  --fw-rail-width: 64px;
+  --fw-sidebar-expanded: 260px;
+  --fw-sidebar-collapsed: 72px;
 }
 
-/* --- MAPPAGE SCSS (Optionnel pour confort) --- */
-$primary: var(--fw-primary);
-$midnight: var(--fw-midnight);
-$slate: var(--fw-slate-medium);
-$ice: var(--fw-ice);
-$border: var(--fw-border);
-$radius-md: var(--fw-radius-md);
-$font-display: var(--fw-font-display);
-$font-sans: var(--fw-font-sans);
+/* Animation Shimmer Globale */
+@keyframes fw-shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* ==========================================================================
+   4. MODES SPÉCIFIQUES (DENSITÉ & CONTRASTE)
+   ========================================================================== */
+
+/* Mode Compact (Impératif 1) */
+[data-density='compact'] {
+  --fw-space-multiplier: 0.5; /* Réduction de 50% des paddings/margins */
+  --fw-radius-md: 4px;        /* Arrondis plus stricts en mode compact */
+}
+
+/* Mode Sombre */
+[data-theme='dark'] {
+  --fw-surface-page: var(--fw-raw-slate-950);
+  --fw-surface-card: var(--fw-raw-slate-900);
+  --fw-surface-sunken: var(--fw-raw-slate-800);
+  --fw-text-primary: var(--fw-raw-slate-50);
+  --fw-text-secondary: #94a3b8;
+  --fw-border: var(--fw-raw-slate-800);
+  --fw-primary: #60a5fa;
+
+  /* Statuts Dark */
+  --fw-success-bg: rgba(16, 185, 129, 0.1);
+  --fw-success-text: #34d399;
+  --fw-success-border: rgba(16, 185, 129, 0.2);
+
+  --fw-warning-bg: rgba(245, 158, 11, 0.1);
+  --fw-warning-text: #fbbf24;
+  --fw-warning-border: rgba(245, 158, 11, 0.2);
+
+  --fw-error-bg: rgba(239, 68, 68, 0.1);
+  --fw-error-text: #f87171;
+  --fw-error-border: rgba(239, 68, 68, 0.2);
+
+  --fw-info-bg: rgba(59, 130, 246, 0.1);
+  --fw-info-text: #60a5fa;
+  --fw-info-border: rgba(59, 130, 246, 0.2);
+
+  --fw-neutral-bg: rgba(148, 163, 184, 0.1);
+  --fw-neutral-text: #94a3b8;
+  --fw-neutral-border: rgba(148, 163, 184, 0.2);
+
+  /* Skeleton Dark Mode */
+  --fw-skeleton-bg: var(--fw-raw-slate-800);
+  --fw-skeleton-shimmer: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
+
+/* High Contrast (Impératif 8 - WCAG AAA) */
+[data-theme='high-contrast'] {
+  --fw-surface-page: #000000;
+  --fw-surface-card: #000000;
+  --fw-text-primary: #ffffff;
+  --fw-border: #ffffff;
+  --fw-primary: #ffff00; /* Jaune néon pour contraste max */
+  --fw-shadow: none;
+
+  --fw-success-bg: #000000;
+  --fw-success-text: #00ff00;
+  --fw-success-border: #00ff00;
+
+  --fw-warning-bg: #000000;
+  --fw-warning-text: #ffff00;
+  --fw-warning-border: #ffff00;
+
+  --fw-error-bg: #000000;
+  --fw-error-text: #ff0000;
+  --fw-error-border: #ff0000;
+
+  --fw-info-bg: #000000;
+  --fw-info-text: #00ffff;
+  --fw-info-border: #00ffff;
+
+  --fw-neutral-bg: #000000;
+  --fw-neutral-text: #ffffff;
+  --fw-neutral-border: #ffffff;
+}

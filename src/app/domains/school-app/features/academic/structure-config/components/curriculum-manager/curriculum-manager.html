@@ -1,0 +1,96 @@
+<app-fw-modal-shell
+  [title]="'Programme : ' + data.level.name"
+  subtitle="Définissez les matières et coefficients pour ce niveau."
+  (close)="close()"
+>
+  <!-- Extra Header Content (Time) -->
+  <div header-extra class="flex items-center gap-2 mt-1">
+    <div class="h-1.5 w-1.5 rounded-full bg-slate-300"></div>
+    <p class="text-xs font-bold text-primary flex items-center gap-1.5">
+      <lucide-icon [name]="Clock" [size]="14"></lucide-icon>
+      {{ totalWeeklyHours() }}h / semaine
+    </p>
+  </div>
+
+  <!-- BODY : Liste des matières -->
+  <div class="space-y-6">
+    <div class="flex items-center justify-between">
+      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Matières enseignées</span>
+      <ng-container *fwHasPermission="'academic:structure:write'">
+        <app-fw-button 
+          *ngIf="!isAdding()"
+          (click)="isAdding.set(true)"
+          variant="primary"
+          size="sm"
+          [icon]="Plus"
+        >
+          Ajouter une matière
+        </app-fw-button>
+      </ng-container>
+    </div>
+
+    <!-- DataList du Programme -->
+    <app-data-list
+      [data]="displayItems()"
+      [total]="displayItems().length"
+      [actions]="curriculumActions"
+      [isLoading]="isLoading()"
+      defaultView="table"
+      (onAction)="handleAction($event)"
+    ></app-data-list>
+  </div>
+
+  <!-- FOOTER : Formulaire d'ajout rapide (Conditionnel) -->
+  <div *ngIf="isAdding()" footer-right class="w-full">
+    <form [formGroup]="addForm" (ngSubmit)="onSave()" class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xl animate-in slide-in-from-bottom duration-300">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-sm font-bold text-slate-900 uppercase tracking-tight">
+          {{ editingItem() ? 'Modifier l\'Enseignement' : 'Nouvel Enseignement' }}
+        </h3>
+        <button type="button" (click)="cancelForm()" class="text-[10px] font-bold text-slate-400 hover:text-slate-600 uppercase tracking-widest">Annuler</button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Sélection Matière -->
+        <div class="fw-field mb-0">
+          <label class="fw-label">Matière</label>
+          <select formControlName="subjectId" class="fw-input h-10">
+            <option value="">Sélectionner...</option>
+            <option *ngFor="let s of allSubjects()" [value]="s.id">{{ s.name }}</option>
+          </select>
+        </div>
+
+        <!-- Coefficient -->
+        <div class="fw-field mb-0">
+          <label class="fw-label">Coeff.</label>
+          <input type="number" step="0.5" formControlName="defaultCoefficient" class="fw-input h-10" />
+        </div>
+
+        <!-- Volume Horaire -->
+        <div class="fw-field mb-0">
+          <label class="fw-label">H / Sem.</label>
+          <input type="number" step="0.5" formControlName="weeklyHours" class="fw-input h-10" />
+        </div>
+
+        <!-- Note Max -->
+        <div class="fw-field mb-0">
+          <label class="fw-label">Note Max</label>
+          <input type="number" formControlName="maxScore" class="fw-input h-10" />
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-100">
+        <app-fw-button 
+          type="submit" 
+          [disabled]="addForm.invalid"
+          variant="primary"
+          size="sm"
+          [icon]="Save"
+        >
+          {{ editingItem() ? 'Enregistrer' : 'Ajouter au programme' }}
+        </app-fw-button>
+      </div>
+    </form>
+  </div>
+</app-fw-modal-shell>
+

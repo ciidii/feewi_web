@@ -1,0 +1,64 @@
+<app-fw-modal-shell 
+  [title]="data.title" 
+  [subtitle]="data.subtitle"
+  (close)="onClose()"
+>
+  <!-- BARRE DE RECHERCHE DENSE -->
+  <div header-extra class="modal-search-wrapper">
+    <div class="search-input-container">
+      <lucide-icon [name]="SearchIcon" [size]="14" class="search-icon"></lucide-icon>
+      <input 
+        type="text" 
+        [ngModel]="searchQuery()" 
+        (ngModelChange)="searchQuery.set($event)"
+        [placeholder]="data.searchPlaceholder || 'Filtrer les résultats...'"
+        class="dense-search-input"
+      />
+      <button 
+        *ngIf="searchQuery()" 
+        (click)="searchQuery.set('')" 
+        class="clear-search-btn"
+      >
+        <lucide-icon [name]="XIcon" [size]="12"></lucide-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- LISTE DES RÉSULTATS -->
+  <div class="report-items-container custom-scrollbar">
+    <div *ngIf="filteredItems().length === 0" class="empty-report-state">
+      <lucide-icon [name]="BarChartIcon" [size]="32" class="opacity-20"></lucide-icon>
+      <p>Aucun résultat ne correspond à votre recherche.</p>
+    </div>
+
+    <div 
+      *ngFor="let item of filteredItems()" 
+      class="report-item-row animate-in fade-in slide-in-from-bottom-1"
+    >
+      <div class="item-info">
+        <h4 class="item-title">{{ item.title }}</h4>
+        <p class="item-subtitle" *ngIf="item.subtitle">{{ item.subtitle }}</p>
+      </div>
+
+      <div class="item-visual" *ngIf="item.progress !== undefined">
+        <div class="track">
+          <div class="fill" 
+            [ngClass]="item.status || 'neutral'"
+            [style.width.%]="item.progress">
+          </div>
+        </div>
+      </div>
+
+      <div class="item-metrics">
+        <span class="main-val">{{ item.value }}</span>
+        <span class="sub-val" *ngIf="item.subValue">{{ item.subValue }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div footer-right>
+    <app-fw-button [variant]="'primary'" (click)="onClose()">
+      Fermer le Rapport
+    </app-fw-button>
+  </div>
+</app-fw-modal-shell>

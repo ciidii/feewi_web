@@ -1,0 +1,11 @@
+<div class="public-container" [style.--fw-primary]="tenant()?.primaryColor || '#2563EB'">
+  <!-- 
+    Le Layout est désormais transparent pour laisser chaque page 
+    (Landing, Stepper, Tracker) gérer son propre Header/Footer spécifique.
+    C'est nécessaire car le design varie fortement entre le "Guichet" (Landing)
+    et le "Stepper" (Formulaire).
+  -->
+  <main class="public-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

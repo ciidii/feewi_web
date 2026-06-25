@@ -1,0 +1,148 @@
+<app-fw-page-shell
+  title="Réinscription Administrative"
+  description="Initiez le dossier d'un élève déjà présent dans l'établissement pour la nouvelle rentrée."
+  [icon]="Sparkles"
+  [backLink]="['/admin/admissions']"
+  density="compact"
+>
+  <!-- ACTIONS -->
+  <div actions class="flex items-center gap-3">
+    <app-fw-button variant="tertiary" size="md" [icon]="X" routerLink="/admin/admissions">
+      Annuler
+    </app-fw-button>
+    <app-fw-button 
+      variant="primary" 
+      size="md" 
+      [icon]="Save" 
+      [disabled]="!selectedStudent() || isSaving()" 
+      [loading]="isSaving()"
+      (click)="onSave()">
+      Enregistrer
+    </app-fw-button>
+  </div>
+
+  <!-- CONTENT -->
+  <main class="re-enrollment-content animate-in fade-in duration-700">
+    
+    <!-- Zone de recherche (Visible si aucun élève sélectionné) -->
+    <section class="search-experience" *ngIf="!selectedStudent()">
+      <div class="search-bar-premium group">
+        <lucide-icon [name]="isLoading() ? RefreshCw : Search" [size]="20" [class.animate-spin]="isLoading()" class="search-icon"></lucide-icon>
+        <input type="text" 
+               [ngModel]="searchQuery()" 
+               (ngModelChange)="onSearchChange($event)"
+               placeholder="Rechercher l'élève par nom ou email..." 
+               class="search-input">
+      </div>
+
+      <!-- Résultats de recherche -->
+      <div class="results-stack mt-8" *ngIf="searchResults().length > 0">
+        @for (stu of searchResults(); track stu.id) {
+          <div class="student-result-card" (click)="selectStudent(stu)">
+            <div class="avatar-box"><lucide-icon [name]="User" [size]="18"></lucide-icon></div>
+            <div class="info">
+              <span class="name">{{ stu.firstName }} {{ stu.lastName }}</span>
+              <span class="email">{{ stu.email }}</span>
+            </div>
+            <div class="phone-meta">Tél : {{ stu.phone || '—' }}</div>
+            <lucide-icon [name]="ArrowRight" [size]="18" class="chevron"></lucide-icon>
+          </div>
+        }
+      </div>
+      
+      <div class="empty-state-search" *ngIf="searchQuery().length >= 2 && searchResults().length === 0 && !isLoading()">
+        <lucide-icon [name]="Info" [size]="24" class="text-slate-300"></lucide-icon>
+        <p>Aucun élève ne correspond à votre recherche.</p>
+      </div>
+    </section>
+
+    <!-- Formulaire de Réinscription (Élève sélectionné) -->
+    <div class="form-layout grid grid-cols-12 gap-8" *ngIf="selectedStudent()">
+      
+      <!-- Colonne Gauche : Résumé & Orientation -->
+      <div class="col-span-12 lg:col-span-7 space-y-6">
+        <section class="zen-card">
+          <header class="card-header">
+            <h3>Candidat & Destination</h3>
+            <button class="btn-change" (click)="selectedStudent.set(null)">Changer d'élève</button>
+          </header>
+          <div class="card-body">
+            <div class="student-hero">
+              <div class="avatar-lg">{{ selectedStudent().name[0] }}</div>
+              <div class="hero-text">
+                <h4>{{ selectedStudent().name }}</h4>
+                <p>{{ selectedStudent().email }}</p>
+              </div>
+            </div>
+
+            <div class="promotion-bridge">
+              <div class="bridge-item current">
+                <span class="bridge-label">Position actuelle</span>
+                <span class="bridge-value">{{ selectedStudent().level }}</span>
+              </div>
+              
+              <div class="bridge-arrow"><lucide-icon [name]="ArrowRight"></lucide-icon></div>
+
+              <div class="bridge-item target">
+                <span class="bridge-label">Destination ({{ selectedStudent().academicYearLabel }})</span>
+                <div class="bridge-fields mt-3">
+                  <div class="form-group">
+                    <label>Niveau de passage *</label>
+                    <select [(ngModel)]="selectedStudent().nextLevelId" class="zen-select highlight">
+                      <option value="">Choisir le niveau...</option>
+                      <option *ngFor="let lvl of levels()" [value]="lvl.id">{{ lvl.name }}</option>
+                    </select>
+                  </div>
+                  <div class="form-group" *ngIf="selectedStudent().nextLevelId">
+                    <label>Filière spécifique</label>
+                    <select [(ngModel)]="selectedStudent().filiereId" class="zen-select">
+                      <option [ngValue]="null">Standard / Tronc commun</option>
+                      <option *ngFor="let f of filieres()" [value]="f.id">{{ f.name }}</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Colonne Droite : Services & Note Administrative -->
+      <div class="col-span-12 lg:col-span-5 space-y-6">
+        <section class="zen-card">
+          <header class="card-header"><h3>Options de rentrée</h3></header>
+          <div class="card-body space-y-6">
+            <div class="form-group">
+              <label>Services Périscolaires</label>
+              <div class="services-stack">
+                <label class="zen-checkbox-row">
+                  <input type="checkbox" checked>
+                  <div class="label-wrap">
+                    <span class="title">Restauration scolaire</span>
+                    <span class="desc">Demi-pension active</span>
+                  </div>
+                </label>
+                <label class="zen-checkbox-row">
+                  <input type="checkbox">
+                  <div class="label-wrap">
+                    <span class="title">Transport (Ramassage)</span>
+                    <span class="desc">Non souscrit</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="zen-info-alert">
+          <lucide-icon [name]="Info" class="text-primary"></lucide-icon>
+          <div class="alert-content">
+            <p><strong>Validation Directe :</strong> Ce dossier passera immédiatement en état <code>VERIFIED</code> car il s'agit d'un élève déjà connu du système.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+</app-fw-page-shell>

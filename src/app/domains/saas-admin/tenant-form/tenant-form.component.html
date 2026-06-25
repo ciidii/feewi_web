@@ -1,289 +1,193 @@
-<div class="flex flex-col h-[90vh] max-h-[850px] w-[700px] max-w-full bg-white rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-
-  <!-- Header Fixe -->
-  <header class="p-8 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white z-10">
-    <div class="flex items-center gap-5">
-      <div class="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600 shadow-sm border border-amber-100">
-        <lucide-icon [name]="SchoolIcon" class="w-7 h-7"></lucide-icon>
-      </div>
-      <div>
-        <h2 class="text-2xl font-display font-bold text-midnight tracking-tight leading-none">Provisioning Système</h2>
-        <p class="text-[11px] text-slate-medium font-bold uppercase tracking-[0.15em] mt-2 flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-          Enregistrement d'un nouvel établissement
-        </p>
-      </div>
-    </div>
-    <button (click)="close()" class="w-12 h-12 rounded-full hover:bg-ice flex items-center justify-center text-slate-medium transition-all group">
-      <lucide-icon [name]="X" class="w-6 h-6 group-hover:rotate-90 transition-transform"></lucide-icon>
+<app-fw-form-shell
+  title="Nouvel Établissement"
+  subtitle="Saisissez les informations de base pour initialiser le tenant."
+  [icon]="SchoolIcon"
+  saveLabel="Créer l'établissement"
+  cancelLabel="Annuler"
+  mode="page"
+  [isLoading]="isLoading()"
+  (save)="onSubmit()"
+  (cancel)="close()"
+>
+  <div class="max-w-4xl mx-auto py-8 space-y-10">
+    <!-- Bouton Retour Rapide -->
+    <button (click)="close()" class="flex items-center gap-2 text-slate-400 hover:text-primary-600 transition-colors group">
+      <lucide-icon [name]="ArrowLeft" class="w-4 h-4 group-hover:-translate-x-1 transition-transform"></lucide-icon>
+      <span class="text-xs font-bold uppercase tracking-widest">Retour à la liste</span>
     </button>
-  </header>
 
-  <!-- Formulaire Scrollable -->
-  <div class="flex-1 overflow-y-auto custom-scrollbar bg-slate-50/30">
-    <form [formGroup]="tenantForm" (ngSubmit)="onSubmit()" class="p-10 space-y-12">
-
+    <form [formGroup]="tenantForm" class="space-y-10">
       <!-- Erreur API Globale -->
-      <div *ngIf="error()" class="p-5 bg-red-50 border border-red-100 rounded-2xl flex gap-4 items-start animate-in shake duration-300">
-        <lucide-icon [name]="AlertCircle" class="w-6 h-6 text-red-600 shrink-0"></lucide-icon>
-        <div class="space-y-1">
-          <p class="text-sm font-bold text-red-700">Erreur critique</p>
-          <p class="text-xs text-red-600/80 font-medium">{{ error() }}</p>
+      <div *ngIf="error()" class="bg-rose-50 border border-rose-100 rounded-xl p-4 flex gap-3 animate-in shake">
+        <lucide-icon [name]="AlertCircle" class="w-5 h-5 text-rose-500 shrink-0"></lucide-icon>
+        <div class="text-sm">
+          <p class="font-bold text-rose-900">Erreur de création</p>
+          <p class="text-rose-700">{{ error() }}</p>
         </div>
       </div>
 
       <!-- SECTION 1 : IDENTITÉ -->
-      <div class="space-y-6">
-        <div class="flex items-center gap-3">
-          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] whitespace-nowrap">01. Identité de l'école</span>
-          <div class="h-[1px] w-full bg-slate-200"></div>
+      <section class="space-y-6">
+        <div class="border-b border-slate-100 pb-2">
+          <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <lucide-icon [name]="SchoolIcon" class="w-4 h-4 text-primary-500"></lucide-icon>
+            Identité de l'établissement
+          </h3>
         </div>
 
-        <div class="space-y-5">
-          <!-- Nom officiel -->
-          <div class="space-y-2">
-            <div class="flex justify-between items-center ml-1">
-              <label class="text-[12px] font-bold text-midnight">Nom officiel de l'établissement <span class="text-red-500">*</span></label>
-              <lucide-icon *ngIf="isValid('name')" [name]="CheckCircle2" class="w-4 h-4 text-green-500 animate-in zoom-in"></lucide-icon>
-            </div>
-            <div class="relative group">
-              <div class="absolute left-4 top-1/2 -translate-y-1/2 z-10 pointer-events-none transition-colors" [class.text-primary]="!isInvalid('name')" [class.text-red-400]="isInvalid('name')">
-                <lucide-icon [name]="SchoolIcon" class="w-5 h-5" [class.text-slate-400]="!isInvalid('name')"></lucide-icon>
-              </div>
-              <input
-                type="text"
-                formControlName="name"
-                placeholder="Lycée Blaise Diagne"
-                class="w-full border border-slate-200 rounded-2xl py-4 pl-12 pr-4 text-sm font-medium text-midnight placeholder:text-slate-400 placeholder:font-normal focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all bg-white"
-                [class.is-invalid]="isInvalid('name')"
-                [class.is-valid]="isValid('name')"
-              />
-            </div>
-            <p *ngIf="isInvalid('name')" class="text-[10px] font-bold text-red-500 mt-1 ml-1 animate-in fade-in">{{ getErrorMessage('name') }}</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="md:col-span-2 space-y-1.5">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Nom officiel *</label>
+            <input type="text" formControlName="name" placeholder="Ex: Institution Sainte Marie" class="fw-input-clean" [class.error]="isInvalid('name')"/>
+            <p *ngIf="isInvalid('name')" class="text-[10px] font-medium text-rose-500">{{ getErrorMessage('name') }}</p>
           </div>
 
-          <!-- Sous-domaine -->
-          <div class="space-y-2">
-            <div class="flex justify-between items-center ml-1">
-              <label class="text-[12px] font-bold text-midnight">Sous-domaine réservé <span class="text-red-500">*</span></label>
-              <lucide-icon *ngIf="isValid('tenantId')" [name]="CheckCircle2" class="w-4 h-4 text-green-500"></lucide-icon>
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">URL d'accès (Slug) *</label>
+            <div class="flex items-center">
+              <input type="text" formControlName="tenantId" class="fw-input-clean rounded-r-none border-r-0" [class.error]="isInvalid('tenantId')"/>
+              <span class="h-[42px] px-3 flex items-center bg-slate-50 border border-slate-200 rounded-r-xl text-xs font-bold text-slate-400">.feewi.io</span>
             </div>
-            <div class="relative group">
-              <div class="absolute left-4 top-1/2 -translate-y-1/2 z-10 pointer-events-none transition-colors" [class.text-primary]="!isInvalid('tenantId')" [class.text-red-400]="isInvalid('tenantId')">
-                <lucide-icon [name]="Globe" class="w-5 h-5" [class.text-slate-400]="!isInvalid('tenantId')"></lucide-icon>
-              </div>
-              <input
-                type="text"
-                formControlName="tenantId"
-                placeholder="blaise-diagne"
-                class="w-full border border-slate-200 rounded-2xl py-4 pl-12 pr-24 text-sm font-medium text-midnight placeholder:text-slate-400 placeholder:font-normal focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all bg-white"
-                [class.is-invalid]="isInvalid('tenantId')"
-                [class.is-valid]="isValid('tenantId')"
-              />
-              <div class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400 bg-slate-100 px-2 py-1 rounded-md">
-                .feewi.io
-              </div>
-            </div>
-            <p *ngIf="isInvalid('tenantId')" class="text-[10px] font-bold text-red-500 mt-1 ml-1 animate-in fade-in">{{ getErrorMessage('tenantId') }}</p>
           </div>
 
-          <!-- Téléphone -->
-          <div class="space-y-2">
-            <div class="flex justify-between items-center ml-1">
-              <label class="text-[12px] font-bold text-midnight">Téléphone de l'école <span class="text-red-500">*</span></label>
-              <lucide-icon *ngIf="isValid('phone')" [name]="CheckCircle2" class="w-4 h-4 text-green-500"></lucide-icon>
-            </div>
-            <div class="relative group">
-              <div class="absolute left-4 top-1/2 -translate-y-1/2 z-10 pointer-events-none transition-colors" [class.text-primary]="!isInvalid('phone')" [class.text-red-400]="isInvalid('phone')">
-                <lucide-icon [name]="Phone" class="w-5 h-5" [class.text-slate-400]="!isInvalid('phone')"></lucide-icon>
-              </div>
-              <input
-                type="text"
-                formControlName="phone"
-                placeholder="+221 33 800 00 00"
-                class="w-full border border-slate-200 rounded-2xl py-4 pl-12 pr-4 text-sm font-medium text-midnight placeholder:text-slate-400 placeholder:font-normal focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all bg-white"
-                [class.is-invalid]="isInvalid('phone')"
-                [class.is-valid]="isValid('phone')"
-              />
-            </div>
-            <p *ngIf="isInvalid('phone')" class="text-[10px] font-bold text-red-500 mt-1 ml-1 animate-in fade-in">{{ getErrorMessage('phone') }}</p>
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Téléphone *</label>
+            <input type="text" formControlName="phone" placeholder="+221 ..." class="fw-input-clean" [class.error]="isInvalid('phone')"/>
           </div>
 
-          <!-- Slogan -->
-          <div class="space-y-2">
-            <label class="text-[12px] font-bold text-midnight ml-1">Slogan ou Signature</label>
-            <div class="relative group">
-              <div class="absolute left-4 top-6 z-10 pointer-events-none">
-                <lucide-icon [name]="Quote" class="w-5 h-5 text-slate-400"></lucide-icon>
+          <div class="md:col-span-2 space-y-1.5">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Slogan ou Devise</label>
+            <input type="text" formControlName="slogan" class="fw-input-clean"/>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 2 : CONFIGURATION -->
+      <section class="space-y-6">
+        <div class="border-b border-slate-100 pb-2">
+          <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <lucide-icon [name]="CheckCircle2" class="w-4 h-4 text-primary-500"></lucide-icon>
+            Paramètres pédagogiques
+          </h3>
+        </div>
+
+        <div class="space-y-6">
+          <div class="space-y-3">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Système éducatif *</label>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              @for (t of educationTemplates; track t.code) {
+                <button
+                  type="button"
+                  (click)="tenantForm.get('educationTemplate')?.setValue(t.code)"
+                  class="p-4 rounded-xl border text-left transition-all"
+                  [class.bg-primary-50]="tenantForm.get('educationTemplate')?.value === t.code"
+                  [class.border-primary-200]="tenantForm.get('educationTemplate')?.value === t.code"
+                  [class.border-slate-200]="tenantForm.get('educationTemplate')?.value !== t.code"
+                >
+                  <p class="text-xs font-bold" [class.text-primary-700]="tenantForm.get('educationTemplate')?.value === t.code">
+                    {{ t.label }}
+                  </p>
+                  <p class="text-[10px] text-slate-400 mt-1">Niveaux standards</p>
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="space-y-3">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Cycles actifs *</label>
+            <div class="flex flex-wrap gap-2">
+              @for (cycle of cycleOptions; track cycle.code) {
+                <button
+                  type="button"
+                  (click)="toggleCycle(cycle.code)"
+                  class="px-4 py-2 rounded-lg border text-xs font-bold transition-all"
+                  [class.bg-slate-900]="isCycleSelected(cycle.code)"
+                  [class.text-white]="isCycleSelected(cycle.code)"
+                  [class.border-slate-900]="isCycleSelected(cycle.code)"
+                  [class.bg-white]="!isCycleSelected(cycle.code)"
+                  [class.text-slate-600]="!isCycleSelected(cycle.code)"
+                  [class.border-slate-200]="!isCycleSelected(cycle.code)"
+                >
+                  {{ cycle.label }}
+                </button>
+              }
+            </div>
+            <p *ngIf="isInvalid('allowedCycles')" class="text-[10px] font-medium text-rose-500">{{ getErrorMessage('allowedCycles') }}</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 3 : ADRESSE ET ADMIN -->
+      <section class="space-y-6">
+        <div class="border-b border-slate-100 pb-2">
+          <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <lucide-icon [name]="MapPin" class="w-4 h-4 text-primary-500"></lucide-icon>
+            Localisation & Administration
+          </h3>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="md:col-span-2 space-y-1.5">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Adresse *</label>
+            <input type="text" formControlName="streetAddress" class="fw-input-clean" [class.error]="isInvalid('streetAddress')"/>
+          </div>
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Ville *</label>
+            <input type="text" formControlName="city" class="fw-input-clean" [class.error]="isInvalid('city')"/>
+          </div>
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Pays *</label>
+            <input type="text" formControlName="country" class="fw-input-clean" [class.error]="isInvalid('country')"/>
+          </div>
+          <div class="md:col-span-2 space-y-1.5">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Email Institutionnel *</label>
+            <input type="email" formControlName="email" class="fw-input-clean" [class.error]="isInvalid('email')"/>
+          </div>
+
+          <!-- ZONE ADMIN (Groupe visuel léger) -->
+          <div class="md:col-span-2 mt-4 p-6 bg-slate-50 border border-slate-100 rounded-2xl space-y-6">
+            <div class="flex items-center gap-3 border-b border-slate-200 pb-3">
+              <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center">
+                <lucide-icon [name]="Lock" class="w-4 h-4"></lucide-icon>
               </div>
-              <textarea
-                formControlName="slogan"
-                rows="3"
-                placeholder="La vision de l'école en quelques mots..."
-                class="w-full border border-slate-200 rounded-2xl py-4 pl-12 pr-4 text-sm font-medium text-midnight placeholder:text-slate-400 placeholder:font-normal focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all bg-white resize-none"
-              ></textarea>
+              <div>
+                <p class="text-xs font-bold text-slate-900 uppercase tracking-tight">Compte Administrateur Racine</p>
+                <p class="text-[10px] text-slate-500">Identifiants de première connexion</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="space-y-1.5">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Prénom *</label>
+                <input type="text" formControlName="adminFirstName" class="fw-input-clean bg-white"/>
+              </div>
+              <div class="space-y-1.5">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nom *</label>
+                <input type="text" formControlName="adminLastName" class="fw-input-clean bg-white"/>
+              </div>
+              <div class="md:col-span-2 space-y-1.5">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Type de poste *</label>
+                <select formControlName="adminStaffType" class="fw-input-clean bg-white h-9 px-2">
+                  <option *ngFor="let type of staffTypes" [value]="type.code">{{ type.label }}</option>
+                </select>
+              </div>
+              <div class="md:col-span-2 space-y-1.5">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Email (Login) *</label>
+                <input type="email" formControlName="adminEmail" class="fw-input-clean bg-white"/>
+              </div>
+              <div class="space-y-1.5">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mot de passe *</label>
+                <input type="password" formControlName="adminPassword" class="fw-input-clean bg-white"/>
+              </div>
+              <div class="space-y-1.5">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Confirmation *</label>
+                <input type="password" formControlName="confirmAdminPassword" class="fw-input-clean bg-white" [class.error]="isInvalid('confirmAdminPassword')"/>
+                <p *ngIf="isInvalid('confirmAdminPassword')" class="text-[9px] font-bold text-rose-500">{{ getErrorMessage('confirmAdminPassword') }}</p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-
-      <!-- SECTION 2 : LOCALISATION -->
-      <div class="space-y-6">
-        <div class="flex items-center gap-3">
-          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] whitespace-nowrap">02. Localisation</span>
-          <div class="h-[1px] w-full bg-slate-200"></div>
-        </div>
-
-        <div class="space-y-5">
-          <!-- Adresse -->
-          <div class="space-y-2">
-            <label class="text-[12px] font-bold text-midnight ml-1">Adresse physique complète <span class="text-red-500">*</span></label>
-            <div class="relative group">
-              <div class="absolute left-4 top-1/2 -translate-y-1/2 z-10 pointer-events-none transition-colors" [class.text-primary]="!isInvalid('streetAddress')" [class.text-red-400]="isInvalid('streetAddress')">
-                <lucide-icon [name]="MapPin" class="w-5 h-5" [class.text-slate-400]="!isInvalid('streetAddress')"></lucide-icon>
-              </div>
-              <input
-                type="text"
-                formControlName="streetAddress"
-                placeholder="Rue 10 x Corniche Ouest"
-                class="w-full border border-slate-200 rounded-2xl py-4 pl-12 pr-4 text-sm font-medium text-midnight placeholder:text-slate-400 placeholder:font-normal focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all bg-white"
-                [class.is-invalid]="isInvalid('streetAddress')"
-                [class.is-valid]="isValid('streetAddress')"
-              />
-            </div>
-            <p *ngIf="isInvalid('streetAddress')" class="text-[10px] font-bold text-red-500 mt-1 ml-1 animate-in fade-in">{{ getErrorMessage('streetAddress') }}</p>
-          </div>
-
-          <!-- Ville -->
-          <div class="space-y-2">
-            <label class="text-[12px] font-bold text-midnight ml-1">Ville / Localité <span class="text-red-500">*</span></label>
-            <input
-              type="text"
-              formControlName="city"
-              placeholder="Dakar"
-              class="w-full border border-slate-200 rounded-2xl py-4 px-4 text-sm font-medium text-midnight placeholder:text-slate-400 placeholder:font-normal focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all bg-white"
-              [class.is-invalid]="isInvalid('city')"
-              [class.is-valid]="isValid('city')"
-            />
-            <p *ngIf="isInvalid('city')" class="text-[10px] font-bold text-red-500 mt-1 ml-1 animate-in fade-in">{{ getErrorMessage('city') }}</p>
-          </div>
-
-          <!-- Email -->
-          <div class="space-y-2">
-            <label class="text-[12px] font-bold text-midnight ml-1">Email institutionnel <span class="text-red-500">*</span></label>
-            <div class="relative group">
-              <div class="absolute left-4 top-1/2 -translate-y-1/2 z-10 pointer-events-none transition-colors" [class.text-primary]="!isInvalid('email')" [class.text-red-400]="isInvalid('email')">
-                <lucide-icon [name]="Mail" class="w-5 h-5" [class.text-slate-400]="!isInvalid('email')"></lucide-icon>
-              </div>
-              <input
-                type="email"
-                formControlName="email"
-                placeholder="contact@ecole.sn"
-                class="w-full border border-slate-200 rounded-2xl py-4 pl-12 pr-4 text-sm font-medium text-midnight placeholder:text-slate-400 placeholder:font-normal focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all bg-white"
-                [class.is-invalid]="isInvalid('email')"
-                [class.is-valid]="isValid('email')"
-              />
-            </div>
-            <p *ngIf="isInvalid('email')" class="text-[10px] font-bold text-red-500 mt-1 ml-1 animate-in fade-in">{{ getErrorMessage('email') }}</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- SECTION 3 : ADMIN -->
-      <div class="space-y-6">
-        <div class="flex items-center gap-3">
-          <span class="text-[10px] font-bold text-primary uppercase tracking-[0.2em] whitespace-nowrap">03. Compte Administrateur Initial</span>
-          <div class="h-[1px] w-full bg-primary/10"></div>
-        </div>
-
-        <div class="space-y-5 p-8 bg-white rounded-[24px] border border-primary/10 shadow-sm">
-          <!-- Prénom -->
-          <div class="space-y-2">
-            <label class="text-[12px] font-bold text-primary/80 ml-1">Prénom <span class="text-red-500">*</span></label>
-            <div class="relative group">
-              <div class="absolute left-4 top-1/2 -translate-y-1/2 z-10 pointer-events-none transition-colors" [class.text-primary]="!isInvalid('adminFirstName')" [class.text-red-400]="isInvalid('adminFirstName')">
-                <lucide-icon [name]="User" class="w-5 h-5 text-primary/30" [class.text-red-400]="isInvalid('adminFirstName')"></lucide-icon>
-              </div>
-              <input
-                type="text"
-                formControlName="adminFirstName"
-                placeholder="Alioune"
-                class="w-full border border-primary/20 rounded-2xl py-4 pl-12 pr-4 text-sm font-medium text-midnight placeholder:text-slate-400 placeholder:font-normal focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all bg-white"
-                [class.is-invalid]="isInvalid('adminFirstName')"
-                [class.is-valid]="isValid('adminFirstName')"
-              />
-            </div>
-            <p *ngIf="isInvalid('adminFirstName')" class="text-[10px] font-bold text-red-500 mt-1 ml-1 animate-in fade-in">{{ getErrorMessage('adminFirstName') }}</p>
-          </div>
-
-          <!-- Nom -->
-          <div class="space-y-2">
-            <label class="text-[12px] font-bold text-primary/80 ml-1">Nom de famille <span class="text-red-500">*</span></label>
-            <input
-              type="text"
-              formControlName="adminLastName"
-              placeholder="Diop"
-              class="w-full border border-primary/20 rounded-2xl py-4 px-4 text-sm font-medium text-midnight placeholder:text-slate-400 placeholder:font-normal focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all bg-white"
-              [class.is-invalid]="isInvalid('adminLastName')"
-              [class.is-valid]="isValid('adminLastName')"
-            />
-            <p *ngIf="isInvalid('adminLastName')" class="text-[10px] font-bold text-red-500 mt-1 ml-1 animate-in fade-in">{{ getErrorMessage('adminLastName') }}</p>
-          </div>
-
-          <!-- Email admin -->
-          <div class="space-y-2">
-            <label class="text-[12px] font-bold text-primary/80 ml-1">Email de connexion Admin <span class="text-red-500">*</span></label>
-            <div class="relative group">
-              <div class="absolute left-4 top-1/2 -translate-y-1/2 z-10 pointer-events-none transition-colors" [class.text-primary]="!isInvalid('adminEmail')" [class.text-red-400]="isInvalid('adminEmail')">
-                <lucide-icon [name]="Mail" class="w-5 h-5 text-primary/30" [class.text-red-400]="isInvalid('adminEmail')"></lucide-icon>
-              </div>
-              <input
-                type="email"
-                formControlName="adminEmail"
-                placeholder="admin@domaine.sn"
-                class="w-full border border-primary/20 rounded-2xl py-4 pl-12 pr-4 text-sm font-medium text-midnight placeholder:text-slate-400 placeholder:font-normal focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all bg-white"
-                [class.is-invalid]="isInvalid('adminEmail')"
-                [class.is-valid]="isValid('adminEmail')"
-              />
-            </div>
-            <p *ngIf="isInvalid('adminEmail')" class="text-[10px] font-bold text-red-500 mt-1 ml-1 animate-in fade-in">{{ getErrorMessage('adminEmail') }}</p>
-          </div>
-
-          <!-- Mot de passe -->
-          <div class="space-y-2">
-            <label class="text-[12px] font-bold text-primary/80 ml-1">Mot de passe provisoire <span class="text-red-500">*</span></label>
-            <div class="relative group">
-              <div class="absolute left-4 top-1/2 -translate-y-1/2 z-10 pointer-events-none transition-colors" [class.text-primary]="!isInvalid('adminPassword')" [class.text-red-400]="isInvalid('adminPassword')">
-                <lucide-icon [name]="Lock" class="w-5 h-5 text-primary/30" [class.text-red-400]="isInvalid('adminPassword')"></lucide-icon>
-              </div>
-              <input
-                type="password"
-                formControlName="adminPassword"
-                placeholder="Minimum 8 caractères"
-                class="w-full border border-primary/20 rounded-2xl py-4 pl-12 pr-4 text-sm font-medium text-midnight placeholder:text-slate-400 placeholder:font-normal focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all bg-white"
-                [class.is-invalid]="isInvalid('adminPassword')"
-                [class.is-valid]="isValid('adminPassword')"
-              />
-            </div>
-            <p *ngIf="isInvalid('adminPassword')" class="text-[10px] font-bold text-red-500 mt-1 ml-1 animate-in fade-in">{{ getErrorMessage('adminPassword') }}</p>
-          </div>
-        </div>
-      </div>
+      </section>
     </form>
   </div>
-
-  <!-- Footer Actions -->
-  <footer class="p-8 border-t border-slate-100 bg-white flex gap-4 shrink-0 shadow-lg">
-    <button (click)="close()" class="flex-1 px-6 py-4 bg-slate-50 text-slate-medium rounded-2xl text-sm font-bold hover:bg-slate-100 transition-all">
-      Annuler
-    </button>
-    <button
-      (click)="onSubmit()"
-      [disabled]="isLoading()"
-      class="flex-[2.5] bg-midnight hover:bg-slate-800 disabled:bg-slate-200 text-white rounded-2xl py-4 text-sm font-bold shadow-lg shadow-midnight/20 transition-all flex items-center justify-center gap-3 active:scale-[0.98]"
-    >
-      <lucide-icon *ngIf="isLoading()" [name]="Loader2" class="w-5 h-5 animate-spin"></lucide-icon>
-      <span *ngIf="!isLoading()">Confirmer l'ouverture du Tenant</span>
-    </button>
-  </footer>
-</div>
+</app-fw-form-shell>

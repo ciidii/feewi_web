@@ -1,8 +1,8 @@
-import { Component, computed, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { LucideAngularModule, User, Mail, Building2, ShieldCheck, KeyRound, Power, X } from 'lucide-angular';
-import { AuthService } from '../../../../services/auth.service';
+import {Component, computed, inject} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import {Building2, KeyRound, LucideAngularModule, Mail, Power, ShieldCheck, User, X} from 'lucide-angular';
+import {AuthService} from '../../../../services/auth.service';
 
 @Component({
   selector: 'app-profile-dialog',

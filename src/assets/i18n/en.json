@@ -1,0 +1,143 @@
+{
+  "auth": {
+    "login": {
+      "title": "Access Console",
+      "subtitle": "Enter your credentials to manage your establishment.",
+      "fields": {
+        "email": {
+          "label": "Login ID",
+          "placeholder": "your@email.com",
+          "errors": {
+            "required": "Email address is required",
+            "invalid": "Invalid email format"
+          }
+        },
+        "password": {
+          "label": "Password",
+          "placeholder": "••••••••",
+          "forgot": "Forgot password?",
+          "errors": {
+            "required": "Password is required",
+            "minlength": "Password must be at least 6 characters long"
+          }
+        },
+        "remember_me": "Stay signed in"
+      },
+      "actions": {
+        "submit": "Start Session"
+      },
+      "errors": {
+        "invalid_credentials": "Incorrect credentials. Please check your entries or contact technical support."
+      },
+      "footer": {
+        "support": "Need help? Contact support",
+        "copyright": "Feewi Platform — Version 2026.4"
+      }
+    },
+    "forgot_password": {
+      "role": "ACCOUNT SECURITY",
+      "title": "Forgot Password",
+      "subtitle": "Enter your email to receive a 6-digit verification code.",
+      "info_alert": "If you don't receive the email within 2 minutes, please check your spam folder.",
+      "fields": {
+        "email": {
+          "label": "Email Address",
+          "placeholder": "your@email.com",
+          "errors": {
+            "required": "This field is required",
+            "email": "Invalid email format"
+          }
+        }
+      },
+      "actions": {
+        "submit": "Send Code",
+        "back_to_login": "Back to login"
+      },
+      "notifications": {
+        "success_title": "Verification",
+        "success_message": "OTP code sent by email.",
+        "error_title": "Request failed"
+      }
+    },
+    "reset_password": {
+      "role": "ACCOUNT SECURITY",
+      "title": "New Password",
+      "subtitle": "Enter the code received by email and your new password.",
+      "fields": {
+        "otp": {
+          "label": "Verification Code",
+          "placeholder": "000000"
+        },
+        "password": {
+          "label": "New Password",
+          "placeholder": "••••••••"
+        },
+        "confirm_password": {
+          "label": "Confirm Password",
+          "placeholder": "••••••••"
+        },
+        "errors": {
+          "mismatch": "Passwords do not match",
+          "otp_required": "Code is required",
+          "password_too_short": "Minimum 8 characters"
+        }
+      },
+      "actions": {
+        "submit": "Reset Password",
+        "back_to_login": "Back to login"
+      },
+      "notifications": {
+        "success_title": "Success",
+        "success_message": "Your password has been successfully updated.",
+        "error_title": "Update error"
+      }
+    }
+  },
+  "global": {
+    "navigation": {
+      "rail_header": "Navigation"
+    },
+    "languages": {
+      "fr": "French",
+      "en": "English"
+    }
+  },
+  "admissions": {
+    "dashboard": {
+      "header": {
+        "title": "Admissions Management",
+        "description": "Strategic decision-making and operational recruitment tracking."
+      },
+      "kpi": {
+        "total": {
+          "label": "Applications",
+          "hint": "Open dossiers"
+        },
+        "conversion": {
+          "label": "Admission Rate",
+          "hint": "Accepted candidates"
+        },
+        "new": {
+          "label": "Acquisition Mix",
+          "hint": "New vs Re-enrollments"
+        },
+        "saturation": {
+          "label": "Available Slots",
+          "hint": "Saturated levels"
+        }
+      },
+      "actions": {
+        "title": "Operational Queue",
+        "subtitle": "Priority administrative tasks for the secretariat.",
+        "verify": "Verifications",
+        "evaluate": "Assessments",
+        "incomplete": "Dossiers to follow-up",
+        "decision": "Management Decisions"
+      },
+      "analysis": {
+        "pipeline_title": "Conversion Pipeline",
+        "capacity_title": "Occupancy Rate by Level"
+      }
+    }
+  }
+}

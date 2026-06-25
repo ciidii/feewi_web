@@ -1,16 +1,19 @@
+@use '../../../../../../styles/tokens' as *;
+
 :host {
   display: block;
+  height: 100%;
+  background: var(--fw-ice);
 }
 
-::ng-deep .staff-form-dialog {
-  mat-dialog-container {
-    padding: 0 !important;
-    border-radius: 24px !important;
-    overflow: hidden !important;
-  }
+.list-page-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
 
-  .mat-mdc-dialog-surface {
-    border-radius: 24px !important;
-    background: white !important;
-  }
+.list-container-integrated {
+  flex: 1;
+  overflow: hidden;
 }

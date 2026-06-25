@@ -1,0 +1,86 @@
+<app-fw-form-shell
+  [title]="isEditMode ? 'Modifier le Niveau' : 'Ajouter un Niveau'"
+  [subtitle]="isEditMode ? 'Mise à jour des paramètres de l\'échelon pédagogique.' : 'Définissez un nouvel échelon pédagogique.'"
+  [icon]="GraduationCap"
+  statusLabel="Référentiel"
+  [saveLabel]="isEditMode ? 'Enregistrer' : 'Créer le niveau'"
+  [isLoading]="isLoading()"
+  [canSave]="levelForm.valid"
+  (save)="onSave()"
+  (cancel)="onCancel()"
+>
+  <form [formGroup]="levelForm" class="space-y-10 py-2">
+
+    <!-- 1. Identification -->
+    <div class="space-y-6">
+      <header class="section-header">
+        <lucide-icon [name]="Type" [size]="14"></lucide-icon>
+        <span class="label">Échelon Pédagogique</span>
+      </header>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Nom du Niveau -->
+        <div class="fw-field">
+          <label class="fw-label">Dénomination</label>
+          <div class="fw-input-wrapper">
+            <input
+              type="text"
+              formControlName="name"
+              placeholder="Ex: CM2 ou 6ème"
+              class="fw-input"
+              [class.error]="isInvalid('name')"
+            />
+          </div>
+        </div>
+
+        <!-- Rang de progression -->
+        <div class="fw-field">
+          <label class="fw-label">Rang de progression</label>
+          <div class="fw-input-wrapper">
+            <input
+              type="number"
+              formControlName="rank"
+              class="fw-input"
+              [class.error]="isInvalid('rank')"
+            />
+          </div>
+          <p class="fw-hint">Définit l'ordre de passage d'un niveau à l'autre.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Organisation -->
+    <div class="space-y-6">
+      <header class="section-header">
+        <lucide-icon [name]="Layers" [size]="14"></lucide-icon>
+        <span class="label">Rattachement Structurel</span>
+      </header>
+
+      <div class="fw-field">
+        <label class="fw-label">Cycle Parent</label>
+        <div class="fw-input-wrapper">
+          <mat-select
+            formControlName="cycleId"
+            placeholder="Sélectionner le cycle"
+            class="fw-input"
+            [class.error]="isInvalid('cycleId')"
+          >
+            <mat-option *ngFor="let cycle of cycles()" [value]="cycle.id">
+              {{ cycle.customName || cycle.systemName }}
+            </mat-option>
+          </mat-select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info Box Minimalist -->
+    <div class="p-4 bg-surface-sunken rounded-xl border border-border flex items-start gap-3">
+      <lucide-icon [name]="Info" [size]="16" class="text-text-tertiary mt-0.5"></lucide-icon>
+      <p class="text-[11px] text-text-secondary leading-relaxed font-medium">
+        Les élèves sont promus d'un rang à l'autre lors du basculement d'année académique.
+      </p>
+    </div>
+
+  </form>
+</app-fw-form-shell>
+

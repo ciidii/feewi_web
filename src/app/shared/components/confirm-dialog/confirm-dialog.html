@@ -1,0 +1,24 @@
+<app-fw-modal-shell 
+  [title]="data.title" 
+  (close)="onCancel()"
+>
+  <div class="confirm-body">
+    <div class="icon-indicator" [ngClass]="data.type || 'info'">
+      <lucide-icon [name]="getIcon()" [size]="32"></lucide-icon>
+    </div>
+    
+    <p class="confirm-message">{{ data.message }}</p>
+  </div>
+
+  <div footer-left>
+    <app-fw-button [variant]="'ghost'" (click)="onCancel()">
+      {{ data.cancelLabel || 'Annuler' }}
+    </app-fw-button>
+  </div>
+
+  <div footer-right>
+    <app-fw-button [variant]="getButtonVariant()" (click)="onConfirm()">
+      {{ data.confirmLabel || 'Confirmer' }}
+    </app-fw-button>
+  </div>
+</app-fw-modal-shell>

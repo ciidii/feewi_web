@@ -1,0 +1,133 @@
+@use "../../../../../../styles/tokens" as *;
+
+:host {
+  display: block;
+  height: 100vh;
+  background: var(--fw-ice);
+  overflow: hidden;
+}
+
+.assignment-dashboard-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  height: calc(100vh - 120px);
+  background: white;
+  border-top: 1px solid var(--fw-border-subtle);
+}
+
+// ─── WAITING AREA (LEFT) ───────────────────────────────────────────────────
+.waiting-area {
+  background: var(--fw-surface-sunken);
+  border-right: 1px solid var(--fw-border-subtle);
+  padding: 1.5rem 0 0;
+
+  .section-header-minimal {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .label {
+      font-family: var(--fw-font-ui);
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--fw-text-primary);
+    }
+
+    .badge-technical {
+      background: var(--fw-primary);
+      color: white;
+      padding: 1px 6px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 800;
+    }
+  }
+}
+
+.student-assignment-card {
+  background: white;
+  border: 1.5px solid var(--fw-border-subtle);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  cursor: grab;
+  box-shadow: var(--fw-shadow-sm);
+
+  &:active { cursor: grabbing; }
+
+  &.cdk-drag-preview {
+    box-shadow: var(--fw-shadow-xl);
+    border-color: var(--fw-primary);
+    opacity: 0.9;
+  }
+}
+
+.card-placeholder {
+  background: var(--fw-primary-alpha);
+  border: 2px dashed var(--fw-primary);
+  border-radius: 12px;
+  min-height: 52px;
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.cdk-drop-list-dragging .student-assignment-card:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+// ─── CLASSES AREA (RIGHT) ──────────────────────────────────────────────────
+.classes-area {
+  background: white;
+
+  .section-header-minimal {
+    .label {
+      font-family: var(--fw-font-ui);
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--fw-text-primary);
+    }
+  }
+}
+
+.class-placement-card {
+  .class-name { font-family: var(--fw-font-display); }
+}
+
+.divider-v {
+  width: 1px;
+  height: 24px;
+  background: var(--fw-border-subtle);
+  margin: 0 0.5rem;
+}
+
+/* CUSTOM SCROLLBAR */
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: var(--fw-border-strong); border-radius: 10px; }
+
+/* VUE DIRECTION : SUPERVISION DES AFFECTATIONS */
+.supervision-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.supervision-card {
+  background: var(--fw-surface-card);
+  border: 1px solid var(--fw-border-subtle);
+  border-radius: 1rem;
+  padding: 1.25rem;
+
+  .track {
+    background: var(--fw-surface-sunken);
+
+    .fill {
+      background: var(--fw-midnight);
+      transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+
+      &.warning { background: var(--fw-warning); }
+      &.danger { background: var(--fw-error); }
+    }
+  }
+}

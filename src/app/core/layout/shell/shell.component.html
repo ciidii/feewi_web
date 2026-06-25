@@ -1,18 +1,21 @@
-<div class="flex flex-col h-screen overflow-hidden bg-white selection:bg-primary selection:text-white antialiased">
-  <!-- Header Supérieur -->
-  <app-header></app-header>
+<div class="shell-layout selection:bg-primary selection:text-white antialiased">
+  
+  <!-- Rail de Navigation (Full Height) -->
+  <app-rail></app-rail>
 
-  <!-- Corps de l'application -->
-  <div class="flex-1 flex overflow-hidden">
-    <!-- Rail de Navigation (Extrême Gauche) -->
-    <app-rail></app-rail>
+  <!-- Sidebar du Module (Full Height) -->
+  <app-sidebar></app-sidebar>
 
-    <!-- Sidebar du Module (Collapsible) -->
-    <app-sidebar></app-sidebar>
+  <div class="shell-container">
+    <!-- Header Sup├®rieur (Slate 50) -->
+    <app-header></app-header>
 
     <!-- Zone de Contenu Principale -->
-    <main class="flex-1 overflow-y-auto bg-ice/50 relative">
-      <div class="p-8 max-w-[1600px] mx-auto">
+    <main class="shell-main relative">
+      <!-- Loader localis├® uniquement sur la zone de contenu -->
+      <fw-page-progress *ngIf="loadingService.isLoading() && loadingService.context() === 'page'"></fw-page-progress>
+
+      <div class="content-wrapper">
         <router-outlet></router-outlet>
       </div>
     </main>

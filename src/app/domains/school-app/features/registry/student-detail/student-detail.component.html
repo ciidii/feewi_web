@@ -1,0 +1,253 @@
+<app-fw-page-shell
+  [backLink]="['/admin/registry/students']"
+  density="compact"
+>
+  <!-- STICKY HEADER ACTIONS -->
+  <div actions class="header-action-hub" *ngIf="student(); let s">
+
+    <!-- Identité étudiant (List Item style) -->
+    <div class="header-student-identity">
+      <div class="stu-avatar">{{ s.firstName.charAt(0) }}</div>
+      <div class="stu-info">
+        <span class="stu-name">{{ fullName() }}</span>
+        <span class="stu-ref">#{{ s.registrationNumber }}</span>
+      </div>
+    </div>
+
+    <div class="divider-v"></div>
+
+    <!-- Status -->
+    <div class="flex items-center gap-3">
+      <app-fw-badge [status]="s.status" size="sm"></app-fw-badge>
+      <span class="text-[10px] font-black uppercase text-text-tertiary tracking-widest">{{ currentLevelName() }}</span>
+    </div>
+
+    <!-- Actions primaires -->
+    <div class="action-buttons-group">
+      <app-fw-button variant="tertiary" size="sm" [icon]="Printer" title="Imprimer Fiche"></app-fw-button>
+      
+      <div class="divider-v"></div>
+
+      <app-fw-button variant="primary" size="sm" [icon]="Edit" [routerLink]="['/admin/registry/students', s.id, 'edit']">
+        Modifier le dossier
+      </app-fw-button>
+
+      <app-fw-button
+        [variant]="s.status === 'ACTIVE' ? 'danger' : 'primary'"
+        size="sm"
+        [icon]="s.status === 'ACTIVE' ? XCircle : CheckCircle"
+        [loading]="isActionLoading()"
+        (click)="toggleStatus()"
+      >
+        {{ s.status === 'ACTIVE' ? 'Suspendre' : 'Réactiver' }}
+      </app-fw-button>
+
+      <app-fw-button
+        *ngIf="canArchive()"
+        variant="danger"
+        size="sm"
+        [icon]="Archive"
+        [loading]="isActionLoading()"
+        (click)="archiveStudent()"
+      >
+        Archiver le dossier
+      </app-fw-button>
+    </div>
+  </div>
+
+  <!-- MAIN LAYOUT -->
+  <div class="decision-hub-layout animate-in fade-in duration-700" 
+       [class.is-loading]="isActionLoading()"
+       *ngIf="student(); let s; else skeletons">
+
+    <!-- 🚀 HYBRID LOADING FEEDBACK -->
+    <fw-block-loader *ngIf="isActionLoading()" [center]="true" message="Mise à jour..."></fw-block-loader>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="pillar-content-area">
+      <div class="pillar-scroll-wrapper custom-scrollbar">
+
+        <!-- 👤 IDENTITÉ & ÉTAT CIVIL -->
+        <section class="fw-standard-card">
+          <header class="card-header">
+            <div class="header-left">
+              <lucide-icon [name]="User" [size]="16" class="header-icon"></lucide-icon>
+              <div class="pillar-title-group">
+                <h3>Identité & État Civil</h3>
+                <p>Informations officielles et nationalité</p>
+              </div>
+            </div>
+          </header>
+          <div class="card-content">
+            <div class="info-grid-dense">
+              <div class="info-field">
+                <label>Prénoms</label>
+                <span class="field-value">{{ s.firstName }}</span>
+              </div>
+              <div class="info-field">
+                <label>Nom de famille</label>
+                <span class="field-value">{{ s.lastName }}</span>
+              </div>
+              <div class="info-field">
+                <label>Genre</label>
+                <span class="field-value">{{ s.gender === 'M' ? 'Masculin' : 'Féminin' }}</span>
+              </div>
+              <div class="info-field">
+                <label>Date de naissance</label>
+                <span class="field-value">{{ s.birthDate | fwDate:'full' }}</span>
+              </div>
+              <div class="info-field">
+                <label>Lieu de naissance</label>
+                <span class="field-value">{{ s.customFields?.['birth_place'] || 'Non renseigné' }}</span>
+              </div>
+              <div class="info-field">
+                <label>Nationalité</label>
+                <span class="field-value">{{ s.customFields?.['nationality'] || 'Non renseignée' }}</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 👨‍👩‍👧 RESPONSABLES LÉGAUX -->
+        <section class="fw-standard-card">
+          <header class="card-header">
+            <div class="header-left">
+              <lucide-icon [name]="Users" [size]="16" class="header-icon"></lucide-icon>
+              <div class="pillar-title-group">
+                <h3>Responsables Légaux</h3>
+                <p>Contacts et tuteurs rattachés</p>
+              </div>
+            </div>
+          </header>
+          <div class="card-content">
+            <div class="space-y-4">
+              @for (guardian of s.guardians; track guardian.guardianEmail) {
+                <div class="p-4 rounded-xl border border-border-subtle bg-surface-sunken flex items-center justify-between group hover:bg-white hover:border-primary transition-all">
+                  <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full bg-midnight text-white flex items-center justify-center font-bold text-sm">
+                      {{ guardian.guardianEmail.charAt(0).toUpperCase() }}
+                    </div>
+                    <div>
+                      <p class="text-sm font-bold text-midnight">{{ guardian.guardianEmail }}</p>
+                      <p class="text-[10px] text-text-tertiary uppercase font-black tracking-widest">
+                        {{ getRelationLabel(guardian.relation) }}
+                        @if (guardian.financialResponsible) {
+                          <span class="text-primary ml-2">• Responsable Financier</span>
+                        }
+                      </p>
+                    </div>
+                  </div>
+                  <app-fw-button variant="tertiary" size="sm" [icon]="Mail"></app-fw-button>
+                </div>
+              } @empty {
+                <div class="py-12 text-center text-text-tertiary italic">
+                  Aucun responsable enregistré.
+                </div>
+              }
+            </div>
+          </div>
+        </section>
+
+        <!-- ✨ INFORMATIONS SPÉCIFIQUES -->
+        <section class="fw-standard-card" *ngIf="s.customFields && (s.customFields | keyvalue).length > 0">
+          <header class="card-header">
+            <div class="header-left">
+              <lucide-icon [name]="Info" [size]="16" class="header-icon"></lucide-icon>
+              <div class="pillar-title-group">
+                <h3>Informations Spécifiques</h3>
+                <p>Champs personnalisés de l'établissement</p>
+              </div>
+            </div>
+          </header>
+          <div class="card-content">
+            <div class="info-grid-dense">
+              @for (field of s.customFields | keyvalue; track field.key) {
+                <div class="info-field" *ngIf="field.key !== 'birth_place' && field.key !== 'nationality'">
+                  <label>{{ field.key | camelToLabel }}</label>
+                  <span class="field-value">{{ field.value || '-' }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+    <!-- RIGHT SIDEBAR (Sticky Tools) -->
+    <aside class="conformity-sidebar">
+      
+      <!-- Urgence & Santé -->
+      <section class="sidebar-card">
+        <div class="card-header">
+          <lucide-icon [name]="Stethoscope" [size]="16" class="text-rose-500"></lucide-icon>
+          <h4>Santé & Urgence</h4>
+        </div>
+        <div class="space-y-4">
+          @if (s.emergencyContact) {
+            <div class="p-4 bg-rose-50/30 rounded-xl border border-rose-100">
+              <p class="text-[9px] font-black text-rose-600 uppercase tracking-widest mb-2">Contact d'urgence</p>
+              <p class="text-sm font-bold text-midnight">{{ s.emergencyContact.name }}</p>
+              <p class="text-[10px] text-text-tertiary font-medium mb-3">{{ s.emergencyContact.relation }}</p>
+              <app-fw-button variant="danger" size="sm" class="w-full" [icon]="Phone">
+                {{ s.emergencyContact.phone }}
+              </app-fw-button>
+            </div>
+          }
+          
+          <div class="grid grid-cols-2 gap-3">
+            <div class="p-3 bg-white rounded-xl border border-border text-center">
+              <p class="text-[8px] font-black text-text-tertiary uppercase mb-1">Gr. Sanguin</p>
+              <p class="text-xs font-bold text-midnight">{{ s.bloodGroup || '?' }}</p>
+            </div>
+            <div class="p-3 bg-white rounded-xl border border-border text-center">
+              <p class="text-[8px] font-black text-text-tertiary uppercase mb-1">Allergies</p>
+              <p class="text-xs font-bold text-rose-600 truncate">{{ s.criticalAllergies || 'Aucune' }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Historique Scolaire -->
+      <section class="sidebar-card">
+        <div class="card-header">
+          <lucide-icon [name]="HistoryIcon" [size]="16"></lucide-icon>
+          <h4>Parcours Scolaire</h4>
+        </div>
+        <div class="history-timeline">
+          @for (h of s.history; track h.academicYearId) {
+            <div class="history-item" [class.active]="$first">
+              <div class="dot-marker">
+                <lucide-icon [name]="GraduationCap" [size]="12"></lucide-icon>
+              </div>
+              <div class="history-content">
+                <p class="h-year">Session {{ h.academicYearId }}</p>
+                <p class="h-level">{{ h.levelName || 'Niveau ' + h.levelId }}</p>
+                <div class="h-result">
+                  <app-fw-badge 
+                    [status]="h.result === 'ADMITTED' || h.result === 'PROMOTED' ? 'VALIDATED' : 'REJECTED'" 
+                    [labelOverride]="h.result"
+                    size="xs">
+                  </app-fw-badge>
+                </div>
+              </div>
+            </div>
+          } @empty {
+            <p class="text-xs text-text-tertiary italic text-center py-4">Aucun historique.</p>
+          }
+        </div>
+      </section>
+    </aside>
+
+  </div>
+
+</app-fw-page-shell>
+
+<ng-template #skeletons>
+  <div class="list-page-content">
+    <div class="skeleton-layout">
+       <div class="skeleton-content h-[200px] rounded-2xl mb-6"></div>
+       <div class="skeleton-content h-[400px] rounded-2xl"></div>
+    </div>
+  </div>
+</ng-template>

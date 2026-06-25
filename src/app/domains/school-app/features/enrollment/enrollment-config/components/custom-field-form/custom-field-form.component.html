@@ -1,0 +1,163 @@
+<app-fw-form-shell
+  [title]="dialogTitle"
+  [subtitle]="dialogSubtitle"
+  [icon]="MessageSquare"
+  [saveLabel]="dialogSaveLabel"
+  cancelLabel="Annuler"
+  [canSave]="fieldForm.valid"
+  (save)="onSave()"
+  (cancel)="onCancel()"
+>
+  <!-- Barre de navigation interne -->
+  <div class="-mx-6 -mt-6 mb-6">
+    <app-fw-tabs
+      [tabs]="formTabs"
+      [activeTabId]="activeTab()"
+      (tabChange)="onTabChange($event)"
+      density="compact"
+    ></app-fw-tabs>
+  </div>
+
+  <form [formGroup]="fieldForm" class="space-y-6">
+
+    <!-- ONGLET : QUESTION (BASIQUE) -->
+    <div *ngIf="activeTab() === 'basic'" class="space-y-6 animate-in fade-in">
+      <div class="space-y-2">
+        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Libellé de la question</label>
+        <div class="relative group">
+          <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors">
+            <lucide-icon [name]="Type" class="w-4.5 h-4.5"></lucide-icon>
+          </div>
+          <input
+            type="text"
+            formControlName="label"
+            placeholder="Ex: Allergies alimentaires de l'enfant ?"
+            class="fw-input"
+            [class.error]="isInvalid('label')"
+          />
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Type de réponse</label>
+        <select formControlName="type" class="fw-input">
+          <option value="TEXT">Texte court</option>
+          <option value="TEXTAREA">Paragraphe (Texte long)</option>
+          <option value="NUMBER">Nombre</option>
+          <option value="DATE">Date</option>
+          <option value="BOOLEAN">Case à cocher (Oui/Non)</option>
+          <option value="SELECT">Liste déroulante</option>
+        </select>
+      </div>
+
+      <div class="p-4 bg-blue-50/50 rounded-xl border border-blue-100 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <lucide-icon [name]="Info" class="w-4 h-4 text-blue-500"></lucide-icon>
+          <span class="text-sm font-semibold text-slate-700">Rendre cette réponse obligatoire</span>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" formControlName="mandatory" class="sr-only peer">
+          <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+        </label>
+      </div>
+
+      <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <lucide-icon [name]="Eye" class="w-4 h-4 text-slate-400"></lucide-icon>
+          <div>
+            <span class="text-sm font-semibold text-slate-700 block">Masquer ce champ</span>
+            <span class="text-xs text-slate-400">Le champ est conservé mais non affiché au parent.</span>
+          </div>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" formControlName="hidden" class="sr-only peer">
+          <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-slate-600"></div>
+        </label>
+      </div>
+    </div>
+
+    <!-- ONGLET : OPTIONS & AIDE -->
+    <div *ngIf="activeTab() === 'options'" class="space-y-6 animate-in fade-in">
+
+      <!-- Placeholder -->
+      <div class="space-y-2">
+        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Placeholder / Message d'aide</label>
+        <div class="relative group">
+          <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-slate-400 group-focus-within:text-primary transition-colors">
+            <lucide-icon [name]="HelpCircle" class="w-4.5 h-4.5"></lucide-icon>
+          </div>
+          <input
+            type="text"
+            formControlName="placeholder"
+            placeholder="Ex: Précisez ici les détails si nécessaire..."
+            class="fw-input"
+          />
+        </div>
+        <p class="text-[10px] text-slate-400 italic ml-1">S'affiche à l'intérieur du champ quand il est vide.</p>
+      </div>
+
+      <!-- Gestion des options (SELECT uniquement) -->
+      <div *ngIf="fieldForm.get('type')?.value === 'SELECT'" class="space-y-4">
+        <div class="p-4 bg-orange-50 rounded-xl border border-orange-100">
+          <div class="flex items-center gap-2 mb-3">
+            <lucide-icon [name]="Settings" class="w-4 h-4 text-orange-600"></lucide-icon>
+            <span class="text-xs font-bold text-orange-800 uppercase tracking-wider">Choix de la liste</span>
+          </div>
+
+          <div class="flex gap-2">
+            <input type="text" [(ngModel)]="optionInput" [ngModelOptions]="{standalone: true}"
+                   placeholder="Ex: SÉNÉGALAISE" class="fw-input bg-white h-10 text-sm" (keyup.enter)="addOption()">
+            <button type="button" class="w-10 h-10 rounded-lg bg-orange-600 text-white flex items-center justify-center shrink-0 hover:bg-orange-700 transition-colors"
+                    (click)="addOption()" [disabled]="!optionInput.trim()">
+              <lucide-icon [name]="Plus" [size]="16"></lucide-icon>
+            </button>
+          </div>
+
+          <div class="flex flex-wrap gap-2 mt-4" *ngIf="fieldForm.get('options')?.value.length > 0">
+            <div *ngFor="let opt of fieldForm.get('options')?.value"
+                 class="flex items-center gap-2 bg-white border border-orange-200 px-3 py-1.5 rounded-full text-xs font-bold text-orange-700 shadow-sm">
+              <span>{{ opt }}</span>
+              <button type="button" (click)="removeOption(opt)" class="hover:text-red-500 transition-colors">
+                <lucide-icon [name]="X" [size]="12"></lucide-icon>
+              </button>
+            </div>
+          </div>
+
+          <div *ngIf="fieldForm.get('options')?.value.length === 0" class="text-[11px] text-orange-400 italic text-center py-2">
+            Ajoutez au moins 2 options pour valider la liste.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ONGLET : APERÇU -->
+    <div *ngIf="activeTab() === 'preview'" class="space-y-6 animate-in fade-in">
+      <div class="p-6 bg-slate-50 rounded-2xl border border-dashed border-slate-300">
+        <div class="space-y-3">
+          <label class="block text-sm font-bold text-slate-700">
+            {{ fieldForm.get('label')?.value || 'Votre question ici...' }}
+            <span *ngIf="fieldForm.get('mandatory')?.value" class="text-primary ml-1">*</span>
+          </label>
+
+          <!-- Rendu dynamique selon type -->
+          <ng-container [ngSwitch]="fieldForm.get('type')?.value">
+            <input *ngSwitchCase="'TEXT'" type="text" class="fw-input bg-white pointer-events-none" [placeholder]="fieldForm.get('placeholder')?.value || ''">
+            <textarea *ngSwitchCase="'TEXTAREA'" class="fw-input bg-white h-24 pointer-events-none" [placeholder]="fieldForm.get('placeholder')?.value || ''"></textarea>
+            <input *ngSwitchCase="'NUMBER'" type="number" class="fw-input bg-white pointer-events-none">
+            <input *ngSwitchCase="'DATE'" type="date" class="fw-input bg-white pointer-events-none">
+            <div *ngSwitchCase="'BOOLEAN'" class="flex items-center gap-2">
+              <div class="w-5 h-5 rounded border border-slate-300 bg-white"></div>
+              <span class="text-sm text-slate-600">Case à cocher</span>
+            </div>
+            <select *ngSwitchCase="'SELECT'" class="fw-input bg-white pointer-events-none">
+              <option *ngIf="fieldForm.get('options')?.value.length === 0">Aucune option définie...</option>
+              <option *ngFor="let opt of fieldForm.get('options')?.value">{{ opt }}</option>
+            </select>
+          </ng-container>
+
+          <p class="text-[10px] text-slate-400">Rendu simulé (Portail Parent)</p>
+        </div>
+      </div>
+    </div>
+  </form>
+</app-fw-form-shell>

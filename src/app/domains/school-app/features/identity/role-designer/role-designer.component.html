@@ -1,273 +1,172 @@
-<!-- Loader élégant -->
-<div *ngIf="isLoading()" class="fixed inset-0 z-50 bg-white/80 backdrop-blur-sm flex items-center justify-center">
-  <div class="flex flex-col items-center gap-5 p-8 bg-white rounded-2xl shadow-2xl">
-    <div class="relative">
-      <div class="w-16 h-16 border-4 border-primary-100 border-t-primary-600 rounded-full animate-spin"></div>
-      <div class="absolute inset-0 flex items-center justify-center">
-        <lucide-icon [name]="ShieldCheck" class="w-6 h-6 text-primary-600 animate-pulse"></lucide-icon>
+<div class="config-feature-root">
+
+  <!-- SIDEBAR DES RÔLES (Fixe) -->
+  <aside class="scope-sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-brand-icon-alt">
+        <lucide-icon [name]="ShieldCheck" [size]="14"></lucide-icon>
+      </div>
+      <div class="sidebar-brand-text">
+        <span class="sidebar-brand-name">Contrôle d'Accès</span>
+        <span class="sidebar-brand-year">Gouvernance SaaS</span>
       </div>
     </div>
-    <div class="text-center">
-      <span class="text-sm font-bold text-slate-700">Chargement de la matrice</span>
-      <p class="text-[10px] text-slate-500 mt-1">Rôles et permissions</p>
-    </div>
-  </div>
-</div>
 
-<div *ngIf="selectedRole()" class="space-y-8 animate-in fade-in duration-500 max-w-[1600px] mx-auto p-6">
-
-  <!-- HEADER SIMPLE ET ÉLÉGANT -->
-  <header class="flex justify-between items-end mb-8">
-    <div class="space-y-1">
-      <h1 class="text-3xl font-display font-bold text-midnight tracking-tight">Rôles & Permissions</h1>
-      <p class="text-sm text-slate-medium font-medium flex items-center gap-2">
-        <lucide-icon [name]="ShieldCheck" class="w-4 h-4 text-primary"></lucide-icon>
-        Matrice de contrôle d'accès • Modifications en temps réel
-      </p>
+    <div class="nav-section-title">
+      Profils Disponibles
+      <span class="level-count">{{ roles().length }}</span>
     </div>
 
-    <div class="flex gap-3">
-      <button
-        (click)="savePermissions()"
-        [disabled]="isSaving() || isLoading()"
-        class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-[13px] font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 active:scale-95 disabled:opacity-50 disabled:shadow-none"
-      >
-        <lucide-icon *ngIf="isSaving()" [name]="Loader2" class="w-4 h-4 animate-spin"></lucide-icon>
-        <lucide-icon *ngIf="!isSaving()" [name]="Save" class="w-4 h-4"></lucide-icon>
-        {{ isSaving() ? 'Enregistrement...' : 'Publier les changements' }}
-      </button>
-
-      <button
-        (click)="openAddRoleForm()"
-        class="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-[13px] font-bold hover:bg-slate-50 transition-all shadow-sm active:scale-95"
-      >
-        <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
-        Nouveau rôle
-      </button>
-    </div>
-  </header>
-
-  <!-- GRILLE PRINCIPALE -->
-  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-    <!-- COLONNE GAUCHE : LISTE DES RÔLES -->
-    <aside class="lg:col-span-3 space-y-4">
-      <!-- En-tête de colonne -->
-      <div class="flex items-center justify-between px-3">
-        <div class="flex items-center gap-2">
-          <div class="w-1.5 h-1.5 rounded-full bg-primary-500"></div>
-          <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Profils disponibles</span>
+    <div class="levels-scroll custom-scrollbar">
+      <div *ngIf="isInitialLoading()" class="space-y-1">
+        <div *ngFor="let i of [1,2,3,4,5]" class="flex items-center gap-3 px-3 py-2">
+          <fw-skeleton shape="rect" width="24px" height="24px" radius="6px"></fw-skeleton>
+          <div class="flex-1 space-y-1.5">
+            <fw-skeleton width="60%" height="8px"></fw-skeleton>
+            <fw-skeleton width="40%" height="6px"></fw-skeleton>
+          </div>
         </div>
-        <button
-          (click)="openAddRoleForm()"
-          class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-primary-50 text-primary-600 transition-all group"
-          title="Ajouter un rôle"
-        >
-          <lucide-icon [name]="Plus" class="w-4 h-4 group-hover:scale-110 transition-transform"></lucide-icon>
-        </button>
       </div>
 
-      <!-- Liste des rôles -->
-      <div class="space-y-2">
-        <div
+      <ng-container *ngIf="!isInitialLoading()">
+        <button
           *ngFor="let role of roles()"
+          class="scope-item"
+          [class.active]="selectedRoleId() === role.id"
           (click)="selectRole(role.id)"
-          class="group relative flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all duration-200"
-          [class.border-slate-200]="selectedRole()?.id !== role.id"
-          [class.bg-white]="selectedRole()?.id !== role.id"
-          [class.border-primary-500]="selectedRole()?.id === role.id"
-          [class.bg-primary-50]="selectedRole()?.id === role.id"
-          [class.shadow-md]="selectedRole()?.id === role.id"
         >
-          <!-- Indicateur de sélection -->
-          <div *ngIf="selectedRole()?.id === role.id"
-               class="absolute -left-[9px] top-1/2 -translate-y-1/2 w-1 h-8 bg-primary-500 rounded-full">
+          <div class="scope-icon">
+            <lucide-icon [name]="role.icon" [size]="14"></lucide-icon>
           </div>
-
-          <div class="flex items-center gap-3 min-w-0">
-            <!-- Avatar du rôle avec dégradé -->
-            <div class="relative">
-              <div class="w-10 h-10 rounded-xl flex items-center justify-center transition-all"
-                   [class.bg-gradient-to-br]="selectedRole()?.id === role.id"
-                   [class.from-primary-500]="selectedRole()?.id === role.id"
-                   [class.to-primary-600]="selectedRole()?.id === role.id"
-                   [class.bg-slate-100]="selectedRole()?.id !== role.id"
-                   [class.text-white]="selectedRole()?.id === role.id"
-                   [class.text-primary-600]="selectedRole()?.id !== role.id"
-              >
-                <lucide-icon [name]="role.icon" class="w-5 h-5"></lucide-icon>
-              </div>
-              <!-- Badge système si nécessaire -->
-              <div *ngIf="role.rawData?.isSystem"
-                   class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-amber-500 rounded-full border-2 border-white"
-                   title="Rôle système"></div>
-            </div>
-
-            <div class="flex flex-col min-w-0">
-              <span class="text-sm font-bold truncate"
-                    [class.text-slate-900]="selectedRole()?.id !== role.id"
-                    [class.text-primary-700]="selectedRole()?.id === role.id">
-                {{ role.name }}
-              </span>
-              <div class="flex items-center gap-2 mt-0.5">
-                <span class="text-[10px] font-medium"
-                      [class.text-slate-500]="selectedRole()?.id !== role.id"
-                      [class.text-primary-500]="selectedRole()?.id === role.id">
-                  {{ role.memberCount }} membre(s)
-                </span>
-                <span *ngIf="role.rawData?.isSystem"
-                      class="text-[8px] px-1.5 py-0.5 bg-slate-200 text-slate-600 rounded-full">
-                  Système
-                </span>
-              </div>
-            </div>
+          <div class="scope-label-wrap">
+            <span class="scope-name">{{ role.name }}</span>
+            <span class="scope-sub">{{ role.memberCount }} membre(s)</span>
           </div>
-
-          <!-- Flèche d'indication -->
-          <lucide-icon [name]="ChevronRight"
-                       class="w-4 h-4 transition-all"
-                       [class.text-primary-500]="selectedRole()?.id === role.id"
-                       [class.text-slate-300]="selectedRole()?.id !== role.id"
-                       [class.translate-x-0.5]="selectedRole()?.id === role.id">
-          </lucide-icon>
-        </div>
-      </div>
-
-      <!-- Carte récapitulative -->
-      <div class="mt-6 p-4 bg-gradient-to-br from-slate-50 to-white rounded-xl border border-slate-200">
-        <div class="flex items-center gap-3 text-xs text-slate-600">
-          <lucide-icon [name]="Info" class="w-4 h-4 text-slate-400"></lucide-icon>
-          <span>Les permissions sont appliquées immédiatement après publication.</span>
-        </div>
-      </div>
-    </aside>
-
-    <!-- COLONNE DROITE : MATRICE DES PERMISSIONS -->
-    <main class="lg:col-span-9">
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-
-        <!-- En-tête du rôle sélectionné -->
-        <div class="p-6 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
-          <div class="flex items-center gap-4">
-            <div class="w-14 h-14 bg-gradient-to-br from-primary-100 to-primary-50 rounded-xl flex items-center justify-center border-2 border-white shadow-sm">
-              <lucide-icon [name]="selectedRole()?.icon || Shield" class="w-7 h-7 text-primary-600"></lucide-icon>
-            </div>
-            <div class="flex-1">
-              <div class="flex items-center gap-3">
-                <h2 class="text-xl font-bold text-slate-900">{{ selectedRole()?.name }}</h2>
-                <span class="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-[10px] font-medium">
-                  ID: {{ selectedRole()?.id }}
-                </span>
-              </div>
-              <div class="flex items-center gap-4 mt-2">
-                <div class="flex items-center gap-2 text-xs text-slate-500">
-                  <lucide-icon [name]="Users" class="w-3.5 h-3.5"></lucide-icon>
-                  <span>{{ selectedRole()?.memberCount }} membres affectés</span>
-                </div>
-                <div class="w-px h-3 bg-slate-200"></div>
-                <div class="flex items-center gap-2 text-xs text-slate-500">
-                  <lucide-icon [name]="Key" class="w-3.5 h-3.5"></lucide-icon>
-                  <span>{{ getTotalPermissions() }} permissions</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Indicateur de modifications non sauvegardées -->
-            <div *ngIf="hasUnsavedChanges()"
-                 class="px-3 py-1.5 bg-amber-50 text-amber-700 rounded-lg text-xs font-medium border border-amber-200 flex items-center gap-1.5">
-              <span class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse"></span>
-              Modifications en attente
-            </div>
-          </div>
-        </div>
-
-        <!-- MATRICE DES PERMISSIONS -->
-        <div class="divide-y divide-slate-100">
-          <div *ngFor="let group of permissionGroups(); let last = last"
-               class="p-6 space-y-4"
-               [class.bg-slate-50/30]="!last">
-
-          <!-- Titre de catégorie avec compteur -->
-          <div class="flex items-center gap-3">
-            <div class="w-1 h-5 bg-primary-500 rounded-full"></div>
-            <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">{{ group.category }}</h3>
-            <span class="text-[10px] px-2 py-0.5 bg-slate-200 text-slate-600 rounded-full">
-                {{ group.permissions.length }} permissions
-              </span>
-          </div>
-
-          <!-- Grille des permissions -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div *ngFor="let perm of group.permissions"
-                 class="group/permission relative flex items-center justify-between p-4 bg-white rounded-xl border border-slate-200 hover:border-primary-200 hover:shadow-sm transition-all">
-
-              <!-- Contenu principal -->
-              <div class="flex-1 pr-4">
-                <div class="flex items-center gap-2">
-                  <p class="text-sm font-semibold text-slate-800 group-hover/permission:text-primary-700 transition-colors">
-                    {{ perm.label }}
-                  </p>
-                  <!-- Badge de permission système -->
-                  <span *ngIf="perm.isSystem"
-                        class="text-[8px] px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded-full">
-                      système
-                    </span>
-                </div>
-                <p class="text-xs text-slate-500 mt-1 leading-relaxed">{{ perm.description }}</p>
-
-                <!-- Tags supplémentaires si nécessaire -->
-                <div *ngIf="perm.dependencies?.length" class="flex gap-1 mt-2">
-                  <span class="text-[8px] text-slate-400">Dépend de:</span>
-                  <span *ngFor="let dep of perm.dependencies"
-                        class="text-[8px] px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded">
-                      {{ dep }}
-                    </span>
-                </div>
-              </div>
-
-              <!-- Switch moderne -->
-              <div class="flex items-center">
-                <button
-                  (click)="onPermissionToggle(perm.id, !perm.granted)"
-                  class="relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-                  [class.bg-primary-600]="perm.granted"
-                  [class.bg-slate-200]="!perm.granted"
-                >
-                    <span
-                      class="inline-block h-5 w-5 transform rounded-full bg-white shadow-lg transition-transform"
-                      [class.translate-x-6]="perm.granted"
-                      [class.translate-x-1]="!perm.granted"
-                    ></span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Footer avec résumé -->
-      <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
-        <div class="flex items-center gap-4 text-xs text-slate-500">
-          <div class="flex items-center gap-1.5">
-            <span class="w-2 h-2 bg-primary-600 rounded-full"></span>
-            <span>{{ getGrantedPermissionsCount() }} permissions actives</span>
-          </div>
-          <div class="w-px h-3 bg-slate-200"></div>
-          <div class="flex items-center gap-1.5">
-            <span class="w-2 h-2 bg-slate-300 rounded-full"></span>
-            <span>{{ getTotalPermissions() - getGrantedPermissionsCount() }} permissions inactives</span>
-          </div>
-        </div>
-
-        <button
-          (click)="expandAllGroups()"
-          class="text-xs text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1"
-        >
-          <lucide-icon [name]="Maximize2" class="w-3 h-3"></lucide-icon>
-          Tout développer
+          <div class="override-dot" *ngIf="selectedRoleId() === role.id && hasUnsavedChanges()"></div>
         </button>
+      </ng-container>
+    </div>
+  </aside>
+
+  <!-- CONTENU PILOTÉ (Viewport avec scrolling géré) -->
+  <div class="config-viewport">
+    <app-fw-page-shell
+      [title]="isInitialLoading() ? 'Chargement...' : 'Matrice : ' + (selectedRole()?.name || 'Sélection')"
+      [description]="isInitialLoading() ? 'Récupération de la configuration de sécurité...' : (selectedRole()?.rawData?.description || 'Définition des permissions granulaires pour ce profil.')"
+      [icon]="Shield"
+      density="compact"
+    >
+      <div actions class="flex items-center gap-3">
+        <div class="relative w-64">
+          <lucide-icon [name]="Search" [size]="14" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></lucide-icon>
+          <input type="text"
+                 [ngModel]="permissionQuery()"
+                 (ngModelChange)="permissionQuery.set($event)"
+                 placeholder="Filtrer les ressources..."
+                 class="search-input-technical"
+                 [disabled]="isInitialLoading()">
+        </div>
+
+        <div class="divider-v"></div>
+
+        <app-fw-button variant="tertiary" size="sm" [icon]="Plus" (click)="openAddRoleForm()" [disabled]="isInitialLoading()">Nouveau rôle</app-fw-button>
+        <app-fw-button *ngIf="selectedRole() && !selectedRole()?.rawData?.isSystemRole" variant="danger" size="sm" [icon]="Trash2" (click)="deleteRole()" [disabled]="isInitialLoading()">Supprimer</app-fw-button>
+        <app-fw-button variant="primary" size="md" [icon]="Save" [loading]="isSaving()" [disabled]="!hasUnsavedChanges() || isInitialLoading() || isReadOnly()" (click)="savePermissions()">Publier</app-fw-button>
       </div>
+
+      <!-- MATRICE : Contenu scrollable -->
+      <div class="pbac-matrix-wrapper custom-scrollbar">
+        <div class="editor-container custom-scrollbar">
+          <div class="pbac-matrix-container">
+
+            <!-- BANNIÈRE LECTURE SEULE -->
+            <div *ngIf="isReadOnly()" class="mx-4 mb-10 p-4 bg-amber-50 border border-amber-100 rounded-2xl flex items-start gap-4 animate-in slide-in-from-top duration-500">
+                <div class="w-10 h-10 rounded-xl bg-white border border-amber-200 flex items-center justify-center shrink-0 text-amber-600">
+                <lucide-icon [name]="ShieldCheck" [size]="20"></lucide-icon>
+                </div>
+                <div>
+                <h4 class="text-sm font-bold text-amber-900">Rôle système protégé</h4>
+                <p class="text-xs text-amber-700 leading-relaxed mt-1">
+                    Ce profil est indispensable au fonctionnement de la plateforme. Ses permissions sont prédéfinies et ne peuvent pas être modifiées pour garantir la sécurité de votre établissement.
+                </p>
+                </div>
+            </div>
+
+            <!-- SKELETON -->
+            <div *ngIf="isInitialLoading()" class="space-y-10 py-4">
+              <div *ngFor="let g of [1,2]" class="space-y-4">
+                <fw-skeleton width="200px" height="12px" radius="4px"></fw-skeleton>
+                <div class="resource-table"><fw-skeleton *ngFor="let r of [1,2,3]" width="100%" height="48px"></fw-skeleton></div>
+              </div>
+            </div>
+
+            <!-- LISTE PBAC -->
+            <div class="space-y-12" *ngIf="!isInitialLoading()">
+              <div *ngFor="let group of filteredPermissionGroups()" class="domain-section">
+                <header class="domain-header mb-4">
+                  <h3 class="domain-title">{{ group.domainName }}</h3>
+                </header>
+
+                <div class="resource-table">
+                  <div class="resource-row header">
+                    <div class="res-info-col uppercase tracking-widest text-[9px] font-bold text-slate-400">Ressource</div>
+                    <div class="res-actions-grid px-4 text-[9px] font-bold text-slate-400 uppercase tracking-widest text-center">
+                      <span>Lecture</span>
+                      <span>Ajout / Édition</span>
+                      <span>Suppression</span>
+                      <span>Spécial</span>
+                    </div>
+                  </div>
+
+                  <div *ngFor="let res of group.resources" class="resource-row">
+                    <div class="res-info-col">
+                      <div class="flex flex-col">
+                        <span class="res-name">{{ res.resourceName }}</span>
+                        <span class="res-code">{{ res.resourceCode }}</span>
+                      </div>
+                    </div>
+
+                    <div class="res-actions-grid px-4 py-2">
+                      <div class="flex justify-center">
+                        <div *ngIf="res.read" class="toggle-wrap" [class.is-disabled]="isReadOnly()" (click)="!isReadOnly() && onPermissionToggle(res.read.id, !res.read.granted)">
+                          <button role="switch" class="fw-toggle-switch sm variant-secondary" [class.on]="res.read.granted" [disabled]="isReadOnly()"><div class="track"><div class="thumb"></div></div></button>
+                        </div>
+                        <div *ngIf="!res.read" class="dot-spacer"></div>
+                      </div>
+
+                      <div class="flex justify-center">
+                        <div *ngIf="res.write" class="toggle-wrap" [class.is-disabled]="isReadOnly()" (click)="!isReadOnly() && onPermissionToggle(res.write.id, !res.write.granted)">
+                          <button role="switch" class="fw-toggle-switch sm variant-primary" [class.on]="res.write.granted" [disabled]="isReadOnly()"><div class="track"><div class="thumb"></div></div></button>
+                        </div>
+                        <div *ngIf="!res.write" class="dot-spacer"></div>
+                      </div>
+
+                      <div class="flex justify-center">
+                        <div *ngIf="res.delete" class="toggle-wrap" [class.is-disabled]="isReadOnly()" (click)="!isReadOnly() && onPermissionToggle(res.delete.id, !res.delete.granted)">
+                          <button role="switch" class="fw-toggle-switch sm variant-danger" [class.on]="res.delete.granted" [disabled]="isReadOnly()"><div class="track"><div class="thumb"></div></div></button>
+                        </div>
+                        <div *ngIf="!res.delete" class="dot-spacer"></div>
+                      </div>
+
+                      <div class="flex justify-center">
+                        <div *ngIf="res.special" class="toggle-wrap" [class.is-disabled]="isReadOnly()" (click)="!isReadOnly() && onPermissionToggle(res.special.id, !res.special.granted)">
+                          <button role="switch" class="fw-toggle-switch sm variant-accent" [class.on]="res.special.granted" [disabled]="isReadOnly()"><div class="track"><div class="thumb"></div></div></button>
+                        </div>
+                        <div *ngIf="!res.special" class="dot-spacer"></div>
+                      </div>                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div *ngIf="filteredPermissionGroups().length === 0" class="py-24 text-center">
+                <lucide-icon [name]="Search" [size]="32" class="text-slate-200 mx-auto mb-4"></lucide-icon>
+                <p class="text-sm font-bold text-slate-400">Aucun droit trouvé pour cette recherche.</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </app-fw-page-shell>
   </div>
-  </main>
-</div>
 </div>

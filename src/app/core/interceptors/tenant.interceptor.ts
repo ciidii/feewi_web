@@ -1,40 +1,27 @@
-import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
-import { inject } from '@angular/core';
-import { Router } from '@angular/router';
-import { catchError, throwError } from 'rxjs';
-import { TenantContextService } from '../services/tenant-context.service';
+import {HttpInterceptorFn} from '@angular/common/http';
+import {inject} from '@angular/core';
+import {TenantContextService} from '../services/tenant-context.service';
 
 export const tenantInterceptor: HttpInterceptorFn = (req, next) => {
-  const router = inject(Router);
   const tenantService = inject(TenantContextService);
-  const token = localStorage.getItem('access_token');
+
+  // 1. Déterminer si c'est une requête vers une API Feewi
+  const isApiRequest = req.url.includes('/api/v1');
+
+  if (!isApiRequest) return next(req);
+
   const activeTenantId = tenantService.activeTenant()?.id;
 
-  // On clone la requête pour ajouter le Bearer Token et le Tenant ID
-  let authReq = req;
+  // 2. Préparer les headers
   const headers: { [name: string]: string } = {};
 
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-
+  // Toujours ajouter le Tenant ID s'il est connu
   if (activeTenantId) {
-    headers['X-Tenant-ID'] = activeTenantId;
+    headers['X-Tenant-Id'] = activeTenantId;
   }
 
-  if (Object.keys(headers).length > 0) {
-    authReq = req.clone({ setHeaders: headers });
-  }
+  // 3. Cloner et envoyer
+  const authReq = req.clone({ setHeaders: headers });
 
-  return next(authReq).pipe(
-    catchError((error: HttpErrorResponse) => {
-      // Gestion des erreurs standard (Section 5 du Guide)
-      if (error.status === 401) {
-        console.warn('[tenantInterceptor] 401 Unauthorized detected. Clearing session.');
-        localStorage.removeItem('access_token');
-        router.navigate(['/auth/login']);
-      }
-      return throwError(() => error);
-    })
-  );
+  return next(authReq);
 };

@@ -1,0 +1,55 @@
+import {Component, inject} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import {AlertTriangle, CheckCircle, HelpCircle, Info, LucideAngularModule} from 'lucide-angular';
+import {FwModalShellComponent} from '../modal-shell/modal-shell.component';
+import {ButtonVariant, FwButtonComponent} from '../button/button.component';
+
+export interface ConfirmDialogData {
+  title: string;
+  message: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  type?: 'destructive' | 'warning' | 'success' | 'info';
+}
+
+@Component({
+  selector: 'app-confirm-dialog',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatDialogModule,
+    LucideAngularModule,
+    FwModalShellComponent,
+    FwButtonComponent
+  ],
+  templateUrl: './confirm-dialog.html',
+  styleUrls: ['./confirm-dialog.scss']
+})
+export class ConfirmDialogComponent {
+  private dialogRef = inject(MatDialogRef<ConfirmDialogComponent>);
+  data: ConfirmDialogData = inject(MAT_DIALOG_DATA);
+
+  getIcon() {
+    switch (this.data.type) {
+      case 'destructive': return AlertTriangle;
+      case 'warning': return AlertTriangle;
+      case 'success': return CheckCircle;
+      case 'info': return Info;
+      default: return HelpCircle;
+    }
+  }
+
+  getButtonVariant(): ButtonVariant {
+    if (this.data.type === 'destructive') return 'danger';
+    return 'primary';
+  }
+
+  onConfirm() {
+    this.dialogRef.close(true);
+  }
+
+  onCancel() {
+    this.dialogRef.close(false);
+  }
+}

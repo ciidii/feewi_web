@@ -1,161 +1,221 @@
-// ===========================================
-// VARIABLES - Palette de couleurs renforcée
-// ===========================================
-:root {
-  --primary-50: #eff6ff;
-  --primary-100: #dbeafe;
-  --primary-200: #bfdbfe;
-  --primary-300: #93c5fd;
-  --primary-400: #60a5fa;
-  --primary-500: #3b82f6;  // Bleu visible
-  --primary-600: #2563eb;  // Bleu foncé visible
-  --primary-700: #1d4ed8;
-  --primary-800: #1e40af;
-  --primary-900: #1e3a8a;
+@use '../../../../../../styles/tokens' as *;
 
-  --slate-50: #f8fafc;
-  --slate-100: #f1f5f9;
-  --slate-200: #e2e8f0;
-  --slate-300: #cbd5e1;
-  --slate-400: #94a3b8;
-  --slate-500: #64748b;
-  --slate-600: #475569;
-  --slate-700: #334155;
-  --slate-800: #1e293b;
-  --slate-900: #0f172a;
-
-  // Couleurs d'accent
-  --emerald-500: #10b981;
-  --emerald-600: #059669;
-  --amber-500: #f59e0b;
-  --amber-600: #d97706;
-  --red-500: #ef4444;
-  --red-600: #dc2626;
+// 1. Mise en page globale
+:host { 
+  display: block; 
+  height: 100%; /* S'adapte au conteneur parent */
+  background-color: var(--fw-surface-page);
 }
 
-// ===========================================
-// BOUTON D'ENREGISTREMENT - VISIBLE
-// ===========================================
-.group {
-  &.flex.items-center.gap-3.px-6.py-3 {
-    background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
-    color: white !important;
-    font-weight: 600 !important;
-    border: none !important;
-    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3) !important;
+.config-feature-root {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  height: 100%; /* Remplace le calc() problématique */
+  background-color: var(--fw-surface-card);
+  border: 1px solid var(--fw-border);
+  border-radius: var(--fw-radius-lg);
+  overflow: hidden; /* Empêche le scroll global du composant */
+}
 
-    &:hover {
-      background: linear-gradient(135deg, #1d4ed8, #1e40af) !important;
-      transform: translateY(-1px);
-      box-shadow: 0 6px 10px -1px rgba(37, 99, 235, 0.4) !important;
+.config-viewport {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0; /* Important pour le scroll Flexbox */
+}
+
+// 2. Sidebar (Fixe à gauche)
+.scope-sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: var(--fw-space-md) var(--fw-space-sm);
+  background-color: var(--fw-surface-card);
+  border-right: 1px solid var(--fw-border);
+
+  .sidebar-header {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--fw-space-sm);
+    padding-bottom: var(--fw-space-md);
+    margin-bottom: var(--fw-space-md);
+    border-bottom: 1px solid var(--fw-border);
+  }
+
+  .nav-section-title {
+    flex-shrink: 0;
+    margin-bottom: var(--fw-space-sm);
+    padding: 0 var(--fw-space-sm);
+    font-size: 9px;
+    font-weight: 850;
+    color: var(--fw-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .levels-scroll {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .scope-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: var(--fw-space-sm);
+    padding: var(--fw-space-sm);
+    margin-bottom: 2px;
+    border: none;
+    border-radius: var(--fw-radius-md);
+    background-color: transparent;
+    cursor: pointer;
+    transition: background-color var(--fw-transition-fast);
+
+    .scope-icon {
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      color: var(--fw-text-tertiary);
+      background-color: var(--fw-surface-sunken);
+      border-radius: var(--fw-radius-sm);
     }
 
-    &:disabled {
-      opacity: 0.5;
-      background: #94a3b8 !important;
-      box-shadow: none !important;
+    .scope-name {
+      display: block;
+      font-size: 0.8125rem;
+      font-weight: 750;
+      color: var(--fw-text-primary);
+      text-align: left;
     }
 
-    lucide-icon {
-      color: white !important;
+    .scope-sub {
+      display: block;
+      font-size: 9px;
+      font-weight: 500;
+      color: var(--fw-text-tertiary);
+      text-align: left;
+    }
+
+    &:hover { background-color: var(--fw-surface-sunken); }
+
+    &.active {
+      background-color: var(--fw-surface-page);
+      .scope-icon { background-color: var(--fw-surface-card); color: var(--fw-primary); border: 1px solid var(--fw-border); }
+      .scope-name { color: var(--fw-primary); }
     }
   }
 }
 
-// ===========================================
-// SWITCH (INTERRUPTEURS) - VISIBLES
-// ===========================================
-button[class*="inline-flex h-7 w-12"] {
-  // État OFF
-  &[class*="bg-slate-200"] {
-    background-color: #cbd5e1 !important;
-    border: 1px solid #94a3b8 !important;
+// 3. Matrice de Permissions (Scrollable)
+.editor-container {
+  flex: 1;
+  overflow-y: auto; /* ICI se passe le scroll */
+  padding: var(--fw-space-lg);
+  background-color: var(--fw-surface-page);
+}
 
-    span {
-      background-color: white !important;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
+.pbac-matrix-container {
+  padding-bottom: var(--fw-space-4xl); /* Espace vital en bas */
+}
+
+.domain-title {
+  margin-bottom: var(--fw-space-md);
+  font-family: var(--fw-font-ui);
+  font-size: 0.75rem;
+  font-weight: 850;
+  color: var(--fw-text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.resource-table {
+  margin-bottom: var(--fw-space-xl);
+  background-color: var(--fw-surface-card);
+  border: 1px solid var(--fw-border);
+  border-radius: var(--fw-radius-md);
+  overflow: hidden;
+}
+
+.resource-row {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  border-bottom: 1px solid var(--fw-surface-page);
+
+  &.header {
+    height: 36px;
+    background-color: var(--fw-surface-sunken);
+    align-items: center;
+  }
+
+  .res-info-col {
+    padding: var(--fw-space-sm) var(--fw-space-md);
+    border-right: 1px solid var(--fw-surface-page);
+
+    .res-name {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 750;
+      color: var(--fw-text-primary);
+    }
+    .res-code {
+      display: block;
+      margin-top: 2px;
+      font-size: 9px;
+      font-family: var(--fw-font-mono);
+      color: var(--fw-text-tertiary);
+      text-transform: uppercase;
     }
   }
+}
 
-  // État ON
-  &[class*="bg-primary-600"] {
-    background-color: #2563eb !important;
-    border: 1px solid #1d4ed8 !important;
+.res-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  align-items: center;
+}
 
-    span {
-      background-color: white !important;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
-    }
+// 4. Éléments d'interface
+.toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--fw-space-sm);
+  padding: var(--fw-space-xs) var(--fw-space-sm);
+  border-radius: var(--fw-radius-md);
+  cursor: pointer;
+  transition: all var(--fw-transition-fast);
+
+  &:hover:not(.is-disabled) { background-color: var(--fw-surface-sunken); }
+
+  &.is-disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    filter: grayscale(0.5);
   }
 
-  // Focus
-  &:focus {
-    outline: none !important;
-    ring: 2px solid #3b82f6 !important;
-    ring-offset: 2px !important;
+  .toggle-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--fw-text-tertiary);
+    text-transform: uppercase;
+    &.on { color: var(--fw-text-primary); }
   }
 }
 
-// ===========================================
-// LISTE DES RÔLES - MEILLEUR CONTRASTE
-// ===========================================
-.border-slate-200 {
-  border-color: #e2e8f0 !important;
+.dot-spacer {
+  width: 2px;
+  height: 2px;
+  background-color: var(--fw-border);
+  border-radius: 50%;
 }
 
-.bg-white {
-  background-color: white !important;
-}
-
-// Rôle sélectionné
-.border-primary-500 {
-  border-color: #3b82f6 !important;
-  border-width: 2px !important;
-}
-
-.bg-primary-50 {
-  background-color: #eff6ff !important;
-}
-
-// Texte du rôle sélectionné
-.text-primary-700 {
-  color: #1d4ed8 !important;
-  font-weight: 600 !important;
-}
-
-// ===========================================
-// CARTES DE PERMISSIONS
-// ===========================================
-.border-slate-200 {
-  border: 1px solid #e2e8f0 !important;
-}
-
-.hover\:border-primary-200:hover {
-  border-color: #bfdbfe !important;
-}
-
-// Badge "système"
-.bg-slate-100.text-slate-500 {
-  background-color: #f1f5f9 !important;
-  color: #64748b !important;
-  font-weight: 500 !important;
-}
-
-// ===========================================
-// INDICATEUR DE MODIFICATIONS
-// ===========================================
-.bg-amber-50 {
-  background-color: #fffbeb !important;
-}
-
-.text-amber-700 {
-  color: #b45309 !important;
-}
-
-.border-amber-200 {
-  border-color: #fcd34d !important;
-}
-
-.bg-amber-500 {
-  background-color: #f59e0b !important;
+.custom-scrollbar {
+  &::-webkit-scrollbar { width: 6px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--fw-border);
+    border-radius: var(--fw-radius-full);
+  }
 }

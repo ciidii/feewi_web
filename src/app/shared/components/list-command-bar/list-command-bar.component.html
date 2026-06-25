@@ -1,0 +1,80 @@
+<div class="unified-command-bar">
+  <!-- LIGNE 1 : RECHERCHE & ACTIONS PRIMAIRES (ou Actions de Masse) -->
+  <div class="command-row primary-row">
+    
+    <!-- MODE NORMAL : RECHERCHE -->
+    <div class="flex items-center gap-4 flex-1 animate-in slide-in-from-left duration-300" *ngIf="selectedCount === 0">
+      <mat-checkbox 
+        color="primary" 
+        [checked]="isAllSelected" 
+        [indeterminate]="isPartiallySelected"
+        (change)="toggleAll.emit()"
+        class="master-checkbox"
+      ></mat-checkbox>
+
+      <div class="search-box-academic">
+        <lucide-icon [name]="SearchIcon" [size]="16"></lucide-icon>
+        <input 
+          type="text" 
+          [ngModel]="searchQuery" 
+          (input)="onSearchInput($event)" 
+          [placeholder]="searchPlaceholder"
+        />
+        <button *ngIf="searchQuery" (click)="clearSearch.emit()" class="clear-btn">
+          <lucide-icon [name]="XIcon" [size]="12"></lucide-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- MODE SÉLECTION : BULK ACTIONS -->
+    <div class="flex items-center gap-6 flex-1 animate-in slide-in-from-left duration-300" *ngIf="selectedCount > 0">
+      <mat-checkbox 
+        color="primary" 
+        [checked]="isAllSelected" 
+        [indeterminate]="isPartiallySelected"
+        (change)="toggleAll.emit()"
+        class="master-checkbox"
+      ></mat-checkbox>
+
+      <div class="bulk-info-badge">
+        <strong>{{ selectedCount }}</strong> sélectionnés
+      </div>
+
+      <div class="bulk-actions-slot">
+        <ng-content select="[bulk-actions]"></ng-content>
+      </div>
+    </div>
+
+    <div class="action-group-integrated" *ngIf="selectedCount === 0">
+      <ng-content select="[primary-actions]"></ng-content>
+    </div>
+  </div>
+
+  <!-- LIGNE 2 : FILTRES RAPIDES & ÉTAT -->
+  <div class="command-row filter-row">
+    <div class="quick-filters-integrated">
+      <ng-content select="[quick-filters]"></ng-content>
+    </div>
+
+    <div class="pagination-controls-integrated">
+      <span class="results-text" *ngIf="totalElements > 0">
+        <strong>{{ totalElements }}</strong> résultats
+      </span>
+      <select class="page-size-select" [ngModel]="pageSize" (ngModelChange)="pageSizeChange.emit($event)">
+        <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }} / page</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- LIGNE 3 : CHIPS DE FILTRES ACTIFS -->
+  <div class="active-chips-row" *ngIf="activeFilters.length > 0">
+    <div *ngFor="let chip of activeFilters" class="academic-tag">
+      <span class="t-label">{{ chip.label }} :</span>
+      <span class="t-val">{{ chip.value }}</span>
+      <button (click)="removeFilter.emit(chip.key)">
+        <lucide-icon [name]="XIcon" [size]="10"></lucide-icon>
+      </button>
+    </div>
+    <button class="btn-clear-all" (click)="clearAllFilters.emit()">Tout effacer</button>
+  </div>
+</div>

@@ -1,93 +1,100 @@
-<div class="relative p-6">
+<div class="relative p-8">
   <!-- Ligne verticale décorative -->
-  <div class="absolute left-24 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-slate-200 to-transparent"></div>
+  <div class="absolute left-24 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-border-subtle to-transparent"></div>
 
-  <div class="space-y-8">
+  <div class="space-y-12">
     <!-- Groupe par date -->
     <div *ngFor="let group of groupedData(); let groupIndex = index"
-         class="relative animate-fadeIn">
+         class="relative animate-in fade-in duration-500">
 
       <!-- En-tête de groupe (date) -->
-      <div class="flex items-center gap-4 mb-4">
+      <div class="flex items-center gap-6 mb-6">
         <div class="w-20 text-right">
-          <span class="text-xs font-mono font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded-full">
-            {{ group.date }}
+          <span class="text-[10px] font-extrabold text-slate-medium bg-white border border-border-subtle px-3 py-1 rounded-lg shadow-sm uppercase tracking-widest">
+            {{ group.date | fwDate:'short' }}
           </span>
         </div>
-        <div class="flex-1 h-px bg-slate-200"></div>
-        <span class="text-xs text-slate-400">{{ group.items.length }} élément(s)</span>
+        <div class="flex-1 h-px bg-border-subtle/50"></div>
+        <span class="text-[10px] font-bold text-slate-medium uppercase tracking-widest">{{ group.items.length }} élément(s)</span>
       </div>
 
       <!-- Éléments du groupe -->
-      <div class="space-y-4">
+      <div class="space-y-6">
         <div *ngFor="let item of group.items; let itemIndex = index"
-             class="relative flex gap-6 group"
-             [class.opacity-75]="isSelected(item.id)">
+             class="relative flex gap-8 group"
+             [class.is-selected]="isSelected(item.id)">
 
           <!-- Point sur la timeline -->
-          <div class="relative z-10 w-20 flex justify-end">
-            <div class="timeline-dot" [ngClass]="getTimelineColor(groupIndex + itemIndex)">
-              <div class="w-2 h-2 rounded-full bg-white"></div>
+          <div class="relative z-10 w-20 flex justify-end pt-5">
+            <div class="timeline-dot shadow-lg shadow-primary-alpha" [ngClass]="getTimelineColor(groupIndex + itemIndex)">
+              <div class="w-2.5 h-2.5 rounded-full bg-white shadow-inner"></div>
             </div>
           </div>
 
           <!-- Carte de contenu -->
-          <div class="flex-1 bg-white rounded-xl border border-slate-200 p-5 mb-2 shadow-sm hover:shadow-md transition-all"
-               [class.bg-primary-50/20]="isSelected(item.id)"
-          [class.ring-1]="isSelected(item.id)"
-          [class.ring-primary-500]="isSelected(item.id)">
+          <div class="flex-1 timeline-card"
+               (click)="onRowClick.emit(item)"
+               [class.is-selected-card]="isSelected(item.id)">
 
-          <div class="flex items-start gap-4">
-            <!-- Checkbox -->
-            <div class="pt-1" (click)="$event.stopPropagation()">
-              <mat-checkbox
-                color="primary"
-                [checked]="isSelected(item.id)"
-                (change)="toggleRow.emit(item.id)"
-                class="timeline-checkbox"
-              ></mat-checkbox>
-            </div>
+            <div class="flex items-start gap-6">
+              <!-- Checkbox -->
+              <div class="pt-1" (click)="$event.stopPropagation()">
+                <mat-checkbox
+                  color="primary"
+                  [checked]="isSelected(item.id)"
+                  (change)="toggleRow.emit(item.id)"
+                  class="row-checkbox"
+                ></mat-checkbox>
+              </div>
 
-            <!-- Contenu principal -->
-            <div class="flex-1">
-              <div class="flex items-start justify-between">
-                <div>
-                  <h3 class="font-semibold text-slate-900">{{ item.title }}</h3>
-                  <p class="text-sm text-slate-500 mt-1">{{ item.subtitle }}</p>
+              <!-- Contenu principal -->
+              <div class="flex-1">
+                <div class="flex items-start justify-between">
+                  <div class="space-y-1">
+                    <h3 class="text-base font-bold text-midnight leading-tight">{{ item.title }}</h3>
+                    <p class="text-sm font-medium text-slate-medium">{{ item.subtitle }}</p>
 
-                  <!-- Métadonnées -->
-                  <div class="flex items-center gap-4 mt-3 text-xs text-slate-400">
-                      <span class="flex items-center gap-1">
-                        <lucide-icon [name]="Clock" class="w-3 h-3"></lucide-icon>
-                        {{ item.date }}
+                    <!-- Métadonnées -->
+                    <div class="flex items-center gap-5 mt-4 text-[10px] font-bold text-slate-medium uppercase tracking-widest">
+                      <span class="flex items-center gap-1.5">
+                        <lucide-icon [name]="Clock" class="w-3.5 h-3.5"></lucide-icon>
+                        {{ item.date | fwDate }}
                       </span>
-                    <span *ngIf="item.metadata?.['location']" class="flex items-center gap-1">
-                        <span>📍</span>
-                      {{ item.metadata?.['location'] }}
+                      <span *ngIf="item.metadata?.['location']" class="flex items-center gap-1.5">
+                        <lucide-icon [name]="MapPin" class="w-3.5 h-3.5"></lucide-icon>
+                        {{ item.metadata?.['location'] }}
                       </span>
+                    </div>
+                  </div>
+
+                  <!-- Badges -->
+                  <div class="flex gap-2">
+                    <app-fw-badge 
+                      *ngFor="let badge of item.badges || []" 
+                      [status]="badge.label" 
+                      [tokenOverride]="$any(badge.type)" 
+                      size="xs">
+                    </app-fw-badge>
                   </div>
                 </div>
 
-                <!-- Badges -->
-                <div class="flex gap-1">
-                    <span *ngFor="let badge of item.badges || []"
-                          class="timeline-badge"
-                          [ngClass]="getBadgeClass()(badge.type)">
-                      {{ badge.label }}
-                    </span>
+                <!-- Actions Dynamiques -->
+                <div class="flex gap-2 mt-6 pt-4 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                  <ng-container *ngFor="let action of filteredActions()">
+                    <ng-container *ngIf="!action.hideIf || !action.hideIf(item)">
+                          <app-fw-button
+                            (click)="onAction.emit({ actionId: action.id, row: item })"
+                            [disabled]="!!(action.disableIf && action.disableIf(item))"
+                            [variant]="'tertiary'"
+                            [size]="'sm'"
+                            [icon]="action.icon"
+                            [title]="action.label"
+                          >
+                            {{ action.label }}
+                          </app-fw-button>
+                    </ng-container>
+                  </ng-container>
                 </div>
-              </div>
-
-              <!-- Actions (apparaissent au survol) -->
-              <div class="flex gap-2 mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button (click)="onView.emit(item)" class="timeline-action">
-                  <lucide-icon [name]="Eye" class="w-4 h-4"></lucide-icon>
-                  <span>Voir</span>
-                </button>
-                <button (click)="onValidate.emit(item)" class="timeline-action primary">
-                  <lucide-icon [name]="CheckCircle" class="w-4 h-4"></lucide-icon>
-                  <span>Valider</span>
-                </button>
               </div>
             </div>
           </div>
@@ -98,15 +105,14 @@
 </div>
 
 <!-- État vide -->
-<div *ngIf="data().length === 0" class="py-20 text-center">
-  <div class="inline-flex flex-col items-center gap-4">
-    <div class="w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center">
-      <lucide-icon [name]="Calendar" class="w-10 h-10 text-slate-300"></lucide-icon>
+<div *ngIf="data().length === 0 && !isLoading()" class="py-24 text-center">
+  <div class="inline-flex flex-col items-center gap-6">
+    <div class="w-24 h-24 bg-slate-50 rounded-[32px] flex items-center justify-center text-slate-200 shadow-inner">
+      <lucide-icon [name]="Calendar" class="w-12 h-12"></lucide-icon>
     </div>
     <div class="space-y-1">
-      <p class="text-sm font-semibold text-slate-700">Aucun élément dans la timeline</p>
-      <p class="text-xs text-slate-500">Les éléments apparaîtront organisés par date</p>
+      <h3 class="text-lg font-bold text-midnight tracking-tight italic uppercase">Timeline vide</h3>
+      <p class="text-sm text-slate-medium font-medium">Aucun événement historique disponible pour cette période.</p>
     </div>
   </div>
-</div>
 </div>

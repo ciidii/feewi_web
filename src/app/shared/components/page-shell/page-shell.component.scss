@@ -1,0 +1,62 @@
+.page-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: var(--fw-surface-sunken); // Fond gris léger par défaut
+
+  /* HEADER AREA (Sticky) */
+  .shell-header-area {
+    background: transparent;
+    z-index: 10;
+    flex-shrink: 0;
+
+    .shell-tabs-area {
+      padding: 0 2rem;
+      margin-top: -1rem; // Rapproche les onglets du header
+      background: transparent;
+    }
+  }
+
+  /* BODY AREA (Scrollable) */
+  .shell-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 2rem; // Padding standard de page
+
+    .content-container {
+      max-width: 1600px;
+      margin: 0 auto;
+      width: 100%;
+      min-height: 100%;
+    }
+  }
+
+  /* SPECIFICITY FOR COMPACT MODE */
+  &.compact {
+    .shell-header-area {
+      background: white;
+      box-shadow: var(--fw-shadow-sm);
+    }
+
+    .shell-body {
+      padding: 1.5rem;
+    }
+  }
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .page-shell {
+    .shell-header-area {
+      .shell-tabs-area {
+        padding: 0 1rem;
+      }
+    }
+
+    .shell-body {
+      padding: 1rem;
+    }
+  }
+}

@@ -1,224 +1,137 @@
-:host {
-  display: block;
-  width: 100%;
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
 }
 
-// ===========================================
-// AVATAR - CORRIGÉ
-// ===========================================
-.avatar-container {
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
+.feewi-card {
+  position: relative;
   background: white;
-  border: 3px solid white;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border-radius: 24px;
+  border: none; // ZERO BORDURE
   overflow: hidden;
+  transition: all var(--fw-transition);
   display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.avatar-circle {
-  width: 100%;
-  height: 100%;
-  border-radius: 13px; // Légèrement moins que le container
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.avatar-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 13px;
-}
-
-.avatar-initials {
-  font-size: 24px;
-  font-weight: 600;
-  color: white;
-  text-transform: uppercase;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-}
-
-// ===========================================
-// CHECKBOX - CORRIGÉE
-// ===========================================
-.checkbox-container {
-  background: white;
-  border-radius: 8px;  // Coins carrés
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  overflow: hidden;
-  width: 28px;
-  height: 28px;
-}
-
-::ng-deep .custom-checkbox {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px !important;
-  height: 28px !important;
-
-  .mdc-checkbox {
-    padding: 0 !important;
-    margin: 0 !important;
-    width: 28px !important;
-    height: 28px !important;
-
-    .mdc-checkbox__background {
-      width: 28px !important;
-      height: 28px !important;
-      border-radius: 6px !important;  // Coins carrés
-      border-color: #cbd5e1 !important;
-    }
-
-    .mdc-checkbox__checkmark {
-      width: 22px !important;
-      height: 22px !important;
-    }
-
-    &.mdc-checkbox--selected .mdc-checkbox__background {
-      background-color: #2563eb !important;
-      border-color: #2563eb !important;
-    }
-  }
-
-  .mat-mdc-checkbox-touch-target {
-    width: 28px !important;
-    height: 28px !important;
-  }
-
-  .mdc-checkbox__native-control {
-    width: 28px !important;
-    height: 28px !important;
-  }
-}
-
-// ===========================================
-// BADGES
-// ===========================================
-.badge-status {
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
-  border: 1px solid;
-  display: inline-flex;
-  align-items: center;
-  letter-spacing: 0.01em;
-  line-height: 1;
-  text-transform: uppercase;
-
-  // Variantes de couleurs
-  &.bg-green-50 {
-    background-color: #f0fdf4;
-    color: #166534;
-    border-color: #86efac;
-  }
-
-  &.bg-amber-50 {
-    background-color: #fffbeb;
-    color: #92400e;
-    border-color: #fcd34d;
-  }
-
-  &.bg-red-50 {
-    background-color: #fef2f2;
-    color: #991b1b;
-    border-color: #fca5a5;
-  }
-
-  &.bg-blue-50 {
-    background-color: #eff6ff;
-    color: #1e40af;
-    border-color: #93c5fd;
-  }
-
-  &.bg-slate-50 {
-    background-color: #f8fafc;
-    color: #475569;
-    border-color: #cbd5e1;
-  }
-}
-
-// ===========================================
-// ACTIONS
-// ===========================================
-.card-action {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #64748b;
-  transition: all 0.2s;
-  background: white;
-  border: 1px solid #e2e8f0;
+  flex-direction: column;
+  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.05); // Ombre vaporeuse
+  isolation: isolate;
   cursor: pointer;
 
   &:hover {
-    background-color: #f8fafc;
-    color: #2563eb;
-    border-color: #94a3b8;
-    transform: scale(1.05);
+    box-shadow: 0 20px 40px -8px rgba(0, 0, 0, 0.1);
+    z-index: 5;
+    transform: translateY(-4px);
+
+    .card-glass-header {
+      opacity: 1;
+      background: linear-gradient(135deg, var(--fw-primary-alpha), transparent);
+    }
   }
 
-  &:active {
-    transform: scale(0.95);
-  }
-
-  &.validate:hover {
-    color: #16a34a;
-    border-color: #86efac;
-    background-color: #f0fdf4;
+  &.is-selected {
+    background-color: var(--fw-primary-alpha);
+    box-shadow: 0 0 0 2px var(--fw-primary), var(--fw-shadow-lg);
   }
 }
 
-// ===========================================
-// UTILITAIRES
-// ===========================================
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+.card-glass-header {
+  height: 56px;
+  background: linear-gradient(135deg, var(--fw-surface-sunken), transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.02); // Ligne quasi invisible
+  transition: all 0.3s ease;
+}
+
+.selection-zone {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+}
+
+.check-badge {
+  width: 26px;
+  height: 26px;
+  background: var(--fw-primary);
+  color: white;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  box-shadow: var(--fw-shadow-md);
+}
+
+.squircle-container {
+  margin-top: -36px;
+  margin-left: 24px;
+  position: relative;
+  z-index: 2;
+  width: 72px;
+  height: 72px;
+}
+
+.squircle-wrapper {
+  width: 100%;
+  height: 100%;
+  background: white;
+  padding: 4px;
+  border-radius: 20px;
+  box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.1);
+}
+
+.squircle-content {
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
+  background: var(--fw-midnight);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 800;
+  font-size: 1.25rem;
   overflow: hidden;
+
+  img { width: 100%; height: 100%; object-fit: cover; }
 }
 
-// Animation d'entrée
-.grid > * {
-  animation: cardAppear 0.3s ease-out forwards;
-  opacity: 0;
-}
+.card-body {
+  padding: 1.5rem;
+  flex: 1;
 
-@keyframes cardAppear {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  .title-section {
+    margin-bottom: 1.25rem;
+    h3 { font-size: 1.0625rem; font-weight: 800; color: var(--fw-midnight); margin-bottom: 0.25rem; }
+    p { font-size: 0.8125rem; font-weight: 600; color: var(--fw-text-tertiary); }
   }
 }
 
-// Délais d'animation
-@for $i from 1 through 20 {
-  .grid > *:nth-child(#{$i}) {
-    animation-delay: #{$i * 0.05}s;
+.metadata-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+
+  lucide-icon { width: 14px; height: 14px; color: var(--fw-text-tertiary); }
+  span {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--fw-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
+}
+
+.card-footer {
+  padding: 1rem 1.5rem;
+  background: transparent;
+  border: none;
 }

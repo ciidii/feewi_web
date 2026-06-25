@@ -1,3 +1,55 @@
 :host {
   display: block;
 }
+
+.shell-layout {
+  display: flex;
+  flex-direction: row; /* Rail -> Sidebar -> Container */
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background-color: var(--fw-raw-white);
+}
+
+app-rail, app-sidebar {
+  flex-shrink: 0;
+  height: 100%;
+}
+
+.shell-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+  background-color: var(--fw-raw-slate-50);
+}
+
+.shell-main {
+  flex: 1;
+  overflow-y: auto;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background-color: var(--fw-raw-white); /* Zone de travail */
+  padding: 16px;
+
+  .content-wrapper {
+    flex: 1;
+    max-width: 1600px;
+    width: 100%;
+    margin: 0 auto;
+    contain: layout;
+  }
+}
+
+// Custom scrollbar
+.shell-main::-webkit-scrollbar {
+  width: 6px;
+}
+
+.shell-main::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}

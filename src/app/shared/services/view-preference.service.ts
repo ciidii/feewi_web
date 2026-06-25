@@ -1,5 +1,5 @@
-import { Injectable, signal } from '@angular/core';
-import { ViewMode } from '../models/data-list.models';
+import {Injectable, signal} from '@angular/core';
+import {ViewMode} from '../models/data-list.models';
 
 @Injectable({
   providedIn: 'root'

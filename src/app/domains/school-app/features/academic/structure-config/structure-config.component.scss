@@ -1,0 +1,52 @@
+@reference "../../../../../../tailwind.css";
+
+:host {
+  display: block;
+  height: 100%;
+  background: var(--fw-ice);
+}
+
+.list-page-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.divider-v {
+  width: 1px;
+  height: 24px;
+  background: var(--fw-border-subtle);
+  margin: 0 0.5rem;
+}
+
+// Grille de cartes pour les cycles
+.grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+// Style spécifique pour les cartes de cycles
+.cycle-card {
+  @apply bg-surface rounded-xl p-8 border border-border shadow-sm transition-all duration-300;
+
+  &:hover {
+    @apply shadow-lg border-primary -translate-y-1;
+
+    .cycle-icon-box {
+      background-color: var(--fw-primary);
+      color: var(--fw-text-inverse);
+    }
+  }
+}
+
+.cycle-icon-box {
+  @apply w-16 h-16 rounded-2xl flex items-center justify-center transition-colors;
+  background-color: var(--fw-primary-alpha);
+  color: var(--fw-primary);
+}
+
+// Skeletons - Utilisation de notre utilitaire global
+.skeleton-pulse {
+  @apply animate-shimmer bg-surface-sunken;
+}

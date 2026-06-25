@@ -1,34 +1,73 @@
 @import "tailwindcss";
 
 @theme {
-  /* --- COULEURS (Feewi Midnight Slate) --- */
-  --color-primary: #2563eb;
-  --color-primary-hover: #1d4ed8;
+  /* --- COULEURS SÉMANTIQUES (Mappées sur les tokens CSS) --- */
+  --color-primary: var(--fw-primary);
+  --color-primary-hover: var(--fw-primary-hover);
   
-  --color-midnight: #0f172a;
-  --color-slate-medium: #64748b;
-  --color-ice: #f8fafc;
-  --color-border-subtle: #e2e8f0;
+  --color-background: var(--fw-surface-page);
+  --color-surface: var(--fw-surface-card);
+  --color-surface-sunken: var(--fw-surface-sunken);
+  --color-inverse: var(--fw-surface-inverse);
+
+  --color-text-main: var(--fw-text-primary);
+  --color-text-muted: var(--fw-text-secondary);
+  --color-text-dim: var(--fw-text-tertiary);
+  --color-text-inverse: var(--fw-text-inverse);
+
+  --color-border: var(--fw-border);
+  --color-border-strong: var(--fw-border-strong);
+
+  --color-success: var(--fw-success);
+  --color-warning: var(--fw-warning);
+  --color-error: var(--fw-error);
 
   /* --- TYPOGRAPHIE --- */
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Lexend", sans-serif;
+  --font-sans: var(--fw-font-sans);
+  --font-display: var(--fw-font-display);
 
   /* --- ARRONDIS --- */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
+  --radius-sm: var(--fw-radius-sm);
+  --radius-md: var(--fw-radius-md);
+  --radius-lg: var(--fw-radius-lg);
+  --radius-xl: var(--fw-radius-xl);
 
-  /* --- OMBRES (Shadows) --- */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  /* --- OMBRES --- */
+  --shadow-sm: var(--fw-shadow-sm);
+  --shadow-md: var(--fw-shadow-md);
+  --shadow-lg: var(--fw-shadow-lg);
 }
 
-/* Variables CSS pour le branding dynamique si besoin */
-:root {
-  --feewi-primary: var(--color-primary);
-  --feewi-surface: var(--color-ice);
-  --feewi-text: var(--color-midnight);
+/* --- UTILITAIRES SPÉCIFIQUES --- */
+@utility bg-page {
+  background-color: var(--fw-surface-page);
+}
+
+@utility text-main {
+  color: var(--fw-text-primary);
+}
+
+/* Troncature Enterprise (Impératif 7) */
+@utility fw-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+  width: 100%; /* S'adapte au conteneur, pas de max-width fixe */
+}
+
+/* Shimmer Effect pour Skeleton */
+@utility animate-shimmer {
+  position: relative;
+  overflow: hidden;
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--fw-skeleton-shimmer);
+    animation: fw-shimmer 2s infinite linear;
+  }
 }

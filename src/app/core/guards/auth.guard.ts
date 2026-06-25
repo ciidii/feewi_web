@@ -1,6 +1,6 @@
-import { inject } from '@angular/core';
-import { Router, CanActivateFn } from '@angular/router';
-import { AuthService } from '../services/auth.service';
+import {inject} from '@angular/core';
+import {CanActivateFn, Router} from '@angular/router';
+import {AuthService} from '../services/auth.service';
 
 export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
@@ -16,7 +16,28 @@ export const authGuard: CanActivateFn = (route, state) => {
     });
   }
 
-  // 2. Check Roles (Optional)
+  // 2. Check Permissions (Primary)
+  const requiredPermissions = route.data['permissions'] as string[];
+  const permissionOp = route.data['permissionOp'] || 'ALL'; // 'ALL' or 'ANY'
+  const user = authService.currentUser();
+  const isMasterAdmin = user?.roles.some(r => ['ROLE_ADMIN', 'ROLE_SUPER_ADMIN'].includes(r));
+
+  if (requiredPermissions && requiredPermissions.length > 0) {
+    // Si c'est un administrateur maître, on le laisse passer le garde (l'API fera la validation finale)
+    if (isMasterAdmin) return true;
+
+    const hasAccess = permissionOp === 'ANY'
+      ? authService.hasAnyPermission(requiredPermissions)
+      : authService.hasAllPermissions(requiredPermissions);
+
+    if (!hasAccess) {
+      console.warn(`[authGuard] Access denied for ${state.url}. Required (${permissionOp}): ${requiredPermissions}`);
+      return router.createUrlTree(['/403']);
+    }
+    return true;
+  }
+
+  // 3. Check Roles (Optional / Fallback)
   const requiredRoles = route.data['roles'] as string[];
   if (requiredRoles && requiredRoles.length > 0) {
     const user = authService.currentUser();
@@ -24,12 +45,12 @@ export const authGuard: CanActivateFn = (route, state) => {
 
     if (!hasRole) {
       console.warn(`[authGuard] Access denied for ${state.url}. Required roles: ${requiredRoles}`);
-      
+
       // Redirect to their specific "home" based on role to avoid loops
       if (user?.roles.includes('ROLE_SUPER_ADMIN')) {
         return router.createUrlTree(['/saas']);
       } else {
-        // If they are a school user but hitting a route they can't access, 
+        // If they are a school user but hitting a route they can't access,
         // redirect to root only if they aren't already there.
         if (state.url === '/') {
           console.error('[authGuard] User has no access even to root. Check role configuration.');

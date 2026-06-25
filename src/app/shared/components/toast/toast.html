@@ -1,1 +1,23 @@
-<p>toast works!</p>
+<div class="fw-toast-container" [ngClass]="getTypeClass()" [@flyInOut]="state()">
+  <div class="toast-icon">
+    <lucide-icon [name]="getIcon()" [size]="20"></lucide-icon>
+  </div>
+
+  <div class="toast-content">
+    <div *ngIf="title()" class="toast-title" [attr.aria-label]="title()">
+      {{ title() }}
+    </div>
+    <div *ngIf="message()" class="toast-message" [attr.aria-label]="message()">
+      {{ message() }}
+    </div>
+  </div>
+
+  <button *ngIf="options().closeButton" (click)="remove()" class="close-btn" aria-label="Fermer">
+    <lucide-icon [name]="X" [size]="14"></lucide-icon>
+  </button>
+
+  <!-- Progress Bar (Optionnelle) -->
+  <div *ngIf="options().progressBar" class="progress-track">
+    <div class="progress-bar" [style.width]="width + '%'"></div>
+  </div>
+</div>

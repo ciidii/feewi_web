@@ -1,0 +1,99 @@
+.fw-toast-container {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 320px;
+  max-width: 400px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  background: var(--fw-surface-card);
+  border: 1px solid var(--fw-border);
+  border-radius: var(--fw-radius-xl);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  pointer-events: auto;
+
+  /* VARIANTES */
+  &.success {
+    border-left: 4px solid var(--fw-success);
+    .toast-icon { color: var(--fw-success); }
+    .progress-bar { background: var(--fw-success); }
+  }
+
+  &.error {
+    border-left: 4px solid var(--fw-error);
+    .toast-icon { color: var(--fw-error); }
+    .progress-bar { background: var(--fw-error); }
+  }
+
+  &.warning {
+    border-left: 4px solid var(--fw-warning);
+    .toast-icon { color: var(--fw-warning); }
+    .progress-bar { background: var(--fw-warning); }
+  }
+
+  &.info {
+    border-left: 4px solid var(--fw-info);
+    .toast-icon { color: var(--fw-info); }
+    .progress-bar { background: var(--fw-info); }
+  }
+}
+
+.toast-icon {
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.toast-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  .toast-title {
+    font-size: 0.875rem;
+    font-weight: 800;
+    color: var(--fw-text-primary);
+  }
+
+  .toast-message {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--fw-text-secondary);
+    line-height: 1.4;
+  }
+}
+
+.close-btn {
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  color: var(--fw-text-tertiary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: var(--fw-transition-fast);
+  margin-top: -2px;
+  margin-right: -4px;
+
+  &:hover {
+    background: var(--fw-surface-sunken);
+    color: var(--fw-text-primary);
+  }
+}
+
+/* PROGRESS BAR */
+.progress-track {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--fw-surface-sunken);
+}
+
+.progress-bar {
+  height: 100%;
+  transition: width 100ms linear;
+}

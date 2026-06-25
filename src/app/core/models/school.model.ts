@@ -3,6 +3,7 @@ export interface School {
   tenantId: string;
   name: string;
   slogan?: string;
+  logoUrl?: string;
   phone: string;
   email: string;
   streetAddress: string;
@@ -11,8 +12,24 @@ export interface School {
   adminFirstName: string;
   adminLastName: string;
   adminPassword?: string;
+  adminStaffType?: 'ADMINISTRATION' | 'TEACHER' | 'SUPPORT' | 'OTHER';
+  educationTemplate?: string; // ex: SN_FR, GMB_EN
+  allowedCycles?: string[];   // ex: ["PRIMARY", "MIDDLE"]
+  status?: 'TRIAL' | 'ACTIVE' | 'SUSPENDED';
   active?: boolean;
   createdAt?: string;
+}
+
+export interface PublicSchoolResponse {
+  tenantId: string;
+  name: string;
+  slogan?: string;
+  logoUrl?: string;
+  phone?: string;
+  email?: string;
+  streetAddress?: string;
+  city?: string;
+  country?: string;
 }
 
 export interface Page<T> {

@@ -1,0 +1,434 @@
+<app-fw-public-header></app-fw-public-header>
+
+<div class="tracker-page bg-surface-page min-h-screen">
+  <main class="main-content container animate-fade">
+
+    <!-- ══════════ CHARGEMENT ══════════ -->
+    <div *ngIf="isLoading()" class="loading-state">
+      <fw-block-loader message="Récupération des informations..."></fw-block-loader>
+    </div>
+
+    <!-- ══════════ RECHERCHE ══════════ -->
+    <div *ngIf="!isLoading() && mode() === 'search'" class="search-state">
+      <div class="search-card">
+
+        <div class="card-head">
+          <div class="icon-wrap"><lucide-icon [name]="Search" [size]="24"></lucide-icon></div>
+          <h1>Retrouver mon dossier</h1>
+          <p>Consultez l'avancement de votre demande d'inscription.</p>
+        </div>
+
+        <!-- Onglets -->
+        <div class="search-tabs">
+          <button class="tab-btn" [class.active]="searchTab() === 'code'" (click)="searchTab.set('code')">
+            Référence + Code
+          </button>
+          <button class="tab-btn" [class.active]="searchTab() === 'email'" (click)="searchTab.set('email')">
+            Rechercher par email
+          </button>
+        </div>
+
+        <!-- Onglet Référence + Code -->
+        <form *ngIf="searchTab() === 'code'" (ngSubmit)="onSearchByCode()" class="search-form">
+          <div class="fw-field">
+            <label class="fw-label">Référence du dossier</label>
+            <input type="text" [(ngModel)]="searchData.reference" name="ref"
+                   class="fw-input" placeholder="Ex: ADM-2026-XXXXX" required>
+          </div>
+          <div class="fw-field">
+            <label class="fw-label">Code d'accès confidentiel</label>
+            <input type="text" [(ngModel)]="searchData.accessCode" name="code"
+                   class="fw-input font-mono tracking-widest" placeholder="••••••••" required>
+          </div>
+          <div *ngIf="error()" class="error-box">
+            <lucide-icon [name]="Info" [size]="16"></lucide-icon>
+            <span>{{ error() }}</span>
+          </div>
+          <app-fw-button type="submit" [variant]="'primary'" class="w-full" [size]="'lg'"
+                         [icon]="ArrowRight" iconPosition="right">
+            Rechercher le dossier
+          </app-fw-button>
+        </form>
+
+        <!-- Onglet Email -->
+        <div *ngIf="searchTab() === 'email'" class="search-form">
+          <div class="fw-field">
+            <label class="fw-label">Adresse email du tuteur</label>
+            <input type="email" [(ngModel)]="emailInput" name="email"
+                   class="fw-input" placeholder="Ex: parent@email.com">
+            <p class="fw-hint">Email utilisé lors de la création du dossier.</p>
+          </div>
+          <div *ngIf="error()" class="error-box">
+            <lucide-icon [name]="Info" [size]="16"></lucide-icon>
+            <span>{{ error() }}</span>
+          </div>
+          <app-fw-button (click)="onSearchByEmail()" [variant]="'primary'" class="w-full" [size]="'lg'"
+                         [icon]="ArrowRight" iconPosition="right">
+            Rechercher par email
+          </app-fw-button>
+
+          <!-- Résultats email -->
+          <div *ngIf="emailResults().length > 0" class="email-results">
+            <p class="results-label">{{ emailResults().length }} dossier(s) trouvé(s) :</p>
+            <button *ngFor="let a of emailResults()" class="result-row" (click)="selectEmailResult(a)">
+              <div class="result-info">
+                <span class="result-name">{{ a.identity.firstName }} {{ a.identity.lastName }}</span>
+                <span class="result-ref">{{ a.reference }}</span>
+              </div>
+              <app-fw-badge [status]="a.status" size="sm"></app-fw-badge>
+              <lucide-icon [name]="ChevronRight" [size]="16" class="result-arrow"></lucide-icon>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══════════ VUE BUNDLE (plusieurs enfants) ══════════ -->
+    <div *ngIf="!isLoading() && mode() === 'bundle'" class="bundle-state">
+
+      <!-- En-tête famille -->
+      <div class="family-header">
+        <div class="family-icon"><lucide-icon [name]="Users" [size]="22"></lucide-icon></div>
+        <div class="family-info">
+          <p class="family-label">Dossier famille</p>
+          <h2>{{ bundle()?.family?.primaryGuardian?.firstName }} {{ bundle()?.family?.primaryGuardian?.lastName }}</h2>
+          <span class="family-ref">{{ bundle()?.reference }}</span>
+        </div>
+        <div class="family-actions">
+          <app-fw-button (click)="reload()" [variant]="'ghost'" [size]="'sm'" [icon]="RefreshCw">Actualiser</app-fw-button>
+          <app-fw-button (click)="reset()" [variant]="'ghost'" [size]="'sm'" [icon]="Search">Autre dossier</app-fw-button>
+        </div>
+      </div>
+
+      <!-- ── Panel décision (piloté par decisionState) ── -->
+
+      <!-- AWAITING_SCHOOL : école traite encore -->
+      <div *ngIf="!selectedAdmission() && bundle()?.decisionState === 'AWAITING_SCHOOL'"
+           class="decision-panel ds-awaiting">
+        <div class="dp-icon">
+          <lucide-icon [name]="Clock" [size]="24"></lucide-icon>
+        </div>
+        <div class="dp-body">
+          <p class="dp-title">Traitement en cours</p>
+          <p class="dp-sub">L'école examine les dossiers de vos enfants. Vous serez notifié dès qu'une décision est prise.</p>
+        </div>
+        <div class="dp-actions">
+          <app-fw-button [variant]="'ghost'" [icon]="RefreshCw" (click)="reload()">Actualiser</app-fw-button>
+        </div>
+      </div>
+
+      <!-- PAYMENT_REQUIRED : tous admis, paiement attendu -->
+      <div *ngIf="!selectedAdmission() && bundle()?.decisionState === 'PAYMENT_REQUIRED'"
+           class="decision-panel ds-payment_required">
+        <div class="dp-icon"><lucide-icon [name]="Sparkles" [size]="24"></lucide-icon></div>
+        <div class="dp-body">
+          <p class="dp-title">Tous vos enfants ont été admis !</p>
+          <p class="dp-sub">Confirmez pour déclencher le processus de paiement des frais d'inscription.</p>
+          <div class="dp-deadline" *ngIf="admissions()[0]?.admissionDeadline">
+            <lucide-icon [name]="Clock" [size]="13"></lucide-icon>
+            <span>Offre valable jusqu'au {{ admissions()[0].admissionDeadline | fwDate:'full' }}</span>
+          </div>
+        </div>
+        <div class="dp-actions">
+          <app-fw-button [variant]="'primary'" [icon]="CheckCircle" iconPosition="right"
+                         [loading]="isDeciding()" (click)="onConfirmAdmitted()">
+            Procéder au paiement
+          </app-fw-button>
+        </div>
+      </div>
+
+      <!-- PARENT_CHOICE : mix admis / refusés — récap + avertissement -->
+      <div *ngIf="!selectedAdmission() && bundle()?.decisionState === 'PARENT_CHOICE'"
+           class="decision-panel ds-parent_choice">
+        <div class="dp-full-width">
+          <div class="dp-header">
+            <div class="dp-icon"><lucide-icon [name]="AlertTriangle" [size]="24"></lucide-icon></div>
+            <div class="dp-body">
+              <p class="dp-title">Décision requise — choix irréversible</p>
+              <p class="dp-sub">Certains dossiers ont été admis, d'autres refusés par l'école. Votre choix s'applique à l'ensemble du dossier famille.</p>
+            </div>
+          </div>
+
+          <!-- Récap enfants -->
+          <div class="dp-recap">
+            <div class="dp-recap-col admitted">
+              <p class="dp-recap-label">Seront validés</p>
+              <ng-container *ngFor="let a of admissions()">
+                <div class="dp-recap-child admitted-row" *ngIf="a.status === 'ADMITTED'">
+                  <lucide-icon [name]="Check" [size]="13"></lucide-icon>
+                  <span>{{ a.identity.firstName }} {{ a.identity.lastName }}</span>
+                </div>
+              </ng-container>
+            </div>
+            <div class="dp-recap-col rejected">
+              <p class="dp-recap-label">Resteront refusés</p>
+              <ng-container *ngFor="let a of admissions()">
+                <div class="dp-recap-child rejected-row" *ngIf="a.status === 'REJECTED'">
+                  <lucide-icon [name]="XCircle" [size]="13"></lucide-icon>
+                  <span>{{ a.identity.firstName }} {{ a.identity.lastName }}</span>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+
+          <div class="dp-actions dp-actions-full">
+            <app-fw-button [variant]="'primary'" [icon]="CheckCircle" iconPosition="right"
+                           [loading]="isDeciding()" (click)="onConfirmAdmitted()">
+              Valider les admis
+            </app-fw-button>
+            <app-fw-button [variant]="'danger'" [icon]="XCircle"
+                           [loading]="isDeciding()" (click)="onCancelAll()">
+              Tout annuler
+            </app-fw-button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CLOSED : état final -->
+      <div *ngIf="!selectedAdmission() && bundle()?.decisionState === 'CLOSED'"
+           class="decision-panel ds-closed">
+        <div class="dp-icon"><lucide-icon [name]="CheckCircle" [size]="24"></lucide-icon></div>
+        <div class="dp-body">
+          <p class="dp-title">Dossier clôturé</p>
+          <p class="dp-sub">Toutes les inscriptions ont été traitées. Aucune action supplémentaire n'est requise.</p>
+        </div>
+      </div>
+
+      <!-- Vue détail d'un enfant sélectionné OU liste -->
+      <div *ngIf="selectedAdmission(); let app" class="single-wrapper">
+        <button class="back-to-list" (click)="selectedAdmission.set(null)" *ngIf="admissions().length > 1">
+          <lucide-icon [name]="ArrowLeft" [size]="15"></lucide-icon>
+          Retour à la liste des enfants
+        </button>
+        <ng-container *ngTemplateOutlet="admissionDetail; context: { app: app }"></ng-container>
+      </div>
+
+      <div *ngIf="!selectedAdmission()" class="children-list">
+        <h3 class="children-title">{{ admissions().length }} enfant(s) inscrit(s)</h3>
+        <button *ngFor="let a of admissions()" class="child-card" (click)="selectedAdmission.set(a)">
+          <div class="child-avatar">{{ a.identity.firstName[0] }}{{ a.identity.lastName[0] }}</div>
+          <div class="child-info">
+            <span class="child-name">{{ a.identity.firstName }} {{ a.identity.lastName }}</span>
+            <span class="child-level">{{ a.schooling.levelLabel || a.schooling.levelId }}</span>
+            <span class="child-message">{{ a.trackerMessage }}</span>
+          </div>
+          <div class="child-right">
+            <app-fw-badge [status]="a.status" size="sm"></app-fw-badge>
+            <span class="missing-alert" *ngIf="hasMissingMandatoryDocs(a.documents)">
+              <lucide-icon [name]="AlertTriangle" [size]="13"></lucide-icon> Docs manquants
+            </span>
+          </div>
+          <lucide-icon [name]="ChevronRight" [size]="18" class="child-arrow"></lucide-icon>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- ══════════ VUE ENFANT UNIQUE ══════════ -->
+    <div *ngIf="!isLoading() && mode() === 'single' && admission(); let app" class="single-state">
+      <ng-container *ngTemplateOutlet="admissionDetail; context: { app: app }"></ng-container>
+      <div class="actions-footer">
+        <app-fw-button (click)="reset()" [variant]="'ghost'" [icon]="Search">Suivre un autre dossier</app-fw-button>
+        <app-fw-button (click)="reload()" [variant]="'secondary'" [icon]="RefreshCw">Actualiser</app-fw-button>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="tracker-footer">
+    <p>&copy; 2026 Feewi Education • Portail d'Admission Sécurisé</p>
+  </footer>
+</div>
+
+<!-- ══════════ TEMPLATE PARTAGÉ : DÉTAIL D'UNE ADMISSION ══════════ -->
+<ng-template #admissionDetail let-app="app">
+
+  <!-- Banner statut -->
+  <div class="status-banner" [class]="app.status.toLowerCase()">
+    <div class="banner-content">
+      <div class="status-info">
+        <app-fw-badge [status]="app.status" size="sm"></app-fw-badge>
+        <h2 class="reference">{{ app.reference }}</h2>
+        <p class="student-name">{{ app.identity?.firstName }} {{ app.identity?.lastName }}</p>
+
+        <div class="tracker-message" *ngIf="app.trackerMessage">
+          <lucide-icon [name]="MessageSquare" [size]="15"></lucide-icon>
+          <span>{{ app.trackerMessage }}</span>
+        </div>
+
+        <!-- CTA DRAFT : continuer -->
+        <div *ngIf="app.status === 'DRAFT'" class="mt-6">
+          <app-fw-button [variant]="'primary'" [size]="'md'" [icon]="ArrowRight" iconPosition="right"
+                         [routerLink]="['/enrollment/form-stepper']">
+            Continuer l'inscription
+          </app-fw-button>
+        </div>
+
+        <!-- ADMITTED : message d'attente (décision au niveau bundle) -->
+        <div *ngIf="app.status === 'ADMITTED'" class="admitted-notice mt-6">
+          <lucide-icon [name]="Sparkles" [size]="16"></lucide-icon>
+          <span>Retournez à la vue famille pour confirmer l'inscription.</span>
+        </div>
+      </div>
+      <div class="banner-icon">
+        <lucide-icon [name]="CheckCircle" [size]="52" *ngIf="app.status === 'VALIDATED'"></lucide-icon>
+        <lucide-icon [name]="Sparkles"    [size]="52" *ngIf="app.status === 'ADMITTED'"></lucide-icon>
+        <lucide-icon [name]="Clock"       [size]="52" *ngIf="app.status === 'WAITLIST'"></lucide-icon>
+        <lucide-icon [name]="ShieldCheck" [size]="52" *ngIf="['SUBMITTED','VERIFIED','TESTING'].includes(app.status)"></lucide-icon>
+        <lucide-icon [name]="Info"        [size]="52" *ngIf="['DRAFT','REJECTED','CANCELLED'].includes(app.status)"></lucide-icon>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alerte docs manquants -->
+  <div class="missing-docs-alert" *ngIf="hasMissingMandatoryDocs(app.documents)">
+    <lucide-icon [name]="AlertTriangle" [size]="16"></lucide-icon>
+    <span>Des pièces obligatoires sont manquantes. Merci de les déposer dès que possible.</span>
+  </div>
+
+  <div class="grid-layout">
+
+    <!-- Timeline -->
+    <div class="timeline-card">
+      <h3 class="card-title">Étapes de traitement</h3>
+      <div class="timeline">
+
+        <div class="timeline-item done" [class.current]="app.status === 'DRAFT'">
+          <div class="t-dot"><lucide-icon [name]="Check" [size]="12"></lucide-icon></div>
+          <div class="t-content">
+            <p class="t-label">Dépôt du dossier</p>
+            <p class="t-date">Dossier créé</p>
+          </div>
+        </div>
+
+        <div class="timeline-item"
+             [class.done]="['SUBMITTED','VERIFIED','TESTING','ADMITTED','WAITLIST','VALIDATED'].includes(app.status)"
+             [class.current]="app.status === 'SUBMITTED'">
+          <div class="t-dot">
+            <lucide-icon [name]="Check" [size]="12"
+              *ngIf="['SUBMITTED','VERIFIED','TESTING','ADMITTED','WAITLIST','VALIDATED'].includes(app.status)">
+            </lucide-icon>
+          </div>
+          <div class="t-content">
+            <p class="t-label">Dossier soumis</p>
+            <p class="t-date">En attente du secrétariat</p>
+          </div>
+        </div>
+
+        <div class="timeline-item"
+             [class.done]="['VERIFIED','TESTING','ADMITTED','WAITLIST','VALIDATED'].includes(app.status)"
+             [class.current]="app.status === 'VERIFIED'">
+          <div class="t-dot">
+            <lucide-icon [name]="Check" [size]="12"
+              *ngIf="['VERIFIED','TESTING','ADMITTED','WAITLIST','VALIDATED'].includes(app.status)">
+            </lucide-icon>
+          </div>
+          <div class="t-content">
+            <p class="t-label">Vérification administrative</p>
+            <p class="t-date">Contrôle des pièces</p>
+          </div>
+        </div>
+
+        <div class="timeline-item"
+             [class.done]="['TESTING','ADMITTED','WAITLIST','VALIDATED'].includes(app.status)"
+             [class.current]="app.status === 'TESTING'">
+          <div class="t-dot">
+            <lucide-icon [name]="Check" [size]="12"
+              *ngIf="['TESTING','ADMITTED','WAITLIST','VALIDATED'].includes(app.status)">
+            </lucide-icon>
+          </div>
+          <div class="t-content">
+            <p class="t-label">Évaluation pédagogique</p>
+            <p class="t-date">Décision de la direction</p>
+          </div>
+        </div>
+
+        <div class="timeline-item"
+             [class.done]="['ADMITTED','WAITLIST','VALIDATED'].includes(app.status)"
+             [class.current]="app.status === 'ADMITTED' || app.status === 'WAITLIST'">
+          <div class="t-dot">
+            <lucide-icon [name]="Check" [size]="12"
+              *ngIf="['ADMITTED','WAITLIST','VALIDATED'].includes(app.status)">
+            </lucide-icon>
+          </div>
+          <div class="t-content">
+            <p class="t-label">{{ app.status === 'WAITLIST' ? 'Liste d\'attente' : 'Candidat admis' }}</p>
+            <p class="t-date">{{ app.status === 'WAITLIST' ? 'En attente d\'une place' : 'Offre d\'admission émise' }}</p>
+          </div>
+        </div>
+
+        <div class="timeline-item" [class.done]="app.status === 'VALIDATED'" [class.current]="app.status === 'VALIDATED'">
+          <div class="t-dot">
+            <lucide-icon [name]="Sparkles" [size]="12" *ngIf="app.status === 'VALIDATED'"></lucide-icon>
+          </div>
+          <div class="t-content">
+            <p class="t-label">Admission définitive</p>
+            <p class="t-date">Inscription confirmée</p>
+          </div>
+        </div>
+
+        <div class="timeline-item rejected" *ngIf="app.status === 'REJECTED' || app.status === 'CANCELLED'">
+          <div class="t-dot rejected"></div>
+          <div class="t-content">
+            <p class="t-label">{{ app.status === 'REJECTED' ? 'Dossier rejeté' : 'Dossier annulé' }}</p>
+            <p class="t-date">Processus terminé</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="info-sidebar">
+
+      <!-- Résumé -->
+      <div class="summary-card">
+        <h3 class="card-title">Résumé</h3>
+        <div class="summary-list">
+          <div class="s-item">
+            <span class="s-label">Élève</span>
+            <span class="s-value">{{ app.identity?.firstName }} {{ app.identity?.lastName }}</span>
+          </div>
+          <div class="s-item" *ngIf="app.schooling">
+            <span class="s-label">Niveau demandé</span>
+            <span class="s-value">{{ app.schooling.levelLabel || app.schooling.levelId }}</span>
+          </div>
+          <div class="s-item" *ngIf="app.type">
+            <span class="s-label">Type</span>
+            <span class="s-value">{{ app.type === 'RE_ENROLLMENT' ? 'Réinscription' : 'Nouvelle inscription' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Documents -->
+      <div class="docs-card" *ngIf="app.documents?.length > 0">
+        <h3 class="card-title">
+          <lucide-icon [name]="FileText" [size]="16"></lucide-icon>
+          Pièces justificatives
+        </h3>
+        <div class="docs-list">
+          <div *ngFor="let doc of app.documents" class="doc-row" [class]="docStatusClass(doc.status)">
+            <div class="doc-status-dot"></div>
+            <span class="doc-name">{{ doc.name }}</span>
+            <span class="doc-badge">{{ docStatusLabel(doc.status) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact -->
+      <div class="contact-card">
+        <div class="card-icon"><lucide-icon [name]="MessageSquare" [size]="20"></lucide-icon></div>
+        <div class="card-body">
+          <h3>Besoin d'aide ?</h3>
+          <p>Contactez notre service admission pour toute question.</p>
+          <div class="contact-actions">
+            <app-fw-button [variant]="'secondary'" [size]="'sm'" [icon]="Phone">Appeler</app-fw-button>
+            <app-fw-button [variant]="'secondary'" [size]="'sm'" [icon]="Mail">Email</app-fw-button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</ng-template>

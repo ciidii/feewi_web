@@ -1,13 +1,15 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { LucideAngularModule, Shield, Save, X, Info, AlertCircle, Loader2, Type, FileText } from 'lucide-angular';
-import { IdentityService } from '../../../../../../../core/services/identity.service';
-import { NotificationService } from '../../../../../../../shared/services/notification.service';
+import {Component, inject, OnInit} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material/input';
+import {MatButtonModule} from '@angular/material/button';
+import {firstValueFrom} from 'rxjs';
+import {AlertCircle, FileText, Info, Loader2, LucideAngularModule, Save, Shield, Type, X} from 'lucide-angular';
+import {IdentityService} from '../../../../../../../core/services/identity.service';
+import {NotificationService} from '../../../../../../../shared/services/notification.service';
+import {FormShellComponent} from '../../../../../../../shared/components/form-shell/form-shell';
 
 @Component({
   selector: 'app-role-form',
@@ -19,7 +21,8 @@ import { NotificationService } from '../../../../../../../shared/services/notifi
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    LucideAngularModule
+    LucideAngularModule,
+    FormShellComponent
   ],
   templateUrl: './role-form.component.html',
   styleUrl: './role-form.component.scss'
@@ -49,23 +52,25 @@ export class RoleFormComponent implements OnInit {
 
   ngOnInit() {}
 
-  async onSave() {
+  onSave() {
     if (this.roleForm.invalid) {
       this.roleForm.markAllAsTouched();
-      this.notificationService.warning('Verifiez les champs avant de continuer.', 'Formulaire incomplet');
+      this.notificationService.warning('Vérifiez les champs avant de continuer.', 'Formulaire incomplet');
       return;
     }
 
-    try {
-      const roleData = this.roleForm.value;
-      await this.identityService.createRole(roleData);
-      this.notificationService.success('Role cree avec succes.', 'Creation terminee');
-      this.dialogRef.close(true);
-    } catch (err: any) {
-      const message = err?.error?.message || err?.message || 'Echec lors de la creation du role.';
-      this.notificationService.error(message, 'Echec de creation');
-      console.error('Failed to create role', err);
-    }
+    const roleData = this.roleForm.value;
+    this.identityService.createRole(roleData).subscribe({
+      next: () => {
+        this.notificationService.success('Rôle créé avec succès.', 'Création terminée');
+        this.dialogRef.close(true);
+      },
+      error: (err: any) => {
+        const message = err?.error?.message || err?.message || 'Échec lors de la création du rôle.';
+        this.notificationService.error(message, 'Échec de création');
+        console.error('Failed to create role', err);
+      }
+    });
   }
 
   onCancel() {
@@ -85,7 +90,7 @@ export class RoleFormComponent implements OnInit {
   getErrorMessage(controlName: string): string {
     const control = this.roleForm.get(controlName);
     if (control?.hasError('required')) return 'Ce champ est obligatoire';
-    if (control?.hasError('minlength')) return `Minimum ${control.errors?.['minlength'].requiredLength} caracteres`;
+    if (control?.hasError('minlength')) return `Minimum ${control.errors?.['minlength'].requiredLength} caractères`;
     if (control?.hasError('pattern')) return 'Le nom doit commencer par ROLE_ (ex: ROLE_SURVEILLANT)';
     return 'Champ invalide';
   }

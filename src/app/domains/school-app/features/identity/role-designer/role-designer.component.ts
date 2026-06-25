@@ -1,67 +1,138 @@
-import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {Component, computed, inject, OnInit, signal, ViewEncapsulation} from '@angular/core';
 import {CommonModule} from '@angular/common';
+import {forkJoin, finalize, switchMap} from 'rxjs';
 import {
   ChevronRight,
+  Edit3,
+  Eye,
+  FilePlus,
   Info,
   Key,
-  Loader2,
   LucideAngularModule,
-  Maximize2,
   Plus,
   Save,
+  Search,
   Shield,
   ShieldCheck,
   Sparkles,
-  Users
+  Trash2,
+  Users,
+  Zap,
+  Settings
 } from 'lucide-angular';
 import {MatButtonModule} from '@angular/material/button';
 import {MatDialog} from '@angular/material/dialog';
 import {IdentityService} from '../../../../../core/services/identity.service';
 import {RoleFormComponent} from './components/role-form/role-form.component';
+import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
+import {ButtonVariant, FwButtonComponent} from '../../../../../shared/components/button/button.component';
+import {FormsModule} from '@angular/forms';
+import {SkeletonComponent} from '../../../../../shared/components/skeleton/skeleton.component';
+import {NotificationService} from '../../../../../shared/services/notification.service';
+import {Permission, Role} from '../../../../../core/models/role.model';
 
-export interface Permission {
-  id: string;
-  label: string;
-  description: string;
+export interface PermissionAction {
+  id: string; // academic:structure:read
+  actionCode: string; // read
+  label: string; // Consulter
+  description?: string;
   granted: boolean;
-  isSystem?: boolean;
-  dependencies?: string[];
+  icon: any;
+  variant: ButtonVariant;
 }
 
-export interface PermissionGroup {
-  category: string;
-  permissions: Permission[];
+export interface PermissionResourceRow {
+  resourceCode: string; // structure
+  resourceName: string; // Structure Éducative
+  // Slots fixes pour la matrice
+  read?: PermissionAction;
+  write?: PermissionAction;
+  delete?: PermissionAction;
+  special?: PermissionAction;
+}
+
+export interface PermissionDomainGroup {
+  domainCode: string; // academic
+  domainName: string; // Pédagogie & Structure
+  resources: PermissionResourceRow[];
 }
 
 @Component({
   selector: 'app-role-designer',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, MatButtonModule],
+  imports: [
+    CommonModule,
+    LucideAngularModule,
+    MatButtonModule,
+    FwPageShellComponent,
+    FwButtonComponent,
+    FormsModule,
+    SkeletonComponent
+  ],
   templateUrl: './role-designer.component.html',
-  styleUrls: ['./role-designer.component.scss']
+  styleUrls: ['./role-designer.component.scss'],
+  encapsulation: ViewEncapsulation.None
 })
 export class RoleDesignerComponent implements OnInit {
   private identityService = inject(IdentityService);
+  private notificationService = inject(NotificationService);
   private dialog = inject(MatDialog);
+
+  // Dictionnaires de traduction
+  private readonly DOMAIN_LABELS: Record<string, string> = {
+    'identity': 'Administration & Sécurité',
+    'academic': 'Pédagogie & Structure',
+    'enrollment': 'Admissions & Inscriptions',
+    'finance': 'Gestion Financière',
+    'notification': 'Communication & Alertes',
+    'student': 'Registre & Scolarité'
+  };
+
+  private readonly RESOURCE_LABELS: Record<string, string> = {
+    'school': 'Établissement (SaaS)',
+    'saas:school': 'Gestion des Écoles (SaaS)',
+    'saas:audit': 'Audit Plateforme (SaaS)',
+    'user': 'Utilisateurs & Staff',
+    'role': 'Rôles & Permissions',
+    'audit': 'Journal d\'audit',
+    'structure': 'Cycles & Niveaux',
+    'subject': 'Matières & Syllabus',
+    'year': 'Calendrier Académique',
+    'class': 'Classes Physiques',
+    'teaching': 'Affectation Enseignants',
+    'assignment': 'Affectation Élèves',
+    'exam': 'Examens & Notes',
+    'attendance': 'Présences (Appel)',
+    'admission': 'Gestion des Candidatures',
+    'dashboard': 'Tableau de Bord Admissions',
+    'config': 'Paramètres du Portail',
+    'registry': 'Fiches Élèves',
+    'discipline': 'Discipline & Suivi'
+  };
+
+  private readonly ACTION_LABELS: Record<string, string> = {
+    'read': 'Lire',
+    'write': 'Modifier',
+    'delete': 'Supprimer',
+    'lifecycle': 'Vie',
+    'manage': 'Gérer',
+    'create': 'Ajouter',
+    'validate': 'Valider',
+    'list': 'Lister',
+    'view': 'Consulter',
+    'submit': 'Soumettre',
+    'verify': 'Vérifier',
+    'assess': 'Évaluer',
+    'decide': 'Décider',
+    'cancel': 'Annuler'
+  };
 
   // États
   isLoading = this.identityService.loading;
+  isInitialLoading = signal(true);
   isSaving = signal(false);
   selectedRoleId = signal<string | null>(null);
   unsavedChanges = signal<Set<string>>(new Set());
-
-  // Icônes
-  readonly ShieldCheck = ShieldCheck;
-  readonly Shield = Shield;
-  readonly Save = Save;
-  readonly Plus = Plus;
-  readonly ChevronRight = ChevronRight;
-  readonly Loader2 = Loader2;
-  readonly Users = Users;
-  readonly Key = Key;
-  readonly Info = Info;
-  readonly Sparkles = Sparkles;
-  readonly Maximize2 = Maximize2;
 
   // Rôles transformés
   roles = computed(() => {
@@ -69,8 +140,8 @@ export class RoleDesignerComponent implements OnInit {
     return apiRoles.map(role => ({
       id: role.id || role.name,
       name: this.formatRoleName(role.name),
-      icon: role.isSystem ? ShieldCheck : Shield,
-      memberCount: (role as any).memberCount || 0,
+      icon: role.isSystemRole ? ShieldCheck : Shield,
+      memberCount: role.memberCount || 0,
       rawData: role
     }));
   });
@@ -82,130 +153,181 @@ export class RoleDesignerComponent implements OnInit {
     return currentRoles.find(r => r.id === this.selectedRoleId()) || currentRoles[0];
   });
 
-  // Groupes de permissions
-  permissionGroups = signal<PermissionGroup[]>([
-    {
-      category: 'Scolarité & Workflow',
-      permissions: [
-        {
-          id: 'student:read',
-          label: 'Consultation Référentiel',
-          description: 'Voir la liste des élèves et leurs informations de base.',
-          granted: false
-        },
-        {
-          id: 'student:write',
-          label: 'Édition Dossiers',
-          description: 'Modifier les informations d\'état civil et les pièces jointes.',
-          granted: false
-        },
-        {
-          id: 'admission:validate',
-          label: 'Validation Admission',
-          description: 'Approuver les nouveaux inscrits et assigner une classe.',
-          granted: false,
-          isSystem: true
-        },
-        {
-          id: 'attendance:manage',
-          label: 'Gestion Absences',
-          description: 'Saisir et justifier les absences journalières.',
-          granted: false
-        }
-      ]
-    },
-    {
-      category: 'Gestion Financière',
-      permissions: [
-        {
-          id: 'finance:read',
-          label: 'Encaissement Frais',
-          description: 'Enregistrer les paiements et générer des factures.',
-          granted: false
-        },
-        {
-          id: 'finance:report',
-          label: 'Rapports de Caisse',
-          description: 'Consulter les bilans et l\'historique des transactions.',
-          granted: false,
-          dependencies: ['finance:read']
-        }
-      ]
-    },
-    {
-      category: 'Système & Sécurité',
-      permissions: [
-        {
-          id: 'user:manage',
-          label: 'Annuaire Staff',
-          description: 'Gérer les comptes utilisateurs des collaborateurs.',
-          granted: false,
-          isSystem: true
-        },
-        {
-          id: 'school:manage',
-          label: 'Configuration Niveaux',
-          description: 'Définir la structure des classes et des cycles.',
-          granted: false
-        },
-        {
-          id: 'audit:read',
-          label: 'Audit Trail',
-          description: 'Consulter le journal des actions de sécurité.',
-          granted: false,
-          isSystem: true
-        }
-      ]
-    }
-  ]);
+  isReadOnly = computed(() => this.selectedRole()?.rawData?.isSystemRole || false);
+
+  // Groupes de permissions PBAC
+  permissionGroups = signal<PermissionDomainGroup[]>([]);
+  permissionQuery = signal('');
+
+  filteredPermissionGroups = computed(() => {
+    const query = this.permissionQuery().toLowerCase();
+    const groups = this.permissionGroups();
+    if (!query) return groups;
+
+    return groups.map(group => ({
+      ...group,
+      resources: group.resources.map(res => ({
+        ...res
+      })).filter(res =>
+        res.resourceName.toLowerCase().includes(query) ||
+        res.resourceCode.toLowerCase().includes(query)
+      )
+    })).filter(group => group.resources.length > 0);
+  });
 
   ngOnInit() {
-    this.loadRoles();
+    this.loadInitialData();
   }
 
-  // ===========================================
-  // MÉTHODES UTILITAIRES
-  // ===========================================
+  loadInitialData() {
+    this.isInitialLoading.set(true);
+
+    forkJoin({
+      permissions: this.identityService.getAvailablePermissions(),
+      roles: this.identityService.getRoles()
+    }).pipe(
+      finalize(() => this.isInitialLoading.set(false))
+    ).subscribe({
+      next: ({ permissions }) => {
+        const groups = this.groupPermissionsToMatrix(permissions);
+        this.permissionGroups.set(groups);
+
+        const firstRole = this.roles()[0];
+        if (firstRole && !this.selectedRoleId()) {
+          this.selectRole(firstRole.id);
+        }
+      },
+      error: (err) => {
+        console.error('Failed to load initial data', err);
+        this.notificationService.error('Impossible de charger les données de sécurité.');
+      }
+    });
+  }
+
+  private groupPermissionsToMatrix(apiPermissions: Permission[]): PermissionDomainGroup[] {
+    const domainMap = new Map<string, Map<string, PermissionResourceRow>>();
+
+    apiPermissions.forEach(p => {
+      if (!p.name) return;
+      const parts = p.name.split(':');
+      let domain, resource, action;
+
+      if (parts.length === 2) {
+        domain = parts[0];
+        resource = parts[0];
+        action = parts[1];
+      } else if (parts.length === 3) {
+        domain = parts[0];
+        resource = parts[1];
+        action = parts[2];
+      } else if (parts.length === 4) {
+        domain = parts[0];
+        resource = `${parts[1]}:${parts[2]}`;
+        action = parts[3];
+      } else {
+        return;
+      }
+
+      if (!domainMap.has(domain)) domainMap.set(domain, new Map());
+      const resourceMap = domainMap.get(domain)!;
+
+      if (!resourceMap.has(resource)) {
+        resourceMap.set(resource, {
+          resourceCode: resource,
+          resourceName: this.RESOURCE_LABELS[resource] || resource.toUpperCase()
+        });
+      }
+
+      const row = resourceMap.get(resource)!;
+      const actionObj: PermissionAction = {
+        id: p.name,
+        actionCode: action,
+        label: this.formatActionLabel(action),
+        description: p.description,
+        granted: false,
+        icon: this.getSemanticIcon(action),
+        variant: 'tertiary'
+      };
+
+      if (['read', 'list', 'view'].includes(action)) {
+        row.read = actionObj;
+      } else if (['write', 'create', 'add', 'submit', 'assess'].includes(action)) {
+        row.write = actionObj;
+      } else if (['delete', 'remove', 'cancel'].includes(action)) {
+        row.delete = actionObj;
+      } else {
+        if (!row.special) row.special = actionObj;
+      }
+    });
+
+    return Array.from(domainMap.entries()).map(([domainCode, resourceMap]) => ({
+      domainCode,
+      domainName: this.DOMAIN_LABELS[domainCode] || domainCode.toUpperCase(),
+      resources: Array.from(resourceMap.values()).sort((a, b) => a.resourceName.localeCompare(b.resourceName))
+    })).sort((a, b) => a.domainName.localeCompare(b.domainName));
+  }
+
+  private formatActionLabel(action: string): string {
+    return this.ACTION_LABELS[action] || action;
+  }
+
+  private getSemanticIcon(action: string): any {
+    switch (action) {
+      case 'read':
+      case 'list':
+      case 'view': return Eye;
+      case 'write':
+      case 'submit':
+      case 'assess': return Edit3;
+      case 'create': return FilePlus;
+      case 'delete':
+      case 'cancel': return Trash2;
+      case 'lifecycle': return Zap;
+      case 'manage': return Settings;
+      case 'validate':
+      case 'verify':
+      case 'decide': return ShieldCheck;
+      default: return Shield;
+    }
+  }
+
+  private getSemanticVariant(action: string, granted: boolean): ButtonVariant {
+    if (!granted) return 'tertiary';
+    switch (action) {
+      case 'read':
+      case 'list':
+      case 'view': return 'secondary';
+      case 'write':
+      case 'create':
+      case 'submit':
+      case 'assess': return 'primary';
+      case 'delete':
+      case 'cancel': return 'danger';
+      case 'lifecycle':
+      case 'manage':
+      case 'validate':
+      case 'verify':
+      case 'decide': return 'accent';
+      default: return 'primary';
+    }
+  }
 
   formatRoleName(roleName: string): string {
     return roleName.replace('ROLE_', '').replace(/_/g, ' ');
-  }
-
-  getTotalPermissions(): number {
-    return this.permissionGroups().reduce((acc, g) => acc + g.permissions.length, 0);
-  }
-
-  getGrantedPermissionsCount(): number {
-    return this.permissionGroups().reduce(
-      (acc, g) => acc + g.permissions.filter(p => p.granted).length,
-      0
-    );
   }
 
   hasUnsavedChanges(): boolean {
     return this.unsavedChanges().size > 0;
   }
 
-  // ===========================================
-  // GESTION DES RÔLES
-  // ===========================================
-
-  async loadRoles() {
-    await this.identityService.getRoles();
-    const firstRole = this.roles()[0];
-    if (firstRole && !this.selectedRoleId()) {
-      this.selectRole(firstRole.id);
-    }
-  }
-
   openAddRoleForm() {
     const dialogRef = this.dialog.open(RoleFormComponent, {
       width: '560px',
-      panelClass: 'role-form-dialog'
+      panelClass: 'feewi-dialog-panel'
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result) this.loadRoles();
+      if (result) this.identityService.getRoles().subscribe();
     });
   }
 
@@ -215,9 +337,11 @@ export class RoleDesignerComponent implements OnInit {
     this.unsavedChanges.set(new Set());
   }
 
-  // ===========================================
-  // GESTION DES PERMISSIONS
-  // ===========================================
+  async deleteRole() {
+    const role = this.selectedRole();
+    if (!role || role.rawData.isSystemRole) return;
+    // Logique de suppression à implémenter
+  }
 
   private syncPermissionsWithSelectedRole() {
     const role = this.selectedRole();
@@ -227,85 +351,92 @@ export class RoleDesignerComponent implements OnInit {
 
     const updatedGroups = this.permissionGroups().map(group => ({
       ...group,
-      permissions: group.permissions.map(p => ({
-        ...p,
-        granted: grantedPermissions.includes(p.id)
-      }))
+      resources: group.resources.map(res => {
+        const updateAction = (act?: PermissionAction) => {
+          if (!act) return undefined;
+          const granted = grantedPermissions.includes(act.id);
+          return { ...act, granted, variant: this.getSemanticVariant(act.actionCode, granted) };
+        };
+        return {
+          ...res,
+          read: updateAction(res.read),
+          write: updateAction(res.write),
+          delete: updateAction(res.delete),
+          special: updateAction(res.special)
+        };
+      })
     }));
 
     this.permissionGroups.set(updatedGroups);
   }
 
   onPermissionToggle(permissionId: string, granted: boolean) {
-    // Mettre à jour l'état local
     const updatedGroups = this.permissionGroups().map(group => ({
       ...group,
-      permissions: group.permissions.map(p =>
-        p.id === permissionId ? {...p, granted} : p
-      )
+      resources: group.resources.map(res => {
+        const updateAction = (act?: PermissionAction) => {
+          if (!act || act.id !== permissionId) return act;
+          return { ...act, granted, variant: this.getSemanticVariant(act.actionCode, granted) };
+        };
+        return {
+          ...res,
+          read: updateAction(res.read),
+          write: updateAction(res.write),
+          delete: updateAction(res.delete),
+          special: updateAction(res.special)
+        };
+      })
     }));
     this.permissionGroups.set(updatedGroups);
 
-    // Marquer comme modifié
     const updated = new Set(this.unsavedChanges());
-    updated.add(permissionId);
+    if (updated.has(permissionId)) updated.delete(permissionId);
+    else updated.add(permissionId);
     this.unsavedChanges.set(updated);
-
-    // Gérer les dépendances si nécessaire
-    this.handleDependencies(permissionId, granted);
   }
 
-  private handleDependencies(permissionId: string, granted: boolean) {
-    if (!granted) return;
-
-    const permission = this.findPermission(permissionId);
-    if (permission?.dependencies) {
-      const updatedGroups = this.permissionGroups().map(group => ({
-        ...group,
-        permissions: group.permissions.map(p =>
-          permission.dependencies?.includes(p.id) ? {...p, granted: true} : p
-        )
-      }));
-      this.permissionGroups.set(updatedGroups);
-    }
-  }
-
-  private findPermission(id: string): Permission | undefined {
-    for (const group of this.permissionGroups()) {
-      const found = group.permissions.find(p => p.id === id);
-      if (found) return found;
-    }
-    return undefined;
-  }
-
-  expandAllGroups() {
-    console.log('Expand all groups');
-  }
-
-  // ===========================================
-  // SAUVEGARDE
-  // ===========================================
-
-  async savePermissions() {
+  savePermissions() {
     const role = this.selectedRole();
     if (!role?.rawData?.id || !this.hasUnsavedChanges()) return;
 
     this.isSaving.set(true);
 
-    const allPermissions = this.permissionGroups().flatMap(g => g.permissions);
-    const grantedIds = allPermissions.filter(p => p.granted).map(p => p.id);
+    const allActions = this.permissionGroups().flatMap(g =>
+      g.resources.flatMap(r => [r.read, r.write, r.delete, r.special].filter(Boolean) as PermissionAction[])
+    );
+    const grantedIds = allActions.filter(a => a.granted).map(a => a.id);
 
-    try {
-      await this.identityService.updateRole(role.rawData.id, {
-        permissions: grantedIds
-      });
-      await this.loadRoles();
-      this.unsavedChanges.set(new Set());
-      console.log('✅ Permissions sauvegardées');
-    } catch (err) {
-      console.error('❌ Erreur de sauvegarde', err);
-    } finally {
-      this.isSaving.set(false);
-    }
+    this.identityService.updateRole(role.rawData.id, { permissions: grantedIds }).pipe(
+      switchMap(() => this.identityService.getRoles()),
+      finalize(() => this.isSaving.set(false))
+    ).subscribe({
+      next: () => {
+        this.unsavedChanges.set(new Set());
+        this.notificationService.success('Permissions mises à jour avec succès.');
+        this.syncPermissionsWithSelectedRole();
+      },
+      error: (err) => {
+        console.error('❌ Erreur de sauvegarde', err);
+        this.notificationService.error('Échec de la sauvegarde des permissions.');
+      }
+    });
   }
+
+  // Icônes
+  readonly ShieldCheck = ShieldCheck;
+  readonly Shield = Shield;
+  readonly Save = Save;
+  readonly Plus = Plus;
+  readonly ChevronRight = ChevronRight;
+  readonly Users = Users;
+  readonly Key = Key;
+  readonly Info = Info;
+  readonly Sparkles = Sparkles;
+  readonly Trash2 = Trash2;
+  readonly Eye = Eye;
+  readonly Edit3 = Edit3;
+  readonly Zap = Zap;
+  readonly Settings = Settings;
+  protected readonly Search = Search;
+
 }

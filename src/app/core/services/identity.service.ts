@@ -1,20 +1,31 @@
-import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
-import { User, UserCreateRequest } from '../models/user.model';
-import { Role } from '../models/role.model';
-import { Page } from '../models/school.model';
+import {inject, Injectable, signal} from '@angular/core';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import {catchError, finalize, Observable, tap, throwError} from 'rxjs';
+import {Staff, StaffCreateRequest, User, UserCreateRequest, UserType} from '../models/user.model';
+import {Permission, Role} from '../models/role.model';
+import {Page} from '../models/school.model';
+import {AuditLog} from '../models/audit.model';
+import {EnvironmentService} from './environment.service';
+import {NotificationService} from '../../shared/services/notification.service';
+import {TenantContextService} from './tenant-context.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class IdentityService {
   private http = inject(HttpClient);
-  private readonly API_URL = 'http://localhost:8080/api/v1';
+  private envService = inject(EnvironmentService);
+  private notificationService = inject(NotificationService);
+  private tenantContext = inject(TenantContextService);
+
+  private readonly API_URL = this.envService.getServiceUrl('identity');
 
   // State
-  private _staffPage = signal<Page<User> | null>(null);
+  private _staffPage = signal<Page<Staff> | null>(null);
   readonly staffPage = this._staffPage.asReadonly();
+
+  private _userPage = signal<Page<User> | null>(null);
+  readonly userPage = this._userPage.asReadonly();
 
   private _roles = signal<Role[]>([]);
   readonly roles = this._roles.asReadonly();
@@ -22,86 +33,202 @@ export class IdentityService {
   private _loading = signal<boolean>(false);
   readonly loading = this._loading.asReadonly();
 
-  /**
-   * Liste les membres du personnel (Staff)
-   */
-  async getStaff(search: string = '', page: number = 0, size: number = 10): Promise<void> {
-    this._loading.set(true);
-    try {
-      const params = new HttpParams()
-        .set('search', search)
-        .set('page', page.toString())
-        .set('size', size.toString());
-
-      const response = await firstValueFrom(
-        this.http.get<Page<User>>(`${this.API_URL}/users`, { params })
-      );
-      this._staffPage.set(response);
-    } catch (error) {
-      console.error('Failed to fetch staff directory', error);
-      throw error;
-    } finally {
-      this._loading.set(false);
-    }
+  private handleError(message: string) {
+    return (error: any) => {
+      console.error(error);
+      this.notificationService.error(message);
+      return throwError(() => error);
+    };
   }
 
   /**
-   * Crée un nouvel employé
+   * Liste les membres du personnel (Staff - Identité physique RH)
    */
-  async createStaff(request: UserCreateRequest): Promise<User> {
+  getStaff(search: string = '', page: number = 0, size: number = 10, type?: string): Observable<Page<Staff>> {
     this._loading.set(true);
-    try {
-      return await firstValueFrom(
-        this.http.post<User>(`${this.API_URL}/users`, request)
-      );
-    } finally {
-      this._loading.set(false);
-    }
+    let params = new HttpParams()
+      .set('search', search)
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    if (type) params = params.set('type', type);
+
+    return this.http.get<Page<Staff>>(`${this.API_URL}/staffs`, { params }).pipe(
+      tap(response => this._staffPage.set(response)),
+      catchError(this.handleError('Erreur lors de la récupération du personnel')),
+      finalize(() => this._loading.set(false))
+    );
   }
 
   /**
-   * Liste les rôles disponibles (Système + Tenant)
+   * Crée un nouveau membre du personnel (RH)
    */
-  async getRoles(): Promise<void> {
+  createStaff(request: StaffCreateRequest): Observable<Staff> {
     this._loading.set(true);
-    try {
-      const roles = await firstValueFrom(
-        this.http.get<Role[]>(`${this.API_URL}/roles`)
-      );
-      this._roles.set(roles);
-    } catch (error) {
-      console.error('Failed to fetch roles', error);
-      throw error;
-    } finally {
-      this._loading.set(false);
+    return this.http.post<Staff>(`${this.API_URL}/staffs`, request).pipe(
+      catchError(this.handleError('Erreur lors de la création du membre du personnel')),
+      finalize(() => this._loading.set(false))
+    );
+  }
+
+  /**
+   * Récupère un membre du personnel par son ID
+   */
+  getStaffById(id: string): Observable<Staff> {
+    return this.http.get<Staff>(`${this.API_URL}/staffs/${id}`).pipe(
+      catchError(this.handleError('Erreur lors de la récupération du membre du personnel'))
+    );
+  }
+
+  /**
+   * Liste les comptes utilisateurs (Accès système)
+   */
+  getUsers(search: string = '', page: number = 0, size: number = 10): Observable<Page<User>> {
+    this._loading.set(true);
+    const params = new HttpParams()
+      .set('search', search)
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    return this.http.get<Page<User>>(`${this.API_URL}/users`, { params }).pipe(
+      tap(response => this._userPage.set(response)),
+      catchError(this.handleError('Erreur lors de la récupération des comptes utilisateurs')),
+      finalize(() => this._loading.set(false))
+    );
+  }
+
+  /**
+   * Crée un compte utilisateur lié à un Staff
+   */
+  createUserAccount(request: UserCreateRequest): Observable<User> {
+    this._loading.set(true);
+    return this.http.post<User>(`${this.API_URL}/users`, request).pipe(
+      catchError(this.handleError('Erreur lors de la création du compte utilisateur')),
+      finalize(() => this._loading.set(false))
+    );
+  }
+
+  /**
+   * Met à jour les informations d'un compte utilisateur
+   */
+  updateUser(id: string, user: Partial<User>): Observable<User> {
+    this._loading.set(true);
+    return this.http.put<User>(`${this.API_URL}/users/${id}`, user).pipe(
+      catchError(this.handleError('Erreur lors de la mise à jour du compte')),
+      finalize(() => this._loading.set(false))
+    );
+  }
+
+  /**
+   * Récupère le référentiel des types d'utilisateurs
+   */
+  getUserTypes(): Observable<UserType[]> {
+    return this.http.get<UserType[]>(`${this.API_URL}/user-types`).pipe(
+      catchError(this.handleError('Impossible de charger les types d\'utilisateurs'))
+    );
+  }
+
+  /**
+   * Récupère le profil complet d'un utilisateur
+   */
+  getUserProfile(id: string): Observable<User> {
+    return this.http.get<User>(`${this.API_URL}/users/${id}/profile`).pipe(
+      catchError(this.handleError('Impossible de charger le profil utilisateur'))
+    );
+  }
+
+  private getHeaders(): { [header: string]: string } {
+    const tenantId = this.tenantContext.activeTenant()?.id;
+    if (tenantId) {
+      return { 'X-Tenant-Id': tenantId };
     }
+    return {};
+  }
+
+  /**
+   * Liste les rôles disponibles
+   */
+  getRoles(): Observable<Role[]> {
+    this._loading.set(true);
+    return this.http.get<Role[]>(`${this.API_URL}/roles`, { headers: this.getHeaders() }).pipe(
+      tap(roles => this._roles.set(roles)),
+      catchError(this.handleError('Erreur lors du chargement des rôles')),
+      finalize(() => this._loading.set(false))
+    );
+  }
+
+  /**
+   * Liste toutes les permissions disponibles
+   */
+  getAvailablePermissions(): Observable<Permission[]> {
+    return this.http.get<Permission[]>(`${this.API_URL}/permissions`, { headers: this.getHeaders() }).pipe(
+      catchError(this.handleError('Impossible de charger les permissions'))
+    );
+  }
+
+  /**
+   * Récupère les logs d'audit globaux (SaaS - Super Admin uniquement)
+   */
+  getGlobalAuditLogs(page: number = 0, size: number = 20): Observable<Page<AuditLog>> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    return this.http.get<Page<AuditLog>>(`${this.API_URL}/audit`, { params }).pipe(
+      catchError(this.handleError('Erreur lors du chargement des journaux d\'audit globaux'))
+    );
+  }
+
+  /**
+   * Récupère les logs d'audit d'établissement (Admin Local)
+   */
+  getTenantAuditLogs(page: number = 0, size: number = 20): Observable<Page<AuditLog>> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    return this.http.get<Page<AuditLog>>(`${this.API_URL}/audit/tenant`, { params }).pipe(
+      catchError(this.handleError('Erreur lors du chargement des journaux d\'audit'))
+    );
   }
 
   /**
    * Crée un rôle personnalisé
    */
-  async createRole(role: Role): Promise<Role> {
+  createRole(role: Role): Observable<Role> {
     this._loading.set(true);
-    try {
-      return await firstValueFrom(
-        this.http.post<Role>(`${this.API_URL}/roles`, role)
-      );
-    } finally {
-      this._loading.set(false);
-    }
+    return this.http.post<Role>(`${this.API_URL}/roles`, role).pipe(
+      catchError(this.handleError('Erreur lors de la création du rôle')),
+      finalize(() => this._loading.set(false))
+    );
   }
 
   /**
-   * Met à jour un rôle existant (permissions, description)
+   * Active ou désactive un compte utilisateur
    */
-  async updateRole(id: string, role: Partial<Role>): Promise<Role> {
+  toggleUserActive(id: string, active: boolean): Observable<void> {
+    return this.http.patch<void>(`${this.API_URL}/users/${id}/active`, { active }).pipe(
+      catchError(this.handleError(active ? "Erreur lors de l'activation" : "Erreur lors de la suspension"))
+    );
+  }
+
+  /**
+   * Change le mot de passe de l'utilisateur connecté
+   */
+  changePassword(payload: any): Observable<void> {
+    return this.http.post<void>(`${this.API_URL}/auth/change-password`, payload).pipe(
+      catchError(this.handleError("Ancien mot de passe incorrect ou erreur système"))
+    );
+  }
+
+  /**
+   * Met à jour un rôle existant
+   */
+  updateRole(id: string, role: Partial<Role>): Observable<Role> {
     this._loading.set(true);
-    try {
-      return await firstValueFrom(
-        this.http.put<Role>(`${this.API_URL}/roles/${id}`, role)
-      );
-    } finally {
-      this._loading.set(false);
-    }
+    return this.http.put<Role>(`${this.API_URL}/roles/${id}`, role).pipe(
+      catchError(this.handleError('Erreur lors de la mise à jour du rôle')),
+      finalize(() => this._loading.set(false))
+    );
   }
 }

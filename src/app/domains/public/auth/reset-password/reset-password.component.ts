@@ -1,20 +1,12 @@
-import { Component, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import {
-  LucideAngularModule,
-  ArrowLeft,
-  KeyRound,
-  Mail,
-  ShieldCheck,
-  Lock,
-  Loader2,
-  RefreshCcw,
-  AlertCircle
-} from 'lucide-angular';
-import { AuthService } from '../../../../core/services/auth.service';
-import { NotificationService } from '../../../../shared/services/notification.service';
+import {Component, computed, inject, signal, ViewEncapsulation} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators} from '@angular/forms';
+import {ActivatedRoute, Router, RouterModule} from '@angular/router';
+import {ArrowLeft, Eye, EyeOff, KeyRound, Lock, LucideAngularModule, ShieldCheck} from 'lucide-angular';
+import {AuthService} from '../../../../core/services/auth.service';
+import {NotificationService} from '../../../../shared/services/notification.service';
+import {FwButtonComponent} from '../../../../shared/components/button/button.component';
+import {TranslateModule, TranslateService} from '@ngx-translate/core';
 
 function passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
   const password = control.get('newPassword')?.value;
@@ -26,9 +18,17 @@ function passwordMatchValidator(control: AbstractControl): ValidationErrors | nu
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, LucideAngularModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterModule,
+    LucideAngularModule,
+    FwButtonComponent,
+    TranslateModule
+  ],
   templateUrl: './reset-password.component.html',
-  styleUrl: './reset-password.component.scss'
+  styleUrl: './reset-password.component.scss',
+  encapsulation: ViewEncapsulation.None
 })
 export class ResetPasswordComponent {
   private fb = inject(FormBuilder);
@@ -36,33 +36,44 @@ export class ResetPasswordComponent {
   private router = inject(Router);
   private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
+  public translate = inject(TranslateService);
 
   readonly ArrowLeft = ArrowLeft;
   readonly KeyRound = KeyRound;
-  readonly Mail = Mail;
   readonly ShieldCheck = ShieldCheck;
   readonly Lock = Lock;
-  readonly Loader2 = Loader2;
-  readonly RefreshCcw = RefreshCcw;
-  readonly AlertCircle = AlertCircle;
+  readonly Eye = Eye;
+  readonly EyeOff = EyeOff;
 
   isLoading = signal(false);
+  showPassword = signal(false);
 
-  resetForm = this.fb.group(
-    {
-      email: ['', [Validators.required, Validators.email]],
-      code: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]],
-      newPassword: ['', [Validators.required, Validators.minLength(8)]],
-      confirmPassword: ['', [Validators.required]]
-    },
-    { validators: passwordMatchValidator }
-  );
+  // D├®tecte si le code OTP est rempli (6 chiffres)
+  isOtpComplete = computed(() => {
+    const code = this.resetForm.get('code')?.value;
+    return code && /^\d{6}$/.test(code);
+  });
+
+  resetForm = this.fb.group({
+    email: ['', [Validators.required, Validators.email]],
+    code: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]],
+    newPassword: ['', [Validators.required, Validators.minLength(8)]]
+  });
 
   constructor() {
     const emailFromQuery = this.route.snapshot.queryParamMap.get('email');
     if (emailFromQuery) {
       this.resetForm.patchValue({ email: emailFromQuery });
     }
+  }
+
+  changeLanguage(lang: string) {
+    this.translate.use(lang);
+    localStorage.setItem('feewi_lang', lang);
+  }
+
+  togglePassword() {
+    this.showPassword.update(v => !v);
   }
 
   isInvalid(controlName: string): boolean {
@@ -72,10 +83,12 @@ export class ResetPasswordComponent {
 
   getErrorMessage(controlName: string): string {
     const control = this.resetForm.get(controlName);
-    if (control?.hasError('required')) return 'Ce champ est obligatoire';
-    if (control?.hasError('email')) return 'Format email invalide';
-    if (control?.hasError('pattern')) return 'Le code doit contenir 6 chiffres';
-    if (control?.hasError('minlength')) return 'Le mot de passe doit contenir au moins 8 caracteres';
+    if (control?.hasError('required')) {
+      return controlName === 'code' ? 'auth.reset_password.fields.errors.otp_required' : 'auth.forgot_password.fields.email.errors.required';
+    }
+    if (control?.hasError('email')) return 'auth.forgot_password.fields.email.errors.email';
+    if (control?.hasError('pattern')) return 'auth.reset_password.fields.errors.otp_required';
+    if (control?.hasError('minlength')) return 'auth.reset_password.fields.errors.password_too_short';
     return 'Champ invalide';
   }
 
@@ -84,29 +97,35 @@ export class ResetPasswordComponent {
     return !!(form.hasError('passwordMismatch') && (form.get('confirmPassword')?.touched || form.touched));
   }
 
-  async onSubmit() {
+  onSubmit() {
     if (this.resetForm.invalid) {
       this.resetForm.markAllAsTouched();
-      this.notificationService.warning('Verifiez les champs du formulaire.', 'Formulaire incomplet');
       return;
     }
 
     const { email, code, newPassword } = this.resetForm.value;
     this.isLoading.set(true);
 
-    try {
-      await this.authService.resetPassword({
-        email: email!,
-        code: code!,
-        newPassword: newPassword!
-      });
-      this.notificationService.success('Mot de passe reinitialise avec succes.', 'Operation terminee');
-      await this.router.navigate(['/auth/login']);
-    } catch (err: any) {
-      const message = err?.error?.message || err?.message || 'Impossible de reinitialiser le mot de passe.';
-      this.notificationService.error(message, 'Echec de reinitialisation');
-    } finally {
-      this.isLoading.set(false);
-    }
+    this.authService.resetPassword({
+      email: email!,
+      code: code!,
+      newPassword: newPassword!
+    }).subscribe({
+      next: () => {
+        this.notificationService.success(
+          this.translate.instant('auth.reset_password.notifications.success_message'),
+          this.translate.instant('auth.reset_password.notifications.success_title')
+        );
+        this.router.navigate(['/auth/login']);
+      },
+      error: (err: any) => {
+        const message = err?.error?.message || err?.message || this.translate.instant('auth.reset_password.notifications.error_title');
+        this.notificationService.error(message, this.translate.instant('auth.reset_password.notifications.error_title'));
+        this.isLoading.set(false);
+      },
+      complete: () => {
+        this.isLoading.set(false);
+      }
+    });
   }
 }

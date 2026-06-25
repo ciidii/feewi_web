@@ -1,0 +1,232 @@
+<app-fw-page-shell
+  *ngIf="staff() as s; else skeletons"
+  [title]="s.firstName + ' ' + s.lastName"
+  [description]="getStaffTypeLabel(s.staffType) + ' • Matricule : ' + (s.matricule || 'Non renseigné')"
+  [icon]="Fingerprint"
+  [backLink]="['/admin/identity/staff']"
+  density="compact"
+>
+  <!-- ACTIONS DE PAGE -->
+  <div actions class="flex items-center gap-2">
+    <ng-container *fwHasPermission="'identity:user:write'">
+      <app-fw-button 
+        (click)="onEditRH()" 
+        variant="tertiary" 
+        size="sm" 
+        [icon]="Edit"
+      >
+        Modifier RH
+      </app-fw-button>
+    </ng-container>
+
+    <div class="w-px h-6 bg-slate-200 mx-1"></div>
+
+    <ng-container *fwHasPermission="'identity:user:write'">
+      <app-fw-button 
+        *ngIf="!s.hasUserAccount"
+        (click)="onManageAccount()"
+        variant="primary" 
+        size="sm" 
+        [icon]="Key"
+      >
+        Ouvrir un accès
+      </app-fw-button>
+
+      <app-fw-button 
+        *ngIf="s.hasUserAccount"
+        (click)="onManageAccount()"
+        variant="tertiary" 
+        size="sm" 
+        [icon]="Shield"
+      >
+        Gérer le compte
+      </app-fw-button>
+    </ng-container>
+  </div>
+
+  <!-- CONTENU DU DOSSIER -->
+  <div class="staff-detail-content animate-in fade-in duration-500">
+    <div class="grid grid-cols-12 gap-6">
+      
+      <!-- COLONNE GAUCHE : IDENTITÉ & CONTACT (8/12) -->
+      <div class="col-span-12 lg:col-span-8 space-y-6">
+        
+        <!-- Carte : Profil RH -->
+        <section class="dossier-card">
+          <header class="card-header">
+            <div class="header-left">
+              <lucide-icon [name]="User" class="header-icon" [size]="16"></lucide-icon>
+              <h3 class="card-title">Information Collaborateur</h3>
+            </div>
+          </header>
+
+          <div class="card-body grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="space-y-1">
+              <label class="info-label">Prénom & Nom</label>
+              <p class="info-value text-lg">{{ s.firstName }} {{ s.lastName }}</p>
+            </div>
+            <div class="space-y-1">
+              <label class="info-label">Matricule Interne</label>
+              <p class="info-value font-mono">{{ s.matricule || '—' }}</p>
+            </div>
+            <div class="space-y-1">
+              <label class="info-label">Email Professionnel</label>
+              <div class="flex items-center gap-2">
+                <lucide-icon [name]="Mail" [size]="14" class="text-slate-400"></lucide-icon>
+                <p class="info-value">{{ s.email }}</p>
+              </div>
+            </div>
+            <div class="space-y-1">
+              <label class="info-label">Téléphone</label>
+              <div class="flex items-center gap-2">
+                <lucide-icon [name]="Phone" [size]="14" class="text-slate-400"></lucide-icon>
+                <p class="info-value">{{ s.phone || 'Non renseigné' }}</p>
+              </div>
+            </div>
+            <div class="space-y-1">
+              <label class="info-label">Type de poste</label>
+              <div class="flex items-center gap-2">
+                <lucide-icon [name]="UserCog" [size]="14" class="text-primary"></lucide-icon>
+                <p class="info-value font-bold text-primary">{{ getStaffTypeLabel(s.staffType) }}</p>
+              </div>
+            </div>
+            <div class="space-y-1">
+              <label class="info-label">Date d'intégration</label>
+              <p class="info-value">{{ s.createdAt | date:'longDate' }}</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Carte : Pédagogie (Si Enseignant) -->
+        <section class="dossier-card" *ngIf="s.staffType === 'TEACHER'">
+          <header class="card-header">
+            <div class="header-left">
+              <lucide-icon [name]="GraduationCap" class="header-icon" [size]="16"></lucide-icon>
+              <h3 class="card-title">Activité Pédagogique</h3>
+            </div>
+          </header>
+          <div class="card-body p-0">
+             <div class="empty-placeholder py-12 flex flex-col items-center justify-center text-center">
+                <lucide-icon [name]="BookOpen" [size]="32" class="text-slate-200 mb-4"></lucide-icon>
+                <p class="text-sm font-bold text-slate-400 italic">Aucune affectation de classe trouvée pour cet enseignant.</p>
+                <app-fw-button variant="ghost" size="sm" class="mt-4" [icon]="Zap">Affecter à une classe</app-fw-button>
+             </div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- COLONNE DROITE : SYSTÈME & ACCÈS (4/12) -->
+      <div class="col-span-12 lg:col-span-4 space-y-6">
+        
+        <!-- Carte : État du Compte -->
+        <section class="dossier-card" [class.account-active]="s.hasUserAccount">
+          <header class="card-header">
+            <div class="header-left">
+              <lucide-icon [name]="Shield" class="header-icon" [size]="16"></lucide-icon>
+              <h3 class="card-title">Accès Système</h3>
+            </div>
+            <app-fw-badge [status]="s.hasUserAccount ? 'ACTIVE' : 'PLANNING'" [labelOverride]="s.hasUserAccount ? 'Compte Actif' : 'Pas d\'accès'"></app-fw-badge>
+          </header>
+
+          <div class="card-body space-y-6">
+            <div *ngIf="userAccount() as user; else noAccount">
+              <div class="space-y-4">
+                <div class="flex flex-col gap-1">
+                  <label class="info-label">Identifiant (Login)</label>
+                  <p class="info-value font-bold">{{ user.email }}</p>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="info-label">Rôles Assignés</label>
+                  <div class="flex flex-wrap gap-1.5">
+                    <span *ngFor="let role of user.roles" class="px-2 py-0.5 bg-slate-100 text-slate-700 text-[10px] font-bold rounded-md uppercase">
+                      {{ role.replace('ROLE_', '') }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-100 grid grid-cols-2 gap-4">
+                  <div class="space-y-0.5">
+                    <label class="info-label">Dernière connexion</label>
+                    <p class="text-[11px] font-bold text-slate-600">{{ (user.lastLoginAt | date:'short') || 'Jamais' }}</p>
+                  </div>
+                  <div class="space-y-0.5">
+                    <label class="info-label">Total sessions</label>
+                    <p class="text-[11px] font-bold text-slate-600">{{ user.connectionCount || 0 }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card-actions-row pt-6 mt-6 border-t border-slate-50">
+                <app-fw-button
+                  *fwHasPermission="'identity:user:write'"
+                  (click)="onManageAccount()"
+                  variant="tertiary"
+                  size="sm"
+                  class="w-full"
+                  [icon]="UserCog"
+                >
+                  Gérer les privilèges
+                </app-fw-button>
+              </div>
+            </div>
+
+            <ng-template #noAccount>
+              <div class="py-4 text-center space-y-4">
+                <p class="text-xs text-slate-500 leading-relaxed">Ce membre du personnel n'a pas encore de compte utilisateur pour se connecter à la plateforme.</p>
+                <app-fw-button 
+                  *fwHasPermission="'identity:user:write'"
+                  (click)="onManageAccount()"
+                  variant="primary" 
+                  size="sm" 
+                  class="w-full" 
+                  [icon]="Key"
+                >
+                  Activer l'accès maintenant
+                </app-fw-button>
+              </div>
+            </ng-template>
+          </div>
+        </section>
+
+        <!-- Carte : Audit Rapide -->
+        <section class="dossier-card">
+          <header class="card-header">
+            <div class="header-left">
+              <lucide-icon [name]="History" class="header-icon" [size]="16"></lucide-icon>
+              <h3 class="card-title">Dernières Activités</h3>
+            </div>
+          </header>
+          <div class="card-body p-0">
+             <div class="divide-y divide-slate-50">
+                <div class="p-4 flex gap-3">
+                   <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center shrink-0">
+                      <lucide-icon [name]="Clock" [size]="14" class="text-slate-400"></lucide-icon>
+                   </div>
+                   <div class="flex flex-col">
+                      <span class="text-[11px] font-bold text-slate-900 uppercase">Profil mis à jour</span>
+                      <span class="text-[9px] text-slate-400">Il y a 2 jours</span>
+                   </div>
+                </div>
+             </div>
+             <button class="w-full py-3 text-center text-[10px] font-bold text-primary uppercase tracking-widest hover:bg-slate-50 transition-colors border-t border-slate-50">
+                Voir tout l'audit
+             </button>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+</app-fw-page-shell>
+
+<ng-template #skeletons>
+  <div class="p-6 space-y-6">
+    <fw-skeleton width="300px" height="24px" radius="6px"></fw-skeleton>
+    <div class="grid grid-cols-12 gap-6">
+       <div class="col-span-8"><fw-skeleton width="100%" height="400px" radius="16px"></fw-skeleton></div>
+       <div class="col-span-4"><fw-skeleton width="100%" height="300px" radius="16px"></fw-skeleton></div>
+    </div>
+  </div>
+</ng-template>

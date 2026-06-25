@@ -1,0 +1,61 @@
+<div class="fw-form-shell-container animate-in" [ngClass]="mode()" cdkTrapFocus [cdkTrapFocusAutoCapture]="mode() === 'dialog'">
+
+  <!-- HEADER -->
+  <header class="form-header">
+    <div class="header-left">
+      <div class="icon-box" *ngIf="icon()">
+        <lucide-icon [name]="icon()" [size]="20"></lucide-icon>
+      </div>
+
+      <div class="title-zone">
+        <div class="flex items-center gap-3">
+          <h2 class="title">{{ title() }}</h2>
+          <span *ngIf="statusLabel()" class="status-badge">{{ statusLabel() }}</span>
+        </div>
+        <p class="subtitle" *ngIf="subtitle()">{{ subtitle() }}</p>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <button *ngIf="mode() === 'dialog'" (click)="onCancel()" class="close-btn" aria-label="Fermer">
+        <lucide-icon [name]="X" [size]="20"></lucide-icon>
+      </button>
+      <ng-content select="[header-actions]"></ng-content>
+    </div>
+  </header>
+
+  <!-- BODY -->
+  <main class="form-body custom-scrollbar">
+    <div class="form-content-wrapper">
+      <ng-content></ng-content>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="form-footer">
+    <div class="footer-left">
+      <ng-content select="[footer-left]"></ng-content>
+    </div>
+
+    <div class="footer-right">
+      <app-fw-button
+        *ngIf="showCancel()"
+        [variant]="'ghost'"
+        (click)="onCancel()"
+        [disabled]="isLoading()"
+      >
+        {{ cancelLabel() }}
+      </app-fw-button>
+
+      <app-fw-button
+        [variant]="'primary'"
+        [loading]="isLoading()"
+        [disabled]="!canSave()"
+        (click)="onSave()"
+        [icon]="Save"
+      >
+        {{ saveLabel() }}
+      </app-fw-button>
+    </div>
+  </footer>
+</div>

@@ -1,0 +1,208 @@
+<app-fw-page-shell
+  [title]="cycle()?.customName || cycle()?.systemName || 'Cycle'"
+  [description]="richDescription() || 'Gestion du cycle'"
+  [icon]="Layers"
+  [backLink]="['/admin/classes']"
+  [tabs]="cycleTabs()"
+  [activeTabId]="activeTab()"
+  (tabChange)="setTab($any($event))"
+  density="compact"
+>
+  <!-- ACTIONS -->
+  <div actions class="flex items-center gap-2" *ngIf="cycle()">
+    <app-fw-button variant="tertiary" size="sm" [icon]="RefreshCw" [loading]="loadingService.isLoading()" (click)="refresh()" title="Actualiser"></app-fw-button>
+    <div class="divider-v"></div>
+    <app-fw-button
+      *ngIf="activeTab() === 'pilotage'"
+      (click)="openEditLevel({id: '', name: '', rank: 0, cycleId: cycleId() || ''})"
+      variant="primary"
+      size="sm"
+      [icon]="Plus"
+      [disabled]="!canEditStructure()"
+      [title]="!canEditStructure() ? 'Permissions insuffisantes pour ajouter un niveau' : ''"
+    >
+      Ajouter un niveau
+    </app-fw-button>
+    <app-fw-button
+      *ngIf="activeTab() === 'filieres'"
+      (click)="openAddFiliere()"
+      variant="primary"
+      size="sm"
+      [icon]="Plus"
+      [disabled]="!canEditStructure()"
+      [title]="!canEditStructure() ? 'Permissions insuffisantes pour ajouter une série' : ''"
+    >
+      Nouvelle série
+    </app-fw-button>
+  </div>
+
+  <!-- CONTENU DE PAGE ALIGNÉ -->
+  <div class="list-page-content animate-in fade-in duration-500" *ngIf="cycle(); else skeletons">
+
+    <!-- BARRE DE COMMANDE UNIFIÉE -->
+    <app-fw-list-command-bar
+      [searchQuery]="searchQuery()"
+      [searchPlaceholder]="activeTab() === 'pilotage' ? 'Rechercher un niveau ou une classe...' : 'Rechercher une série...'"
+      [totalElements]="activeTab() === 'pilotage' ? (viewMode() === 'tiles' ? levelGroups().length : displayAllClasses().length) : displayFilieres().length"
+      [activeFilters]="activeFilterChips()"
+      (searchChange)="onSearch($event)"
+      (clearSearch)="onSearch('')"
+      (removeFilter)="removeFilter($event)"
+      (clearAllFilters)="clearAllFilters()"
+    >
+      <!-- SWITCH DE VUE (Seulement pour pilotage) -->
+      <div extra-filters *ngIf="activeTab() === 'pilotage'" class="flex items-center gap-1 bg-surface-sunken p-1 rounded-lg border border-border-subtle">
+        <button 
+          (click)="viewMode.set('tiles')"
+          class="w-8 h-8 flex items-center justify-center rounded-md transition-all"
+          [class.bg-white]="viewMode() === 'tiles'"
+          [class.shadow-sm]="viewMode() === 'tiles'"
+          [class.text-primary]="viewMode() === 'tiles'"
+          [class.text-text-tertiary]="viewMode() !== 'tiles'"
+          title="Vue par niveaux"
+        >
+          <lucide-icon [name]="LayoutGrid" [size]="14"></lucide-icon>
+        </button>
+        <button 
+          (click)="viewMode.set('table')"
+          class="w-8 h-8 flex items-center justify-center rounded-md transition-all"
+          [class.bg-white]="viewMode() === 'table'"
+          [class.shadow-sm]="viewMode() === 'table'"
+          [class.text-primary]="viewMode() === 'table'"
+          [class.text-text-tertiary]="viewMode() !== 'table'"
+          title="Vue en liste"
+        >
+          <lucide-icon [name]="List" [size]="14"></lucide-icon>
+        </button>
+      </div>
+    </app-fw-list-command-bar>
+
+    <!-- CONTENU DYNAMIQUE -->
+    <main class="relative min-h-[400px]">
+
+      <!-- VUE PILOTAGE -->
+      <div *ngIf="activeTab() === 'pilotage'" class="animate-in slide-in-from-bottom duration-500">
+        
+        <!-- MODE TUILES (Groupé par niveaux) -->
+        <div *ngIf="viewMode() === 'tiles'" class="space-y-6">
+          <div *ngFor="let group of levelGroups()" class="fw-standard-card">
+            <!-- Header du Niveau -->
+            <header class="card-header">
+              <div class="header-left">
+                <div class="level-rank">{{ group.level.rank }}</div>
+                <div class="pillar-title-group">
+                  <h3>{{ group.level.name }}</h3>
+                  <p>{{ group.classes.length }} classe(s) ouverte(s)</p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <app-fw-button
+                  variant="tertiary"
+                  size="sm"
+                  [icon]="UserCheck"
+                  [routerLink]="['/admin/academic/assignments']"
+                  [queryParams]="{ levelId: group.level.id }"
+                >
+                  Affecter
+                </app-fw-button>
+
+                <app-fw-button
+                  (click)="openCurriculumManager(group.level)"
+                  variant="tertiary"
+                  size="sm"
+                  [icon]="ListChecks"
+                >
+                  Programme
+                </app-fw-button>
+
+                <app-fw-button
+                  (click)="openEditLevel(group.level)"
+                  variant="ghost"
+                  size="sm"
+                  [icon]="Edit"
+                  [disabled]="!canEditStructure()"
+                  [title]="!canEditStructure() ? 'Permissions insuffisantes pour modifier le niveau' : ''"
+                ></app-fw-button>
+              </div>
+            </header>
+
+            <!-- Grille de Classes -->
+            <div class="card-content">
+              <div class="class-grid">
+                <div *ngFor="let cls of group.classes" (click)="goToClassDetails(cls)" class="class-tile">
+                  <div class="tile-content">
+                    <span class="tile-name">{{ cls.name }}</span>
+                    <span class="tile-meta">{{ cls.capacity }} places disponibles</span>
+                    <div class="tile-indicator">
+                      <div class="dot" [ngClass]="cls.assignedTeachings === cls.totalTeachings ? 'bg-emerald-500' : 'bg-amber-400'"></div>
+                      <span class="label">{{ cls.assignedTeachings || 0 }}/{{ cls.totalTeachings || 0 }} Enseignants</span>
+                    </div>
+                  </div>
+                  <lucide-icon [name]="Users" class="tile-bg-icon"></lucide-icon>
+                </div>
+
+                <button 
+                  (click)="canEditStructure() && openAddClass(group.level)" 
+                  class="add-class-btn"
+                  [class.is-disabled]="!canEditStructure()"
+                  [title]="!canEditStructure() ? 'Permissions insuffisantes pour ouvrir une classe' : ''"
+                >
+                  <lucide-icon [name]="Plus" [size]="20"></lucide-icon>
+                  <span>Ouvrir une classe</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODE TABLEAU (Liste globale des classes) -->
+        <div *ngIf="viewMode() === 'table'" class="animate-in fade-in duration-300">
+          <app-data-list
+            [data]="displayAllClasses()"
+            [total]="displayAllClasses().length"
+            [actions]="classActions"
+            [isLoading]="loadingService.isLoading()"
+            [showSearch]="false"
+            [showFilterButton]="false"
+            defaultView="table"
+            (onAction)="handleClassAction($event)"
+            (onRowClick)="goToClassDetails($event.rawData)"
+          ></app-data-list>
+        </div>
+
+        <!-- État vide (Niveaux) -->
+        <div *ngIf="levelGroups().length === 0 && !loadingService.isLoading()" class="py-12">
+          <app-fw-empty-state
+            [icon]="GraduationCap"
+            title="Aucun résultat"
+            [description]="searchQuery() ? 'Aucun niveau ou classe ne correspond à votre recherche.' : 'Commencez par ajouter les niveaux pédagogiques de ce cycle (ex: 6ème, 5ème...)'"
+            [ctaLabel]="searchQuery() ? 'Effacer la recherche' : 'Ajouter mon premier niveau'"
+            (ctaClick)="searchQuery() ? clearAllFilters() : openEditLevel({id: '', name: '', rank: 1, cycleId: cycleId() || ''})"
+          ></app-fw-empty-state>
+        </div>
+      </div>
+
+      <!-- VUE FILIÈRES (DataList Classique) -->
+      <div *ngIf="activeTab() === 'filieres'"
+           class="animate-in fade-in slide-in-from-right duration-300">
+        <app-data-list
+          [data]="displayFilieres()"
+          [total]="displayFilieres().length"
+          [actions]="filiereActions"
+          [isLoading]="loadingService.isLoading()"
+          [showSearch]="false"
+          [showFilterButton]="false"
+          (onAction)="handleFiliereAction($event)"
+        ></app-data-list>
+      </div>
+
+    </main>
+  </div>
+</app-fw-page-shell>
+
+<ng-template #skeletons>
+  <div class="list-page-content">
+    <app-cycle-detail-skeleton></app-cycle-detail-skeleton>
+  </div>
+</ng-template>

@@ -1,0 +1,95 @@
+<app-fw-form-shell
+  title="Planifier une Rentrée"
+  subtitle="Initialisation du calendrier administratif et pédagogique."
+  [icon]="Calendar"
+  saveLabel="Créer l'année scolaire"
+  [isLoading]="isLoading()"
+  [canSave]="yearForm.valid"
+  (save)="onSave()"
+  (cancel)="onCancel()"
+>
+  <form [formGroup]="yearForm" class="space-y-10 py-2">
+    
+    <!-- 1. Identification -->
+    <div class="space-y-6">
+      <header class="section-header">
+        <lucide-icon [name]="Type" [size]="14"></lucide-icon>
+        <span class="label">Identification & Évaluation</span>
+      </header>
+
+      <div class="grid grid-cols-2 gap-6">
+        <div class="fw-field">
+          <label class="fw-label">Libellé de l'année</label>
+          <div class="fw-input-wrapper">
+            <input type="text" formControlName="label" placeholder="ex: 2025-2026" class="fw-input" [class.error]="isInvalid('label')"/>
+          </div>
+        </div>
+
+        <div class="fw-field">
+          <label class="fw-label">Système d'évaluation</label>
+          <div class="fw-input-wrapper">
+            <mat-select formControlName="systemType" class="fw-input">
+              <mat-option value="TRIMESTER">Trimestriel (3 périodes)</mat-option>
+              <mat-option value="SEMESTER">Semestriel (2 périodes)</mat-option>
+              <mat-option value="ANNUAL">Annuel (1 période)</mat-option>
+            </mat-select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Temporalité Globale -->
+    <div class="space-y-6">
+      <header class="section-header">
+        <lucide-icon [name]="Calendar" [size]="14"></lucide-icon>
+        <span class="label">Période d'Exercice</span>
+      </header>
+
+      <div class="grid grid-cols-2 gap-6">
+        <div class="fw-field">
+          <label class="fw-label">Date de début</label>
+          <div class="fw-input-wrapper relative">
+            <input 
+              [matDatepicker]="startPicker"
+              formControlName="startDate"
+              class="fw-input cursor-pointer"
+              [class.error]="isInvalid('startDate')"
+              (click)="startPicker.open()"
+              placeholder="Sélectionner..."
+              readonly
+            />
+            <mat-datepicker-toggle matSuffix [for]="startPicker" class="absolute right-1 top-1/2 -translate-y-1/2"></mat-datepicker-toggle>
+            <mat-datepicker #startPicker startView="multi-year"></mat-datepicker>
+          </div>
+        </div>
+
+        <div class="fw-field">
+          <label class="fw-label">Date de fin</label>
+          <div class="fw-input-wrapper relative">
+            <input 
+              [matDatepicker]="endPicker"
+              formControlName="endDate"
+              class="fw-input cursor-pointer"
+              [class.error]="isInvalid('endDate')"
+              (click)="endPicker.open()"
+              placeholder="Sélectionner..."
+              readonly
+            />
+            <mat-datepicker-toggle matSuffix [for]="endPicker" class="absolute right-1 top-1/2 -translate-y-1/2"></mat-datepicker-toggle>
+            <mat-datepicker #endPicker startView="multi-year"></mat-datepicker>
+          </div>
+        </div>
+      </div>
+      <p class="text-[10px] text-slate-400 italic ml-1">Les jalons spécifiques (cours, inscriptions, examens) seront configurables après la création.</p>
+    </div>
+
+    <!-- Info Box Minimalist -->
+    <div class="p-4 bg-surface-sunken rounded-xl border border-border flex items-start gap-3">
+      <lucide-icon [name]="Info" [size]="16" class="text-text-tertiary mt-0.5"></lucide-icon>
+      <p class="text-[11px] text-text-secondary leading-relaxed font-medium">
+        L'année sera créée en état <span class="text-midnight font-bold">PLANNING</span>. L'activation manuelle ultérieure archivera automatiquement la session précédente.
+      </p>
+    </div>
+
+  </form>
+</app-fw-form-shell>

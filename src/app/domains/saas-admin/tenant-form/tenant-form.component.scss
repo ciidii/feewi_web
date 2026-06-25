@@ -1,41 +1,50 @@
 :host {
   display: block;
+  background-color: white;
+  min-height: 100vh;
 }
 
-/* Scrollbar élégante pour votre structure */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #e2e8f0;
-  border-radius: 10px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #cbd5e1;
-}
+/* --- INPUTS ÉPURÉS --- */
+.fw-input-clean {
+  width: 100%;
+  height: 42px;
+  padding: 0 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--fw-midnight);
+  background-color: white;
+  border: 1px solid var(--fw-border);
+  border-radius: var(--fw-radius-xl);
+  transition: all 0.2s;
 
-/* Feedback visuel sur les bordures */
-.fw-input, input, textarea {
-  &.is-invalid {
-    border-color: #ef4444 !important;
-    &:focus {
-      box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1) !important;
-    }
+  &::placeholder {
+    color: var(--fw-slate-light);
+    font-weight: 400;
   }
-  
-  &.is-valid {
-    border-color: #22c55e !important;
+
+  &:focus {
+    outline: none;
+    border-color: var(--fw-primary);
+    box-shadow: 0 0 0 3px var(--fw-primary-alpha);
+  }
+
+  &.error {
+    border-color: #fca5a5;
+    background-color: #fffafb;
   }
 }
 
-/* Animation des erreurs */
-.animate-in {
-  animation-duration: 300ms;
+/* --- SECTIONS --- */
+section {
+  animation: fadeIn 0.5s ease-out;
 }
 
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- ANIMATIONS --- */
 @keyframes shake {
   10%, 90% { transform: translate3d(-1px, 0, 0); }
   20%, 80% { transform: translate3d(2px, 0, 0); }

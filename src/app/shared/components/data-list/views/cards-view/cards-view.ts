@@ -1,22 +1,27 @@
-import { Component, input, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import {Component, input, output} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {MatCheckboxModule} from '@angular/material/checkbox';
 
 // Importer les icônes nécessaires
 import {
-  LucideAngularModule,
-  Eye,
-  CheckCircle,
-  MoreHorizontal,
   Calendar,
-  MapPin,
+  Check,
+  CheckCircle,
+  Eye,
+  Globe,
+  Hash,
+  LayoutGrid,
+  LucideAngularModule,
   Mail,
-  Phone,
-  LayoutGrid, Globe, Check
+  MapPin,
+  MoreHorizontal,
+  Phone
 } from 'lucide-angular';
-import {TableRow} from '../../../../models/data-list.models';
-
-// Importer les modèles
+import {RowAction, TableRow} from '../../../../models/data-list.models';
+import {FwBadgeComponent} from '../../../badge/badge.component';
+import {FwButtonComponent} from '../../../button/button.component';
+import {FwDatePipe} from '../../../../pipes/fw-date.pipe';
+import {HasPermissionDirective} from '../../../../directives/has-permission.directive';
 
 @Component({
   selector: 'app-cards-view',
@@ -24,7 +29,10 @@ import {TableRow} from '../../../../models/data-list.models';
   imports: [
     CommonModule,
     MatCheckboxModule,
-    LucideAngularModule
+    LucideAngularModule,
+    FwBadgeComponent,
+    FwButtonComponent,
+    FwDatePipe
   ],
   templateUrl: './cards-view.html',
   styleUrls: ['./cards-view.scss']
@@ -42,6 +50,13 @@ export class CardsViewComponent {
 
   /** Fonction pour obtenir la classe d'un badge */
   getBadgeClass = input.required<(type: string) => string>();
+
+  /** Actions disponibles */
+  actions = input<RowAction[]>([]);
+
+  /** Actions filtrées (PBAC) */
+  filteredActions = input<RowAction[]>([]);
+
 // Ajouter cette méthode
   getInitials(title: string): string {
     if (!title) return '?';
@@ -60,11 +75,11 @@ export class CardsViewComponent {
   /** Basculer la sélection d'une carte */
   toggleRow = output<string | number>();
 
-  /** Voir les détails */
-  onView = output<TableRow>();
+  /** Émettre un clic sur la ligne (Action primaire) */
+  onRowClick = output<TableRow>();
 
-  /** Valider */
-  onValidate = output<TableRow>();
+  /** Émettre une action */
+  onAction = output<{ actionId: string, row: TableRow }>();
 
   // ===========================================
   // MÉTHODES UTILITAIRES
@@ -81,6 +96,17 @@ export class CardsViewComponent {
     return date;
   }
 
+  /** Obtenir la classe CSS d'une action */
+  getActionClass(action: RowAction): string {
+    switch (action.type) {
+      case 'primary': return 'text-primary-600 hover:bg-primary-50';
+      case 'danger': return 'text-rose-600 hover:bg-rose-50';
+      case 'success': return 'text-emerald-600 hover:bg-emerald-50';
+      case 'warning': return 'text-amber-600 hover:bg-amber-50';
+      default: return 'text-slate-600 hover:bg-slate-100';
+    }
+  }
+
   // ===========================================
   // EXPOSITION DES ICÔNES
   // ===========================================
@@ -95,4 +121,5 @@ export class CardsViewComponent {
   protected readonly LayoutGrid = LayoutGrid;
   protected readonly Globe = Globe;
   protected readonly Check = Check;
+  protected readonly Hash = Hash;
 }

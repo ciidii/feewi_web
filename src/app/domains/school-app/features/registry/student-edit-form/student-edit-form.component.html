@@ -1,0 +1,95 @@
+<app-fw-form-shell
+  [title]="'Modifier le dossier élève'"
+  [subtitle]="student() ? (student()!.firstName + ' ' + student()!.lastName.toUpperCase()) : 'Chargement...'"
+  [isLoading]="isLoading() || isSaving()"
+  (save)="onSubmit()"
+  (cancel)="cancel()"
+>
+  <form [formGroup]="form" class="space-y-10">
+    
+    <!-- ÉTAT ADMINISTRATIF -->
+    <div class="space-y-6">
+      <div class="flex items-center gap-3 pb-2 border-b border-slate-100">
+        <div class="p-2 bg-blue-50 text-blue-600 rounded-lg">
+          <lucide-icon [name]="ShieldAlert" class="w-5 h-5"></lucide-icon>
+        </div>
+        <h3 class="font-display font-bold text-slate-900">Statut de l'élève</h3>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="space-y-2">
+          <label class="text-sm font-semibold text-slate-700">Statut actuel</label>
+          <select formControlName="status" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none">
+            @for (opt of statusOptions; track opt.value) {
+              <option [value]="opt.value" [class]="opt.class">{{ opt.label }}</option>
+            }
+          </select>
+          <p class="text-xs text-slate-500 italic">Modifier ce statut impactera la visibilité de l'élève dans les listes de classe.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- INFORMATIONS MÉDICALES -->
+    <div class="space-y-6">
+      <div class="flex items-center gap-3 pb-2 border-b border-slate-100">
+        <div class="p-2 bg-rose-50 text-rose-600 rounded-lg">
+          <lucide-icon [name]="Stethoscope" class="w-5 h-5"></lucide-icon>
+        </div>
+        <h3 class="font-display font-bold text-slate-900">Données Médicales</h3>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="space-y-2">
+          <label class="text-sm font-semibold text-slate-700">Groupe Sanguin</label>
+          <select formControlName="bloodGroup" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none">
+            <option value="">Non défini</option>
+            @for (bg of bloodGroups; track bg) {
+              <option [value]="bg">{{ bg }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="md:col-span-2 space-y-2">
+          <label class="text-sm font-semibold text-slate-700">Allergies critiques</label>
+          <input 
+            type="text" 
+            formControlName="criticalAllergies"
+            placeholder="Ex: Asthme, Arachides, Pénicilline..."
+            class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- INFORMATIONS COMPLÉMENTAIRES (Custom Fields) -->
+    <div class="space-y-6">
+      <div class="flex items-center gap-3 pb-2 border-b border-slate-100">
+        <div class="p-2 bg-slate-100 text-slate-600 rounded-lg">
+          <lucide-icon [name]="User" class="w-5 h-5"></lucide-icon>
+        </div>
+        <h3 class="font-display font-bold text-slate-900">Autres informations</h3>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="space-y-2">
+          <label class="text-sm font-semibold text-slate-700">Nationalité</label>
+          <input 
+            type="text" 
+            formControlName="nationality"
+            class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
+          >
+        </div>
+
+        <div class="space-y-2">
+          <label class="text-sm font-semibold text-slate-700">Lieu de naissance</label>
+          <input 
+            type="text" 
+            formControlName="birthPlace"
+            class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
+          >
+        </div>
+      </div>
+    </div>
+
+  </form>
+</app-fw-form-shell>

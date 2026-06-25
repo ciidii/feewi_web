@@ -1,0 +1,273 @@
+<div class="detail-container animate-in" *ngIf="school() as s; else loader">
+  
+  <!-- ======================================= -->
+  <!-- HEADER PROFESSIONNEL -->
+  <!-- ======================================= -->
+  <header class="sticky top-0 z-30 bg-white border-b border-slate-200 shadow-sm px-6 py-4">
+    <div class="flex items-center justify-between">
+      <!-- Gauche : Retour et Identité -->
+      <div class="flex items-center gap-4">
+        <button routerLink="/saas/tenants" class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-500 transition-all active:scale-95">
+          <lucide-icon [name]="ArrowLeft" class="w-5 h-5"></lucide-icon>
+        </button>
+        <div class="h-8 w-px bg-slate-200"></div>
+        <div class="flex flex-col">
+          <div class="flex items-center gap-3">
+            <h1 class="text-xl font-bold text-slate-900">{{ s.name }}</h1>
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border"
+                  [ngClass]="s.active !== false ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'">
+              {{ s.active !== false ? 'Établissement Actif' : 'Établissement Inactif' }}
+            </span>
+          </div>
+          <div class="flex items-center gap-2 text-xs text-slate-500">
+            <span class="font-mono bg-slate-100 px-1.5 py-0.5 rounded">ID: {{ s.tenantId }}</span>
+            <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+            <span>Enregistré le {{ formatDate(s.createdAt) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Droite : Actions -->
+      <div class="flex items-center gap-3">
+        <button *fwHasPermission="'identity:saas:school:manage'" (click)="onImpersonate()" [disabled]="isActionLoading()" class="flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-700 border border-amber-200 rounded-xl text-xs font-bold hover:bg-amber-100 transition-all shadow-sm active:scale-95 disabled:opacity-50">
+          <lucide-icon [name]="ExternalLink" class="w-4 h-4"></lucide-icon>
+          Impersonnaliser
+        </button>
+        
+        <div class="h-8 w-px bg-slate-200 mx-1" *fwHasPermission="'identity:saas:school:manage'"></div>
+
+        <button *fwHasPermission="'identity:saas:school:manage'" (click)="onEdit()" [disabled]="isActionLoading()" class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-50 transition-all shadow-sm active:scale-95 disabled:opacity-50">
+          <lucide-icon [name]="Edit" class="w-4 h-4 text-primary-600"></lucide-icon>
+          Modifier
+        </button>
+
+        <button *fwHasPermission="'identity:saas:school:manage'" (click)="onChangeStatus()" [disabled]="isActionLoading()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-rose-50 border border-rose-100 text-rose-600 hover:bg-rose-100 transition-all active:scale-95 disabled:opacity-50" [title]="(school()?.status === 'ACTIVE' || school()?.active !== false) ? 'Suspendre l\'accès' : 'Réactiver l\'accès'">
+          <lucide-icon *ngIf="!isActionLoading()" [name]="(school()?.status === 'ACTIVE' || school()?.active !== false) ? XCircle : CheckCircle" class="w-5 h-5"></lucide-icon>
+          <lucide-icon *ngIf="isActionLoading()" [name]="RefreshCw" class="w-5 h-5 animate-spin"></lucide-icon>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ======================================= -->
+  <!-- CONTENU PRINCIPAL -->
+  <!-- ======================================= -->
+  <main class="flex-1 overflow-y-auto p-8 custom-scrollbar">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      <!-- Colonne Gauche (2/3) : Fiche technique -->
+      <div class="lg:col-span-2 space-y-6">
+        
+        <!-- Carte : Informations de l'Établissement -->
+        <div class="info-card">
+          <div class="card-header">
+            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-widest flex items-center gap-2">
+              <div class="w-7 h-7 bg-primary-50 rounded-lg flex items-center justify-center text-primary-600">
+                <lucide-icon [name]="Building2" class="w-4 h-4"></lucide-icon>
+              </div>
+              Identité & Coordonnées
+            </h3>
+          </div>
+          <div class="card-body">
+            <div class="grid grid-cols-2 gap-8">
+              <div class="space-y-1">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nom de l'école</label>
+                <p class="text-base font-bold text-slate-900">{{ s.name }}</p>
+              </div>
+              <div class="space-y-1">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Slogan / Devise</label>
+                <p class="text-sm italic text-slate-600">"{{ s.slogan || 'Non renseigné' }}"</p>
+              </div>
+              
+              <div class="space-y-1">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email de contact</label>
+                <div class="flex items-center gap-2">
+                  <lucide-icon [name]="Mail" class="w-3.5 h-3.5 text-slate-400"></lucide-icon>
+                  <p class="text-sm font-medium text-slate-900">{{ s.email }}</p>
+                </div>
+              </div>
+              <div class="space-y-1">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Téléphone</label>
+                <div class="flex items-center gap-2">
+                  <lucide-icon [name]="Phone" class="w-3.5 h-3.5 text-slate-400"></lucide-icon>
+                  <p class="text-sm font-medium text-slate-900">{{ s.phone }}</p>
+                </div>
+              </div>
+
+              <div class="col-span-2 space-y-1">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Adresse complète</label>
+                <div class="flex items-start gap-2">
+                  <lucide-icon [name]="MapPin" class="w-3.5 h-3.5 text-slate-400 mt-0.5"></lucide-icon>
+                  <p class="text-sm font-medium text-slate-900">{{ s.streetAddress }}, {{ s.city }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Carte : Administration Scolaire (Admin Principal) -->
+        <div class="info-card">
+          <div class="card-header">
+            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-widest flex items-center gap-2">
+              <div class="w-7 h-7 bg-amber-50 rounded-lg flex items-center justify-center text-amber-600">
+                <lucide-icon [name]="ShieldCheck" class="w-4 h-4"></lucide-icon>
+              </div>
+              Administrateur Principal
+            </h3>
+          </div>
+          <div class="card-body">
+            <div class="flex items-center gap-6">
+              <div class="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center text-2xl font-bold text-slate-400 uppercase border-2 border-dashed border-slate-200">
+                {{ s.adminFirstName[0] }}{{ s.adminLastName[0] }}
+              </div>
+              <div class="grid grid-cols-2 gap-x-12 gap-y-4 flex-1">
+                <div class="space-y-1">
+                  <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nom de l'administrateur</label>
+                  <p class="text-sm font-bold text-slate-900">{{ s.adminFirstName }} {{ s.adminLastName }}</p>
+                </div>
+                <div class="space-y-1">
+                  <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email personnel</label>
+                  <p class="text-sm font-medium text-slate-600">{{ s.adminEmail }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Colonne Droite (1/3) : Statuts & Moteur -->
+      <div class="space-y-6">
+        
+        <!-- Carte : Statistiques & Quotas -->
+        <div class="info-card border-primary-100 shadow-lg shadow-primary-900/5">
+          <div class="card-header bg-primary-50/30">
+            <h3 class="text-xs font-bold text-primary-700 uppercase tracking-widest flex items-center gap-2">
+              <lucide-icon [name]="Activity" class="w-4 h-4"></lucide-icon>
+              Métriques du Tenant
+            </h3>
+          </div>
+          <div class="card-body">
+            <div class="grid grid-cols-2 gap-4">
+              <div class="stat-pill">
+                <span class="stat-label">Utilisateurs</span>
+                <span class="stat-value">24</span>
+              </div>
+              <div class="stat-pill">
+                <span class="stat-label">Élèves</span>
+                <span class="stat-value">450</span>
+              </div>
+              <div class="stat-pill col-span-2">
+                <span class="stat-label">Consommation Stockage</span>
+                <div class="flex items-center justify-between mt-1">
+                  <span class="text-sm font-bold text-slate-900">1.2 GB / 5 GB</span>
+                  <span class="text-[10px] font-bold text-primary-600">24%</span>
+                </div>
+                <div class="w-full h-1.5 bg-slate-200 rounded-full mt-2 overflow-hidden">
+                  <div class="h-full bg-primary-500" style="width: 24%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Carte : Portail d'Inscription -->
+        <div class="info-card" *ngIf="enrollmentPortal() as portal">
+          <div class="card-header">
+            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-widest flex items-center gap-2">
+              <div class="w-7 h-7 rounded-lg flex items-center justify-center"
+                   [ngClass]="portal.portalActive ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400'">
+                <lucide-icon [name]="portal.portalActive ? Globe : Lock" class="w-4 h-4"></lucide-icon>
+              </div>
+              Portail d'Inscription
+            </h3>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border"
+                  [ngClass]="portal.portalActive
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                    : 'bg-rose-50 text-rose-600 border-rose-200'">
+              {{ portal.portalActive ? 'Ouvert' : 'Fermé' }}
+            </span>
+          </div>
+
+          <div class="card-body space-y-3">
+            <div *ngIf="!portal.availableYears.length"
+                 class="text-xs text-slate-400 italic text-center py-2">
+              Aucune année scolaire disponible
+            </div>
+
+            <div *ngFor="let year of portal.availableYears"
+                 class="p-3 rounded-xl border border-slate-100 bg-slate-50 space-y-2">
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2 min-w-0">
+                  <lucide-icon [name]="GraduationCap" [size]="13" class="text-slate-400 shrink-0"></lucide-icon>
+                  <span class="text-[11px] font-bold text-slate-800 truncate">{{ year.label }}</span>
+                </div>
+                <span class="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase border"
+                      [ngClass]="yearStateClass(year.state)">
+                  {{ yearStateLabel(year.state) }}
+                </span>
+              </div>
+
+              <div class="flex flex-wrap gap-1.5 text-[9px] font-bold uppercase tracking-wide">
+                <span class="px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-600">
+                  {{ regModeLabel(year.registrationMode) }}
+                </span>
+                <span *ngFor="let type of year.allowedTypes"
+                      class="px-1.5 py-0.5 rounded bg-indigo-50 border border-indigo-100 text-indigo-700">
+                  {{ type === 'NEW_ENROLLMENT' ? 'Nouvelle insc.' : 'Réinscription' }}
+                </span>
+              </div>
+
+              <p *ngIf="year.welcomeMessage"
+                 class="text-[10px] text-slate-500 italic leading-tight line-clamp-2">
+                {{ year.welcomeMessage }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Carte : Journal d'Audit Rapide -->
+        <div class="info-card">
+          <div class="card-header">
+            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-widest flex items-center gap-2">
+              <lucide-icon [name]="HistoryIcon" class="w-4 h-4 text-slate-400"></lucide-icon>
+              Activités Récentes
+            </h3>
+          </div>
+          <div class="card-body p-0">
+            <div class="divide-y divide-slate-50">
+              <div class="p-4 flex gap-3 hover:bg-slate-50 transition-colors cursor-default">
+                <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                  <lucide-icon [name]="CheckCircle" class="w-4 h-4"></lucide-icon>
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-[11px] font-bold text-slate-900 uppercase tracking-tight">Configuration Mise à jour</span>
+                  <span class="text-[10px] text-slate-500">par Super Admin • Il y a 2h</span>
+                </div>
+              </div>
+              <div class="p-4 flex gap-3 hover:bg-slate-50 transition-colors cursor-default">
+                <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                  <lucide-icon [name]="Users" class="w-4 h-4"></lucide-icon>
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-[11px] font-bold text-slate-900 uppercase tracking-tight">Nouveau Staff Ajouté</span>
+                  <span class="text-[10px] text-slate-500">par Admin École • Hier</span>
+                </div>
+              </div>
+            </div>
+            <button class="w-full py-3 text-center text-[10px] font-bold text-primary-600 uppercase tracking-widest hover:bg-slate-50 transition-colors border-t border-slate-50">
+              Voir tout l'audit
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Loader -->
+<ng-template #loader>
+  <div class="flex flex-col items-center justify-center h-full gap-4">
+    <div class="w-12 h-12 border-4 border-primary-100 border-t-primary-600 rounded-full animate-spin"></div>
+    <span class="text-sm font-bold text-slate-500 uppercase tracking-widest animate-pulse">Chargement de l'établissement...</span>
+  </div>
+</ng-template>

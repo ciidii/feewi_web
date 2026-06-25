@@ -1,0 +1,60 @@
+<app-fw-form-shell
+  [title]="isEditMode ? 'Modifier la Filière' : 'Nouvelle Filière'"
+  [subtitle]="isEditMode ? 'Mise à jour des paramètres de spécialisation.' : 'Définissez une nouvelle spécialité pédagogique.'"
+  [icon]="Tag"
+  statusLabel="Optionnel"
+  [saveLabel]="isEditMode ? 'Enregistrer' : 'Créer la filière'"
+  [isLoading]="isLoading()"
+  [canSave]="filiereForm.valid"
+  (save)="onSave()"
+  (cancel)="onCancel()"
+>
+  <form [formGroup]="filiereForm" class="space-y-10 py-2">
+
+    <!-- 1. Identification -->
+    <div class="space-y-6">
+      <header class="section-header">
+        <lucide-icon [name]="Tag" [size]="14"></lucide-icon>
+        <span class="label">Identification de la Série</span>
+      </header>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="fw-field">
+          <label class="fw-label">Nom de la filière</label>
+          <div class="fw-input-wrapper">
+            <input
+              type="text"
+              formControlName="name"
+              placeholder="Ex: Sciences"
+              class="fw-input"
+              [class.error]="isInvalid('name')"
+            />
+          </div>
+        </div>
+
+        <div class="fw-field">
+          <label class="fw-label">Code technique</label>
+          <div class="fw-input-wrapper">
+            <input
+              type="text"
+              formControlName="code"
+              placeholder="Ex: S1, L' ou G"
+              class="fw-input uppercase"
+              [class.error]="isInvalid('code')"
+            />
+          </div>
+          <p class="fw-hint">Utilisé pour les matricules et codes classes.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info Box Minimalist -->
+    <div class="p-4 bg-surface-sunken rounded-xl border border-border flex items-start gap-3">
+      <lucide-icon [name]="Info" [size]="16" class="text-text-tertiary mt-0.5"></lucide-icon>
+      <p class="text-[11px] text-text-secondary leading-relaxed font-medium">
+        Les filières sont optionnelles. Elles permettent de spécialiser les niveaux (ex: Terminale S1 vs Terminale L).
+      </p>
+    </div>
+
+  </form>
+</app-fw-form-shell>

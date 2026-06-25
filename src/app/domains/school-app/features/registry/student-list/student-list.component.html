@@ -1,0 +1,85 @@
+<app-fw-page-shell
+  title="Répertoire des Élèves"
+  description="Gérez le référentiel central des élèves inscrits dans l'établissement."
+  [icon]="Users"
+  [tabs]="studentTabs()"
+  [activeTabId]="activeTabId()"
+  (tabChange)="onTabChange($event)"
+  density="compact"
+>
+  <!-- ACTIONS -->
+  <div actions class="flex items-center gap-3">
+    <app-fw-button
+      [variant]="'tertiary'"
+      [size]="'md'"
+      [icon]="Download"
+    >
+      Exporter
+    </app-fw-button>
+    <app-fw-button
+      [variant]="'primary'"
+      [size]="'md'"
+      [icon]="UserPlus"
+    >
+      Inscrire un élève
+    </app-fw-button>
+  </div>
+
+  <!-- CONTENU DE PAGE ALIGNÉ -->
+  <div class="list-page-content animate-in fade-in duration-500">
+
+    <!-- BARRE DE COMMANDE UNIFIÉE -->
+    <app-fw-list-command-bar
+      [searchQuery]="searchQuery()"
+      [searchPlaceholder]="'Rechercher un élève...'"
+      [totalElements]="studentPage()?.totalElements || 0"
+      [activeFilters]="activeFilterChips()"
+      (searchChange)="onSearch($event)"
+      (clearSearch)="onSearch('')"
+      (removeFilter)="removeFilter($event)"
+      (clearAllFilters)="clearAllFilters()"
+    >
+      <!-- ACTIONS PRIMAIRES -->
+      <div primary-actions class="flex items-center gap-2">
+        <app-fw-button variant="tertiary" size="sm" [icon]="Download" title="Exporter"></app-fw-button>
+        <app-fw-button variant="tertiary" size="sm" [icon]="RefreshCw" [loading]="loadingService.isLoading()" (click)="loadStudents(searchQuery(), selectedStatus())" title="Actualiser"></app-fw-button>
+        <div class="divider-v"></div>
+        <app-fw-button
+          variant="primary"
+          size="sm"
+          [icon]="UserPlus"
+        >
+          Inscrire un élève
+        </app-fw-button>
+      </div>
+
+      <!-- FILTRES RAPIDES -->
+      <div quick-filters>
+        <button class="more-filters-trigger" (click)="openFilterModal()" [class.has-active]="selectedClassId()">
+          <lucide-icon [name]="Filter" [size]="14"></lucide-icon>
+          <span>Filtres</span>
+        </button>
+      </div>
+    </app-fw-list-command-bar>
+
+    <!-- LISTE DES ÉLÈVES -->
+    <div class="list-container-integrated">
+      <app-data-list
+        [data]="studentRows()"
+        [tabs]="studentTabs()"
+        [activeTab]="activeTabId()"
+        [actions]="studentActions"
+        [total]="studentPage()?.totalElements || 0"
+        [isLoading]="loadingService.isLoading()"
+        [showSearch]="false"
+        [showFilterButton]="false"
+        [cardMode]="false"
+        defaultView="cards"
+        (onTabChange)="onTabChange($event)"
+        (onAction)="handleAction($event)"
+      ></app-data-list>
+    </div>
+
+  </div>
+
+</app-fw-page-shell>

@@ -1,0 +1,183 @@
+<app-fw-page-shell
+  *ngIf="schoolClass() as cls; else skeletons"
+  [title]="'Classe : ' + cls.fullName"
+  [description]="richDescription()"
+  [icon]="School"
+  [backLink]="['/admin/classes/cycles', level()?.cycleId]"
+  [tabs]="classTabs"
+  [activeTabId]="activeTab()"
+  (tabChange)="setTab($event)"
+  density="compact"
+>
+  <!-- CONTENU DE PAGE ALIGNÉ -->
+  <div class="list-page-content animate-in fade-in duration-500">
+    
+    <!-- BARRE DE COMMANDE UNIFIÉE -->
+    <app-fw-list-command-bar
+      [searchQuery]="searchQuery()"
+      [searchPlaceholder]="activeTab() === 'students' ? 'Rechercher un élève...' : 'Rechercher une matière...'"
+      [totalElements]="activeTab() === 'students' ? assignments().length : teachings().length"
+      (searchChange)="onSearch($event)"
+      (clearSearch)="onSearch('')"
+    >
+       <!-- ACTIONS PRIMAIRES -->
+       <div primary-actions class="flex items-center gap-2">
+         <app-fw-button variant="tertiary" size="sm" [icon]="Download" title="Exporter"></app-fw-button>
+         <app-fw-button
+           variant="tertiary"
+           size="sm"
+           [icon]="RefreshCw"
+           [loading]="isLoading()"
+           (click)="refresh()"
+           title="Actualiser"
+         ></app-fw-button>
+         
+         <div class="divider-v"></div>
+
+         <ng-container *fwHasPermission="'academic:assignment:write'">
+           <app-fw-button
+             *ngIf="activeTab() === 'students'"
+             variant="primary"
+             size="sm"
+             [icon]="UserPlus"
+             [routerLink]="['/admin/academic/assignments']"
+             [queryParams]="{ levelId: cls.levelId, classId: cls.id }"
+           >
+             Affecter
+           </app-fw-button>
+         </ng-container>
+
+         <ng-container *fwHasPermission="'academic:teaching:write'">
+           <app-fw-button
+             *ngIf="activeTab() === 'teachings'"
+             variant="primary"
+             size="sm"
+             [icon]="Plus"
+           >
+             Cours manuel
+           </app-fw-button>
+         </ng-container>
+       </div>
+    </app-fw-list-command-bar>
+
+    <div class="decision-hub-layout-integrated" [class.is-loading]="isActionLoading()">
+
+      <!-- 🚀 HYBRID LOADING FEEDBACK -->
+      <fw-block-loader *ngIf="isActionLoading()" [center]="true" message="Traitement en cours..."></fw-block-loader>
+
+      <main class="pillar-content-area">
+        <div class="pillar-scroll-wrapper custom-scrollbar">
+
+          <!-- TAB 1: REGISTRE DES ÉLÈVES -->
+          <div *ngIf="activeTab() === 'students' && !isLoading()" class="animate-in fade-in duration-500">
+            <app-data-list
+              [data]="displayStudents()"
+              [total]="displayStudents().length"
+              [actions]="studentActions"
+              [isLoading]="isLoading()"
+              [showSearch]="false"
+              [showFilterButton]="false"
+              defaultView="table"
+              (onAction)="handleStudentAction($event)"
+              (onRowClick)="handleStudentAction({ actionId: 'view', row: $event })"
+            ></app-data-list>
+            
+            <!-- État vide -->
+            <div *ngIf="assignments().length === 0" class="py-12">
+              <app-fw-empty-state
+                [icon]="Users"
+                title="Aucun élève inscrit"
+                description="Cette classe est actuellement vide pour la session en cours."
+                ctaLabel="Démarrer les affectations"
+                routerLink="/admin/academic/assignments"
+              ></app-fw-empty-state>
+            </div>
+          </div>
+
+          <!-- TAB 2: ÉQUIPE PÉDAGOGIQUE -->
+          <div *ngIf="activeTab() === 'teachings' && !isLoading()" class="animate-in fade-in duration-500">
+            <app-data-list
+              [data]="displayTeam()"
+              [total]="displayTeam().length"
+              [actions]="teamActions"
+              [isLoading]="isLoading()"
+              [showSearch]="false"
+              [showFilterButton]="false"
+              defaultView="table"
+              (onAction)="handleTeamAction($event)"
+            ></app-data-list>
+          </div>
+
+          <!-- TAB 3: EMPLOI DU TEMPS -->
+          <div *ngIf="activeTab() === 'schedule' && !isLoading()" class="animate-in fade-in duration-500">
+             <div class="flex flex-col items-center justify-center p-20 bg-white rounded-3xl border-2 border-dashed border-border text-center">
+               <lucide-icon [name]="Calendar" [size]="48" class="text-text-tertiary mb-6 opacity-20"></lucide-icon>
+               <h3 class="text-xl font-bold text-midnight">Emploi du temps</h3>
+               <p class="text-text-secondary mt-2 max-w-sm">Le moteur de génération d'emplois du temps sera disponible dans une prochaine mise à jour.</p>
+             </div>
+          </div>
+
+        </div>
+      </main>
+
+      <!-- RIGHT SIDEBAR (Stats de classe) -->
+      <aside class="conformity-sidebar">
+        <!-- Occupation -->
+        <div class="compliance-card">
+          <lucide-icon [name]="Users" [size]="20"></lucide-icon>
+          <div class="compliance-text">
+            <strong>Taux d'occupation</strong>
+            <span>{{ assignments().length }} / {{ cls.capacity }} places utilisées</span>
+          </div>
+        </div>
+
+        <!-- Programme complet -->
+        <section class="sidebar-card">
+          <div class="card-header">
+            <lucide-icon [name]="BookOpen" [size]="16"></lucide-icon>
+            <h4>Programme</h4>
+          </div>
+          <div class="p-2 space-y-4">
+             <div class="flex justify-between items-center">
+               <span class="text-xs font-medium text-slate-500">Matières suivies</span>
+               <span class="text-xs font-bold text-midnight">{{ teachings().length }}</span>
+             </div>
+             <app-fw-button 
+               [variant]="'ghost'" 
+               size="sm" 
+               class="w-full"
+               [routerLink]="['/admin/classes/levels', cls.levelId, 'curriculum']"
+             >
+               Voir le programme complet
+             </app-fw-button>
+          </div>
+        </section>
+
+        <!-- Prof Principal -->
+        <section class="sidebar-card">
+          <div class="card-header">
+            <lucide-icon [name]="GraduationCap" [size]="16"></lucide-icon>
+            <h4>Professeur Principal</h4>
+          </div>
+          <div class="p-4 text-center">
+            <div class="w-12 h-12 bg-surface-sunken rounded-full mx-auto mb-3 flex items-center justify-center">
+              <lucide-icon [name]="Plus" [size]="18" class="text-text-tertiary"></lucide-icon>
+            </div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Non assigné</p>
+          </div>
+        </section>
+
+      </aside>
+
+    </div>
+  </div>
+</app-fw-page-shell>
+
+<ng-template #skeletons>
+  <div class="list-page-content">
+    <div class="skeleton-layout">
+       <div class="skeleton-content h-[200px] rounded-2xl mb-6"></div>
+       <div class="skeleton-content h-[400px] rounded-2xl"></div>
+    </div>
+  </div>
+</ng-template>

@@ -1,82 +1,192 @@
-<aside 
-  class="bg-white border-r border-border-subtle h-[calc(100vh-64px)] transition-all duration-300 relative flex flex-col overflow-hidden select-none"
-  [class.w-72]="navService.isSidebarExpanded()"
-  [class.w-20]="!navService.isSidebarExpanded()"
+<aside
+  class="sidebar-container"
+  [class.is-expanded]="navService.isSidebarExpanded()"
+  [class.is-collapsed]="!navService.isSidebarExpanded()"
 >
-  
-  <!-- === MONDE 1 : SAAS SYSTEM ADMIN === -->
-  <ng-container *ngIf="auth.hasRole('ROLE_SUPER_ADMIN')">
-    <div class="p-4 overflow-hidden shrink-0">
-      <div class="flex items-center gap-3 bg-amber-50 border border-amber-100 rounded-2xl h-14 w-full px-6">
-        <lucide-icon [name]="ShieldCheck" class="w-6 h-6 text-amber-600 shrink-0"></lucide-icon>
-        <span *ngIf="navService.isSidebarExpanded()" class="text-sm font-bold text-amber-800 uppercase tracking-tighter">Console SaaS</span>
-      </div>
+
+  <!-- SIDEBAR HEADER (CONTROLS) -->
+  <header class="sidebar-header">
+    <div class="service-context" *ngIf="navService.isSidebarExpanded()">
+      <span class="service-label">{{ getActiveServiceLabel() }}</span>
     </div>
 
-    <nav class="flex-1 px-3 py-2 space-y-1 overflow-y-auto">
-      <a 
-        *ngFor="let item of saasItems" 
-        [routerLink]="item.route"
-        routerLinkActive="bg-amber-50 text-amber-700 font-bold border-r-2 border-amber-600"
-        class="flex items-center h-11 px-4 rounded-lg text-slate-medium hover:bg-ice hover:text-amber-600 transition-all group relative border-r-2 border-transparent"
-        [class.justify-center]="!navService.isSidebarExpanded()"
-      >
-        <lucide-icon [name]="item.icon" class="w-5 h-5 shrink-0 stroke-[1.5px]"></lucide-icon>
-        <span *ngIf="navService.isSidebarExpanded()" class="ml-4 text-sm font-medium">{{ item.label }}</span>
-      </a>
-    </nav>
-  </ng-container>
-
-  <!-- === MONDE 2 : SCHOOL APP === -->
-  <ng-container *ngIf="!auth.hasRole('ROLE_SUPER_ADMIN')">
-    <!-- Hero Button École -->
-    <div class="p-4 flex justify-center shrink-0">
-      <button 
-        routerLink="/admissions"
-        class="flex items-center bg-white border border-border-subtle shadow-sm hover:shadow-md transition-all rounded-2xl h-14 w-full group active:scale-95 overflow-hidden"
-        [class.justify-center]="!navService.isSidebarExpanded()"
-        [class.px-6]="navService.isSidebarExpanded()"
-      >
-        <lucide-icon [name]="Plus" class="w-6 h-6 text-primary stroke-[3px] shrink-0"></lucide-icon>
-        <span *ngIf="navService.isSidebarExpanded()" class="ml-3 text-sm font-bold text-midnight whitespace-nowrap">Nouvelle Inscription</span>
-      </button>
-    </div>
-
-    <nav class="flex-1 px-3 py-2 space-y-1 overflow-y-auto">
-      <div *ngIf="navService.isSidebarExpanded()" class="px-4 py-2 mt-2">
-        <span class="text-[10px] font-bold text-slate-medium uppercase tracking-widest">Scolarité</span>
-      </div>
-      <a 
-        *ngFor="let item of academicItems" 
-        [routerLink]="item.route"
-        routerLinkActive="bg-ice text-primary font-bold border-r-2 border-primary"
-        class="flex items-center h-11 px-4 rounded-lg text-slate-medium hover:bg-ice hover:text-primary transition-all group"
-        [class.justify-center]="!navService.isSidebarExpanded()"
-      >
-        <lucide-icon [name]="item.icon" class="w-5 h-5 shrink-0 stroke-[1.5px]"></lucide-icon>
-        <span *ngIf="navService.isSidebarExpanded()" class="ml-4 text-sm font-medium">{{ item.label }}</span>
-      </a>
-
-      <div *ngIf="navService.isSidebarExpanded()" class="px-4 py-2 mt-4">
-        <span class="text-[10px] font-bold text-slate-medium uppercase tracking-widest">Identity</span>
-      </div>
-      <a 
-        *ngFor="let item of identityItems" 
-        [routerLink]="item.route"
-        routerLinkActive="bg-ice text-primary font-bold border-r-2 border-primary"
-        class="flex items-center h-11 px-4 rounded-lg text-slate-medium hover:bg-ice hover:text-primary transition-all group"
-        [class.justify-center]="!navService.isSidebarExpanded()"
-      >
-        <lucide-icon [name]="item.icon" class="w-5 h-5 shrink-0 stroke-[1.5px]"></lucide-icon>
-        <span *ngIf="navService.isSidebarExpanded()" class="ml-4 text-sm font-medium">{{ item.label }}</span>
-      </a>
-    </nav>
-  </ng-container>
-
-  <!-- Footer Toggle -->
-  <div class="p-3 border-t border-border-subtle flex justify-end shrink-0">
-    <button (click)="navService.toggleSidebar()" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-ice text-slate-medium">
-      <lucide-icon [name]="navService.isSidebarExpanded() ? ChevronLeft : ChevronRight" class="w-4 h-4"></lucide-icon>
+    <button class="toggle-btn" (click)="navService.toggleSidebar()" title="Basculer la sidebar">
+      <lucide-icon [name]="navService.isSidebarExpanded() ? ChevronLeft : ChevronRight" [size]="14"></lucide-icon>
     </button>
-  </div>
+  </header>
+
+  <!-- === CONSOLE SAAS === -->
+  <ng-container *ngIf="auth.currentUser()?.roles?.includes('ROLE_SUPER_ADMIN')">
+    <div class="saas-badge">
+      <div class="inner">
+        <lucide-icon [name]="ShieldCheck" [size]="20"></lucide-icon>
+        <span class="label">Console Système</span>
+      </div>
+    </div>
+
+    <nav class="nav-scroll">
+      <ng-container *ngFor="let item of saasItems">
+        <a *fwHasPermission="item.permission"
+           [routerLink]="item.route"
+           routerLinkActive="active-link"
+           [attr.data-label]="item.label"
+           class="sidebar-link">
+          <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
+          <span class="label">{{ item.label }}</span>
+        </a>
+      </ng-container>
+    </nav>
+  </ng-container>
+
+  <!-- === SCHOOL APP NAVIGATION === -->
+  <ng-container *ngIf="!auth.currentUser()?.roles?.includes('ROLE_SUPER_ADMIN')">
+    <nav class="nav-scroll">
+      <!-- DASHBOARD -->
+      <ng-container *ngIf="navService.activeService() === 'dashboard'">
+        <span class="nav-section-title">Navigation Rapide</span>
+        <a routerLink="/admin/home"
+           routerLinkActive="active-link"
+           class="sidebar-link"
+           [attr.data-label]="'Console de Pilotage'">
+          <div class="icon-wrap"><lucide-icon [name]="LayoutGrid" [size]="16"></lucide-icon></div>
+          <span class="label">Console de Pilotage</span>
+        </a>
+
+        <span class="nav-section-title">Analyse Pilotage</span>
+        <a routerLink="/admin/enrollment"
+           routerLinkActive="active-link"
+           class="sidebar-link"
+           [attr.data-label]="'Analyses & Stats'">
+          <div class="icon-wrap"><lucide-icon [name]="BarChart3" [size]="16"></lucide-icon></div>
+          <span class="label">Analyses & Stats</span>
+        </a>
+      </ng-container>
+
+      <!-- ENROLLMENT -->
+      <ng-container *ngIf="navService.activeService() === 'enrollment'">
+        <span class="nav-section-title">Inscriptions</span>
+        <ng-container *ngFor="let item of enrollmentItems; let i = index">
+          <a *fwHasPermission="item.permission"
+             [routerLink]="item.route"
+             routerLinkActive="active-link"
+             [routerLinkActiveOptions]="i === 0 ? {exact: true} : {exact: false}"
+             class="sidebar-link"
+             [attr.data-label]="item.label">
+            <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
+            <span class="label">{{ item.label }}</span>
+          </a>
+        </ng-container>
+      </ng-container>
+
+      <!-- REGISTRY -->
+      <ng-container *ngIf="navService.activeService() === 'registry'">
+        <span class="nav-section-title">Registre Élèves</span>
+        <ng-container *ngFor="let item of registryItems; let i = index">
+          <a *fwHasPermission="item.permission"
+             [routerLink]="item.route"
+             routerLinkActive="active-link"
+             [routerLinkActiveOptions]="i === 0 ? {exact: true} : {exact: false}"
+             class="sidebar-link"
+             [attr.data-label]="item.label">
+            <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
+            <span class="label">{{ item.label }}</span>
+          </a>
+        </ng-container>
+      </ng-container>
+
+      <!-- ACADEMIC -->
+      <ng-container *ngIf="navService.activeService() === 'academic'">
+        <span class="nav-section-title">Pilotage</span>
+        <ng-container *ngFor="let item of academicItems; let i = index">
+          <a *fwHasPermission="item.permission"
+             [routerLink]="item.route"
+             routerLinkActive="active-link"
+             [routerLinkActiveOptions]="i === 0 ? {exact: true} : {exact: false}"
+             class="sidebar-link"
+             [attr.data-label]="item.label">
+            <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
+            <span class="label">{{ item.label }}</span>
+          </a>
+        </ng-container>
+      </ng-container>
+
+      <!-- IDENTITY -->
+      <ng-container *ngIf="navService.activeService() === 'identity'">
+        <span class="nav-section-title">Sécurité & Staff</span>
+        <ng-container *ngFor="let item of identityItems; let i = index">
+          <a *fwHasPermission="item.permission"
+             [routerLink]="item.route"
+             routerLinkActive="active-link"
+             [routerLinkActiveOptions]="i === 0 ? {exact: true} : {exact: false}"
+             class="sidebar-link"
+             [attr.data-label]="item.label">
+            <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
+            <span class="label">{{ item.label }}</span>
+          </a>
+        </ng-container>
+      </ng-container>
+
+      <!-- SETTINGS (SYSTEM) -->
+      <ng-container *ngIf="navService.activeService() === 'settings'">
+        <span class="nav-section-title">Apparence</span>
+
+        <button (click)="uiService.setTheme('light')" class="sidebar-link" [class.active-link]="uiService.theme() === 'light'" [attr.data-label]="'Mode Clair'">
+          <div class="icon-wrap"><lucide-icon [name]="Sun" [size]="16"></lucide-icon></div>
+          <span class="label">Mode Clair</span>
+        </button>
+
+        <button (click)="uiService.setTheme('dark')" class="sidebar-link" [class.active-link]="uiService.theme() === 'dark'" [attr.data-label]="'Mode Sombre'">
+          <div class="icon-wrap"><lucide-icon [name]="Moon" [size]="16"></lucide-icon></div>
+          <span class="label">Mode Sombre</span>
+        </button>
+
+        <span class="nav-section-title">Affichage</span>
+
+        <button (click)="uiService.toggleDensity()" class="sidebar-link" [attr.data-label]="'Changer Densité'">
+          <div class="icon-wrap"><lucide-icon [name]="uiService.density() === 'compact' ? Minimize : Maximize" [size]="16"></lucide-icon></div>
+          <span class="label">{{ uiService.density() === 'compact' ? 'Mode Confortable' : 'Mode Compact' }}</span>
+        </button>
+
+        <ng-container *ngIf="schoolSettingsItems.length > 0">
+            <span class="nav-section-title">Paramètres École</span>
+            <ng-container *ngFor="let item of schoolSettingsItems">
+                <a *fwHasPermission="item.permission"
+                   [routerLink]="item.route"
+                   routerLinkActive="active-link"
+                   class="sidebar-link"
+                   [attr.data-label]="item.label">
+                    <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
+                    <span class="label">{{ item.label }}</span>
+                </a>
+            </ng-container>
+        </ng-container>
+
+        <span class="nav-section-title">Localisation</span>
+
+        <a class="sidebar-link" [attr.data-label]="'Langue'">
+          <div class="icon-wrap"><lucide-icon [name]="Globe" [size]="16"></lucide-icon></div>
+          <span class="label">Français (Bêta)</span>
+        </a>
+
+        <!-- SESSION (Affiné) -->
+        <span class="nav-section-title mt-4">Ma Session</span>
+
+        <div class="sidebar-profile-card">
+          <div class="avatar-box">
+            <lucide-icon [name]="User" [size]="14"></lucide-icon>
+          </div>
+          <div class="info">
+            <span class="name">{{ auth.currentUser()?.firstName }} {{ auth.currentUser()?.lastName }}</span>
+            <span class="role">{{ auth.currentUser()?.roles?.[0]?.replace('ROLE_', '') }}</span>
+          </div>
+        </div>
+
+        <button (click)="auth.logout()" class="sidebar-link logout-item" [attr.data-label]="'Déconnexion'">
+          <div class="icon-wrap"><lucide-icon [name]="LogOut" [size]="16"></lucide-icon></div>
+          <span class="label">Déconnexion</span>
+        </button>
+      </ng-container>
+    </nav>
+  </ng-container>
+
 </aside>

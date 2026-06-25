@@ -1,31 +1,31 @@
-import { Component, input, output, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatMenuModule } from '@angular/material/menu';
+import {Component, computed, input, model, output, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {MatButtonModule} from '@angular/material/button';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatMenuModule} from '@angular/material/menu';
 import {
-  LucideAngularModule,
-  LayoutGrid,
-  Table,
+  Archive,
   Calendar,
-  Layers,
-  Search,
-  X,
+  Check,
+  CheckCircle,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
-  CheckCircle,
-  Trash2,
   Download,
-  Archive,
+  Filter,
   Inbox,
-  ChevronDown,
+  Layers,
+  LayoutGrid,
+  LucideAngularModule,
+  Search,
   Sparkles,
-  Check
+  Table,
+  Trash2,
+  X
 } from 'lucide-angular';
-
-// Importer les modèles
 import {
+  RowAction,
   SearchState,
   SelectionState,
   TabItem,
@@ -33,16 +33,17 @@ import {
   ViewConfig,
   ViewMode
 } from '../../models/data-list.models';
-
-// Importer les composants
-import { ExpandableViewComponent } from './views/expandable-view/expandable-view';
-import { CardsViewComponent } from './views/cards-view/cards-view';
+import {ExpandableViewComponent} from './views/expandable-view/expandable-view';
+import {CardsViewComponent} from './views/cards-view/cards-view';
 import {SortState, TableViewComponent} from './views/table-view/table-view';
-import { TimelineViewComponent } from './views/timeline-view/timeline-view';
-
-
-// Importer les services
-import { ViewPreferenceService } from '../../services/view-preference.service';
+import {TimelineViewComponent} from './views/timeline-view/timeline-view';
+import {CardSkeletonComponent} from '../skeleton/card-skeleton.component';
+import {BlockLoaderComponent} from '../loader/block-loader.component';
+import {FwEmptyStateComponent} from '../empty-state/empty-state.component';
+import {FwRefreshBannerComponent} from '../refresh-banner/refresh-banner.component';
+import {FwButtonComponent} from '../button/button.component';
+import {ViewPreferenceService} from '../../services/view-preference.service';
+import {AuthService} from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-data-list',
@@ -57,21 +58,34 @@ import { ViewPreferenceService } from '../../services/view-preference.service';
     CardsViewComponent,
     TableViewComponent,
     TimelineViewComponent,
-    MatMenuModule
+    CardSkeletonComponent,
+    MatMenuModule,
+    BlockLoaderComponent,
+    FwEmptyStateComponent,
+    FwRefreshBannerComponent,
+    FwButtonComponent
   ],
   templateUrl: './data-list.component.html',
   styleUrls: ['./data-list.component.scss']
 })
 export class DataListComponent {
-  // ===========================================
-  // CONSTRUCTEUR
-  // ===========================================
+  constructor(
+    private viewPreferenceService: ViewPreferenceService,
+    private authService: AuthService
+  ) {
+  }
 
-  constructor(private viewPreferenceService: ViewPreferenceService) {
-    // Charger la préférence de vue au démarrage
+  ngOnInit() {
     const savedView = this.viewPreferenceService.getPreferredView()();
-    if (savedView !== this.viewMode()) {
+
+    // Priorité :
+    // 1. Vue sauvegardée par l'utilisateur
+    // 2. Vue définie par le développeur (defaultView)
+    // 3. Vue par défaut du système (expandable)
+    if (savedView) {
       this.viewMode.set(savedView);
+    } else if (this.defaultView()) {
+      this.viewMode.set(this.defaultView());
     }
   }
 
@@ -81,6 +95,9 @@ export class DataListComponent {
 
   /** Les données à afficher */
   data = input<TableRow[]>([]);
+
+  /** Vue par défaut (si aucune préférence n'est enregistrée) */
+  defaultView = input<ViewMode>('table');
 
   /** Les onglets disponibles */
   tabs = input<TabItem[]>([]);
@@ -100,6 +117,32 @@ export class DataListComponent {
   /** Afficher ou non la barre de recherche */
   showSearch = input<boolean>(true);
 
+  /** Afficher ou non le bouton de filtres */
+  showFilterButton = input<boolean>(true);
+
+  /** Actions disponibles sur chaque ligne */
+  actions = input<RowAction[]>([]);
+
+  /** Actions filtrées par permissions (Désactivé pour afficher les actions inactives) */
+  filteredActions = computed(() => {
+    return this.actions();
+  });
+
+  /** État de chargement */
+  isLoading = input<boolean>(false);
+
+  /** Données périmées (Impératif 3) */
+  isStale = input<boolean>(false);
+
+  /** Masquer la barre d'outils interne (recherche, onglets, vues) */
+  hideToolbar = input<boolean>(false);
+
+  /** Masquer la barre de sélection groupée */
+  hideSelectionBar = input<boolean>(false);
+
+  /** Mode carte (bordures, fond blanc) ou intégré */
+  cardMode = input<boolean>(true);
+
   // ===========================================
   // OUTPUTS (événements vers le parent)
   // ===========================================
@@ -110,10 +153,14 @@ export class DataListComponent {
   /** Recherche */
   onSearch = output<string>();
 
-  /** Actions sur une ligne */
-  onView = output<TableRow>();
-  onValidate = output<TableRow>();
-  onPrint = output<TableRow>();
+  /** Demande de rafraîchissement */
+  onRefresh = output<void>();
+
+  /** Événement d'action dynamique */
+  onAction = output<{ actionId: string, row: TableRow }>();
+
+  /** Clic sur une ligne (Action primaire de navigation) */
+  onRowClick = output<TableRow>();
 
   /** Actions groupées */
   onBulkValidate = output<(string | number)[]>();
@@ -135,7 +182,7 @@ export class DataListComponent {
   searchQuery = signal('');
 
   /** IDs sélectionnés */
-  selectedIds = signal<Set<string | number>>(new Set());
+  selectedIds = model<Set<string | number>>(new Set());
 
   /** IDs des lignes dépliées (pour vue expandable) */
   expandedIds = signal<Set<string | number>>(new Set());
@@ -171,14 +218,14 @@ export class DataListComponent {
       label: 'Vue Tableau',
       icon: Table,
       description: 'Affichage classique en lignes et colonnes',
-      isAvailable: true  // Maintenant disponible
+      isAvailable: true
     },
     {
       id: 'timeline',
       label: 'Vue Chronologique',
       icon: Calendar,
       description: 'Organisation par date',
-      isAvailable: true  // Maintenant disponible
+      isAvailable: true
     }
   ];
 
@@ -263,6 +310,11 @@ export class DataListComponent {
     }
     return pages;
   });
+
+  /** Gérer le clic sur une ligne (Relais typé) */
+  handleRowClick(row: TableRow): void {
+    this.onRowClick.emit(row);
+  }
 
   // ===========================================
   // MÉTHODES DE SÉLECTION
@@ -399,12 +451,7 @@ export class DataListComponent {
       default: return 'bg-slate-50 text-slate-600 border-slate-200';
     }
   }
-  // ===========================================
-// MÉTHODES POUR LE SÉLECTEUR DE VUES INTELLIGENT
-// ===========================================
 
-  /** Obtenir l'icône de la vue actuelle */
-  /** Obtenir l'icône de la vue actuelle */
   /** Obtenir l'icône de la vue actuelle */
   getCurrentViewIcon(): any {
     const currentView = this.viewOptions.find(v => v.id === this.viewMode());
@@ -419,27 +466,8 @@ export class DataListComponent {
 
   /** Vérifier si une vue est nouvelle (pour afficher le badge) */
   isNewView(viewId: string): boolean {
-    // Les vues récemment ajoutées - à ajuster selon vos besoins
     const newViews = ['cards', 'timeline'];
     return newViews.includes(viewId);
-  }
-
-  /** Marquer une vue comme vue (optionnel) */
-  markViewAsSeen(viewId: string): void {
-    try {
-      localStorage.setItem(`view-${viewId}-seen`, 'true');
-    } catch (error) {
-      console.warn('Impossible d\'accéder au localStorage', error);
-    }
-  }
-
-  /** Vérifier si une vue a déjà été vue (optionnel) */
-  hasViewBeenSeen(viewId: string): boolean {
-    try {
-      return localStorage.getItem(`view-${viewId}-seen`) === 'true';
-    } catch (error) {
-      return false;
-    }
   }
 
   // ===========================================
@@ -461,8 +489,11 @@ export class DataListComponent {
   protected readonly ChevronDown = ChevronDown;
   protected readonly Sparkles = Sparkles;
   protected readonly Check = Check;
+  protected readonly Filter = Filter;
+
+  isFiltersOpen = signal(false);
+
+  toggleFilters() {
+    this.isFiltersOpen.update(v => !v);
+  }
 }
-
-
-
-

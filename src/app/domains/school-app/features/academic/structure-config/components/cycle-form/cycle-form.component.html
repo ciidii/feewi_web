@@ -1,0 +1,59 @@
+<app-fw-form-shell
+  [title]="isEditMode ? 'Modifier le Cycle' : 'Nouveau Cycle Éducatif'"
+  [subtitle]="isEditMode ? 'Mise à jour des paramètres du bloc pédagogique.' : 'Définissez un grand bloc d\'organisation pédagogique.'"
+  [icon]="Layers"
+  statusLabel="Structure"
+  [saveLabel]="isEditMode ? 'Enregistrer' : 'Créer le cycle'"
+  [isLoading]="isLoading()"
+  [canSave]="cycleForm.valid"
+  (save)="onSave()"
+  (cancel)="onCancel()"
+>
+  <form [formGroup]="cycleForm" class="space-y-10 py-2">
+
+    <!-- 1. Identification -->
+    <div class="space-y-6">
+      <header class="section-header">
+        <lucide-icon [name]="Type" [size]="14"></lucide-icon>
+        <span class="label">Identification du Cycle</span>
+      </header>
+
+      <div class="fw-field">
+        <label class="fw-label">Dénomination</label>
+        <div class="fw-input-wrapper">
+          <input
+            type="text"
+            formControlName="name"
+            placeholder="Ex: Enseignement Moyen"
+            class="fw-input"
+            [class.error]="isInvalid('name')"
+          />
+        </div>
+        <p class="fw-hint">Le nom qui apparaîtra sur les bulletins et certificats.</p>
+      </div>
+
+      <div class="fw-field">
+        <label class="fw-label">Ordre d'affichage (Rang)</label>
+        <div class="fw-input-wrapper">
+          <input
+            type="number"
+            formControlName="rank"
+            class="fw-input"
+            [class.error]="isInvalid('rank')"
+          />
+        </div>
+        <p class="fw-hint">Définit la position dans les listes (1 = premier).</p>
+      </div>
+    </div>
+
+    <!-- Info Box Minimalist -->
+    <div class="p-4 bg-surface-sunken rounded-xl border border-border flex items-start gap-3">
+      <lucide-icon [name]="Info" [size]="16" class="text-text-tertiary mt-0.5"></lucide-icon>
+      <p class="text-[11px] text-text-secondary leading-relaxed font-medium">
+        Les <span class="text-midnight font-bold">cycles</span> regroupent vos niveaux pédagogiques pour faciliter le pilotage de l'établissement.
+      </p>
+    </div>
+
+  </form>
+</app-fw-form-shell>
+

@@ -1,0 +1,292 @@
+<div *ngIf="config() && !portalClosed(); else loader" class="stepper-layout animate-fade">
+
+  <!-- 🏛️ HEADER INSTITUTIONNEL (Top Bar) -->
+  <header class="stepper-header">
+    <fw-page-progress *ngIf="loading() || submitting() || savingDraft()"></fw-page-progress>
+    
+    <!-- Niveau 1 : Marque & Session -->
+    <div class="header-top">
+      <div class="container">
+        <div class="brand">
+          <div class="school-logo">
+            <img *ngIf="tenantCtx.activeTenant()?.logoUrl" [src]="tenantCtx.activeTenant()?.logoUrl">
+            <lucide-icon *ngIf="!tenantCtx.activeTenant()?.logoUrl" [name]="GraduationCap" [size]="18"></lucide-icon>
+          </div>
+          <div class="school-info">
+            <span class="name">{{ tenantCtx.activeTenant()?.name || 'Établissement' }}</span>
+            <span class="year" *ngIf="selectedYearLabel()">{{ selectedYearLabel() }}</span>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <div class="session-info" *ngIf="bundleRef()">
+            <span class="session-label">Dossier</span>
+            <div class="access-badge">
+              <lucide-icon [name]="Lock" [size]="12"></lucide-icon>
+              <span class="ref">{{ bundleRef() }}</span>
+              <span class="separator"></span>
+              <span class="code">{{ accessCode() }}</span>
+            </div>
+          </div>
+          <button class="save-draft-btn"
+                  (click)="saveDraftAndExit()"
+                  [disabled]="savingDraft() || submitting()"
+                  type="button">
+            <lucide-icon [name]="Save" [size]="14"></lucide-icon>
+            <span class="save-label">Enregistrer & Quitter</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Niveau 2 : Stepper Global (Épuré) -->
+    <nav class="global-nav">
+      <div class="container">
+        <!-- Step 1: Famille -->
+        <div class="nav-item" [class.active]="globalPhase() === 'GUARDIAN'" [class.done]="globalPhase() !== 'GUARDIAN'">
+          <div class="indicator">
+            <lucide-icon *ngIf="globalPhase() !== 'GUARDIAN'" [name]="CheckCircle" [size]="14"></lucide-icon>
+            <span *ngIf="globalPhase() === 'GUARDIAN'">01</span>
+          </div>
+          <span class="label">Famille</span>
+        </div>
+
+        <div class="nav-connector" [class.active]="globalPhase() !== 'GUARDIAN'"></div>
+
+        <!-- Step 2: Enfants -->
+        <div class="nav-item" [class.active]="globalPhase() === 'HUB'" [class.done]="globalPhase() === 'REVIEW'">
+          <div class="indicator">
+            <lucide-icon *ngIf="globalPhase() === 'REVIEW'" [name]="CheckCircle" [size]="14"></lucide-icon>
+            <span *ngIf="globalPhase() !== 'REVIEW'">02</span>
+          </div>
+          <span class="label">Enfants</span>
+          <span class="count-pill" *ngIf="admissions().length > 0">{{ admissions().length }}</span>
+        </div>
+
+        <div class="nav-connector" [class.active]="globalPhase() === 'REVIEW'"></div>
+
+        <!-- Step 3: Validation -->
+        <div class="nav-item" [class.active]="globalPhase() === 'REVIEW'">
+          <div class="indicator">03</div>
+          <span class="label">Validation</span>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- 📝 CONTENU PRINCIPAL (Centré) -->
+  <main class="stepper-main" [class.is-loading]="submitting() || savingDraft()">
+    <div class="form-container">
+
+      <!-- 🚀 HYBRID LOADING FEEDBACK -->
+      <fw-block-loader *ngIf="submitting() || savingDraft()" [center]="true" message="Enregistrement..."></fw-block-loader>
+
+      <!-- 🟢 BANNIÈRE DE CONTEXTE ENFANT (Intégrée au flux) -->
+      <header class="child-context-banner animate-in fade-in slide-in-from-top-4 duration-500" *ngIf="isChildFlow()">
+        <div class="child-meta">
+          <div class="child-avatar">{{ activeAdmission()?.identity?.firstName?.charAt(0) || 'E' }}</div>
+          <div class="child-info">
+            <p class="context-label">Édition du dossier</p>
+            <h2 class="child-name">{{ activeAdmission()?.identity?.firstName || 'Nouvel élève' }} {{ activeAdmission()?.identity?.lastName }}</h2>
+          </div>
+        </div>
+        
+        <div class="child-steps-nav">
+          <div *ngFor="let s of childSteps()" class="cs-item" 
+               [class.active]="childPhase() === s"
+               [class.done]="isChildStepDone(s)">
+            <lucide-icon [name]="childStepIcon(s)" [size]="16"></lucide-icon>
+            <span class="cs-label">{{ childStepLabel(s) }}</span>
+          </div>
+        </div>
+
+        <!-- Barre de progression discrète -->
+        <div class="cs-progress-bar">
+          <div class="fill" [style.width.%]="childProgress()"></div>
+        </div>
+      </header>
+      
+      <div class="view-viewport">
+        <!-- Phase GUARDIAN -->
+        <app-step-family
+          *ngIf="globalPhase() === 'GUARDIAN'"
+          [data]="familyStore"
+          [title]="schema()?.family?.label"
+          [coreFieldControls]="schema()?.family?.guardianCoreFieldControls || {}"
+          [customFields]="familyCustomFields()"
+          [instruction]="instructions()['family']">
+        </app-step-family>
+
+        <!-- Phase HUB -->
+        <app-step-hub
+          *ngIf="globalPhase() === 'HUB' && !isChildFlow()"
+          [admissions]="admissions()"
+          [allLevels]="levels()"
+          [schoolingLabel]="schema()?.schooling?.label || 'Scolarité'"
+          (editChild)="openChildEditor($event)"
+          (addChild)="addNewChild()"
+          (submitAll)="goToReview()">
+        </app-step-hub>
+
+        <!-- Phase CHILD : Identité -->
+        <app-step-identity
+          *ngIf="isChildFlow() && childPhase() === 'STUDENT'"
+          [identity]="store.identity"
+          [schooling]="store.schooling"
+          [title]="schema()?.identity?.label"
+          [coreFieldControls]="schema()?.identity?.coreFieldControls || {}"
+          [customFields]="identityCustomFields()"
+          [schoolingCustomFields]="schoolingCustomFields()"
+          [availableLevels]="levels()"
+          [groupedLevels]="groupedLevels()"
+          [instruction]="instructions()['identity']"
+          (onLevelChange)="onLevelChange($event)">
+        </app-step-identity>
+
+        <!-- Phase CHILD : Santé -->
+        <app-step-medical
+          *ngIf="isChildFlow() && childPhase() === 'MEDICAL'"
+          [medical]="store.medical"
+          [title]="schema()?.medical?.label"
+          [customFields]="medicalCustomFields()"
+          [instruction]="instructions()['medical']">
+        </app-step-medical>
+
+        <!-- Phase CHILD : Services -->
+        <app-step-services
+          *ngIf="isChildFlow() && childPhase() === 'SERVICES'"
+          [title]="schema()?.services?.label"
+          [availableServices]="schema()?.services?.availableServices || []"
+          (selectionsChange)="store.services = $event">
+        </app-step-services>
+
+        <!-- Phase CHILD : Extra Pillars -->
+        <app-step-extra
+          *ngIf="isChildFlow() && isExtraPillarKey(childPhase()!)"
+          [data]="store.extraPillars[childPhase()!]"
+          [customFields]="getExtraPillarConfig(childPhase()!)?.customFields || []"
+          [title]="getExtraPillarConfig(childPhase()!)?.label || ''"
+          [instruction]="instructions()[childPhase()!]">
+        </app-step-extra>
+
+        <!-- Phase CHILD : Documents -->
+        <app-step-vault
+          *ngIf="isChildFlow() && childPhase() === 'DOCS'"
+          [title]="schema()?.documents?.label"
+          [documents]="activeAdmission()?.documents || []"
+          [uploadingDocCode]="uploadingDoc()"
+          (onFileSelected)="onDocUpload($event)">
+        </app-step-vault>
+
+        <!-- Phase REVIEW -->
+        <app-step-review
+          *ngIf="globalPhase() === 'REVIEW'"
+          [family]="familyStore"
+          [admissions]="admissions()"
+          [allLevels]="levels()"
+          [legalText]="config()?.legalText || ''"
+          [consent]="consent">
+        </app-step-review>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- 🔘 ACTIONS FIXES (Bottom Bar) -->
+  <footer class="stepper-footer">
+    <div class="container">
+      
+      <!-- GUARDIAN -->
+      <ng-container *ngIf="globalPhase() === 'GUARDIAN'">
+        <div class="flex-1 flex items-center justify-center">
+          <div class="step-context">
+            <span class="step-text">Étape 1 sur 3</span>
+            <div class="step-dots">
+              <div class="dot active"></div>
+              <div class="dot"></div>
+              <div class="dot"></div>
+            </div>
+          </div>
+        </div>
+        <app-fw-button
+          (click)="nextGlobalStep()" 
+          [loading]="submitting()"
+          variant="primary"
+          [icon]="ArrowRight"
+          iconPosition="right"
+        >
+          Continuer vers les enfants
+        </app-fw-button>
+      </ng-container>
+
+      <!-- CHILD FLOW -->
+      <ng-container *ngIf="isChildFlow()">
+        <app-fw-button
+          (click)="prevChildStep()"
+          variant="ghost"
+          [icon]="ArrowLeft"
+        >
+          {{ childPhase() === 'STUDENT' ? 'Quitter' : 'Précédent' }}
+        </app-fw-button>
+        <div class="flex-1 flex items-center justify-center">
+          <div class="step-context">
+            <span class="step-text">Étape {{ childSteps().indexOf(childPhase()!) + 1 }} sur {{ childSteps().length }}</span>
+            <div class="step-dots">
+              <div *ngFor="let s of childSteps()" class="dot"
+                   [class.active]="childPhase() === s"
+                   [class.done]="isChildStepDone(s)"></div>
+            </div>
+          </div>
+        </div>
+        <app-fw-button
+          (click)="nextChildStep()" 
+          [loading]="submitting()"
+          variant="primary"
+          [icon]="childPhase() === 'DOCS' ? CheckCircle : ArrowRight"
+          iconPosition="right"
+        >
+          {{ childPhase() === 'DOCS' ? 'Valider cet élève' : 'Suivant' }}
+        </app-fw-button>
+      </ng-container>
+
+      <!-- REVIEW -->
+      <ng-container *ngIf="globalPhase() === 'REVIEW'">
+        <app-fw-button
+          (click)="globalPhase.set('HUB'); childPhase.set(null)"
+          variant="ghost"
+          [icon]="ArrowLeft"
+        >
+          Retour aux enfants
+        </app-fw-button>
+        <div class="flex-1 flex items-center justify-center">
+          <div class="step-context">
+            <span class="step-text">Étape 3 sur 3</span>
+            <div class="step-dots">
+              <div class="dot done"></div>
+              <div class="dot done"></div>
+              <div class="dot active"></div>
+            </div>
+          </div>
+        </div>
+        <app-fw-button
+          (click)="submit()" 
+          [loading]="submitting()"
+          [disabled]="!consent.checked"
+          variant="primary"
+          [icon]="Sparkles"
+        >
+          Soumettre définitivement
+        </app-fw-button>
+      </ng-container>
+
+    </div>
+  </footer>
+
+</div>
+
+<!-- Loader initial -->
+<ng-template #loader>
+  <div class="min-h-screen flex items-center justify-center">
+    <fw-block-loader message="Chargement de votre session..."></fw-block-loader>
+  </div>
+</ng-template>

@@ -1,0 +1,162 @@
+<app-fw-page-shell
+  [title]="'Programme : ' + (level()?.name || '...')"
+  [description]="curriculumItems().length + ' matières au programme • Volume Hebdo : ' + totalWeeklyHours() + 'H'"
+  [icon]="ListChecks"
+  [backLink]="['/admin/classes/cycles', level()?.cycleId]"
+  density="compact"
+>
+  <!-- ACTIONS -->
+  <div actions>
+    <ng-container *fwHasPermission="'academic:structure:write'">
+      <app-fw-button
+        *ngIf="!isAdding()"
+        (click)="isAdding.set(true)"
+        variant="primary"
+        size="sm"
+        [icon]="Plus"
+      >
+        Ajouter une matière
+      </app-fw-button>
+    </ng-container>
+  </div>
+
+  <!-- CONTENU -->
+  <div class="decision-hub-layout" [class.is-loading]="isActionLoading()">
+    
+    <!-- 🚀 HYBRID LOADING FEEDBACK -->
+    <fw-block-loader *ngIf="isActionLoading()" [center]="true" message="Mise à jour du programme..."></fw-block-loader>
+
+    <main class="pillar-content-area">
+      <div class="pillar-scroll-wrapper custom-scrollbar">
+
+        <!-- 📝 FORMULAIRE D'AJOUT / ÉDITION -->
+        <ng-container *fwHasPermission="'academic:structure:write'">
+          <section class="fw-standard-card animate-in slide-in-from-top duration-300" *ngIf="isAdding()">
+            <header class="card-header">
+              <div class="header-left">
+                <lucide-icon [name]="editingItem() ? Edit : Plus" [size]="16" class="header-icon"></lucide-icon>
+                <div class="pillar-title-group">
+                  <h3>{{ editingItem() ? 'Modifier la matière' : 'Ajouter une matière au programme' }}</h3>
+                  <p>Définissez les paramètres pédagogiques pour ce niveau.</p>
+                </div>
+              </div>
+              <button (click)="cancelForm()" class="text-slate-400 hover:text-midnight transition-colors">
+                <lucide-icon [name]="X" [size]="18"></lucide-icon>
+              </button>
+            </header>
+
+            <div class="card-content">
+              <form [formGroup]="addForm" (ngSubmit)="onSave()" class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+                <!-- Matière -->
+                <div class="fw-field md:col-span-2">
+                  <label class="fw-label">Matière / Discipline</label>
+                  <div class="fw-input-wrapper">
+                    <select formControlName="subjectId" class="fw-input">
+                      <option value="">Sélectionner une matière...</option>
+                      <option *ngFor="let s of availableSubjects()" [value]="s.id">{{ s.name }} ({{ s.code }})</option>
+                      <option *ngIf="editingItem()" [value]="editingItem()?.subjectId" disabled>{{ editingItem()?.subjectName }}</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Coeff -->
+                <div class="fw-field">
+                  <label class="fw-label">Coefficient</label>
+                  <div class="fw-input-wrapper">
+                    <input type="number" formControlName="defaultCoefficient" class="fw-input" step="0.5" min="0.5">
+                  </div>
+                </div>
+
+                <!-- Heures -->
+                <div class="fw-field">
+                  <label class="fw-label">Volume Horaire (H)</label>
+                  <div class="fw-input-wrapper">
+                    <input type="number" formControlName="weeklyHours" class="fw-input" step="0.5" min="0">
+                  </div>
+                </div>
+
+                <!-- Max Score -->
+                <div class="fw-field">
+                  <label class="fw-label">Note Max (Barème)</label>
+                  <div class="fw-input-wrapper">
+                    <input type="number" formControlName="maxScore" class="fw-input" min="1">
+                  </div>
+                </div>
+
+                <!-- Optionnelle -->
+                <div class="fw-field flex items-center h-[3rem]">
+                  <label class="flex items-center gap-3 cursor-pointer group">
+                    <input type="checkbox" formControlName="optional" class="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary">
+                    <span class="text-xs font-bold text-slate-600 uppercase tracking-wider group-hover:text-midnight transition-colors">Optionnelle</span>
+                  </label>
+                </div>
+
+                <!-- Submit -->
+                <div class="md:col-span-2 flex justify-end gap-3">
+                  <app-fw-button (click)="cancelForm()" variant="ghost" size="md">Annuler</app-fw-button>
+                  <app-fw-button type="submit" variant="primary" size="md" [icon]="Save" [disabled]="addForm.invalid" [loading]="isActionLoading()">
+                    {{ editingItem() ? 'Mettre à jour' : 'Ajouter au programme' }}
+                  </app-fw-button>
+                </div>
+              </form>
+            </div>
+          </section>
+        </ng-container>
+
+        <!-- 📊 LISTE DU PROGRAMME -->
+        <div class="animate-in fade-in duration-500">
+          <app-data-list
+            [data]="displayItems()"
+            [total]="displayItems().length"
+            [actions]="curriculumActions"
+            [isLoading]="isLoading()"
+            (onAction)="handleAction($event)"
+          ></app-data-list>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- RIGHT SIDEBAR (Stats & Recap) -->
+    <aside class="conformity-sidebar">
+      <div class="compliance-card">
+        <lucide-icon [name]="Clock" [size]="20"></lucide-icon>
+        <div class="compliance-text">
+          <strong>Charge Horaire</strong>
+          <span>{{ totalWeeklyHours() }} heures de cours / semaine</span>
+        </div>
+      </div>
+
+      <section class="sidebar-card">
+        <div class="card-header">
+          <lucide-icon [name]="BookOpen" [size]="16"></lucide-icon>
+          <h4>Répartition</h4>
+        </div>
+        <div class="p-2 space-y-4">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-medium text-slate-500">Matières Obligatoires</span>
+            <span class="text-xs font-bold text-midnight">{{ mandatoryCount() }}</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-medium text-slate-500">Matières Optionnelles</span>
+            <span class="text-xs font-bold text-midnight">{{ optionalCount() }}</span>
+          </div>
+        </div>
+      </section>
+      
+      <div class="p-4 bg-primary-alpha/5 rounded-2xl border border-primary-alpha">
+        <p class="text-[10px] text-primary font-bold uppercase tracking-widest leading-relaxed">
+          Le programme définit les matières qui apparaîtront sur les bulletins et dans les emplois du temps de ce niveau.
+        </p>
+      </div>
+    </aside>
+
+  </div>
+</app-fw-page-shell>
+
+<ng-template #skeletons>
+  <div class="skeleton-layout">
+    <div class="skeleton-content"></div>
+    <div class="skeleton-sidebar"></div>
+  </div>
+</ng-template>

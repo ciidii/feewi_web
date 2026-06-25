@@ -1,20 +1,24 @@
-import { Component, input, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import {Component, input, output} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {MatCheckboxModule} from '@angular/material/checkbox';
 
 // Importer les icônes nécessaires
 import {
-  LucideAngularModule,
-  Eye,
-  CheckCircle,
-  Printer,
-  MoreHorizontal,
-  ArrowUpDown,
-  ArrowUp,
   ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  CheckCircle,
+  Eye,
+  LucideAngularModule,
+  MoreHorizontal,
+  Printer,
   Table
 } from 'lucide-angular';
-import {TableRow} from '../../../../models/data-list.models';
+import {RowAction, TableRow} from '../../../../models/data-list.models';
+import {FwDatePipe} from '../../../../pipes/fw-date.pipe';
+import {SkeletonComponent} from '../../../../components/skeleton/skeleton.component';
+import {FwButtonComponent} from '../../../../components/button/button.component';
+import {FwBadgeComponent} from '../../../../components/badge/badge.component';
 
 
 export type SortDirection = 'asc' | 'desc' | null;
@@ -29,7 +33,11 @@ export interface SortState {
   imports: [
     CommonModule,
     MatCheckboxModule,
-    LucideAngularModule
+    LucideAngularModule,
+    FwDatePipe,
+    SkeletonComponent,
+    FwButtonComponent,
+    FwBadgeComponent
   ],
   templateUrl: './table-view.html',
   styleUrls: ['./table-view.scss']
@@ -39,14 +47,23 @@ export class TableViewComponent {
   // INPUTS
   // ===========================================
 
-  /** Les données à afficher */
+  /** Les donn├®es ├á afficher */
   data = input<TableRow[]>([]);
+
+  /** ├ëtat de chargement */
+  isLoading = input<boolean>(false);
 
   /** IDs des éléments sélectionnés */
   selectedIds = input<Set<string | number>>(new Set());
 
   /** Fonction pour obtenir la classe d'un badge */
   getBadgeClass = input.required<(type: string) => string>();
+
+  /** Actions disponibles */
+  actions = input<RowAction[]>([]);
+
+  /** Actions filtrées (PBAC) */
+  filteredActions = input<RowAction[]>([]);
 
   // ===========================================
   // OUTPUTS
@@ -55,17 +72,14 @@ export class TableViewComponent {
   /** Basculer la sélection d'une ligne */
   toggleRow = output<string | number>();
 
+  /** Émettre un clic sur la ligne (Action primaire) */
+  onRowClick = output<TableRow>();
+
   /** Basculer la sélection de toutes les lignes */
   toggleAll = output<void>();
 
-  /** Voir les détails */
-  onView = output<TableRow>();
-
-  /** Valider */
-  onValidate = output<TableRow>();
-
-  /** Imprimer */
-  onPrint = output<TableRow>();
+  /** Émettre une action */
+  onAction = output<{ actionId: string, row: TableRow }>();
 
   /** Trier */
   onSort = output<SortState>();
@@ -83,9 +97,59 @@ export class TableViewComponent {
   /** Colonne survolée */
   hoveredColumn: string | null = null;
 
+  /** Largeurs des colonnes */
+  columnWidths: Record<string, number> = {};
+
+  /** État du redimensionnement */
+  private resizing = {
+    active: false,
+    column: '',
+    startX: 0,
+    startWidth: 0
+  };
+
   // ===========================================
   // MÉTHODES
   // ===========================================
+
+  /** Démarrer le redimensionnement */
+  startResizing(event: MouseEvent, column: string): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const header = (event.target as HTMLElement).parentElement;
+    if (!header) return;
+
+    this.resizing = {
+      active: true,
+      column,
+      startX: event.pageX,
+      startWidth: header.offsetWidth
+    };
+
+    document.addEventListener('mousemove', this.onMouseMove);
+    document.addEventListener('mouseup', this.onMouseUp);
+    document.body.style.cursor = 'col-resize';
+  }
+
+  private onMouseMove = (event: MouseEvent): void => {
+    if (!this.resizing.active) return;
+
+    const diff = event.pageX - this.resizing.startX;
+    const newWidth = Math.max(80, this.resizing.startWidth + diff);
+
+    this.columnWidths = {
+      ...this.columnWidths,
+      [this.resizing.column]: newWidth
+    };
+  };
+
+  private onMouseUp = (): void => {
+    this.resizing.active = false;
+    document.removeEventListener('mousemove', this.onMouseMove);
+    document.removeEventListener('mouseup', this.onMouseUp);
+    document.body.style.cursor = 'default';
+  };
 
   /** Vérifier si une ligne est sélectionnée */
   isSelected(id: string | number): boolean {
@@ -128,10 +192,15 @@ export class TableViewComponent {
     return this.sortState.direction === 'asc' ? ArrowUp : ArrowDown;
   }
 
-  /** Formater la date */
-  formatDate(date?: string): string {
-    if (!date) return '—';
-    return date;
+  /** Obtenir la classe CSS d'une action */
+  getActionClass(action: RowAction): string {
+    switch (action.type) {
+      case 'primary': return 'text-primary-600 hover:bg-primary-50';
+      case 'danger': return 'text-rose-600 hover:bg-rose-50';
+      case 'success': return 'text-emerald-600 hover:bg-emerald-50';
+      case 'warning': return 'text-amber-600 hover:bg-amber-50';
+      default: return 'text-slate-600 hover:bg-slate-100';
+    }
   }
 
   // ===========================================

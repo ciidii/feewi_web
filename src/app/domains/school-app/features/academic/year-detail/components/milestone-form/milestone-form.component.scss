@@ -1,0 +1,25 @@
+@use '../../../../../../../../styles/tokens' as *;
+
+:host {
+  display: block;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  margin-bottom: 1.5rem;
+
+  lucide-icon { color: var(--fw-text-tertiary); }
+
+  .label {
+    font-family: var(--fw-font-ui);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--fw-text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+}

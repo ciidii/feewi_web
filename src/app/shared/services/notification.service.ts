@@ -1,5 +1,5 @@
-import { Injectable, inject } from '@angular/core';
-import { ToastrService } from 'ngx-toastr';
+import {inject, Injectable} from '@angular/core';
+import {ActiveToast, ToastrService} from 'ngx-toastr';
 
 export type NotificationType = 'success' | 'error' | 'warning' | 'info';
 
@@ -12,8 +12,8 @@ export class NotificationService {
   /**
    * Affiche une notification de succès
    */
-  success(message: string, title: string = 'Succès'): void {
-    this.toastr.success(message, title, {
+  success(message: string, title: string = 'Succès'): ActiveToast<any> {
+    return this.toastr.success(message, title, {
       timeOut: 3000,
       progressBar: true,
       positionClass: 'toast-top-right'
@@ -23,8 +23,8 @@ export class NotificationService {
   /**
    * Affiche une notification d'erreur
    */
-  error(message: string, title: string = 'Erreur'): void {
-    this.toastr.error(message, title, {
+  error(message: string, title: string = 'Erreur'): ActiveToast<any> {
+    return this.toastr.error(message, title, {
       timeOut: 5000,
       progressBar: true,
       positionClass: 'toast-top-right',
@@ -35,8 +35,8 @@ export class NotificationService {
   /**
    * Affiche une notification d'avertissement
    */
-  warning(message: string, title: string = 'Attention'): void {
-    this.toastr.warning(message, title, {
+  warning(message: string, title: string = 'Attention'): ActiveToast<any> {
+    return this.toastr.warning(message, title, {
       timeOut: 4000,
       progressBar: true,
       positionClass: 'toast-top-right'
@@ -46,8 +46,8 @@ export class NotificationService {
   /**
    * Affiche une notification d'information
    */
-  info(message: string, title: string = 'Information'): void {
-    this.toastr.info(message, title, {
+  info(message: string, title: string = 'Information'): ActiveToast<any> {
+    return this.toastr.info(message, title, {
       timeOut: 3000,
       progressBar: true,
       positionClass: 'toast-top-right'
@@ -57,8 +57,8 @@ export class NotificationService {
   /**
    * Affiche une notification personnalisée
    */
-  show(type: NotificationType, message: string, title?: string): void {
-    this[type](message, title);
+  show(type: NotificationType, message: string, title?: string): ActiveToast<any> {
+    return this[type](message, title);
   }
 
   /**

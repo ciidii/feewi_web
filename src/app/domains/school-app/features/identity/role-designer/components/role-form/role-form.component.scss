@@ -1,36 +1,61 @@
+@use '../../../../../../../../styles/tokens' as *;
+
 :host {
   display: block;
-  height: 100%;
 }
 
-::ng-deep .role-form-dialog {
-  mat-dialog-container {
-    padding: 0 !important;
-    border-radius: 24px !important;
-    overflow: hidden !important;
-    border: none !important;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
-  }
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  margin-bottom: 1.5rem;
 
-  .mat-mdc-dialog-surface {
-    border-radius: 24px !important;
-    background: white !important;
-    box-shadow: none !important;
+  lucide-icon { color: var(--fw-text-tertiary); }
+
+  .label {
+    font-family: var(--fw-font-ui);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--fw-text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 }
 
-.custom-scrollbar {
-  &::-webkit-scrollbar {
-    width: 6px;
+// Minimalist Form Overrides
+::ng-deep .fw-input {
+  background: var(--fw-surface-sunken);
+  border: 1px solid var(--fw-border-subtle);
+  border-radius: 12px;
+  height: 3rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s;
+  width: 100%;
+  padding: 0 1rem;
+  outline: none;
+
+  &:focus {
+    background: white;
+    border-color: var(--fw-primary);
+    box-shadow: 0 0 0 4px var(--fw-primary-alpha);
   }
-  &::-webkit-scrollbar-track {
-    background: transparent;
+
+  &.error {
+    background: var(--fw-error-bg);
+    border-color: var(--fw-error);
   }
-  &::-webkit-scrollbar-thumb {
-    background: #e2e8f0;
-    border-radius: 10px;
+
+  &.valid {
+    border-color: var(--fw-success);
+    background: var(--fw-success-bg);
   }
-  &::-webkit-scrollbar-thumb:hover {
-    background: #cbd5e1;
-  }
+}
+
+::ng-deep textarea.fw-input {
+  height: auto;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
 }
