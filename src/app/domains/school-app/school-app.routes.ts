@@ -175,6 +175,20 @@ export const SCHOOL_APP_ROUTES: Routes = [
     ]
   },
   {
+    path: 'documents',
+    data: {
+      permissions: ['document:request:submit', 'document:request:manage', 'document:request:validate'],
+      permissionOp: 'ANY'
+    },
+    children: [
+      {
+        path: 'requests',
+        title: 'Demandes de Documents',
+        loadComponent: () => import('./features/documents/document-requests/document-requests.component').then(m => m.DocumentRequestsComponent)
+      }
+    ]
+  },
+  {
     path: 'settings',
     children: [
       {

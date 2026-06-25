@@ -12,3 +12,24 @@ export interface UploadTicketResponse {
 export interface DocumentViewResponse {
   viewUrl: string;
 }
+
+export type DocumentType = 'CERTIFICAT_SCOLARITE' | 'RELEVE_NOTES' | 'ATTESTATION_PAIEMENT';
+
+export type DocumentRequestStatus = 'PENDING' | 'ELIGIBLE' | 'INELIGIBLE' | 'READY' | 'REJECTED' | 'DELIVERED';
+
+export interface DocumentRequest {
+  id: string;
+  studentId: string;
+  documentType: DocumentType;
+  requestedBy: string;
+  status: DocumentRequestStatus;
+  rejectionReason?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface SubmitDocumentRequest {
+  studentId: string;
+  documentType: DocumentType;
+  requestedBy: string;
+}

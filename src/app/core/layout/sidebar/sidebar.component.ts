@@ -86,6 +86,11 @@ export class SidebarComponent {
     { label: 'Calendrier Scolaire', icon: Calendar, route: '/admin/academic/years', permission: 'academic:year:read' },
   ];
 
+  // --- 3b. DOCUMENT REQUESTS ---
+  documentItems = [
+    { label: 'Demandes de documents', icon: FileText, route: '/admin/documents/requests', permission: 'document:request:manage' },
+  ];
+
   // --- 4. IDENTITY SERVICE ---
   identityItems = [
     { label: 'Personnel (Staff)', icon: Users, route: '/admin/identity/staff', permission: 'identity:user:read' },
@@ -111,6 +116,7 @@ export class SidebarComponent {
       case 'dashboard': return 'Tableau de bord';
       case 'enrollment': return 'Inscriptions';
       case 'registry': return 'Registre élèves';
+      case 'documents': return 'Demandes de documents';
       case 'academic': return 'Structure Acad.';
       case 'identity': return 'Sécurité & Staff';
       case 'saas': return 'Système SaaS';
