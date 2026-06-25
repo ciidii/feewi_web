@@ -46,6 +46,8 @@ export class NavigationContextService {
           this.navState.setActiveService('academic');
         } else if (url.startsWith('/admin/identity')) {
           this.navState.setActiveService('identity');
+        } else if (url.startsWith('/admin/documents')) {
+          this.navState.setActiveService('documents');
         } else if (url.startsWith('/admin/settings')) {
           this.navState.setActiveService('settings');
         }

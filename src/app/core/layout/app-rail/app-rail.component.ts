@@ -6,6 +6,7 @@ import {
   BarChart3,
   Briefcase,
   Building2,
+  FileText,
   GraduationCap,
   Home,
   LayoutGrid,
@@ -54,6 +55,7 @@ export class AppRailComponent {
   readonly User = Users;
   readonly LogOut = LogOut;
   readonly Briefcase = Briefcase;
+  readonly FileText = FileText;
   readonly GraduationCap = GraduationCap;
   readonly LayoutGrid = LayoutGrid;
   readonly ShieldCheck = ShieldCheck;

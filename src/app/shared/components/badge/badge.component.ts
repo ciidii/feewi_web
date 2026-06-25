@@ -23,6 +23,11 @@ const STATUS_MAP: Record<string, BadgeConfig> = {
   REQUIRED:   { label: 'Obligatoire',    token: 'error'   },
   PLANNING:   { label: 'Planification',  token: 'info'    },
   CLOSED:     { label: 'Clôturée',       token: 'neutral' },
+  PENDING:    { label: 'En attente',     token: 'info'    },
+  ELIGIBLE:   { label: 'Éligible',       token: 'success' },
+  INELIGIBLE: { label: 'Non éligible',   token: 'error'   },
+  READY:      { label: 'Prêt',           token: 'success' },
+  DELIVERED:  { label: 'Remis',          token: 'neutral' },
 };
 
 @Component({

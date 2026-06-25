@@ -47,6 +47,10 @@
         <lucide-icon [name]="ShieldCheck" [size]="18"></lucide-icon>
         <span class="rail-label">Sécurité</span>
       </a>
+      <a *fwHasPermission="['document:request:submit', 'document:request:manage', 'document:request:validate']; op 'ANY'" (click)="onSelectService('documents')" routerLink="/admin/documents/requests" class="rail-link" [class.active]="navService.activeService() === 'documents'" [attr.data-label]="'Documents'">
+        <lucide-icon [name]="FileText" [size]="18"></lucide-icon>
+        <span class="rail-label">Documents</span>
+      </a>
     </ng-container>
   </div>
 
