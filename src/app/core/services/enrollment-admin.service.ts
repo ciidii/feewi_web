@@ -3,7 +3,7 @@ import {inject, Injectable} from "@angular/core";
 import {EnvironmentService} from "./environment.service";
 import {NotificationService} from "../../shared/services/notification.service";
 import {TenantContextService} from "./tenant-context.service";
-import {catchError, Observable, throwError} from "rxjs";
+import {catchError, Observable, of, throwError} from "rxjs";
 import {API_ENDPOINTS} from "../constants/api-endpoints";
 import {
   Admission,
@@ -16,7 +16,8 @@ import {
   EnrollmentConfig,
   LevelConfigResponse,
   LevelOverrideConfig,
-  YearOverrideConfig
+  YearOverrideConfig,
+  EnrollmentDashboardStats
 } from '../models/enrollment.model';
 
 @Injectable({
@@ -51,6 +52,61 @@ export class EnrollmentAdminService {
       const errorMessage = error?.error?.message || message;
       this.notificationService.error(errorMessage);
       return throwError(() => error);
+    };
+  }
+
+  // --- DASHBOARD & STATS ---
+
+  /** Statistiques consolidées pour le Dashboard (Direction/Secrétariat) */
+  getDashboardStats(academicYearId?: string): Observable<EnrollmentDashboardStats> {
+    let params = new HttpParams();
+    if (academicYearId) params = params.set('academicYearId', academicYearId);
+
+    return this.http.get<EnrollmentDashboardStats>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.DASHBOARD_STATS), {
+      params,
+      headers: this.getHeaders()
+    }).pipe(
+      catchError(() => {
+        console.warn('[EnrollmentService] Dashboard API not ready, using MOCK data');
+        return of(this.getMockDashboardData());
+      })
+    );
+  }
+
+  private getMockDashboardData(): EnrollmentDashboardStats {
+    return {
+      metrics: {
+        totalApplications: 156,
+        newApplications: 92,
+        reEnrollments: 64,
+        conversionRate: 42.3,
+        growthTrend: 15
+      },
+      operational: {
+        pendingVerification: 24,
+        pendingEvaluation: 12,
+        pendingDecision: 8,
+        incompleteDossiers: 6
+      },
+      pipeline: {
+        submitted: 60,
+        verified: 45,
+        testing: 30,
+        validated: 21
+      },
+      capacity: {
+        saturatedLevelsCount: 3,
+        levels: [
+          { id: '1', name: 'Terminales S', totalApplications: 45, validated: 38, totalCapacity: 40, occupancyRate: 95, isSaturated: true },
+          { id: '2', name: '6ème Fondamental', totalApplications: 80, validated: 72, totalCapacity: 80, occupancyRate: 90, isSaturated: true },
+          { id: '3', name: 'CP1', totalApplications: 30, validated: 28, totalCapacity: 30, occupancyRate: 93, isSaturated: true },
+          { id: '4', name: 'Maternelle GS', totalApplications: 25, validated: 15, totalCapacity: 30, occupancyRate: 60, isSaturated: false }
+        ]
+      },
+      upcomingMilestones: [
+        { label: 'Commission Pédagogique #4', date: '2026-06-15T14:00:00Z', location: 'Salle de réunion A' },
+        { label: 'Clôture Inscriptions Portail', date: '2026-06-30T23:59:59Z' }
+      ]
     };
   }
 

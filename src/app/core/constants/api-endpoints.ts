@@ -46,6 +46,7 @@ export const API_ENDPOINTS = {
       RECEIVE_DOCUMENT: (id: string, docCode: string) => `/admin/admissions/${id}/documents/${docCode}/receive`,
       VERIFY: (id: string) => `/admin/admissions/${id}/verify`,
       CANCEL: (id: string) => `/admin/admissions/${id}/cancel`,
+      DASHBOARD_STATS: '/admin/stats/dashboard',
 
       // Direction
       ADMIT: (id: string) => `/admin/direction/admissions/${id}/admit`,

@@ -104,6 +104,7 @@ export class RoleDesignerComponent implements OnInit {
     'exam': 'Examens & Notes',
     'attendance': 'Présences (Appel)',
     'admission': 'Gestion des Candidatures',
+    'dashboard': 'Tableau de Bord Admissions',
     'config': 'Paramètres du Portail',
     'registry': 'Fiches Élèves',
     'discipline': 'Discipline & Suivi'

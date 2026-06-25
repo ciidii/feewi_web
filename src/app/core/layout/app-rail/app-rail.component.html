@@ -31,7 +31,7 @@
         <lucide-icon [name]="Home" [size]="18"></lucide-icon>
         <span class="rail-label">Accueil</span>
       </a>
-      <a *fwHasPermission="['enrollment:admission:read', 'enrollment:session:read']; op 'ANY'" (click)="onSelectService('enrollment')" routerLink="/admin/enrollment" class="rail-link" [class.active]="navService.activeService() === 'enrollment'" [attr.data-label]="'Inscriptions'">
+      <a *fwHasPermission="['enrollment:dashboard:view', 'enrollment:admission:view', 'enrollment:config:manage']; op 'ANY'" (click)="onSelectService('enrollment')" routerLink="/admin/enrollment" class="rail-link" [class.active]="navService.activeService() === 'enrollment'" [attr.data-label]="'Inscriptions'">
         <lucide-icon [name]="Briefcase" [size]="18"></lucide-icon>
         <span class="rail-label">Inscriptions</span>
       </a>

@@ -8,7 +8,7 @@ export const environment: Environment = {
 
   logLevel: 'error',
   services: {
-    enrollment: '/enrollment/api/v1',
+    enrollment: '/api/v1/enrollment',
     identity: '/api/v1',
     academic: '/api/v1/academic',
     school: '/api/v1/schools',

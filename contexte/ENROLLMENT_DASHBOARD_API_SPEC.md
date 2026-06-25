@@ -21,7 +21,7 @@ Créer **un point de terminaison (endpoint) unique** sur le backend dédié à l
 
 *   **Méthode :** `GET`
 *   **URL :** `/api/v1/enrollment/admin/stats/dashboard`
-*   **Sécurité (PBAC) requise :** `enrollment:admission:view`
+*   **Sécurité (PBAC) requise :** `enrollment:dashboard:view`
 *   **Paramètres de requête (Query Params) :**
     *   `academicYearId` (Optionnel) : L'ID de l'année scolaire. Si omis, le backend doit utiliser l'année académique active par défaut.
 

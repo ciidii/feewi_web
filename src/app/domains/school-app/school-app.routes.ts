@@ -7,16 +7,22 @@ export const SCHOOL_APP_ROUTES: Routes = [
     loadComponent: () => import('./features/dashboard/home/home.component').then(m => m.HomeComponent)
   },
   {
+    // Ancienne route maquette (valeurs codées en dur) — redirige vers le vrai tableau de bord d'admissions.
     path: 'dashboard',
-    title: 'Tableau de bord',
-    loadComponent: () => import('./features/dashboard/dashboard/dashboard.component').then(m => m.DashboardComponent)
+    redirectTo: 'enrollment',
+    pathMatch: 'full'
   },
   {
     path: 'enrollment',
+    data: {
+      permissions: ['enrollment:dashboard:view', 'enrollment:admission:view', 'enrollment:admission:submit', 'enrollment:admission:verify', 'enrollment:admission:assess', 'enrollment:admission:decide', 'enrollment:config:manage'],
+      permissionOp: 'ANY'
+    },
     children: [
       {
         path: '',
         title: 'Tableau de Bord Admissions',
+        data: {permissions: ['enrollment:dashboard:view']},
         loadComponent: () => import('./features/enrollment/enrollment-dashboard/admission-dashboard.component').then(m => m.AdmissionDashboardComponent)
       },
       {

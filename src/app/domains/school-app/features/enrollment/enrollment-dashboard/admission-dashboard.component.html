@@ -24,169 +24,175 @@
 
   <!-- DASHBOARD BODY -->
   <div class="animate-in fade-in duration-700 space-y-6" *ngIf="!isLoading(); else skeletons">
-
-    <!-- COUCHE 1 : TOP METRICS (STRIP) -->
-    <section class="stats-strip">
-      <div class="stat-metric-card">
-        <div class="metric-info">
-          <span class="label">Dossiers Ouverts</span>
-          <div class="value-wrap">
-            <span class="value">{{ totalApps() }}</span>
-            <span class="trend up">+12%</span>
-          </div>
-          <p class="sub-data">85% numériques • 15% guichet</p>
-        </div>
-        <div class="metric-icon"><lucide-icon [name]="FileText"></lucide-icon></div>
-      </div>
-
-      <div class="stat-metric-card">
-        <div class="metric-info">
-          <span class="label">Taux d'Admission</span>
-          <div class="value-wrap">
-            <span class="value">{{ conversionRate() }}%</span>
-          </div>
-          <p class="sub-data">Cible institutionnelle : 65%</p>
-        </div>
-        <div class="metric-icon"><lucide-icon [name]="Activity"></lucide-icon></div>
-      </div>
-
-      <div class="stat-metric-card">
-        <div class="metric-info">
-          <span class="label">Mix Acquisition</span>
-          <div class="value-wrap">
-            <span class="value">{{ newAppsCount() }}</span>
-            <span class="trend">Nouveaux</span>
-          </div>
-          <p class="sub-data">{{ reEnrollCount() }} réinscriptions</p>
-        </div>
-        <div class="metric-icon"><lucide-icon [name]="TrendingUp"></lucide-icon></div>
-      </div>
-
-      <div class="stat-metric-card">
-        <div class="metric-info">
-          <span class="label">Alerte Saturation</span>
-          <div class="value-wrap">
-            <span class="value" [class.text-rose-600]="saturatedCount() > 0">{{ saturatedCount() }}</span>
-          </div>
-          <p class="sub-data">Niveaux critiques (>90%)</p>
-        </div>
-        <div class="metric-icon" [class.text-rose-600]="saturatedCount() > 0">
-          <lucide-icon [name]="AlertTriangle"></lucide-icon>
-        </div>
-      </div>
-    </section>
-
-    <!-- GRID : RANGÉE 1 (OPÉRATIONNEL & CAPACITÉ) -->
-    <div class="academic-row">
-      <!-- File d'attente prioritaire -->
-      <section class="work-section main-col">
-        <header class="section-header">
-          <h3>Actions Prioritaires</h3>
-          <app-fw-button variant="tertiary" size="sm" [icon]="ArrowRight" routerLink="/admin/enrollment/list">Liste complète</app-fw-button>
-        </header>
-        <div class="section-body">
-          <table class="compact-action-table">
-            <tbody>
-              <tr [routerLink]="['/admin/enrollment/list']" [queryParams]="{status: 'SUBMITTED'}" class="cursor-pointer group">
-                <td class="action-cell">
-                  <div class="icon-box-smart verify">
-                    <lucide-icon [name]="ClipboardCheck"></lucide-icon>
-                    <span class="smart-badge" *ngIf="pendingVerification() > 0">{{ pendingVerification() }}</span>
-                  </div>
-                  <div class="label-wrap"><strong>Vérification administrative</strong><span>Dossiers en attente de relecture</span></div>
-                </td>
-                <td class="chevron-cell"><lucide-icon [name]="ArrowRight" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all"></lucide-icon></td>
-              </tr>
-              <tr [routerLink]="['/admin/enrollment/list']" [queryParams]="{status: 'VERIFIED'}" class="cursor-pointer group">
-                <td class="action-cell">
-                  <div class="icon-box-smart evaluate">
-                    <lucide-icon [name]="GraduationCap"></lucide-icon>
-                    <span class="smart-badge" *ngIf="pendingEvaluation() > 0">{{ pendingEvaluation() }}</span>
-                  </div>
-                  <div class="label-wrap"><strong>Planification évaluations</strong><span>Tests et entretiens à organiser</span></div>
-                </td>
-                <td class="chevron-cell"><lucide-icon [name]="ArrowRight" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all"></lucide-icon></td>
-              </tr>
-              <tr [routerLink]="['/admin/enrollment/list']" [queryParams]="{incomplete: true}" class="cursor-pointer group">
-                <td class="action-cell">
-                  <div class="icon-box-smart incomplete">
-                    <lucide-icon [name]="XCircle"></lucide-icon>
-                    <span class="smart-badge danger" *ngIf="incompleteDossiers() > 0">{{ incompleteDossiers() }}</span>
-                  </div>
-                  <div class="label-wrap"><strong>Relances documents</strong><span>Pièces manquantes ou rejetées</span></div>
-                </td>
-                <td class="chevron-cell"><lucide-icon [name]="ArrowRight" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all"></lucide-icon></td>
-              </tr>
-              <tr [routerLink]="['/admin/enrollment/list']" [queryParams]="{status: 'ADMITTED'}" class="cursor-pointer group">
-                <td class="action-cell">
-                  <div class="icon-box-smart decision">
-                    <lucide-icon [name]="ShieldCheck"></lucide-icon>
-                    <span class="smart-badge primary" *ngIf="pendingDecision() > 0">{{ pendingDecision() }}</span>
-                  </div>
-                  <div class="label-wrap"><strong>Validation Direction</strong><span>Dossiers prêts pour décision finale</span></div>
-                </td>
-                <td class="chevron-cell"><lucide-icon [name]="ArrowRight" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all"></lucide-icon></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- Taux d'Occupation (Aligné en hauteur) -->
-      <section class="monitoring-card side-col h-full flex flex-col">
-        <h3 class="card-title"><lucide-icon [name]="School" class="w-4 h-4"></lucide-icon> Taux d'Occupation</h3>
-
-        <div class="flex-1 space-y-5">
-          <div *ngFor="let lvl of levelStats().slice(0, 4)" class="level-filling-item">
-            <div class="info"><span class="name">{{ lvl.name }}</span><span class="pct">{{ lvl.occupancyRate }}%</span></div>
-            <div class="track"><div class="fill" [class.warning]="lvl.occupancyRate >= 75 && lvl.occupancyRate < 90" [class.danger]="lvl.occupancyRate >= 90" [style.width.%]="lvl.occupancyRate"></div></div>
-          </div>
+    
+    <ng-container *ngIf="dashboardData(); let data">
+        <!-- COUCHE 1 : TOP METRICS (STRIP) -->
+        <section class="stats-strip">
+        <div class="stat-metric-card">
+            <div class="metric-info">
+            <span class="label">Dossiers Ouverts</span>
+            <div class="value-wrap">
+                <span class="value">{{ data.metrics.totalApplications }}</span>
+                <span class="trend up" *ngIf="data.metrics.growthTrend">+{{ data.metrics.growthTrend }}%</span>
+            </div>
+            <p class="sub-data">{{ data.metrics.newApplications }} nouveaux • {{ data.metrics.reEnrollments }} réinscriptions</p>
+            </div>
+            <div class="metric-icon"><lucide-icon [name]="FileText"></lucide-icon></div>
         </div>
 
-        <!-- Bouton de dépassement (The "+ Plus" lever) -->
-        <button *ngIf="levelStats().length > 4" class="more-levels-btn" (click)="openCapacityReport()">
-          <lucide-icon [name]="Plus" [size]="12"></lucide-icon>
-          <span>{{ levelStats().length - 4 }} autres niveaux...</span>
-        </button>
-      </section>
-    </div>
-
-    <!-- GRID : RANGÉE 2 (PIPELINE & JALONS) -->
-    <div class="academic-row">
-      <!-- Pipeline Linéaire -->
-      <section class="work-section main-col">
-        <header class="section-header"><h3>Flux de Conversion (Conversion Pipeline)</h3></header>
-        <div class="section-body">
-          <div class="pipeline-ribbon">
-            <div class="step"><span class="label">Soumis</span><span class="val">{{ statusStats().submitted }}</span></div>
-            <div class="conversion-bridge">→</div>
-            <div class="step active"><span class="label">Vérifiés</span><span class="val">{{ statusStats().verified }}</span></div>
-            <div class="conversion-bridge">→</div>
-            <div class="step"><span class="label">Évaluation</span><span class="val">{{ statusStats().testing }}</span></div>
-            <div class="conversion-bridge">→</div>
-            <div class="step"><span class="label">Admis</span><span class="val">{{ statusStats().validated }}</span></div>
-          </div>
-          <div class="px-8 pb-6 flex justify-between items-center text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-            <span>Collecte</span><span>Revue</span><span>Test</span><span>Admis</span>
-          </div>
+        <div class="stat-metric-card">
+            <div class="metric-info">
+            <span class="label">Taux d'Admission</span>
+            <div class="value-wrap">
+                <span class="value">{{ data.metrics.conversionRate }}%</span>
+            </div>
+            <p class="sub-data">Cible institutionnelle : 65%</p>
+            </div>
+            <div class="metric-icon"><lucide-icon [name]="Activity"></lucide-icon></div>
         </div>
-      </section>
 
-      <!-- Jalons -->
-      <section class="monitoring-card side-col">
-        <h3 class="card-title"><lucide-icon [name]="Clock" class="w-4 h-4"></lucide-icon> Prochains Jalons</h3>
-        <div class="space-y-4">
-          <div class="flex gap-4 items-start p-3 bg-slate-50 rounded-xl">
-            <div class="font-bold text-primary text-xs uppercase leading-tight">24<br>AVR</div>
-            <div><p class="text-xs font-bold text-midnight">Commission #4</p><p class="text-[10px] text-slate-400">Salle A • 14:00</p></div>
-          </div>
-          <div class="flex gap-4 items-start p-3 bg-slate-50 rounded-xl">
-            <div class="font-bold text-slate-400 text-xs uppercase leading-tight">30<br>AVR</div>
-            <div><p class="text-xs font-bold text-midnight">Clôture Inscriptions</p><p class="text-[10px] text-slate-400">Portail public</p></div>
-          </div>
+        <div class="stat-metric-card">
+            <div class="metric-info">
+            <span class="label">Mix Acquisition</span>
+            <div class="value-wrap">
+                <span class="value">{{ data.metrics.newApplications }}</span>
+                <span class="trend">Nouveaux</span>
+            </div>
+            <p class="sub-data">{{ data.metrics.reEnrollments }} réinscriptions</p>
+            </div>
+            <div class="metric-icon"><lucide-icon [name]="TrendingUp"></lucide-icon></div>
         </div>
-      </section>
-    </div>
+
+        <div class="stat-metric-card">
+            <div class="metric-info">
+            <span class="label">Alerte Saturation</span>
+            <div class="value-wrap">
+                <span class="value" [class.text-rose-600]="data.capacity.saturatedLevelsCount > 0">{{ data.capacity.saturatedLevelsCount }}</span>
+            </div>
+            <p class="sub-data">Niveaux critiques (>90%)</p>
+            </div>
+            <div class="metric-icon" [class.text-rose-600]="data.capacity.saturatedLevelsCount > 0">
+            <lucide-icon [name]="AlertTriangle"></lucide-icon>
+            </div>
+        </div>
+        </section>
+
+        <!-- GRID : RANGÉE 1 (OPÉRATIONNEL & CAPACITÉ) -->
+        <div class="academic-row">
+        <!-- File d'attente prioritaire -->
+        <section class="work-section main-col">
+            <header class="section-header">
+            <h3>Actions Prioritaires</h3>
+            <app-fw-button variant="tertiary" size="sm" [icon]="ArrowRight" routerLink="/admin/enrollment/list">Liste complète</app-fw-button>
+            </header>
+            <div class="section-body">
+            <table class="compact-action-table">
+                <tbody>
+                <tr [routerLink]="['/admin/enrollment/list']" [queryParams]="{status: 'SUBMITTED'}" class="cursor-pointer group">
+                    <td class="action-cell">
+                    <div class="icon-box-smart verify">
+                        <lucide-icon [name]="ClipboardCheck"></lucide-icon>
+                        <span class="smart-badge" *ngIf="data.operational.pendingVerification > 0">{{ data.operational.pendingVerification }}</span>
+                    </div>
+                    <div class="label-wrap"><strong>Vérification administrative</strong><span>Dossiers en attente de relecture</span></div>
+                    </td>
+                    <td class="chevron-cell"><lucide-icon [name]="ArrowRight" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all"></lucide-icon></td>
+                </tr>
+                <tr [routerLink]="['/admin/enrollment/list']" [queryParams]="{status: 'VERIFIED'}" class="cursor-pointer group">
+                    <td class="action-cell">
+                    <div class="icon-box-smart evaluate">
+                        <lucide-icon [name]="GraduationCap"></lucide-icon>
+                        <span class="smart-badge" *ngIf="data.operational.pendingEvaluation > 0">{{ data.operational.pendingEvaluation }}</span>
+                    </div>
+                    <div class="label-wrap"><strong>Planification évaluations</strong><span>Tests et entretiens à organiser</span></div>
+                    </td>
+                    <td class="chevron-cell"><lucide-icon [name]="ArrowRight" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all"></lucide-icon></td>
+                </tr>
+                <tr [routerLink]="['/admin/enrollment/list']" [queryParams]="{incomplete: true}" class="cursor-pointer group">
+                    <td class="action-cell">
+                    <div class="icon-box-smart incomplete">
+                        <lucide-icon [name]="XCircle"></lucide-icon>
+                        <span class="smart-badge danger" *ngIf="data.operational.incompleteDossiers > 0">{{ data.operational.incompleteDossiers }}</span>
+                    </div>
+                    <div class="label-wrap"><strong>Relances documents</strong><span>Pièces manquantes ou rejetées</span></div>
+                    </td>
+                    <td class="chevron-cell"><lucide-icon [name]="ArrowRight" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all"></lucide-icon></td>
+                </tr>
+                <tr [routerLink]="['/admin/enrollment/list']" [queryParams]="{status: 'ADMITTED'}" class="cursor-pointer group">
+                    <td class="action-cell">
+                    <div class="icon-box-smart decision">
+                        <lucide-icon [name]="ShieldCheck"></lucide-icon>
+                        <span class="smart-badge primary" *ngIf="data.operational.pendingDecision > 0">{{ data.operational.pendingDecision }}</span>
+                    </div>
+                    <div class="label-wrap"><strong>Validation Direction</strong><span>Dossiers prêts pour décision finale</span></div>
+                    </td>
+                    <td class="chevron-cell"><lucide-icon [name]="ArrowRight" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all"></lucide-icon></td>
+                </tr>
+                </tbody>
+            </table>
+            </div>
+        </section>
+
+        <!-- Taux d'Occupation -->
+        <section class="monitoring-card side-col h-full flex flex-col">
+            <h3 class="card-title"><lucide-icon [name]="School" class="w-4 h-4"></lucide-icon> Taux d'Occupation</h3>
+
+            <div class="flex-1 space-y-5">
+            <div *ngFor="let lvl of data.capacity.levels.slice(0, 4)" class="level-filling-item">
+                <div class="info"><span class="name">{{ lvl.name }}</span><span class="pct">{{ lvl.occupancyRate }}%</span></div>
+                <div class="track"><div class="fill" [class.warning]="lvl.occupancyRate >= 75 && lvl.occupancyRate < 90" [class.danger]="lvl.occupancyRate >= 90" [style.width.%]="lvl.occupancyRate"></div></div>
+            </div>
+            </div>
+
+            <!-- Bouton de dépassement -->
+            <button *ngIf="data.capacity.levels.length > 4" class="more-levels-btn" (click)="openCapacityReport()">
+            <lucide-icon [name]="Plus" [size]="12"></lucide-icon>
+            <span>{{ data.capacity.levels.length - 4 }} autres niveaux...</span>
+            </button>
+        </section>
+        </div>
+
+        <!-- GRID : RANGÉE 2 (PIPELINE & JALONS) -->
+        <div class="academic-row">
+        <!-- Pipeline Linéaire -->
+        <section class="work-section main-col">
+            <header class="section-header"><h3>Flux de Conversion (Conversion Pipeline)</h3></header>
+            <div class="section-body">
+            <div class="pipeline-ribbon">
+                <div class="step"><span class="label">Soumis</span><span class="val">{{ data.pipeline.submitted }}</span></div>
+                <div class="conversion-bridge">→</div>
+                <div class="step active"><span class="label">Vérifiés</span><span class="val">{{ data.pipeline.verified }}</span></div>
+                <div class="conversion-bridge">→</div>
+                <div class="step"><span class="label">Évaluation</span><span class="val">{{ data.pipeline.testing }}</span></div>
+                <div class="conversion-bridge">→</div>
+                <div class="step"><span class="label">Admis</span><span class="val">{{ data.pipeline.validated }}</span></div>
+            </div>
+            <div class="px-8 pb-6 flex justify-between items-center text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                <span>Collecte</span><span>Revue</span><span>Test</span><span>Admis</span>
+            </div>
+            </div>
+        </section>
+
+        <!-- Jalons -->
+        <section class="monitoring-card side-col">
+            <h3 class="card-title"><lucide-icon [name]="Clock" class="w-4 h-4"></lucide-icon> Prochains Jalons</h3>
+            <div class="space-y-4">
+            <div *ngFor="let milestone of data.upcomingMilestones" class="flex gap-4 items-start p-3 bg-slate-50 rounded-xl">
+                <div class="font-bold text-primary text-xs uppercase leading-tight">
+                    {{ milestone.date | date:'dd' }}<br>{{ milestone.date | date:'MMM' }}
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-midnight">{{ milestone.label }}</p>
+                    <p class="text-[10px] text-slate-400">{{ milestone.location || '—' }} • {{ milestone.date | date:'HH:mm' }}</p>
+                </div>
+            </div>
+            <div *ngIf="data.upcomingMilestones.length === 0" class="py-8 text-center">
+                <p class="text-[10px] text-slate-400 uppercase font-bold">Aucun jalon programmé</p>
+            </div>
+            </div>
+        </section>
+        </div>
+    </ng-container>
 
   </div>
 </app-fw-page-shell>
