@@ -70,8 +70,10 @@
         </div>
 
         <!-- Statut (Badge) -->
-        <div class="col-span-3">
-          <app-fw-badge *ngIf="row.badges?.[0] as b" [status]="b.label" [tokenOverride]="$any(badgeTypeMap(b.type))" size="xs"></app-fw-badge>
+        <div class="col-span-3 flex flex-wrap gap-1">
+          <ng-container *ngFor="let b of row.badges">
+            <app-fw-badge [status]="b.label" [tokenOverride]="$any(badgeTypeMap(b.type))" size="xs"></app-fw-badge>
+          </ng-container>
         </div>
 
         <!-- Date / Metadata -->
@@ -81,7 +83,7 @@
 
         <!-- Actions rapides -->
         <div class="col-span-2 flex justify-end gap-1" (click)="$event.stopPropagation()">
-          <ng-container *ngFor="let action of filteredActions().slice(0, 2)">
+          <ng-container *ngFor="let action of filteredActions().slice(0, 3)">
             <app-fw-button
               *ngIf="!action.hideIf || !action.hideIf(row)"
               (click)="onAction.emit({ actionId: action.id, row: row })"
