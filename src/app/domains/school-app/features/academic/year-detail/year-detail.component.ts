@@ -5,34 +5,24 @@ import {
   Archive,
   ArrowLeft,
   Calendar,
+  CalendarOff,
   CheckCircle,
   Clock,
   Edit,
+  Layers,
   LayoutDashboard,
   LucideAngularModule,
-  ChevronRight,
-  MoreVertical,
   Play,
   Plus,
   Printer,
   RotateCcw,
   Trash2,
-  XCircle,
-  Globe,
-  BookOpen,
-  Hash,
-  ListChecks,
-  Sparkles,
-  Zap,
-  CalendarDays,
-  CalendarOff,
-  Layers
+  XCircle
 } from 'lucide-angular';
-import {MilestoneFormComponent} from './components/milestone-form/milestone-form.component';
 import {PeriodFormComponent} from './components/period-form/period-form.component';
 import {HolidayFormComponent} from './components/holiday-form/holiday-form.component';
 import {RowAction, TableRow} from '../../../../../shared/models/data-list.models';
-import {AcademicMilestone, AcademicYear, Holiday, Period} from '../../../../../core/models/academic.model';
+import {AcademicYear, Holiday, Period} from '../../../../../core/models/academic.model';
 import {AcademicService} from '../../../../../core/services/academic.service';
 import {NotificationService} from '../../../../../shared/services/notification.service';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
@@ -44,19 +34,17 @@ import {FwTab} from '../../../../../shared/components/tabs/tabs.component';
 import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.component';
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
 import {BlockLoaderComponent} from '../../../../../shared/components/loader/block-loader.component';
-import {MatMenuModule} from '@angular/material/menu';
 import {AuthService} from '../../../../../core/services/auth.service';
 import {HasPermissionDirective} from '../../../../../shared/directives/has-permission.directive';
 
 export interface TimelineEvent {
   id: string;
-  type: 'PERIOD' | 'HOLIDAY' | 'EXAM' | 'MILESTONE';
+  type: 'PERIOD' | 'HOLIDAY';
   label: string;
   startDate: string;
   endDate: string;
-  description?: string;
-  isClosed?: boolean;
-  milestoneType?: string;
+  description: string;
+  schoolClosed?: boolean;
 }
 
 @Component({
@@ -67,7 +55,6 @@ export interface TimelineEvent {
     LucideAngularModule,
     RouterModule,
     MatDialogModule,
-    MatMenuModule,
     DataListComponent,
     FwPageShellComponent,
     FwBadgeComponent,
@@ -87,9 +74,7 @@ export class YearDetailComponent implements OnInit {
   private dialog = inject(MatDialog);
   private locale = inject(LOCALE_ID);
 
-  // États
   year = signal<AcademicYear | null>(null);
-  milestones = signal<AcademicMilestone[]>([]);
   periods = signal<Period[]>([]);
   holidays = signal<Holiday[]>([]);
   isLoading = signal(true);
@@ -97,361 +82,106 @@ export class YearDetailComponent implements OnInit {
   activeTabId = signal('timeline');
 
   readonly canManageLifecycle = computed(() => this.authService.hasPermission('academic:year:lifecycle'));
-  readonly canEditCalendar = computed(() => this.authService.hasPermission('academic:year:write'));
 
-  // Configuration des Onglets
   readonly yearTabs: FwTab[] = [
     {id: 'timeline', label: 'Vue Chronologique', icon: LayoutDashboard},
-    {id: 'calendar', label: 'Jalons', icon: CalendarDays},
     {id: 'periods', label: 'Périodes', icon: Layers},
     {id: 'holidays', label: 'Congés', icon: CalendarOff}
   ];
 
-  // Actions pour les jalons
-  readonly milestoneActions: RowAction[] = [
-    {id: 'edit', label: 'Modifier', icon: Edit, type: 'primary', permission: 'academic:year:write'},
-    {id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger', permission: 'academic:year:write'}
-  ];
-
-  // Actions pour les périodes
   readonly periodActions: RowAction[] = [
     {id: 'edit', label: 'Modifier', icon: Edit, type: 'primary', permission: 'academic:year:write'},
     {id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger', permission: 'academic:year:write'}
   ];
 
-  // Actions pour les congés
   readonly holidayActions: RowAction[] = [
     {id: 'edit', label: 'Modifier', icon: Edit, type: 'primary', permission: 'academic:year:write'},
     {id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger', permission: 'academic:year:write'}
   ];
 
-  // Transformation des Jalons pour le DataList
-  displayMilestones = computed<TableRow[]>(() => {
-    return this.milestones().map(m => ({
-      id: m.id,
-      title: m.label,
-      subtitle: this.getMilestoneDescription(m.type),
-      avatarLabel: m.type.substring(0, 2).toUpperCase(),
-      date: `${this.formatDateShort(m.startDate)} - ${this.formatDateShort(m.endDate)}`,
-      badges: [
-        {label: this.getMilestoneLabel(m.type), type: this.getMilestoneBadgeType(m.type)}
-      ],
-      rawData: m
-    }));
-  });
-
-  // Transformation des Périodes pour le DataList
-  displayPeriods = computed<TableRow[]>(() => {
-    return this.periods().map(p => ({
+  displayPeriods = computed<TableRow[]>(() =>
+    this.periods().map(p => ({
       id: p.id,
       title: p.label,
-      subtitle: `Cours : ${this.formatDateShort(p.startDate)} → ${this.formatDateShort(p.endDate)}`,
+      subtitle: `${this.formatDate(p.startDate)} → ${this.formatDate(p.endDate)}`,
       avatarLabel: p.label.substring(0, 2).toUpperCase(),
-      date: p.examStartDate ? `Examen : ${this.formatDateShort(p.examStartDate)}` : undefined,
       badges: [{label: 'PÉRIODE', type: 'info' as any}],
       rawData: p
-    }));
-  });
+    }))
+  );
 
-  readonly closedHolidaysCount = computed(() => this.holidays().filter(h => h.schoolClosed).length);
-
-  // Transformation des Congés pour le DataList
-  displayHolidays = computed<TableRow[]>(() => {
-    return this.holidays().map(h => ({
+  displayHolidays = computed<TableRow[]>(() =>
+    this.holidays().map(h => ({
       id: h.id,
       title: h.label,
-      subtitle: `${this.formatDateShort(h.startDate)} → ${this.formatDateShort(h.endDate)}`,
+      subtitle: `${this.formatDate(h.startDate)} → ${this.formatDate(h.endDate)}`,
       avatarLabel: h.label.substring(0, 2).toUpperCase(),
       badges: [{label: h.schoolClosed ? 'FERMÉ' : 'CONGÉ', type: (h.schoolClosed ? 'danger' : 'warning') as any}],
       rawData: h
-    }));
-  });
+    }))
+  );
 
-  // Construction de la Timeline (V2)
+  readonly closedHolidaysCount = computed(() => this.holidays().filter(h => h.schoolClosed).length);
+
   timelineEvents = computed<TimelineEvent[]>(() => {
-    return this.milestones()
-      .map(m => ({
-        id: m.id,
-        type: 'MILESTONE' as const,
-        label: m.label,
-        startDate: m.startDate,
-        endDate: m.endDate,
-        milestoneType: m.type,
-        description: this.getMilestoneDescription(m.type)
-      }))
+    const periodEvents: TimelineEvent[] = this.periods().map(p => ({
+      id: p.id,
+      type: 'PERIOD' as const,
+      label: p.label,
+      startDate: p.startDate,
+      endDate: p.endDate,
+      description: `${this.formatDate(p.startDate)} → ${this.formatDate(p.endDate)}`
+    }));
+    const holidayEvents: TimelineEvent[] = this.holidays().map(h => ({
+      id: h.id,
+      type: 'HOLIDAY' as const,
+      label: h.label,
+      startDate: h.startDate,
+      endDate: h.endDate,
+      description: h.schoolClosed ? 'Établissement fermé' : 'Suspension de cours',
+      schoolClosed: h.schoolClosed
+    }));
+    return [...periodEvents, ...holidayEvents]
       .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
   });
-
-  private getMilestoneLabel(type: string): string {
-    switch (type) {
-      case 'ENROLLMENT': return 'Admission';
-      case 'RE_ENROLLMENT': return 'Réinscription';
-      case 'LESSONS': return 'Enseignement';
-      case 'EXAMS': return 'Examens';
-      case 'VACATION': return 'Vacances';
-      case 'COMMENCEMENT': return 'Remise';
-      default: return type;
-    }
-  }
-
-  private getMilestoneBadgeType(type: string): any {
-    switch (type) {
-      case 'LESSONS': return 'info';
-      case 'ENROLLMENT':
-      case 'RE_ENROLLMENT': return 'success';
-      case 'EXAMS': return 'warning';
-      case 'VACATION': return 'danger';
-      case 'COMMENCEMENT': return 'info';
-      default: return 'default';
-    }
-  }
-
-  private getMilestoneDescription(type: string): string {
-    switch (type) {
-      case 'ENROLLMENT': return 'Période d\'inscription des nouveaux élèves';
-      case 'RE_ENROLLMENT': return 'Campagne de réinscription des élèves actuels';
-      case 'LESSONS': return 'Période effective des cours';
-      case 'EXAMS': return 'Sessions d\'examens nationaux ou blancs';
-      case 'VACATION': return 'Période de fermeture de l\'établissement';
-      case 'COMMENCEMENT': return 'Cérémonie de remise des diplômes';
-      default: return 'Jalon institutionnel';
-    }
-  }
-
-  getMilestoneIcon(type: string): any {
-    switch (type) {
-      case 'ENROLLMENT': return Globe;
-      case 'RE_ENROLLMENT': return RotateCcw;
-      case 'LESSONS': return BookOpen;
-      case 'EXAMS': return Hash;
-      case 'VACATION': return Calendar;
-      case 'COMMENCEMENT': return CheckCircle;
-      default: return CheckCircle;
-    }
-  }
 
   // Icônes
   readonly ArrowLeft = ArrowLeft;
   readonly Calendar = Calendar;
-  readonly Clock = Clock;
-  readonly CheckCircle = CheckCircle;
-  readonly Plus = Plus;
-  readonly LayoutDashboard = LayoutDashboard;
-  readonly CalendarDays = CalendarDays;
-  readonly ChevronRight = ChevronRight;
-  readonly MoreVertical = MoreVertical;
-  readonly Edit = Edit;
-  readonly Trash2 = Trash2;
-  readonly Printer = Printer;
-  readonly Play = Play;
-  readonly Archive = Archive;
-  readonly RotateCcw = RotateCcw;
-  readonly XCircle = XCircle;
-  readonly Globe = Globe;
-  readonly ListChecks = ListChecks;
-  readonly Sparkles = Sparkles;
-  readonly Zap = Zap;
-  readonly Layers = Layers;
   readonly CalendarOff = CalendarOff;
+  readonly CheckCircle = CheckCircle;
+  readonly Clock = Clock;
+  readonly Edit = Edit;
+  readonly Layers = Layers;
+  readonly LayoutDashboard = LayoutDashboard;
+  readonly Play = Play;
+  readonly Plus = Plus;
+  readonly Printer = Printer;
+  readonly RotateCcw = RotateCcw;
+  readonly Trash2 = Trash2;
+  readonly XCircle = XCircle;
+  readonly Archive = Archive;
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.loadYearDetails(id);
-    }
+    if (id) this.loadYearDetails(id);
   }
 
   async loadYearDetails(id: string) {
     this.isLoading.set(true);
     try {
-      const [yearData, milestonesData, periodsData, holidaysData] = await Promise.all([
+      const [yearData, periodsData, holidaysData] = await Promise.all([
         firstValueFrom(this.academicService.getYearById(id)),
-        firstValueFrom(this.academicService.getMilestones(id)),
         firstValueFrom(this.academicService.getPeriods(id)),
         firstValueFrom(this.academicService.getHolidays(id))
       ]);
-
       this.year.set(yearData);
-      this.milestones.set(milestonesData);
       this.periods.set(periodsData);
       this.holidays.set(holidaysData);
-    } catch (error) {
+    } catch {
       this.notificationService.error("Erreur lors du chargement des détails de l'année.");
     } finally {
       this.isLoading.set(false);
-    }
-  }
-
-  // --- ACTIONS JALONS (V2) ---
-
-  handleMilestoneAction(event: { actionId: string, row: TableRow }) {
-    if (event.actionId === 'edit') {
-      this.openMilestoneForm(event.row.rawData);
-    } else if (event.actionId === 'delete') {
-      this.confirmDeleteMilestone(event.row.id as string, event.row.title);
-    }
-  }
-
-  openMilestoneForm(milestone?: AcademicMilestone) {
-    const dialogRef = this.dialog.open(MilestoneFormComponent, {
-      width: '560px',
-      maxWidth: '95vw',
-      panelClass: 'feewi-dialog-panel',
-      data: {
-        year: this.year(),
-        milestone: milestone
-      }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result && this.year()) {
-        this.loadYearDetails(this.year()!.id);
-      }
-    });
-  }
-
-  private async confirmDeleteMilestone(id: string, name: string) {
-    const confirmed = await this.confirmAction(
-      'Supprimer le jalon ?',
-      `Voulez-vous supprimer "${name}" du calendrier ?`,
-      'Oui, supprimer',
-      'danger'
-    );
-
-    if (confirmed && this.year()) {
-      try {
-        await firstValueFrom(this.academicService.deleteMilestone(this.year()!.id, id));
-        this.notificationService.success('Jalon supprimé.');
-        this.loadYearDetails(this.year()!.id);
-      } catch (e) {
-        this.notificationService.error("Échec de la suppression.");
-      }
-    }
-  }
-
-  // ===========================================
-  // FACTORY AUTOMATION (V2)
-  // ===========================================
-
-  async onGenerateCalendar(strategy: 'TEMPLATE' | 'AUTO') {
-    const y = this.year();
-    if (!y) return;
-
-    const confirmed = await this.confirmAction(
-      strategy === 'TEMPLATE' ? 'Importer le calendrier officiel ?' : 'Générer automatiquement ?',
-      strategy === 'TEMPLATE'
-        ? 'Cela copiera les dates officielles (Sénégal) pour cette année scolaire. Les jalons existants seront conservés.'
-        : 'Cela découpera l\'année en périodes égales selon votre système (Trimestre/Semestre).',
-      'Confirmer la génération',
-      'info'
-    );
-
-    if (confirmed) {
-      this.isActionLoading.set(true);
-      try {
-        await firstValueFrom(this.academicService.generateCalendar(y.id, strategy, strategy === 'TEMPLATE' ? 'SN_OFFICIAL_2026_2027' : undefined));
-        this.notificationService.success('Le calendrier a été généré avec succès.');
-        this.loadYearDetails(y.id);
-      } catch (e) {
-        this.notificationService.error("Échec de la génération automatique.");
-      } finally {
-        this.isActionLoading.set(false);
-      }
-    }
-  }
-
-  // ===========================================
-  // ACTIONS DE CYCLE DE VIE (WORKFLOW V2)
-  // ===========================================
-
-  async onActivate() {
-    const y = this.year();
-    if (!y) return;
-
-    const confirmed = await this.confirmAction(
-      'Activer l\'année ?',
-      `L'année ${y.label} deviendra l'année par défaut. L'ancienne année active sera archivée.`,
-      'Oui, activer',
-      'info'
-    );
-
-    if (confirmed) {
-      this.isActionLoading.set(true);
-      try {
-        await firstValueFrom(this.academicService.activateYear(y.id));
-        this.notificationService.success(`L'année ${y.label} est désormais active.`);
-        this.loadYearDetails(y.id);
-      } catch (e) {
-        this.notificationService.error("Échec de l'activation.");
-      } finally {
-        this.isActionLoading.set(false);
-      }
-    }
-  }
-
-  async onClose() {
-    const y = this.year();
-    if (!y) return;
-
-    const confirmed = await this.confirmAction(
-      'Clôturer l\'année ?',
-      `Cette action verrouille le calendrier et prépare la fin d'année. Les cours seront considérés comme terminés.`,
-      'Oui, clôturer',
-      'warning'
-    );
-
-    if (confirmed) {
-      this.isActionLoading.set(true);
-      try {
-        await firstValueFrom(this.academicService.closeYear(y.id));
-        this.notificationService.success(`Année ${y.label} en cours de clôture.`);
-        this.loadYearDetails(y.id);
-      } catch (e) {
-        this.notificationService.error("Échec de la clôture.");
-      } finally {
-        this.isActionLoading.set(false);
-      }
-    }
-  }
-
-  async onReopen() {
-    const y = this.year();
-    if (!y) return;
-
-    this.isActionLoading.set(true);
-    try {
-      await firstValueFrom(this.academicService.reopenYear(y.id));
-      this.notificationService.info(`L'année ${y.label} a été rouverte.`);
-      this.loadYearDetails(y.id);
-    } catch (e) {
-      this.notificationService.error("Échec de la réouverture.");
-    } finally {
-      this.isActionLoading.set(false);
-    }
-  }
-
-  async onArchive() {
-    const y = this.year();
-    if (!y) return;
-
-    const confirmed = await this.confirmAction(
-      'Archivage définitif ?',
-      `ATTENTION : L'archivage est irréversible. L'année passera en lecture seule définitivement.`,
-      'Oui, archiver définitivement',
-      'danger'
-    );
-
-    if (confirmed) {
-      this.isActionLoading.set(true);
-      try {
-        await firstValueFrom(this.academicService.archiveYear(y.id));
-        this.notificationService.success(`L'année ${y.label} est maintenant archivée.`);
-        this.loadYearDetails(y.id);
-      } catch (e) {
-        this.notificationService.error("Échec de l'archivage.");
-      } finally {
-        this.isActionLoading.set(false);
-      }
     }
   }
 
@@ -460,40 +190,26 @@ export class YearDetailComponent implements OnInit {
   // ===========================================
 
   handlePeriodAction(event: { actionId: string, row: TableRow }) {
-    if (event.actionId === 'edit') {
-      this.openPeriodForm(event.row.rawData as Period);
-    } else if (event.actionId === 'delete') {
-      this.confirmDeletePeriod(event.row.id as string, event.row.title);
-    }
+    if (event.actionId === 'edit') this.openPeriodForm(event.row.rawData as Period);
+    else if (event.actionId === 'delete') this.confirmDeletePeriod(event.row.id as string, event.row.title);
   }
 
   openPeriodForm(period?: Period) {
-    const dialogRef = this.dialog.open(PeriodFormComponent, {
-      width: '600px',
-      maxWidth: '95vw',
-      panelClass: 'feewi-dialog-panel',
+    const ref = this.dialog.open(PeriodFormComponent, {
+      width: '480px', maxWidth: '95vw', panelClass: 'feewi-dialog-panel',
       data: {year: this.year(), period}
     });
-    dialogRef.afterClosed().subscribe(result => {
-      if (result && this.year()) this.loadYearDetails(this.year()!.id);
-    });
+    ref.afterClosed().subscribe(ok => { if (ok && this.year()) this.loadYearDetails(this.year()!.id); });
   }
 
   private async confirmDeletePeriod(id: string, name: string) {
-    const confirmed = await this.confirmAction(
-      'Supprimer la période ?',
-      `"${name}" sera définitivement retirée du calendrier.`,
-      'Oui, supprimer',
-      'danger'
-    );
-    if (confirmed && this.year()) {
+    const ok = await this.confirmAction('Supprimer la période ?', `"${name}" sera retirée du calendrier.`, 'Supprimer', 'danger');
+    if (ok && this.year()) {
       try {
         await firstValueFrom(this.academicService.deletePeriod(this.year()!.id, id));
         this.notificationService.success('Période supprimée.');
         this.loadYearDetails(this.year()!.id);
-      } catch {
-        this.notificationService.error("Échec de la suppression.");
-      }
+      } catch { this.notificationService.error('Échec de la suppression.'); }
     }
   }
 
@@ -502,64 +218,101 @@ export class YearDetailComponent implements OnInit {
   // ===========================================
 
   handleHolidayAction(event: { actionId: string, row: TableRow }) {
-    if (event.actionId === 'edit') {
-      this.openHolidayForm(event.row.rawData as Holiday);
-    } else if (event.actionId === 'delete') {
-      this.confirmDeleteHoliday(event.row.id as string, event.row.title);
-    }
+    if (event.actionId === 'edit') this.openHolidayForm(event.row.rawData as Holiday);
+    else if (event.actionId === 'delete') this.confirmDeleteHoliday(event.row.id as string, event.row.title);
   }
 
   openHolidayForm(holiday?: Holiday) {
-    const dialogRef = this.dialog.open(HolidayFormComponent, {
-      width: '560px',
-      maxWidth: '95vw',
-      panelClass: 'feewi-dialog-panel',
+    const ref = this.dialog.open(HolidayFormComponent, {
+      width: '480px', maxWidth: '95vw', panelClass: 'feewi-dialog-panel',
       data: {year: this.year(), holiday}
     });
-    dialogRef.afterClosed().subscribe(result => {
-      if (result && this.year()) this.loadYearDetails(this.year()!.id);
-    });
+    ref.afterClosed().subscribe(ok => { if (ok && this.year()) this.loadYearDetails(this.year()!.id); });
   }
 
   private async confirmDeleteHoliday(id: string, name: string) {
-    const confirmed = await this.confirmAction(
-      'Supprimer le congé ?',
-      `"${name}" sera retiré du calendrier.`,
-      'Oui, supprimer',
-      'danger'
-    );
-    if (confirmed && this.year()) {
+    const ok = await this.confirmAction('Supprimer le congé ?', `"${name}" sera retiré du calendrier.`, 'Supprimer', 'danger');
+    if (ok && this.year()) {
       try {
         await firstValueFrom(this.academicService.deleteHoliday(this.year()!.id, id));
         this.notificationService.success('Congé supprimé.');
         this.loadYearDetails(this.year()!.id);
-      } catch {
-        this.notificationService.error("Échec de la suppression.");
-      }
+      } catch { this.notificationService.error('Échec de la suppression.'); }
     }
   }
 
+  // ===========================================
+  // CYCLE DE VIE
+  // ===========================================
+
+  async onActivate() {
+    const y = this.year();
+    if (!y) return;
+    const ok = await this.confirmAction(`Activer l'année ${y.label} ?`, "Elle deviendra l'année par défaut.", 'Oui, activer', 'info');
+    if (!ok) return;
+    this.isActionLoading.set(true);
+    try {
+      await firstValueFrom(this.academicService.activateYear(y.id));
+      this.notificationService.success(`${y.label} est désormais active.`);
+      this.loadYearDetails(y.id);
+    } catch { this.notificationService.error("Échec de l'activation."); }
+    finally { this.isActionLoading.set(false); }
+  }
+
+  async onClose() {
+    const y = this.year();
+    if (!y) return;
+    const ok = await this.confirmAction('Clôturer l\'année ?', 'Le calendrier sera verrouillé. Cette action est réversible.', 'Clôturer', 'warning');
+    if (!ok) return;
+    this.isActionLoading.set(true);
+    try {
+      await firstValueFrom(this.academicService.closeYear(y.id));
+      this.notificationService.success(`${y.label} clôturée.`);
+      this.loadYearDetails(y.id);
+    } catch { this.notificationService.error('Échec de la clôture.'); }
+    finally { this.isActionLoading.set(false); }
+  }
+
+  async onReopen() {
+    const y = this.year();
+    if (!y) return;
+    this.isActionLoading.set(true);
+    try {
+      await firstValueFrom(this.academicService.reopenYear(y.id));
+      this.notificationService.info(`${y.label} rouverte.`);
+      this.loadYearDetails(y.id);
+    } catch { this.notificationService.error('Échec de la réouverture.'); }
+    finally { this.isActionLoading.set(false); }
+  }
+
+  async onArchive() {
+    const y = this.year();
+    if (!y) return;
+    const ok = await this.confirmAction('Archivage définitif ?', 'ATTENTION : irréversible. L\'année passera en lecture seule.', 'Archiver', 'danger');
+    if (!ok) return;
+    this.isActionLoading.set(true);
+    try {
+      await firstValueFrom(this.academicService.archiveYear(y.id));
+      this.notificationService.success(`${y.label} archivée.`);
+      this.loadYearDetails(y.id);
+    } catch { this.notificationService.error("Échec de l'archivage."); }
+    finally { this.isActionLoading.set(false); }
+  }
+
   private confirmAction(title: string, message: string, confirmLabel: string, type: 'info' | 'warning' | 'danger'): Promise<boolean> {
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '450px',
-      data: {title, message, confirmLabel, type}
-    });
-    return new Promise(resolve => dialogRef.afterClosed().subscribe(res => resolve(!!res)));
+    const ref = this.dialog.open(ConfirmDialogComponent, {width: '450px', data: {title, message, confirmLabel, type}});
+    return new Promise(resolve => ref.afterClosed().subscribe(res => resolve(!!res)));
   }
 
   formatDate(date?: string): string {
     if (!date) return '—';
-    return formatDate(date, 'd MMMM yyyy', this.locale);
-  }
-
-  formatDateShort(date: string): string {
-    return formatDate(date, 'd MMM', this.locale);
+    return formatDate(date, 'd MMM yyyy', this.locale);
   }
 
   getDuration(year: AcademicYear): string {
     const start = new Date(year.startDate);
     const end = new Date(year.endDate);
     const months = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
-    return `${months} Mois`;
+    return `${months} mois`;
   }
 }
