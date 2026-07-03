@@ -18,6 +18,8 @@ import {
   RefreshCw,
   Search,
   Tag,
+  ToggleLeft,
+  ToggleRight,
   Trash2,
   UserCheck,
   Users
@@ -28,6 +30,7 @@ import {
   combineLatest,
   filter,
   finalize,
+  firstValueFrom,
   forkJoin,
   map,
   of,
@@ -51,6 +54,7 @@ import {DataListComponent} from '../../../../../../shared/components/data-list/d
 import {LevelFormComponent} from '../components/level-form/level-form.component';
 import {FiliereFormComponent} from '../components/filiere-form/filiere-form.component';
 import {ClassFormComponent} from '../components/class-form/class-form.component';
+import {ConfirmDialogComponent} from '../../../../../../shared/components/confirm-dialog/confirm-dialog';
 import {FwButtonComponent} from '../../../../../../shared/components/button/button.component';
 import {FwEmptyStateComponent} from '../../../../../../shared/components/empty-state/empty-state.component';
 import {FwPageShellComponent} from '../../../../../../shared/components/page-shell/page-shell.component';
@@ -141,6 +145,16 @@ export class CycleDetailComponent implements OnInit {
 
   readonly filiereActions: RowAction[] = [
     {id: 'edit', label: 'Modifier', icon: Edit, type: 'primary', permission: 'academic:structure:write'},
+    {
+      id: 'activate', label: 'Activer', icon: ToggleRight, type: 'success',
+      permission: 'academic:structure:write',
+      hideIf: (row) => !!row.rawData?.active
+    },
+    {
+      id: 'deactivate', label: 'Désactiver', icon: ToggleLeft, type: 'warning',
+      permission: 'academic:structure:write',
+      hideIf: (row) => !row.rawData?.active
+    },
     {id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger', permission: 'academic:structure:write'}
   ];
 
@@ -193,9 +207,14 @@ export class CycleDetailComponent implements OnInit {
         title: f.name,
         subtitle: `Code série : ${f.code}`,
         avatarLabel: f.code.substring(0, 2).toUpperCase(),
-        badges: [{label: 'SÉRIE', type: 'info'}],
+        badges: [
+          {label: 'SÉRIE', type: 'info'},
+          f.active
+            ? {label: 'ACTIVE', type: 'success'}
+            : {label: 'INACTIVE', type: 'default', tooltip: 'Non proposée à la création de classe ou d\'admission'}
+        ],
         rawData: f
-      }));
+      } satisfies TableRow));
   });
 
   activeFilterChips = computed(() => {
@@ -339,7 +358,42 @@ export class CycleDetailComponent implements OnInit {
   }
 
   handleFiliereAction(event: { actionId: string, row: TableRow }) {
-    this.notificationService.info("Action sur filière bientôt disponible.");
+    if (event.actionId === 'activate') {
+      this.toggleFiliereStatus(event.row, true);
+    } else if (event.actionId === 'deactivate') {
+      this.toggleFiliereStatus(event.row, false);
+    } else {
+      this.notificationService.info("Action sur filière bientôt disponible.");
+    }
+  }
+
+  private toggleFiliereStatus(row: TableRow, active: boolean) {
+    const applyToggle = async () => {
+      try {
+        await firstValueFrom(this.academicService.toggleFiliereStatus(String(row.id), active));
+        this.notificationService.success(active ? `"${row.title}" est maintenant active.` : `"${row.title}" est maintenant inactive.`);
+        this.refresh();
+      } catch {
+        // Notification d'erreur déjà émise par AcademicService.handleError
+      }
+    };
+
+    if (!active) {
+      const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+        width: '420px',
+        data: {
+          title: 'Désactiver cette série ?',
+          message: `"${row.title}" ne sera plus proposée à la création de classe ni sur le portail d'admission. Réversible à tout moment.`,
+          confirmLabel: 'Oui, désactiver',
+          type: 'warning'
+        }
+      });
+      dialogRef.afterClosed().subscribe(confirmed => {
+        if (confirmed) this.loadingService.execute(applyToggle, 'global');
+      });
+    } else {
+      this.loadingService.execute(applyToggle, 'global');
+    }
   }
 
   handleClassAction(event: { actionId: string, row: TableRow }) {
@@ -369,6 +423,8 @@ export class CycleDetailComponent implements OnInit {
   readonly ListChecks = ListChecks;
   readonly Edit = Edit;
   readonly Trash2 = Trash2;
+  readonly ToggleRight = ToggleRight;
+  readonly ToggleLeft = ToggleLeft;
   readonly GraduationCap = GraduationCap;
   readonly Tag = Tag;
   readonly Users = Users;

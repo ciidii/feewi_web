@@ -74,6 +74,7 @@ export interface Filiere {
   id: string;
   name: string;
   code: string;
+  active: boolean;
 }
 
 export interface Subject {

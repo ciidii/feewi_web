@@ -359,6 +359,13 @@ export class AcademicService {
     );
   }
 
+  toggleFiliereStatus(id: string, active: boolean): Observable<Filiere> {
+    const params = new HttpParams().set('active', active);
+    return this.http.patch<Filiere>(`${this.API_URL}/filieres/${id}/status`, {}, { params, headers: this.getHeaders(true) }).pipe(
+      catchError(this.handleError(active ? 'Erreur lors de l\'activation de la filière' : 'Erreur lors de la désactivation de la filière'))
+    );
+  }
+
   // ===========================================
   // GESTION DES MATIÈRES (RÉFÉRENTIEL)
   // ===========================================
