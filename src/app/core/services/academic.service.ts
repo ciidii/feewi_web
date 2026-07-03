@@ -130,6 +130,12 @@ export class AcademicService {
     );
   }
 
+  updateMilestone(yearId: string, milestoneId: string, milestone: Partial<AcademicMilestone>): Observable<AcademicMilestone> {
+    return this.http.put<AcademicMilestone>(`${this.API_URL}/years/${yearId}/milestones/${milestoneId}`, milestone, { headers: this.getHeaders(true) }).pipe(
+      catchError(this.handleError('Erreur lors de la mise à jour du jalon'))
+    );
+  }
+
   deleteMilestone(yearId: string, milestoneId: string): Observable<void> {
     return this.http.delete<void>(`${this.API_URL}/years/${yearId}/milestones/${milestoneId}`, { headers: this.getHeaders(true) }).pipe(
       catchError(this.handleError('Erreur lors de la suppression du jalon'))

@@ -53,7 +53,8 @@ export class MilestoneFormComponent implements OnInit {
     {value: 'ENROLLMENT', label: 'Campagne d\'Admission', icon: Calendar},
     {value: 'RE_ENROLLMENT', label: 'Réinscriptions', icon: Calendar},
     {value: 'EXAMS', label: 'Sessions d\'Examens', icon: AlertCircle},
-    {value: 'VACATION', label: 'Vacances & Congés', icon: Calendar}
+    {value: 'VACATION', label: 'Vacances & Congés', icon: Calendar},
+    {value: 'COMMENCEMENT', label: 'Cérémonie de Remise', icon: AlertCircle}
   ];
 
   ngOnInit() {
@@ -85,11 +86,8 @@ export class MilestoneFormComponent implements OnInit {
 
     this.isLoading.set(true);
     try {
-      if (this.isEditMode) {
-        // Le backend V2 ne propose pas encore d'update explicite par jalon,
-        // on suit le pattern delete + create ou on attend l'endpoint PUT.
-        // Pour l'instant, on simule l'ajout.
-        await firstValueFrom(this.academicService.createMilestone(this.data.year.id, this.milestoneForm.value));
+      if (this.isEditMode && this.data.milestone) {
+        await firstValueFrom(this.academicService.updateMilestone(this.data.year.id, this.data.milestone.id, this.milestoneForm.value));
       } else {
         await firstValueFrom(this.academicService.createMilestone(this.data.year.id, this.milestoneForm.value));
       }

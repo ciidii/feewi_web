@@ -142,6 +142,7 @@ export class YearDetailComponent implements OnInit {
       case 'LESSONS': return 'Enseignement';
       case 'EXAMS': return 'Examens';
       case 'VACATION': return 'Vacances';
+      case 'COMMENCEMENT': return 'Remise';
       default: return type;
     }
   }
@@ -153,6 +154,7 @@ export class YearDetailComponent implements OnInit {
       case 'RE_ENROLLMENT': return 'success';
       case 'EXAMS': return 'warning';
       case 'VACATION': return 'danger';
+      case 'COMMENCEMENT': return 'info';
       default: return 'default';
     }
   }
@@ -164,6 +166,7 @@ export class YearDetailComponent implements OnInit {
       case 'LESSONS': return 'Période effective des cours';
       case 'EXAMS': return 'Sessions d\'examens nationaux ou blancs';
       case 'VACATION': return 'Période de fermeture de l\'établissement';
+      case 'COMMENCEMENT': return 'Cérémonie de remise des diplômes';
       default: return 'Jalon institutionnel';
     }
   }
@@ -175,6 +178,7 @@ export class YearDetailComponent implements OnInit {
       case 'LESSONS': return BookOpen;
       case 'EXAMS': return Hash;
       case 'VACATION': return Calendar;
+      case 'COMMENCEMENT': return CheckCircle;
       default: return CheckCircle;
     }
   }
@@ -292,7 +296,7 @@ export class YearDetailComponent implements OnInit {
     if (confirmed) {
       this.isActionLoading.set(true);
       try {
-        await firstValueFrom(this.academicService.generateCalendar(y.id, strategy, strategy === 'TEMPLATE' ? 'SN_OFFICIAL' : undefined));
+        await firstValueFrom(this.academicService.generateCalendar(y.id, strategy, strategy === 'TEMPLATE' ? 'SN_OFFICIAL_2026_2027' : undefined));
         this.notificationService.success('Le calendrier a été généré avec succès.');
         this.loadYearDetails(y.id);
       } catch (e) {
@@ -413,5 +417,12 @@ export class YearDetailComponent implements OnInit {
 
   formatDateShort(date: string): string {
     return formatDate(date, 'd MMM', this.locale);
+  }
+
+  getDuration(year: AcademicYear): string {
+    const start = new Date(year.startDate);
+    const end = new Date(year.endDate);
+    const months = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
+    return `${months} Mois`;
   }
 }

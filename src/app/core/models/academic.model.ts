@@ -11,7 +11,7 @@ export interface AcademicYear {
   createdAt?: string;
 }
 
-export type MilestoneType = 'ENROLLMENT' | 'LESSONS' | 'EXAMS' | 'RE_ENROLLMENT' | 'VACATION';
+export type MilestoneType = 'ENROLLMENT' | 'LESSONS' | 'EXAMS' | 'RE_ENROLLMENT' | 'VACATION' | 'COMMENCEMENT';
 
 export interface AcademicMilestone {
   id: string;
