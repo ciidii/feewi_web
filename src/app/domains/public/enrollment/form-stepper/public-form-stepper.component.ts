@@ -497,7 +497,7 @@ export class PublicFormStepperComponent implements OnInit {
     const admissionId = this.activeAdmission()?.id;
     if (!admissionId) { this.notify.error('ID Admission manquant.'); return false; }
     try {
-      await this.enrollment.updateChildPillar(admissionId, key, data).toPromise();
+      await this.enrollment.updateChildPillar(admissionId, key, data, this.accessCode()).toPromise();
       return true;
     } catch { return false; }
   }
@@ -507,7 +507,7 @@ export class PublicFormStepperComponent implements OnInit {
     if (!admissionId) return false;
     if (!this.store.services.length) return true;
     try {
-      await this.enrollment.subscribeServices(admissionId, this.store.services).toPromise();
+      await this.enrollment.subscribeServices(admissionId, this.store.services, this.accessCode()).toPromise();
       return true;
     } catch { return false; }
   }
@@ -523,7 +523,7 @@ export class PublicFormStepperComponent implements OnInit {
     this.docEngine.getUploadTicket({ fileName: data.file.name, contentType: data.file.type, serviceOrigin: 'enrollment' }).pipe(
       switchMap(ticket =>
         this.docEngine.uploadFileDirectly(ticket.uploadUrl, data.file).pipe(
-          switchMap(() => this.enrollment.uploadDocument(admissionId, data.code, ticket.fileId))
+          switchMap(() => this.enrollment.uploadDocument(admissionId, data.code, ticket.fileId, this.accessCode()))
         )
       ),
       finalize(() => {

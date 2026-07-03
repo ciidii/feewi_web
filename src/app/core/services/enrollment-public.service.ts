@@ -111,9 +111,10 @@ export class EnrollmentPublicService {
   }
 
   /** ÉTAPE 3 — Met à jour un pilier de l'admission (ex: identity, medical) */
-  updateChildPillar(admissionId: string, pillarKey: string, data: any): Observable<void> {
+  updateChildPillar(admissionId: string, pillarKey: string, data: any, accessCode: string): Observable<void> {
+    const params = new HttpParams().set('accessCode', accessCode);
     return this.http
-      .patch<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.UPDATE_PILLAR(admissionId, pillarKey)), data, { headers: this.getHeaders(true) })
+      .patch<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.UPDATE_PILLAR(admissionId, pillarKey)), data, { headers: this.getHeaders(true), params })
       .pipe(catchError(this.handleError(`Erreur sur le pilier ${pillarKey}`)));
   }
 
@@ -125,24 +126,27 @@ export class EnrollmentPublicService {
   }
 
   /** Services — Souscriptions cantine/transport */
-  subscribeServices(admissionId: string, subscriptions: ServiceSubscriptionRequest[]): Observable<void> {
+  subscribeServices(admissionId: string, subscriptions: ServiceSubscriptionRequest[], accessCode: string): Observable<void> {
+    const params = new HttpParams().set('accessCode', accessCode);
     return this.http
-      .patch<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.SUBSCRIPTIONS(admissionId)), subscriptions, { headers: this.getHeaders(true) })
+      .patch<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.SUBSCRIPTIONS(admissionId)), subscriptions, { headers: this.getHeaders(true), params })
       .pipe(catchError(this.handleError('Erreur lors de la sélection des services')));
   }
 
   /** Documents — Upload URL brute (string) */
-  uploadDocument(admissionId: string, docCode: string, fileUrl: string): Observable<void> {
+  uploadDocument(admissionId: string, docCode: string, fileUrl: string, accessCode: string): Observable<void> {
     const headers = this.getHeaders(true).set('Content-Type', 'text/plain');
+    const params = new HttpParams().set('accessCode', accessCode);
     return this.http
-      .post<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.DOCUMENTS(admissionId, docCode)), fileUrl, { headers })
+      .post<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.DOCUMENTS(admissionId, docCode)), fileUrl, { headers, params })
       .pipe(catchError(this.handleError('Erreur lors de l\'envoi du document')));
   }
 
   /** Soumet une admission individuelle */
-  submitAdmission(admissionId: string): Observable<Admission> {
+  submitAdmission(admissionId: string, accessCode: string): Observable<Admission> {
+    const params = new HttpParams().set('accessCode', accessCode);
     return this.http
-      .post<Admission>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.SUBMIT_ADMISSION(admissionId)), null, { headers: this.getHeaders(true) })
+      .post<Admission>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.SUBMIT_ADMISSION(admissionId)), null, { headers: this.getHeaders(true), params })
       .pipe(catchError(this.handleError('Erreur lors de la soumission')));
   }
 
@@ -172,9 +176,10 @@ export class EnrollmentPublicService {
   }
 
   /** Annule une admission */
-  cancelAdmission(admissionId: string): Observable<void> {
+  cancelAdmission(admissionId: string, accessCode: string): Observable<void> {
+    const params = new HttpParams().set('accessCode', accessCode);
     return this.http
-      .post<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.CANCEL(admissionId)), null, { headers: this.getHeaders(true) })
+      .post<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.CANCEL(admissionId)), null, { headers: this.getHeaders(true), params })
       .pipe(catchError(this.handleError('Erreur lors de l\'annulation')));
   }
 
