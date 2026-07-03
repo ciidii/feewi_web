@@ -12,6 +12,7 @@
 
   <!-- ACTIONS -->
   <div actions class="flex items-center gap-2">
+    <app-fw-button *fwHasPermission="'academic:year:write'" [hidden]="y.status !== 'PLANNING'" (click)="onDelete()" variant="danger" size="sm" [icon]="Trash2" [loading]="isActionLoading()">Supprimer</app-fw-button>
     <app-fw-button *fwHasPermission="'academic:year:lifecycle'" [hidden]="y.status !== 'PLANNING'" (click)="onActivate()" variant="primary" size="sm" [icon]="Play" [loading]="isActionLoading()">Activer</app-fw-button>
     <app-fw-button *fwHasPermission="'academic:year:lifecycle'" [hidden]="y.status !== 'ACTIVE'" (click)="onClose()" variant="danger" size="sm" [icon]="XCircle" [loading]="isActionLoading()">Clôturer</app-fw-button>
     <ng-container *fwHasPermission="'academic:year:lifecycle'">

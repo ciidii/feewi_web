@@ -113,6 +113,12 @@ export class AcademicService {
     );
   }
 
+  deleteYear(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/years/${id}`, { headers: this.getHeaders(true) }).pipe(
+      catchError(this.handleError('Suppression impossible. Vérifiez que l\'année est en statut PLANNING et sans élèves inscrits.'))
+    );
+  }
+
   // ===========================================
   // JALONS (MILESTONES) - NOUVEAU V2
   // ===========================================

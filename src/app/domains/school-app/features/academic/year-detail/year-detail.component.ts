@@ -1,6 +1,6 @@
 import {Component, computed, inject, LOCALE_ID, OnInit, signal, ViewEncapsulation} from '@angular/core';
 import {CommonModule, formatDate} from '@angular/common';
-import {ActivatedRoute, RouterModule} from '@angular/router';
+import {ActivatedRoute, Router, RouterModule} from '@angular/router';
 import {
   Archive,
   ArrowLeft,
@@ -50,6 +50,7 @@ import {HasPermissionDirective} from '../../../../../shared/directives/has-permi
 })
 export class YearDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private academicService = inject(AcademicService);
   private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
@@ -190,6 +191,27 @@ export class YearDetailComponent implements OnInit {
     try { await firstValueFrom(this.academicService.archiveYear(y.id)); this.notificationService.success(`${y.label} archivée.`); this.loadYearDetails(y.id); }
     catch { this.notificationService.error("Échec de l'archivage."); }
     finally { this.isActionLoading.set(false); }
+  }
+
+  async onDelete() {
+    const y = this.year(); if (!y) return;
+    const ok = await this.confirmAction(
+      `Supprimer "${y.label}" ?`,
+      'Cette action est irréversible. Le calendrier et les jalons associés seront supprimés.',
+      'Supprimer définitivement',
+      'danger'
+    );
+    if (!ok) return;
+    this.isActionLoading.set(true);
+    try {
+      await firstValueFrom(this.academicService.deleteYear(y.id));
+      this.notificationService.success(`"${y.label}" supprimée.`);
+      this.router.navigate(['/admin/academic/years']);
+    } catch {
+      this.notificationService.error('Suppression impossible. L\'année a peut-être des élèves inscrits ou n\'est plus en statut PLANNING.');
+    } finally {
+      this.isActionLoading.set(false);
+    }
   }
 
   private confirmAction(title: string, message: string, confirmLabel: string, type: 'info' | 'warning' | 'danger'): Promise<boolean> {
