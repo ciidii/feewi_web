@@ -193,7 +193,7 @@
           <lucide-icon [name]="CalendarDays" [size]="14" class="text-primary"></lucide-icon>
           <span class="label">Jalons institutionnels</span>
         </div>
-        <app-fw-button 
+        <app-fw-button
           (click)="openMilestoneForm()"
           [disabled]="y.status === 'ARCHIVED'"
           variant="primary"
@@ -210,6 +210,82 @@
           [actions]="milestoneActions"
           defaultView="table"
           (onAction)="handleMilestoneAction($event)"
+        ></app-data-list>
+      </div>
+    </div>
+
+    <!-- CAS 3 : PÉRIODES (trimestres / semestres) -->
+    <div *ngIf="activeTabId() === 'periods'" class="space-y-4">
+      <div class="flex justify-between items-center px-1">
+        <div class="section-header-minimal">
+          <lucide-icon [name]="Layers" [size]="14" class="text-primary"></lucide-icon>
+          <span class="label">Périodes d'évaluation — {{ y.systemType === 'TRIMESTER' ? 'Système trimestriel' : y.systemType === 'SEMESTER' ? 'Système semestriel' : 'Système annuel' }}</span>
+        </div>
+        <app-fw-button
+          *fwHasPermission="'academic:year:write'"
+          (click)="openPeriodForm()"
+          [disabled]="y.status === 'ARCHIVED'"
+          variant="primary"
+          size="sm"
+          [icon]="Plus"
+        >
+          Ajouter une période
+        </app-fw-button>
+      </div>
+
+      <!-- Compteur info -->
+      <div *ngIf="periods().length > 0" class="flex items-center gap-2 px-1">
+        <span class="text-[10px] text-text-tertiary font-medium">
+          {{ periods().length }} période(s) définie(s)
+          <ng-container *ngIf="y.systemType === 'TRIMESTER'"> · max. 3 pour un système trimestriel</ng-container>
+          <ng-container *ngIf="y.systemType === 'SEMESTER'"> · max. 2 pour un système semestriel</ng-container>
+        </span>
+      </div>
+
+      <div class="list-container-integrated">
+        <app-data-list
+          [data]="displayPeriods()"
+          [total]="displayPeriods().length"
+          [actions]="periodActions"
+          defaultView="table"
+          (onAction)="handlePeriodAction($event)"
+        ></app-data-list>
+      </div>
+    </div>
+
+    <!-- CAS 4 : CONGÉS & VACANCES -->
+    <div *ngIf="activeTabId() === 'holidays'" class="space-y-4">
+      <div class="flex justify-between items-center px-1">
+        <div class="section-header-minimal">
+          <lucide-icon [name]="CalendarOff" [size]="14" class="text-primary"></lucide-icon>
+          <span class="label">Congés & Vacances scolaires</span>
+        </div>
+        <app-fw-button
+          *fwHasPermission="'academic:year:write'"
+          (click)="openHolidayForm()"
+          [disabled]="y.status === 'ARCHIVED'"
+          variant="primary"
+          size="sm"
+          [icon]="Plus"
+        >
+          Ajouter un congé
+        </app-fw-button>
+      </div>
+
+      <!-- Résumé fermetures complètes -->
+      <div *ngIf="holidays().length > 0" class="flex items-center gap-3 px-1">
+        <span class="text-[10px] text-text-tertiary font-medium">
+          {{ holidays().length }} congé(s) · {{ closedHolidaysCount() }} fermeture(s) complète(s)
+        </span>
+      </div>
+
+      <div class="list-container-integrated">
+        <app-data-list
+          [data]="displayHolidays()"
+          [total]="displayHolidays().length"
+          [actions]="holidayActions"
+          defaultView="table"
+          (onAction)="handleHolidayAction($event)"
         ></app-data-list>
       </div>
     </div>

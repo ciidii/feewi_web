@@ -24,11 +24,15 @@ import {
   ListChecks,
   Sparkles,
   Zap,
-  CalendarDays
+  CalendarDays,
+  CalendarOff,
+  Layers
 } from 'lucide-angular';
 import {MilestoneFormComponent} from './components/milestone-form/milestone-form.component';
+import {PeriodFormComponent} from './components/period-form/period-form.component';
+import {HolidayFormComponent} from './components/holiday-form/holiday-form.component';
 import {RowAction, TableRow} from '../../../../../shared/models/data-list.models';
-import {AcademicMilestone, AcademicYear} from '../../../../../core/models/academic.model';
+import {AcademicMilestone, AcademicYear, Holiday, Period} from '../../../../../core/models/academic.model';
 import {AcademicService} from '../../../../../core/services/academic.service';
 import {NotificationService} from '../../../../../shared/services/notification.service';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
@@ -86,6 +90,8 @@ export class YearDetailComponent implements OnInit {
   // États
   year = signal<AcademicYear | null>(null);
   milestones = signal<AcademicMilestone[]>([]);
+  periods = signal<Period[]>([]);
+  holidays = signal<Holiday[]>([]);
   isLoading = signal(true);
   isActionLoading = signal(false);
   activeTabId = signal('timeline');
@@ -93,14 +99,28 @@ export class YearDetailComponent implements OnInit {
   readonly canManageLifecycle = computed(() => this.authService.hasPermission('academic:year:lifecycle'));
   readonly canEditCalendar = computed(() => this.authService.hasPermission('academic:year:write'));
 
-  // Configuration des Onglets (Architecture V2)
+  // Configuration des Onglets
   readonly yearTabs: FwTab[] = [
     {id: 'timeline', label: 'Vue Chronologique', icon: LayoutDashboard},
-    {id: 'calendar', label: 'Gestion du Calendrier', icon: CalendarDays}
+    {id: 'calendar', label: 'Jalons', icon: CalendarDays},
+    {id: 'periods', label: 'Périodes', icon: Layers},
+    {id: 'holidays', label: 'Congés', icon: CalendarOff}
   ];
 
   // Actions pour les jalons
   readonly milestoneActions: RowAction[] = [
+    {id: 'edit', label: 'Modifier', icon: Edit, type: 'primary', permission: 'academic:year:write'},
+    {id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger', permission: 'academic:year:write'}
+  ];
+
+  // Actions pour les périodes
+  readonly periodActions: RowAction[] = [
+    {id: 'edit', label: 'Modifier', icon: Edit, type: 'primary', permission: 'academic:year:write'},
+    {id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger', permission: 'academic:year:write'}
+  ];
+
+  // Actions pour les congés
+  readonly holidayActions: RowAction[] = [
     {id: 'edit', label: 'Modifier', icon: Edit, type: 'primary', permission: 'academic:year:write'},
     {id: 'delete', label: 'Supprimer', icon: Trash2, type: 'danger', permission: 'academic:year:write'}
   ];
@@ -117,6 +137,33 @@ export class YearDetailComponent implements OnInit {
         {label: this.getMilestoneLabel(m.type), type: this.getMilestoneBadgeType(m.type)}
       ],
       rawData: m
+    }));
+  });
+
+  // Transformation des Périodes pour le DataList
+  displayPeriods = computed<TableRow[]>(() => {
+    return this.periods().map(p => ({
+      id: p.id,
+      title: p.label,
+      subtitle: `Cours : ${this.formatDateShort(p.startDate)} → ${this.formatDateShort(p.endDate)}`,
+      avatarLabel: p.label.substring(0, 2).toUpperCase(),
+      date: p.examStartDate ? `Examen : ${this.formatDateShort(p.examStartDate)}` : undefined,
+      badges: [{label: 'PÉRIODE', type: 'info' as any}],
+      rawData: p
+    }));
+  });
+
+  readonly closedHolidaysCount = computed(() => this.holidays().filter(h => h.schoolClosed).length);
+
+  // Transformation des Congés pour le DataList
+  displayHolidays = computed<TableRow[]>(() => {
+    return this.holidays().map(h => ({
+      id: h.id,
+      title: h.label,
+      subtitle: `${this.formatDateShort(h.startDate)} → ${this.formatDateShort(h.endDate)}`,
+      avatarLabel: h.label.substring(0, 2).toUpperCase(),
+      badges: [{label: h.schoolClosed ? 'FERMÉ' : 'CONGÉ', type: (h.schoolClosed ? 'danger' : 'warning') as any}],
+      rawData: h
     }));
   });
 
@@ -204,6 +251,8 @@ export class YearDetailComponent implements OnInit {
   readonly ListChecks = ListChecks;
   readonly Sparkles = Sparkles;
   readonly Zap = Zap;
+  readonly Layers = Layers;
+  readonly CalendarOff = CalendarOff;
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -215,13 +264,17 @@ export class YearDetailComponent implements OnInit {
   async loadYearDetails(id: string) {
     this.isLoading.set(true);
     try {
-      const [yearData, milestonesData] = await Promise.all([
+      const [yearData, milestonesData, periodsData, holidaysData] = await Promise.all([
         firstValueFrom(this.academicService.getYearById(id)),
-        firstValueFrom(this.academicService.getMilestones(id))
+        firstValueFrom(this.academicService.getMilestones(id)),
+        firstValueFrom(this.academicService.getPeriods(id)),
+        firstValueFrom(this.academicService.getHolidays(id))
       ]);
 
       this.year.set(yearData);
       this.milestones.set(milestonesData);
+      this.periods.set(periodsData);
+      this.holidays.set(holidaysData);
     } catch (error) {
       this.notificationService.error("Erreur lors du chargement des détails de l'année.");
     } finally {
@@ -398,6 +451,90 @@ export class YearDetailComponent implements OnInit {
         this.notificationService.error("Échec de l'archivage.");
       } finally {
         this.isActionLoading.set(false);
+      }
+    }
+  }
+
+  // ===========================================
+  // ACTIONS PÉRIODES
+  // ===========================================
+
+  handlePeriodAction(event: { actionId: string, row: TableRow }) {
+    if (event.actionId === 'edit') {
+      this.openPeriodForm(event.row.rawData as Period);
+    } else if (event.actionId === 'delete') {
+      this.confirmDeletePeriod(event.row.id as string, event.row.title);
+    }
+  }
+
+  openPeriodForm(period?: Period) {
+    const dialogRef = this.dialog.open(PeriodFormComponent, {
+      width: '600px',
+      maxWidth: '95vw',
+      panelClass: 'feewi-dialog-panel',
+      data: {year: this.year(), period}
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && this.year()) this.loadYearDetails(this.year()!.id);
+    });
+  }
+
+  private async confirmDeletePeriod(id: string, name: string) {
+    const confirmed = await this.confirmAction(
+      'Supprimer la période ?',
+      `"${name}" sera définitivement retirée du calendrier.`,
+      'Oui, supprimer',
+      'danger'
+    );
+    if (confirmed && this.year()) {
+      try {
+        await firstValueFrom(this.academicService.deletePeriod(this.year()!.id, id));
+        this.notificationService.success('Période supprimée.');
+        this.loadYearDetails(this.year()!.id);
+      } catch {
+        this.notificationService.error("Échec de la suppression.");
+      }
+    }
+  }
+
+  // ===========================================
+  // ACTIONS CONGÉS
+  // ===========================================
+
+  handleHolidayAction(event: { actionId: string, row: TableRow }) {
+    if (event.actionId === 'edit') {
+      this.openHolidayForm(event.row.rawData as Holiday);
+    } else if (event.actionId === 'delete') {
+      this.confirmDeleteHoliday(event.row.id as string, event.row.title);
+    }
+  }
+
+  openHolidayForm(holiday?: Holiday) {
+    const dialogRef = this.dialog.open(HolidayFormComponent, {
+      width: '560px',
+      maxWidth: '95vw',
+      panelClass: 'feewi-dialog-panel',
+      data: {year: this.year(), holiday}
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && this.year()) this.loadYearDetails(this.year()!.id);
+    });
+  }
+
+  private async confirmDeleteHoliday(id: string, name: string) {
+    const confirmed = await this.confirmAction(
+      'Supprimer le congé ?',
+      `"${name}" sera retiré du calendrier.`,
+      'Oui, supprimer',
+      'danger'
+    );
+    if (confirmed && this.year()) {
+      try {
+        await firstValueFrom(this.academicService.deleteHoliday(this.year()!.id, id));
+        this.notificationService.success('Congé supprimé.');
+        this.loadYearDetails(this.year()!.id);
+      } catch {
+        this.notificationService.error("Échec de la suppression.");
       }
     }
   }

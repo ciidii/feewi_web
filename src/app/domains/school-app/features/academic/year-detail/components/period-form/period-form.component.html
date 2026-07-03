@@ -1,0 +1,84 @@
+<app-fw-form-shell
+  [title]="isEditMode ? 'Modifier la Période' : 'Nouvelle Période'"
+  [subtitle]="'Segmentez l\'année ' + year().label + ' en périodes évaluables.'"
+  [icon]="Calendar"
+  [saveLabel]="isEditMode ? 'Mettre à jour' : 'Créer la période'"
+  [isLoading]="isLoading()"
+  [canSave]="periodForm.valid"
+  (save)="onSave()"
+  (cancel)="onCancel()"
+>
+  <form [formGroup]="periodForm" class="space-y-8 py-2">
+
+    <!-- 1. Identification -->
+    <div class="space-y-4">
+      <header class="section-header">
+        <lucide-icon [name]="AlertCircle" [size]="14"></lucide-icon>
+        <span class="label">Identification</span>
+      </header>
+      <div class="fw-field">
+        <label class="fw-label">Libellé de la période</label>
+        <div class="fw-input-wrapper">
+          <input type="text" formControlName="label"
+                 placeholder="ex: 1er Trimestre, 1er Semestre, Période Unique..."
+                 class="fw-input" [class.error]="isInvalid('label')"/>
+        </div>
+        <span *ngIf="isInvalid('label')" class="fw-error">Libellé requis (min. 2 caractères).</span>
+      </div>
+    </div>
+
+    <!-- 2. Durée des cours -->
+    <div class="space-y-4">
+      <header class="section-header">
+        <lucide-icon [name]="Clock" [size]="14"></lucide-icon>
+        <span class="label">Durée des cours</span>
+      </header>
+      <div class="grid grid-cols-2 gap-6">
+        <div class="fw-field">
+          <label class="fw-label">Début des cours</label>
+          <div class="fw-input-wrapper">
+            <input type="date" formControlName="startDate" class="fw-input" [class.error]="isInvalid('startDate')"/>
+          </div>
+        </div>
+        <div class="fw-field">
+          <label class="fw-label">Fin des cours</label>
+          <div class="fw-input-wrapper">
+            <input type="date" formControlName="endDate" class="fw-input" [class.error]="isInvalid('endDate')"/>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Session d'examens (optionnel) -->
+    <div class="space-y-4">
+      <header class="section-header">
+        <lucide-icon [name]="Calendar" [size]="14"></lucide-icon>
+        <span class="label">
+          Session d'examens
+          <span class="text-[10px] text-text-tertiary font-normal ml-1">(optionnel)</span>
+        </span>
+      </header>
+      <div class="grid grid-cols-2 gap-6">
+        <div class="fw-field">
+          <label class="fw-label">Début des examens</label>
+          <div class="fw-input-wrapper">
+            <input type="date" formControlName="examStartDate" class="fw-input"/>
+          </div>
+        </div>
+        <div class="fw-field">
+          <label class="fw-label">Fin des examens</label>
+          <div class="fw-input-wrapper">
+            <input type="date" formControlName="examEndDate" class="fw-input"/>
+          </div>
+        </div>
+      </div>
+      <div class="fw-field">
+        <label class="fw-label">Date limite de saisie des notes</label>
+        <div class="fw-input-wrapper">
+          <input type="date" formControlName="gradingDeadline" class="fw-input"/>
+        </div>
+      </div>
+    </div>
+
+  </form>
+</app-fw-form-shell>
