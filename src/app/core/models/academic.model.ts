@@ -23,20 +23,12 @@ export interface AcademicMilestone {
   createdAt?: string;
 }
 
-export interface Period {
-  id: string;
-  yearId: string;
-  label: string;
-  startDate: string;
-  endDate: string;
-  examStartDate: string;
-  examEndDate: string;
-  gradingDeadline: string;
-}
+export type CalendarEntryType = 'COURS' | 'CONGE';
 
-export interface Holiday {
+export interface CalendarEntry {
   id: string;
-  yearId: string;
+  academicYearId: string;
+  type: CalendarEntryType;
   label: string;
   startDate: string;
   endDate: string;

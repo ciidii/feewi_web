@@ -12,11 +12,10 @@ import {
   CreateYearRequest,
   CurriculumItem,
   Cycle,
+  CalendarEntry,
   CycleGroup,
   Filiere,
-  Holiday,
   Level,
-  Period,
   SchoolClass, StudentAssignment,
   Subject,
   SyllabusDomain,
@@ -155,54 +154,30 @@ export class AcademicService {
   }
 
   // ===========================================
-  // PÉRIODES & CONGÉS (Anciens, gardés pour compatibilité ou migration)
+  // CALENDRIER UNIFIÉ
   // ===========================================
 
-  getPeriods(yearId: string): Observable<Period[]> {
-    return this.http.get<Period[]>(`${this.API_URL}/years/${yearId}/periods`, { headers: this.getHeaders() }).pipe(
-      catchError(this.handleError('Erreur lors du chargement des périodes'))
+  getCalendarEntries(yearId: string): Observable<CalendarEntry[]> {
+    return this.http.get<CalendarEntry[]>(`${this.API_URL}/years/${yearId}/calendar`, { headers: this.getHeaders() }).pipe(
+      catchError(this.handleError('Erreur lors du chargement du calendrier'))
     );
   }
 
-  createPeriod(yearId: string, period: Partial<Period>): Observable<Period> {
-    return this.http.post<Period>(`${this.API_URL}/years/${yearId}/periods`, period, { headers: this.getHeaders(true) }).pipe(
-      catchError(this.handleError('Erreur lors de la création de la période'))
+  createCalendarEntry(yearId: string, entry: Partial<CalendarEntry>): Observable<CalendarEntry> {
+    return this.http.post<CalendarEntry>(`${this.API_URL}/years/${yearId}/calendar`, entry, { headers: this.getHeaders(true) }).pipe(
+      catchError(this.handleError('Erreur lors de la création'))
     );
   }
 
-  updatePeriod(yearId: string, id: string, period: Partial<Period>): Observable<Period> {
-    return this.http.put<Period>(`${this.API_URL}/years/${yearId}/periods/${id}`, period, { headers: this.getHeaders(true) }).pipe(
-      catchError(this.handleError('Erreur lors de la mise à jour de la période'))
+  updateCalendarEntry(yearId: string, id: string, entry: Partial<CalendarEntry>): Observable<CalendarEntry> {
+    return this.http.put<CalendarEntry>(`${this.API_URL}/years/${yearId}/calendar/${id}`, entry, { headers: this.getHeaders(true) }).pipe(
+      catchError(this.handleError('Erreur lors de la mise à jour'))
     );
   }
 
-  deletePeriod(yearId: string, id: string): Observable<void> {
-    return this.http.delete<void>(`${this.API_URL}/years/${yearId}/periods/${id}`, { headers: this.getHeaders(true) }).pipe(
-      catchError(this.handleError('Erreur lors de la suppression de la période'))
-    );
-  }
-
-  getHolidays(yearId: string): Observable<Holiday[]> {
-    return this.http.get<Holiday[]>(`${this.API_URL}/years/${yearId}/holidays`, { headers: this.getHeaders() }).pipe(
-      catchError(this.handleError('Erreur lors du chargement des congés'))
-    );
-  }
-
-  createHoliday(yearId: string, holiday: Partial<Holiday>): Observable<Holiday> {
-    return this.http.post<Holiday>(`${this.API_URL}/years/${yearId}/holidays`, holiday, { headers: this.getHeaders(true) }).pipe(
-      catchError(this.handleError('Erreur lors de la création du congé'))
-    );
-  }
-
-  updateHoliday(yearId: string, id: string, holiday: Partial<Holiday>): Observable<Holiday> {
-    return this.http.put<Holiday>(`${this.API_URL}/years/${yearId}/holidays/${id}`, holiday, { headers: this.getHeaders(true) }).pipe(
-      catchError(this.handleError('Erreur lors de la mise à jour du congé'))
-    );
-  }
-
-  deleteHoliday(yearId: string, id: string): Observable<void> {
-    return this.http.delete<void>(`${this.API_URL}/years/${yearId}/holidays/${id}`, { headers: this.getHeaders(true) }).pipe(
-      catchError(this.handleError('Erreur lors de la suppression du congé'))
+  deleteCalendarEntry(yearId: string, id: string): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/years/${yearId}/calendar/${id}`, { headers: this.getHeaders(true) }).pipe(
+      catchError(this.handleError('Erreur lors de la suppression'))
     );
   }
 

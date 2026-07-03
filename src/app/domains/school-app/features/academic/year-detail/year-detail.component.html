@@ -10,34 +10,17 @@
   density="compact"
 >
 
-  <!-- ACTIONS DE PAGE -->
+  <!-- ACTIONS -->
   <div actions class="flex items-center gap-2">
-    <app-fw-button
-      *fwHasPermission="'academic:year:lifecycle'"
-      [hidden]="y.status !== 'PLANNING'"
-      (click)="onActivate()"
-      variant="primary" size="sm" [icon]="Play"
-      [loading]="isActionLoading()"
-    >Activer l'année</app-fw-button>
-
-    <app-fw-button
-      *fwHasPermission="'academic:year:lifecycle'"
-      [hidden]="y.status !== 'ACTIVE'"
-      (click)="onClose()"
-      variant="danger" size="sm" [icon]="XCircle"
-      [loading]="isActionLoading()"
-    >Clôturer</app-fw-button>
-
+    <app-fw-button *fwHasPermission="'academic:year:lifecycle'" [hidden]="y.status !== 'PLANNING'" (click)="onActivate()" variant="primary" size="sm" [icon]="Play" [loading]="isActionLoading()">Activer</app-fw-button>
+    <app-fw-button *fwHasPermission="'academic:year:lifecycle'" [hidden]="y.status !== 'ACTIVE'" (click)="onClose()" variant="danger" size="sm" [icon]="XCircle" [loading]="isActionLoading()">Clôturer</app-fw-button>
     <ng-container *fwHasPermission="'academic:year:lifecycle'">
       <app-fw-button *ngIf="y.status === 'CLOSING'" (click)="onReopen()" variant="tertiary" size="sm" [icon]="RotateCcw" [loading]="isActionLoading()">Rouvrir</app-fw-button>
       <app-fw-button *ngIf="y.status === 'CLOSING'" (click)="onArchive()" variant="primary" size="sm" [icon]="Archive" [loading]="isActionLoading()">Archiver</app-fw-button>
     </ng-container>
-
     <div *ngIf="y.status === 'ARCHIVED'" class="flex items-center gap-2 px-3 py-1.5 bg-surface-sunken text-text-tertiary rounded-lg text-[10px] font-bold uppercase tracking-widest border border-border">
-      <lucide-icon [name]="Archive" [size]="12"></lucide-icon>
-      Lecture seule
+      <lucide-icon [name]="Archive" [size]="12"></lucide-icon> Lecture seule
     </div>
-
     <div class="divider-v"></div>
     <app-fw-button variant="tertiary" size="sm" [icon]="Printer" title="Imprimer"></app-fw-button>
   </div>
@@ -72,8 +55,8 @@
               <lucide-icon [name]="Layers" [size]="20"></lucide-icon>
             </div>
             <div>
-              <p class="text-[9px] font-black text-text-tertiary uppercase tracking-widest mb-0.5">Périodes</p>
-              <p class="text-sm font-bold text-midnight">{{ periods().length }} définie(s)</p>
+              <p class="text-[9px] font-black text-text-tertiary uppercase tracking-widest mb-0.5">Périodes de cours</p>
+              <p class="text-sm font-bold text-midnight">{{ coursCount() }}</p>
             </div>
           </div>
         </div>
@@ -84,7 +67,7 @@
             </div>
             <div>
               <p class="text-[9px] font-black text-text-tertiary uppercase tracking-widest mb-0.5">Congés</p>
-              <p class="text-sm font-bold text-midnight">{{ holidays().length }} planifié(s)</p>
+              <p class="text-sm font-bold text-midnight">{{ congeCount() }}</p>
             </div>
           </div>
         </div>
@@ -94,105 +77,65 @@
       <div class="fw-standard-card p-8 md:p-12 relative overflow-hidden min-h-[300px]">
         <div class="absolute left-12 md:left-1/2 top-0 bottom-0 w-px bg-border -translate-x-1/2 hidden md:block"></div>
 
-        <div *ngIf="timelineEvents().length > 0" class="relative space-y-10">
-          <div *ngFor="let event of timelineEvents(); let i = index"
+        <div *ngIf="timelineEntries().length > 0" class="relative space-y-10">
+          <div *ngFor="let e of timelineEntries(); let i = index"
                class="relative flex flex-col md:flex-row items-center gap-8 group"
                [ngClass]="i % 2 === 0 ? 'md:flex-row-reverse' : ''">
-
             <!-- Pastille -->
             <div class="absolute left-12 md:left-1/2 -translate-x-1/2 w-8 h-8 rounded-full border-2 border-white shadow-sm z-10 flex items-center justify-center transition-transform group-hover:scale-110"
-                 [ngClass]="{
-                   'bg-primary text-white': event.type === 'PERIOD',
-                   'bg-amber-500 text-white': event.type === 'HOLIDAY'
-                 }">
-              <lucide-icon [name]="event.type === 'PERIOD' ? Layers : CalendarOff" [size]="14"></lucide-icon>
+                 [ngClass]="e.type === 'COURS' ? 'bg-primary text-white' : 'bg-amber-500 text-white'">
+              <lucide-icon [name]="e.type === 'COURS' ? Layers : CalendarOff" [size]="14"></lucide-icon>
             </div>
-
             <!-- Carte -->
             <div class="w-full md:w-[45%] flex flex-col" [ngClass]="i % 2 === 0 ? 'md:items-start' : 'md:items-end md:text-right'">
               <span class="text-[9px] font-black uppercase tracking-[0.2em] mb-2"
-                    [ngClass]="event.type === 'PERIOD' ? 'text-primary' : 'text-amber-600'">
-                {{ event.startDate | date:'d MMM' }} — {{ event.endDate | date:'d MMM yyyy' }}
+                    [ngClass]="e.type === 'COURS' ? 'text-primary' : 'text-amber-600'">
+                {{ e.startDate | date:'d MMM' }} — {{ e.endDate | date:'d MMM yyyy' }}
               </span>
-              <div class="p-4 rounded-xl border border-border-subtle bg-white shadow-sm transition-all group-hover:shadow-md group-hover:border-border w-full">
-                <div class="flex items-center gap-2 mb-1">
+              <div class="p-4 rounded-xl border border-border-subtle bg-white shadow-sm transition-all group-hover:shadow-md w-full">
+                <div class="flex items-center gap-1.5 mb-1">
                   <span class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded"
-                        [ngClass]="event.type === 'PERIOD' ? 'bg-primary/10 text-primary' : (event.schoolClosed ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-700')">
-                    {{ event.type === 'PERIOD' ? 'Période' : (event.schoolClosed ? 'Fermé' : 'Congé') }}
+                        [ngClass]="e.type === 'COURS' ? 'bg-primary/10 text-primary' : (e.schoolClosed ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-700')">
+                    {{ e.type === 'COURS' ? 'Cours' : (e.schoolClosed ? 'Fermé' : 'Congé') }}
                   </span>
                 </div>
-                <h4 class="text-sm font-bold text-midnight">{{ event.label }}</h4>
-                <p class="text-[11px] text-text-tertiary mt-0.5">{{ event.description }}</p>
+                <h4 class="text-sm font-bold text-midnight">{{ e.label }}</h4>
               </div>
             </div>
-
             <div class="hidden md:block md:w-[45%]"></div>
           </div>
         </div>
 
-        <!-- État vide -->
-        <div *ngIf="timelineEvents().length === 0" class="flex flex-col items-center justify-center py-16 gap-3">
+        <div *ngIf="timelineEntries().length === 0" class="flex flex-col items-center justify-center py-16 gap-3">
           <lucide-icon [name]="Calendar" [size]="32" class="text-text-tertiary opacity-40"></lucide-icon>
-          <p class="text-sm text-text-tertiary">Aucune période ni congé planifié.</p>
-          <p class="text-xs text-text-tertiary opacity-70">Ajoutez des périodes et des congés dans les onglets correspondants.</p>
+          <p class="text-sm text-text-tertiary">Calendrier vide.</p>
+          <p class="text-xs text-text-tertiary opacity-70">Ajoutez des entrées depuis l'onglet "Calendrier".</p>
         </div>
       </div>
     </div>
 
-    <!-- ONGLET 2 : PÉRIODES -->
-    <div *ngIf="activeTabId() === 'periods'" class="space-y-4">
+    <!-- ONGLET 2 : CALENDRIER (liste CRUD) -->
+    <div *ngIf="activeTabId() === 'calendar'" class="space-y-4">
       <div class="flex justify-between items-center px-1">
         <div class="section-header-minimal">
           <lucide-icon [name]="Layers" [size]="14" class="text-primary"></lucide-icon>
-          <span class="label">
-            Périodes d'évaluation
-            <span class="text-text-tertiary font-normal text-[11px] ml-1">
-              ({{ y.systemType === 'TRIMESTER' ? 'trimestriel' : y.systemType === 'SEMESTER' ? 'semestriel' : 'annuel' }})
-            </span>
-          </span>
+          <span class="label">Entrées du calendrier</span>
+          <span class="text-[10px] text-text-tertiary font-normal ml-2">{{ entries().length }} entrée(s)</span>
         </div>
         <app-fw-button
           *fwHasPermission="'academic:year:write'"
-          (click)="openPeriodForm()"
+          (click)="openEntryForm()"
           [disabled]="y.status === 'ARCHIVED'"
           variant="primary" size="sm" [icon]="Plus"
         >Ajouter</app-fw-button>
       </div>
       <div class="list-container-integrated">
         <app-data-list
-          [data]="displayPeriods()"
-          [total]="displayPeriods().length"
-          [actions]="periodActions"
+          [data]="displayEntries()"
+          [total]="displayEntries().length"
+          [actions]="entryActions"
           defaultView="table"
-          (onAction)="handlePeriodAction($event)"
-        ></app-data-list>
-      </div>
-    </div>
-
-    <!-- ONGLET 3 : CONGÉS -->
-    <div *ngIf="activeTabId() === 'holidays'" class="space-y-4">
-      <div class="flex justify-between items-center px-1">
-        <div class="section-header-minimal">
-          <lucide-icon [name]="CalendarOff" [size]="14" class="text-primary"></lucide-icon>
-          <span class="label">Congés & Vacances</span>
-        </div>
-        <app-fw-button
-          *fwHasPermission="'academic:year:write'"
-          (click)="openHolidayForm()"
-          [disabled]="y.status === 'ARCHIVED'"
-          variant="primary" size="sm" [icon]="Plus"
-        >Ajouter</app-fw-button>
-      </div>
-      <div *ngIf="holidays().length > 0" class="px-1 text-[11px] text-text-tertiary">
-        {{ closedHolidaysCount() }} fermeture(s) complète sur {{ holidays().length }} congé(s)
-      </div>
-      <div class="list-container-integrated">
-        <app-data-list
-          [data]="displayHolidays()"
-          [total]="displayHolidays().length"
-          [actions]="holidayActions"
-          defaultView="table"
-          (onAction)="handleHolidayAction($event)"
+          (onAction)="handleEntryAction($event)"
         ></app-data-list>
       </div>
     </div>

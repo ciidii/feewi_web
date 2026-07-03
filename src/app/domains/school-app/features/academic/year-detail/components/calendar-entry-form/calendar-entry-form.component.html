@@ -1,0 +1,81 @@
+<app-fw-form-shell
+  [title]="isEditMode ? 'Modifier l\'entrée' : 'Nouvelle entrée de calendrier'"
+  [subtitle]="year().label"
+  [icon]="form.get('type')?.value === 'COURS' ? Layers : CalendarOff"
+  [saveLabel]="isEditMode ? 'Mettre à jour' : 'Ajouter'"
+  [isLoading]="isLoading()"
+  [canSave]="form.valid"
+  (save)="onSave()"
+  (cancel)="onCancel()"
+>
+  <form [formGroup]="form" class="space-y-5 py-2">
+
+    <!-- Type -->
+    <div class="fw-field">
+      <label class="fw-label">Type</label>
+      <div class="flex gap-3">
+        <label class="flex-1 flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors"
+               [class.border-primary]="form.get('type')?.value === 'COURS'"
+               [class.bg-primary/5]="form.get('type')?.value === 'COURS'"
+               [class.border-border]="form.get('type')?.value !== 'COURS'">
+          <input type="radio" formControlName="type" value="COURS" class="sr-only"/>
+          <lucide-icon [name]="Layers" [size]="16" class="text-primary shrink-0"></lucide-icon>
+          <div>
+            <p class="text-xs font-semibold text-text-primary">Période de cours</p>
+            <p class="text-[10px] text-text-tertiary">Trimestre, semestre...</p>
+          </div>
+        </label>
+        <label class="flex-1 flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors"
+               [class.border-amber-500]="form.get('type')?.value === 'CONGE'"
+               [class.bg-amber-50]="form.get('type')?.value === 'CONGE'"
+               [class.border-border]="form.get('type')?.value !== 'CONGE'">
+          <input type="radio" formControlName="type" value="CONGE" class="sr-only"/>
+          <lucide-icon [name]="CalendarOff" [size]="16" class="text-amber-500 shrink-0"></lucide-icon>
+          <div>
+            <p class="text-xs font-semibold text-text-primary">Congé / Vacances</p>
+            <p class="text-[10px] text-text-tertiary">Tabaski, Noël, Korité...</p>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Libellé -->
+    <div class="fw-field">
+      <label class="fw-label">Libellé</label>
+      <div class="fw-input-wrapper">
+        <input type="text" formControlName="label"
+               [placeholder]="isConge ? 'ex: Vacances de Noël, Tabaski...' : 'ex: 1er Trimestre, 2ème Semestre...'"
+               class="fw-input" [class.error]="isInvalid('label')"/>
+      </div>
+      <span *ngIf="isInvalid('label')" class="fw-error">Libellé requis.</span>
+    </div>
+
+    <!-- Dates -->
+    <div class="grid grid-cols-2 gap-4">
+      <div class="fw-field">
+        <label class="fw-label">Du</label>
+        <div class="fw-input-wrapper">
+          <input type="date" formControlName="startDate" class="fw-input" [class.error]="isInvalid('startDate')"/>
+        </div>
+      </div>
+      <div class="fw-field">
+        <label class="fw-label">Au</label>
+        <div class="fw-input-wrapper">
+          <input type="date" formControlName="endDate" class="fw-input" [class.error]="isInvalid('endDate')"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fermé ? (uniquement pour CONGE) -->
+    <div *ngIf="isConge" class="fw-field">
+      <label class="flex items-center gap-3 cursor-pointer">
+        <input type="checkbox" formControlName="schoolClosed" class="w-4 h-4 accent-amber-500 rounded"/>
+        <div>
+          <p class="text-sm font-medium text-text-primary">Établissement complètement fermé</p>
+          <p class="text-[11px] text-text-tertiary">Aucune activité pendant cette période</p>
+        </div>
+      </label>
+    </div>
+
+  </form>
+</app-fw-form-shell>
