@@ -32,6 +32,7 @@ import {FwPageShellComponent} from '../../../../../shared/components/page-shell/
 import {FwTab} from '../../../../../shared/components/tabs/tabs.component';
 import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.component';
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
+import {FwInfoCardComponent} from '../../../../../shared/components/info-card/info-card.component';
 import {BlockLoaderComponent} from '../../../../../shared/components/loader/block-loader.component';
 import {AuthService} from '../../../../../core/services/auth.service';
 import {HasPermissionDirective} from '../../../../../shared/directives/has-permission.directive';
@@ -42,7 +43,7 @@ import {HasPermissionDirective} from '../../../../../shared/directives/has-permi
   imports: [
     CommonModule, LucideAngularModule, RouterModule, MatDialogModule,
     DataListComponent, FwPageShellComponent, FwBadgeComponent,
-    FwButtonComponent, BlockLoaderComponent, HasPermissionDirective
+    FwButtonComponent, FwInfoCardComponent, BlockLoaderComponent, HasPermissionDirective
   ],
   templateUrl: './year-detail.component.html',
   styleUrls: ['./year-detail.component.scss'],

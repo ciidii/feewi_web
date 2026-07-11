@@ -7,10 +7,10 @@
 }
 
 .list-page-content {
-  padding: 1.5rem;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--fw-space-sm);
 }
 
 .list-container-integrated {
@@ -22,30 +22,5 @@
   box-shadow: var(--fw-shadow-sm);
 }
 
-// Styles pour le trigger de filtre
-.more-filters-trigger {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 32px;
-  padding: 0 12px;
-  background: white;
-  border: 1px solid var(--fw-border);
-  border-radius: var(--fw-radius-md);
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--fw-text-secondary);
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &:hover {
-    background: var(--fw-surface-sunken);
-    border-color: var(--fw-border-hover);
-  }
-
-  &.has-active {
-    background: var(--fw-primary-alpha);
-    border-color: var(--fw-primary);
-    color: var(--fw-primary);
-  }
-}
+// .more-filters-trigger est désormais défini globalement dans list-command-bar.component.scss
+// (composant à travers lequel ce bouton est toujours projeté via [quick-filters]).

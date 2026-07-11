@@ -74,7 +74,9 @@
   color: var(--fw-text-tertiary);
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background var(--fw-transition-fast), color var(--fw-transition-fast),
+              box-shadow var(--fw-transition-fast), width var(--fw-transition),
+              padding var(--fw-transition), margin var(--fw-transition);
   outline: none;
   position: relative;
 
@@ -142,15 +144,29 @@
     }
   }
 
-  .logout-btn {
+  .notif-btn {
+    position: relative;
     width: 32px; height: 32px; border-radius: 8px; border: none; background: transparent;
     color: var(--fw-text-tertiary); cursor: pointer; display: grid; place-items: center;
     transition: all 0.2s;
-    &:hover { background: var(--fw-error-bg); color: var(--fw-error); }
+    &:hover { background: white; color: var(--fw-primary); box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+
+    .notification-pulse {
+      position: absolute; top: 4px; right: 4px; width: 6px; height: 6px;
+      background: var(--fw-primary); border-radius: 50%;
+      box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4);
+      animation: pulse-blue 2s infinite;
+    }
   }
 }
 
-/* ├ëTAT EXPANS├ë LOGIQUE */
+@keyframes pulse-blue {
+  0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); }
+  70% { box-shadow: 0 0 0 6px rgba(37, 99, 235, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+}
+
+/* ÉTAT EXPANSÉ LOGIQUE */
 .feewi-app-rail.is-expanded {
   .rail-link {
     height: 40px; padding: 0 12px; margin: 0 4px; border-radius: 10px; gap: 12px; justify-content: flex-start;
@@ -158,20 +174,20 @@
   }
 }
 
-/* ├ëTAT R├ëTRACT├ë LOGIQUE */
+/* ÉTAT RÉTRACTÉ LOGIQUE */
 .feewi-app-rail:not(.is-expanded) {
   .rail-link { width: 40px; height: 40px; margin: 0 auto; border-radius: 12px; justify-content: center; padding: 0; .rail-label { display: none; } }
-  .user-session-box { 
-    align-items: center; 
+  .user-session-box {
+    align-items: center;
     gap: 0.5rem;
-    .logout-btn { display: grid; } /* Assurer l'affichage */
+    .notif-btn { display: grid; } /* Assurer l'affichage */
   }
 }
 
 /* TOOLTIPS */
 .feewi-app-rail:not(.is-expanded) .rail-link:hover::after,
 .feewi-app-rail:not(.is-expanded) .profile-trigger:hover::after,
-.feewi-app-rail:not(.is-expanded) .logout-btn:hover::after {
+.feewi-app-rail:not(.is-expanded) .notif-btn:hover::after {
   content: attr(data-label);
   position: fixed; left: 60px; background: #0f172a; color: white;
   border-radius: 6px; padding: 6px 12px; font-size: 11px; font-weight: 700;

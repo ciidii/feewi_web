@@ -6,7 +6,12 @@
   (cancel)="cancel()"
 >
   <form [formGroup]="form" class="space-y-10">
-    
+
+    <div *ngIf="isArchived()" class="p-4 rounded-xl bg-slate-100 border border-slate-200 text-sm text-slate-600 flex items-center gap-3">
+      <lucide-icon [name]="ShieldAlert" class="w-5 h-5 shrink-0 text-slate-400"></lucide-icon>
+      Ce dossier est archivé et ne peut plus être modifié depuis ce formulaire.
+    </div>
+
     <!-- ÉTAT ADMINISTRATIF -->
     <div class="space-y-6">
       <div class="flex items-center gap-3 pb-2 border-b border-slate-100">

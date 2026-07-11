@@ -119,6 +119,7 @@ export class EnrollmentAdminService {
     levelId?: string,
     academicYearId?: string,
     channel?: 'DIGITAL' | 'DIRECT',
+    incompleteOnly?: boolean,
     page?: number,
     size?: number
   } = {}): Observable<AdmissionPageResponse> {
@@ -128,6 +129,7 @@ export class EnrollmentAdminService {
     if (params.levelId) httpParams = httpParams.set('levelId', params.levelId);
     if (params.academicYearId) httpParams = httpParams.set('academicYearId', params.academicYearId);
     if (params.channel) httpParams = httpParams.set('channel', params.channel);
+    if (params.incompleteOnly) httpParams = httpParams.set('incompleteOnly', 'true');
     if (params.page !== undefined) httpParams = httpParams.set('page', params.page.toString());
     if (params.size !== undefined) httpParams = httpParams.set('size', params.size.toString());
 
@@ -157,6 +159,13 @@ export class EnrollmentAdminService {
   cancelAdmission(admissionId: string): Observable<void> {
     return this.http.post<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.CANCEL(admissionId)), null, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors de l\'annulation'))
+    );
+  }
+
+  /** Confirmer le paiement (garde-fou minimal, précondition à la validation) */
+  confirmPayment(admissionId: string): Observable<void> {
+    return this.http.patch<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.CONFIRM_PAYMENT(admissionId)), {}, { headers: this.getHeaders() }).pipe(
+      catchError(this.handleError('Erreur lors de la confirmation du paiement'))
     );
   }
 

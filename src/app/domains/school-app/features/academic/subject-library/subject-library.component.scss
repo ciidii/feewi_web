@@ -7,10 +7,10 @@
 }
 
 .list-page-content {
-  padding: 1.5rem;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--fw-space-sm);
 }
 
 .list-container-integrated {

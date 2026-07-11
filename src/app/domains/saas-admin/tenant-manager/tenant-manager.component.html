@@ -1,11 +1,10 @@
-<div class="space-y-6 animate-in fade-in duration-500">
-  <!-- Page Header Épuré -->
-  <header class="flex justify-between items-center">
-    <div>
-      <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Gestion des Établissements</h1>
-      <p class="text-sm text-slate-500 font-medium">Supervisez les écoles et les domaines du réseau Feewi.</p>
-    </div>
-
+<app-fw-page-shell
+  title="Gestion des Établissements"
+  description="Supervisez les écoles et les domaines du réseau Feewi."
+  [icon]="Building2"
+  density="compact"
+>
+  <div actions>
     <button
       *fwHasPermission="'identity:saas:school:create'"
       routerLink="/saas/tenants/new"
@@ -14,7 +13,7 @@
       <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon>
       Nouvel Établissement
     </button>
-  </header>
+  </div>
 
   <!-- Table Component -->
   <app-data-list
@@ -31,4 +30,4 @@
     (onPageChange)="onPageChange($event)"
     (onAction)="handleAction($event)"
   ></app-data-list>
-</div>
+</app-fw-page-shell>

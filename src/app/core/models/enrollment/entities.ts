@@ -103,6 +103,11 @@ export interface Admission {
   primaryGuardian?: Guardian;
   extraPillars?: Record<string, { customFields: Record<string, any> }>;
 
+  /** Garde-fou paiement minimal (depuis le 2026-07-11) : précondition à validate() */
+  paymentConfirmed?: boolean;
+  paymentConfirmedBy?: string;
+  paymentConfirmedAt?: string;
+
   createdAt: string;
   updatedAt: string;
   submittedAt?: string;

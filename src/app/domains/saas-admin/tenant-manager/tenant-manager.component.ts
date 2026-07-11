@@ -1,13 +1,14 @@
 import {Component, computed, inject, LOCALE_ID, OnInit, signal} from '@angular/core';
 import {CommonModule, formatDate} from '@angular/common';
 import {Router, RouterModule} from '@angular/router';
-import {Globe, LucideAngularModule, Plus, RefreshCw, Settings, ShieldCheck, Trash2, Search} from 'lucide-angular';
+import {Building2, Globe, LucideAngularModule, Plus, RefreshCw, Settings, ShieldCheck, Trash2, Search} from 'lucide-angular';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {RowAction, TableRow, TabItem} from '../../../shared/models/data-list.models';
 import {DataListComponent} from '../../../shared/components/data-list/data-list.component';
 import {SchoolService} from '../../../core/services/school.service';
 import {School} from '../../../core/models/school.model';
 import {HasPermissionDirective} from '../../../shared/directives/has-permission.directive';
+import {FwPageShellComponent} from '../../../shared/components/page-shell/page-shell.component';
 
 @Component({
   selector: 'app-tenant-manager',
@@ -18,7 +19,8 @@ import {HasPermissionDirective} from '../../../shared/directives/has-permission.
     MatDialogModule,
     DataListComponent,
     RouterModule,
-    HasPermissionDirective
+    HasPermissionDirective,
+    FwPageShellComponent
   ],
   templateUrl: './tenant-manager.component.html',
   styleUrls: ['./tenant-manager.component.scss']
@@ -29,6 +31,7 @@ export class TenantManagerComponent implements OnInit {
   private locale = inject(LOCALE_ID);
 
   // Icônes
+  readonly Building2 = Building2;
   readonly Globe = Globe;
   readonly Plus = Plus;
   readonly RefreshCw = RefreshCw;

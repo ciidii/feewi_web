@@ -1,0 +1,126 @@
+@use '../../../../../../styles/tokens' as *;
+
+:host { display: block; height: 100%; background: var(--fw-ice); }
+
+.list-page-content {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0; // la barre de commande et le tableau forment un seul bloc, sans espace
+}
+
+// La barre de commande perd son élévation propre et son coin inférieur arrondi :
+// elle devient le haut du même bloc que le tableau, avec une seule séparation nette.
+::ng-deep .unified-command-bar {
+  margin-bottom: 0 !important;
+  border-radius: 12px 12px 0 0 !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+
+.list-container-integrated {
+  flex: 1;
+  overflow: hidden;
+  background: white;
+  border-radius: 0 0 12px 12px;
+  border: 1px solid var(--fw-border-subtle);
+  border-top: 1px solid var(--fw-border-subtle);
+  box-shadow: var(--fw-shadow-sm);
+
+  ::ng-deep {
+    tr { background-color: white !important; transition: all 0.15s ease-out !important; }
+    tr:hover:not(.is-selected) { background-color: #f0f7ff !important; cursor: pointer; }
+    tr.is-selected { background-color: #e6f0ff !important; border-left: 4px solid var(--fw-primary) !important; position: relative; }
+    .table-checkbox, .row-checkbox { transform: scale(0.9); opacity: 1 !important; }
+    tr:not(.is-selected) .row-checkbox { opacity: 0.6 !important; }
+    tr:hover .row-checkbox, tr.is-selected .row-checkbox { opacity: 1 !important; }
+  }
+}
+
+/* --- ACADEMIC DRAWER (PRO-CLEAN DESIGN) --- */
+.academic-drawer-overlay {
+  position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); z-index: 1000;
+}
+
+.academic-drawer {
+  position: fixed; top: 0; right: 0; width: 340px; height: 100vh; background: white; z-index: 1001;
+  box-shadow: -20px 0 60px rgba(0, 0, 0, 0.15);
+  display: flex; flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  border-left: 1px solid var(--fw-border);
+
+  &.is-open { transform: translateX(0); }
+
+  .drawer-header {
+    padding: 1.5rem; border-bottom: 1px solid var(--fw-surface-sunken);
+    display: flex; justify-content: space-between; align-items: center;
+
+    .header-content {
+      display: flex; align-items: center; gap: 1rem;
+      .icon-indicator { width: 36px; height: 36px; border-radius: 10px; background: var(--fw-primary-alpha); color: var(--fw-primary); display: grid; place-items: center; }
+      .title-wrap {
+        h3 { font-size: 0.9375rem; font-weight: 900; color: var(--fw-midnight); margin: 0; line-height: 1.1; }
+        p { font-size: 11px; color: var(--fw-text-tertiary); font-weight: 500; margin: 2px 0 0 0; }
+      }
+    }
+
+    .close-btn {
+      background: var(--fw-surface-sunken); border: none; padding: 6px; border-radius: 8px; cursor: pointer; color: var(--fw-text-tertiary);
+      &:hover { color: var(--fw-midnight); background: var(--fw-border-subtle); }
+    }
+  }
+
+  .drawer-body {
+    padding: 1.5rem; flex: 1; overflow-y: auto;
+    &::-webkit-scrollbar { width: 4px; }
+    &::-webkit-scrollbar-thumb { background: var(--fw-surface-sunken); border-radius: 10px; }
+  }
+
+  .filter-section-block {
+    .block-label { display: block; font-size: 0.6875rem; font-weight: 850; color: var(--fw-text-tertiary); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; }
+
+    .date-range-academic {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;
+      .date-field {
+        span { display: block; font-size: 10px; font-weight: 750; color: var(--fw-text-secondary); margin-bottom: 4px; text-transform: uppercase; }
+        input { width: 100%; height: 36px; background: var(--fw-surface-sunken); border: 1.5px solid transparent; border-radius: 8px; padding: 0 0.75rem; font-size: 0.8125rem; font-weight: 600; outline: none; }
+      }
+    }
+
+    .fields-stack {
+      display: flex; flex-direction: column; gap: 1rem;
+      .academic-field-group {
+        label { display: block; font-size: 10px; font-weight: 750; color: var(--fw-text-secondary); margin-bottom: 4px; text-transform: uppercase; }
+        select { width: 100%; height: 36px; background: var(--fw-surface-sunken); border: 1.5px solid transparent; border-radius: 8px; padding: 0 0.75rem; font-size: 0.8125rem; font-weight: 600; outline: none; }
+      }
+    }
+
+    .provenance-grid {
+      display: grid; grid-template-columns: 1fr; gap: 0.625rem;
+      .prov-option {
+        display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1rem; background: var(--fw-surface-sunken); border-radius: 10px; border: 2px solid transparent; width: 100%; text-align: left; cursor: pointer; transition: all 0.2s;
+        lucide-icon { color: var(--fw-text-tertiary); }
+        span { font-size: 0.8125rem; font-weight: 700; color: var(--fw-text-secondary); }
+        &.active { background: white; border-color: var(--fw-primary); box-shadow: var(--fw-shadow-sm); span { color: var(--fw-primary); } lucide-icon { color: var(--fw-primary); } }
+        &:hover:not(.active) { background: var(--fw-border-subtle); }
+      }
+    }
+  }
+
+  .drawer-footer-premium {
+    padding: 1.5rem; border-top: 1px solid var(--fw-surface-sunken);
+    display: flex; flex-direction: column; gap: 1rem;
+    background: #fafbfc;
+
+    .btn-reset-link {
+      font-size: 10px; font-weight: 850; color: var(--fw-text-tertiary); background: transparent; border: none;
+      cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; align-self: center;
+      &:hover { color: var(--fw-error); text-decoration: underline; }
+    }
+
+    app-fw-button { width: 100%; }
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }

@@ -14,7 +14,7 @@ import {
   Printer,
   Table
 } from 'lucide-angular';
-import {RowAction, TableRow} from '../../../../models/data-list.models';
+import {RowAction, TableRow, TabItem} from '../../../../models/data-list.models';
 import {FwDatePipe} from '../../../../pipes/fw-date.pipe';
 import {SkeletonComponent} from '../../../../components/skeleton/skeleton.component';
 import {FwButtonComponent} from '../../../../components/button/button.component';
@@ -65,9 +65,18 @@ export class TableViewComponent {
   /** Actions filtrées (PBAC) */
   filteredActions = input<RowAction[]>([]);
 
+  /** Onglets de filtrage rattachés à l'en-tête du tableau (et non à la page) */
+  tabs = input<TabItem[]>([]);
+
+  /** Onglet actif */
+  activeTab = input<string>('Tous');
+
   // ===========================================
   // OUTPUTS
   // ===========================================
+
+  /** Changement d'onglet */
+  onTabChange = output<string>();
 
   /** Basculer la sélection d'une ligne */
   toggleRow = output<string | number>();

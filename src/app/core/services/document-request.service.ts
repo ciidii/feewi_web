@@ -58,4 +58,12 @@ export class DocumentRequestService {
       catchError(this.handleError('Erreur lors du refus'))
     );
   }
+
+  /** Marque le document comme remis au demandeur (READY → DELIVERED) */
+  deliver(id: string): Observable<DocumentRequest> {
+    return this.http.patch<DocumentRequest>(`${this.baseUrl}/${id}/deliver`, {}).pipe(
+      tap(() => this.notificationService.success('Document marqué comme remis')),
+      catchError(this.handleError('Erreur lors de la remise du document'))
+    );
+  }
 }

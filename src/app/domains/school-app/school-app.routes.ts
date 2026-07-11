@@ -7,6 +7,11 @@ export const SCHOOL_APP_ROUTES: Routes = [
     loadComponent: () => import('./features/dashboard/home/home.component').then(m => m.HomeComponent)
   },
   {
+    path: 'account/profile',
+    title: 'Mon profil',
+    loadComponent: () => import('./features/account/my-profile/my-profile.component').then(m => m.MyProfileComponent)
+  },
+  {
     // Ancienne route maquette (valeurs codées en dur) — redirige vers le vrai tableau de bord d'admissions.
     path: 'dashboard',
     redirectTo: 'enrollment',
@@ -23,17 +28,17 @@ export const SCHOOL_APP_ROUTES: Routes = [
         path: '',
         title: 'Tableau de Bord Admissions',
         data: {permissions: ['enrollment:dashboard:view']},
-        loadComponent: () => import('./features/enrollment/enrollment-dashboard/admission-dashboard.component').then(m => m.AdmissionDashboardComponent)
+        loadComponent: () => import('./features/enrollment/enrollment-dashboard/enrollment-dashboard.component').then(m => m.EnrollmentDashboardComponent)
       },
       {
         path: 'list',
         title: 'Liste des Admissions',
-        loadComponent: () => import('./features/enrollment/enrollment-list/admission-list.component').then(m => m.AdmissionsComponent)
+        loadComponent: () => import('./features/enrollment/enrollment-list/enrollment-list.component').then(m => m.EnrollmentListComponent)
       },
       {
         path: 'direct',
         title: 'Saisie Guichet',
-        loadComponent: () => import('./features/enrollment/enrollment-direct-entry/admission-direct-entry.component').then(m => m.AdmissionDirectEntryComponent)
+        loadComponent: () => import('./features/enrollment/enrollment-direct-entry/enrollment-direct-entry.component').then(m => m.EnrollmentDirectEntryComponent)
       },
       {
         path: 're-enrollment',
@@ -48,7 +53,7 @@ export const SCHOOL_APP_ROUTES: Routes = [
       {
         path: ':id',
         title: 'Dossier d’Admission',
-        loadComponent: () => import('./features/enrollment/enrollment-detail/admission-detail.component').then(m => m.AdmissionDetailComponent)
+        loadComponent: () => import('./features/enrollment/enrollment-detail/enrollment-detail.component').then(m => m.EnrollmentDetailComponent)
       }
     ]
   },

@@ -18,7 +18,6 @@ import {
   History,
   Layers,
   LayoutGrid,
-  LogOut,
   LucideAngularModule,
   Maximize,
   Minimize,
@@ -62,7 +61,6 @@ export class SidebarComponent {
   readonly Moon = Moon;
   readonly Maximize = Maximize;
   readonly Minimize = Minimize;
-  readonly Globe = Globe;
 
   // --- 1. ENROLLMENT SERVICE ---
   enrollmentItems = [
@@ -74,8 +72,8 @@ export class SidebarComponent {
 
   // --- 2. STUDENT REGISTRY ---
   registryItems = [
-    { label: 'Liste des élèves', icon: Users, route: '/admin/registry/students', permission: 'academic:assignment:read' },
-    { label: 'Dossiers scolaires', icon: FileText, route: '/admin/registry/students/records', permission: 'academic:assignment:read' },
+    { label: 'Liste des élèves', icon: Users, route: '/admin/registry/students', queryParams: null, permission: 'academic:assignment:read' },
+    { label: 'Dossiers scolaires', icon: FileText, route: '/admin/registry/students', queryParams: { status: 'LEFT' }, permission: 'academic:assignment:read' },
   ];
 
   // --- 3. ACADEMIC STRUCTURE ---
@@ -126,6 +124,5 @@ export class SidebarComponent {
   }
 
   protected readonly User = User;
-  protected readonly LogOut = LogOut;
   protected readonly LayoutGrid = LayoutGrid;
 }

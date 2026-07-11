@@ -27,20 +27,21 @@ app-rail, app-sidebar {
 
 .shell-main {
   flex: 1;
-  overflow-y: auto;
+  overflow: hidden;
   position: relative;
   display: flex;
   flex-direction: column;
   min-width: 0;
-  background-color: var(--fw-raw-white); /* Zone de travail */
-  padding: 16px;
+  background-color: transparent; /* Zone de travail libre */
+  padding: 0;
 
   .content-wrapper {
     flex: 1;
-    max-width: 1600px;
     width: 100%;
-    margin: 0 auto;
+    height: 100%;
     contain: layout;
+    display: flex;
+    flex-direction: column;
   }
 }
 

@@ -32,6 +32,7 @@ import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-d
 import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
 import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.component';
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
+import {FwInfoCardComponent} from '../../../../../shared/components/info-card/info-card.component';
 import {CamelToLabelPipe} from '../../../../../shared/pipes/camel-to-label.pipe';
 import {PageProgressComponent} from '../../../../../shared/components/loader/page-progress.component';
 import {BlockLoaderComponent} from '../../../../../shared/components/loader/block-loader.component';
@@ -48,6 +49,7 @@ import {FwDatePipe} from '../../../../../shared/pipes/fw-date.pipe';
     FwPageShellComponent,
     FwBadgeComponent,
     FwButtonComponent,
+    FwInfoCardComponent,
     CamelToLabelPipe,
     BlockLoaderComponent,
     FwDatePipe

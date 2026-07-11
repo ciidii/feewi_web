@@ -31,6 +31,7 @@ import {
   combineLatest,
   filter,
   finalize,
+  firstValueFrom,
   forkJoin,
   map,
   of,
@@ -61,6 +62,7 @@ import {FwListCommandBarComponent} from '../../../../../shared/components/list-c
 import {BlockLoaderComponent} from '../../../../../shared/components/loader/block-loader.component';
 import {AuthService} from '../../../../../core/services/auth.service';
 import {HasPermissionDirective} from '../../../../../shared/directives/has-permission.directive';
+import {ConfirmDialogComponent, ConfirmDialogData} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 
 @Component({
   selector: 'app-class-detail',
@@ -88,6 +90,7 @@ export class ClassDetailComponent {
   private academicService = inject(AcademicService);
   private identityService = inject(IdentityService);
   private authService = inject(AuthService);
+  private dialog = inject(MatDialog);
   private navState = inject(NavigationStateService);
   private notificationService = inject(NotificationService);
   protected loadingService = inject(LoadingService);
@@ -240,13 +243,43 @@ export class ClassDetailComponent {
     this.searchQuery.set(query);
   }
 
-  handleStudentAction(event: { actionId: string, row: TableRow }) {
+  async handleStudentAction(event: { actionId: string, row: TableRow }) {
     if (event.actionId === 'view') {
       const assignment = event.row.rawData as StudentAssignment;
       this.router.navigate(['/admin/registry/students', assignment.studentId]);
     } else if (event.actionId === 'remove') {
-      this.notificationService.info("Désaffectation bientôt disponible.");
+      await this.removeStudentAssignment(event.row.rawData as StudentAssignment);
     }
+  }
+
+  private async removeStudentAssignment(assignment: StudentAssignment) {
+    const confirmed = await this.confirmAction(
+      'Retirer l\'élève de la classe',
+      `${assignment.studentFirstName} ${assignment.studentLastName} sera remis(e) en liste d'attente d'affectation.`,
+      'Retirer',
+      'warning'
+    );
+    if (!confirmed) return;
+
+    this.isActionLoading.set(true);
+    try {
+      await firstValueFrom(this.academicService.unassignStudent(assignment.id));
+      this.notificationService.success('Élève retiré de la classe.');
+      this.refresh();
+    } catch (error: any) {
+      if (error?.status === 403 && typeof error?.error?.message === 'string' && error.error.message.includes('verrouill')) {
+        this.notificationService.error('Les affectations de ce niveau sont verrouillées par la Direction.');
+      } else {
+        this.notificationService.error('Échec du retrait.');
+      }
+    } finally {
+      this.isActionLoading.set(false);
+    }
+  }
+
+  private confirmAction(title: string, message: string, confirmLabel: string, type: ConfirmDialogData['type']): Promise<boolean> {
+    const ref = this.dialog.open(ConfirmDialogComponent, {width: '420px', data: {title, message, confirmLabel, type}});
+    return new Promise(resolve => ref.afterClosed().subscribe(res => resolve(!!res)));
   }
 
   handleTeamAction(event: { actionId: string, row: TableRow }) {

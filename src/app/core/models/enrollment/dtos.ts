@@ -83,6 +83,8 @@ export interface ReEnrollRequest {
 export interface ReEnrollEligibilityResponse {
   eligible: boolean;
   reason?: string;
+  /** Code machine stable (depuis le 2026-07-11), en complément additif de `reason` */
+  reasonCode?: 'STUDENT_NOT_FOUND' | 'STUDENT_ARCHIVED' | 'STUDENT_LEFT' | 'STUDENT_SUSPENDED' | 'STUDENT_STATUS_OTHER' | 'ALREADY_HAS_ACTIVE_REENROLLMENT';
 }
 
 // --- REQUESTS ADMIN ---

@@ -56,6 +56,7 @@ import {FiliereFormComponent} from '../components/filiere-form/filiere-form.comp
 import {ClassFormComponent} from '../components/class-form/class-form.component';
 import {ConfirmDialogComponent} from '../../../../../../shared/components/confirm-dialog/confirm-dialog';
 import {FwButtonComponent} from '../../../../../../shared/components/button/button.component';
+import {FwInfoCardComponent} from '../../../../../../shared/components/info-card/info-card.component';
 import {FwEmptyStateComponent} from '../../../../../../shared/components/empty-state/empty-state.component';
 import {FwPageShellComponent} from '../../../../../../shared/components/page-shell/page-shell.component';
 import {FwTab} from '../../../../../../shared/components/tabs/tabs.component';
@@ -78,6 +79,7 @@ export interface LevelGroup {
     DataListComponent,
     MatDialogModule,
     FwButtonComponent,
+    FwInfoCardComponent,
     FwEmptyStateComponent,
     FwPageShellComponent,
     FwListCommandBarComponent,

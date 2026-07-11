@@ -29,6 +29,7 @@ import {Staff, User as UserAccount} from '../../../../../core/models/user.model'
 import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
 import {FwBadgeComponent} from '../../../../../shared/components/badge/badge.component';
+import {FwInfoCardComponent} from '../../../../../shared/components/info-card/info-card.component';
 import {HasPermissionDirective} from '../../../../../shared/directives/has-permission.directive';
 import {firstValueFrom} from 'rxjs';
 import {SkeletonComponent} from '../../../../../shared/components/skeleton/skeleton.component';
@@ -45,6 +46,7 @@ import {AccountFormComponent} from '../user-accounts/components/account-form/acc
     FwPageShellComponent,
     FwButtonComponent,
     FwBadgeComponent,
+    FwInfoCardComponent,
     HasPermissionDirective,
     SkeletonComponent
   ],

@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Aperçu statique — Admissions (stratégie appliquée)</title>
+<style>
+  :root{
+    --fw-midnight:#0f172a;
+    --fw-primary:#2563eb;
+    --fw-primary-alpha:rgba(37,99,235,0.1);
+    --fw-surface-page:#f8fafc;
+    --fw-surface-card:#ffffff;
+    --fw-surface-sunken:#f1f5f9;
+    --fw-border:#e2e8f0;
+    --fw-border-subtle:#e2e8f0;
+    --fw-text-primary:#0f172a;
+    --fw-text-secondary:#475569;
+    --fw-text-tertiary:#94a3b8;
+    --fw-success:#10b981; --fw-success-bg:#f0fdf4; --fw-success-border:#a7f3d0;
+    --fw-warning:#f59e0b; --fw-warning-bg:#fffbeb; --fw-warning-border:#fde68a;
+    --fw-error:#ef4444; --fw-error-bg:#fef2f2; --fw-error-border:#fecaca;
+    --fw-info:#3b82f6; --fw-info-bg:#eff6ff; --fw-info-border:#bfdbfe;
+    --fw-neutral:#64748b; --fw-neutral-bg:#f8fafc; --fw-neutral-border:#e2e8f0;
+    --fw-rail-width:64px;
+    --fw-sidebar-width:260px;
+    --fw-shadow-sm:0 1px 2px rgba(15,23,42,0.05);
+    --fw-shadow-md:0 4px 6px -1px rgba(15,23,42,0.07), 0 2px 4px -1px rgba(15,23,42,0.04);
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; margin:0; }
+  body{
+    font-family:var(--font);
+    color:var(--fw-text-primary);
+    background:var(--fw-surface-page);
+    -webkit-font-smoothing:antialiased;
+  }
+  .icon{ display:inline-block; vertical-align:middle; }
+  svg{ display:block; }
+
+  /* ============ LAYOUT ============ */
+  .shell{ display:flex; flex-direction:row; height:100vh; width:100vw; overflow:hidden; }
+
+  /* ---- RAIL ---- */
+  .rail{
+    width:var(--fw-rail-width);
+    height:100%;
+    background:var(--fw-surface-sunken);
+    display:flex;
+    flex-direction:column;
+    flex-shrink:0;
+  }
+  .rail-header{ height:64px; display:flex; align-items:center; justify-content:center; }
+  .rail-logo{
+    width:36px; height:36px; border-radius:10px; background:var(--fw-midnight);
+    display:grid; place-items:center; color:#fff;
+  }
+  .rail-items{ flex:1; padding:1rem 0.5rem; display:flex; flex-direction:column; gap:0.5rem; }
+  .rail-link{
+    width:40px; height:40px; margin:0 auto; border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--fw-text-tertiary); cursor:pointer;
+  }
+  .rail-link.active{ background:#fff; color:var(--fw-primary); box-shadow:0 2px 8px rgba(0,0,0,0.04); }
+  .rail-footer{ padding:0.5rem; display:flex; flex-direction:column; gap:0.5rem; align-items:center; border-top:1px solid rgba(0,0,0,0.03); }
+  .rail-avatar{
+    width:32px; height:32px; border-radius:8px; background:var(--fw-midnight); color:#fff;
+    display:grid; place-items:center; font-size:11px; font-weight:800; cursor:pointer;
+  }
+  .rail-bell{
+    width:32px; height:32px; border-radius:8px; display:grid; place-items:center;
+    color:var(--fw-text-tertiary); position:relative; cursor:pointer;
+  }
+  .rail-bell .dot{
+    position:absolute; top:5px; right:5px; width:6px; height:6px; border-radius:50%;
+    background:var(--fw-primary); box-shadow:0 0 0 2px var(--fw-surface-sunken);
+  }
+  .rail-settings{ width:36px; height:36px; border-radius:10px; display:grid; place-items:center; color:var(--fw-text-tertiary); cursor:pointer; margin-top:2px; }
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{ width:var(--fw-sidebar-width); height:100%; background:#fff; border-right:1px solid var(--fw-border); flex-shrink:0; padding:1.25rem 0.75rem; overflow-y:auto; }
+  .sidebar-title{ font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:var(--fw-text-tertiary); padding:0 0.5rem; margin-bottom:0.5rem; }
+  .sidebar-link{
+    display:flex; align-items:center; gap:0.75rem; height:40px; padding:0 0.75rem; border-radius:10px;
+    color:var(--fw-text-secondary); font-size:13px; font-weight:600; cursor:pointer; margin-bottom:2px;
+  }
+  .sidebar-link.active{ background:var(--fw-primary-alpha); color:var(--fw-primary); font-weight:750; }
+  .sidebar-link:not(.active):hover{ background:var(--fw-surface-sunken); }
+
+  /* ---- PAGE ---- */
+  .page{ flex:1; min-width:0; height:100%; overflow-y:auto; background:var(--fw-surface-page); }
+  .page-inner{ max-width:1600px; margin:0 auto; padding:1.5rem; display:flex; flex-direction:column; gap:0.5rem; }
+
+  /* Header de page : fond + élévation (décision "présence/hiérarchie claire") */
+  .page-header-area{ background:var(--fw-surface-card); box-shadow:var(--fw-shadow-md); border-radius:14px; margin:-1.5rem -1.5rem 0.5rem; }
+  .page-header{ height:72px; display:flex; align-items:center; gap:1.5rem; padding:0 1.5rem; }
+  .page-header-main{ display:flex; align-items:center; gap:1rem; flex-shrink:0; }
+  .page-icon{ width:36px; height:36px; border-radius:8px; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.06); color:var(--fw-primary); display:grid; place-items:center; }
+  .page-titles h1{ margin:0; font-size:1.125rem; font-weight:850; letter-spacing:-0.01em; color:var(--fw-midnight); }
+  .page-titles p{ margin:2px 0 0; font-size:12px; font-weight:500; color:var(--fw-text-tertiary); }
+  .page-search{ flex:1; display:flex; justify-content:center; min-width:0; }
+  .page-search-box{ position:relative; width:100%; max-width:440px; display:flex; align-items:center; }
+  .page-search-box .icon{ position:absolute; left:12px; color:var(--fw-text-tertiary); }
+  .page-search-box input{
+    width:100%; height:34px; background:rgba(0,0,0,0.03); border:1px solid transparent; border-radius:8px;
+    padding:0 12px 0 34px; font-size:12.5px; font-weight:500; font-family:var(--font); outline:none;
+  }
+  .page-actions{ display:flex; align-items:center; gap:0.5rem; flex-shrink:0; }
+
+  /* Carte unique : recherche, filtres+onglets et tableau — aucun espace entre eux */
+  .list-card{ background:#fff; border:1px solid var(--fw-border-subtle); border-radius:12px; box-shadow:0 4px 20px -4px rgba(0,0,0,0.08); overflow:hidden; }
+  .command-row{ display:flex; align-items:center; justify-content:space-between; padding:0.75rem 1.25rem; gap:1.5rem; }
+  .command-row.primary{ border-bottom:1px solid var(--fw-surface-sunken); }
+  .command-row.filters{ background:#fafbfc; padding:0.5rem 1.25rem; }
+  .search-box{ flex:1; max-width:440px; display:flex; align-items:center; gap:0.75rem; background:var(--fw-surface-sunken); border-radius:8px; padding:0 1rem; height:36px; }
+  .search-box input{ flex:1; background:transparent; border:none; outline:none; font-size:12.5px; font-weight:600; color:var(--fw-midnight); font-family:var(--font); }
+  .search-box .icon{ color:var(--fw-text-tertiary); }
+  .btn{
+    display:inline-flex; align-items:center; gap:6px; height:32px; padding:0 12px; border-radius:8px;
+    font-size:11.5px; font-weight:750; cursor:pointer; border:1px solid transparent; white-space:nowrap;
+  }
+  .btn-tertiary{ background:transparent; color:var(--fw-text-secondary); border-color:var(--fw-border); }
+  .btn-primary{ background:var(--fw-midnight); color:#fff; }
+  .btn-icon{ width:32px; height:32px; padding:0; justify-content:center; }
+  .divider-v{ width:1px; height:20px; background:var(--fw-border); }
+  .pill{
+    display:inline-flex; align-items:center; gap:6px; height:32px; padding:0 12px; border-radius:8px;
+    font-size:11px; font-weight:700; color:var(--fw-text-secondary); background:#fff; border:1px solid var(--fw-border); cursor:pointer;
+  }
+  .pill.active{ background:var(--fw-error-bg); color:var(--fw-error); border-color:var(--fw-error-border); }
+  .results-text{ font-size:11px; color:var(--fw-text-tertiary); }
+  .results-text b{ color:var(--fw-midnight); font-weight:850; }
+  .page-size{ font-size:10px; font-weight:850; color:var(--fw-text-secondary); border:1.5px solid var(--fw-border); border-radius:6px; padding:3px 6px; background:transparent; }
+  .chips-row{ padding:0.5rem 1.25rem; background:#fff; border-top:1px solid var(--fw-surface-sunken); display:flex; align-items:center; gap:0.5rem; }
+  .chip{ display:flex; align-items:center; gap:6px; padding:3px 8px; background:var(--fw-surface-sunken); border-radius:6px; font-size:10px; }
+  .chip .label{ font-weight:800; color:var(--fw-text-tertiary); text-transform:uppercase; }
+  .chip .val{ font-weight:750; color:var(--fw-midnight); }
+
+  /* Table — thead/tbody unifiés (fond identique, correctif §3.2 / §5.5) */
+  .table-tabs-inline{ display:flex; align-items:center; gap:4px; }
+  .table-tab{ display:flex; align-items:center; gap:6px; height:32px; padding:0 12px; border-radius:8px; border:none; background:transparent; color:var(--fw-text-secondary); font-size:12px; font-weight:700; cursor:pointer; font-family:var(--font); }
+  .table-tab:hover{ background:var(--fw-surface-sunken); }
+  .table-tab.active{ background:var(--fw-primary-alpha); color:var(--fw-primary); }
+  .table-tab-count{ font-size:10px; font-weight:800; background:rgba(0,0,0,0.06); padding:1px 6px; border-radius:99px; }
+  .table-tab.active .table-tab-count{ background:rgba(255,255,255,0.7); }
+  table{ width:100%; border-collapse:separate; border-spacing:0; table-layout:fixed; }
+  thead{ background:#ffffff; } /* AVANT (bug) : rgba(248,250,252,0.3) — quasi la couleur du fond de page */
+  thead th{ padding:10px 12px; text-align:left; font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:var(--fw-text-tertiary); border:none; }
+  thead th.col-actions{ text-align:right; }
+  tbody tr{ background:#fff; border-bottom:1px solid var(--fw-surface-sunken); }
+  tbody tr:last-child{ border-bottom:none; }
+  tbody tr:hover{ background:var(--fw-surface-sunken); }
+  tbody td{ padding:10px 12px; font-size:13px; vertical-align:middle; }
+  .row-main{ display:flex; align-items:center; gap:10px; }
+  .avatar{ width:30px; height:30px; border-radius:9px; background:var(--fw-surface-sunken); display:grid; place-items:center; font-size:10px; font-weight:800; color:var(--fw-text-tertiary); flex-shrink:0; }
+  .row-title{ font-size:13px; font-weight:700; color:var(--fw-midnight); }
+  .row-sub{ font-size:12px; font-weight:500; color:var(--fw-text-secondary); }
+  .badge{ display:inline-flex; align-items:center; height:20px; padding:0 8px; border-radius:99px; font-size:10px; font-weight:800; border:1px solid transparent; }
+  .row-date{ font-size:10px; font-weight:700; text-transform:uppercase; color:var(--fw-text-tertiary); }
+  .row-actions{ display:flex; justify-content:flex-end; gap:4px; }
+  .row-actions .btn-icon{ background:transparent; border-color:transparent; color:var(--fw-text-tertiary); }
+  .table-footer{ display:flex; align-items:center; justify-content:space-between; padding:10px 16px; border-top:1px solid var(--fw-surface-sunken); }
+  .pager{ display:flex; align-items:center; gap:6px; }
+  .pager button{ width:26px; height:26px; border-radius:6px; border:1px solid var(--fw-border); background:#fff; font-size:11px; font-weight:700; color:var(--fw-text-secondary); cursor:pointer; }
+  .pager button.active{ background:var(--fw-midnight); color:#fff; border-color:var(--fw-midnight); }
+
+  .banner{
+    background:var(--fw-info-bg); border:1px dashed var(--fw-info-border); color:var(--fw-info);
+    font-size:11px; font-weight:700; padding:8px 14px; border-radius:8px; margin:0 0 0.5rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ============ RAIL ============ -->
+  <nav class="rail">
+    <div class="rail-header"><div class="rail-logo">F</div></div>
+    <div class="rail-items">
+      <div class="rail-link"><svg class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></div>
+      <div class="rail-link active"><svg class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+      <div class="rail-link"><svg class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+      <div class="rail-link"><svg class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9z"/></svg></div>
+      <div class="rail-link"><svg class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+      <div class="rail-link"><svg class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div>
+    </div>
+    <div class="rail-footer">
+      <div class="rail-bell"><svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="dot"></span></div>
+      <div class="rail-avatar">JP</div>
+      <div class="rail-settings"><svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+    </div>
+  </nav>
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="sidebar-title">Inscriptions</div>
+    <div class="sidebar-link"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Tableau de bord</div>
+    <div class="sidebar-link active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg> Liste des dossiers</div>
+    <div class="sidebar-link"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg> Réinscription</div>
+    <div class="sidebar-link"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20z"/></svg> Paramètres Portail</div>
+  </aside>
+
+  <!-- ============ PAGE ============ -->
+  <main class="page">
+    <div class="page-inner">
+
+      <div class="banner">Aperçu statique v3 — Télécharger/Actualiser rejoignent la ligne de "Supprimer la sélection" ; les onglets de statut rejoignent la ligne "Avancé" ; recherche, filtres/onglets et tableau forment désormais une seule carte sans espace. Aucune donnée réelle, aucune dépendance Angular.</div>
+
+      <!-- Header de page (élevé, cf. décision précédente) -->
+      <div class="page-header-area">
+        <div class="page-header">
+          <div class="page-header-main">
+            <div class="page-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+            </div>
+            <div class="page-titles">
+              <h1>Admissions</h1>
+              <p>48 dossiers enregistrés</p>
+            </div>
+          </div>
+
+          <div class="page-search">
+            <div class="page-search-box">
+              <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              <input type="text" placeholder="Rechercher élève, dossier, staff...">
+            </div>
+          </div>
+
+          <div class="page-actions">
+            <button class="btn btn-primary"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg> Nouveau Dossier</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Carte unique : recherche, filtres+onglets et tableau ne font plus qu'un seul bloc,
+           sans espace entre eux (retour utilisateur sur capture d'écran). -->
+      <div class="list-card">
+        <div class="command-row primary">
+          <div class="search-box">
+            <svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="text" placeholder="Rechercher un candidat...">
+          </div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <button class="btn btn-tertiary btn-icon" title="Exporter"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+            <button class="btn btn-tertiary btn-icon" title="Actualiser"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+            <div class="divider-v" style="height:20px;"></div>
+            <button class="btn btn-tertiary" style="color:var(--fw-error); border-color:var(--fw-error-border);">Supprimer la sélection</button>
+          </div>
+        </div>
+
+        <!-- Filtres orthogonaux (Dossier incomplet, Avancé) ET onglets de statut du tableau :
+             une seule ligne, comme demandé — les deux mécanismes restent conceptuellement
+             distincts (filtres = axes combinables, onglets = statut exclusif) mais partagent
+             désormais le même espace visuel plutôt que deux lignes empilées. -->
+        <div class="command-row filters">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button class="pill active">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/></svg>
+              Dossier incomplet
+            </button>
+            <button class="pill">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+              Avancé
+            </button>
+            <div class="divider-v" style="height:20px;"></div>
+            <div class="table-tabs-inline" role="tablist">
+              <button class="table-tab"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg> Tous <span class="table-tab-count">48</span></button>
+              <button class="table-tab active"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> À Vérifier <span class="table-tab-count">14</span></button>
+              <button class="table-tab"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> À Évaluer <span class="table-tab-count">9</span></button>
+              <button class="table-tab"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg> En Décision <span class="table-tab-count">6</span></button>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:1rem;">
+            <span class="results-text"><b>14</b> résultats</span>
+            <select class="page-size"><option>20 / page</option></select>
+          </div>
+        </div>
+
+        <div class="chips-row">
+          <div class="chip"><span class="label">Dossier incomplet :</span><span class="val">Oui</span></div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th style="width:36px;"><input type="checkbox"></th>
+              <th style="width:26%;">Élément</th>
+              <th>Détails</th>
+              <th style="width:14%;">Statut</th>
+              <th style="width:14%;">Dernière MAJ</th>
+              <th class="col-actions" style="width:110px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td><div class="row-main"><div class="avatar">LM</div><span class="row-title">Léa Martin</span></div></td>
+              <td><span class="row-sub">CM2 · Dossier #4821</span></td>
+              <td><span class="badge" style="background:var(--fw-info-bg); color:var(--fw-info); border-color:var(--fw-info-border);">À vérifier</span></td>
+              <td><span class="row-date">Il y a 2h</span></td>
+              <td><div class="row-actions">
+                <button class="btn btn-icon" title="Voir le dossier"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                <button class="btn btn-icon" title="Approuver" style="color:var(--fw-success);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></button>
+              </div></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td><div class="row-main"><div class="avatar">TN</div><span class="row-title">Thomas N'Guessan</span></div></td>
+              <td><span class="row-sub">6ème · Dossier #4822</span></td>
+              <td><span class="badge" style="background:var(--fw-warning-bg); color:var(--fw-warning); border-color:var(--fw-warning-border);">Incomplet</span></td>
+              <td><span class="row-date">Il y a 5h</span></td>
+              <td><div class="row-actions">
+                <button class="btn btn-icon" title="Voir le dossier"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                <button class="btn btn-icon" title="Approuver" style="color:var(--fw-success);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></button>
+              </div></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td><div class="row-main"><div class="avatar">SK</div><span class="row-title">Sofia Kaboré</span></div></td>
+              <td><span class="row-sub">CP · Dossier #4823</span></td>
+              <td><span class="badge" style="background:var(--fw-info-bg); color:var(--fw-info); border-color:var(--fw-info-border);">À vérifier</span></td>
+              <td><span class="row-date">Hier</span></td>
+              <td><div class="row-actions">
+                <button class="btn btn-icon" title="Voir le dossier"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                <button class="btn btn-icon" title="Approuver" style="color:var(--fw-success);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></button>
+              </div></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td><div class="row-main"><div class="avatar">RB</div><span class="row-title">Rayan Belkacem</span></div></td>
+              <td><span class="row-sub">3ème · Dossier #4824</span></td>
+              <td><span class="badge" style="background:var(--fw-neutral-bg); color:var(--fw-neutral); border-color:var(--fw-neutral-border);">Brouillon</span></td>
+              <td><span class="row-date">Il y a 3 jours</span></td>
+              <td><div class="row-actions">
+                <button class="btn btn-icon" title="Voir le dossier"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                <button class="btn btn-icon" title="Approuver" style="color:var(--fw-success);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></button>
+              </div></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="table-footer">
+          <span class="results-text">Page <b>1</b> sur 4</span>
+          <div class="pager">
+            <button>‹</button>
+            <button class="active">1</button>
+            <button>2</button>
+            <button>3</button>
+            <button>4</button>
+            <button>›</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+</div>
+</body>
+</html>

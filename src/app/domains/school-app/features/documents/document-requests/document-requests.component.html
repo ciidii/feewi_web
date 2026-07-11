@@ -122,4 +122,33 @@
       <p class="text-sm text-text-tertiary">Aucune demande en attente de validation.</p>
     </div>
   </div>
+
+  <!-- VUE REMISE : DOCUMENTS PRÊTS -->
+  <div class="requests-list" *ngIf="activeTab() === 'ready'">
+    <div *ngFor="let req of readyRequests()" class="request-card">
+      <div class="request-info">
+        <span class="font-bold text-midnight">{{ studentLabel(req.studentId) }}</span>
+        <span class="text-xs text-slate-400">{{ documentTypeLabels[req.documentType] }} · demandé par {{ req.requestedBy }}</span>
+      </div>
+      <app-fw-badge [status]="req.status"></app-fw-badge>
+      <div class="request-actions">
+        <app-fw-button
+          variant="secondary"
+          size="sm"
+          [icon]="Download"
+          [disabled]="!req.fileId"
+          [title]="!req.fileId ? 'Aucun fichier associé à cette demande' : ''"
+          (click)="downloadDocument(req)"
+        >
+          Télécharger
+        </app-fw-button>
+        <app-fw-button variant="primary" size="sm" [icon]="CheckCircle" (click)="deliverRequest(req)">Marquer comme remis</app-fw-button>
+      </div>
+    </div>
+
+    <div *ngIf="readyRequests().length === 0" class="empty-state">
+      <lucide-icon [name]="CheckCircle" [size]="40" class="mx-auto text-slate-200 mb-4"></lucide-icon>
+      <p class="text-sm text-text-tertiary">Aucun document prêt à remettre.</p>
+    </div>
+  </div>
 </app-fw-page-shell>

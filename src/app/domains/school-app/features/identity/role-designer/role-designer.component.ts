@@ -48,7 +48,8 @@ export interface PermissionResourceRow {
   read?: PermissionAction;
   write?: PermissionAction;
   delete?: PermissionAction;
-  special?: PermissionAction;
+  /** Actions non-CRUD (validate, supervise, manage...) — plusieurs possibles par ressource. */
+  specials?: PermissionAction[];
 }
 
 export interface PermissionDomainGroup {
@@ -101,6 +102,7 @@ export class RoleDesignerComponent implements OnInit {
     'class': 'Classes Physiques',
     'teaching': 'Affectation Enseignants',
     'assignment': 'Affectation Élèves',
+    'roster': 'Roster de Classe',
     'exam': 'Examens & Notes',
     'attendance': 'Présences (Appel)',
     'admission': 'Gestion des Candidatures',
@@ -124,7 +126,9 @@ export class RoleDesignerComponent implements OnInit {
     'verify': 'Vérifier',
     'assess': 'Évaluer',
     'decide': 'Décider',
-    'cancel': 'Annuler'
+    'cancel': 'Annuler',
+    'confirm-payment': 'Confirmer paiement',
+    'deliver': 'Remettre'
   };
 
   // États
@@ -256,7 +260,8 @@ export class RoleDesignerComponent implements OnInit {
       } else if (['delete', 'remove', 'cancel'].includes(action)) {
         row.delete = actionObj;
       } else {
-        if (!row.special) row.special = actionObj;
+        if (!row.specials) row.specials = [];
+        row.specials.push(actionObj);
       }
     });
 
@@ -362,7 +367,7 @@ export class RoleDesignerComponent implements OnInit {
           read: updateAction(res.read),
           write: updateAction(res.write),
           delete: updateAction(res.delete),
-          special: updateAction(res.special)
+          specials: res.specials?.map(act => updateAction(act)!)
         };
       })
     }));
@@ -383,7 +388,7 @@ export class RoleDesignerComponent implements OnInit {
           read: updateAction(res.read),
           write: updateAction(res.write),
           delete: updateAction(res.delete),
-          special: updateAction(res.special)
+          specials: res.specials?.map(act => updateAction(act) as PermissionAction)
         };
       })
     }));
@@ -402,7 +407,7 @@ export class RoleDesignerComponent implements OnInit {
     this.isSaving.set(true);
 
     const allActions = this.permissionGroups().flatMap(g =>
-      g.resources.flatMap(r => [r.read, r.write, r.delete, r.special].filter(Boolean) as PermissionAction[])
+      g.resources.flatMap(r => [r.read, r.write, r.delete, ...(r.specials || [])].filter(Boolean) as PermissionAction[])
     );
     const grantedIds = allActions.filter(a => a.granted).map(a => a.id);
 

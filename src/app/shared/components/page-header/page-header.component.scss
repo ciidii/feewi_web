@@ -4,11 +4,12 @@
 }
 
 .page-header {
-  height: 96px; 
+  height: 96px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 2rem;
+  gap: 1.5rem;
+  padding: 0 var(--fw-page-padding-x, 2rem); /* Hérite de l'alignement horizontal global */
   background: transparent;
   border: none;
   font-family: var(--fw-font-sans);
@@ -16,8 +17,8 @@
 
   &.compact {
     height: 72px;
-    background: white;
-    border-bottom: 1px solid var(--fw-border-subtle);
+    background: transparent; /* Fond délégué au conteneur de la shell */
+    border-bottom: none;       /* Bordure déléguée au conteneur de la shell */
     .icon-container { width: 36px; height: 36px; border-radius: 8px; }
     .page-title { font-size: 1.125rem; }
     .page-desc { display: none; }
@@ -29,6 +30,37 @@
   display: flex;
   align-items: center;
   gap: 1.25rem;
+  flex-shrink: 0;
+}
+
+// --- OMNISEARCH ---
+.header-search {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+
+  .search-input-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 440px;
+    display: flex;
+    align-items: center;
+
+    .search-icon { position: absolute; left: 12px; color: var(--fw-text-tertiary); pointer-events: none; }
+    .fw-search-input {
+      width: 100%; height: 34px;
+      background: rgba(0,0,0,0.03);
+      border: 1px solid transparent;
+      border-radius: 8px;
+      padding: 0 45px 0 34px;
+      font-size: 12.5px;
+      font-weight: 500;
+      transition: all 0.2s;
+      &:focus { background: white; border-color: var(--fw-primary); box-shadow: 0 0 0 3px var(--fw-primary-alpha); outline: none; }
+    }
+    .search-kbd { position: absolute; right: 8px; display: flex; gap: 2px; kbd { min-width: 18px; height: 18px; background: white; border: 1px solid var(--fw-border); border-radius: 4px; font-size: 10px; font-weight: 700; color: var(--fw-text-tertiary); display: grid; place-items: center; } }
+  }
 }
 
 .btn-back {
@@ -91,6 +123,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  flex-shrink: 0;
 }
 
 @keyframes fade {
@@ -104,11 +137,11 @@
 
 @media (max-width: 768px) {
   .page-header { 
-    padding: 1.5rem; 
+    padding: var(--fw-space-md) var(--fw-page-padding-x, 1rem); 
     height: auto; 
     flex-direction: column; 
     align-items: flex-start; 
-    gap: 1rem; 
+    gap: var(--fw-space-sm); 
   }
   .header-actions { width: 100%; justify-content: flex-end; }
 }

@@ -148,11 +148,14 @@
                         <div *ngIf="!res.delete" class="dot-spacer"></div>
                       </div>
 
-                      <div class="flex justify-center">
-                        <div *ngIf="res.special" class="toggle-wrap" [class.is-disabled]="isReadOnly()" (click)="!isReadOnly() && onPermissionToggle(res.special.id, !res.special.granted)">
-                          <button role="switch" class="fw-toggle-switch sm variant-accent" [class.on]="res.special.granted" [disabled]="isReadOnly()"><div class="track"><div class="thumb"></div></div></button>
+                      <div class="flex flex-col items-center justify-center gap-1.5">
+                        <div *ngFor="let sp of res.specials" class="flex flex-col items-center">
+                          <div class="toggle-wrap" [class.is-disabled]="isReadOnly()" (click)="!isReadOnly() && onPermissionToggle(sp.id, !sp.granted)">
+                            <button role="switch" class="fw-toggle-switch sm variant-accent" [class.on]="sp.granted" [disabled]="isReadOnly()"><div class="track"><div class="thumb"></div></div></button>
+                          </div>
+                          <span *ngIf="res.specials!.length > 1" class="text-[8px] text-slate-400 uppercase tracking-wide mt-0.5">{{ sp.label }}</span>
                         </div>
-                        <div *ngIf="!res.special" class="dot-spacer"></div>
+                        <div *ngIf="!res.specials?.length" class="dot-spacer"></div>
                       </div>                    </div>
                   </div>
                 </div>

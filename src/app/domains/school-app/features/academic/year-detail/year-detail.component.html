@@ -8,6 +8,7 @@
   [activeTabId]="activeTabId()"
   (tabChange)="activeTabId.set($event)"
   density="compact"
+  [showSearch]="false"
 >
 
   <!-- ACTIONS -->
@@ -39,7 +40,7 @@
 
       <!-- Cartes résumé -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="fw-standard-card mb-0">
+        <app-fw-info-card [noHeader]="true" [noPadding]="true">
           <div class="p-5 flex items-center gap-4">
             <div class="w-10 h-10 bg-surface-sunken text-text-tertiary rounded-xl flex items-center justify-center">
               <lucide-icon [name]="Calendar" [size]="20"></lucide-icon>
@@ -49,8 +50,8 @@
               <p class="text-sm font-bold text-midnight">{{ getDuration(y) }}</p>
             </div>
           </div>
-        </div>
-        <div class="fw-standard-card mb-0">
+        </app-fw-info-card>
+        <app-fw-info-card [noHeader]="true" [noPadding]="true">
           <div class="p-5 flex items-center gap-4">
             <div class="w-10 h-10 bg-surface-sunken text-text-tertiary rounded-xl flex items-center justify-center">
               <lucide-icon [name]="Layers" [size]="20"></lucide-icon>
@@ -60,8 +61,8 @@
               <p class="text-sm font-bold text-midnight">{{ coursCount() }}</p>
             </div>
           </div>
-        </div>
-        <div class="fw-standard-card mb-0">
+        </app-fw-info-card>
+        <app-fw-info-card [noHeader]="true" [noPadding]="true">
           <div class="p-5 flex items-center gap-4">
             <div class="w-10 h-10 bg-surface-sunken text-text-tertiary rounded-xl flex items-center justify-center">
               <lucide-icon [name]="CalendarOff" [size]="20"></lucide-icon>
@@ -71,11 +72,12 @@
               <p class="text-sm font-bold text-midnight">{{ congeCount() }}</p>
             </div>
           </div>
-        </div>
+        </app-fw-info-card>
       </div>
 
       <!-- Timeline -->
-      <div class="fw-standard-card p-8 md:p-12 relative overflow-hidden min-h-[300px]">
+      <app-fw-info-card [noHeader]="true" [noPadding]="true">
+        <div class="p-8 md:p-12 relative overflow-hidden min-h-[300px]">
         <div class="absolute left-12 md:left-1/2 top-0 bottom-0 w-px bg-border -translate-x-1/2 hidden md:block"></div>
 
         <div *ngIf="timelineEntries().length > 0" class="relative space-y-10">
@@ -112,7 +114,8 @@
           <p class="text-sm text-text-tertiary">Calendrier vide.</p>
           <p class="text-xs text-text-tertiary opacity-70">Ajoutez des entrées depuis l'onglet "Calendrier".</p>
         </div>
-      </div>
+        </div>
+      </app-fw-info-card>
     </div>
 
     <!-- ONGLET 2 : CALENDRIER (liste CRUD) -->

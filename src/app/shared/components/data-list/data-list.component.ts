@@ -76,9 +76,21 @@ export class DataListComponent {
   }
 
   ngOnInit() {
+    // Quand cardMode=false, le sélecteur de vue (qui vit dans la toolbar interne) n'est
+    // jamais affiché sur cette page — l'utilisateur n'a donc aucun moyen d'y voir ni d'y
+    // changer la préférence globale sauvegardée par ailleurs. Dans ce cas, la vue choisie
+    // par la page elle-même (defaultView) doit être la seule source de vérité, sinon une
+    // préférence choisie sur une AUTRE page (ex: vue Cartes) peut rendre une page entière
+    // invisible ici (ex: des onglets qui ne vivent que dans la vue Tableau).
+    if (!this.cardMode()) {
+      this.viewMode.set(this.defaultView());
+      return;
+    }
+
     const savedView = this.viewPreferenceService.getPreferredView()();
 
-    // Priorité :
+    // Priorité (uniquement quand le sélecteur de vue est visible sur cette page, donc que
+    // l'utilisateur peut réellement voir/changer la préférence qu'il a choisie) :
     // 1. Vue sauvegardée par l'utilisateur
     // 2. Vue définie par le développeur (defaultView)
     // 3. Vue par défaut du système (expandable)

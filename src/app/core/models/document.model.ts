@@ -24,6 +24,8 @@ export interface DocumentRequest {
   requestedBy: string;
   status: DocumentRequestStatus;
   rejectionReason?: string;
+  /** Référence au PDF généré (StoredFile.id), renseigné automatiquement à l'approbation */
+  fileId?: string;
   createdAt: string;
   updatedAt?: string;
 }

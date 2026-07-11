@@ -7,11 +7,11 @@
 }
 
 .list-page-content {
-  padding: 1.5rem;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  height: calc(100vh - 84px);
+  gap: var(--fw-space-sm);
+  height: var(--fw-page-body-height);
   overflow: hidden;
 }
 
@@ -71,7 +71,7 @@
   .card-header {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: var(--fw-space-sm);
     margin-bottom: 0.75rem;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid rgba(0, 0, 0, 0.06);

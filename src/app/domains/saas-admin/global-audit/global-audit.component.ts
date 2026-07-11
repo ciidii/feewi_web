@@ -1,23 +1,22 @@
 import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {Activity, Download, Filter, History, LucideAngularModule, Search, ShieldCheck} from 'lucide-angular';
+import {Activity, Download, History, LucideAngularModule, ShieldCheck} from 'lucide-angular';
 import {DataListComponent} from '../../../shared/components/data-list/data-list.component';
 import {TabItem, TableRow} from '../../../shared/models/data-list.models';
 import {SchoolService} from '../../../core/services/school.service';
 import {AuditLog} from '../../../core/models/audit.model';
+import {FwPageShellComponent} from '../../../shared/components/page-shell/page-shell.component';
 
 @Component({
   selector: 'app-global-audit',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, DataListComponent],
+  imports: [CommonModule, LucideAngularModule, DataListComponent, FwPageShellComponent],
   templateUrl: './global-audit.component.html'
 })
 export class GlobalAuditComponent implements OnInit {
   private schoolService = inject(SchoolService);
 
   readonly HistoryIcon = History;
-  readonly Search = Search;
-  readonly Filter = Filter;
   readonly Download = Download;
   readonly ShieldCheck = ShieldCheck;
 

@@ -66,8 +66,6 @@
     <div class="list-container-integrated">
       <app-data-list
         [data]="studentRows()"
-        [tabs]="studentTabs()"
-        [activeTab]="activeTabId()"
         [actions]="studentActions"
         [total]="studentPage()?.totalElements || 0"
         [isLoading]="loadingService.isLoading()"
@@ -75,7 +73,6 @@
         [showFilterButton]="false"
         [cardMode]="false"
         defaultView="cards"
-        (onTabChange)="onTabChange($event)"
         (onAction)="handleAction($event)"
       ></app-data-list>
     </div>

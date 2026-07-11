@@ -3,7 +3,6 @@ import {CommonModule} from '@angular/common';
 import {ActivatedRoute, Router, RouterModule} from '@angular/router';
 import {
   Activity,
-  ArrowLeft,
   Building2,
   Calendar,
   CheckCircle,
@@ -38,11 +37,13 @@ import {finalize} from 'rxjs';
 import {EnrollmentPublicService} from '../../../core/services/enrollment-public.service';
 import {PublicPortalSummary} from '../../../core/models/enrollment/dtos';
 import {HasPermissionDirective} from '../../../shared/directives/has-permission.directive';
+import {FwPageShellComponent} from '../../../shared/components/page-shell/page-shell.component';
+import {FwInfoCardComponent} from '../../../shared/components/info-card/info-card.component';
 
 @Component({
   selector: 'app-tenant-detail',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, RouterModule, MatDialogModule, HasPermissionDirective],
+  imports: [CommonModule, LucideAngularModule, RouterModule, MatDialogModule, HasPermissionDirective, FwPageShellComponent, FwInfoCardComponent],
   templateUrl: './tenant-detail.component.html',
   styleUrls: ['./tenant-detail.component.scss']
 })
@@ -61,7 +62,6 @@ export class TenantDetailComponent implements OnInit {
   isActionLoading = signal(false);
 
   // Icônes
-  readonly ArrowLeft = ArrowLeft;
   readonly Building2 = Building2;
   readonly Mail = Mail;
   readonly Phone = Phone;

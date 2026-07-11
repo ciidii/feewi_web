@@ -38,6 +38,8 @@ export interface EmergencyContact {
 }
 
 export interface StudentResponse extends StudentSummary {
+  birthPlace?: string;
+  nationality?: string;
   bloodGroup?: string;
   criticalAllergies?: string;
   emergencyContact?: EmergencyContact;
@@ -46,6 +48,8 @@ export interface StudentResponse extends StudentSummary {
 }
 
 export interface UpdateStudentRequest {
+  birthPlace?: string;
+  nationality?: string;
   bloodGroup?: string;
   criticalAllergies?: string;
   status?: StudentStatus;

@@ -11,11 +11,12 @@ import {
   Users
 } from 'lucide-angular';
 import {SchoolService} from '../../../core/services/school.service';
+import {FwPageShellComponent} from '../../../shared/components/page-shell/page-shell.component';
 
 @Component({
   selector: 'app-saas-stats',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [CommonModule, LucideAngularModule, FwPageShellComponent],
   templateUrl: './saas-stats.component.html'
 })
 export class SaasStatsComponent implements OnInit {

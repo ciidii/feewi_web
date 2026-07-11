@@ -46,18 +46,21 @@ export class StudentEditFormComponent implements OnInit {
     status: ['', Validators.required],
     bloodGroup: [''],
     criticalAllergies: [''],
-    // On pourrait dynamiser les customFields selon une config,
-    // ici on simplifie en mappant les champs connus.
     nationality: [''],
     birthPlace: ['']
   });
 
+  // 'ARCHIVED' volontairement absent : l'archivage doit passer par le bouton dédié de la
+  // fiche élève (canBeArchived(), LEFT -> ARCHIVED uniquement). Avant BL-STUD-01 (backend),
+  // le sélectionner ici contournait silencieusement ce garde-fou ; depuis, l'appel échoue
+  // (500 sans message exploitable, cf. feewi_web/docs/STUDENT-FRONTEND-BACKLOG.md BL-FE-STUD-01/03).
   statusOptions = [
     { value: 'ACTIVE', label: 'Actif', class: 'text-emerald-600' },
     { value: 'SUSPENDED', label: 'Suspendu', class: 'text-amber-600' },
-    { value: 'LEFT', label: 'Sorti de l\'établissement', class: 'text-rose-600' },
-    { value: 'ARCHIVED', label: 'Archivé (Ancien élève)', class: 'text-slate-600' }
+    { value: 'LEFT', label: 'Sorti de l\'établissement', class: 'text-rose-600' }
   ];
+
+  readonly isArchived = signal(false);
 
   bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
@@ -79,9 +82,19 @@ export class StudentEditFormComponent implements OnInit {
           status: s.status,
           bloodGroup: s.bloodGroup,
           criticalAllergies: s.criticalAllergies,
-          nationality: s.customFields?.['nationality'] || '',
-          birthPlace: s.customFields?.['birth_place'] || ''
+          // Fallback sur l'ancien emplacement (customFields) pour les dossiers déjà écrits
+          // avant BL-FE-STUD-02 — birthPlace/nationality sont désormais de vrais champs.
+          nationality: s.nationality || s.customFields?.['nationality'] || '',
+          birthPlace: s.birthPlace || s.customFields?.['birth_place'] || ''
         });
+
+        this.isArchived.set(s.status === 'ARCHIVED');
+        if (s.status === 'ARCHIVED') {
+          this.form.disable();
+          this.notificationService.info(
+            'Ce dossier est archivé et ne peut plus être modifié. Utilisez la fiche élève pour le consulter.'
+          );
+        }
       },
       error: () => this.notificationService.error('Impossible de charger les données de l\'élève.')
     });
@@ -97,11 +110,8 @@ export class StudentEditFormComponent implements OnInit {
       status: val.status as StudentStatus,
       bloodGroup: val.bloodGroup,
       criticalAllergies: val.criticalAllergies,
-      customFields: {
-        ...this.student()?.customFields,
-        nationality: val.nationality,
-        birth_place: val.birthPlace
-      }
+      nationality: val.nationality,
+      birthPlace: val.birthPlace
     };
 
     this.studentService.updateStudent(this.studentId, request).pipe(

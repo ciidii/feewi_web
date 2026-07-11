@@ -22,15 +22,61 @@
   .avatar-fallback { font-size: 10px; font-weight: 800; color: var(--fw-text-tertiary); }
 }
 
+/* ONGLETS DE FILTRAGE (en-tête du tableau) */
+.table-tabs-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 16px;
+  background: white;
+  border-bottom: 1px solid var(--fw-surface-sunken);
+}
+
+.table-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--fw-text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--fw-transition-fast), color var(--fw-transition-fast);
+
+  &:hover { background: var(--fw-surface-sunken); }
+
+  &.active {
+    background: var(--fw-primary-alpha);
+    color: var(--fw-primary);
+  }
+
+  .table-tab-count {
+    font-size: 10px;
+    font-weight: 800;
+    background: rgba(0, 0, 0, 0.06);
+    padding: 1px 6px;
+    border-radius: 99px;
+  }
+
+  &.active .table-tab-count {
+    background: rgba(255, 255, 255, 0.7);
+  }
+}
+
 /* TABLE STYLES - ZERO BORDERS */
 table {
   border-spacing: 0;
   border-collapse: separate;
 }
 
+/* thead partage exactement le même fond que tbody : plus de "deux boîtes empilées" */
 thead {
-  background: transparent;
-  
+  background: white;
+
   tr th {
     border: none;
     background: transparent;

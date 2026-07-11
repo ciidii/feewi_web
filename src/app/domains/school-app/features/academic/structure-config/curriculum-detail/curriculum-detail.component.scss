@@ -11,7 +11,7 @@
   display: grid;
   grid-template-columns: 1fr 320px;
   gap: 0;
-  height: calc(100vh - 84px);
+  height: var(--fw-page-body-height);
   overflow: hidden;
   transition: all 0.3s ease;
 
@@ -37,36 +37,8 @@
   }
 }
 
-// ── THE MINIMALIST DOSSIER CARD ─────────────────────────────────────────────
-.fw-standard-card {
-  background: white;
-  border-radius: 16px;
-  border: 1px solid var(--fw-border-subtle);
-  box-shadow: var(--fw-shadow-sm);
-  margin-bottom: 2rem;
-  overflow: hidden;
-  transition: all 0.2s ease;
-
-  .card-header {
-    padding: 1.25rem 1.5rem;
-    background: white;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-
-    .header-left { display: flex; align-items: center; gap: 0.75rem; }
-    .header-icon { color: var(--fw-text-tertiary); flex-shrink: 0; }
-
-    .pillar-title-group {
-      h3 { font-family: var(--fw-font-ui); font-size: 0.75rem; font-weight: 700; color: var(--fw-text-primary); margin: 0; text-transform: uppercase; letter-spacing: 0.05em; }
-      p { font-size: 11px; font-weight: 500; color: var(--fw-text-tertiary); margin: 1px 0 0; }
-    }
-  }
-
-  .card-content { padding: 2rem; }
-}
+// La carte "dossier" est désormais fournie par app-fw-info-card (shared/components/info-card).
+app-fw-info-card { display: block; margin-bottom: 2rem; }
 
 // ── SIDEBAR STYLES ─────────────────────────────────────────────────────────
 .conformity-sidebar {

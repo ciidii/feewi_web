@@ -1,12 +1,14 @@
 export type NotificationChannel = 'EMAIL' | 'SMS' | 'IN_APP';
 
-export type NotificationType = 
+export type NotificationType =
   | 'ADMISSION_SUBMITTED'
-  | 'ADMISSION_VALIDATED' 
-  | 'PAYMENT_RECEIVED' 
+  | 'ADMISSION_VALIDATED'
+  | 'ADMISSION_WAITLISTED'
+  | 'PAYMENT_RECEIVED'
 
   | 'PAYMENT_REQUESTED'
   | 'CLASS_ASSIGNED'
+  | 'CLASS_UNASSIGNED'
   | 'GENERAL_INFO'
   | 'URGENT_ALERT';
 

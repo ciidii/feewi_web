@@ -7,6 +7,7 @@
   [activeTabId]="activeTab()"
   (tabChange)="setTab($any($event))"
   density="compact"
+  [showSearch]="false"
 >
   <!-- ACTIONS -->
   <div actions class="flex items-center gap-2" *ngIf="cycle()">
@@ -51,7 +52,7 @@
       (clearAllFilters)="clearAllFilters()"
     >
       <!-- SWITCH DE VUE (Seulement pour pilotage) -->
-      <div extra-filters *ngIf="activeTab() === 'pilotage'" class="flex items-center gap-1 bg-surface-sunken p-1 rounded-lg border border-border-subtle">
+      <div quick-filters *ngIf="activeTab() === 'pilotage'" class="flex items-center gap-1 bg-surface-sunken p-1 rounded-lg border border-border-subtle">
         <button 
           (click)="viewMode.set('tiles')"
           class="w-8 h-8 flex items-center justify-center rounded-md transition-all"
@@ -85,75 +86,70 @@
         
         <!-- MODE TUILES (Groupé par niveaux) -->
         <div *ngIf="viewMode() === 'tiles'" class="space-y-6">
-          <div *ngFor="let group of levelGroups()" class="fw-standard-card">
-            <!-- Header du Niveau -->
-            <header class="card-header">
-              <div class="header-left">
-                <div class="level-rank">{{ group.level.rank }}</div>
-                <div class="pillar-title-group">
-                  <h3>{{ group.level.name }}</h3>
-                  <p>{{ group.classes.length }} classe(s) ouverte(s)</p>
-                </div>
-              </div>
-
-              <div class="flex items-center gap-2">
-                <app-fw-button
-                  variant="tertiary"
-                  size="sm"
-                  [icon]="UserCheck"
-                  [routerLink]="['/admin/academic/assignments']"
-                  [queryParams]="{ levelId: group.level.id }"
-                >
-                  Affecter
-                </app-fw-button>
-
-                <app-fw-button
-                  (click)="openCurriculumManager(group.level)"
-                  variant="tertiary"
-                  size="sm"
-                  [icon]="ListChecks"
-                >
-                  Programme
-                </app-fw-button>
-
-                <app-fw-button
-                  (click)="openEditLevel(group.level)"
-                  variant="ghost"
-                  size="sm"
-                  [icon]="Edit"
-                  [disabled]="!canEditStructure()"
-                  [title]="!canEditStructure() ? 'Permissions insuffisantes pour modifier le niveau' : ''"
-                ></app-fw-button>
-              </div>
-            </header>
-
-            <!-- Grille de Classes -->
-            <div class="card-content">
-              <div class="class-grid">
-                <div *ngFor="let cls of group.classes" (click)="goToClassDetails(cls)" class="class-tile">
-                  <div class="tile-content">
-                    <span class="tile-name">{{ cls.name }}</span>
-                    <span class="tile-meta">{{ cls.capacity }} places disponibles</span>
-                    <div class="tile-indicator">
-                      <div class="dot" [ngClass]="cls.assignedTeachings === cls.totalTeachings ? 'bg-emerald-500' : 'bg-amber-400'"></div>
-                      <span class="label">{{ cls.assignedTeachings || 0 }}/{{ cls.totalTeachings || 0 }} Enseignants</span>
-                    </div>
-                  </div>
-                  <lucide-icon [name]="Users" class="tile-bg-icon"></lucide-icon>
-                </div>
-
-                <button 
-                  (click)="canEditStructure() && openAddClass(group.level)" 
-                  class="add-class-btn"
-                  [class.is-disabled]="!canEditStructure()"
-                  [title]="!canEditStructure() ? 'Permissions insuffisantes pour ouvrir une classe' : ''"
-                >
-                  <lucide-icon [name]="Plus" [size]="20"></lucide-icon>
-                  <span>Ouvrir une classe</span>
-                </button>
+          <app-fw-info-card *ngFor="let group of levelGroups()">
+            <div header-left class="header-left">
+              <div class="level-rank">{{ group.level.rank }}</div>
+              <div class="pillar-title-group">
+                <h3>{{ group.level.name }}</h3>
+                <p>{{ group.classes.length }} classe(s) ouverte(s)</p>
               </div>
             </div>
-          </div>
+
+            <div card-actions class="flex items-center gap-2">
+              <app-fw-button
+                variant="tertiary"
+                size="sm"
+                [icon]="UserCheck"
+                [routerLink]="['/admin/academic/assignments']"
+                [queryParams]="{ levelId: group.level.id }"
+              >
+                Affecter
+              </app-fw-button>
+
+              <app-fw-button
+                (click)="openCurriculumManager(group.level)"
+                variant="tertiary"
+                size="sm"
+                [icon]="ListChecks"
+              >
+                Programme
+              </app-fw-button>
+
+              <app-fw-button
+                (click)="openEditLevel(group.level)"
+                variant="ghost"
+                size="sm"
+                [icon]="Edit"
+                [disabled]="!canEditStructure()"
+                [title]="!canEditStructure() ? 'Permissions insuffisantes pour modifier le niveau' : ''"
+              ></app-fw-button>
+            </div>
+
+            <!-- Grille de Classes -->
+            <div class="class-grid">
+              <div *ngFor="let cls of group.classes" (click)="goToClassDetails(cls)" class="class-tile">
+                <div class="tile-content">
+                  <span class="tile-name">{{ cls.name }}</span>
+                  <span class="tile-meta">{{ cls.capacity }} places disponibles</span>
+                  <div class="tile-indicator">
+                    <div class="dot" [ngClass]="cls.assignedTeachings === cls.totalTeachings ? 'bg-emerald-500' : 'bg-amber-400'"></div>
+                    <span class="label">{{ cls.assignedTeachings || 0 }}/{{ cls.totalTeachings || 0 }} Enseignants</span>
+                  </div>
+                </div>
+                <lucide-icon [name]="Users" class="tile-bg-icon"></lucide-icon>
+              </div>
+
+              <button
+                (click)="canEditStructure() && openAddClass(group.level)"
+                class="add-class-btn"
+                [class.is-disabled]="!canEditStructure()"
+                [title]="!canEditStructure() ? 'Permissions insuffisantes pour ouvrir une classe' : ''"
+              >
+                <lucide-icon [name]="Plus" [size]="20"></lucide-icon>
+                <span>Ouvrir une classe</span>
+              </button>
+            </div>
+          </app-fw-info-card>
         </div>
 
         <!-- MODE TABLEAU (Liste globale des classes) -->

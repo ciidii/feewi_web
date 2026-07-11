@@ -65,11 +65,14 @@
             <p class="text-[11px] text-text-secondary">Si activé, cette matière suit le programme officiel.</p>
           </div>
         </div>
-        <mat-slide-toggle 
-          color="primary" 
-          formControlName="isProvisioned"
-          (click)="$event.stopPropagation()"
-        ></mat-slide-toggle>
+        <button
+          type="button"
+          class="fw-toggle-switch sm"
+          [class.on]="subjectForm.get('isProvisioned')?.value"
+          (click)="$event.stopPropagation(); subjectForm.get('isProvisioned')?.setValue(!subjectForm.get('isProvisioned')?.value)"
+        >
+          <div class="track"><div class="thumb"></div></div>
+        </button>
       </div>
 
     </div>

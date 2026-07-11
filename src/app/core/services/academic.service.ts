@@ -487,4 +487,34 @@ export class AcademicService {
       catchError(this.handleError('Erreur lors du chargement de la supervision des affectations'))
     );
   }
+
+  /**
+   * Verrouille les affectations d'un (année, niveau) — validation formelle de la Direction.
+   * Bloque ensuite assignStudent/unassignStudent pour ce niveau (409→403 côté backend).
+   */
+  validateAssignments(academicYearId: string, levelId: string): Observable<void> {
+    const params = new HttpParams().set('academicYearId', academicYearId).set('levelId', levelId);
+    return this.http.post<void>(`${this.API_URL}/assignments/validate`, {}, { params, headers: this.getHeaders(true) }).pipe(
+      catchError(this.handleError('Erreur lors de la validation des affectations'))
+    );
+  }
+
+  /**
+   * Retire le verrou posé par validateAssignments.
+   */
+  unlockAssignments(academicYearId: string, levelId: string): Observable<void> {
+    const params = new HttpParams().set('academicYearId', academicYearId).set('levelId', levelId);
+    return this.http.delete<void>(`${this.API_URL}/assignments/validate`, { params, headers: this.getHeaders(true) }).pipe(
+      catchError(this.handleError('Erreur lors du déverrouillage des affectations'))
+    );
+  }
+
+  /**
+   * Roster d'une classe pour un enseignant qui y est affecté (permission academic:roster:read).
+   */
+  getRoster(classId: string): Observable<StudentAssignment[]> {
+    return this.http.get<StudentAssignment[]>(`${this.API_URL}/assignments/roster/${classId}`, { headers: this.getHeaders() }).pipe(
+      catchError(this.handleError('Erreur lors du chargement du roster de la classe'))
+    );
+  }
 }
