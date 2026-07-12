@@ -29,6 +29,8 @@ export const API_ENDPOINTS = {
       CONFIRM_ADMITTED: (bundleId: string) => `/public/admissions/bundles/${bundleId}/confirm-admitted`,
       CANCEL_ALL: (bundleId: string) => `/public/admissions/bundles/${bundleId}/cancel-all`,
       CANCEL: (id: string) => `/public/admissions/${id}/cancel`,
+      DELETE_ADMISSION: (id: string) => `/public/admissions/${id}`,
+      DELETE_BUNDLE: (bundleId: string) => `/public/admissions/bundles/${bundleId}`,
     },
     ADMIN: {
       // Configuration

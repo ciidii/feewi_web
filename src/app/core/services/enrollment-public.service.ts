@@ -197,6 +197,22 @@ export class EnrollmentPublicService {
       .pipe(catchError(this.handleError('Erreur lors de l\'annulation')));
   }
 
+  /** Supprime définitivement une admission en brouillon (statut DRAFT uniquement) */
+  deleteAdmission(admissionId: string, accessCode: string): Observable<void> {
+    const params = new HttpParams().set('accessCode', accessCode);
+    return this.http
+      .delete<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.DELETE_ADMISSION(admissionId)), { headers: this.getHeaders(true), params })
+      .pipe(catchError(this.handleError('Erreur lors de la suppression du brouillon')));
+  }
+
+  /** Supprime définitivement un dossier familial en brouillon (tous les enfants doivent être DRAFT) */
+  deleteBundle(bundleId: string, accessCode: string): Observable<void> {
+    const params = new HttpParams().set('accessCode', accessCode);
+    return this.http
+      .delete<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.DELETE_BUNDLE(bundleId)), { headers: this.getHeaders(true), params })
+      .pipe(catchError(this.handleError('Erreur lors de la suppression du dossier')));
+  }
+
   /** Réinscription élève existant */
   reEnroll(request: ReEnrollRequest): Observable<Admission> {
     return this.http

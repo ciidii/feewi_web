@@ -2,6 +2,7 @@ import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ActivatedRoute, Router, RouterModule} from '@angular/router';
 import {FormsModule} from '@angular/forms';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {
   AlertTriangle,
   ArrowLeft,
@@ -21,6 +22,7 @@ import {
   Search,
   ShieldCheck,
   Sparkles,
+  Trash2,
   Users,
   XCircle
 } from 'lucide-angular';
@@ -33,6 +35,7 @@ import {FwBadgeComponent} from '../../../../shared/components/badge/badge.compon
 import {FwPublicHeaderComponent} from '../../../../shared/layout/public-header/public-header.component';
 import {BlockLoaderComponent} from '../../../../shared/components/loader/block-loader.component';
 import {FwDatePipe} from '../../../../shared/pipes/fw-date.pipe';
+import {ConfirmDialogComponent} from '../../../../shared/components/confirm-dialog/confirm-dialog';
 
 type TrackerMode = 'bundle' | 'single' | 'search';
 type SearchTab  = 'code' | 'email';
@@ -40,7 +43,7 @@ type SearchTab  = 'code' | 'email';
 @Component({
   selector: 'app-public-tracker',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule, FormsModule,
+  imports: [CommonModule, RouterModule, LucideAngularModule, FormsModule, MatDialogModule,
     FwButtonComponent, FwBadgeComponent, FwPublicHeaderComponent, BlockLoaderComponent, FwDatePipe],
   templateUrl: './public-tracker.component.html',
   styleUrls: ['./public-tracker.component.scss']
@@ -51,6 +54,7 @@ export class PublicTrackerComponent implements OnInit {
   private router  = inject(Router);
   private enrollment = inject(EnrollmentPublicService);
   private session = inject(AdmissionSessionService);
+  private dialog  = inject(MatDialog);
 
   // ── Mode d'affichage ──────────────────────────────────────────────────────
   mode      = signal<TrackerMode>('search');
@@ -65,6 +69,7 @@ export class PublicTrackerComponent implements OnInit {
   // ── Chargement / erreurs ──────────────────────────────────────────────────
   isLoading      = signal(false);
   isDeciding     = signal(false);
+  isDeletingDraft = signal(false);
   error          = signal<string | null>(null);
 
   // ── Formulaires ───────────────────────────────────────────────────────────
@@ -80,6 +85,18 @@ export class PublicTrackerComponent implements OnInit {
     const app = this.selectedAdmission() ?? this.admission();
     return app?.documents?.some(d => d.mandatory && d.status === 'MISSING') ?? false;
   });
+
+  /** Code d'accès connu pour le dossier actuellement affiché (bundle, recherche par code, ou lien direct) */
+  resolvedAccessCode = computed(() =>
+    this.bundle()?.accessCode
+    ?? this.route.snapshot.queryParamMap.get('accessCode')
+    ?? (this.searchData.accessCode || null)
+  );
+
+  /** Vrai si tous les enfants du bundle sont en brouillon (suppression du dossier familial possible) */
+  canDeleteBundle = computed(() =>
+    this.admissions().length > 0 && this.admissions().every(a => a.status === 'DRAFT')
+  );
 
   ngOnInit() {
     const qp = this.route.snapshot.queryParamMap;
@@ -226,6 +243,69 @@ export class PublicTrackerComponent implements OnInit {
     });
   }
 
+  // ── Suppression de dossiers en brouillon ─────────────────────────────────
+
+  onDeleteAdmission(app: Admission) {
+    const accessCode = this.resolvedAccessCode();
+    if (!accessCode) return;
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Supprimer le brouillon',
+        message: `Le dossier de ${app.identity?.firstName} ${app.identity?.lastName} sera définitivement supprimé. Cette action est irréversible.`,
+        confirmLabel: 'Supprimer définitivement',
+        type: 'destructive'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.isDeletingDraft.set(true);
+      this.enrollment.deleteAdmission(app.id, accessCode).pipe(
+        finalize(() => this.isDeletingDraft.set(false))
+      ).subscribe({
+        next: () => {
+          if (this.mode() === 'bundle') {
+            this.selectedAdmission.set(null);
+            this.reload();
+          } else {
+            this.session.clearSession();
+            this.reset();
+          }
+        }
+      });
+    });
+  }
+
+  onDeleteBundle() {
+    const b = this.bundle();
+    if (!b) return;
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Supprimer tout le dossier',
+        message: 'Le dossier familial et tous les enfants en brouillon seront définitivement supprimés. Cette action est irréversible et vous devrez recommencer une nouvelle demande.',
+        confirmLabel: 'Supprimer définitivement',
+        type: 'destructive'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.isDeletingDraft.set(true);
+      this.enrollment.deleteBundle(b.id, this.bundleAccessCode).pipe(
+        finalize(() => this.isDeletingDraft.set(false))
+      ).subscribe({
+        next: () => {
+          this.session.clearSession();
+          this.reset();
+        }
+      });
+    });
+  }
+
   hasMissingMandatoryDocs(documents: any[] | undefined): boolean {
     if (!documents) return false;
     return documents.some(d => d.mandatory && (d.status === 'MISSING' || d.status === 'REJECTED'));
@@ -257,5 +337,5 @@ export class PublicTrackerComponent implements OnInit {
   readonly LayoutGrid = LayoutGrid; readonly Check = Check;
   readonly Sparkles = Sparkles; readonly XCircle = XCircle;
   readonly AlertTriangle = AlertTriangle; readonly ChevronRight = ChevronRight;
-  readonly Users = Users;
+  readonly Users = Users; readonly Trash2 = Trash2;
 }

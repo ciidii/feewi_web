@@ -98,6 +98,10 @@
         <div class="family-actions">
           <app-fw-button (click)="reload()" [variant]="'ghost'" [size]="'sm'" [icon]="RefreshCw">Actualiser</app-fw-button>
           <app-fw-button (click)="reset()" [variant]="'ghost'" [size]="'sm'" [icon]="Search">Autre dossier</app-fw-button>
+          <app-fw-button *ngIf="canDeleteBundle()" (click)="onDeleteBundle()" [variant]="'danger'" [size]="'sm'"
+                         [icon]="Trash2" [loading]="isDeletingDraft()">
+            Supprimer le dossier
+          </app-fw-button>
         </div>
       </div>
 
@@ -257,11 +261,15 @@
           <span>{{ app.trackerMessage }}</span>
         </div>
 
-        <!-- CTA DRAFT : continuer -->
-        <div *ngIf="app.status === 'DRAFT'" class="mt-6">
+        <!-- CTA DRAFT : continuer ou supprimer -->
+        <div *ngIf="app.status === 'DRAFT'" class="mt-6 flex gap-3 flex-wrap">
           <app-fw-button [variant]="'primary'" [size]="'md'" [icon]="ArrowRight" iconPosition="right"
                          [routerLink]="['/enrollment/form-stepper']">
             Continuer l'inscription
+          </app-fw-button>
+          <app-fw-button *ngIf="resolvedAccessCode()" [variant]="'danger'" [size]="'md'" [icon]="Trash2"
+                         [loading]="isDeletingDraft()" (click)="onDeleteAdmission(app)">
+            Supprimer le brouillon
           </app-fw-button>
         </div>
 
