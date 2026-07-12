@@ -3,9 +3,11 @@ import {CommonModule} from '@angular/common';
 import {finalize, forkJoin, map, of, switchMap} from 'rxjs';
 import {
   Activity,
+  AlertTriangle,
   ArrowLeft,
   ArrowRight,
   BadgeCheck,
+  Ban,
   CheckCircle,
   ChevronLeft,
   ChevronRight,
@@ -181,6 +183,16 @@ export class EnrollmentDetailComponent implements OnInit {
       ['UPLOADED', 'RECEIVED', 'VERIFIED'].includes(d.status)
     );
     return documentsReady && !!app.paymentConfirmed;
+  });
+
+  /**
+   * Alerte purement informative (BL-BILL-01) — ne conditionne JAMAIS la validation finale.
+   * `isReadyForFinalValidation` ci-dessus reste volontairement indépendant de `billingInfo`.
+   */
+  billingAlertMessage = computed(() => {
+    const info = this.application()?.billingInfo;
+    if (!info || info.paid) return null;
+    return 'Frais d\'inscription non soldés selon billing-service.';
   });
 
   ngOnInit() {
@@ -596,6 +608,19 @@ export class EnrollmentDetailComponent implements OnInit {
     return this.servicesConfig().find(s => s.code === serviceCode);
   }
 
+  // --- VERDICT FINAL (Header, états clos) ---
+  decisionStatusIcon(status: string): any {
+    if (status === 'REJECTED') return this.XCircle;
+    if (status === 'CANCELLED') return this.Ban;
+    return this.CheckCircle;
+  }
+
+  decisionStatusLabel(status: string): string {
+    if (status === 'REJECTED') return 'Candidature rejetée';
+    if (status === 'CANCELLED') return 'Dossier annulé';
+    return 'Admission validée';
+  }
+
 
   // --- ICONS ---
   readonly ArrowLeft = ArrowLeft;
@@ -628,6 +653,8 @@ export class EnrollmentDetailComponent implements OnInit {
   readonly Globe = Globe;
   readonly ArrowRight = ArrowRight;
   readonly Activity = Activity;
+  readonly Ban = Ban;
+  readonly AlertTriangle = AlertTriangle;
   protected readonly Info = Info;
   protected readonly Loader2 = Loader2;
   protected readonly Sparkles = Sparkles;

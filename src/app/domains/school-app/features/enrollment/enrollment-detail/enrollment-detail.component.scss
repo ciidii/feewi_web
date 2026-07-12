@@ -22,19 +22,31 @@
   }
 }
 
+// 3 zones explicites en ligne : gauche (largeur fixe) | centre (1fr, workflow centré) |
+// droite (largeur fixe, ancrée à l'extrémité). Grid plutôt que flex + margin-auto : la colonne
+// "droite" hérite d'une largeur intrinsèque et colle systématiquement au bord, quel que soit le
+// contenu du centre — pas d'ambiguïté possible entre flex-grow et marges auto.
 .header-action-hub {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   width: 100%;
   gap: 1.5rem;
   position: relative;
+}
 
-  // 👤 Pillar 1: Student Identity (Left)
+// 👤 ZONE GAUCHE : Identité étudiant + type
+.hub-left {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  min-width: 0;
+
   .header-student-identity {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    flex: 0 0 auto; // Don't grow, don't shrink
+    flex-shrink: 0;
 
     .stu-avatar {
       width: 38px;
@@ -71,32 +83,35 @@
       }
     }
   }
+}
 
-  // 🔄 Pillar 2: Centered Workflow (Middle)
-  .header-workflow-wrap {
-    flex: 1; // Occupy remaining space
-    display: flex;
-    justify-content: center;
-    min-width: 0;
+// 🔄 ZONE CENTRE : Workflow, centré dans la colonne 1fr
+.hub-center {
+  display: flex;
+  justify-content: center;
+  min-width: 0;
 
-    // Internal component spacing
-    ::ng-deep .workflow-steps {
-      gap: 32px !important; // More air as requested
-    }
-
-    ::ng-deep .workflow-line {
-      margin: 0 -20px !important;
-    }
+  ::ng-deep .workflow-steps {
+    gap: 32px !important; // More air as requested
   }
 
-  // 🛠️ Pillar 3: Action Group (Right)
+  ::ng-deep .workflow-line {
+    margin: 0 -20px !important;
+  }
+}
+
+// 🛠️ ZONE DROITE : Actions — colonne grid `auto`, toujours collée au bord droit
+.hub-right {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  justify-self: end;
+  flex-shrink: 0;
+
   .action-buttons-group {
     display: flex;
     align-items: center;
     gap: 8px;
-    flex: 0 0 auto; // Don't grow, don't shrink
-    margin-left: auto; // Ancre le groupe (et la danger-zone qui suit) à l'extrémité droite,
-                        // indépendamment de la largeur prise par le workflow.
   }
 
   .danger-zone {
@@ -104,12 +119,38 @@
     border-left: 1px solid var(--fw-border);
     flex-shrink: 0;
   }
+}
 
+.header-action-hub {
   .divider-v {
     width: 1px;
     height: 24px;
     background: var(--fw-border);
     flex-shrink: 0;
+  }
+
+  // Type de démarche : Admission (neutre) vs Réinscription (accentué)
+  .admission-type-chip {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    height: 24px;
+    padding: 0 10px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    background: var(--fw-surface-sunken);
+    color: var(--fw-text-secondary);
+    border: 1px solid var(--fw-border);
+
+    &.is-re {
+      background: var(--fw-primary-alpha);
+      color: var(--fw-primary);
+      border-color: transparent;
+    }
   }
 
   .payment-status-chip {
@@ -130,6 +171,58 @@
       background: var(--fw-success-bg);
       color: var(--fw-success-text);
       border-color: var(--fw-success-border);
+    }
+  }
+
+  // Alerte informative billing-service (BL-BILL-01) — jamais bloquante, purement visuelle.
+  .billing-alert-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    max-width: 320px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    background: var(--fw-warning-bg);
+    color: var(--fw-warning-text);
+    border: 1px solid var(--fw-warning-border);
+
+    lucide-icon {
+      flex-shrink: 0;
+    }
+  }
+
+  // Verdict final — occupe la zone droite dans les états clos (VALIDATED/REJECTED/CANCELLED)
+  // pour que le hub garde son équilibre 3-colonnes même sans bouton d'action.
+  .decision-status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    background: var(--fw-success-bg);
+    color: var(--fw-success-text);
+    border: 1px solid var(--fw-success-border);
+
+    &.rejected {
+      background: var(--fw-error-bg);
+      color: var(--fw-error-text);
+      border-color: var(--fw-error-border);
+    }
+
+    &.cancelled {
+      background: var(--fw-neutral-bg);
+      color: var(--fw-neutral-text);
+      border-color: var(--fw-neutral-border);
     }
   }
 }

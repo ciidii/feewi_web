@@ -80,6 +80,15 @@ export interface ServiceSubscription {
   optionCode: string;
 }
 
+// --- BILLING (INFORMATIF — jamais bloquant, BL-BILL-01) ---
+// Miroir de `domain.model.BillingInfo` (enrollment-service) : un simple booléen,
+// construit depuis BillingServiceClientPort.isFeePaid() qui n'expose que
+// Optional<Boolean> (pas de montant). null si billing-service indisponible/non consulté.
+
+export interface BillingInfo {
+  paid: boolean;
+}
+
 // --- ADMISSION (ENFANT) ---
 
 export interface Admission {
@@ -107,6 +116,13 @@ export interface Admission {
   paymentConfirmed?: boolean;
   paymentConfirmedBy?: string;
   paymentConfirmedAt?: string;
+
+  /**
+   * Solde billing-service, purement informatif (BL-BILL-01) — null si billing-service
+   * injoignable ou non consulté. Ne doit JAMAIS conditionner la validation finale
+   * (voir isReadyForFinalValidation, qui ne dépend que de paymentConfirmed/documentsReady).
+   */
+  billingInfo?: BillingInfo | null;
 
   createdAt: string;
   updatedAt: string;
