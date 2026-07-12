@@ -1,0 +1,62 @@
+<app-fw-form-shell
+  [title]="'Enregistrer un paiement'"
+  [subtitle]="dialogData.studentName"
+  [icon]="Wallet"
+  saveLabel="Enregistrer le paiement"
+  [isLoading]="isLoading()"
+  [canSave]="paymentForm.valid"
+  (save)="onSave()"
+  (cancel)="onCancel()"
+>
+  <form [formGroup]="paymentForm" class="space-y-6 py-2">
+
+    <div class="fw-field">
+      <label class="fw-label">Type de frais</label>
+      <div class="fw-input-wrapper">
+        <select formControlName="feeTypeCode" class="fw-input" [class.error]="isInvalid('feeTypeCode')">
+          <option *ngFor="let ft of dialogData.feeTypes" [value]="ft.code">{{ ft.label }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div class="fw-field">
+        <label class="fw-label">Montant (FCFA)</label>
+        <div class="fw-input-wrapper">
+          <input type="number" formControlName="amount" min="1" step="1" class="fw-input" [class.error]="isInvalid('amount')" placeholder="Ex: 50000" />
+        </div>
+      </div>
+
+      <div class="fw-field">
+        <label class="fw-label">Méthode</label>
+        <div class="fw-input-wrapper">
+          <select formControlName="method" class="fw-input">
+            <option *ngFor="let m of methodOptions" [value]="m.value">{{ m.label }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="fw-field">
+      <label class="fw-label">Référence <span class="fw-optional">(optionnel)</span></label>
+      <div class="fw-input-wrapper">
+        <input type="text" formControlName="reference" class="fw-input" placeholder="Ex: VIR-2026-00123" />
+      </div>
+    </div>
+
+    <div class="fw-field">
+      <label class="fw-label">Notes <span class="fw-optional">(optionnel)</span></label>
+      <div class="fw-input-wrapper">
+        <textarea formControlName="notes" class="fw-input" rows="2" placeholder="Commentaire libre"></textarea>
+      </div>
+    </div>
+
+    <div class="p-4 bg-surface-sunken rounded-xl border border-border flex items-start gap-3">
+      <lucide-icon [name]="Info" [size]="16" class="text-text-tertiary mt-0.5"></lucide-icon>
+      <p class="text-[11px] text-text-secondary leading-relaxed font-medium">
+        Le paiement est immédiatement pris en compte dans le solde de l'élève. Il ne peut pas être modifié ou supprimé après enregistrement.
+      </p>
+    </div>
+
+  </form>
+</app-fw-form-shell>

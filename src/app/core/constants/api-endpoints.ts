@@ -70,6 +70,14 @@ export const API_ENDPOINTS = {
     CYCLES: '/cycles',
   },
 
+  BILLING: {
+    STATEMENT: (studentId: string) => `/students/${studentId}/statement`,
+    FEE_TYPES: '/fee-types',
+    FEE_TYPE: (id: string) => `/fee-types/${id}`,
+    FEE_ITEMS: (studentId: string) => `/students/${studentId}/fee-items`,
+    PAYMENTS: (studentId: string) => `/students/${studentId}/payments`,
+  },
+
   SCHOOL: {
     PUBLIC_INFO: (tenantId: string) => `/public/${tenantId}`,
   },

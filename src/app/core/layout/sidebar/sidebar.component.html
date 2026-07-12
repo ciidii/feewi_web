@@ -127,6 +127,22 @@
         </ng-container>
       </ng-container>
 
+      <!-- FINANCE -->
+      <ng-container *ngIf="navService.activeService() === 'finance'">
+        <span class="nav-section-title">Finance</span>
+        <ng-container *ngFor="let item of financeItems; let i = index">
+          <a *fwHasPermission="item.permission"
+             [routerLink]="item.route"
+             routerLinkActive="active-link"
+             [routerLinkActiveOptions]="i === 0 ? {exact: true} : {exact: false}"
+             class="sidebar-link"
+             [attr.data-label]="item.label">
+            <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
+            <span class="label">{{ item.label }}</span>
+          </a>
+        </ng-container>
+      </ng-container>
+
       <!-- IDENTITY -->
       <ng-container *ngIf="navService.activeService() === 'identity'">
         <span class="nav-section-title">Sécurité & Staff</span>

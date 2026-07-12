@@ -51,6 +51,10 @@
         <lucide-icon [name]="FileText" [size]="18"></lucide-icon>
         <span class="rail-label">Documents</span>
       </a>
+      <a *fwHasPermission="['finance:fee:manage', 'finance:payment:read', 'finance:payment:write', 'finance:report:read']; op 'ANY'" (click)="onSelectService('finance')" routerLink="/admin/finance/fee-types" class="rail-link" [class.active]="navService.activeService() === 'finance'" [attr.data-label]="'Finance'">
+        <lucide-icon [name]="Wallet" [size]="18"></lucide-icon>
+        <span class="rail-label">Finance</span>
+      </a>
     </ng-container>
   </div>
 

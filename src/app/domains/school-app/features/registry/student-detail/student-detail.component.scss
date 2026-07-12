@@ -188,6 +188,84 @@ app-fw-info-card { display: block; margin-bottom: 1.5rem; }
   }
 }
 
+/* ==========================================================================
+   FINANCE
+   ========================================================================== */
+.finance-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.finance-tile {
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--fw-surface-sunken);
+  border: 1px solid var(--fw-border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  &.is-alert { border-color: rgba(225, 29, 72, 0.3); background: rgba(225, 29, 72, 0.04); }
+
+  .finance-tile-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--fw-text-tertiary); }
+  .finance-tile-value { font-size: 1.05rem; font-weight: 800; color: var(--fw-midnight); }
+}
+
+.finance-alert-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(225, 29, 72, 0.08);
+  color: #be123c;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.finance-section-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--fw-text-tertiary);
+  margin: 16px 0 8px;
+}
+
+.finance-breakdown-row {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--fw-midnight);
+
+  &:nth-child(odd) { background: var(--fw-surface-sunken); }
+
+  .fb-label { font-weight: 800; }
+}
+
+.finance-payment-row {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--fw-border);
+  margin-bottom: 8px;
+
+  .fp-main { display: flex; align-items: center; justify-content: space-between; }
+  .fp-amount { font-weight: 800; font-size: 0.9rem; color: var(--fw-midnight); }
+  .fp-type { font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--fw-text-tertiary); }
+  .fp-meta { font-size: 11px; color: var(--fw-text-tertiary); margin-top: 2px; }
+  .fp-notes { font-size: 11px; color: var(--fw-text-secondary); margin-top: 4px; font-style: italic; }
+}
+
 /* Custom Scrollbar */
 .custom-scrollbar::-webkit-scrollbar { width: 6px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: var(--fw-surface-sunken); border-radius: 10px; }

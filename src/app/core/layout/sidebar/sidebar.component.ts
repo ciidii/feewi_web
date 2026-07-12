@@ -28,7 +28,8 @@ import {
   User,
   UserCheck,
   UserPlus,
-  Users
+  Users,
+  Wallet
 } from 'lucide-angular';
 
 import {UiPreferenceService} from '../../../shared/services/ui-preference.service';
@@ -89,6 +90,11 @@ export class SidebarComponent {
     { label: 'Demandes de documents', icon: FileText, route: '/admin/documents/requests', permission: 'document:request:manage' },
   ];
 
+  // --- 3c. FINANCE ---
+  financeItems = [
+    { label: 'Catalogue des frais', icon: Wallet, route: '/admin/finance/fee-types', permission: 'finance:fee:manage' },
+  ];
+
   // --- 4. IDENTITY SERVICE ---
   identityItems = [
     { label: 'Personnel (Staff)', icon: Users, route: '/admin/identity/staff', permission: 'identity:user:read' },
@@ -115,6 +121,7 @@ export class SidebarComponent {
       case 'enrollment': return 'Inscriptions';
       case 'registry': return 'Registre élèves';
       case 'documents': return 'Demandes de documents';
+      case 'finance': return 'Finance';
       case 'academic': return 'Structure Acad.';
       case 'identity': return 'Sécurité & Staff';
       case 'saas': return 'Système SaaS';

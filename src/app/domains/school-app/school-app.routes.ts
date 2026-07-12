@@ -180,6 +180,21 @@ export const SCHOOL_APP_ROUTES: Routes = [
     ]
   },
   {
+    path: 'finance',
+    data: {
+      permissions: ['finance:fee:manage', 'finance:payment:read', 'finance:payment:write', 'finance:report:read'],
+      permissionOp: 'ANY'
+    },
+    children: [
+      {
+        path: 'fee-types',
+        title: 'Catalogue des Frais',
+        data: {permissions: ['finance:fee:manage']},
+        loadComponent: () => import('./features/finance/fee-type-catalog/fee-type-catalog.component').then(m => m.FeeTypeCatalogComponent)
+      }
+    ]
+  },
+  {
     path: 'documents',
     data: {
       permissions: ['document:request:submit', 'document:request:manage', 'document:request:validate'],

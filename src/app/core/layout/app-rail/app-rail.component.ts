@@ -24,7 +24,8 @@ import {
   Shield,
   ShieldCheck,
   Sun,
-  Users
+  Users,
+  Wallet
 } from 'lucide-angular';
 import {AuthService} from '../../services/auth.service';
 import {NavigationContextService} from '../../services/navigation-context.service';
@@ -82,6 +83,7 @@ export class AppRailComponent {
   protected readonly Building2 = Building2;
   protected readonly School = School;
   protected readonly Users = Users;
+  protected readonly Wallet = Wallet;
 
   // Nouvelles icônes pour le toggle
   readonly PanelLeftClose = PanelLeftClose;

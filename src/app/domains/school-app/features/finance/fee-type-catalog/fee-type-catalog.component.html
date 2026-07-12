@@ -1,0 +1,63 @@
+<app-fw-page-shell
+  title="Catalogue des Types de Frais"
+  description="Gérez les catégories de frais scolaires facturables aux familles."
+  [icon]="CreditCard"
+  density="compact"
+>
+  <!-- CONTENU DE PAGE ALIGNÉ -->
+  <div class="list-page-content animate-in fade-in duration-500">
+
+    <!-- BARRE DE COMMANDE UNIFIÉE -->
+    <app-fw-list-command-bar
+      [searchQuery]="searchQuery()"
+      [searchPlaceholder]="'Rechercher un type de frais...'"
+      [totalElements]="feeTypes().length"
+      [activeFilters]="activeFilterChips()"
+      (searchChange)="onSearch($event)"
+      (clearSearch)="onSearch('')"
+      (removeFilter)="removeFilter($event)"
+      (clearAllFilters)="clearAllFilters()"
+    >
+      <!-- ACTIONS PRIMAIRES -->
+      <div primary-actions class="flex items-center gap-2">
+        <app-fw-button variant="tertiary" size="sm" [icon]="RefreshCw" [loading]="isLoading()" (click)="loadData()" title="Actualiser"></app-fw-button>
+        <div class="divider-v"></div>
+        <app-fw-button
+          *fwHasPermission="'finance:fee:manage'"
+          (click)="openFeeTypeForm()"
+          variant="primary"
+          size="sm"
+          [icon]="Plus"
+        >
+          Nouveau type de frais
+        </app-fw-button>
+      </div>
+    </app-fw-list-command-bar>
+
+    <!-- LISTE DES TYPES DE FRAIS -->
+    <div class="list-container-integrated">
+      <app-data-list
+        [data]="displayFeeTypes()"
+        [total]="displayFeeTypes().length"
+        [actions]="feeTypeActions"
+        [isLoading]="isLoading()"
+        [showSearch]="false"
+        [showFilterButton]="false"
+        [cardMode]="false"
+        (onAction)="handleAction($event)"
+      ></app-data-list>
+
+      <!-- État vide -->
+      <div *ngIf="displayFeeTypes().length === 0 && !isLoading()" class="py-24">
+        <app-fw-empty-state
+          [icon]="CreditCard"
+          title="Aucun type de frais trouvé"
+          description="Créez vos catégories de frais (cantine, transport, uniforme...) pour pouvoir les facturer aux familles."
+          [ctaLabel]="canManage() ? 'Créer mon premier type de frais' : ''"
+          (ctaClick)="openFeeTypeForm()"
+        ></app-fw-empty-state>
+      </div>
+    </div>
+
+  </div>
+</app-fw-page-shell>

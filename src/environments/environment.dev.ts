@@ -6,6 +6,7 @@ export const environment: Environment = {
   apiVersion: 'v1',
   appName: 'Feewi Education - LOCAL',
   logLevel: 'debug',
+  devTenantSlug: 'all-cycle',
   services: {
     enrollment: '/api/v1/enrollment',
     identity: '/api/v1',
@@ -13,7 +14,8 @@ export const environment: Environment = {
     school: '/api/v1/schools',
     documents: '/documents/api/v1/documents',
     student: '/student/api/v1',
-    notifications: '/api/v1/notifications'
+    notifications: '/api/v1/notifications',
+    billing: '/api/v1/billing'
     },
   features: {
     enableAnalytics: false,
