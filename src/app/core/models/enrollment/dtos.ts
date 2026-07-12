@@ -41,7 +41,6 @@ export interface LevelConfigResponse extends DefaultConfigResponse {
 // --- REQUESTS PORTAIL PARENT ---
 
 export interface CreateBundleRequest {
-  tenantId: string;
   family: {
     primaryGuardian: {
       firstName: string;
