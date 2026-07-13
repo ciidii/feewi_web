@@ -12,16 +12,25 @@ export interface FeeType {
   isSystemDefined: boolean;
   createdAt: string;
   updatedAt: string;
+  /**
+   * Montant de référence utilisé par la facturation automatique des services parascolaires
+   * (BL-BILL-10) — null pour INSCRIPTION/SCOLARITE et tout type destiné à des FeeItem ponctuels
+   * saisis à la main. Sans ce montant, un service souscrit à l'inscription (Cantine, Transport)
+   * ne sera jamais facturé automatiquement.
+   */
+  defaultAmount?: number | null;
 }
 
 export interface CreateFeeTypeRequest {
   code: string;
   label: string;
+  defaultAmount?: number | null;
 }
 
 export interface UpdateFeeTypeRequest {
   label?: string;
   active?: boolean;
+  defaultAmount?: number | null;
 }
 
 export interface FeeItem {

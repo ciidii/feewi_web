@@ -2,7 +2,7 @@ import {Component, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
-import {CreditCard, Info, LucideAngularModule, Power, Tag, Type} from 'lucide-angular';
+import {CreditCard, Info, LucideAngularModule, Power, Tag, Type, Wallet} from 'lucide-angular';
 import {firstValueFrom} from 'rxjs';
 import {BillingService} from '../../../../../../../core/services/billing.service';
 import {NotificationService} from '../../../../../../../shared/services/notification.service';
@@ -39,11 +39,13 @@ export class FeeTypeFormComponent implements OnInit {
   readonly Tag = Tag;
   readonly Info = Info;
   readonly Power = Power;
+  readonly Wallet = Wallet;
 
   feeTypeForm: FormGroup = this.fb.group({
     code: ['', [Validators.required, Validators.pattern(/^[A-Z0-9_]+$/)]],
     label: ['', [Validators.required, Validators.minLength(2)]],
-    active: [true]
+    active: [true],
+    defaultAmount: [null, [Validators.min(1)]]
   });
 
   isLoading = signal(false);
@@ -65,16 +67,21 @@ export class FeeTypeFormComponent implements OnInit {
 
     this.isLoading.set(true);
     try {
+      const rawAmount = this.feeTypeForm.value.defaultAmount;
+      const defaultAmount = rawAmount === '' || rawAmount === null || rawAmount === undefined ? null : Number(rawAmount);
+
       if (this.isEditMode && this.dialogData?.feeType) {
         await firstValueFrom(this.billingService.updateFeeType(this.dialogData.feeType.id, {
           label: this.feeTypeForm.value.label,
-          active: this.feeTypeForm.value.active
+          active: this.feeTypeForm.value.active,
+          defaultAmount
         }));
         this.notificationService.success('Le type de frais a été mis à jour.');
       } else {
         await firstValueFrom(this.billingService.createFeeType({
           code: this.feeTypeForm.value.code,
-          label: this.feeTypeForm.value.label
+          label: this.feeTypeForm.value.label,
+          defaultAmount
         }));
         this.notificationService.success('Le type de frais a été ajouté au catalogue.');
       }

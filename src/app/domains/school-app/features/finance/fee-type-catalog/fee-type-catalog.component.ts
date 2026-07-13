@@ -109,7 +109,8 @@ export class FeeTypeCatalogComponent implements OnInit {
         avatarLabel: ft.code.substring(0, 2).toUpperCase(),
         badges: [
           {label: ft.active ? 'Actif' : 'Inactif', type: ft.active ? 'success' : 'default'},
-          ...(ft.isSystemDefined ? [{label: 'Système', type: 'info' as const}] : [])
+          ...(ft.isSystemDefined ? [{label: 'Système', type: 'info' as const}] : []),
+          ...(ft.defaultAmount != null ? [{label: 'Facturation auto', type: 'primary' as const}] : [])
         ],
         rawData: ft
       }));

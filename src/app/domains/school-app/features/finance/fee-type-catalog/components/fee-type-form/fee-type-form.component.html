@@ -48,6 +48,34 @@
       </div>
     </div>
 
+    <!-- 1bis. Montant par défaut (facturation automatique) -->
+    <div class="space-y-6">
+      <header class="section-header">
+        <lucide-icon [name]="Wallet" [size]="14"></lucide-icon>
+        <span class="label">Facturation automatique (optionnel)</span>
+      </header>
+
+      <div class="fw-field">
+        <label class="fw-label">Montant par défaut (FCFA)</label>
+        <div class="fw-input-wrapper">
+          <input
+            type="number"
+            formControlName="defaultAmount"
+            placeholder="Ex: 25000"
+            class="fw-input"
+            min="1"
+            [class.error]="isInvalid('defaultAmount')"
+          />
+        </div>
+        <p class="fw-hint">
+          Si renseigné, ce type de frais peut être facturé automatiquement quand un élève souscrit
+          au service correspondant à l'inscription (Cantine, Transport...) — le code technique doit
+          alors correspondre exactement au code du service côté inscription. Laisser vide pour un
+          type de frais saisi manuellement (Inscription, Scolarité, frais ponctuels).
+        </p>
+      </div>
+    </div>
+
     <!-- 2. Statut (édition uniquement) -->
     <div class="space-y-6" *ngIf="isEditMode">
       <header class="section-header">
