@@ -260,6 +260,7 @@ app-fw-info-card { display: block; margin-bottom: 1.5rem; }
   margin-bottom: 8px;
 
   .fp-main { display: flex; align-items: center; justify-content: space-between; }
+  .fp-right { display: flex; align-items: center; gap: 10px; }
   .fp-amount { font-weight: 800; font-size: 0.9rem; color: var(--fw-midnight); }
   .fp-type { font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--fw-text-tertiary); }
   .fp-meta { font-size: 11px; color: var(--fw-text-tertiary); margin-top: 2px; }

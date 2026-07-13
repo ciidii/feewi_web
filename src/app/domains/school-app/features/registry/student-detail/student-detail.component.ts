@@ -30,6 +30,7 @@ import {AcademicService} from '../../../../../core/services/academic.service';
 import {Level} from '../../../../../core/models/academic.model';
 import {BillingService} from '../../../../../core/services/billing.service';
 import {FeeType, StudentStatement} from '../../../../../core/models/billing.model';
+import {DocumentEngineService} from '../../../../../core/services/document-engine.service';
 import {NotificationService} from '../../../../../shared/services/notification.service';
 import {AuthService} from '../../../../../core/services/auth.service';
 import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
@@ -68,6 +69,7 @@ export class StudentDetailComponent implements OnInit {
   private studentService = inject(StudentRegistryService);
   private academicService = inject(AcademicService);
   private billingService = inject(BillingService);
+  private documentEngineService = inject(DocumentEngineService);
   private dialog = inject(MatDialog);
   private notificationService = inject(NotificationService);
   private authService = inject(AuthService);
@@ -102,6 +104,7 @@ export class StudentDetailComponent implements OnInit {
   statement = signal<StudentStatement | null>(null);
   feeTypes = signal<FeeType[]>([]);
   isFinanceLoading = signal(false);
+  generatingReceiptForPaymentId = signal<string | null>(null);
 
   readonly canReadFinanceAction = computed(() =>
     this.authService.hasAnyPermission(['finance:payment:read', 'finance:report:read', 'finance:fee:manage'])
@@ -185,6 +188,22 @@ export class StudentDetailComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(saved => {
       if (saved) this.loadFinance(s.id);
+    });
+  }
+
+  generateReceipt(paymentId: string) {
+    const s = this.student();
+    if (!s || this.generatingReceiptForPaymentId()) return;
+
+    const requestedBy = this.authService.currentUser()?.email ?? '';
+    this.generatingReceiptForPaymentId.set(paymentId);
+    this.documentEngineService.generatePaymentReceipt(s.id, paymentId, requestedBy).pipe(
+      finalize(() => this.generatingReceiptForPaymentId.set(null))
+    ).subscribe({
+      next: (response) => {
+        window.open(response.downloadUrl, '_blank');
+        this.notificationService.success(`Reçu ${response.receiptNumber} généré.`);
+      }
     });
   }
 

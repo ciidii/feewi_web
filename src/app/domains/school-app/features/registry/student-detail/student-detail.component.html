@@ -204,7 +204,21 @@
                 <div class="finance-payment-row">
                   <div class="fp-main">
                     <span class="fp-amount">{{ p.amount | number:'1.0-0':'fr-FR' }} FCFA</span>
-                    <span class="fp-type">{{ p.feeTypeCode }}</span>
+                    <div class="fp-right">
+                      <span class="fp-type">{{ p.feeTypeCode }}</span>
+                      <app-fw-button
+                        *ngIf="canRecordPaymentAction()"
+                        variant="tertiary"
+                        size="xs"
+                        [icon]="ReceiptText"
+                        [loading]="generatingReceiptForPaymentId() === p.id"
+                        [disabled]="generatingReceiptForPaymentId() !== null && generatingReceiptForPaymentId() !== p.id"
+                        title="Générer le reçu"
+                        (click)="generateReceipt(p.id)"
+                      >
+                        Reçu
+                      </app-fw-button>
+                    </div>
                   </div>
                   <div class="fp-meta">
                     <span>{{ p.method }}</span>

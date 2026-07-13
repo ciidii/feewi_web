@@ -88,5 +88,6 @@ export const API_ENDPOINTS = {
   DOCUMENTS: {
     UPLOAD_TICKET: '/upload-ticket',
     VIEW: (fileId: string) => `/${fileId}/view`,
+    RECEIPTS: '/receipts',
   }
 };
