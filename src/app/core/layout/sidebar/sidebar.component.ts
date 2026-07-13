@@ -26,6 +26,7 @@ import {
   Plus, Shield,
   ShieldCheck,
   Sun,
+  TrendingUp,
   User,
   UserCheck,
   UserPlus,
@@ -95,6 +96,7 @@ export class SidebarComponent {
   financeItems = [
     { label: 'Catalogue des frais', icon: Wallet, route: '/admin/finance/fee-types', permission: 'finance:fee:manage' },
     { label: 'Suivi des paiements', icon: ClipboardCheck, route: '/admin/finance/payment-tracking', permission: 'finance:payment:read' },
+    { label: 'Reporting', icon: TrendingUp, route: '/admin/finance/reporting', permission: 'finance:report:read' },
   ];
 
   // --- 4. IDENTITY SERVICE ---

@@ -22,6 +22,7 @@ export const API_ENDPOINTS = {
       RE_ENROLL_ELIGIBILITY: '/public/admissions/re-enroll/eligibility',
       SUBSCRIPTIONS: (id: string) => `/public/admissions/${id}/subscriptions`,
       DOCUMENTS: (id: string, docCode: string) => `/public/admissions/${id}/documents/${docCode}`,
+      DOCUMENT_UPLOAD_TICKET: (id: string, docCode: string) => `/public/admissions/${id}/documents/${docCode}/upload-ticket`,
       MINE: '/public/admissions/mine',
       TRACK: (ref: string) => `/public/admissions/${ref}/track`,
       SUBMIT_ADMISSION: (id: string) => `/public/admissions/${id}/submit`,
@@ -77,6 +78,7 @@ export const API_ENDPOINTS = {
     FEE_ITEMS: (studentId: string) => `/students/${studentId}/fee-items`,
     PAYMENTS: (studentId: string) => `/students/${studentId}/payments`,
     BALANCES_BATCH: '/students/balances',
+    REPORTS_AGGREGATE: '/reports/aggregate',
   },
 
   SCHOOL: {

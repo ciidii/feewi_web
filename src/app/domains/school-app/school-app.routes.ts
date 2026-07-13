@@ -197,6 +197,12 @@ export const SCHOOL_APP_ROUTES: Routes = [
         title: 'Suivi des paiements',
         data: {permissions: ['finance:payment:read']},
         loadComponent: () => import('./features/finance/payment-tracking/payment-tracking.component').then(m => m.PaymentTrackingComponent)
+      },
+      {
+        path: 'reporting',
+        title: 'Reporting Financier',
+        data: {permissions: ['finance:report:read']},
+        loadComponent: () => import('./features/finance/reporting/reporting.component').then(m => m.ReportingComponent)
       }
     ]
   },

@@ -92,6 +92,33 @@ export interface StudentBalance {
   byFeeType: FeeTypeBalance[];
 }
 
+// --- REPORTING AGRÉGÉ (BL-BILL-04, ADR-005) ---
+
+/** Groupe nommé de studentId envoyé au reporting agrégé — billing-service n'interprète jamais groupKey. */
+export interface AggregateGroupRequest {
+  groupKey: string;
+  studentIds: string[];
+}
+
+export interface AggregateRequest {
+  groups: AggregateGroupRequest[];
+}
+
+export interface AggregateGroupTotals {
+  groupKey?: string;
+  studentCount: number;
+  totalDue: number;
+  totalPaid: number;
+  totalBalance: number;
+  /** null si totalDue = 0 — pas de taux de recouvrement significatif, distinct de 0%. */
+  recoveryRate: number | null;
+}
+
+export interface AggregateReportResponse {
+  groups: AggregateGroupTotals[];
+  overall: AggregateGroupTotals;
+}
+
 /** Erreur billing-service — errorCode stable pour les 422 documentés (ADR-002 §5). */
 export interface BillingErrorCode {
   FEE_TYPE_SYSTEM_DEFINED: 'FEE_TYPE_SYSTEM_DEFINED';

@@ -6,6 +6,8 @@ import {NotificationService} from '../../shared/services/notification.service';
 import {TenantContextService} from './tenant-context.service';
 import {API_ENDPOINTS} from '../constants/api-endpoints';
 import {
+  AggregateGroupRequest,
+  AggregateReportResponse,
   CreateFeeItemRequest,
   CreateFeeTypeRequest,
   FeeItem,
@@ -75,6 +77,18 @@ export class BillingService {
       headers: this.getHeaders(true)
     }).pipe(
       catchError(this.handleError('Impossible de charger les soldes des élèves'))
+    );
+  }
+
+  /**
+   * Reporting agrégé (BL-BILL-04, ADR-005) : taux de recouvrement + créances par groupe
+   * (typiquement une classe = un groupe), en un seul appel plutôt qu'une sommation côté client.
+   */
+  getAggregateReport(groups: AggregateGroupRequest[]): Observable<AggregateReportResponse> {
+    return this.http.post<AggregateReportResponse>(this.getUrl(API_ENDPOINTS.BILLING.REPORTS_AGGREGATE), {groups}, {
+      headers: this.getHeaders(true)
+    }).pipe(
+      catchError(this.handleError('Impossible de charger le rapport de recouvrement'))
     );
   }
 
