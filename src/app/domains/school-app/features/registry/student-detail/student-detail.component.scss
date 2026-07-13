@@ -267,6 +267,36 @@ app-fw-info-card { display: block; margin-bottom: 1.5rem; }
   .fp-notes { font-size: 11px; color: var(--fw-text-secondary); margin-top: 4px; font-style: italic; }
 }
 
+.installment-plan-group {
+  border: 1px solid var(--fw-border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+
+  .ip-group-header {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--fw-text-tertiary);
+    margin: 0 0 8px;
+  }
+}
+
+.installment-tranche-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 0;
+  border-top: 1px solid var(--fw-border-subtle);
+
+  &:first-of-type { border-top: none; padding-top: 0; }
+
+  .it-main { display: flex; align-items: center; justify-content: space-between; }
+  .it-seq { font-weight: 800; font-size: 0.8125rem; color: var(--fw-midnight); }
+  .it-meta { font-size: 11px; color: var(--fw-text-tertiary); }
+}
+
 /* Custom Scrollbar */
 .custom-scrollbar::-webkit-scrollbar { width: 6px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: var(--fw-surface-sunken); border-radius: 10px; }

@@ -203,6 +203,12 @@ export const SCHOOL_APP_ROUTES: Routes = [
         title: 'Reporting Financier',
         data: {permissions: ['finance:report:read']},
         loadComponent: () => import('./features/finance/reporting/reporting.component').then(m => m.ReportingComponent)
+      },
+      {
+        path: 'overdue-installments',
+        title: 'Relances - Tranches en retard',
+        data: {permissions: ['finance:payment:write']},
+        loadComponent: () => import('./features/finance/overdue-installments/overdue-installments.component').then(m => m.OverdueInstallmentsComponent)
       }
     ]
   },

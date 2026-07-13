@@ -143,6 +143,15 @@
         <app-fw-info-card *ngIf="canReadFinanceAction()" [icon]="Wallet" title="Finance" subtitle="Frais de scolarité et paiements enregistrés">
           <div card-actions>
             <app-fw-button
+              *ngIf="canManageFeeAction()"
+              variant="secondary"
+              size="sm"
+              [icon]="Layers"
+              (click)="openInstallmentPlanDialog()"
+            >
+              Créer un plan de tranches
+            </app-fw-button>
+            <app-fw-button
               *ngIf="canRecordPaymentAction()"
               variant="primary"
               size="sm"
@@ -229,6 +238,36 @@
                 </div>
               } @empty {
                 <p class="text-xs text-text-tertiary italic py-4 text-center">Aucun paiement enregistré.</p>
+              }
+            </div>
+
+            <!-- Plans de tranches -->
+            <div class="finance-installments" *ngIf="installmentPlans().length > 0">
+              <p class="finance-section-label">
+                <lucide-icon [name]="Layers" [size]="13"></lucide-icon>
+                Plans de tranches
+              </p>
+              @for (plan of installmentPlans(); track plan.installmentGroupId) {
+                <div class="installment-plan-group">
+                  <p class="ip-group-header">{{ getFeeTypeLabel(plan.feeTypeCode) }}</p>
+                  @for (tranche of plan.tranches; track tranche.feeItemId) {
+                    <div class="installment-tranche-row">
+                      <div class="it-main">
+                        <span class="it-seq">Tranche {{ tranche.installmentSequence }}/{{ plan.tranches.length }}</span>
+                        <app-fw-badge
+                          [labelOverride]="getInstallmentStatusLabel(tranche)"
+                          [tokenOverride]="getInstallmentStatusToken(tranche.status)"
+                          size="xs"
+                        ></app-fw-badge>
+                      </div>
+                      <div class="it-meta">
+                        <span>{{ tranche.amount | number:'1.0-0':'fr-FR' }} FCFA</span>
+                        <span>· Échéance : {{ tranche.dueDate | fwDate:'full' }}</span>
+                        <span *ngIf="tranche.remainingAmount > 0">· Restant : {{ tranche.remainingAmount | number:'1.0-0':'fr-FR' }} FCFA</span>
+                      </div>
+                    </div>
+                  }
+                </div>
               }
             </div>
           </ng-container>

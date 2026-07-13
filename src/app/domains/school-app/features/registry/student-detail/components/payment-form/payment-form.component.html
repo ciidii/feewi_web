@@ -37,6 +37,18 @@
       </div>
     </div>
 
+    <div class="fw-field" *ngIf="availableTranches().length > 0">
+      <label class="fw-label">Solder une tranche spécifique <span class="fw-optional">(optionnel)</span></label>
+      <div class="fw-input-wrapper">
+        <select formControlName="feeItemId" class="fw-input">
+          <option [ngValue]="null">Aucune (paiement global du type de frais)</option>
+          <option *ngFor="let t of availableTranches()" [ngValue]="t.feeItemId">
+            Tranche {{ t.installmentSequence }} — Restant : {{ t.remainingAmount | number:'1.0-0':'fr-FR' }} FCFA
+          </option>
+        </select>
+      </div>
+    </div>
+
     <div class="fw-field">
       <label class="fw-label">Référence <span class="fw-optional">(optionnel)</span></label>
       <div class="fw-input-wrapper">

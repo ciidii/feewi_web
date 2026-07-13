@@ -7,12 +7,20 @@ import {firstValueFrom} from 'rxjs';
 import {BillingService} from '../../../../../../../core/services/billing.service';
 import {NotificationService} from '../../../../../../../shared/services/notification.service';
 import {FormShellComponent} from '../../../../../../../shared/components/form-shell/form-shell';
-import {FeeType, PAYMENT_METHOD_LABELS, PaymentMethod} from '../../../../../../../core/models/billing.model';
+import {
+  FeeType,
+  InstallmentPlan,
+  InstallmentTranche,
+  PAYMENT_METHOD_LABELS,
+  PaymentMethod
+} from '../../../../../../../core/models/billing.model';
 
 export interface PaymentFormDialogData {
   studentId: string;
   studentName: string;
   feeTypes: FeeType[];
+  /** Plans de tranches de l'élève (BL-BILL-06) — permet de solder une tranche précise, optionnel. */
+  installmentPlans?: InstallmentPlan[];
 }
 
 @Component({
@@ -44,16 +52,36 @@ export class PaymentFormComponent implements OnInit {
     amount: [null, [Validators.required, Validators.min(1)]],
     method: ['CASH', [Validators.required]],
     reference: [''],
-    notes: ['']
+    notes: [''],
+    feeItemId: [null]
   });
 
   isLoading = signal(false);
+
+  /** Tranches non soldées du type de frais sélectionné — recalculé à chaque changement de feeTypeCode. */
+  availableTranches = signal<InstallmentTranche[]>([]);
 
   ngOnInit() {
     const defaultCode = this.dialogData.feeTypes.find(f => f.code === 'INSCRIPTION')?.code
       ?? this.dialogData.feeTypes[0]?.code
       ?? '';
     this.paymentForm.patchValue({feeTypeCode: defaultCode});
+    this.updateAvailableTranches(defaultCode);
+
+    this.paymentForm.get('feeTypeCode')?.valueChanges.subscribe((code: string) => {
+      // Un changement de type de frais invalide la tranche sélectionnée — elle ne lui appartient plus.
+      this.paymentForm.patchValue({feeItemId: null}, {emitEvent: false});
+      this.updateAvailableTranches(code);
+    });
+  }
+
+  private updateAvailableTranches(feeTypeCode: string) {
+    const plans = this.dialogData.installmentPlans ?? [];
+    const tranches = plans
+      .filter(plan => plan.feeTypeCode === feeTypeCode)
+      .flatMap(plan => plan.tranches)
+      .filter(tranche => tranche.status !== 'PAID');
+    this.availableTranches.set(tranches);
   }
 
   async onSave() {
@@ -70,7 +98,8 @@ export class PaymentFormComponent implements OnInit {
         amount: raw.amount,
         method: raw.method,
         reference: raw.reference?.trim() || null,
-        notes: raw.notes?.trim() || null
+        notes: raw.notes?.trim() || null,
+        feeItemId: raw.feeItemId || null
       }));
       this.notificationService.success('Paiement enregistré.');
       this.dialogRef.close(true);

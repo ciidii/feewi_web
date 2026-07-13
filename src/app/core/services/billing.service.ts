@@ -10,8 +10,11 @@ import {
   AggregateReportResponse,
   CreateFeeItemRequest,
   CreateFeeTypeRequest,
+  CreateInstallmentPlanRequest,
   FeeItem,
   FeeType,
+  InstallmentPlan,
+  OverdueInstallment,
   Payment,
   RecordPaymentRequest,
   StudentBalance,
@@ -89,6 +92,33 @@ export class BillingService {
       headers: this.getHeaders(true)
     }).pipe(
       catchError(this.handleError('Impossible de charger le rapport de recouvrement'))
+    );
+  }
+
+  // --- TRANCHES DE PAIEMENT (BL-BILL-06, ADR-007) ---
+
+  createInstallmentPlan(studentId: string, request: CreateInstallmentPlanRequest): Observable<FeeItem[]> {
+    return this.http.post<FeeItem[]>(this.getUrl(API_ENDPOINTS.BILLING.INSTALLMENT_PLANS(studentId)), request, {
+      headers: this.getHeaders()
+    }).pipe(
+      catchError(this.handleError('Erreur lors de la création du plan de tranches'))
+    );
+  }
+
+  getInstallmentPlans(studentId: string): Observable<InstallmentPlan[]> {
+    return this.http.get<InstallmentPlan[]>(this.getUrl(API_ENDPOINTS.BILLING.INSTALLMENT_PLANS(studentId)), {
+      headers: this.getHeaders(true)
+    }).pipe(
+      catchError(this.handleError('Impossible de charger les plans de tranches'))
+    );
+  }
+
+  /** Liste de retard tenant entier (Secrétariat/Comptable) — envoi manuel, pas de SMS automatisé. */
+  getOverdueInstallments(): Observable<OverdueInstallment[]> {
+    return this.http.get<OverdueInstallment[]>(this.getUrl(API_ENDPOINTS.BILLING.INSTALLMENTS_OVERDUE), {
+      headers: this.getHeaders(true)
+    }).pipe(
+      catchError(this.handleError('Impossible de charger la liste des retards'))
     );
   }
 

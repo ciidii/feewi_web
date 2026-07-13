@@ -1,0 +1,133 @@
+@use '../../../../../../styles/tokens' as *;
+
+:host {
+  display: block;
+  height: 100%;
+  background: var(--fw-ice);
+}
+
+.list-page-content {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--fw-space-md);
+}
+
+/* ==========================================================================
+   TABLEAU "TRANCHES EN RETARD"
+   ========================================================================== */
+.work-section {
+  background: white;
+  border-radius: 16px;
+  box-shadow: var(--fw-shadow-sm);
+  overflow: hidden;
+
+  .section-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--fw-surface-sunken);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h3 {
+      font-size: 0.75rem;
+      font-weight: 850;
+      color: var(--fw-text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin: 0;
+    }
+  }
+}
+
+.overdue-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th {
+    text-align: left;
+    padding: 0.75rem 1.5rem;
+    font-size: 10px;
+    font-weight: 850;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--fw-text-tertiary);
+    border-bottom: 1px solid var(--fw-surface-sunken);
+  }
+
+  td {
+    padding: 1rem 1.5rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--fw-midnight);
+    border-bottom: 1px solid var(--fw-surface-sunken);
+    vertical-align: top;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tr:hover td {
+    background: var(--fw-primary-alpha);
+  }
+
+  .cell-student {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    .student-link {
+      background: none;
+      border: none;
+      padding: 0;
+      font: inherit;
+      font-weight: 800;
+      color: var(--fw-primary);
+      cursor: pointer;
+      text-align: left;
+
+      &:hover { text-decoration: underline; }
+    }
+
+    .student-reg {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--fw-text-tertiary);
+    }
+  }
+
+  .cell-contact {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
+.contact-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--fw-text-secondary);
+  text-decoration: none;
+
+  &:hover { color: var(--fw-primary); text-decoration: underline; }
+}
+
+.overdue-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 850;
+  background: var(--fw-warning-bg);
+  color: var(--fw-warning-text);
+
+  &.is-severe {
+    background: var(--fw-error-bg);
+    color: var(--fw-error-text);
+  }
+}

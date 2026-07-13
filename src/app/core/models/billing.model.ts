@@ -34,6 +34,9 @@ export interface FeeItem {
   dueDate?: string | null;
   createdBy: string;
   createdAt: string;
+  /** Renseignés uniquement pour les tranches d'un plan d'installments (BL-BILL-06, ADR-007). */
+  installmentGroupId?: string | null;
+  installmentSequence?: number | null;
 }
 
 export interface CreateFeeItemRequest {
@@ -55,6 +58,9 @@ export interface Payment {
   recordedBy: string;
   recordedAt: string;
   notes?: string | null;
+  receiptNumber?: string | null;
+  /** Non-null si ce paiement solde spécifiquement une tranche (BL-BILL-06, ADR-007 §6). */
+  feeItemId?: string | null;
 }
 
 export interface RecordPaymentRequest {
@@ -64,6 +70,8 @@ export interface RecordPaymentRequest {
   reference?: string | null;
   receivedAt?: string | null;
   notes?: string | null;
+  /** Si fourni, ce paiement solde spécifiquement cette tranche (BL-BILL-06, ADR-007 §6). */
+  feeItemId?: string | null;
 }
 
 export interface FeeTypeBalance {
@@ -117,6 +125,50 @@ export interface AggregateGroupTotals {
 export interface AggregateReportResponse {
   groups: AggregateGroupTotals[];
   overall: AggregateGroupTotals;
+}
+
+// --- TRANCHES DE PAIEMENT (BL-BILL-06, ADR-007) ---
+
+export type InstallmentStatus = 'PENDING' | 'PAID' | 'OVERDUE';
+
+export interface CreateInstallmentPlanRequest {
+  feeTypeCode: string;
+  academicYearId: string;
+  totalAmount: number;
+  installmentCount: number;
+  /** Date ISO (yyyy-MM-dd), échéance de la 1re tranche. */
+  firstDueDate: string;
+  intervalDays: number;
+}
+
+export interface InstallmentTranche {
+  feeItemId: string;
+  installmentSequence: number;
+  amount: number;
+  dueDate: string;
+  remainingAmount: number;
+  status: InstallmentStatus;
+  daysOverdue: number;
+}
+
+export interface InstallmentPlan {
+  installmentGroupId: string;
+  feeTypeCode: string;
+  tranches: InstallmentTranche[];
+}
+
+/** Ligne de la liste de retard tenant entier — envoi manuel par le Secrétariat (Approche B, pas de SMS auto). */
+export interface OverdueInstallment {
+  studentId: string;
+  feeItemId: string;
+  installmentSequence: number;
+  remainingAmount: number;
+  dueDate: string;
+  daysOverdue: number;
+  guardianEmail?: string | null;
+  guardianPhone?: string | null;
+  /** Limitation connue : GuardianLink ne capture pas de nom de tuteur — c'est le nom de l'élève. */
+  guardianName?: string | null;
 }
 
 /** Erreur billing-service — errorCode stable pour les 422 documentés (ADR-002 §5). */

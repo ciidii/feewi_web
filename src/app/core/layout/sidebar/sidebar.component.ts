@@ -6,6 +6,7 @@ import {AuthService} from '../../services/auth.service';
 import {MatMenuModule} from '@angular/material/menu';
 import {
   BarChart3,
+  BellRing,
   BookOpen,
   Briefcase,
   Building2,
@@ -97,6 +98,7 @@ export class SidebarComponent {
     { label: 'Catalogue des frais', icon: Wallet, route: '/admin/finance/fee-types', permission: 'finance:fee:manage' },
     { label: 'Suivi des paiements', icon: ClipboardCheck, route: '/admin/finance/payment-tracking', permission: 'finance:payment:read' },
     { label: 'Reporting', icon: TrendingUp, route: '/admin/finance/reporting', permission: 'finance:report:read' },
+    { label: 'Relances', icon: BellRing, route: '/admin/finance/overdue-installments', permission: 'finance:payment:write' },
   ];
 
   // --- 4. IDENTITY SERVICE ---

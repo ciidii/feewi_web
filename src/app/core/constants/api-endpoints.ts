@@ -79,6 +79,8 @@ export const API_ENDPOINTS = {
     PAYMENTS: (studentId: string) => `/students/${studentId}/payments`,
     BALANCES_BATCH: '/students/balances',
     REPORTS_AGGREGATE: '/reports/aggregate',
+    INSTALLMENT_PLANS: (studentId: string) => `/students/${studentId}/installment-plans`,
+    INSTALLMENTS_OVERDUE: '/installments/overdue',
   },
 
   SCHOOL: {
