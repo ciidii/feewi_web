@@ -74,6 +74,7 @@
         [cardMode]="false"
         defaultView="cards"
         (onAction)="handleAction($event)"
+        (onRowClick)="handleAction({ actionId: 'view', row: $event })"
       ></app-data-list>
     </div>
 
