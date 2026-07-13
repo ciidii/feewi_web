@@ -76,6 +76,7 @@ export const API_ENDPOINTS = {
     FEE_TYPE: (id: string) => `/fee-types/${id}`,
     FEE_ITEMS: (studentId: string) => `/students/${studentId}/fee-items`,
     PAYMENTS: (studentId: string) => `/students/${studentId}/payments`,
+    BALANCES_BATCH: '/students/balances',
   },
 
   SCHOOL: {

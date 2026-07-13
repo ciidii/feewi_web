@@ -13,6 +13,7 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  ClipboardCheck,
   FileText,
   Globe,
   History,
@@ -93,6 +94,7 @@ export class SidebarComponent {
   // --- 3c. FINANCE ---
   financeItems = [
     { label: 'Catalogue des frais', icon: Wallet, route: '/admin/finance/fee-types', permission: 'finance:fee:manage' },
+    { label: 'Suivi des paiements', icon: ClipboardCheck, route: '/admin/finance/payment-tracking', permission: 'finance:payment:read' },
   ];
 
   // --- 4. IDENTITY SERVICE ---

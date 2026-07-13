@@ -1,6 +1,6 @@
 import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import {inject, Injectable} from '@angular/core';
-import {catchError, Observable, throwError} from 'rxjs';
+import {catchError, Observable, of, throwError} from 'rxjs';
 import {EnvironmentService} from './environment.service';
 import {NotificationService} from '../../shared/services/notification.service';
 import {TenantContextService} from './tenant-context.service';
@@ -12,6 +12,7 @@ import {
   FeeType,
   Payment,
   RecordPaymentRequest,
+  StudentBalance,
   StudentStatement,
   UpdateFeeTypeRequest,
 } from '../models/billing.model';
@@ -59,6 +60,21 @@ export class BillingService {
       headers: this.getHeaders(true)
     }).pipe(
       catchError(this.handleError('Impossible de charger le relevé financier'))
+    );
+  }
+
+  /**
+   * Solde de plusieurs élèves en un seul appel (BL-BILL-02, écran "qui a payé"). Un élève sans
+   * aucun FeeItem apparaît quand même, avec un solde à zéro — jamais omis silencieusement.
+   */
+  getBalancesBatch(studentIds: string[]): Observable<StudentBalance[]> {
+    if (studentIds.length === 0) {
+      return of([]);
+    }
+    return this.http.post<StudentBalance[]>(this.getUrl(API_ENDPOINTS.BILLING.BALANCES_BATCH), {studentIds}, {
+      headers: this.getHeaders(true)
+    }).pipe(
+      catchError(this.handleError('Impossible de charger les soldes des élèves'))
     );
   }
 

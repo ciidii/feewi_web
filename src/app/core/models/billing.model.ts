@@ -83,6 +83,15 @@ export interface StudentStatement {
   payments: Payment[];
 }
 
+/** Solde d'un élève sans historique de paiements — retourné par le batch BL-BILL-02. */
+export interface StudentBalance {
+  studentId: string;
+  totalDue: number;
+  totalPaid: number;
+  balance: number;
+  byFeeType: FeeTypeBalance[];
+}
+
 /** Erreur billing-service — errorCode stable pour les 422 documentés (ADR-002 §5). */
 export interface BillingErrorCode {
   FEE_TYPE_SYSTEM_DEFINED: 'FEE_TYPE_SYSTEM_DEFINED';
