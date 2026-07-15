@@ -83,7 +83,7 @@ export class EnrollmentDirectEntryComponent implements OnInit {
         primaryGuardian: this.fb.group({
           firstName: ['', [Validators.required, Validators.minLength(2)]],
           lastName: ['', [Validators.required, Validators.minLength(2)]],
-          email: ['', [Validators.email]],
+          email: ['', [Validators.required, Validators.email]],
           phone: ['', Validators.required],
           relation: ['FATHER', Validators.required],
           isFinancialResponsible: [true]
