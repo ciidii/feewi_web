@@ -97,7 +97,9 @@ export class LoginComponent {
         if (success) {
           // Déclenche le Splash Screen Global pour une transition "Premium"
           this.loadingService.start('global');
-          this.router.navigate(['/admin/home']);
+          const roles = this.authService.currentUser()?.roles ?? [];
+          const isParentOnly = roles.includes('ROLE_PARENT') && !roles.some(r => ['ROLE_ADMIN', 'ROLE_SECRETARY', 'ROLE_SUPER_ADMIN'].includes(r));
+          this.router.navigate([isParentOnly ? '/parent/dashboard' : '/admin/home']);
         } else {
           this.loginError.set(true);
           this.isLoading.set(false);

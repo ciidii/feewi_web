@@ -1,0 +1,37 @@
+<div class="child-detail">
+  <button type="button" class="back-link" (click)="goBack()">
+    <lucide-icon [name]="ArrowLeft" [size]="16"></lucide-icon>
+    Retour
+  </button>
+
+  <div class="loading-state" *ngIf="isLoading()">
+    <fw-skeleton width="200px" height="24px"></fw-skeleton>
+    <fw-skeleton width="100%" height="120px" radius="16px"></fw-skeleton>
+  </div>
+
+  <ng-container *ngIf="!isLoading() && child() as c">
+    <header class="child-header">
+      <div class="child-icon">
+        <lucide-icon [name]="GraduationCap" [size]="28"></lucide-icon>
+      </div>
+      <div>
+        <h1 class="title">{{ c.firstName }} {{ c.lastName }}</h1>
+        <p class="subtitle">Matricule {{ c.registrationNumber }} · {{ statusLabel(c.status) }}</p>
+      </div>
+    </header>
+
+    <section class="info-card">
+      <h2 class="section-title">Scolarité</h2>
+      <p class="note" *ngIf="!c.currentAcademicYearId">
+        Aucune affectation de classe enregistrée pour le moment.
+      </p>
+      <p class="note" *ngIf="c.currentAcademicYearId">
+        Élève actif pour l'année scolaire en cours. Le détail de la classe et du niveau sera affiché ici prochainement.
+      </p>
+    </section>
+  </ng-container>
+
+  <div class="empty-state" *ngIf="!isLoading() && !child()">
+    <p>Cet enfant n'est pas lié à votre compte.</p>
+  </div>
+</div>

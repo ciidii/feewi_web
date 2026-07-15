@@ -1,8 +1,9 @@
 import {Component, inject} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {RouterModule} from '@angular/router';
-import {GraduationCap, LucideAngularModule, Search, ShieldCheck} from 'lucide-angular';
+import {GraduationCap, LogIn, LucideAngularModule, Search, ShieldCheck} from 'lucide-angular';
 import {TenantContextService} from '../../../core/services/tenant-context.service';
+import {APP_PATHS} from '../../../core/constants/app-paths';
 
 @Component({
   selector: 'app-fw-public-header',
@@ -12,23 +13,35 @@ import {TenantContextService} from '../../../core/services/tenant-context.servic
     <header class="public-header">
       <div class="container">
         <!-- Brand -->
-        <div class="brand" routerLink="/enrollment/landing">
+        <div class="brand" [routerLink]="paths.PUBLIC.HOME">
           <div class="brand-logo">
             <img *ngIf="tenantCtx.activeTenant()?.logoUrl" [src]="tenantCtx.activeTenant()?.logoUrl">
             <lucide-icon *ngIf="!tenantCtx.activeTenant()?.logoUrl" [name]="GraduationCap" [size]="20"></lucide-icon>
           </div>
           <div class="brand-info">
-            <span class="brand-name">{{ tenantCtx.activeTenant()?.name || 'PORTAIL ADMISSION' }}</span>
+            <span class="brand-name">{{ tenantCtx.activeTenant()?.name || 'PORTAIL ÉCOLE' }}</span>
             <span class="brand-tagline">Système de gestion scolaire</span>
           </div>
         </div>
 
         <!-- Navigation Desktop -->
         <nav class="header-nav">
-          <a routerLink="/enrollment/landing" routerLinkActive="active" class="nav-link">
+          <a [routerLink]="paths.PUBLIC.HOME" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link">
             Accueil
           </a>
-          <a routerLink="/enrollment/tracker" routerLinkActive="active" class="nav-link">
+          <a [routerLink]="paths.PUBLIC.RESULTS" routerLinkActive="active" class="nav-link">
+            Résultats
+          </a>
+          <a [routerLink]="paths.PUBLIC.GALLERY" routerLinkActive="active" class="nav-link">
+            Galerie
+          </a>
+          <a [routerLink]="paths.PUBLIC.PRICING" routerLinkActive="active" class="nav-link">
+            Tarifs
+          </a>
+          <a [routerLink]="paths.PUBLIC.ADMISSIONS_HOME" routerLinkActive="active" class="nav-link">
+            Admissions
+          </a>
+          <a [routerLink]="paths.PUBLIC.ADMISSIONS_TRACKER" routerLinkActive="active" class="nav-link">
             <lucide-icon [name]="Search" [size]="14"></lucide-icon>
             Suivre un dossier
           </a>
@@ -40,6 +53,10 @@ import {TenantContextService} from '../../../core/services/tenant-context.servic
              <lucide-icon [name]="ShieldCheck" [size]="14"></lucide-icon>
              <span>Officiel</span>
            </div>
+           <a [routerLink]="paths.AUTH.LOGIN" class="parent-space-btn">
+             <lucide-icon [name]="LogIn" [size]="14"></lucide-icon>
+             <span>Espace Parent</span>
+           </a>
         </div>
       </div>
     </header>
@@ -95,7 +112,7 @@ import {TenantContextService} from '../../../core/services/tenant-context.servic
     .header-nav {
       display: flex;
       align-items: center;
-      gap: 32px;
+      gap: 22px;
 
       .nav-link {
         font-size: 0.8125rem;
@@ -110,6 +127,12 @@ import {TenantContextService} from '../../../core/services/tenant-context.servic
         &:hover { color: var(--fw-primary); }
         &.active { color: var(--fw-primary); }
       }
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
     .portal-badge {
@@ -127,6 +150,26 @@ import {TenantContextService} from '../../../core/services/tenant-context.servic
       lucide-icon { color: var(--fw-primary); }
     }
 
+    .parent-space-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: var(--fw-primary);
+      color: white;
+      border-radius: var(--fw-radius-full);
+      font-size: 0.8125rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: opacity 0.2s ease;
+
+      &:hover { opacity: 0.85; }
+    }
+
+    @media (max-width: 480px) {
+      .parent-space-btn span { display: none; }
+    }
+
     @media (max-width: 768px) {
       .header-nav { display: none; }
       .brand-tagline { display: none; }
@@ -135,8 +178,10 @@ import {TenantContextService} from '../../../core/services/tenant-context.servic
 })
 export class FwPublicHeaderComponent {
   tenantCtx = inject(TenantContextService);
+  readonly paths = APP_PATHS;
 
   readonly GraduationCap = GraduationCap;
   readonly Search = Search;
   readonly ShieldCheck = ShieldCheck;
+  readonly LogIn = LogIn;
 }
