@@ -1,9 +1,13 @@
 @use '../../../../../../styles/tokens' as *;
 
 // 1. Mise en page globale
-:host { 
-  display: block; 
+// Ce composant utilise ViewEncapsulation.None (cf. @Component) : le sélecteur `:host` ne
+// fonctionne PAS dans ce mode (Angular ne peut pas le lier à un attribut de scoping puisqu'il
+// n'y en a pas) — il faut cibler le nom de balise réel directement, en global.
+app-role-designer {
+  display: block;
   height: 100%; /* S'adapte au conteneur parent */
+  min-height: 0; /* Empêche le flex item de grandir à la taille de son contenu (piège flexbox classique) */
   background-color: var(--fw-surface-page);
 }
 
@@ -23,6 +27,12 @@
   flex-direction: column;
   min-width: 0;
   min-height: 0; /* Important pour le scroll Flexbox */
+
+  /* display:block/min-height:0 sont déjà posés globalement par page-shell.component.scss ;
+     ici on ajoute juste flex:1, spécifique à ce parent flex (.config-viewport). */
+  > app-fw-page-shell {
+    flex: 1;
+  }
 }
 
 // 2. Sidebar (Fixe à gauche)
@@ -110,8 +120,19 @@
 }
 
 // 3. Matrice de Permissions (Scrollable)
+// .pbac-matrix-wrapper n'avait auparavant AUCUNE règle : le flex:1 de .editor-container
+// était donc sans effet (son parent n'était pas un conteneur flex), et rien ne pouvait scroller.
+.pbac-matrix-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .editor-container {
   flex: 1;
+  min-height: 0; /* Empêche le contenu de forcer la croissance du conteneur */
   overflow-y: auto; /* ICI se passe le scroll */
   padding: var(--fw-space-lg);
   background-color: var(--fw-surface-page);
@@ -209,6 +230,108 @@
   height: 2px;
   background-color: var(--fw-border);
   border-radius: 50%;
+}
+
+// 5. Vue métier : capacités & synthèse par catégorie
+.category-summary-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--fw-space-sm);
+  margin: 0 var(--fw-space-md) var(--fw-space-xl);
+}
+
+.category-scope-toggle {
+  margin-left: auto;
+  padding: 6px var(--fw-space-sm);
+  font-size: 10px;
+  font-weight: 750;
+  color: var(--fw-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover { text-decoration: underline; }
+}
+
+.category-summary-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px var(--fw-space-sm);
+  background-color: var(--fw-surface-card);
+  border: 1px solid var(--fw-border);
+  border-radius: var(--fw-radius-full);
+
+  .summary-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--fw-text-secondary);
+  }
+
+  .summary-count {
+    font-size: 10px;
+    font-weight: 850;
+    color: var(--fw-text-primary);
+    font-family: var(--fw-font-mono);
+  }
+
+  &.has-critical {
+    border-color: rgba(244, 63, 94, 0.35);
+    .summary-count { color: #e11d48; }
+  }
+}
+
+.capability-table {
+  background-color: var(--fw-surface-card);
+  border: 1px solid var(--fw-border);
+  border-radius: var(--fw-radius-md);
+  overflow: hidden;
+}
+
+.capability-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fw-space-md);
+  padding: var(--fw-space-sm) var(--fw-space-md);
+  border-bottom: 1px solid var(--fw-surface-page);
+
+  &:last-child { border-bottom: none; }
+
+  .cap-info {
+    display: flex;
+    align-items: center;
+    gap: var(--fw-space-sm);
+    min-width: 0;
+  }
+
+  .cap-label {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--fw-text-primary);
+  }
+
+  .cap-risk-badge {
+    flex-shrink: 0;
+    padding: 2px 8px;
+    font-size: 9px;
+    font-weight: 850;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-radius: var(--fw-radius-full);
+
+    &.risk-sensitive {
+      color: #b45309;
+      background-color: rgba(245, 158, 11, 0.12);
+    }
+
+    &.risk-critical {
+      color: #e11d48;
+      background-color: rgba(244, 63, 94, 0.12);
+    }
+  }
 }
 
 .custom-scrollbar {

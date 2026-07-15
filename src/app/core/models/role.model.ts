@@ -13,3 +13,21 @@ export interface Permission {
   name: string;
   description: string;
 }
+
+export type RiskLevel = 'NORMAL' | 'SENSITIVE' | 'CRITICAL';
+
+export interface PermissionCapability {
+  code: string;
+  label: string;
+  categoryCode: string;
+  categoryLabel: string;
+  riskLevel: RiskLevel;
+  permissions: string[];
+}
+
+export interface RolePreset {
+  code: string;
+  name: string;
+  description: string;
+  permissions: string[];
+}

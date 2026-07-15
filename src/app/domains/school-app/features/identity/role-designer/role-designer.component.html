@@ -62,20 +62,23 @@
           <input type="text"
                  [ngModel]="permissionQuery()"
                  (ngModelChange)="permissionQuery.set($event)"
-                 placeholder="Filtrer les ressources..."
+                 [placeholder]="showAdvancedView() ? 'Filtrer les ressources...' : 'Filtrer les capacités...'"
                  class="search-input-technical"
                  [disabled]="isInitialLoading()">
         </div>
 
         <div class="divider-v"></div>
 
+        <app-fw-button variant="tertiary" size="sm" [icon]="Settings2" (click)="showAdvancedView.set(!showAdvancedView())" [disabled]="isInitialLoading()">
+          {{ showAdvancedView() ? 'Vue métier' : 'Vue technique' }}
+        </app-fw-button>
         <app-fw-button variant="tertiary" size="sm" [icon]="Plus" (click)="openAddRoleForm()" [disabled]="isInitialLoading()">Nouveau rôle</app-fw-button>
         <app-fw-button *ngIf="selectedRole() && !selectedRole()?.rawData?.isSystemRole" variant="danger" size="sm" [icon]="Trash2" (click)="deleteRole()" [disabled]="isInitialLoading()">Supprimer</app-fw-button>
         <app-fw-button variant="primary" size="md" [icon]="Save" [loading]="isSaving()" [disabled]="!hasUnsavedChanges() || isInitialLoading() || isReadOnly()" (click)="savePermissions()">Publier</app-fw-button>
       </div>
 
       <!-- MATRICE : Contenu scrollable -->
-      <div class="pbac-matrix-wrapper custom-scrollbar">
+        <div class="pbac-matrix-wrapper custom-scrollbar">
         <div class="editor-container custom-scrollbar">
           <div class="pbac-matrix-container">
 
@@ -100,8 +103,57 @@
               </div>
             </div>
 
-            <!-- LISTE PBAC -->
-            <div class="space-y-12" *ngIf="!isInitialLoading()">
+            <!-- SYNTHÈSE PAR CATÉGORIE -->
+            <div class="category-summary-row" *ngIf="!isInitialLoading() && !showAdvancedView() && categorySummary().length > 0">
+              <div *ngFor="let s of categorySummary()" class="category-summary-badge" [class.has-critical]="s.hasCritical">
+                <span class="summary-label">{{ s.categoryLabel }}</span>
+                <span class="summary-count">{{ s.grantedCount }}/{{ s.totalCount }}</span>
+              </div>
+
+              <button
+                type="button"
+                class="category-scope-toggle"
+                *ngIf="hiddenCategoryCount() > 0 || showAllCategories()"
+                (click)="showAllCategories.set(!showAllCategories())"
+              >
+                {{ showAllCategories() ? 'Réduire aux catégories utilisées' : ('+ Afficher les ' + hiddenCategoryCount() + ' autres catégories') }}
+              </button>
+            </div>
+
+            <!-- VUE MÉTIER (par défaut) : capacités groupées par catégorie business, recadrée par scope -->
+            <div class="space-y-12" *ngIf="!isInitialLoading() && !showAdvancedView()">
+              <div *ngFor="let group of visibleCapabilityGroups()" class="domain-section">
+                <header class="domain-header mb-4">
+                  <h3 class="domain-title">{{ group.categoryLabel }}</h3>
+                </header>
+
+                <div class="capability-table">
+                  <div *ngFor="let cap of group.capabilities" class="capability-row">
+                    <div class="cap-info">
+                      <span class="cap-label">{{ cap.label }}</span>
+                      <span class="cap-risk-badge" [ngClass]="riskClass(cap.riskLevel)" *ngIf="cap.riskLevel !== 'NORMAL'">{{ riskLabel(cap.riskLevel) }}</span>
+                    </div>
+                    <div class="toggle-wrap" [class.is-disabled]="isReadOnly()" (click)="!isReadOnly() && onCapabilityToggle(cap, !cap.granted)">
+                      <button role="switch" class="fw-toggle-switch sm variant-primary" [class.on]="cap.granted" [disabled]="isReadOnly()"><div class="track"><div class="thumb"></div></div></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div *ngIf="filteredCapabilityGroups().length === 0" class="py-24 text-center">
+                <lucide-icon [name]="Search" [size]="32" class="text-slate-200 mx-auto mb-4"></lucide-icon>
+                <p class="text-sm font-bold text-slate-400">Aucune capacité trouvée pour cette recherche.</p>
+              </div>
+
+              <div *ngIf="filteredCapabilityGroups().length > 0 && visibleCapabilityGroups().length === 0" class="py-24 text-center">
+                <lucide-icon [name]="Search" [size]="32" class="text-slate-200 mx-auto mb-4"></lucide-icon>
+                <p class="text-sm font-bold text-slate-400">Résultat uniquement dans des catégories masquées.</p>
+                <button type="button" class="category-scope-toggle mt-3" (click)="showAllCategories.set(true)">Afficher toutes les catégories</button>
+              </div>
+            </div>
+
+            <!-- VUE TECHNIQUE : matrice domaine × ressource × CRUD -->
+            <div class="space-y-12" *ngIf="!isInitialLoading() && showAdvancedView()">
               <div *ngFor="let group of filteredPermissionGroups()" class="domain-section">
                 <header class="domain-header mb-4">
                   <h3 class="domain-title">{{ group.domainName }}</h3>

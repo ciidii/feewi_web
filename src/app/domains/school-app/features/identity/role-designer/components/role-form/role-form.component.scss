@@ -59,3 +59,57 @@
   padding-top: 0.75rem;
   padding-bottom: 0.75rem;
 }
+
+// Étape 1 : grille de modèles métier
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.template-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 1rem;
+  text-align: left;
+  background: var(--fw-surface-sunken);
+  border: 1px solid var(--fw-border-subtle);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: white;
+    border-color: var(--fw-primary);
+    box-shadow: 0 0 0 4px var(--fw-primary-alpha);
+  }
+
+  .template-icon {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    color: var(--fw-primary);
+    background-color: var(--fw-surface-card);
+    border-radius: var(--fw-radius-sm);
+  }
+
+  .template-name {
+    font-size: 0.8125rem;
+    font-weight: 750;
+    color: var(--fw-text-primary);
+  }
+
+  .template-desc {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--fw-text-tertiary);
+  }
+
+  &.template-card-custom {
+    border-style: dashed;
+  }
+}
