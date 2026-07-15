@@ -241,6 +241,13 @@ export class AuthService {
     return this.fetchProfile().pipe(
       map(profile => {
         this._isReady.set(true);
+        // fetchProfile() avale déjà ses propres erreurs HTTP (résout à null plutôt que de
+        // lever), donc un token invalide/expiré ne remonte jamais jusqu'au catchError
+        // ci-dessous : c'est ici qu'il faut le détecter et nettoyer le token mort, sinon il
+        // reste en storage et refait échouer /users/me à chaque rechargement de page.
+        if (profile === null) {
+          this.clearToken();
+        }
         return profile !== null;
       }),
       catchError(() => {

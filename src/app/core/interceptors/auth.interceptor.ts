@@ -21,14 +21,20 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     console.debug(`[AuthInterceptor] No token found in any storage`);
   }
 
-  // 2. Vérifier si c'est une requête vers l'API et non une requête de login
+  // 2. Vérifier si c'est une requête vers l'API et non une requête publique/anonyme
   // On utilise une vérification plus robuste
   const isApiRequest = req.url.includes('/api/v1');
   const isLoginRequest = req.url.includes('/auth/login') || req.url.includes('/auth/register');
+  // Les routes "/public/" (config d'admission, vitrine école, etc.) sont permitAll() côté
+  // backend, mais un Bearer token présent-mais-invalide/expiré fait échouer l'authentification
+  // AVANT même l'évaluation de permitAll() (comportement Spring Security OAuth2 Resource
+  // Server) — d'où un 401 sur une route censée être anonyme. On n'attache donc jamais de
+  // token à ces routes, qu'il soit valide ou non : elles n'en ont jamais besoin.
+  const isPublicRequest = req.url.includes('/public/');
 
   let authReq = req;
 
-  if (isApiRequest && token && !isLoginRequest) {
+  if (isApiRequest && token && !isLoginRequest && !isPublicRequest) {
     console.debug(`[AuthInterceptor] Adding token to request: ${req.url}`);
     authReq = req.clone({
       setHeaders: {
