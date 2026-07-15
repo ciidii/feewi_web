@@ -1,3 +1,16 @@
+// ViewEncapsulation.None sur FwPageShellComponent : `:host` ne fonctionne pas (Angular ne peut
+// pas scoper :host sans encapsulation), donc la balise <app-fw-page-shell> elle-même n'a par
+// défaut AUCUN style (un élément custom inconnu est `inline`, sans hauteur bornée). Sans cette
+// règle, `.page-shell` ci-dessous (height:100%) n'a rien contre quoi se résoudre : tout le
+// contenu grandit à sa taille naturelle au lieu de déclencher le scroll interne de .shell-body —
+// bug qui se reproduit silencieusement sur toute nouvelle page utilisant ce composant tant que
+// la page elle-même ne le repatch pas localement (cf. role-designer avant ce correctif global).
+app-fw-page-shell {
+  display: block;
+  height: 100%;
+  min-height: 0;
+}
+
 .page-shell {
   display: flex;
   flex-direction: column;

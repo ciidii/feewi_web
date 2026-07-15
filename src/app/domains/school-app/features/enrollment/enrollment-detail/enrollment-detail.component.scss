@@ -1,8 +1,10 @@
 @use '../../../../../../styles/tokens' as *;
 
-:host {
+// ViewEncapsulation.None : `:host` ne fonctionne pas dans ce mode — cibler le nom de balise réel.
+app-enrollment-detail {
   display: block;
   height: 100%;
+  min-height: 0;
   background: var(--fw-ice);
 }
 
@@ -608,6 +610,13 @@ app-fw-info-card { display: block; margin-bottom: 1.5rem; }
         color: var(--fw-midnight);
         text-transform: uppercase;
         letter-spacing: 0.02em;
+      }
+
+      .svc-cancelled {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--fw-danger, #dc2626);
+        white-space: nowrap;
       }
     }
 

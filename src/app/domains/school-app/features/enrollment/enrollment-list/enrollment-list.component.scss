@@ -1,6 +1,8 @@
 @use '../../../../../../styles/tokens' as *;
 
-:host { display: block; height: 100%; background: var(--fw-ice); }
+// Ce composant utilise ViewEncapsulation.None : `:host` ne fonctionne pas dans ce mode (même
+// piège que role-designer/page-shell) — il faut cibler le nom de balise réel, en global.
+app-enrollment-list { display: block; height: 100%; min-height: 0; background: var(--fw-ice); }
 
 .list-page-content {
   padding: 0;

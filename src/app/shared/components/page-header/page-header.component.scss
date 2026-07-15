@@ -1,4 +1,5 @@
-:host {
+// ViewEncapsulation.None : `:host` ne fonctionne pas dans ce mode — cibler le nom de balise réel.
+app-fw-page-header {
   display: block;
   width: 100%;
 }
