@@ -13,6 +13,7 @@ import {
   LucideAngularModule,
   Mail,
   MapPin,
+  MoreVertical,
   Pencil,
   Phone,
   RefreshCw,
@@ -24,6 +25,7 @@ import {SchoolService} from '../../../core/services/school.service';
 import {School} from '../../../core/models/school.model';
 import {NotificationService} from '../../../shared/services/notification.service';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import {MatMenuModule} from '@angular/material/menu';
 import {ConfirmDialogComponent} from '../../../shared/components/confirm-dialog/confirm-dialog';
 import {TenantEditFormComponent} from '../tenant-edit-form/tenant-edit-form.component';
 import {finalize} from 'rxjs';
@@ -36,7 +38,7 @@ import {FwInfoCardComponent} from '../../../shared/components/info-card/info-car
 @Component({
   selector: 'app-tenant-detail',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, RouterModule, MatDialogModule, HasPermissionDirective, FwPageShellComponent, FwInfoCardComponent],
+  imports: [CommonModule, LucideAngularModule, RouterModule, MatDialogModule, MatMenuModule, HasPermissionDirective, FwPageShellComponent, FwInfoCardComponent],
   templateUrl: './tenant-detail.component.html',
   styleUrls: ['./tenant-detail.component.scss']
 })
@@ -70,6 +72,7 @@ export class TenantDetailComponent implements OnInit {
   readonly GraduationCap = GraduationCap;
   readonly Pencil = Pencil;
   readonly Trash2 = Trash2;
+  readonly MoreVertical = MoreVertical;
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
