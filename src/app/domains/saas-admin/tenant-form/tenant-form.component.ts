@@ -68,6 +68,25 @@ export class TenantFormComponent implements OnInit {
   error = signal<string | null>(null);
   isIdManuallyEdited = false;
 
+  /** Libellés lisibles des champs, pour signaler précisément ce qui manque à la soumission. */
+  private readonly controlLabels: Record<string, string> = {
+    name: 'Nom officiel',
+    tenantId: "URL d'accès (slug)",
+    phone: 'Téléphone',
+    educationTemplate: 'Système éducatif',
+    allowedCycles: 'Cycles actifs',
+    streetAddress: 'Adresse',
+    city: 'Ville',
+    country: 'Pays',
+    email: 'Email institutionnel',
+    adminFirstName: 'Prénom administrateur',
+    adminLastName: 'Nom administrateur',
+    adminStaffType: 'Type de poste',
+    adminEmail: 'Email de connexion',
+    adminPassword: 'Mot de passe',
+    confirmAdminPassword: 'Confirmation du mot de passe'
+  };
+
   // --- État du stepper ---
   currentStep = signal(0);
   readonly steps: WizardStep[] = [
@@ -244,10 +263,23 @@ export class TenantFormComponent implements OnInit {
   onSubmit() {
     if (this.tenantForm.invalid) {
       this.tenantForm.markAllAsTouched();
+
+      // Liste précise des champs à corriger.
+      const missing = Object.keys(this.controlLabels)
+        .filter(k => this.tenantForm.get(k)?.invalid)
+        .map(k => this.controlLabels[k]);
+      if (this.tenantForm.hasError('passwordMismatch') && !missing.includes(this.controlLabels['confirmAdminPassword'])) {
+        missing.push('Mots de passe non identiques');
+      }
+
       // Positionne l'utilisateur sur la première étape en erreur.
       const firstInvalid = this.steps.findIndex((_, i) => !this.isStepValid(i));
       if (firstInvalid >= 0) this.currentStep.set(firstInvalid);
-      this.notificationService.warning('Verifiez les champs du formulaire.', 'Formulaire incomplet');
+
+      const detail = missing.length
+        ? `À compléter : ${missing.join(', ')}.`
+        : 'Vérifiez les champs du formulaire.';
+      this.notificationService.warning(detail, 'Formulaire incomplet');
       return;
     }
 
