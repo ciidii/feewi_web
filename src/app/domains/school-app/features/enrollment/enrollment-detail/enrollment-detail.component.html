@@ -385,6 +385,20 @@
           <div *ngFor="let sub of app.subscriptions" class="sidebar-svc-item">
             <div class="svc-main">
               <span class="svc-name">{{ getServiceConfig(sub.serviceCode)?.label || sub.serviceCode }}</span>
+              <ng-container *ngIf="sub.status === 'CANCELLED'; else activeSvc">
+                <span class="svc-cancelled">Résilié à partir du {{ sub.effectiveTo | fwDate }}</span>
+              </ng-container>
+              <ng-template #activeSvc>
+                <app-fw-button
+                  *ngIf="app.status === 'VALIDATED' && canTerminateSubscriptionAction()"
+                  variant="tertiary"
+                  size="sm"
+                  [icon]="Ban"
+                  (click)="terminateSubscription(sub)"
+                >
+                  Résilier
+                </app-fw-button>
+              </ng-template>
             </div>
             <span class="svc-opt" *ngIf="sub.optionCode">{{ sub.optionCode }}</span>
           </div>

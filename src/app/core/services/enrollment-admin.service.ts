@@ -162,6 +162,16 @@ export class EnrollmentAdminService {
     );
   }
 
+  /**
+   * Résiliation d'une souscription à un service optionnel (ADR-010, Secrétariat) — effet
+   * différé, jamais rétroactif. La période déjà facturée reste due.
+   */
+  terminateSubscription(admissionId: string, serviceCode: string, request: {effectiveDate: string; reason?: string}): Observable<void> {
+    return this.http.post<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.TERMINATE_SUBSCRIPTION(admissionId, serviceCode)), request, { headers: this.getHeaders() }).pipe(
+      catchError(this.handleError('Erreur lors de la résiliation du service'))
+    );
+  }
+
   /** Confirmer le paiement (garde-fou minimal, précondition à la validation) */
   confirmPayment(admissionId: string): Observable<void> {
     return this.http.patch<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.ADMIN.CONFIRM_PAYMENT(admissionId)), {}, { headers: this.getHeaders() }).pipe(

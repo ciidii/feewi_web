@@ -55,7 +55,7 @@ import {FwPageShellComponent} from '../../../../../shared/components/page-shell/
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
 import {FwInfoCardComponent} from '../../../../../shared/components/info-card/info-card.component';
 import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
-import {Admission, AssessmentRequest, RequiredDocument} from '../../../../../core/models/enrollment.model';
+import {Admission, AssessmentRequest, RequiredDocument, ServiceSubscription} from '../../../../../core/models/enrollment.model';
 import {EnrollmentSchema, ServiceConfig} from '../../../../../core/models/enrollment/config';
 import {BlockLoaderComponent} from '../../../../../shared/components/loader/block-loader.component';
 import {PageProgressComponent} from '../../../../../shared/components/loader/page-progress.component';
@@ -66,6 +66,9 @@ import {
 import {CamelToLabelPipe} from '../../../../../shared/pipes/camel-to-label.pipe';
 import {FwDatePipe} from '../../../../../shared/pipes/fw-date.pipe';
 import {AuthService} from '../../../../../core/services/auth.service';
+import {
+  TerminateSubscriptionDialogComponent
+} from './components/terminate-subscription-dialog/terminate-subscription-dialog.component';
 
 @Component({
   selector: 'app-enrollment-detail',
@@ -126,6 +129,7 @@ export class EnrollmentDetailComponent implements OnInit {
   readonly canDecideAction = computed(() => this.authService.hasPermission('enrollment:admission:decide'));
   readonly canCancelAction = computed(() => this.authService.hasPermission('enrollment:admission:cancel'));
   readonly canConfirmPaymentAction = computed(() => this.authService.hasPermission('enrollment:admission:confirm-payment'));
+  readonly canTerminateSubscriptionAction = computed(() => this.authService.hasPermission('enrollment:admission:terminate-subscription'));
 
   // --- CALCULS RÉACTIFS (Workflow Logic) ---
   canVerify = computed(() => this.application()?.status === 'SUBMITTED');
@@ -473,6 +477,25 @@ export class EnrollmentDetailComponent implements OnInit {
           this.notificationService.info('Dossier annulé.');
         }
       }
+    });
+  }
+
+  terminateSubscription(sub: ServiceSubscription) {
+    const app = this.application();
+    if (!app) return;
+
+    const dialogRef = this.dialog.open(TerminateSubscriptionDialogComponent, {
+      width: '480px',
+      panelClass: 'feewi-dialog-panel',
+      data: {
+        admissionId: app.id,
+        serviceCode: sub.serviceCode,
+        serviceLabel: this.getServiceConfig(sub.serviceCode)?.label || sub.serviceCode
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) this.loadApplication(app.id);
     });
   }
 

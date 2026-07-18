@@ -78,6 +78,11 @@ export interface Assessment {
 export interface ServiceSubscription {
   serviceCode: string;
   optionCode: string;
+  /** ADR-010 — absent/undefined = ACTIVE (rétrocompatible avec les souscriptions existantes). */
+  status?: 'ACTIVE' | 'CANCELLED';
+  effectiveFrom?: string | null;
+  /** Premier jour non facturé — renseigné uniquement si status === 'CANCELLED'. */
+  effectiveTo?: string | null;
 }
 
 // --- BILLING (INFORMATIF — jamais bloquant, BL-BILL-01) ---

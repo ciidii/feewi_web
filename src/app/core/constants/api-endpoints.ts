@@ -50,6 +50,7 @@ export const API_ENDPOINTS = {
       RECEIVE_DOCUMENT: (id: string, docCode: string) => `/admin/admissions/${id}/documents/${docCode}/receive`,
       VERIFY: (id: string) => `/admin/admissions/${id}/verify`,
       CANCEL: (id: string) => `/admin/admissions/${id}/cancel`,
+      TERMINATE_SUBSCRIPTION: (id: string, serviceCode: string) => `/admin/admissions/${id}/subscriptions/${serviceCode}/terminate`,
       CONFIRM_PAYMENT: (id: string) => `/admin/admissions/${id}/payment/confirm`,
       DASHBOARD_STATS: '/admin/stats/dashboard',
 
