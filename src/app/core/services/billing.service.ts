@@ -8,6 +8,7 @@ import {API_ENDPOINTS} from '../constants/api-endpoints';
 import {
   AggregateGroupRequest,
   AggregateReportResponse,
+  BillingSettings,
   CreateFeeItemRequest,
   CreateFeeTypeRequest,
   CreateInstallmentPlanRequest,
@@ -19,6 +20,7 @@ import {
   RecordPaymentRequest,
   StudentBalance,
   StudentStatement,
+  UpdateBillingSettingsRequest,
   UpdateFeeTypeRequest,
 } from '../models/billing.model';
 
@@ -173,6 +175,24 @@ export class BillingService {
       headers: this.getHeaders()
     }).pipe(
       catchError(this.handleError('Erreur lors de l\'enregistrement du paiement'))
+    );
+  }
+
+  // --- RÉGLAGES DE FACTURATION (ADR-009 §5) ---
+
+  getBillingSettings(): Observable<BillingSettings> {
+    return this.http.get<BillingSettings>(this.getUrl(API_ENDPOINTS.BILLING.SETTINGS), {
+      headers: this.getHeaders(true)
+    }).pipe(
+      catchError(this.handleError('Impossible de charger les réglages de facturation'))
+    );
+  }
+
+  updateBillingSettings(request: UpdateBillingSettingsRequest): Observable<BillingSettings> {
+    return this.http.put<BillingSettings>(this.getUrl(API_ENDPOINTS.BILLING.SETTINGS), request, {
+      headers: this.getHeaders()
+    }).pipe(
+      catchError(this.handleError('Erreur lors de la mise à jour des réglages de facturation'))
     );
   }
 }

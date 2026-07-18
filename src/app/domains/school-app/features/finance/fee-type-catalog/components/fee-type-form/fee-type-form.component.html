@@ -27,6 +27,7 @@
               placeholder="Ex: CANTINE"
               class="fw-input uppercase"
               [class.error]="isInvalid('code')"
+              (blur)="onCodeChanged()"
             />
           </div>
           <p class="fw-hint" *ngIf="!isEditMode">Lettres majuscules, chiffres et underscores uniquement. Non modifiable après création.</p>
@@ -48,14 +49,40 @@
       </div>
     </div>
 
-    <!-- 1bis. Montant par défaut (facturation automatique) -->
+    <!-- 1bis. Tarification (facturation automatique) -->
     <div class="space-y-6">
       <header class="section-header">
         <lucide-icon [name]="Wallet" [size]="14"></lucide-icon>
-        <span class="label">Facturation automatique (optionnel)</span>
+        <span class="label">Tarification (optionnel)</span>
       </header>
 
-      <div class="fw-field">
+      <div class="flex gap-2 p-1 bg-surface-sunken rounded-xl w-fit">
+        <button
+          type="button"
+          class="px-4 py-2 rounded-lg text-xs font-bold transition-all"
+          [class.bg-white]="pricingMode === 'amount'"
+          [class.shadow-sm]="pricingMode === 'amount'"
+          [class.text-midnight]="pricingMode === 'amount'"
+          [class.text-text-secondary]="pricingMode !== 'amount'"
+          (click)="setPricingMode('amount')"
+        >
+          Montant unique
+        </button>
+        <button
+          type="button"
+          class="px-4 py-2 rounded-lg text-xs font-bold transition-all"
+          [class.bg-white]="pricingMode === 'options'"
+          [class.shadow-sm]="pricingMode === 'options'"
+          [class.text-midnight]="pricingMode === 'options'"
+          [class.text-text-secondary]="pricingMode !== 'options'"
+          (click)="setPricingMode('options')"
+        >
+          Catalogue d'options
+        </button>
+      </div>
+
+      <!-- Mode montant unique -->
+      <div class="fw-field" *ngIf="pricingMode === 'amount'">
         <label class="fw-label">Montant par défaut (FCFA)</label>
         <div class="fw-input-wrapper">
           <input
@@ -73,6 +100,45 @@
           alors correspondre exactement au code du service côté inscription. Laisser vide pour un
           type de frais saisi manuellement (Inscription, Scolarité, frais ponctuels).
         </p>
+      </div>
+
+      <!-- Mode catalogue d'options -->
+      <div class="space-y-3" *ngIf="pricingMode === 'options'" formArrayName="options">
+        <p class="fw-hint" *ngIf="isScolarite">
+          Scolarité : chaque option correspond à un niveau scolaire — le tarif s'applique
+          automatiquement selon le niveau souhaité par la famille.
+        </p>
+        <p class="fw-hint" *ngIf="!isScolarite">
+          Chaque option correspond à un choix possible pour ce service (ex. zone de transport,
+          formule de cantine) — le code doit correspondre exactement à l'option choisie côté
+          inscription.
+        </p>
+
+        <div *ngFor="let opt of optionsArray.controls; let i = index" [formGroupName]="i"
+             class="grid grid-cols-[1fr_1fr_140px_auto] gap-2 items-start">
+          <div class="fw-field" *ngIf="!isScolarite">
+            <input type="text" formControlName="code" placeholder="Ex: ALLER_RETOUR" class="fw-input uppercase" />
+          </div>
+          <div class="fw-field" *ngIf="isScolarite">
+            <select formControlName="code" class="fw-input">
+              <option value="" disabled>Sélectionner un niveau</option>
+              <option *ngFor="let level of levels()" [value]="level.id">{{ level.name }}</option>
+            </select>
+          </div>
+          <div class="fw-field">
+            <input type="text" formControlName="label" placeholder="Libellé" class="fw-input" />
+          </div>
+          <div class="fw-field">
+            <input type="number" formControlName="price" placeholder="Prix" class="fw-input" min="1" />
+          </div>
+          <button type="button" class="icon-btn" (click)="removeOption(i)">
+            <lucide-icon [name]="Trash2" [size]="14"></lucide-icon>
+          </button>
+        </div>
+
+        <app-fw-button variant="tertiary" size="sm" [icon]="Plus" (click)="addOption()">
+          Ajouter une option
+        </app-fw-button>
       </div>
     </div>
 

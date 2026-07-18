@@ -7,6 +7,39 @@
   <!-- CONTENU DE PAGE ALIGNÉ -->
   <div class="list-page-content animate-in fade-in duration-500">
 
+    <!-- RÉGLAGES DE FACTURATION (ADR-009 §5) -->
+    <div class="bg-surface-sunken rounded-2xl p-5 border border-border flex items-center justify-between gap-4 flex-wrap">
+      <div class="flex items-center gap-4">
+        <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm text-text-tertiary">
+          <lucide-icon [name]="Settings" [size]="18"></lucide-icon>
+        </div>
+        <div>
+          <p class="text-sm font-bold text-midnight">Mensualisation</p>
+          <p class="text-[11px] text-text-secondary">
+            Nombre de mensualités sur lesquelles la scolarité et les services souscrits sont répartis.
+          </p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2" *fwHasPermission="'finance:fee:manage'">
+        <input
+          type="number"
+          min="1"
+          class="fw-input w-24"
+          [ngModel]="nombreMensualitesInput()"
+          (ngModelChange)="nombreMensualitesInput.set($event)"
+        />
+        <app-fw-button
+          variant="secondary"
+          size="sm"
+          [loading]="isSavingSettings()"
+          [disabled]="nombreMensualitesInput() === billingSettings()?.nombreMensualites"
+          (click)="saveBillingSettings()"
+        >
+          Enregistrer
+        </app-fw-button>
+      </div>
+    </div>
+
     <!-- BARRE DE COMMANDE UNIFIÉE -->
     <app-fw-list-command-bar
       [searchQuery]="searchQuery()"
@@ -58,6 +91,5 @@
         ></app-fw-empty-state>
       </div>
     </div>
-
   </div>
 </app-fw-page-shell>

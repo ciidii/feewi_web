@@ -1,10 +1,11 @@
 import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {CreditCard, Edit, LucideAngularModule, Plus, RefreshCw, Search, ToggleLeft, ToggleRight, Trash2} from 'lucide-angular';
+import {FormsModule} from '@angular/forms';
+import {CreditCard, Edit, LucideAngularModule, Plus, RefreshCw, Search, Settings, ToggleLeft, ToggleRight, Trash2} from 'lucide-angular';
 import {firstValueFrom} from 'rxjs';
 import {BillingService} from '../../../../../core/services/billing.service';
 import {NotificationService} from '../../../../../shared/services/notification.service';
-import {FeeType} from '../../../../../core/models/billing.model';
+import {BillingSettings, FeeType} from '../../../../../core/models/billing.model';
 import {DataListComponent} from '../../../../../shared/components/data-list/data-list.component';
 import {RowAction, TableRow} from '../../../../../shared/models/data-list.models';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
@@ -25,6 +26,7 @@ const MANAGE_PERMISSION = 'finance:fee:manage';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     LucideAngularModule,
     DataListComponent,
     MatDialogModule,
@@ -52,11 +54,17 @@ export class FeeTypeCatalogComponent implements OnInit {
   readonly ToggleRight = ToggleRight;
   readonly Search = Search;
   readonly RefreshCw = RefreshCw;
+  readonly Settings = Settings;
 
   // États
   feeTypes = signal<FeeType[]>([]);
   isLoading = signal(true);
   searchQuery = signal('');
+
+  // Réglages de facturation (ADR-009 §5)
+  billingSettings = signal<BillingSettings | null>(null);
+  nombreMensualitesInput = signal<number | null>(null);
+  isSavingSettings = signal(false);
 
   readonly canManage = computed(() => this.authService.hasPermission(MANAGE_PERMISSION));
 
@@ -110,7 +118,8 @@ export class FeeTypeCatalogComponent implements OnInit {
         badges: [
           {label: ft.active ? 'Actif' : 'Inactif', type: ft.active ? 'success' : 'default'},
           ...(ft.isSystemDefined ? [{label: 'Système', type: 'info' as const}] : []),
-          ...(ft.defaultAmount != null ? [{label: 'Facturation auto', type: 'primary' as const}] : [])
+          ...(ft.options?.length ? [{label: `${ft.options.length} option${ft.options.length > 1 ? 's' : ''}`, type: 'primary' as const}]
+            : ft.defaultAmount != null ? [{label: 'Facturation auto', type: 'primary' as const}] : [])
         ],
         rawData: ft
       }));
@@ -118,6 +127,7 @@ export class FeeTypeCatalogComponent implements OnInit {
 
   ngOnInit() {
     this.loadData();
+    this.loadBillingSettings();
   }
 
   async loadData() {
@@ -129,6 +139,32 @@ export class FeeTypeCatalogComponent implements OnInit {
       // La notification d'erreur est déjà déclenchée par BillingService.handleError
     } finally {
       this.isLoading.set(false);
+    }
+  }
+
+  private async loadBillingSettings() {
+    try {
+      const settings = await firstValueFrom(this.billingService.getBillingSettings());
+      this.billingSettings.set(settings);
+      this.nombreMensualitesInput.set(settings.nombreMensualites);
+    } catch (error) {
+      // La notification d'erreur est déjà déclenchée par BillingService.handleError
+    }
+  }
+
+  async saveBillingSettings() {
+    const value = this.nombreMensualitesInput();
+    if (value == null || value < 1) return;
+
+    this.isSavingSettings.set(true);
+    try {
+      const updated = await firstValueFrom(this.billingService.updateBillingSettings({nombreMensualites: value}));
+      this.billingSettings.set(updated);
+      this.notificationService.success('Réglage de mensualisation mis à jour.');
+    } catch (error) {
+      // La notification d'erreur est déjà déclenchée par BillingService.handleError
+    } finally {
+      this.isSavingSettings.set(false);
     }
   }
 

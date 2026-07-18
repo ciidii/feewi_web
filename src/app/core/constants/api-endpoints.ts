@@ -81,6 +81,7 @@ export const API_ENDPOINTS = {
     REPORTS_AGGREGATE: '/reports/aggregate',
     INSTALLMENT_PLANS: (studentId: string) => `/students/${studentId}/installment-plans`,
     INSTALLMENTS_OVERDUE: '/installments/overdue',
+    SETTINGS: '/settings',
   },
 
   SCHOOL: {

@@ -4,6 +4,20 @@
 
 export type PaymentMethod = 'CASH' | 'BANK_TRANSFER' | 'WAVE' | 'ORANGE_MONEY';
 
+/**
+ * Option tarifaire d'un FeeType (ADR-009 §1/§2). Deux modes de résolution du champ `code`,
+ * non unifiés côté backend :
+ * - Services parascolaires (TRANSPORT, CANTEEN...) : `code` = code métier texte stable
+ *   (ex. "ALLER_RETOUR"), résolu depuis ServiceSubscription.optionCode.
+ * - FeeType SCOLARITE uniquement : `code` = levelId (UUID academic-structure-service),
+ *   résolu depuis wish.levelId.
+ */
+export interface FeeTypeOption {
+  code: string;
+  label: string;
+  price: number;
+}
+
 export interface FeeType {
   id: string;
   code: string;
@@ -17,20 +31,27 @@ export interface FeeType {
    * (BL-BILL-10) — null pour INSCRIPTION/SCOLARITE et tout type destiné à des FeeItem ponctuels
    * saisis à la main. Sans ce montant, un service souscrit à l'inscription (Cantine, Transport)
    * ne sera jamais facturé automatiquement.
+   * Coexiste avec `options` (ADR-009 §1) : si `options` est renseigné, il est prioritaire pour
+   * la résolution de prix côté backend — `defaultAmount` reste un fallback pour la facturation
+   * ponctuelle (BL-BILL-10) tant qu'aucune option n'est configurée.
    */
   defaultAmount?: number | null;
+  /** Catalogue d'options tarifaires (ADR-009) — toujours présent, [] si aucune option configurée. */
+  options: FeeTypeOption[];
 }
 
 export interface CreateFeeTypeRequest {
   code: string;
   label: string;
   defaultAmount?: number | null;
+  options?: FeeTypeOption[];
 }
 
 export interface UpdateFeeTypeRequest {
   label?: string;
   active?: boolean;
   defaultAmount?: number | null;
+  options?: FeeTypeOption[];
 }
 
 export interface FeeItem {
@@ -185,6 +206,19 @@ export interface BillingErrorCode {
   FEE_TYPE_SYSTEM_DEFINED: 'FEE_TYPE_SYSTEM_DEFINED';
   FEE_TYPE_IN_USE: 'FEE_TYPE_IN_USE';
   FEE_TYPE_CODE_DUPLICATE: 'FEE_TYPE_CODE_DUPLICATE';
+}
+
+// --- RÉGLAGES DE FACTURATION (ADR-009 §5) ---
+
+export interface BillingSettings {
+  nombreMensualites: number;
+  updatedAt?: string | null;
+  /** Email de l'utilisateur ayant modifié le réglage — null pour le seed système. */
+  updatedBy?: string | null;
+}
+
+export interface UpdateBillingSettingsRequest {
+  nombreMensualites: number;
 }
 
 export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
