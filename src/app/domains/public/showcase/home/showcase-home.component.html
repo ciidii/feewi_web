@@ -1,0 +1,128 @@
+<fw-block-loader *ngIf="isLoading()" [center]="true" message="Chargement de la vitrine..."></fw-block-loader>
+
+<div class="showcase-home" *ngIf="!isLoading()">
+
+  <!-- HERO -->
+  <section class="hero" [style.background-image]="branding()?.coverUrl ? 'url(' + branding()!.coverUrl + ')' : null">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div class="hero-logo" *ngIf="tenantCtx.activeTenant()?.logoUrl">
+        <img [src]="tenantCtx.activeTenant()?.logoUrl" alt="Logo école" />
+      </div>
+      <div class="hero-logo hero-logo-fallback" *ngIf="!tenantCtx.activeTenant()?.logoUrl">
+        <lucide-icon [name]="GraduationCap" [size]="28"></lucide-icon>
+      </div>
+
+      <h1 class="hero-title">{{ tenantCtx.activeTenant()?.name }}</h1>
+      <p class="hero-desc" *ngIf="branding()?.description">{{ branding()?.description }}</p>
+
+      <div class="hero-actions">
+        <app-fw-button variant="primary" size="lg" [icon]="ArrowRight" iconPosition="right" routerLink="/admissions">
+          Inscriptions en ligne
+        </app-fw-button>
+        <app-fw-button variant="secondary" size="lg" [icon]="Search" routerLink="/admissions/tracker">
+          Suivre mon dossier
+        </app-fw-button>
+      </div>
+    </div>
+  </section>
+
+  <!-- KPI -->
+  <section class="kpi-band" *ngIf="branding()?.stats?.length">
+    <div class="kpi-grid">
+      <div class="kpi-item" *ngFor="let stat of branding()!.stats">
+        <span class="kpi-value">{{ stat.value }}</span>
+        <span class="kpi-label">{{ stat.label }}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- VALEURS -->
+  <section class="section values-section" *ngIf="branding()?.values?.length">
+    <div class="section-inner two-col">
+      <div class="section-intro">
+        <span class="eyebrow">Notre projet éducatif</span>
+        <h2>Ce qui nous anime</h2>
+      </div>
+      <ul class="values-list">
+        <li *ngFor="let value of branding()!.values">
+          <lucide-icon [name]="CheckCircle2" [size]="18"></lucide-icon>
+          <span>{{ value }}</span>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- RÉSULTATS -->
+  <section class="section" *ngIf="recentResults().length">
+    <div class="section-inner">
+      <div class="section-header">
+        <div class="section-intro">
+          <span class="eyebrow"><lucide-icon [name]="Award" [size]="14"></lucide-icon> Résultats aux examens</span>
+          <h2>Des résultats qui parlent d'eux-mêmes</h2>
+        </div>
+        <a routerLink="/resultats-examens" class="section-link">
+          Voir tous les résultats <lucide-icon [name]="ArrowRight" [size]="14"></lucide-icon>
+        </a>
+      </div>
+      <div class="results-grid">
+        <app-exam-result-card *ngFor="let result of recentResults()" [result]="result" />
+      </div>
+    </div>
+  </section>
+
+  <!-- GALERIE -->
+  <section class="section" *ngIf="galleryPreview().length">
+    <div class="section-inner">
+      <div class="section-header">
+        <div class="section-intro">
+          <span class="eyebrow"><lucide-icon [name]="Camera" [size]="14"></lucide-icon> Vie de l'établissement</span>
+          <h2>Notre école en images</h2>
+        </div>
+        <a routerLink="/galerie" class="section-link">
+          Voir la galerie <lucide-icon [name]="ArrowRight" [size]="14"></lucide-icon>
+        </a>
+      </div>
+      <div class="gallery-preview-grid">
+        <div class="gallery-preview-item" *ngFor="let photo of galleryPreview()">
+          <img [src]="photo.url" [alt]="photo.caption || 'Photo établissement'" loading="lazy" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TARIFS RÉSUMÉ -->
+  <section class="section pricing-summary" *ngIf="pricingPlans().length">
+    <div class="section-inner">
+      <div class="section-header">
+        <div class="section-intro">
+          <span class="eyebrow">Frais de scolarité</span>
+          <h2>Des tarifs transparents par cycle</h2>
+        </div>
+        <a routerLink="/tarifs" class="section-link">
+          Voir tarifs & services <lucide-icon [name]="ArrowRight" [size]="14"></lucide-icon>
+        </a>
+      </div>
+      <div class="pricing-mini-grid">
+        <div class="pricing-mini-card" *ngFor="let plan of pricingPlans()">
+          <span class="plan-label">{{ plan.label }}</span>
+          <span class="plan-price">À partir de {{ plan.tuitionAmount | number }} {{ plan.currency }}<span class="plan-period">/{{ plan.period }}</span></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA FINAL -->
+  <section class="final-cta">
+    <div class="final-cta-inner">
+      <lucide-icon [name]="Sparkles" [size]="28"></lucide-icon>
+      <h2 *ngIf="activeCampaign()">Campagne d'admission {{ activeCampaign()?.label }} ouverte</h2>
+      <h2 *ngIf="!activeCampaign()">Prêt à rejoindre notre établissement ?</h2>
+      <p>Démarrez votre demande d'inscription en ligne en quelques minutes.</p>
+      <app-fw-button variant="primary" size="lg" [icon]="ArrowRight" iconPosition="right" routerLink="/admissions">
+        Commencer mon inscription
+      </app-fw-button>
+    </div>
+  </section>
+
+</div>

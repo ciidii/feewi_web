@@ -1,4 +1,30 @@
-export interface School {
+export interface SchoolStat {
+  label: string;
+  value: string;
+}
+
+export interface SchoolSocialLinks {
+  facebook?: string;
+  instagram?: string;
+  linkedin?: string;
+  youtube?: string;
+  whatsapp?: string;
+}
+
+/** Champs de branding vitrine partagés entre l'admin (School) et le public (PublicSchoolResponse). */
+export interface SchoolBrandingFields {
+  coverUrl?: string;
+  description?: string;
+  secondaryColor?: string;
+  accentColor?: string;
+  foundedYear?: number;
+  studentCount?: number;
+  values?: string[];
+  stats?: SchoolStat[];
+  socialLinks?: SchoolSocialLinks;
+}
+
+export interface School extends SchoolBrandingFields {
   id?: string;
   tenantId: string;
   name: string;
@@ -20,7 +46,7 @@ export interface School {
   createdAt?: string;
 }
 
-export interface PublicSchoolResponse {
+export interface PublicSchoolResponse extends SchoolBrandingFields {
   tenantId: string;
   name: string;
   slogan?: string;

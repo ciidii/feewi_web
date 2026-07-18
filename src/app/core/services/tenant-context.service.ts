@@ -38,7 +38,7 @@ export class TenantContextService {
 
   private updateBranding(tenant: Tenant): void {
     if (tenant.primaryColor) {
-      document.documentElement.style.setProperty('--feewi-primary', tenant.primaryColor);
+      document.documentElement.style.setProperty('--fw-primary', tenant.primaryColor);
     }
   }
 }

@@ -14,6 +14,7 @@ import {
   ServiceSubscriptionRequest,
 } from '../models/enrollment/dtos';
 import {Admission} from '../models/enrollment/entities';
+import {UploadTicketResponse} from '../models/document.model';
 
 import {TenantContextService} from './tenant-context.service';
 import {EnvironmentService} from './environment.service';
@@ -131,6 +132,19 @@ export class EnrollmentPublicService {
     return this.http
       .patch<void>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.SUBSCRIPTIONS(admissionId)), subscriptions, { headers: this.getHeaders(true), params })
       .pipe(catchError(this.handleError('Erreur lors de la sélection des services')));
+  }
+
+  /**
+   * Demande un ticket d'upload via enrollment-service (proxy vers document-engine-service),
+   * qui vérifie l'accessCode avant l'appel sortant — le portail public n'a pas de JWT et ne
+   * peut donc pas appeler document-engine-service directement.
+   */
+  getDocumentUploadTicket(admissionId: string, docCode: string, fileName: string, contentType: string, accessCode: string): Observable<UploadTicketResponse> {
+    const headers = this.getHeaders(true);
+    const params = new HttpParams().set('accessCode', accessCode);
+    return this.http
+      .post<UploadTicketResponse>(this.getUrl(API_ENDPOINTS.ENROLLMENT.PUBLIC.DOCUMENT_UPLOAD_TICKET(admissionId, docCode)), { fileName, contentType }, { headers, params })
+      .pipe(catchError(this.handleError('Impossible d\'obtenir un ticket d\'envoi')));
   }
 
   /** Documents — Upload URL brute (string) */

@@ -3,6 +3,7 @@ import {HttpClient, HttpParams} from '@angular/common/http';
 import {catchError, finalize, Observable, tap, throwError} from 'rxjs';
 import {Page, PublicSchoolResponse, School} from '../models/school.model';
 import {AuditLog} from '../models/audit.model';
+import {BrandingUploadTicketRequest, BrandingUploadTicketResponse} from '../models/showcase';
 import {EnvironmentService} from './environment.service';
 import {NotificationService} from '../../shared/services/notification.service';
 
@@ -107,23 +108,22 @@ export class SchoolService {
   }
 
   /**
+   * Demande un ticket d'upload public et permanent pour le logo ou la couverture de l'école
+   * (proxy vers document-engine-service, cf. SchoolController#requestBrandingUploadTicket).
+   */
+  getBrandingUploadTicket(request: BrandingUploadTicketRequest): Observable<BrandingUploadTicketResponse> {
+    return this.http.post<BrandingUploadTicketResponse>(`${this.API_URL}/my-school/branding/upload-ticket`, request).pipe(
+      catchError(this.handleError('Impossible d\'obtenir un ticket d\'envoi pour l\'image'))
+    );
+  }
+
+  /**
    * Provisionne une nouvelle école (SaaS Admin)
    */
   createSchool(school: any): Observable<School> {
     this._loading.set(true);
     return this.http.post<School>(this.API_URL, school).pipe(
       catchError(this.handleError('Erreur lors de la création de l\'établissement')),
-      finalize(() => this._loading.set(false))
-    );
-  }
-
-  /**
-   * Met à jour les informations d'une école
-   */
-  updateSchool(id: string, school: Partial<School>): Observable<School> {
-    this._loading.set(true);
-    return this.http.put<School>(`${this.API_URL}/${id}`, school).pipe(
-      catchError(this.handleError('Erreur lors de la mise à jour de l\'établissement')),
       finalize(() => this._loading.set(false))
     );
   }

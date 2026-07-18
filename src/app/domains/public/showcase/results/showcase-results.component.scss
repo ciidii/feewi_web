@@ -1,0 +1,102 @@
+:host {
+  display: block;
+  font-family: var(--fw-font-sans);
+  min-height: 60vh;
+}
+
+.page-header {
+  background: var(--fw-surface-card);
+  border-bottom: 1px solid var(--fw-border);
+  padding: 48px 24px;
+  text-align: center;
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--fw-primary);
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-family: var(--fw-font-display);
+    font-size: 2rem;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    color: var(--fw-text-primary);
+    margin-bottom: 10px;
+  }
+
+  p {
+    max-width: 520px;
+    margin: 0 auto;
+    color: var(--fw-text-secondary);
+    font-size: 0.9375rem;
+  }
+}
+
+.page-inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.top-students {
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--fw-font-display);
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--fw-text-primary);
+    margin-bottom: 16px;
+
+    lucide-icon { color: var(--fw-primary); }
+  }
+}
+
+.students-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.student-card {
+  background: var(--fw-surface-card);
+  border: 1px solid var(--fw-border);
+  border-radius: var(--fw-radius-lg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  .student-name { font-weight: 700; font-size: 0.875rem; color: var(--fw-text-primary); }
+  .student-mention { font-size: 0.75rem; font-weight: 600; color: var(--fw-primary); }
+  .student-score { font-size: 0.75rem; color: var(--fw-text-tertiary); }
+}
+
+.results-cta {
+  text-align: center;
+  padding: 32px 0 0;
+  border-top: 1px solid var(--fw-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+
+  p { font-weight: 700; color: var(--fw-text-primary); }
+}
