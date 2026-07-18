@@ -143,15 +143,6 @@
         <app-fw-info-card *ngIf="canReadFinanceAction()" [icon]="Wallet" title="Finance" subtitle="Frais de scolarité et paiements enregistrés">
           <div card-actions>
             <app-fw-button
-              *ngIf="canManageFeeAction()"
-              variant="secondary"
-              size="sm"
-              [icon]="Layers"
-              (click)="openInstallmentPlanDialog()"
-            >
-              Créer un plan de tranches
-            </app-fw-button>
-            <app-fw-button
               *ngIf="canRecordPaymentAction()"
               variant="primary"
               size="sm"
