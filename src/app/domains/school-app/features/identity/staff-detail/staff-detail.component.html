@@ -5,6 +5,7 @@
   [icon]="Fingerprint"
   [backLink]="['/admin/identity/staff']"
   density="compact"
+  [showSearch]="false"
 >
   <!-- ACTIONS DE PAGE -->
   <div actions class="flex items-center gap-2">
@@ -52,15 +53,8 @@
       <div class="col-span-12 lg:col-span-8 space-y-6">
         
         <!-- Carte : Profil RH -->
-        <section class="dossier-card">
-          <header class="card-header">
-            <div class="header-left">
-              <lucide-icon [name]="User" class="header-icon" [size]="16"></lucide-icon>
-              <h3 class="card-title">Information Collaborateur</h3>
-            </div>
-          </header>
-
-          <div class="card-body grid grid-cols-1 md:grid-cols-2 gap-8">
+        <app-fw-info-card [icon]="User" title="Information Collaborateur">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div class="space-y-1">
               <label class="info-label">Prénom & Nom</label>
               <p class="info-value text-lg">{{ s.firstName }} {{ s.lastName }}</p>
@@ -95,24 +89,16 @@
               <p class="info-value">{{ s.createdAt | date:'longDate' }}</p>
             </div>
           </div>
-        </section>
+        </app-fw-info-card>
 
         <!-- Carte : Pédagogie (Si Enseignant) -->
-        <section class="dossier-card" *ngIf="s.staffType === 'TEACHER'">
-          <header class="card-header">
-            <div class="header-left">
-              <lucide-icon [name]="GraduationCap" class="header-icon" [size]="16"></lucide-icon>
-              <h3 class="card-title">Activité Pédagogique</h3>
-            </div>
-          </header>
-          <div class="card-body p-0">
-             <div class="empty-placeholder py-12 flex flex-col items-center justify-center text-center">
-                <lucide-icon [name]="BookOpen" [size]="32" class="text-slate-200 mb-4"></lucide-icon>
-                <p class="text-sm font-bold text-slate-400 italic">Aucune affectation de classe trouvée pour cet enseignant.</p>
-                <app-fw-button variant="ghost" size="sm" class="mt-4" [icon]="Zap">Affecter à une classe</app-fw-button>
-             </div>
+        <app-fw-info-card *ngIf="s.staffType === 'TEACHER'" [icon]="GraduationCap" title="Activité Pédagogique" [noPadding]="true">
+          <div class="empty-placeholder py-12 flex flex-col items-center justify-center text-center">
+            <lucide-icon [name]="BookOpen" [size]="32" class="text-slate-200 mb-4"></lucide-icon>
+            <p class="text-sm font-bold text-slate-400 italic">Aucune affectation de classe trouvée pour cet enseignant.</p>
+            <app-fw-button variant="ghost" size="sm" class="mt-4" [icon]="Zap">Affecter à une classe</app-fw-button>
           </div>
-        </section>
+        </app-fw-info-card>
 
       </div>
 
@@ -120,16 +106,12 @@
       <div class="col-span-12 lg:col-span-4 space-y-6">
         
         <!-- Carte : État du Compte -->
-        <section class="dossier-card" [class.account-active]="s.hasUserAccount">
-          <header class="card-header">
-            <div class="header-left">
-              <lucide-icon [name]="Shield" class="header-icon" [size]="16"></lucide-icon>
-              <h3 class="card-title">Accès Système</h3>
-            </div>
+        <app-fw-info-card [icon]="Shield" title="Accès Système" [accent]="s.hasUserAccount ? 'primary' : 'default'">
+          <div card-actions>
             <app-fw-badge [status]="s.hasUserAccount ? 'ACTIVE' : 'PLANNING'" [labelOverride]="s.hasUserAccount ? 'Compte Actif' : 'Pas d\'accès'"></app-fw-badge>
-          </header>
+          </div>
 
-          <div class="card-body space-y-6">
+          <div class="space-y-6">
             <div *ngIf="userAccount() as user; else noAccount">
               <div class="space-y-4">
                 <div class="flex flex-col gap-1">
@@ -188,33 +170,25 @@
               </div>
             </ng-template>
           </div>
-        </section>
+        </app-fw-info-card>
 
         <!-- Carte : Audit Rapide -->
-        <section class="dossier-card">
-          <header class="card-header">
-            <div class="header-left">
-              <lucide-icon [name]="History" class="header-icon" [size]="16"></lucide-icon>
-              <h3 class="card-title">Dernières Activités</h3>
+        <app-fw-info-card [icon]="History" title="Dernières Activités" [noPadding]="true">
+          <div class="divide-y divide-slate-50">
+            <div class="p-4 flex gap-3">
+              <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center shrink-0">
+                <lucide-icon [name]="Clock" [size]="14" class="text-slate-400"></lucide-icon>
+              </div>
+              <div class="flex flex-col">
+                <span class="text-[11px] font-bold text-slate-900 uppercase">Profil mis à jour</span>
+                <span class="text-[9px] text-slate-400">Il y a 2 jours</span>
+              </div>
             </div>
-          </header>
-          <div class="card-body p-0">
-             <div class="divide-y divide-slate-50">
-                <div class="p-4 flex gap-3">
-                   <div class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center shrink-0">
-                      <lucide-icon [name]="Clock" [size]="14" class="text-slate-400"></lucide-icon>
-                   </div>
-                   <div class="flex flex-col">
-                      <span class="text-[11px] font-bold text-slate-900 uppercase">Profil mis à jour</span>
-                      <span class="text-[9px] text-slate-400">Il y a 2 jours</span>
-                   </div>
-                </div>
-             </div>
-             <button class="w-full py-3 text-center text-[10px] font-bold text-primary uppercase tracking-widest hover:bg-slate-50 transition-colors border-t border-slate-50">
-                Voir tout l'audit
-             </button>
           </div>
-        </section>
+          <button class="w-full py-3 text-center text-[10px] font-bold text-primary uppercase tracking-widest hover:bg-slate-50 transition-colors border-t border-slate-50">
+            Voir tout l'audit
+          </button>
+        </app-fw-info-card>
 
       </div>
     </div>

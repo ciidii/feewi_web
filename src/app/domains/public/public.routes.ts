@@ -1,9 +1,10 @@
 import {Routes} from '@angular/router';
-import {PublicEnrollmentLayoutComponent} from './enrollment/layout/public-enrollment-layout.component';
 import {AuthLayoutComponent} from './auth/layout/auth-layout.component';
+import {PublicShellComponent} from './layout/public-shell/public-shell.component';
+import {tenantResolver} from '../../core/resolvers/tenant.resolver';
 
 export const PUBLIC_ROUTES: Routes = [
-  // 1. Flux Authentification (Enveloppé dans AuthLayout)
+  // 1. Flux Authentification (Enveloppé dans AuthLayout) — staff/admin, pas de résolution tenant
   {
     path: 'auth',
     component: AuthLayoutComponent,
@@ -28,14 +29,11 @@ export const PUBLIC_ROUTES: Routes = [
         title: 'Sécurisation du compte',
         loadComponent: () => import('./features/auth/force-password-change/force-password-change.component').then(m => m.ForcePasswordChangeComponent)
       },
-      // Redirection par défaut : /auth -> /auth/login
-
       {
         path: '',
         redirectTo: 'login',
         pathMatch: 'full'
       },
-      // Catch-all pour le module auth : /auth/inconnu -> /auth/login
       {
         path: '**',
         redirectTo: 'login'
@@ -43,38 +41,56 @@ export const PUBLIC_ROUTES: Routes = [
     ]
   },
 
-  // 2. Flux Enrollment (Portail Parent)
+  // 2. École introuvable — hors du sous-arbre résolu, pour éviter toute boucle de redirection
   {
-    path: 'enrollment',
-    component: PublicEnrollmentLayoutComponent,
+    path: 'ecole-introuvable',
+    loadComponent: () => import('./errors/tenant-not-found/tenant-not-found.component').then(m => m.TenantNotFoundComponent)
+  },
+
+  // 3. Vitrine école + Admissions (Portail Parent) — tenant résolu une seule fois pour tout le sous-arbre
+  {
+    path: '',
+    component: PublicShellComponent,
+    resolve: {tenant: tenantResolver},
+    runGuardsAndResolvers: 'paramsOrQueryParamsChange',
     children: [
       {
         path: '',
-        loadComponent: () => import('./enrollment/landing/public-landing.component').then(m => m.PublicLandingComponent)
+        loadComponent: () => import('./showcase/home/showcase-home.component').then(m => m.ShowcaseHomeComponent)
       },
       {
-        path: 'form-stepper',
-        loadComponent: () => import('./enrollment/form-stepper/public-form-stepper.component').then(m => m.PublicFormStepperComponent)
+        path: 'resultats-examens',
+        loadComponent: () => import('./showcase/results/showcase-results.component').then(m => m.ShowcaseResultsComponent)
       },
       {
-        path: 'tracker',
-        loadComponent: () => import('./enrollment/tracker/public-tracker.component').then(m => m.PublicTrackerComponent)
+        path: 'galerie',
+        loadComponent: () => import('./showcase/gallery/showcase-gallery.component').then(m => m.ShowcaseGalleryComponent)
       },
       {
-        path: 'tracker/:id',
-        loadComponent: () => import('./enrollment/tracker/public-tracker.component').then(m => m.PublicTrackerComponent)
+        path: 'tarifs',
+        loadComponent: () => import('./showcase/pricing/showcase-pricing.component').then(m => m.ShowcasePricingComponent)
       },
       {
-        path: 'soft-enrollment',
-        loadComponent: () => import('./enrollment/soft-enrollment/public-soft-enrollment.component').then(m => m.SoftEnrollmentComponent)
+        path: 'admissions',
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./admissions/home/admissions-home.component').then(m => m.AdmissionsHomeComponent)
+          },
+          {
+            path: 'form-stepper',
+            loadComponent: () => import('./admissions/form-stepper/public-form-stepper.component').then(m => m.PublicFormStepperComponent)
+          },
+          {
+            path: 'tracker',
+            loadComponent: () => import('./admissions/tracker/public-tracker.component').then(m => m.PublicTrackerComponent)
+          },
+          {
+            path: 'tracker/:id',
+            loadComponent: () => import('./admissions/tracker/public-tracker.component').then(m => m.PublicTrackerComponent)
+          }
+        ]
       }
     ]
-  },
-
-  // 3. Redirection globale racine du module public
-  {
-    path: '',
-    redirectTo: 'enrollment',
-    pathMatch: 'full'
   }
 ];

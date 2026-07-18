@@ -1,0 +1,60 @@
+<fw-block-loader *ngIf="isLoading()" [center]="true" message="Chargement de la galerie..."></fw-block-loader>
+
+<div class="gallery-page" *ngIf="!isLoading()">
+
+  <header class="page-header">
+    <span class="eyebrow"><lucide-icon [name]="Images" [size]="14"></lucide-icon> Vie de l'établissement</span>
+    <h1>Galerie photo</h1>
+    <p>Découvrez le campus, la vie scolaire et les événements de {{ tenantCtx.activeTenant()?.name }}.</p>
+  </header>
+
+  <div class="page-inner">
+    <div class="category-chips" *ngIf="categories().length > 1">
+      <button
+        *ngFor="let category of categories()"
+        class="chip"
+        [class.active]="activeCategory() === category"
+        (click)="setCategory(category)">
+        {{ category }}
+      </button>
+    </div>
+
+    <app-fw-empty-state
+      *ngIf="!filteredAlbums().length"
+      [icon]="Images"
+      title="Aucune photo dans cette catégorie"
+      description="Revenez plus tard, de nouvelles photos seront bientôt publiées.">
+    </app-fw-empty-state>
+
+    <div class="albums-grid" *ngIf="filteredAlbums().length">
+      <button class="album-card" *ngFor="let album of filteredAlbums()" (click)="openAlbum(album)">
+        <img [src]="album.coverImageUrl" [alt]="album.title" loading="lazy" />
+        <div class="album-overlay">
+          <span class="album-title">{{ album.title }}</span>
+          <span class="album-count">{{ album.photos.length }} photo(s)</span>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL ALBUM -->
+  <div class="album-modal-backdrop" *ngIf="selectedAlbum()" (click)="closeAlbum()">
+    <div class="album-modal-wrap" (click)="$event.stopPropagation()">
+      <app-fw-modal-shell [title]="selectedAlbum()?.title" [showFooter]="false" (close)="closeAlbum()">
+        <div class="photo-viewer">
+          <button class="nav-btn prev" (click)="prevPhoto()" *ngIf="selectedAlbum()!.photos.length > 1">
+            <lucide-icon [name]="ChevronLeft" [size]="20"></lucide-icon>
+          </button>
+
+          <img [src]="selectedPhoto()?.url" [alt]="selectedPhoto()?.caption || ''" class="photo-viewer-img" />
+
+          <button class="nav-btn next" (click)="nextPhoto()" *ngIf="selectedAlbum()!.photos.length > 1">
+            <lucide-icon [name]="ChevronRight" [size]="20"></lucide-icon>
+          </button>
+        </div>
+        <p class="photo-caption" *ngIf="selectedPhoto()?.caption">{{ selectedPhoto()?.caption }}</p>
+      </app-fw-modal-shell>
+    </div>
+  </div>
+
+</div>

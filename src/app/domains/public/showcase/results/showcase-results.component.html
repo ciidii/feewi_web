@@ -1,0 +1,49 @@
+<fw-block-loader *ngIf="isLoading()" [center]="true" message="Chargement des résultats..."></fw-block-loader>
+
+<div class="results-page" *ngIf="!isLoading()">
+
+  <header class="page-header">
+    <span class="eyebrow"><lucide-icon [name]="Award" [size]="14"></lucide-icon> Résultats officiels</span>
+    <h1>Résultats aux examens officiels</h1>
+    <p>{{ tenantCtx.activeTenant()?.name }} publie chaque année les résultats de ses élèves aux examens nationaux.</p>
+  </header>
+
+  <div class="page-inner">
+    <app-fw-tabs
+      *ngIf="examTabs().length"
+      [tabs]="examTabs()"
+      [activeTabId]="activeExam()"
+      (tabChange)="onTabChange($event)">
+    </app-fw-tabs>
+
+    <app-fw-empty-state
+      *ngIf="!filteredResults().length"
+      [icon]="Award"
+      title="Aucun résultat publié"
+      description="Les résultats de cet examen n'ont pas encore été publiés pour cet établissement.">
+    </app-fw-empty-state>
+
+    <div class="results-grid" *ngIf="filteredResults().length">
+      <app-exam-result-card *ngFor="let result of filteredResults()" [result]="result" />
+    </div>
+
+    <section class="top-students" *ngIf="latestTopStudents().length">
+      <h2><lucide-icon [name]="Medal" [size]="18"></lucide-icon> Meilleurs élèves</h2>
+      <div class="students-grid">
+        <div class="student-card" *ngFor="let student of latestTopStudents()">
+          <span class="student-name">{{ student.name }}</span>
+          <span class="student-mention">{{ student.mention }}</span>
+          <span class="student-score">{{ student.score }}</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="results-cta">
+      <p>Envie de rejoindre nos élèves ?</p>
+      <app-fw-button variant="primary" [icon]="ArrowRight" iconPosition="right" routerLink="/admissions">
+        Faire une demande d'inscription
+      </app-fw-button>
+    </div>
+  </div>
+
+</div>

@@ -5,6 +5,32 @@
 
 ---
 
+## État au 2026-07-11
+
+La quasi-totalité des composants atomiques listés ci-dessous ont été livrés depuis cette revue,
+puis étendus lors de l'audit approfondi consigné dans `UI_UX_STRATEGY.md` (qui fait foi pour l'état
+détaillé le plus récent — tabs, cartes, formulaires, toggles). Résumé :
+
+- **1.2 `fw-button`** — livré, utilisé partout.
+- **1.3 `fw-badge`** — livré, utilisé partout.
+- **2.1/2.2 Input unifié (`.fw-field`/`.fw-label`/`.fw-input`/`.fw-hint`)** — livré. `.fw-input` et
+  `.fw-hint` ont d'abord été ajoutés en tant que styles imbriqués (`.fw-input-wrapper .fw-input`)
+  sans exister en règle de premier niveau, ce qui les rendait inopérants dans plusieurs formulaires
+  utilisant `.fw-input` seul ; corrigé (voir `UI_UX_STRATEGY.md`).
+- **3.1 Empty state (`fw-empty-state`)** — livré.
+- **5.1 Header de page unifié** — **obsolète tel que décrit** : le header global de l'application a
+  depuis été supprimé entièrement (recherche déplacée vers `page-header`, notifications/profil vers
+  `app-rail`). Le pattern `page-shell`/`page-header` actuel remplace cette section.
+- **5.2 `fw-tabs`** — livré (`shared/components/tabs`), mais l'architecture finale retenue diffère
+  de "un seul composant qui remplace tous les usages à l'identique" : deux mécanismes coexistent
+  intentionnellement — `FwTab` (identité par `id`) pour la navigation au niveau `page-shell`, et
+  `TabItem` (identité par `label`) pour les filtres au niveau table/liste (`list-command-bar` ou
+  `table-view`). Voir `UI_UX_STRATEGY.md` pour la décision détaillée.
+- **Phase 4 (portail parent mobile / upload / consentement)** — non traitée dans cette session,
+  reste à faire.
+
+---
+
 ## Résumé exécutif
 
 L'application Feewi dispose d'une **base solide** : palette cohérente, bonne typographie, composants partagés utiles (`form-shell`, `confirm-dialog`, `data-list`). Le portail d'inscription est particulièrement bien travaillé visuellement.

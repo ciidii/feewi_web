@@ -51,17 +51,49 @@
         <lucide-icon [name]="FileText" [size]="18"></lucide-icon>
         <span class="rail-label">Documents</span>
       </a>
+      <a *fwHasPermission="['finance:fee:manage', 'finance:payment:read', 'finance:payment:write', 'finance:report:read']; op 'ANY'" (click)="onSelectService('finance')" routerLink="/admin/finance/fee-types" class="rail-link" [class.active]="navService.activeService() === 'finance'" [attr.data-label]="'Finance'">
+        <lucide-icon [name]="Wallet" [size]="18"></lucide-icon>
+        <span class="rail-label">Finance</span>
+      </a>
     </ng-container>
   </div>
 
   <div class="rail-footer">
-    <!-- Settings & Profile Trigger -->
+    <!-- Notifications & Profil -->
+    <div class="user-session-box" [class.is-expanded]="isRailExpanded()">
+      <div class="profile-trigger" (click)="openProfileDialog()" [attr.data-label]="'Mon compte'">
+        <div class="avatar-squircle">{{ initials }}</div>
+        <div class="user-info" *ngIf="isRailExpanded()">
+          <span class="name">{{ auth.currentUser()?.firstName }} {{ auth.currentUser()?.lastName }}</span>
+          <span class="role">{{ auth.currentUser()?.roles?.[0]?.replace('ROLE_', '') }}</span>
+        </div>
+      </div>
+
+      <button
+        class="notif-btn"
+        title="Centre de notifications"
+        [attr.data-label]="'Notifications'"
+        [matMenuTriggerFor]="notificationMenu"
+        #notificationMenuTrigger="matMenuTrigger"
+      >
+        <lucide-icon [name]="Bell" [size]="16"></lucide-icon>
+        <span *ngIf="unreadCount() > 0" class="notification-pulse"></span>
+      </button>
+    </div>
+
+    <mat-menu #notificationMenu="matMenu" class="notification-menu-panel" xPosition="after" yPosition="above" [overlapTrigger]="false">
+      <div (click)="$event.stopPropagation()" class="popover-wrapper">
+        <app-notification-popover (actionTaken)="notificationMenuTrigger.closeMenu()"></app-notification-popover>
+      </div>
+    </mat-menu>
+
+    <!-- Settings Trigger -->
     <a (click)="onSelectService('settings')"
        class="rail-link settings-trigger"
        [class.active]="navService.activeService() === 'settings'"
-       [attr.data-label]="'Mon Profil & Réglages'">
+       [attr.data-label]="'Réglages'">
       <lucide-icon [name]="Settings" [size]="18"></lucide-icon>
-      <span class="rail-label">Profil & Réglages</span>
+      <span class="rail-label">Réglages</span>
     </a>
   </div>
 </nav>

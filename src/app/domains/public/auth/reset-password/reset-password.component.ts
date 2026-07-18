@@ -2,11 +2,14 @@ import {Component, computed, inject, signal, ViewEncapsulation} from '@angular/c
 import {CommonModule} from '@angular/common';
 import {AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators} from '@angular/forms';
 import {ActivatedRoute, Router, RouterModule} from '@angular/router';
-import {ArrowLeft, Eye, EyeOff, KeyRound, Lock, LucideAngularModule, ShieldCheck} from 'lucide-angular';
+import {ArrowLeft, Eye, EyeOff, KeyRound, Lock, LucideAngularModule, Send, ShieldCheck} from 'lucide-angular';
+import {finalize, interval, take} from 'rxjs';
 import {AuthService} from '../../../../core/services/auth.service';
 import {NotificationService} from '../../../../shared/services/notification.service';
 import {FwButtonComponent} from '../../../../shared/components/button/button.component';
 import {TranslateModule, TranslateService} from '@ngx-translate/core';
+
+const RESEND_COOLDOWN_SECONDS = 30;
 
 function passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
   const password = control.get('newPassword')?.value;
@@ -44,9 +47,12 @@ export class ResetPasswordComponent {
   readonly Lock = Lock;
   readonly Eye = Eye;
   readonly EyeOff = EyeOff;
+  readonly Send = Send;
 
   isLoading = signal(false);
   showPassword = signal(false);
+  isSendingCode = signal(false);
+  cooldownSeconds = signal(0);
 
   // D├®tecte si le code OTP est rempli (6 chiffres)
   isOtpComplete = computed(() => {
@@ -74,6 +80,40 @@ export class ResetPasswordComponent {
 
   togglePassword() {
     this.showPassword.update(v => !v);
+  }
+
+  sendCode() {
+    const emailControl = this.resetForm.get('email');
+    if (emailControl?.invalid) {
+      emailControl.markAsTouched();
+      return;
+    }
+
+    const email = emailControl!.value!;
+    this.isSendingCode.set(true);
+
+    this.authService.forgotPassword(email).pipe(
+      finalize(() => this.isSendingCode.set(false))
+    ).subscribe({
+      next: () => {
+        this.notificationService.success(
+          this.translate.instant('auth.reset_password.notifications.code_sent_message'),
+          this.translate.instant('auth.reset_password.notifications.code_sent_title')
+        );
+        this.startCooldown();
+      },
+      error: (err: any) => {
+        const message = err?.error?.message || err?.message || this.translate.instant('auth.reset_password.notifications.error_title');
+        this.notificationService.error(message, this.translate.instant('auth.reset_password.notifications.error_title'));
+      }
+    });
+  }
+
+  private startCooldown() {
+    this.cooldownSeconds.set(RESEND_COOLDOWN_SECONDS);
+    interval(1000).pipe(take(RESEND_COOLDOWN_SECONDS)).subscribe({
+      next: () => this.cooldownSeconds.update(s => s - 1)
+    });
   }
 
   isInvalid(controlName: string): boolean {

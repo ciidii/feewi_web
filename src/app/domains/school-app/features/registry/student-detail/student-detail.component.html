@@ -1,6 +1,7 @@
 <app-fw-page-shell
   [backLink]="['/admin/registry/students']"
   density="compact"
+  [showSearch]="false"
 >
   <!-- STICKY HEADER ACTIONS -->
   <div actions class="header-action-hub" *ngIf="student(); let s">
@@ -68,17 +69,7 @@
       <div class="pillar-scroll-wrapper custom-scrollbar">
 
         <!-- 👤 IDENTITÉ & ÉTAT CIVIL -->
-        <section class="fw-standard-card">
-          <header class="card-header">
-            <div class="header-left">
-              <lucide-icon [name]="User" [size]="16" class="header-icon"></lucide-icon>
-              <div class="pillar-title-group">
-                <h3>Identité & État Civil</h3>
-                <p>Informations officielles et nationalité</p>
-              </div>
-            </div>
-          </header>
-          <div class="card-content">
+        <app-fw-info-card [icon]="User" title="Identité &amp; État Civil" subtitle="Informations officielles et nationalité">
             <div class="info-grid-dense">
               <div class="info-field">
                 <label>Prénoms</label>
@@ -98,28 +89,17 @@
               </div>
               <div class="info-field">
                 <label>Lieu de naissance</label>
-                <span class="field-value">{{ s.customFields?.['birth_place'] || 'Non renseigné' }}</span>
+                <span class="field-value">{{ s.birthPlace || s.customFields?.['birth_place'] || 'Non renseigné' }}</span>
               </div>
               <div class="info-field">
                 <label>Nationalité</label>
-                <span class="field-value">{{ s.customFields?.['nationality'] || 'Non renseignée' }}</span>
+                <span class="field-value">{{ s.nationality || s.customFields?.['nationality'] || 'Non renseignée' }}</span>
               </div>
             </div>
-          </div>
-        </section>
+        </app-fw-info-card>
 
         <!-- 👨‍👩‍👧 RESPONSABLES LÉGAUX -->
-        <section class="fw-standard-card">
-          <header class="card-header">
-            <div class="header-left">
-              <lucide-icon [name]="Users" [size]="16" class="header-icon"></lucide-icon>
-              <div class="pillar-title-group">
-                <h3>Responsables Légaux</h3>
-                <p>Contacts et tuteurs rattachés</p>
-              </div>
-            </div>
-          </header>
-          <div class="card-content">
+        <app-fw-info-card [icon]="Users" title="Responsables Légaux" subtitle="Contacts et tuteurs rattachés">
             <div class="space-y-4">
               @for (guardian of s.guardians; track guardian.guardianEmail) {
                 <div class="p-4 rounded-xl border border-border-subtle bg-surface-sunken flex items-center justify-between group hover:bg-white hover:border-primary transition-all">
@@ -145,21 +125,10 @@
                 </div>
               }
             </div>
-          </div>
-        </section>
+        </app-fw-info-card>
 
         <!-- ✨ INFORMATIONS SPÉCIFIQUES -->
-        <section class="fw-standard-card" *ngIf="s.customFields && (s.customFields | keyvalue).length > 0">
-          <header class="card-header">
-            <div class="header-left">
-              <lucide-icon [name]="Info" [size]="16" class="header-icon"></lucide-icon>
-              <div class="pillar-title-group">
-                <h3>Informations Spécifiques</h3>
-                <p>Champs personnalisés de l'établissement</p>
-              </div>
-            </div>
-          </header>
-          <div class="card-content">
+        <app-fw-info-card *ngIf="s.customFields && (s.customFields | keyvalue).length > 0" [icon]="Info" title="Informations Spécifiques" subtitle="Champs personnalisés de l'établissement">
             <div class="info-grid-dense">
               @for (field of s.customFields | keyvalue; track field.key) {
                 <div class="info-field" *ngIf="field.key !== 'birth_place' && field.key !== 'nationality'">
@@ -168,8 +137,132 @@
                 </div>
               }
             </div>
+        </app-fw-info-card>
+
+        <!-- 💰 FINANCE -->
+        <app-fw-info-card *ngIf="canReadFinanceAction()" [icon]="Wallet" title="Finance" subtitle="Frais de scolarité et paiements enregistrés">
+          <div card-actions>
+            <app-fw-button
+              *ngIf="canRecordPaymentAction()"
+              variant="primary"
+              size="sm"
+              [icon]="Wallet"
+              (click)="openPaymentDialog()"
+            >
+              Enregistrer un paiement
+            </app-fw-button>
           </div>
-        </section>
+
+          <fw-block-loader *ngIf="isFinanceLoading()" message="Chargement du relevé..."></fw-block-loader>
+
+          <ng-container *ngIf="!isFinanceLoading() && statement(); let st">
+            <!-- Résumé solde -->
+            <div class="finance-summary">
+              <div class="finance-tile">
+                <span class="finance-tile-label">Total dû</span>
+                <span class="finance-tile-value">{{ st.totalDue | number:'1.0-0':'fr-FR' }} FCFA</span>
+              </div>
+              <div class="finance-tile">
+                <span class="finance-tile-label">Total payé</span>
+                <span class="finance-tile-value text-emerald-600">{{ st.totalPaid | number:'1.0-0':'fr-FR' }} FCFA</span>
+              </div>
+              <div class="finance-tile" [class.is-alert]="st.balance > 0">
+                <span class="finance-tile-label">Solde restant</span>
+                <span class="finance-tile-value" [class.text-rose-600]="st.balance > 0">
+                  {{ st.balance | number:'1.0-0':'fr-FR' }} FCFA
+                </span>
+              </div>
+            </div>
+
+            <div *ngIf="st.balance > 0" class="finance-alert-banner">
+              <lucide-icon [name]="AlertTriangle" [size]="15"></lucide-icon>
+              <span>Solde non soldé sur au moins un type de frais.</span>
+            </div>
+
+            <!-- Détail par type de frais -->
+            <div class="finance-breakdown" *ngIf="st.byFeeType.length > 0">
+              <p class="finance-section-label">Détail par type de frais</p>
+              @for (ft of st.byFeeType; track ft.feeTypeCode) {
+                <div class="finance-breakdown-row">
+                  <span class="fb-label">{{ ft.label }}</span>
+                  <span class="fb-due">Dû : {{ ft.due | number:'1.0-0':'fr-FR' }}</span>
+                  <span class="fb-paid">Payé : {{ ft.paid | number:'1.0-0':'fr-FR' }}</span>
+                  <span class="fb-balance" [class.text-rose-600]="ft.balance > 0">
+                    Solde : {{ ft.balance | number:'1.0-0':'fr-FR' }}
+                  </span>
+                </div>
+              }
+            </div>
+
+            <!-- Historique des paiements -->
+            <div class="finance-history">
+              <p class="finance-section-label">
+                <lucide-icon [name]="ReceiptText" [size]="13"></lucide-icon>
+                Historique des paiements
+              </p>
+              @for (p of sortedPayments(); track p.id) {
+                <div class="finance-payment-row">
+                  <div class="fp-main">
+                    <span class="fp-amount">{{ p.amount | number:'1.0-0':'fr-FR' }} FCFA</span>
+                    <div class="fp-right">
+                      <span class="fp-type">{{ p.feeTypeCode }}</span>
+                      <app-fw-button
+                        *ngIf="canRecordPaymentAction()"
+                        variant="tertiary"
+                        size="xs"
+                        [icon]="ReceiptText"
+                        [loading]="generatingReceiptForPaymentId() === p.id"
+                        [disabled]="generatingReceiptForPaymentId() !== null && generatingReceiptForPaymentId() !== p.id"
+                        title="Générer le reçu"
+                        (click)="generateReceipt(p.id)"
+                      >
+                        Reçu
+                      </app-fw-button>
+                    </div>
+                  </div>
+                  <div class="fp-meta">
+                    <span>{{ p.method }}</span>
+                    <span *ngIf="p.reference">· {{ p.reference }}</span>
+                    <span>· {{ p.receivedAt | fwDate:'full' }}</span>
+                  </div>
+                  <p class="fp-notes" *ngIf="p.notes">{{ p.notes }}</p>
+                </div>
+              } @empty {
+                <p class="text-xs text-text-tertiary italic py-4 text-center">Aucun paiement enregistré.</p>
+              }
+            </div>
+
+            <!-- Plans de tranches -->
+            <div class="finance-installments" *ngIf="installmentPlans().length > 0">
+              <p class="finance-section-label">
+                <lucide-icon [name]="Layers" [size]="13"></lucide-icon>
+                Plans de tranches
+              </p>
+              @for (plan of installmentPlans(); track plan.installmentGroupId) {
+                <div class="installment-plan-group">
+                  <p class="ip-group-header">{{ getFeeTypeLabel(plan.feeTypeCode) }}</p>
+                  @for (tranche of plan.tranches; track tranche.feeItemId) {
+                    <div class="installment-tranche-row">
+                      <div class="it-main">
+                        <span class="it-seq">Tranche {{ tranche.installmentSequence }}/{{ plan.tranches.length }}</span>
+                        <app-fw-badge
+                          [labelOverride]="getInstallmentStatusLabel(tranche)"
+                          [tokenOverride]="getInstallmentStatusToken(tranche.status)"
+                          size="xs"
+                        ></app-fw-badge>
+                      </div>
+                      <div class="it-meta">
+                        <span>{{ tranche.amount | number:'1.0-0':'fr-FR' }} FCFA</span>
+                        <span>· Échéance : {{ tranche.dueDate | fwDate:'full' }}</span>
+                        <span *ngIf="tranche.remainingAmount > 0">· Restant : {{ tranche.remainingAmount | number:'1.0-0':'fr-FR' }} FCFA</span>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </ng-container>
+        </app-fw-info-card>
 
       </div>
     </main>

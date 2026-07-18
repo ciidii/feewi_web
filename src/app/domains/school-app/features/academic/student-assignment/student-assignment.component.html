@@ -255,6 +255,22 @@
           <span>{{ lvl.waiting }} en attente</span>
           <span>{{ lvl.remainingCapacity }} places restantes</span>
         </div>
+
+        <footer *fwHasPermission="'academic:assignment:validate'" class="mt-3 pt-3 border-t border-border-subtle flex items-center justify-between">
+          <span class="text-[10px] font-black uppercase tracking-widest" [class.text-emerald-600]="lockedLevelIds().has(lvl.levelId)" [class.text-text-tertiary]="!lockedLevelIds().has(lvl.levelId)">
+            {{ lockedLevelIds().has(lvl.levelId) ? 'Verrouillé' : 'Modifiable' }}
+          </span>
+          <app-fw-button
+            *ngIf="!lockedLevelIds().has(lvl.levelId)"
+            variant="secondary" size="xs" [icon]="Lock"
+            [loading]="isLockActionLoading() === lvl.levelId"
+            (click)="onValidateLevel(lvl.levelId)">Verrouiller</app-fw-button>
+          <app-fw-button
+            *ngIf="lockedLevelIds().has(lvl.levelId)"
+            variant="tertiary" size="xs" [icon]="Unlock"
+            [loading]="isLockActionLoading() === lvl.levelId"
+            (click)="onUnlockLevel(lvl.levelId)">Déverrouiller</app-fw-button>
+        </footer>
       </div>
 
       <div *ngIf="summary().length === 0" class="col-span-full py-20 text-center bg-white border-2 border-dashed border-border-subtle rounded-2xl">

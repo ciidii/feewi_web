@@ -78,6 +78,20 @@ export interface Assessment {
 export interface ServiceSubscription {
   serviceCode: string;
   optionCode: string;
+  /** ADR-010 — absent/undefined = ACTIVE (rétrocompatible avec les souscriptions existantes). */
+  status?: 'ACTIVE' | 'CANCELLED';
+  effectiveFrom?: string | null;
+  /** Premier jour non facturé — renseigné uniquement si status === 'CANCELLED'. */
+  effectiveTo?: string | null;
+}
+
+// --- BILLING (INFORMATIF — jamais bloquant, BL-BILL-01) ---
+// Miroir de `domain.model.BillingInfo` (enrollment-service) : un simple booléen,
+// construit depuis BillingServiceClientPort.isFeePaid() qui n'expose que
+// Optional<Boolean> (pas de montant). null si billing-service indisponible/non consulté.
+
+export interface BillingInfo {
+  paid: boolean;
 }
 
 // --- ADMISSION (ENFANT) ---
@@ -102,6 +116,18 @@ export interface Admission {
   /** Résolu depuis le bundle par l'endpoint admin /details */
   primaryGuardian?: Guardian;
   extraPillars?: Record<string, { customFields: Record<string, any> }>;
+
+  /** Garde-fou paiement minimal (depuis le 2026-07-11) : précondition à validate() */
+  paymentConfirmed?: boolean;
+  paymentConfirmedBy?: string;
+  paymentConfirmedAt?: string;
+
+  /**
+   * Solde billing-service, purement informatif (BL-BILL-01) — null si billing-service
+   * injoignable ou non consulté. Ne doit JAMAIS conditionner la validation finale
+   * (voir isReadyForFinalValidation, qui ne dépend que de paymentConfirmed/documentsReady).
+   */
+  billingInfo?: BillingInfo | null;
 
   createdAt: string;
   updatedAt: string;

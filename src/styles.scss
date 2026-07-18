@@ -431,6 +431,41 @@ html { height: 100%; }
 
 /* --- DESIGN SYSTEM UTILITIES --- */
 
+// Version autonome de .fw-input : certains formulaires posent la classe directement sur un
+// <input>/<select> (icône positionnée en absolute par le parent) sans .fw-input-wrapper
+// englobant. La règle imbriquée ci-dessous (.fw-input-wrapper .fw-input) a une spécificité
+// plus forte et continue de gagner quand un wrapper est présent — celle-ci ne s'applique
+// que quand .fw-input est seule.
+.fw-input {
+  display: block;
+  width: 100%;
+  height: 52px;
+  background: var(--fw-surface-sunken);
+  border: 1.5px solid transparent;
+  border-radius: 14px;
+  padding: 0 16px;
+  font-family: var(--fw-font-sans);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--fw-text-primary);
+  outline: none;
+  transition: all var(--fw-transition-fast);
+
+  &::placeholder { color: var(--fw-text-placeholder); }
+  &:hover { background: #eef2f6; }
+  &:focus {
+    background: var(--fw-surface-card);
+    border-color: var(--fw-primary);
+    box-shadow: 0 0 0 4px var(--fw-primary-alpha);
+  }
+  &.error,
+  &:has(.ng-invalid.ng-touched) {
+    border-color: var(--fw-error);
+    background: var(--fw-error-bg);
+    &:focus { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1); }
+  }
+}
+
 .fw-input-wrapper {
   display: flex;
   align-items: center;
@@ -516,6 +551,14 @@ html { height: 100%; }
     }
   }
 
+  .fw-hint {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--fw-text-tertiary);
+    margin-top: 4px;
+    margin-left: 4px;
+  }
+
   .fw-error-text {
     font-size: 10px;
     font-weight: 700;
@@ -540,6 +583,23 @@ html { height: 100%; }
       font-size: 8px;
     }
   }
+}
+
+/* --- PAIRE LIBELLÉ/VALEUR (utilisée dans app-fw-info-card et ses pages consommatrices) --- */
+.info-label {
+  display: block;
+  font-size: 9px;
+  font-weight: 850;
+  text-transform: uppercase;
+  color: var(--fw-text-tertiary);
+  letter-spacing: 0.05em;
+}
+
+.info-value {
+  font-size: 0.875rem;
+  font-weight: 650;
+  color: var(--fw-midnight);
+  margin: 0;
 }
 
 @keyframes fw-shake {

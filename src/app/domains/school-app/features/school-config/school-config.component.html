@@ -51,19 +51,133 @@
             </div>
 
             <div class="fw-field">
-                <label class="fw-label">Identité Visuelle (Logo)</label>
-                <div class="flex items-center gap-6">
-                    <div class="logo-upload-box">
-                        <img *ngIf="schoolForm.get('logoUrl')?.value" [src]="schoolForm.get('logoUrl')?.value" alt="Logo preview" />
-                        <lucide-icon *ngIf="!schoolForm.get('logoUrl')?.value" [name]="Camera" [size]="24" class="text-slate-300"></lucide-icon>
-                    </div>
-                    <div class="flex-1 space-y-2">
-                        <div class="fw-input-wrapper">
-                            <input type="text" formControlName="logoUrl" class="fw-input" placeholder="URL de l'image (PNG, SVG)..." />
-                        </div>
-                        <p class="text-[10px] text-text-tertiary font-medium">Recommandé : Image carrée avec fond transparent.</p>
-                    </div>
+                <label class="fw-label">Logo</label>
+                <app-image-upload-field
+                    [currentUrl]="schoolForm.get('logoUrl')?.value"
+                    target="logo"
+                    aspect="square"
+                    hint="Recommandé : image carrée avec fond transparent."
+                    [disabled]="!canUpdate()"
+                    (uploaded)="onLogoUploaded($event)">
+                </app-image-upload-field>
+            </div>
+
+            <div class="fw-field">
+                <label class="fw-label">Image de couverture (vitrine publique)</label>
+                <app-image-upload-field
+                    [currentUrl]="schoolForm.get('coverUrl')?.value"
+                    target="cover"
+                    aspect="wide"
+                    hint="Recommandé : image large (16:9), affichée en haut de la page d'accueil vitrine."
+                    [disabled]="!canUpdate()"
+                    (uploaded)="onCoverUploaded($event)">
+                </app-image-upload-field>
+            </div>
+
+            <div class="fw-field">
+              <label class="fw-label">Description (vitrine publique)</label>
+              <div class="fw-input-wrapper">
+                <textarea formControlName="description" class="fw-input" rows="3" placeholder="Présentation courte de l'établissement affichée sur la page d'accueil publique..."></textarea>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Carte : Vitrine publique -->
+        <section class="dossier-card">
+          <header class="card-header">
+            <div class="header-left">
+              <lucide-icon [name]="Sparkles" class="header-icon" [size]="16"></lucide-icon>
+              <h3 class="card-title">Vitrine publique</h3>
+            </div>
+          </header>
+
+          <div class="card-body space-y-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="fw-field">
+                <label class="fw-label">Couleur secondaire</label>
+                <div class="fw-input-wrapper">
+                  <input type="color" formControlName="secondaryColor" class="fw-input h-10" />
                 </div>
+              </div>
+              <div class="fw-field">
+                <label class="fw-label">Couleur d'accent</label>
+                <div class="fw-input-wrapper">
+                  <input type="color" formControlName="accentColor" class="fw-input h-10" />
+                </div>
+              </div>
+              <div class="fw-field">
+                <label class="fw-label">Année de fondation</label>
+                <div class="fw-input-wrapper">
+                  <input type="number" formControlName="foundedYear" class="fw-input" placeholder="Ex: 2013" />
+                </div>
+              </div>
+              <div class="fw-field">
+                <label class="fw-label">Effectif (élèves)</label>
+                <div class="fw-input-wrapper">
+                  <input type="number" formControlName="studentCount" class="fw-input" placeholder="Ex: 850" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Valeurs institutionnelles -->
+            <div class="fw-field">
+              <label class="fw-label">Valeurs institutionnelles</label>
+              <div class="space-y-2">
+                <div *ngFor="let v of valuesArray.controls; let i = index" class="flex items-center gap-2">
+                  <input type="text" [formControl]="$any(v)" class="fw-input flex-1" placeholder="Ex: Excellence académique" />
+                  <button type="button" class="icon-btn" [disabled]="!canUpdate()" (click)="removeValue(i)">
+                    <lucide-icon [name]="Trash2" [size]="14"></lucide-icon>
+                  </button>
+                </div>
+              </div>
+              <app-fw-button variant="tertiary" size="sm" [icon]="Plus" [disabled]="!canUpdate()" (click)="addValue()" class="mt-2">
+                Ajouter une valeur
+              </app-fw-button>
+            </div>
+
+            <!-- Statistiques clés -->
+            <div class="fw-field">
+              <label class="fw-label">Statistiques clés (KPI vitrine)</label>
+              <div class="space-y-2" formArrayName="stats">
+                <div *ngFor="let s of statsArray.controls; let i = index" [formGroupName]="i" class="flex items-center gap-2">
+                  <input type="text" formControlName="label" class="fw-input flex-1" placeholder="Ex: Taux de réussite BAC" />
+                  <input type="text" formControlName="value" class="fw-input w-32" placeholder="Ex: 96%" />
+                  <button type="button" class="icon-btn" [disabled]="!canUpdate()" (click)="removeStat(i)">
+                    <lucide-icon [name]="Trash2" [size]="14"></lucide-icon>
+                  </button>
+                </div>
+              </div>
+              <app-fw-button variant="tertiary" size="sm" [icon]="Plus" [disabled]="!canUpdate()" (click)="addStat()" class="mt-2">
+                Ajouter une statistique
+              </app-fw-button>
+            </div>
+
+            <!-- Réseaux sociaux -->
+            <div class="fw-field" formGroupName="socialLinks">
+              <label class="fw-label">Réseaux sociaux</label>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="fw-input-wrapper">
+                  <lucide-icon [name]="Facebook" [size]="14" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></lucide-icon>
+                  <input type="text" formControlName="facebook" class="fw-input pl-12" placeholder="URL Facebook" />
+                </div>
+                <div class="fw-input-wrapper">
+                  <lucide-icon [name]="Instagram" [size]="14" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></lucide-icon>
+                  <input type="text" formControlName="instagram" class="fw-input pl-12" placeholder="URL Instagram" />
+                </div>
+                <div class="fw-input-wrapper">
+                  <lucide-icon [name]="Linkedin" [size]="14" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></lucide-icon>
+                  <input type="text" formControlName="linkedin" class="fw-input pl-12" placeholder="URL LinkedIn" />
+                </div>
+                <div class="fw-input-wrapper">
+                  <lucide-icon [name]="Youtube" [size]="14" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></lucide-icon>
+                  <input type="text" formControlName="youtube" class="fw-input pl-12" placeholder="URL YouTube" />
+                </div>
+                <div class="fw-input-wrapper">
+                  <lucide-icon [name]="MessageCircle" [size]="14" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></lucide-icon>
+                  <input type="text" formControlName="whatsapp" class="fw-input pl-12" placeholder="Lien WhatsApp (wa.me/...)" />
+                </div>
+              </div>
             </div>
           </div>
         </section>

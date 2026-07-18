@@ -1,14 +1,49 @@
 <app-fw-form-shell
-  title="Nouveau Rôle"
-  subtitle="Définition d'un profil d'accès personnalisé."
+  [title]="step() === 'template' ? 'Nouveau Rôle' : 'Nouveau Rôle : Identification'"
+  [subtitle]="step() === 'template' ? 'Choisissez un modèle métier proche de la réalité, ou partez d\'un profil vide.' : 'Définition d\'un profil d\'accès personnalisé.'"
   [icon]="Shield"
   saveLabel="Créer le profil"
   [isLoading]="isLoading()"
-  [canSave]="roleForm.valid"
+  [canSave]="canSave"
+  [showCancel]="step() === 'template'"
   (save)="onSave()"
   (cancel)="onCancel()"
 >
-  <form [formGroup]="roleForm" (ngSubmit)="onSave()" class="space-y-10 py-2">
+  <app-fw-button
+    footer-left
+    *ngIf="step() === 'details'"
+    variant="tertiary"
+    size="sm"
+    [icon]="ChevronLeft"
+    (click)="goBackToTemplates()"
+  >Retour aux modèles</app-fw-button>
+
+  <!-- ÉTAPE 1 : CHOIX D'UN MODÈLE MÉTIER -->
+  <div class="template-grid" *ngIf="step() === 'template'">
+    <button
+      type="button"
+      class="template-card"
+      *ngFor="let preset of presets()"
+      (click)="selectPreset(preset)"
+    >
+      <div class="template-icon">
+        <lucide-icon [name]="Shield" [size]="18"></lucide-icon>
+      </div>
+      <span class="template-name">{{ preset.name }}</span>
+      <span class="template-desc">{{ preset.description }}</span>
+    </button>
+
+    <button type="button" class="template-card template-card-custom" (click)="selectPreset(null)">
+      <div class="template-icon">
+        <lucide-icon [name]="Sparkles" [size]="18"></lucide-icon>
+      </div>
+      <span class="template-name">Personnalisé</span>
+      <span class="template-desc">Partir d'un profil vide et définir les permissions manuellement.</span>
+    </button>
+  </div>
+
+  <!-- ÉTAPE 2 : IDENTIFICATION -->
+  <form [formGroup]="roleForm" (ngSubmit)="onSave()" class="space-y-10 py-2" *ngIf="step() === 'details'">
 
     <!-- 1. Identification -->
     <div class="space-y-6">
@@ -63,7 +98,7 @@
     <div class="p-4 bg-surface-sunken rounded-xl border border-border flex items-start gap-3">
       <lucide-icon [name]="Info" [size]="16" class="text-text-tertiary mt-0.5"></lucide-icon>
       <p class="text-[11px] text-text-secondary leading-relaxed font-medium">
-        Après la création, vous pourrez configurer les <span class="text-midnight font-bold">permissions granulaires</span> dans la matrice du Designer.
+        Après la création, vous pourrez ajuster les <span class="text-midnight font-bold">capacités de ce rôle</span> dans le Role Designer.
       </p>
     </div>
 

@@ -13,6 +13,14 @@ export interface DocumentViewResponse {
   viewUrl: string;
 }
 
+export interface PaymentReceiptResponse {
+  fileId: string;
+  studentId: string;
+  paymentId: string;
+  receiptNumber: string;
+  downloadUrl: string;
+}
+
 export type DocumentType = 'CERTIFICAT_SCOLARITE' | 'RELEVE_NOTES' | 'ATTESTATION_PAIEMENT';
 
 export type DocumentRequestStatus = 'PENDING' | 'ELIGIBLE' | 'INELIGIBLE' | 'READY' | 'REJECTED' | 'DELIVERED';
@@ -24,6 +32,8 @@ export interface DocumentRequest {
   requestedBy: string;
   status: DocumentRequestStatus;
   rejectionReason?: string;
+  /** Référence au PDF généré (StoredFile.id), renseigné automatiquement à l'approbation */
+  fileId?: string;
   createdAt: string;
   updatedAt?: string;
 }

@@ -10,7 +10,7 @@
 .assignment-dashboard-layout {
   display: grid;
   grid-template-columns: 320px 1fr;
-  height: calc(100vh - 120px);
+  height: var(--fw-page-body-height);
   background: white;
   border-top: 1px solid var(--fw-border-subtle);
 }

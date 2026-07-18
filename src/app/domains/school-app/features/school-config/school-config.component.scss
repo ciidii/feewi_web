@@ -54,32 +54,21 @@
   }
 }
 
-// ─── LOGO PREVIEW ──────────────────────────────────────────────────────────
-.logo-upload-box {
-    width: 96px;
-    height: 96px;
-    border-radius: 24px;
-    background: var(--fw-surface-sunken);
-    border: 2px dashed var(--fw-border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    position: relative;
-    transition: all 0.2s;
+// ─── BRANDING VITRINE ────────────────────────────────────────────────────────
+.icon-btn {
+    width: 36px;
+    height: 36px;
     flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border-radius: var(--fw-radius-md);
+    border: 1px solid var(--fw-border-subtle);
+    background: var(--fw-surface-card);
+    color: var(--fw-text-tertiary);
+    cursor: pointer;
 
-    img {
-        width: 100%;
-        height: 100%;
-        object-contain: contain;
-        padding: 8px;
-    }
-
-    &:hover {
-        border-color: var(--fw-primary);
-        background: white;
-    }
+    &:hover:not(:disabled) { color: var(--fw-error); border-color: var(--fw-error-border); }
+    &:disabled { cursor: not-allowed; opacity: 0.5; }
 }
 
 // ─── SYSTEM DATA SIDEBAR ────────────────────────────────────────────────────
@@ -136,6 +125,27 @@
     border-color: var(--fw-error);
     background: var(--fw-error-bg);
   }
+}
+
+::ng-deep textarea.fw-input {
+  height: auto;
+  min-height: 90px;
+  padding: 0.875rem 1.25rem;
+  resize: vertical;
+  font-family: inherit;
+}
+
+::ng-deep input[type="color"].fw-input {
+  padding: 4px;
+  cursor: pointer;
+}
+
+// Les lignes valeurs/stats/réseaux sociaux placent plusieurs .fw-input dans un conteneur flex :
+// leur largeur doit être pilotée par flex-1/w-32 (Tailwind), pas par la règle globale width:100%
+// ci-dessus — sélecteur plus spécifique pour gagner sur l'ordre de déclaration.
+::ng-deep .flex > .fw-input {
+  width: auto;
+  min-width: 0;
 }
 
 .divider-v {

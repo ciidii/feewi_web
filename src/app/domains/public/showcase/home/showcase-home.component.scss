@@ -1,0 +1,300 @@
+:host {
+  display: block;
+  font-family: var(--fw-font-sans);
+}
+
+.section-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+// ── HERO ─────────────────────────────────────────────────────────────────────
+.hero {
+  position: relative;
+  min-height: 480px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--fw-midnight);
+  background-size: cover;
+  background-position: center;
+  padding: 64px 24px;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.55) 0%, rgba(15, 23, 42, 0.85) 100%);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 640px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.hero-logo {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--fw-radius-xl);
+  overflow: hidden;
+  box-shadow: var(--fw-shadow-lg);
+  margin-bottom: 8px;
+
+  img { width: 100%; height: 100%; object-fit: cover; }
+
+  &.hero-logo-fallback {
+    background: rgba(255, 255, 255, 0.12);
+    color: white;
+    display: grid;
+    place-items: center;
+  }
+}
+
+.hero-title {
+  font-family: var(--fw-font-display);
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: white;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.hero-desc {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1rem;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+// ── KPI ──────────────────────────────────────────────────────────────────────
+.kpi-band {
+  background: var(--fw-surface-card);
+  border-bottom: 1px solid var(--fw-border);
+}
+
+.kpi-grid {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 24px;
+  text-align: center;
+}
+
+.kpi-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.kpi-value {
+  font-family: var(--fw-font-display);
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--fw-primary);
+}
+
+.kpi-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--fw-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+// ── SECTIONS GÉNÉRIQUES ──────────────────────────────────────────────────────
+.section {
+  padding: 56px 0;
+}
+
+.section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fw-primary);
+  margin-bottom: 8px;
+}
+
+.section-intro h2 {
+  font-family: var(--fw-font-display);
+  font-size: 1.625rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--fw-text-primary);
+}
+
+.section-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--fw-primary);
+  text-decoration: none;
+  white-space: nowrap;
+
+  &:hover { text-decoration: underline; }
+}
+
+// ── VALEURS ──────────────────────────────────────────────────────────────────
+.values-section { background: var(--fw-surface-card); }
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: center;
+
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.values-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--fw-text-primary);
+
+    lucide-icon { color: var(--fw-primary); flex-shrink: 0; }
+  }
+}
+
+// ── RÉSULTATS ────────────────────────────────────────────────────────────────
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+// ── GALERIE PREVIEW ──────────────────────────────────────────────────────────
+.gallery-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+
+  @media (max-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.gallery-preview-item {
+  aspect-ratio: 4 / 3;
+  border-radius: var(--fw-radius-lg);
+  overflow: hidden;
+
+  img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+  &:hover img { transform: scale(1.05); }
+}
+
+// ── TARIFS RÉSUMÉ ────────────────────────────────────────────────────────────
+.pricing-summary { background: var(--fw-surface-card); }
+
+.pricing-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.pricing-mini-card {
+  border: 1px solid var(--fw-border);
+  border-radius: var(--fw-radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.plan-label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--fw-text-secondary);
+}
+
+.plan-price {
+  font-family: var(--fw-font-display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--fw-text-primary);
+}
+
+.plan-period {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--fw-text-tertiary);
+}
+
+// ── CTA FINAL ────────────────────────────────────────────────────────────────
+.final-cta {
+  background: var(--fw-midnight);
+  padding: 64px 24px;
+  text-align: center;
+}
+
+.final-cta-inner {
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: white;
+
+  lucide-icon { color: var(--fw-primary); }
+
+  h2 {
+    font-family: var(--fw-font-display);
+    font-size: 1.5rem;
+    font-weight: 800;
+  }
+
+  p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9375rem;
+  }
+
+  app-fw-button { margin-top: 8px; }
+}
+
+@media (max-width: 480px) {
+  .hero-title { font-size: 1.875rem; }
+}

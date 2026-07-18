@@ -32,7 +32,7 @@ import {FwButtonComponent} from '../../../../../shared/components/button/button.
 import {FwTab} from '../../../../../shared/components/tabs/tabs.component';
 import {FwListCommandBarComponent} from '../../../../../shared/components/list-command-bar/list-command-bar.component';
 import {SharedFilterModalComponent} from '../../../../../shared/components/filter-modal/shared-filter-modal.component';
-import {Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 
 @Component({
   selector: 'app-student-list',
@@ -56,6 +56,7 @@ export class StudentListComponent implements OnInit, OnDestroy {
   private dialog = inject(MatDialog);
   protected loadingService = inject(LoadingService);
   private router = inject(Router);
+  private activatedRoute = inject(ActivatedRoute);
   // --- ÉTATS ---
   activeTabId = signal('ACTIVE');
   searchQuery = signal('');
@@ -116,7 +117,22 @@ export class StudentListComponent implements OnInit, OnDestroy {
   readonly RefreshCw = RefreshCw;
 
   ngOnInit() {
-    this.loadInitialData();
+    this.loadClasses();
+
+    // Le lien sidebar "Dossiers scolaires" pointe vers cette même route avec ?status=LEFT.
+    // Comme Angular réutilise l'instance du composant entre navigations sur le même chemin,
+    // on s'abonne (pas juste un snapshot) pour réagir même sans recréation du composant.
+    this.activatedRoute.queryParamMap.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(params => {
+      const requested = params.get('status') as StudentStatus | null;
+      const validStatuses: StudentStatus[] = ['ACTIVE', 'SUSPENDED', 'LEFT'];
+      const status = requested && validStatuses.includes(requested) ? requested : 'ACTIVE';
+      this.activeTabId.set(status);
+      this.selectedStatus.set(status);
+      this.loadStudents(this.searchQuery(), this.selectedStatus());
+    });
+
     this.searchSubject.pipe(
       debounceTime(400),
       distinctUntilChanged(),
@@ -126,12 +142,11 @@ export class StudentListComponent implements OnInit, OnDestroy {
     });
   }
 
-  async loadInitialData() {
+  private async loadClasses() {
     try {
       const year = await firstValueFrom(this.academicService.getCurrentYear());
       const classes = await firstValueFrom(this.academicService.getClassesByYear(year.id));
       this.classes.set(classes);
-      await this.loadStudents();
     } catch (e) {
       console.error(e);
     }

@@ -4,51 +4,6 @@
   display: block;
 }
 
-/* ==========================================================================
-   TOOLBAR REFINEMENT (TECHNICAL STYLE)
-   ========================================================================== */
-.tab-button-technical {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.875rem;
-  border-radius: 10px;
-  font-family: var(--fw-font-ui);
-  font-size: 0.75rem;
-  font-weight: 750;
-  color: var(--fw-text-tertiary);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-
-  &:hover {
-    color: var(--fw-text-secondary);
-    background: var(--fw-surface-sunken);
-  }
-
-  &.active {
-    color: var(--fw-primary);
-    background: var(--fw-primary-alpha);
-  }
-
-  .badge-technical {
-    padding: 1px 5px;
-    border-radius: 20px;
-    background: var(--fw-surface-sunken);
-    font-size: 9px;
-    font-weight: 800;
-    color: var(--fw-text-tertiary);
-
-    &.active {
-      background: var(--fw-primary);
-      color: white;
-    }
-  }
-}
-
 /* SEARCH INPUT (MINIMAL TECHNICAL) */
 .search-input-technical {
   height: 36px;

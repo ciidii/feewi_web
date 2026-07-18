@@ -1,7 +1,6 @@
 import {Component, inject} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Router, RouterOutlet} from '@angular/router';
-import {HeaderComponent} from '../header/header.component';
 import {AppRailComponent} from '../app-rail/app-rail.component';
 import {SidebarComponent} from '../sidebar/sidebar.component';
 import {PageProgressComponent} from '../../../shared/components/loader/page-progress.component';
@@ -14,7 +13,6 @@ import {filter} from 'rxjs';
   imports: [
     CommonModule,
     RouterOutlet,
-    HeaderComponent,
     AppRailComponent,
     SidebarComponent,
     PageProgressComponent

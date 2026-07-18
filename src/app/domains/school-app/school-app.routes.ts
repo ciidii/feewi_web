@@ -7,6 +7,11 @@ export const SCHOOL_APP_ROUTES: Routes = [
     loadComponent: () => import('./features/dashboard/home/home.component').then(m => m.HomeComponent)
   },
   {
+    path: 'account/profile',
+    title: 'Mon profil',
+    loadComponent: () => import('./features/account/my-profile/my-profile.component').then(m => m.MyProfileComponent)
+  },
+  {
     // Ancienne route maquette (valeurs codées en dur) — redirige vers le vrai tableau de bord d'admissions.
     path: 'dashboard',
     redirectTo: 'enrollment',
@@ -23,17 +28,17 @@ export const SCHOOL_APP_ROUTES: Routes = [
         path: '',
         title: 'Tableau de Bord Admissions',
         data: {permissions: ['enrollment:dashboard:view']},
-        loadComponent: () => import('./features/enrollment/enrollment-dashboard/admission-dashboard.component').then(m => m.AdmissionDashboardComponent)
+        loadComponent: () => import('./features/enrollment/enrollment-dashboard/enrollment-dashboard.component').then(m => m.EnrollmentDashboardComponent)
       },
       {
         path: 'list',
         title: 'Liste des Admissions',
-        loadComponent: () => import('./features/enrollment/enrollment-list/admission-list.component').then(m => m.AdmissionsComponent)
+        loadComponent: () => import('./features/enrollment/enrollment-list/enrollment-list.component').then(m => m.EnrollmentListComponent)
       },
       {
         path: 'direct',
         title: 'Saisie Guichet',
-        loadComponent: () => import('./features/enrollment/enrollment-direct-entry/admission-direct-entry.component').then(m => m.AdmissionDirectEntryComponent)
+        loadComponent: () => import('./features/enrollment/enrollment-direct-entry/enrollment-direct-entry.component').then(m => m.EnrollmentDirectEntryComponent)
       },
       {
         path: 're-enrollment',
@@ -48,7 +53,7 @@ export const SCHOOL_APP_ROUTES: Routes = [
       {
         path: ':id',
         title: 'Dossier d’Admission',
-        loadComponent: () => import('./features/enrollment/enrollment-detail/admission-detail.component').then(m => m.AdmissionDetailComponent)
+        loadComponent: () => import('./features/enrollment/enrollment-detail/enrollment-detail.component').then(m => m.EnrollmentDetailComponent)
       }
     ]
   },
@@ -171,6 +176,39 @@ export const SCHOOL_APP_ROUTES: Routes = [
         path: 'students/:id/edit',
         title: 'Modifier Élève',
         loadComponent: () => import('./features/registry/student-edit-form/student-edit-form.component').then(m => m.StudentEditFormComponent)
+      }
+    ]
+  },
+  {
+    path: 'finance',
+    data: {
+      permissions: ['finance:fee:manage', 'finance:payment:read', 'finance:payment:write', 'finance:report:read'],
+      permissionOp: 'ANY'
+    },
+    children: [
+      {
+        path: 'fee-types',
+        title: 'Catalogue des Frais',
+        data: {permissions: ['finance:fee:manage']},
+        loadComponent: () => import('./features/finance/fee-type-catalog/fee-type-catalog.component').then(m => m.FeeTypeCatalogComponent)
+      },
+      {
+        path: 'payment-tracking',
+        title: 'Suivi des paiements',
+        data: {permissions: ['finance:payment:read']},
+        loadComponent: () => import('./features/finance/payment-tracking/payment-tracking.component').then(m => m.PaymentTrackingComponent)
+      },
+      {
+        path: 'reporting',
+        title: 'Reporting Financier',
+        data: {permissions: ['finance:report:read']},
+        loadComponent: () => import('./features/finance/reporting/reporting.component').then(m => m.ReportingComponent)
+      },
+      {
+        path: 'overdue-installments',
+        title: 'Relances - Tranches en retard',
+        data: {permissions: ['finance:payment:write']},
+        loadComponent: () => import('./features/finance/overdue-installments/overdue-installments.component').then(m => m.OverdueInstallmentsComponent)
       }
     ]
   },

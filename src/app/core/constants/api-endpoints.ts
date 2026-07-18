@@ -22,6 +22,7 @@ export const API_ENDPOINTS = {
       RE_ENROLL_ELIGIBILITY: '/public/admissions/re-enroll/eligibility',
       SUBSCRIPTIONS: (id: string) => `/public/admissions/${id}/subscriptions`,
       DOCUMENTS: (id: string, docCode: string) => `/public/admissions/${id}/documents/${docCode}`,
+      DOCUMENT_UPLOAD_TICKET: (id: string, docCode: string) => `/public/admissions/${id}/documents/${docCode}/upload-ticket`,
       MINE: '/public/admissions/mine',
       TRACK: (ref: string) => `/public/admissions/${ref}/track`,
       SUBMIT_ADMISSION: (id: string) => `/public/admissions/${id}/submit`,
@@ -29,6 +30,8 @@ export const API_ENDPOINTS = {
       CONFIRM_ADMITTED: (bundleId: string) => `/public/admissions/bundles/${bundleId}/confirm-admitted`,
       CANCEL_ALL: (bundleId: string) => `/public/admissions/bundles/${bundleId}/cancel-all`,
       CANCEL: (id: string) => `/public/admissions/${id}/cancel`,
+      DELETE_ADMISSION: (id: string) => `/public/admissions/${id}`,
+      DELETE_BUNDLE: (bundleId: string) => `/public/admissions/bundles/${bundleId}`,
     },
     ADMIN: {
       // Configuration
@@ -47,6 +50,8 @@ export const API_ENDPOINTS = {
       RECEIVE_DOCUMENT: (id: string, docCode: string) => `/admin/admissions/${id}/documents/${docCode}/receive`,
       VERIFY: (id: string) => `/admin/admissions/${id}/verify`,
       CANCEL: (id: string) => `/admin/admissions/${id}/cancel`,
+      TERMINATE_SUBSCRIPTION: (id: string, serviceCode: string) => `/admin/admissions/${id}/subscriptions/${serviceCode}/terminate`,
+      CONFIRM_PAYMENT: (id: string) => `/admin/admissions/${id}/payment/confirm`,
       DASHBOARD_STATS: '/admin/stats/dashboard',
 
       // Direction
@@ -67,6 +72,19 @@ export const API_ENDPOINTS = {
     CYCLES: '/cycles',
   },
 
+  BILLING: {
+    STATEMENT: (studentId: string) => `/students/${studentId}/statement`,
+    FEE_TYPES: '/fee-types',
+    FEE_TYPE: (id: string) => `/fee-types/${id}`,
+    FEE_ITEMS: (studentId: string) => `/students/${studentId}/fee-items`,
+    PAYMENTS: (studentId: string) => `/students/${studentId}/payments`,
+    BALANCES_BATCH: '/students/balances',
+    REPORTS_AGGREGATE: '/reports/aggregate',
+    INSTALLMENT_PLANS: (studentId: string) => `/students/${studentId}/installment-plans`,
+    INSTALLMENTS_OVERDUE: '/installments/overdue',
+    SETTINGS: '/settings',
+  },
+
   SCHOOL: {
     PUBLIC_INFO: (tenantId: string) => `/public/${tenantId}`,
   },
@@ -74,5 +92,6 @@ export const API_ENDPOINTS = {
   DOCUMENTS: {
     UPLOAD_TICKET: '/upload-ticket',
     VIEW: (fileId: string) => `/${fileId}/view`,
+    RECEIPTS: '/receipts',
   }
 };

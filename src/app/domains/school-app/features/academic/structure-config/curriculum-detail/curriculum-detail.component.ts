@@ -25,6 +25,7 @@ import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '../../../../../../shared/components/confirm-dialog/confirm-dialog';
 import {SyllabusViewerComponent} from '../components/syllabus-viewer/syllabus-viewer';
 import {FwButtonComponent} from '../../../../../../shared/components/button/button.component';
+import {FwInfoCardComponent} from '../../../../../../shared/components/info-card/info-card.component';
 import {FwPageShellComponent} from '../../../../../../shared/components/page-shell/page-shell.component';
 import {BlockLoaderComponent} from '../../../../../../shared/components/loader/block-loader.component';
 import {HasPermissionDirective} from '../../../../../../shared/directives/has-permission.directive';
@@ -40,6 +41,7 @@ import {HasPermissionDirective} from '../../../../../../shared/directives/has-pe
     ReactiveFormsModule,
     MatDialogModule,
     FwButtonComponent,
+    FwInfoCardComponent,
     FwPageShellComponent,
     BlockLoaderComponent,
     HasPermissionDirective

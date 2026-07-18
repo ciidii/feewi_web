@@ -1,7 +1,7 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpBackend, HttpClient, HttpHeaders} from '@angular/common/http';
 import {catchError, Observable, throwError} from 'rxjs';
-import {UploadTicketRequest, UploadTicketResponse} from '../models/document.model';
+import {PaymentReceiptResponse, UploadTicketRequest, UploadTicketResponse} from '../models/document.model';
 import {EnvironmentService} from './environment.service';
 import {NotificationService} from '../../shared/services/notification.service';
 
@@ -58,6 +58,19 @@ export class DocumentEngineService {
       responseType: 'text'
     }).pipe(
       catchError(this.handleError('Impossible de récupérer l\'aperçu du document'))
+    );
+  }
+
+  /**
+   * Générer le reçu de paiement numéroté (BL-BILL-05) pour un paiement donné.
+   */
+  generatePaymentReceipt(studentId: string, paymentId: string, requestedBy?: string): Observable<PaymentReceiptResponse> {
+    return this.http.post<PaymentReceiptResponse>(`${this.baseUrl}/receipts`, {
+      studentId,
+      paymentId,
+      requestedBy
+    }).pipe(
+      catchError(this.handleError('Impossible de générer le reçu de paiement'))
     );
   }
 }

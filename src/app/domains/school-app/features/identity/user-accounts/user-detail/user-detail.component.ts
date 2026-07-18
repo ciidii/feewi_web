@@ -25,6 +25,7 @@ import {AccountFormComponent} from '../components/account-form/account-form.comp
 import {MatDialog} from '@angular/material/dialog';
 import {FwPageShellComponent} from '../../../../../../shared/components/page-shell/page-shell.component';
 import {FwButtonComponent} from '../../../../../../shared/components/button/button.component';
+import {FwInfoCardComponent} from '../../../../../../shared/components/info-card/info-card.component';
 import {HasPermissionDirective} from '../../../../../../shared/directives/has-permission.directive';
 import {SkeletonComponent} from '../../../../../../shared/components/skeleton/skeleton.component';
 import {IdentityService} from '../../../../../../core/services/identity.service';
@@ -42,6 +43,7 @@ import {FwTab} from '../../../../../../shared/components/tabs/tabs.component';
     LucideAngularModule,
     FwPageShellComponent,
     FwButtonComponent,
+    FwInfoCardComponent,
     HasPermissionDirective,
     SkeletonComponent
   ],

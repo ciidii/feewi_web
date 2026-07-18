@@ -1,0 +1,74 @@
+<app-fw-page-shell
+  title="Relances"
+  description="Tranches en retard, tenant entier — à traiter manuellement avec les familles (appel, SMS, email)."
+  [icon]="BellRing"
+  density="compact"
+>
+  <div class="list-page-content animate-in fade-in duration-500">
+
+    <!-- CHARGEMENT -->
+    <div *ngIf="isLoading()" class="py-24 flex flex-col items-center justify-center gap-3">
+      <span class="text-xs font-bold text-slate-400 uppercase tracking-wide">Chargement des retards...</span>
+    </div>
+
+    <!-- ÉTAT VIDE : aucun retard — bonne nouvelle -->
+    <div *ngIf="!isLoading() && rows().length === 0" class="py-24">
+      <app-fw-empty-state
+        [icon]="PartyPopper"
+        title="Aucun retard actuellement"
+        description="Toutes les tranches sont à jour ou soldées. Rien à relancer pour le moment."
+      ></app-fw-empty-state>
+    </div>
+
+    <!-- TABLEAU DES RETARDS -->
+    <div class="work-section" *ngIf="!isLoading() && rows().length > 0">
+      <div class="section-header">
+        <h3>Tranches en retard</h3>
+        <span class="text-xs font-bold text-slate-400">{{ rows().length }} tranche(s)</span>
+      </div>
+      <div class="section-body">
+        <table class="overdue-table">
+          <thead>
+            <tr>
+              <th>Élève</th>
+              <th>Tranche</th>
+              <th>Montant restant</th>
+              <th>Échéance</th>
+              <th>Retard</th>
+              <th>Contact tuteur</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of rows()">
+              <td class="cell-student">
+                <button type="button" class="student-link" (click)="goToStudent(row.studentId)">
+                  {{ row.studentDisplayName }}
+                </button>
+                <span class="student-reg" *ngIf="row.registrationNumber">#{{ row.registrationNumber }}</span>
+              </td>
+              <td>Tranche {{ row.installmentSequence }}</td>
+              <td>{{ formatAmount(row.remainingAmount) }}</td>
+              <td>{{ row.dueDate | fwDate:'full' }}</td>
+              <td>
+                <span class="overdue-badge" [class.is-severe]="isSevere(row.daysOverdue)">
+                  {{ row.daysOverdue }} j
+                </span>
+              </td>
+              <td class="cell-contact">
+                <a *ngIf="row.guardianEmail" [href]="'mailto:' + row.guardianEmail" class="contact-link" title="Envoyer un email">
+                  <lucide-icon [name]="Mail" [size]="13"></lucide-icon>
+                  {{ row.guardianEmail }}
+                </a>
+                <a *ngIf="row.guardianPhone" [href]="'tel:' + row.guardianPhone" class="contact-link" title="Appeler">
+                  <lucide-icon [name]="Phone" [size]="13"></lucide-icon>
+                  {{ row.guardianPhone }}
+                </a>
+                <span *ngIf="!row.guardianEmail && !row.guardianPhone" class="text-text-tertiary">—</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</app-fw-page-shell>

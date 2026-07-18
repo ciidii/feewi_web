@@ -4,6 +4,7 @@
   [icon]="ListChecks"
   [backLink]="['/admin/classes/cycles', level()?.cycleId]"
   density="compact"
+  [showSearch]="false"
 >
   <!-- ACTIONS -->
   <div actions>
@@ -31,21 +32,19 @@
 
         <!-- 📝 FORMULAIRE D'AJOUT / ÉDITION -->
         <ng-container *fwHasPermission="'academic:structure:write'">
-          <section class="fw-standard-card animate-in slide-in-from-top duration-300" *ngIf="isAdding()">
-            <header class="card-header">
-              <div class="header-left">
-                <lucide-icon [name]="editingItem() ? Edit : Plus" [size]="16" class="header-icon"></lucide-icon>
-                <div class="pillar-title-group">
-                  <h3>{{ editingItem() ? 'Modifier la matière' : 'Ajouter une matière au programme' }}</h3>
-                  <p>Définissez les paramètres pédagogiques pour ce niveau.</p>
-                </div>
-              </div>
+          <app-fw-info-card
+            class="animate-in slide-in-from-top duration-300"
+            *ngIf="isAdding()"
+            [icon]="editingItem() ? Edit : Plus"
+            [title]="editingItem() ? 'Modifier la matière' : 'Ajouter une matière au programme'"
+            subtitle="Définissez les paramètres pédagogiques pour ce niveau."
+          >
+            <div card-actions>
               <button (click)="cancelForm()" class="text-slate-400 hover:text-midnight transition-colors">
                 <lucide-icon [name]="X" [size]="18"></lucide-icon>
               </button>
-            </header>
+            </div>
 
-            <div class="card-content">
               <form [formGroup]="addForm" (ngSubmit)="onSave()" class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
                 <!-- Matière -->
                 <div class="fw-field md:col-span-2">
@@ -99,8 +98,7 @@
                   </app-fw-button>
                 </div>
               </form>
-            </div>
-          </section>
+          </app-fw-info-card>
         </ng-container>
 
         <!-- 📊 LISTE DU PROGRAMME -->

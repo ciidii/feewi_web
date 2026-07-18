@@ -1,0 +1,95 @@
+<app-fw-page-shell
+  title="Catalogue des Types de Frais"
+  description="Gérez les catégories de frais scolaires facturables aux familles."
+  [icon]="CreditCard"
+  density="compact"
+>
+  <!-- CONTENU DE PAGE ALIGNÉ -->
+  <div class="list-page-content animate-in fade-in duration-500">
+
+    <!-- RÉGLAGES DE FACTURATION (ADR-009 §5) -->
+    <div class="bg-surface-sunken rounded-2xl p-5 border border-border flex items-center justify-between gap-4 flex-wrap">
+      <div class="flex items-center gap-4">
+        <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm text-text-tertiary">
+          <lucide-icon [name]="Settings" [size]="18"></lucide-icon>
+        </div>
+        <div>
+          <p class="text-sm font-bold text-midnight">Mensualisation</p>
+          <p class="text-[11px] text-text-secondary">
+            Nombre de mensualités sur lesquelles la scolarité et les services souscrits sont répartis.
+          </p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2" *fwHasPermission="'finance:fee:manage'">
+        <input
+          type="number"
+          min="1"
+          class="fw-input w-24"
+          [ngModel]="nombreMensualitesInput()"
+          (ngModelChange)="nombreMensualitesInput.set($event)"
+        />
+        <app-fw-button
+          variant="secondary"
+          size="sm"
+          [loading]="isSavingSettings()"
+          [disabled]="nombreMensualitesInput() === billingSettings()?.nombreMensualites"
+          (click)="saveBillingSettings()"
+        >
+          Enregistrer
+        </app-fw-button>
+      </div>
+    </div>
+
+    <!-- BARRE DE COMMANDE UNIFIÉE -->
+    <app-fw-list-command-bar
+      [searchQuery]="searchQuery()"
+      [searchPlaceholder]="'Rechercher un type de frais...'"
+      [totalElements]="feeTypes().length"
+      [activeFilters]="activeFilterChips()"
+      (searchChange)="onSearch($event)"
+      (clearSearch)="onSearch('')"
+      (removeFilter)="removeFilter($event)"
+      (clearAllFilters)="clearAllFilters()"
+    >
+      <!-- ACTIONS PRIMAIRES -->
+      <div primary-actions class="flex items-center gap-2">
+        <app-fw-button variant="tertiary" size="sm" [icon]="RefreshCw" [loading]="isLoading()" (click)="loadData()" title="Actualiser"></app-fw-button>
+        <div class="divider-v"></div>
+        <app-fw-button
+          *fwHasPermission="'finance:fee:manage'"
+          (click)="openFeeTypeForm()"
+          variant="primary"
+          size="sm"
+          [icon]="Plus"
+        >
+          Nouveau type de frais
+        </app-fw-button>
+      </div>
+    </app-fw-list-command-bar>
+
+    <!-- LISTE DES TYPES DE FRAIS -->
+    <div class="list-container-integrated">
+      <app-data-list
+        [data]="displayFeeTypes()"
+        [total]="displayFeeTypes().length"
+        [actions]="feeTypeActions"
+        [isLoading]="isLoading()"
+        [showSearch]="false"
+        [showFilterButton]="false"
+        [cardMode]="false"
+        (onAction)="handleAction($event)"
+      ></app-data-list>
+
+      <!-- État vide -->
+      <div *ngIf="displayFeeTypes().length === 0 && !isLoading()" class="py-24">
+        <app-fw-empty-state
+          [icon]="CreditCard"
+          title="Aucun type de frais trouvé"
+          description="Créez vos catégories de frais (cantine, transport, uniforme...) pour pouvoir les facturer aux familles."
+          [ctaLabel]="canManage() ? 'Créer mon premier type de frais' : ''"
+          (ctaClick)="openFeeTypeForm()"
+        ></app-fw-empty-state>
+      </div>
+    </div>
+  </div>
+</app-fw-page-shell>

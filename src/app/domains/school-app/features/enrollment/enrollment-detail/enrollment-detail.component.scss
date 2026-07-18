@@ -1,0 +1,862 @@
+@use '../../../../../../styles/tokens' as *;
+
+// ViewEncapsulation.None : `:host` ne fonctionne pas dans ce mode — cibler le nom de balise réel.
+app-enrollment-detail {
+  display: block;
+  height: 100%;
+  min-height: 0;
+  background: var(--fw-ice);
+}
+
+/* ==========================================================================
+   STICKY HEADER ACTION HUB (Custom List-Item & Centered Workflow)
+   ========================================================================== */
+// Override page-header to allow actions to occupy full width
+.page-header {
+  .header-main {
+    flex: 0 1 auto !important;
+  }
+
+  .header-actions {
+    flex: 1 !important;
+    display: flex;
+    align-items: center;
+  }
+}
+
+// 3 zones explicites en ligne : gauche (largeur fixe) | centre (1fr, workflow centré) |
+// droite (largeur fixe, ancrée à l'extrémité). Grid plutôt que flex + margin-auto : la colonne
+// "droite" hérite d'une largeur intrinsèque et colle systématiquement au bord, quel que soit le
+// contenu du centre — pas d'ambiguïté possible entre flex-grow et marges auto.
+.header-action-hub {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  width: 100%;
+  gap: 1.5rem;
+  position: relative;
+}
+
+// 👤 ZONE GAUCHE : Identité étudiant + type
+.hub-left {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  min-width: 0;
+
+  .header-student-identity {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+
+    .stu-avatar {
+      width: 38px;
+      height: 38px;
+      background: var(--fw-midnight);
+      color: white;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 1rem;
+      box-shadow: var(--fw-shadow-sm);
+    }
+
+    .stu-info {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+
+      .stu-name {
+        font-family: var(--fw-font-display);
+        font-size: 0.875rem;
+        font-weight: 850;
+        color: var(--fw-midnight);
+        line-height: 1.2;
+        white-space: nowrap;
+      }
+
+      .stu-ref {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--fw-text-tertiary);
+        letter-spacing: 0.02em;
+      }
+    }
+  }
+}
+
+// 🔄 ZONE CENTRE : Workflow, centré dans la colonne 1fr
+.hub-center {
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+
+  ::ng-deep .workflow-steps {
+    gap: 32px !important; // More air as requested
+  }
+
+  ::ng-deep .workflow-line {
+    margin: 0 -20px !important;
+  }
+}
+
+// 🛠️ ZONE DROITE : Actions — colonne grid `auto`, toujours collée au bord droit
+.hub-right {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  justify-self: end;
+  flex-shrink: 0;
+
+  .action-buttons-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .danger-zone {
+    padding-left: 1.25rem;
+    border-left: 1px solid var(--fw-border);
+    flex-shrink: 0;
+  }
+}
+
+.header-action-hub {
+  .divider-v {
+    width: 1px;
+    height: 24px;
+    background: var(--fw-border);
+    flex-shrink: 0;
+  }
+
+  // Type de démarche : Admission (neutre) vs Réinscription (accentué)
+  .admission-type-chip {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    height: 24px;
+    padding: 0 10px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    background: var(--fw-surface-sunken);
+    color: var(--fw-text-secondary);
+    border: 1px solid var(--fw-border);
+
+    &.is-re {
+      background: var(--fw-primary-alpha);
+      color: var(--fw-primary);
+      border-color: transparent;
+    }
+  }
+
+  .payment-status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    background: var(--fw-warning-bg);
+    color: var(--fw-warning-text);
+    border: 1px solid var(--fw-warning-border);
+
+    &.is-confirmed {
+      background: var(--fw-success-bg);
+      color: var(--fw-success-text);
+      border-color: var(--fw-success-border);
+    }
+  }
+
+  // Alerte informative billing-service (BL-BILL-01) — jamais bloquante, purement visuelle.
+  .billing-alert-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    max-width: 320px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    background: var(--fw-warning-bg);
+    color: var(--fw-warning-text);
+    border: 1px solid var(--fw-warning-border);
+
+    lucide-icon {
+      flex-shrink: 0;
+    }
+  }
+
+  // Verdict final — occupe la zone droite dans les états clos (VALIDATED/REJECTED/CANCELLED)
+  // pour que le hub garde son équilibre 3-colonnes même sans bouton d'action.
+  .decision-status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    background: var(--fw-success-bg);
+    color: var(--fw-success-text);
+    border: 1px solid var(--fw-success-border);
+
+    &.rejected {
+      background: var(--fw-error-bg);
+      color: var(--fw-error-text);
+      border-color: var(--fw-error-border);
+    }
+
+    &.cancelled {
+      background: var(--fw-neutral-bg);
+      color: var(--fw-neutral-text);
+      border-color: var(--fw-neutral-border);
+    }
+  }
+}
+
+/* ==========================================================================
+   MAIN LAYOUT & CONTENT
+   ========================================================================== */
+.decision-hub-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 0;
+  height: var(--fw-page-body-height);
+  overflow: hidden;
+  transition: all 0.3s ease;
+
+  &.is-loading {
+    pointer-events: none;
+
+    .pillar-content-area, .conformity-sidebar {
+      opacity: 0.6;
+      filter: grayscale(0.2);
+    }
+  }
+
+  @media (max-width: 1100px) {
+    grid-template-columns: 1fr 300px;
+  }
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    .conformity-sidebar {
+      display: none;
+    }
+  }
+}
+
+.locked-message {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--fw-success-bg);
+  color: var(--fw-success-text);
+  border-radius: 12px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  border: 1px solid var(--fw-success);
+  margin-top: 1rem;
+  animation: slideUp 0.4s ease-out;
+}
+
+.pillar-content-area {
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  .pillar-scroll-wrapper {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+    scroll-behavior: smooth;
+    @media (max-width: 768px) {
+      padding: 1.25rem;
+    }
+  }
+}
+
+// La carte "dossier" est désormais fournie par app-fw-info-card (shared/components/info-card).
+app-fw-info-card { display: block; margin-bottom: 1.5rem; }
+
+.info-grid-dense {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem 2rem;
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+
+  .info-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    label {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--fw-text-tertiary);
+    }
+
+    .field-value {
+      font-size: 0.9375rem;
+      font-weight: 700;
+      color: var(--fw-midnight);
+    }
+
+    &.highlight .field-value {
+      color: var(--fw-primary);
+    }
+  }
+}
+
+// ── ASSESSMENT ACTION CARD (Institutional Evaluation) ─────────────────────
+.assessment-action-card {
+  margin-top: 2.5rem;
+  background: white;
+  border: 1.5px solid var(--fw-midnight); // Distinct accent border
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--fw-shadow-lg);
+
+  .card-header {
+    padding: 1.25rem 1.5rem;
+    background: var(--fw-midnight);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    .header-icon {
+      color: white;
+      opacity: 0.9;
+    }
+
+    .pillar-title-group {
+      h3 {
+        font-family: var(--fw-font-ui);
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: white;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      p {
+        font-size: 11px;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.6);
+        margin: 1px 0 0;
+      }
+    }
+  }
+
+  .assessment-body {
+    display: grid;
+    grid-template-columns: 1fr 380px; // Slightly smaller and more flexible
+    gap: 0;
+    border-top: 1px solid var(--fw-border-subtle);
+
+    @media (max-width: 1280px) {
+      grid-template-columns: 1fr; // Stack earlier to prevent sidebar collision
+    }
+  }
+}
+
+.grades-display {
+  padding: 2rem;
+  border-right: 1px solid var(--fw-border-subtle);
+  @media (max-width: 1280px) {
+    border-right: none;
+    border-bottom: 1px solid var(--fw-border-subtle);
+  }
+}
+
+.grades-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th {
+    text-align: left;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--fw-text-tertiary);
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--fw-border-subtle);
+  }
+
+  td {
+    padding: 1rem;
+    font-weight: 700;
+    color: var(--fw-midnight);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.02);
+  }
+
+  .grade-input {
+    width: 64px;
+    height: 36px;
+    border: 1.5px solid var(--fw-border);
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 800;
+    font-family: inherit;
+  }
+
+  .average-row td {
+    background: var(--fw-surface-sunken);
+    padding: 1.25rem 1rem;
+    border-bottom: none;
+
+    .average-score {
+      font-size: 1.25rem;
+      font-weight: 900;
+
+      &.passing {
+        color: var(--fw-success);
+      }
+    }
+  }
+}
+
+.decision-box {
+  background: white; // Clean unicolor
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  .decision-label {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--fw-text-tertiary);
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  textarea {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1.5px solid var(--fw-border);
+    font-family: inherit;
+    font-size: 14px;
+    transition: border-color 0.2s;
+
+    &:focus {
+      border-color: var(--fw-primary);
+      outline: none;
+    }
+  }
+
+  .decision-actions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+
+    .btn-opt {
+      height: 40px;
+      border-radius: 10px;
+      border: 1.5px solid var(--fw-border);
+      background: white;
+      font-weight: 800;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      &.reject.active {
+        border-color: var(--fw-error);
+        color: var(--fw-error);
+        background: var(--fw-error-bg);
+      }
+
+      &.wait.active {
+        border-color: var(--fw-warning);
+        color: var(--fw-warning);
+        background: var(--fw-warning-bg);
+      }
+
+      &.admit.active {
+        border-color: var(--fw-success);
+        color: var(--fw-success);
+        background: var(--fw-success-bg);
+      }
+
+      &:hover:not(.active) {
+        background: var(--fw-surface-sunken);
+        border-color: var(--fw-slate-medium);
+      }
+    }
+  }
+}
+
+
+// ── GUARDIAN COMPACT ──────────────────────────────────────────────────────
+.guardian-compact-card {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.25rem;
+  background: var(--fw-surface-sunken);
+  border-radius: 16px;
+
+  .card-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    .avatar-md {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: var(--fw-midnight);
+      color: white;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+    }
+
+    h4 {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--fw-midnight);
+      margin: 0;
+    }
+
+    .relation-tag {
+      font-size: 9px;
+      font-weight: 800;
+      color: var(--fw-primary);
+      background: white;
+      padding: 2px 8px;
+      border-radius: 100px;
+      text-transform: uppercase;
+      border: 1px solid var(--fw-border-subtle);
+    }
+  }
+
+  .card-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    .contact-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .finance-badge {
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--fw-text-tertiary);
+
+      &.active {
+        color: var(--fw-success);
+      }
+    }
+  }
+}
+
+// ── SERVICES DISPLAY (Sidebar Variant) ────────────────────────────────────
+.services-list-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  .sidebar-svc-item {
+    padding: 0.75rem 1rem;
+    background: var(--fw-surface-sunken);
+    border-radius: 12px;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+
+    &:hover {
+      background: white;
+      border-color: var(--fw-border-subtle);
+      box-shadow: var(--fw-shadow-sm);
+    }
+
+    .svc-main {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+
+      .svc-name {
+        font-size: 0.8125rem;
+        font-weight: 800;
+        color: var(--fw-midnight);
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+      }
+
+      .svc-cancelled {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--fw-danger, #dc2626);
+        white-space: nowrap;
+      }
+    }
+
+    .svc-opt {
+      display: block;
+      margin-top: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--fw-primary);
+      background: white;
+      padding: 2px 8px;
+      border-radius: 6px;
+      width: fit-content;
+      border: 1px solid var(--fw-primary-alpha);
+    }
+  }
+}
+
+/* ==========================================================================
+   RIGHT SIDEBAR
+   ========================================================================== */
+.conformity-sidebar {
+  background: var(--fw-surface-sunken);
+  border-left: 1px solid rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.sidebar-card {
+  background: var(--fw-surface-card);
+  border-radius: var(--fw-radius-lg);
+  padding: 1.25rem;
+  box-shadow: var(--fw-shadow-sm);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+    lucide-icon {
+      color: var(--fw-text-tertiary);
+    }
+
+    h4 {
+      flex: 1;
+      margin: 0;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--fw-text-primary);
+    }
+
+    .doc-counter {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--fw-primary);
+      background: var(--fw-primary-alpha);
+      padding: 0.125rem 0.5rem;
+      border-radius: 12px;
+    }
+  }
+}
+
+.documents-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.document-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--fw-surface-card);
+  border: 1px solid transparent;
+
+  &:hover {
+    background: var(--fw-surface-sunken);
+    border-color: rgba(0, 0, 0, 0.06);
+  }
+
+  &.missing {
+    opacity: 0.7;
+
+    .document-status {
+      color: var(--fw-warning);
+    }
+  }
+
+  .document-info {
+    flex: 1;
+
+    .document-name {
+      display: block;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--fw-text-primary);
+    }
+
+    .document-status {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+  }
+
+  .upload-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: none;
+    background: var(--fw-surface-sunken);
+    color: var(--fw-text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+
+    &:hover {
+      background: var(--fw-primary);
+      color: var(--fw-text-inverse);
+    }
+
+    &.uploading {
+      background: var(--fw-info-bg);
+      color: var(--fw-info);
+      cursor: wait;
+      pointer-events: none;
+    }
+  }
+}
+
+.compliance-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-radius: 16px;
+  background: white;
+  border: 1px solid var(--fw-border);
+  flex-shrink: 0;
+
+  lucide-icon {
+    flex-shrink: 0;
+    color: var(--fw-text-tertiary);
+  }
+
+  .compliance-text {
+    flex: 1;
+
+    strong {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: var(--fw-text-primary);
+      margin-bottom: 0.125rem;
+    }
+
+    span {
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--fw-text-tertiary);
+    }
+  }
+
+  &.compliant {
+    border-color: var(--fw-success);
+    background: var(--fw-success-bg);
+
+    lucide-icon {
+      color: var(--fw-success);
+    }
+
+    .compliance-text strong {
+      color: var(--fw-success-text);
+    }
+  }
+}
+
+.skeleton-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 0;
+  height: var(--fw-page-body-height);
+  background: var(--fw-surface-card);
+  border-radius: var(--fw-radius-xl);
+  overflow: hidden;
+
+  .skeleton-content {
+    background: var(--fw-surface-card);
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  .skeleton-sidebar {
+    background: var(--fw-surface-sunken);
+    animation: pulse 1.5s ease-in-out infinite 0.2s;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--fw-surface-sunken);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--fw-border);
+  border-radius: 10px;
+
+  &:hover {
+    background: var(--fw-text-tertiary);
+  }
+}

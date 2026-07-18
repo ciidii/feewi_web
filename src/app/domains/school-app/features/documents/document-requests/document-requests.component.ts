@@ -6,6 +6,7 @@ import {catchError} from 'rxjs/operators';
 import {
   CheckCircle,
   Clock,
+  Download,
   FileText,
   LucideAngularModule,
   Plus,
@@ -16,6 +17,7 @@ import {
 } from 'lucide-angular';
 
 import {DocumentRequestService} from '../../../../../core/services/document-request.service';
+import {DocumentEngineService} from '../../../../../core/services/document-engine.service';
 import {StudentRegistryService} from '../../../../../core/services/student-registry.service';
 import {AuthService} from '../../../../../core/services/auth.service';
 import {DocumentRequest, DocumentType} from '../../../../../core/models/document.model';
@@ -43,6 +45,7 @@ import {FwTabsComponent, FwTab} from '../../../../../shared/components/tabs/tabs
 })
 export class DocumentRequestsComponent implements OnInit, OnDestroy {
   private documentRequestService = inject(DocumentRequestService);
+  private documentEngineService = inject(DocumentEngineService);
   private studentService = inject(StudentRegistryService);
   private authService = inject(AuthService);
 
@@ -55,6 +58,7 @@ export class DocumentRequestsComponent implements OnInit, OnDestroy {
   readonly ShieldCheck = ShieldCheck;
   readonly CheckCircle = CheckCircle;
   readonly XCircle = XCircle;
+  readonly Download = Download;
 
   readonly documentTypeLabels: Record<DocumentType, string> = {
     CERTIFICAT_SCOLARITE: 'Certificat de scolarité',
@@ -66,16 +70,19 @@ export class DocumentRequestsComponent implements OnInit, OnDestroy {
   readonly canManage = computed(() => this.authService.hasPermission('document:request:manage'));
   readonly canValidate = computed(() => this.authService.hasPermission('document:request:validate'));
   readonly canSubmit = computed(() => this.authService.hasPermission('document:request:submit'));
+  readonly canDeliver = computed(() => this.authService.hasPermission('document:request:deliver'));
 
   readonly tabs = computed<FwTab[]>(() => [
     {id: 'secretariat', label: 'À vérifier', icon: this.Clock, count: this.pendingRequests().length, disabled: !this.canManage()},
-    {id: 'direction', label: 'À valider', icon: this.ShieldCheck, count: this.eligibleRequests().length, disabled: !this.canValidate()}
+    {id: 'direction', label: 'À valider', icon: this.ShieldCheck, count: this.eligibleRequests().length, disabled: !this.canValidate()},
+    {id: 'ready', label: 'Prêts', icon: this.CheckCircle, count: this.readyRequests().length, disabled: !this.canDeliver()}
   ]);
-  readonly activeTab = signal<'secretariat' | 'direction'>('secretariat');
+  readonly activeTab = signal<'secretariat' | 'direction' | 'ready'>('secretariat');
 
   // --- Data ---
   readonly pendingRequests = signal<DocumentRequest[]>([]);
   readonly eligibleRequests = signal<DocumentRequest[]>([]);
+  readonly readyRequests = signal<DocumentRequest[]>([]);
   readonly isLoading = signal(false);
   readonly studentNames = signal<Record<string, string>>({});
 
@@ -91,7 +98,7 @@ export class DocumentRequestsComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   ngOnInit() {
-    this.activeTab.set(this.canManage() ? 'secretariat' : 'direction');
+    this.activeTab.set(this.canManage() ? 'secretariat' : this.canValidate() ? 'direction' : 'ready');
     this.loadAll();
 
     this.searchSubject.pipe(
@@ -109,6 +116,7 @@ export class DocumentRequestsComponent implements OnInit, OnDestroy {
   loadAll() {
     if (this.canManage()) this.loadPending();
     if (this.canValidate()) this.loadEligible();
+    if (this.canDeliver()) this.loadReady();
   }
 
   loadPending() {
@@ -125,6 +133,13 @@ export class DocumentRequestsComponent implements OnInit, OnDestroy {
   loadEligible() {
     this.documentRequestService.listRequests('ELIGIBLE').subscribe(data => {
       this.eligibleRequests.set(data);
+      this.resolveStudentNames(data);
+    });
+  }
+
+  loadReady() {
+    this.documentRequestService.listRequests('READY').subscribe(data => {
+      this.readyRequests.set(data);
       this.resolveStudentNames(data);
     });
   }
@@ -147,7 +162,7 @@ export class DocumentRequestsComponent implements OnInit, OnDestroy {
   }
 
   onTabChange(tabId: string) {
-    this.activeTab.set(tabId as 'secretariat' | 'direction');
+    this.activeTab.set(tabId as 'secretariat' | 'direction' | 'ready');
   }
 
   onSearchChange(query: string) {
@@ -207,6 +222,17 @@ export class DocumentRequestsComponent implements OnInit, OnDestroy {
     const reason = window.prompt('Motif de refus :');
     if (reason === null || reason.trim() === '') return;
     this.documentRequestService.reject(request.id, reason).subscribe(() => this.loadEligible());
+  }
+
+  downloadDocument(request: DocumentRequest) {
+    if (!request.fileId) return;
+    this.documentEngineService.getViewUrl(request.fileId).subscribe(url => {
+      window.open(url, '_blank');
+    });
+  }
+
+  deliverRequest(request: DocumentRequest) {
+    this.documentRequestService.deliver(request.id).subscribe(() => this.loadReady());
   }
 
   studentLabel(studentId: string): string {

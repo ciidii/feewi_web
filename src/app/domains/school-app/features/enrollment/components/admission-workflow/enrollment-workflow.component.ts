@@ -55,10 +55,32 @@ export class EnrollmentWorkflowComponent {
     {state: 'VALIDATED', label: 'Décision', icon: UserCheck, description: 'Admission confirmée par la direction.'}
   ];
 
-  /** Détermine l'index de l'étape actuelle */
+  /**
+   * Détermine l'index de l'étape actuelle. ADMITTED/WAITLIST (décision pédagogique prise, en
+   * attente de validation finale) et REJECTED/CANCELLED (issue terminale) n'apparaissent pas
+   * dans `steps` : sans ce rattachement, currentStepIndex vaudrait -1 et AUCUNE étape ne
+   * s'affichait comme active ou complétée, rendant le workflow illisible pour ces statuts.
+   */
   currentStepIndex = computed(() => {
     const currentState = this.state();
-    return this.steps.findIndex(s => s.state === currentState);
+    const idx = this.steps.findIndex(s => s.state === currentState);
+    if (idx !== -1) return idx;
+    if (['ADMITTED', 'WAITLIST', 'REJECTED', 'CANCELLED'].includes(currentState)) {
+      return this.steps.length - 1;
+    }
+    return -1; // DRAFT : aucune étape commencée
+  });
+
+  /** Issue terminale négative — l'étape courante doit se distinguer visuellement d'une progression normale. */
+  isNegativeOutcome = computed(() => ['REJECTED', 'CANCELLED'].includes(this.state()));
+
+  /** Libellé de l'étape courante, à afficher en toutes lettres à côté des icônes en mode compact. */
+  currentStepLabel = computed(() => {
+    const currentState = this.state();
+    if (currentState === 'REJECTED') return 'Rejeté';
+    if (currentState === 'CANCELLED') return 'Annulé';
+    const idx = this.currentStepIndex();
+    return idx >= 0 ? this.steps[idx].label : 'Brouillon';
   });
 
   /** Détermine si une étape est passée, active ou future */

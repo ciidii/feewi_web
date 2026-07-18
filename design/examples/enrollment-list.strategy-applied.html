@@ -1,0 +1,143 @@
+<!--
+  EXEMPLE DE RÉFÉRENCE — pas un fichier vivant de l'application.
+
+  Ceci est l'application concrète de UI_UX_STRATEGY.md §5.1 ("Architecture de page Liste")
+  au cas P0 le plus critique du rapport : enrollment-list.component.html (liste des dossiers
+  d'admission — l'écran le plus utilisé du produit, cf. USER_PROFILES.md Profil 2).
+
+  Comparer avec l'original :
+  src/app/domains/school-app/features/enrollment/enrollment-list/enrollment-list.component.html
+
+  Ce que ce fichier change par rapport à l'original, et pourquoi — chaque bloc est annoté ci-dessous.
+  Le pattern suivi est celui qui fonctionne déjà réellement dans l'app sur
+  user-account-list.component.html (cf. UI_UX_STRATEGY.md §2, "Ce qui fonctionne déjà").
+-->
+
+<!--
+  RÈGLE §5.1 : les onglets vivent au niveau page-shell, jamais à l'intérieur de data-list.
+  C'est le seul axe de statut du pipeline sur cette page (mutuellement exclusif, 4 valeurs
+  fixes) → c'est un usage légitime d'onglet, pas un filtre.
+  Modèle FwTab (id-based), pas TabItem (label-based) — voir §5.1 et §3.1 du rapport pour
+  la raison de ce choix (le modèle label-based est celui qui casse le rendu).
+-->
+<app-fw-page-shell
+  title="Admissions"
+  [description]="totalElements() + ' dossiers enregistrés'"
+  [icon]="Layers"
+  [tabs]="admissionTabs()"
+  [activeTabId]="activeTabId()"
+  (tabChange)="onTabChange($event)"
+  density="compact"
+>
+  <!-- Actions de page — inchangé par rapport à l'original, déjà au bon endroit. -->
+  <div actions class="flex items-center gap-2">
+    <app-fw-button variant="tertiary" size="sm" [icon]="Download" title="Exporter"></app-fw-button>
+    <app-fw-button variant="tertiary" size="sm" [icon]="RefreshCw" [loading]="isLoading()" (click)="loadAdmissions()" title="Actualiser"></app-fw-button>
+    <div class="divider-v"></div>
+    <app-fw-button variant="primary" size="sm" [icon]="UserPlus" routerLink="/admin/enrollment/direct">
+      Nouveau Dossier
+    </app-fw-button>
+  </div>
+
+  <div class="list-page-content animate-in fade-in duration-500">
+
+    <!-- BARRE DE COMMANDE : recherche + filtres ORTHOGONAUX aux onglets uniquement.
+         RÈGLE §5.1 : ne jamais réutiliser le même terme que l'axe des onglets.
+         L'original affichait un chip "État : Dossiers Incomplets" — "État" entrait en collision
+         avec l'axe des onglets (qui EST l'état du dossier). Renommé "Dossier incomplet" pour lever
+         toute ambiguïté : c'est un axe de complétude documentaire, pas un statut de pipeline. -->
+    <app-fw-list-command-bar
+      [searchQuery]="searchQuery()"
+      [searchPlaceholder]="'Rechercher un candidat...'"
+      [totalElements]="totalElements()"
+      [pageSize]="pageSize()"
+      [pageSizeOptions]="pageSizeOptions"
+      [activeFilters]="activeFilterChips()"
+      [isAllSelected]="admissionRows().length > 0 && selectedIds().size === admissionRows().length"
+      [isPartiallySelected]="selectedIds().size > 0 && selectedIds().size < admissionRows().length"
+      [selectedCount]="selectedIds().size"
+      (toggleAll)="toggleAllRows()"
+      (searchChange)="searchQuery.set($event); onFilterChange()"
+      (clearSearch)="searchQuery.set(''); onFilterChange()"
+      (pageSizeChange)="onPageSizeChange($event)"
+      (removeFilter)="removeFilter($event)"
+      (clearAllFilters)="clearAllFilters()"
+    >
+      <div bulk-actions>
+        <app-fw-button
+          variant="danger"
+          size="sm"
+          [icon]="Trash2"
+          (click)="handleBulkDelete()"
+          [loading]="isLoading()">
+          Supprimer la sélection
+        </app-fw-button>
+      </div>
+
+      <!-- Filtre "Incomplets" — rappel : dans le .ts, ce booléen doit être ajouté aux paramètres
+           envoyés par loadAdmissions() (il en était absent dans l'original, cf. rapport §3.1
+           point 5 — le chip s'affichait actif sans jamais changer les résultats). -->
+      <div quick-filters class="quick-filters-integrated">
+        <button class="filter-pill-toggle" [class.active]="incompleteOnly()" (click)="incompleteOnly.set(!incompleteOnly()); onFilterChange()">
+          <lucide-icon [name]="XCircle" [size]="14"></lucide-icon>
+          <span>Dossier incomplet</span>
+        </button>
+
+        <div class="divider-v small"></div>
+
+        <button class="more-filters-trigger" (click)="openFilterModal()" [class.has-active]="selectedChannel() || selectedStartDate()">
+          <lucide-icon [name]="Filter" [size]="14"></lucide-icon>
+          <span>Avancé</span>
+        </button>
+      </div>
+    </app-fw-list-command-bar>
+
+    <!-- LISTE DES DONNÉES.
+         RÈGLE §5.1 : data-list ne reçoit plus ni [tabs], ni [activeTab], ni (onTabChange).
+         C'est exactement ce qui manquait dans l'original pour que les onglets s'affichent —
+         [cardMode]="false" masquait la barre d'outils interne de data-list (recherche, filtre,
+         ET les onglets qu'elle tentait de rendre elle-même). Puisque les onglets vivent maintenant
+         au niveau page-shell, ce blocage n'a plus aucun effet indésirable : cardMode ne contrôle
+         plus que l'affichage de la barre interne (déjà désactivée via showSearch/showFilterButton). -->
+    <div class="list-container-integrated">
+      <app-data-list
+        [(selectedIds)]="selectedIds"
+        [data]="admissionRows()"
+        [actions]="admissionActions"
+        [isLoading]="isLoading()"
+        [page]="currentPage()"
+        [total]="totalElements()"
+        [totalPages]="totalPages()"
+        [showSearch]="false"
+        [showFilterButton]="false"
+        [cardMode]="false"
+        defaultView="table"
+        (onPageChange)="onPageChange($event)"
+        (onAction)="handleAction($event)"
+        (onRowClick)="handleAction({ actionId: 'view', row: $event })"
+      >
+      </app-data-list>
+    </div>
+
+  </div>
+
+</app-fw-page-shell>
+
+<!--
+  Changements requis côté enrollment-list.component.ts (non montrés ici, fichier .html uniquement) :
+
+  1. admissionTabs() doit retourner FwTab[] au lieu de TabItem[] :
+       { id: 'ALL', label: 'Tous', icon: Layers, count: totalElements() }
+       { id: 'SUBMITTED', label: 'À Vérifier', icon: Clock }
+       { id: 'VERIFIED', label: 'À Évaluer', icon: ShieldCheck }
+       { id: 'DECISION', label: 'En Décision', icon: UserCheck }
+
+  2. Remplacer `activeTab = signal('Tous')` par `activeTabId = signal('ALL')`, et adapter
+     loadAdmissions() pour mapper l'id (pas le label) vers AdmissionStatus.
+
+  3. onTabChange(id: string) { this.activeTabId.set(id); ... } — reçoit désormais un id, pas un
+     label, cohérent avec (tabChange) de app-fw-page-shell.
+
+  4. Dans loadAdmissions(), ajouter incompleteOnly() aux paramètres envoyés à l'API — c'est ce
+     qui rend le filtre "Dossier incomplet" réellement fonctionnel (rapport §3.1, point 5).
+-->

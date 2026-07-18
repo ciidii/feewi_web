@@ -1,0 +1,60 @@
+<app-fw-form-shell
+  [title]="'Créer un plan de tranches'"
+  [subtitle]="dialogData.studentName"
+  [icon]="Layers"
+  saveLabel="Créer le plan"
+  [isLoading]="isLoading()"
+  [canSave]="planForm.valid"
+  (save)="onSave()"
+  (cancel)="onCancel()"
+>
+  <form [formGroup]="planForm" class="space-y-6 py-2">
+
+    <div class="fw-field">
+      <label class="fw-label">Type de frais</label>
+      <div class="fw-input-wrapper">
+        <select formControlName="feeTypeCode" class="fw-input" [class.error]="isInvalid('feeTypeCode')">
+          <option *ngFor="let ft of dialogData.feeTypes" [value]="ft.code">{{ ft.label }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="fw-field">
+      <label class="fw-label">Montant total (FCFA)</label>
+      <div class="fw-input-wrapper">
+        <input type="number" formControlName="totalAmount" min="1" step="1" class="fw-input" [class.error]="isInvalid('totalAmount')" placeholder="Ex: 300000" />
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div class="fw-field">
+        <label class="fw-label">Nombre de tranches</label>
+        <div class="fw-input-wrapper">
+          <input type="number" formControlName="installmentCount" min="2" step="1" class="fw-input" [class.error]="isInvalid('installmentCount')" placeholder="Ex: 3" />
+        </div>
+      </div>
+
+      <div class="fw-field">
+        <label class="fw-label">Intervalle (jours)</label>
+        <div class="fw-input-wrapper">
+          <input type="number" formControlName="intervalDays" min="0" step="1" class="fw-input" [class.error]="isInvalid('intervalDays')" placeholder="Ex: 30" />
+        </div>
+      </div>
+    </div>
+
+    <div class="fw-field">
+      <label class="fw-label">Échéance de la 1re tranche</label>
+      <div class="fw-input-wrapper">
+        <input type="date" formControlName="firstDueDate" class="fw-input" [class.error]="isInvalid('firstDueDate')" />
+      </div>
+    </div>
+
+    <div class="p-4 bg-surface-sunken rounded-xl border border-border flex items-start gap-3">
+      <lucide-icon [name]="Info" [size]="16" class="text-text-tertiary mt-0.5"></lucide-icon>
+      <p class="text-[11px] text-text-secondary leading-relaxed font-medium">
+        Le montant total est réparti également entre les tranches. Chaque tranche suivante est échue selon l'intervalle indiqué, à partir de la 1re échéance.
+      </p>
+    </div>
+
+  </form>
+</app-fw-form-shell>

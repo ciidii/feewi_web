@@ -1,0 +1,77 @@
+<fw-block-loader *ngIf="isLoading()" [center]="true" message="Chargement des tarifs..."></fw-block-loader>
+
+<div class="pricing-page" *ngIf="!isLoading()">
+
+  <header class="page-header">
+    <span class="eyebrow"><lucide-icon [name]="Wallet" [size]="14"></lucide-icon> Frais de scolarité</span>
+    <h1>Tarifs & Services</h1>
+    <p>Des frais transparents, par cycle, sans surprise. Contactez le secrétariat pour toute question sur les modalités de paiement.</p>
+  </header>
+
+  <div class="page-inner">
+
+    <!-- TARIFS PAR CYCLE -->
+    <section class="plans-grid">
+      <div class="plan-card" *ngFor="let plan of pricingPlans()">
+        <span class="plan-cycle">{{ plan.label }}</span>
+        <div class="plan-amount">
+          <span class="amount-value">{{ plan.tuitionAmount | number }}</span>
+          <span class="amount-unit">{{ plan.currency }} / {{ plan.period }}</span>
+        </div>
+        <span class="plan-registration" *ngIf="plan.registrationFee">
+          + {{ plan.registrationFee | number }} {{ plan.currency }} de frais d'inscription
+        </span>
+
+        <ul class="plan-inclusions">
+          <li *ngFor="let inclusion of plan.inclusions">
+            <lucide-icon [name]="CheckCircle2" [size]="16"></lucide-icon>
+            <span>{{ inclusion }}</span>
+          </li>
+        </ul>
+
+        <app-fw-button variant="primary" [icon]="ArrowRight" iconPosition="right" routerLink="/admissions" class="plan-cta">
+          S'inscrire
+        </app-fw-button>
+      </div>
+    </section>
+
+    <!-- SERVICES & OPTIONS -->
+    <section class="amenities-section" *ngIf="amenities().length">
+      <h2>Services & Options</h2>
+      <div class="amenities-grid">
+        <div class="amenity-card" *ngFor="let amenity of amenities()">
+          <div class="amenity-icon">
+            <lucide-icon [name]="iconFor(amenity.icon)" [size]="20"></lucide-icon>
+          </div>
+          <div class="amenity-body">
+            <div class="amenity-head">
+              <span class="amenity-label">{{ amenity.label }}</span>
+              <app-fw-badge
+                [labelOverride]="amenity.included ? 'Inclus' : 'En option'"
+                [tokenOverride]="amenity.included ? 'success' : 'neutral'">
+              </app-fw-badge>
+            </div>
+            <p>{{ amenity.description }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq-section">
+      <h2>Questions fréquentes</h2>
+      <details class="faq-item" *ngFor="let item of faqItems">
+        <summary>{{ item.q }}</summary>
+        <p>{{ item.a }}</p>
+      </details>
+    </section>
+
+    <div class="pricing-cta">
+      <p>Prêt à inscrire votre enfant ?</p>
+      <app-fw-button variant="primary" size="lg" [icon]="ArrowRight" iconPosition="right" routerLink="/admissions/form-stepper">
+        Démarrer mon inscription
+      </app-fw-button>
+    </div>
+
+  </div>
+</div>

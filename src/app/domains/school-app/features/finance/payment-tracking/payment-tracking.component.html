@@ -1,0 +1,79 @@
+<app-fw-page-shell
+  title="Suivi des Paiements"
+  description="Suivez qui a payé et qui n'a pas payé, classe par classe."
+  [icon]="Wallet"
+  density="compact"
+>
+  <!-- ACTIONS : Sélection de contexte -->
+  <div actions class="flex items-center gap-3">
+    <div class="flex items-center gap-2 bg-white border border-border-subtle rounded-xl px-3 h-10">
+      <lucide-icon [name]="GraduationCap" [size]="14" class="text-slate-400"></lucide-icon>
+      <select
+        [ngModel]="selectedClassId()"
+        (ngModelChange)="onClassChange($event)"
+        class="bg-transparent border-none text-xs font-bold text-midnight focus:ring-0 cursor-pointer outline-none">
+        <option value="">Sélectionner une classe...</option>
+        <option *ngFor="let cls of classes()" [value]="cls.id">{{ cls.fullName }}</option>
+      </select>
+    </div>
+
+    <div class="divider-v"></div>
+
+    <app-fw-button
+      variant="tertiary"
+      size="sm"
+      [icon]="RefreshCw"
+      [loading]="isLoading()"
+      (click)="refresh()"
+      title="Actualiser"
+      [disabled]="!selectedClassId()"
+    ></app-fw-button>
+  </div>
+
+  <!-- CONTENU DE PAGE ALIGNÉ -->
+  <div class="list-page-content animate-in fade-in duration-500">
+
+    <!-- ÉTAT VIDE : aucune classe sélectionnée -->
+    <div *ngIf="!selectedClassId()" class="py-24">
+      <app-fw-empty-state
+        [icon]="GraduationCap"
+        title="Choisissez une classe"
+        description="Sélectionnez une classe ci-dessus pour consulter la situation de paiement de ses élèves."
+      ></app-fw-empty-state>
+    </div>
+
+    <ng-container *ngIf="selectedClassId()">
+      <!-- BARRE DE COMMANDE UNIFIÉE -->
+      <app-fw-list-command-bar
+        [searchQuery]="searchQuery()"
+        [searchPlaceholder]="'Rechercher un élève...'"
+        [totalElements]="displayRows().length"
+        (searchChange)="onSearch($event)"
+        (clearSearch)="onSearch('')"
+      ></app-fw-list-command-bar>
+
+      <!-- LISTE DES ÉLÈVES DE LA CLASSE -->
+      <div class="list-container-integrated">
+        <app-data-list
+          [data]="displayRows()"
+          [total]="displayRows().length"
+          [actions]="rowActions"
+          [isLoading]="isLoading()"
+          [showSearch]="false"
+          [showFilterButton]="false"
+          [cardMode]="false"
+          (onAction)="handleAction($event)"
+        ></app-data-list>
+
+        <!-- État vide : classe sans élèves -->
+        <div *ngIf="displayRows().length === 0 && !isLoading()" class="py-24">
+          <app-fw-empty-state
+            [icon]="Wallet"
+            title="Aucun élève dans cette classe"
+            description="Cette classe ne compte aucun élève inscrit pour le moment."
+          ></app-fw-empty-state>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</app-fw-page-shell>

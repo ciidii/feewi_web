@@ -1,7 +1,8 @@
 <div [ngClass]="cardMode() ? 'bg-white rounded-2xl shadow-sm hover:shadow-md' : 'bg-transparent'" class="flex flex-col transition-all overflow-hidden">
 
   <!-- ======================================= -->
-  <!-- TOOLBAR (Tabs + Sélecteur de vues + Recherche) -->
+  <!-- TOOLBAR (Sélecteur de vues + Recherche) — les onglets vivent désormais dans -->
+  <!-- l'en-tête de chaque vue (ex: app-table-view), pas ici (§5.1 UI_UX_STRATEGY.md) -->
   <!-- ======================================= -->
   <div class="flex items-center justify-between bg-white px-6 h-14" *ngIf="cardMode() && !hideToolbar()">
 
@@ -53,24 +54,6 @@
         class="select-checkbox opacity-40 hover:opacity-100 transition-opacity"
         title="Tout sélectionner"
       ></mat-checkbox>
-
-      <!-- Onglets (Technical Style) -->
-      <nav class="flex gap-1" role="tablist">
-        <button
-          *ngFor="let tab of tabs()"
-          (click)="onTabChange.emit(tab.label)"
-          role="tab"
-          [attr.aria-selected]="activeTab() === tab.label"
-          class="tab-button-technical"
-          [class.active]="activeTab() === tab.label"
-        >
-          <lucide-icon *ngIf="tab.icon" [name]="tab.icon" class="w-3.5 h-3.5"></lucide-icon>
-          <span>{{ tab.label }}</span>
-          <span *ngIf="tab.count" class="badge-technical" [class.active]="activeTab() === tab.label">
-            {{ tab.count }}
-          </span>
-        </button>
-      </nav>
 
       <!-- Bouton Filtres -->
       <button
@@ -237,11 +220,14 @@
       [selectedIds]="selectedIds()"
       [getBadgeClass]="getBadgeClass"
       [actions]="filteredActions()"
+      [tabs]="tabs()"
+      [activeTab]="activeTab()"
       (toggleRow)="toggleRow($event)"
       (toggleAll)="toggleAll()"
       (onAction)="onAction.emit($event)"
       (onSort)="handleSort($event)"
       (onRowClick)="handleRowClick($event)"
+      (onTabChange)="onTabChange.emit($event)"
     ></app-table-view>
 
     <!-- VUE TIMELINE -->

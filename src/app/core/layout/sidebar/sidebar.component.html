@@ -84,8 +84,9 @@
         <ng-container *ngFor="let item of registryItems; let i = index">
           <a *fwHasPermission="item.permission"
              [routerLink]="item.route"
+             [queryParams]="item.queryParams"
              routerLinkActive="active-link"
-             [routerLinkActiveOptions]="i === 0 ? {exact: true} : {exact: false}"
+             [routerLinkActiveOptions]="{exact: true}"
              class="sidebar-link"
              [attr.data-label]="item.label">
             <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
@@ -126,6 +127,22 @@
         </ng-container>
       </ng-container>
 
+      <!-- FINANCE -->
+      <ng-container *ngIf="navService.activeService() === 'finance'">
+        <span class="nav-section-title">Finance</span>
+        <ng-container *ngFor="let item of financeItems; let i = index">
+          <a *fwHasPermission="item.permission"
+             [routerLink]="item.route"
+             routerLinkActive="active-link"
+             [routerLinkActiveOptions]="i === 0 ? {exact: true} : {exact: false}"
+             class="sidebar-link"
+             [attr.data-label]="item.label">
+            <div class="icon-wrap"><lucide-icon [name]="item.icon" [size]="16"></lucide-icon></div>
+            <span class="label">{{ item.label }}</span>
+          </a>
+        </ng-container>
+      </ng-container>
+
       <!-- IDENTITY -->
       <ng-container *ngIf="navService.activeService() === 'identity'">
         <span class="nav-section-title">Sécurité & Staff</span>
@@ -144,6 +161,16 @@
 
       <!-- SETTINGS (SYSTEM) -->
       <ng-container *ngIf="navService.activeService() === 'settings'">
+        <span class="nav-section-title">Compte</span>
+
+        <a routerLink="/admin/account/profile"
+           routerLinkActive="active-link"
+           class="sidebar-link"
+           [attr.data-label]="'Mon Profil'">
+          <div class="icon-wrap"><lucide-icon [name]="User" [size]="16"></lucide-icon></div>
+          <span class="label">Mon Profil</span>
+        </a>
+
         <span class="nav-section-title">Apparence</span>
 
         <button (click)="uiService.setTheme('light')" class="sidebar-link" [class.active-link]="uiService.theme() === 'light'" [attr.data-label]="'Mode Clair'">
@@ -177,30 +204,6 @@
             </ng-container>
         </ng-container>
 
-        <span class="nav-section-title">Localisation</span>
-
-        <a class="sidebar-link" [attr.data-label]="'Langue'">
-          <div class="icon-wrap"><lucide-icon [name]="Globe" [size]="16"></lucide-icon></div>
-          <span class="label">Français (Bêta)</span>
-        </a>
-
-        <!-- SESSION (Affiné) -->
-        <span class="nav-section-title mt-4">Ma Session</span>
-
-        <div class="sidebar-profile-card">
-          <div class="avatar-box">
-            <lucide-icon [name]="User" [size]="14"></lucide-icon>
-          </div>
-          <div class="info">
-            <span class="name">{{ auth.currentUser()?.firstName }} {{ auth.currentUser()?.lastName }}</span>
-            <span class="role">{{ auth.currentUser()?.roles?.[0]?.replace('ROLE_', '') }}</span>
-          </div>
-        </div>
-
-        <button (click)="auth.logout()" class="sidebar-link logout-item" [attr.data-label]="'Déconnexion'">
-          <div class="icon-wrap"><lucide-icon [name]="LogOut" [size]="16"></lucide-icon></div>
-          <span class="label">Déconnexion</span>
-        </button>
       </ng-container>
     </nav>
   </ng-container>
