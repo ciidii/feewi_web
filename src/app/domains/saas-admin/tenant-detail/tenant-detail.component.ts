@@ -6,10 +6,6 @@ import {
   Building2,
   Calendar,
   CheckCircle,
-  ChevronRight,
-  CreditCard,
-  Edit,
-  ExternalLink,
   Globe,
   GraduationCap,
   History,
@@ -17,20 +13,14 @@ import {
   LucideAngularModule,
   Mail,
   MapPin,
-  MoreVertical,
   Phone,
-  Printer,
   RefreshCw,
   ShieldCheck,
-  Trash2,
-  User,
-  Users,
   XCircle
 } from 'lucide-angular';
 import {SchoolService} from '../../../core/services/school.service';
 import {School} from '../../../core/models/school.model';
 import {NotificationService} from '../../../shared/services/notification.service';
-import {AuthService} from '../../../core/services/auth.service';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '../../../shared/components/confirm-dialog/confirm-dialog';
 import {finalize} from 'rxjs';
@@ -52,7 +42,6 @@ export class TenantDetailComponent implements OnInit {
   private router = inject(Router);
   private schoolService = inject(SchoolService);
   private notificationService = inject(NotificationService);
-  private authService = inject(AuthService);
   private dialog = inject(MatDialog);
   private enrollmentPublicService = inject(EnrollmentPublicService);
 
@@ -71,17 +60,11 @@ export class TenantDetailComponent implements OnInit {
   readonly ShieldCheck = ShieldCheck;
   readonly CheckCircle = CheckCircle;
   readonly XCircle = XCircle;
-  readonly Edit = Edit;
-  readonly Trash2 = Trash2;
-  readonly Printer = Printer;
-  readonly MoreVertical = MoreVertical;
   readonly Activity = Activity;
-  readonly Users = Users;
-  readonly CreditCard = CreditCard;
   readonly HistoryIcon = History;
-  readonly ChevronRight = ChevronRight;
-  readonly User = User;
-  readonly ExternalLink = ExternalLink;
+  readonly RefreshCw = RefreshCw;
+  readonly Lock = Lock;
+  readonly GraduationCap = GraduationCap;
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -118,6 +101,27 @@ export class TenantDetailComponent implements OnInit {
     });
   }
 
+  /** Libellé du statut fidèle à SchoolStatus backend (TRIAL | ACTIVE | SUSPENDED). */
+  statusLabel(): string {
+    switch (this.school()?.status) {
+      case 'SUSPENDED': return 'Suspendu';
+      case 'TRIAL': return 'Essai';
+      default: return 'Actif';
+    }
+  }
+
+  statusBadgeClass(): string {
+    switch (this.school()?.status) {
+      case 'SUSPENDED': return 'bg-rose-50 text-rose-700 border-rose-200';
+      case 'TRIAL': return 'bg-amber-50 text-amber-700 border-amber-200';
+      default: return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+    }
+  }
+
+  isSuspended(): boolean {
+    return this.school()?.status === 'SUSPENDED';
+  }
+
   yearStateLabel(state: string): string {
     const map: Record<string, string> = { ACTIVE: 'Active', PLANNING: 'Planification', CLOSED: 'Clôturée' };
     return map[state] ?? state;
@@ -139,33 +143,21 @@ export class TenantDetailComponent implements OnInit {
     return map[mode] ?? mode;
   }
 
-  async onImpersonate() {
-    const s = this.school();
-    if (!s || !s.tenantId) return;
-
-    // Dans une implémentation réelle, nous devrions avoir l'ID de l'admin
-    // Pour l'instant, nous affichons un message d'information
-    this.notificationService.info(`Tentative de connexion en tant qu'administrateur de ${s.name}...`);
-
-    // Simulation: si nous avions l'ID de l'utilisateur admin
-    // this.authService.impersonate(adminUserId).subscribe(...)
-    this.notificationService.warning("L'identifiant de l'administrateur est requis pour cette action.");
-  }
-
   onChangeStatus() {
     const s = this.school();
     if (!s || !s.id) return;
 
-    const isCurrentlyActive = s.status === 'ACTIVE' || s.active !== false;
-    const newStatus = isCurrentlyActive ? 'SUSPENDED' : 'ACTIVE';
+    // Le seul endpoint de mutation super-admin disponible : PATCH /schools/{id}/status.
+    const isSuspended = s.status === 'SUSPENDED';
+    const newStatus = isSuspended ? 'ACTIVE' : 'SUSPENDED';
 
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: isCurrentlyActive ? 'Suspendre l\'établissement' : 'Réactiver l\'établissement',
-        message: `Êtes-vous sûr de vouloir ${isCurrentlyActive ? 'suspendre' : 'réactiver'} l'accès pour ${s.name} ?`,
-        confirmLabel: isCurrentlyActive ? 'Suspendre' : 'Réactiver',
-        type: isCurrentlyActive ? 'danger' : 'primary'
+        title: isSuspended ? 'Réactiver l\'établissement' : 'Suspendre l\'établissement',
+        message: `Êtes-vous sûr de vouloir ${isSuspended ? 'réactiver' : 'suspendre'} l'accès pour ${s.name} ?`,
+        confirmLabel: isSuspended ? 'Réactiver' : 'Suspendre',
+        type: isSuspended ? 'primary' : 'danger'
       }
     });
 
@@ -181,11 +173,6 @@ export class TenantDetailComponent implements OnInit {
     });
   }
 
-  onEdit() {
-    // Cette partie pourrait ouvrir la modale d'édition existante
-    this.notificationService.info("Redirection vers le formulaire d'édition...");
-  }
-
   formatDate(date?: string): string {
     if (!date) return 'Date inconnue';
     return new Date(date).toLocaleDateString('fr-FR', {
@@ -194,8 +181,4 @@ export class TenantDetailComponent implements OnInit {
       year: 'numeric'
     });
   }
-
-  protected readonly RefreshCw = RefreshCw;
-  protected readonly Lock = Lock;
-  protected readonly GraduationCap = GraduationCap;
 }

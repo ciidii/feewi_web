@@ -1,15 +1,6 @@
 import {Component, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {
-  Activity,
-  ArrowDownRight,
-  ArrowUpRight,
-  BarChart3,
-  Building2,
-  LucideAngularModule,
-  TrendingUp,
-  Users
-} from 'lucide-angular';
+import {Activity, BarChart3, Building2, LucideAngularModule, TrendingUp, Users} from 'lucide-angular';
 import {SchoolService} from '../../../core/services/school.service';
 import {FwPageShellComponent} from '../../../shared/components/page-shell/page-shell.component';
 
@@ -27,16 +18,8 @@ export class SaasStatsComponent implements OnInit {
   readonly Users = Users;
   readonly Activity = Activity;
   readonly TrendingUp = TrendingUp;
-  readonly ArrowUpRight = ArrowUpRight;
-  readonly ArrowDownRight = ArrowDownRight;
 
-  stats = signal({
-    totalSchools: 0,
-    activeSchools: 0,
-    totalStudents: 0,
-    systemUptime: '99.9%'
-  });
-
+  totalSchools = signal<number | null>(null);
   isLoading = signal(false);
 
   ngOnInit() {
@@ -45,15 +28,15 @@ export class SaasStatsComponent implements OnInit {
 
   loadStats() {
     this.isLoading.set(true);
-    // Simulate API call for global stats
-    setTimeout(() => {
-      this.stats.set({
-        totalSchools: this.schoolService.schoolsPage()?.totalElements || 0,
-        activeSchools: 12, // Mock data
-        totalStudents: 4500, // Mock data
-        systemUptime: '99.98%'
-      });
-      this.isLoading.set(false);
-    }, 800);
+    // Seule métrique réellement disponible côté backend aujourd'hui : le nombre total
+    // d'établissements (totalElements de GET /schools). Le reste (élèves, taux d'activité,
+    // MRR) nécessite un endpoint d'agrégation cross-tenant (roadmap BL-SAAS-03).
+    this.schoolService.getSchools('', 0, 1).subscribe({
+      next: (page) => {
+        this.totalSchools.set(page.totalElements);
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false)
+    });
   }
 }

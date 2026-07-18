@@ -155,7 +155,21 @@ export class AuthService {
   }
 
   private updateTenantContext(profile: UserProfile): void {
-    if (profile.tenantId && !this.navContext.isSaasDomain()) {
+    // Le super-admin opère sur le tenant SYSTEM. On le détecte par son rôle (fiable dès le
+    // login), pas par la route courante : /my-school lui est interdit (403) car il n'a pas
+    // la permission identity:school:read réservée aux admins d'école.
+    const isSuperAdmin = profile.roles?.includes('ROLE_SUPER_ADMIN') || this.navContext.isSaasDomain();
+
+    if (isSuperAdmin) {
+      this.tenantService.setTenant({
+        id: 'SYSTEM',
+        name: 'Administration Feewi',
+        allowedCycles: []
+      });
+      return;
+    }
+
+    if (profile.tenantId) {
       // Pour les utilisateurs d'école connectés, on récupère les infos complètes via /my-school
       this.schoolService.getMySchool().subscribe({
         next: (school) => {
@@ -186,12 +200,6 @@ export class AuthService {
             }
           });
         }
-      });
-    } else if (this.navContext.isSaasDomain()) {
-      this.tenantService.setTenant({
-        id: 'SYSTEM',
-        name: 'Administration Feewi',
-        allowedCycles: []
       });
     }
   }

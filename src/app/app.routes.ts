@@ -25,7 +25,9 @@ export const routes: Routes = [
     path: 'saas',
     component: ShellComponent,
     canActivate: [authGuard],
-    data: {permissions: ['identity:school:read']},
+    // Garde-fou réservé au super-admin : identity:saas:school:list est une permission
+    // système absente des rôles d'école (identity:school:read, elle, est portée par tout admin d'école).
+    data: {permissions: ['identity:saas:school:list']},
     loadChildren: () => import('./domains/saas-admin/saas-admin.routes').then(m => m.SAAS_ADMIN_ROUTES)
   },
 

@@ -3,6 +3,7 @@
   description="Supervisez les écoles et les domaines du réseau Feewi."
   [icon]="Building2"
   density="compact"
+  [showSearch]="false"
 >
   <div actions>
     <button
@@ -15,19 +16,42 @@
     </button>
   </div>
 
-  <!-- Table Component -->
-  <app-data-list
-    [data]="tenants()"
-    [tabs]="tenantTabs()"
-    [activeTab]="activeTab()"
-    [total]="totalTenants()"
-    [page]="currentPage()"
-    [totalPages]="totalPages()"
-    [actions]="tenantActions"
-    [isLoading]="isLoading()"
-    (onTabChange)="onTabChange($event)"
-    (onSearch)="onSearch($event)"
-    (onPageChange)="onPageChange($event)"
-    (onAction)="handleAction($event)"
-  ></app-data-list>
+  <!-- Wrapper obligatoire : sans lui, <app-data-list [actions]="..."> devient un enfant
+       direct du page-shell et son binding [actions] est happé par la projection
+       select="[actions]" de l'en-tête (le tableau atterrit dans .header-actions, largeur
+       1000000px → hors écran). Le div englobant part dans le <ng-content> par défaut. -->
+  <div class="animate-in fade-in duration-500">
+    <!-- Recherche (la barre interne de la data-list est masquée en mode cardMode=false) -->
+    <div class="mb-4 relative max-w-sm">
+      <lucide-icon [name]="Search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></lucide-icon>
+      <input
+        type="text"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="onSearch($event)"
+        placeholder="Rechercher un établissement…"
+        class="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-primary-300"
+      />
+    </div>
+
+    <!-- Table Component — vue Tableau imposée (cardMode=false) pour ne pas hériter d'une
+         préférence de vue globale choisie sur une autre page (cf. data-list ngOnInit). -->
+    <app-data-list
+      [data]="tenants()"
+      [tabs]="tenantTabs()"
+      [activeTab]="activeTab()"
+      [total]="totalTenants()"
+      [page]="currentPage()"
+      [totalPages]="totalPages()"
+      [actions]="tenantActions"
+      [isLoading]="isLoading()"
+      [cardMode]="false"
+      defaultView="table"
+      [showSearch]="false"
+      [showFilterButton]="false"
+      (onTabChange)="onTabChange($event)"
+      (onPageChange)="onPageChange($event)"
+      (onAction)="handleAction($event)"
+      (onRowClick)="handleRowClick($event)"
+    ></app-data-list>
+  </div>
 </app-fw-page-shell>
