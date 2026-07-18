@@ -50,10 +50,29 @@
     </div>
   </div>
 
-  <!-- LIGNE 2 : FILTRES RAPIDES & ÉTAT -->
+  <!-- LIGNE 2 : FILTRES RAPIDES, ONGLETS & ÉTAT -->
   <div class="command-row filter-row">
     <div class="quick-filters-integrated">
       <ng-content select="[quick-filters]"></ng-content>
+
+      <ng-container *ngIf="tabs.length > 0">
+        <div class="divider-v small"></div>
+        <div class="cmdbar-tabs" role="tablist">
+          <button
+            *ngFor="let tab of tabs"
+            type="button"
+            role="tab"
+            [attr.aria-selected]="activeTab === tab.label"
+            class="cmdbar-tab"
+            [class.active]="activeTab === tab.label"
+            (click)="tabChange.emit(tab.label)"
+          >
+            <lucide-icon *ngIf="tab.icon" [name]="tab.icon" [size]="14"></lucide-icon>
+            <span>{{ tab.label }}</span>
+            <span *ngIf="tab.count !== undefined" class="cmdbar-tab-count">{{ tab.count }}</span>
+          </button>
+        </div>
+      </ng-container>
     </div>
 
     <div class="pagination-controls-integrated">

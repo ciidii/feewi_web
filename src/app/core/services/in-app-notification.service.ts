@@ -2,7 +2,7 @@ import {inject, Injectable, OnDestroy, signal} from '@angular/core';
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {Router} from '@angular/router';
 import {catchError, finalize, map, Observable, of, tap} from 'rxjs';
-import {AlertTriangle, Bell, CheckCircle, CreditCard, FilePlus, Info, UserPlus} from 'lucide-angular';
+import {AlertTriangle, Bell, CheckCircle, Clock, CreditCard, FilePlus, Info, UserPlus, UserMinus} from 'lucide-angular';
 
 import {EnvironmentService} from './environment.service';
 import {AuthService} from './auth.service';
@@ -48,6 +48,13 @@ export class InAppNotificationService implements OnDestroy {
       bgClass: 'bg-emerald-50',
       routePattern: '/admin/enrollment/:id'
     },
+    'ADMISSION_WAITLISTED': {
+      label: 'Admission',
+      icon: Clock,
+      colorClass: 'text-amber-500',
+      bgClass: 'bg-amber-50',
+      routePattern: '/admin/enrollment/:id'
+    },
     'PAYMENT_RECEIVED': {
       label: 'Paiement',
       icon: CreditCard,
@@ -67,6 +74,13 @@ export class InAppNotificationService implements OnDestroy {
       icon: UserPlus,
       colorClass: 'text-indigo-500',
       bgClass: 'bg-indigo-50',
+      routePattern: '/admin/academic/classes/:id'
+    },
+    'CLASS_UNASSIGNED': {
+      label: 'Classe',
+      icon: UserMinus,
+      colorClass: 'text-amber-500',
+      bgClass: 'bg-amber-50',
       routePattern: '/admin/academic/classes/:id'
     },
     'GENERAL_INFO': {
@@ -220,6 +234,7 @@ export class InAppNotificationService implements OnDestroy {
    */
   getMetadata(type: NotificationType): NotificationMetadata {
     return this.METADATA_REGISTRY[type] || {
+      label: 'Notification',
       icon: Bell,
       colorClass: 'text-slate-500',
       bgClass: 'bg-slate-50'

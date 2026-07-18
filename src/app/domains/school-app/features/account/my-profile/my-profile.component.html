@@ -1,0 +1,68 @@
+<app-fw-page-shell
+  *ngIf="profile() as p"
+  [title]="fullName"
+  [description]="primaryRoleLabel"
+  [icon]="User"
+  [backLink]="['/admin/home']"
+  density="compact"
+  [showSearch]="false"
+>
+  <div class="my-profile-content animate-in fade-in duration-500">
+    <div class="grid grid-cols-12 gap-6">
+
+      <!-- COLONNE GAUCHE : IDENTITÉ & ÉTABLISSEMENT (8/12) -->
+      <div class="col-span-12 lg:col-span-8 space-y-6">
+
+        <app-fw-info-card [icon]="User" title="Identité">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="space-y-1">
+              <label class="info-label">Prénom &amp; Nom</label>
+              <p class="info-value text-lg">{{ p.firstName }} {{ p.lastName }}</p>
+            </div>
+            <div class="space-y-1">
+              <label class="info-label">Email</label>
+              <p class="info-value">{{ p.email }}</p>
+            </div>
+            <ng-container *ngIf="p.staff as staff">
+              <div class="space-y-1" *ngIf="staff.phone">
+                <label class="info-label">Téléphone</label>
+                <p class="info-value">{{ staff.phone }}</p>
+              </div>
+              <div class="space-y-1">
+                <label class="info-label">Matricule</label>
+                <p class="info-value font-mono">{{ staff.matricule || '—' }}</p>
+              </div>
+            </ng-container>
+          </div>
+        </app-fw-info-card>
+
+        <app-fw-info-card [icon]="Building2" title="Établissement">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="space-y-1">
+              <label class="info-label">Nom</label>
+              <p class="info-value">{{ tenantName() }}</p>
+            </div>
+            <div class="space-y-1" *ngIf="p.staff as staff">
+              <label class="info-label">Fonction</label>
+              <p class="info-value">{{ formatStaffType(staff.staffType) }}</p>
+            </div>
+          </div>
+        </app-fw-info-card>
+      </div>
+
+      <!-- COLONNE DROITE : RÔLE & ACCÈS (4/12) -->
+      <div class="col-span-12 lg:col-span-4 space-y-6">
+        <app-fw-info-card [icon]="ShieldCheck" title="Rôle &amp; accès">
+          <div class="space-y-3">
+            <div class="role-chip" *ngFor="let role of p.roles">
+              <lucide-icon [name]="KeyRound" [size]="13"></lucide-icon>
+              <span>{{ formatRole(role) }}</span>
+            </div>
+            <p class="info-value text-sm" *ngIf="!p.roles?.length">Aucun rôle assigné.</p>
+          </div>
+        </app-fw-info-card>
+      </div>
+
+    </div>
+  </div>
+</app-fw-page-shell>

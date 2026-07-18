@@ -6,6 +6,7 @@ import {AuthService} from '../../services/auth.service';
 import {MatMenuModule} from '@angular/material/menu';
 import {
   BarChart3,
+  BellRing,
   BookOpen,
   Briefcase,
   Building2,
@@ -13,12 +14,12 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  ClipboardCheck,
   FileText,
   Globe,
   History,
   Layers,
   LayoutGrid,
-  LogOut,
   LucideAngularModule,
   Maximize,
   Minimize,
@@ -26,10 +27,12 @@ import {
   Plus, Shield,
   ShieldCheck,
   Sun,
+  TrendingUp,
   User,
   UserCheck,
   UserPlus,
-  Users
+  Users,
+  Wallet
 } from 'lucide-angular';
 
 import {UiPreferenceService} from '../../../shared/services/ui-preference.service';
@@ -62,7 +65,6 @@ export class SidebarComponent {
   readonly Moon = Moon;
   readonly Maximize = Maximize;
   readonly Minimize = Minimize;
-  readonly Globe = Globe;
 
   // --- 1. ENROLLMENT SERVICE ---
   enrollmentItems = [
@@ -74,8 +76,8 @@ export class SidebarComponent {
 
   // --- 2. STUDENT REGISTRY ---
   registryItems = [
-    { label: 'Liste des élèves', icon: Users, route: '/admin/registry/students', permission: 'academic:assignment:read' },
-    { label: 'Dossiers scolaires', icon: FileText, route: '/admin/registry/students/records', permission: 'academic:assignment:read' },
+    { label: 'Liste des élèves', icon: Users, route: '/admin/registry/students', queryParams: null, permission: 'academic:assignment:read' },
+    { label: 'Dossiers scolaires', icon: FileText, route: '/admin/registry/students', queryParams: { status: 'LEFT' }, permission: 'academic:assignment:read' },
   ];
 
   // --- 3. ACADEMIC STRUCTURE ---
@@ -84,6 +86,19 @@ export class SidebarComponent {
     { label: 'Affectations Élèves', icon: UserCheck, route: '/admin/academic/assignments', permission: 'academic:assignment:read' },
     { label: 'Bibliothèque Matières', icon: BookOpen, route: '/admin/academic/library', permission: 'academic:structure:read' },
     { label: 'Calendrier Scolaire', icon: Calendar, route: '/admin/academic/years', permission: 'academic:year:read' },
+  ];
+
+  // --- 3b. DOCUMENT REQUESTS ---
+  documentItems = [
+    { label: 'Demandes de documents', icon: FileText, route: '/admin/documents/requests', permission: 'document:request:manage' },
+  ];
+
+  // --- 3c. FINANCE ---
+  financeItems = [
+    { label: 'Catalogue des frais', icon: Wallet, route: '/admin/finance/fee-types', permission: 'finance:fee:manage' },
+    { label: 'Suivi des paiements', icon: ClipboardCheck, route: '/admin/finance/payment-tracking', permission: 'finance:payment:read' },
+    { label: 'Reporting', icon: TrendingUp, route: '/admin/finance/reporting', permission: 'finance:report:read' },
+    { label: 'Relances', icon: BellRing, route: '/admin/finance/overdue-installments', permission: 'finance:payment:write' },
   ];
 
   // --- 4. IDENTITY SERVICE ---
@@ -111,6 +126,8 @@ export class SidebarComponent {
       case 'dashboard': return 'Tableau de bord';
       case 'enrollment': return 'Inscriptions';
       case 'registry': return 'Registre élèves';
+      case 'documents': return 'Demandes de documents';
+      case 'finance': return 'Finance';
       case 'academic': return 'Structure Acad.';
       case 'identity': return 'Sécurité & Staff';
       case 'saas': return 'Système SaaS';
@@ -120,6 +137,5 @@ export class SidebarComponent {
   }
 
   protected readonly User = User;
-  protected readonly LogOut = LogOut;
   protected readonly LayoutGrid = LayoutGrid;
 }

@@ -39,9 +39,9 @@
     <div class="field-group">
       <label>Souscription obligatoire</label>
       <label class="toggle-row">
-        <div class="toggle-switch sm" [class.on]="mandatory()" (click)="mandatory.set(!mandatory())">
+        <button type="button" class="fw-toggle-switch sm" [class.on]="mandatory()" (click)="mandatory.set(!mandatory())">
           <div class="track"><div class="thumb"></div></div>
-        </div>
+        </button>
         <span>{{ mandatory() ? 'Oui — tous les élèves doivent souscrire' : 'Non — optionnel pour les familles' }}</span>
       </label>
     </div>

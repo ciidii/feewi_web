@@ -84,12 +84,16 @@
       },
       "actions": {
         "submit": "Réinitialiser",
-        "back_to_login": "Retour à la connexion"
+        "back_to_login": "Retour à la connexion",
+        "send_code": "Envoyer le code",
+        "resend_code": "Renvoyer le code ({{seconds}}s)"
       },
       "notifications": {
         "success_title": "Succès",
         "success_message": "Votre mot de passe a été mis à jour avec succès.",
-        "error_title": "Erreur de mise à jour"
+        "error_title": "Erreur de mise à jour",
+        "code_sent_title": "Code envoyé",
+        "code_sent_message": "Si un compte existe pour cet email, un code de vérification vient d'être envoyé."
       }
     }
   },

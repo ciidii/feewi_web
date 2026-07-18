@@ -87,7 +87,7 @@ export class YearListComponent implements OnInit {
       icon: Archive,
       type: 'warning',
       permission: 'academic:year:lifecycle',
-      hideIf: (row) => row.metadata?.['status'] !== 'ACTIVE'
+      hideIf: (row) => row.metadata?.['status'] !== 'CLOSING'
     }
   ];
 
@@ -191,7 +191,34 @@ export class YearListComponent implements OnInit {
       case 'activate':
         this.confirmActivation(event.row);
         break;
+      case 'archive':
+        this.confirmArchive(event.row);
+        break;
     }
+  }
+
+  private confirmArchive(row: TableRow) {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '450px',
+      data: {
+        title: 'Archiver définitivement ?',
+        message: `ATTENTION : L'archivage de "${row.title}" est irréversible. L'année passera en lecture seule permanente.`,
+        confirmLabel: 'Oui, archiver',
+        type: 'danger'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(async (confirmed) => {
+      if (confirmed) {
+        try {
+          await firstValueFrom(this.academicService.archiveYear(row.id as string));
+          this.notificationService.success(`L'année ${row.title} a été archivée.`);
+          this.loadYears();
+        } catch (error) {
+          this.notificationService.error("Erreur lors de l'archivage.");
+        }
+      }
+    });
   }
 
   private confirmActivation(row: TableRow) {

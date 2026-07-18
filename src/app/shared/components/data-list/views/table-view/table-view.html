@@ -1,7 +1,24 @@
+<!-- ONGLETS DE FILTRAGE — rattachés au tableau, pas à la page (§5.1 UI_UX_STRATEGY.md) -->
+<div class="table-tabs-row" *ngIf="tabs().length > 0" role="tablist">
+  <button
+    *ngFor="let tab of tabs()"
+    type="button"
+    role="tab"
+    [attr.aria-selected]="activeTab() === tab.label"
+    class="table-tab"
+    [class.active]="activeTab() === tab.label"
+    (click)="onTabChange.emit(tab.label)"
+  >
+    <lucide-icon *ngIf="tab.icon" [name]="tab.icon" [size]="14"></lucide-icon>
+    <span>{{ tab.label }}</span>
+    <span *ngIf="tab.count !== undefined" class="table-tab-count">{{ tab.count }}</span>
+  </button>
+</div>
+
 <div class="overflow-x-auto custom-scrollbar">
   <table class="w-full border-collapse table-fixed">
     <!-- EN-TÊTE DU TABLEAU -->
-    <thead class="bg-slate-50/30">
+    <thead>
     <tr>
       <!-- Checkbox (colonne fixe) -->
       <th class="w-14 py-2 px-3 text-left">

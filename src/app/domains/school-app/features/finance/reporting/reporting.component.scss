@@ -1,0 +1,159 @@
+@use '../../../../../../styles/tokens' as *;
+
+:host {
+  display: block;
+  height: 100%;
+  background: var(--fw-ice);
+}
+
+.list-page-content {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--fw-space-md);
+}
+
+.divider-v {
+  width: 1px;
+  height: 24px;
+  background: var(--fw-border-subtle);
+}
+
+/* ==========================================================================
+   CARTE DE SYNTHÈSE (périmètre sélectionné)
+   ========================================================================== */
+.stats-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.stat-metric-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: var(--fw-shadow-sm);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .metric-info {
+    .label {
+      font-size: 10px;
+      font-weight: 850;
+      text-transform: uppercase;
+      color: var(--fw-text-tertiary);
+      letter-spacing: 0.08em;
+    }
+
+    .value-wrap {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      margin-top: 0.25rem;
+
+      .value {
+        font-size: 1.5rem;
+        font-weight: 900;
+        color: var(--fw-midnight);
+        font-family: var(--fw-font-display);
+      }
+    }
+  }
+
+  .metric-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    background: var(--fw-surface-sunken);
+    color: var(--fw-text-secondary);
+    flex-shrink: 0;
+
+    lucide-icon { width: 18px; height: 18px; }
+  }
+}
+
+/* ==========================================================================
+   TABLEAU "CRÉANCES PAR CLASSE"
+   ========================================================================== */
+.work-section {
+  background: white;
+  border-radius: 16px;
+  box-shadow: var(--fw-shadow-sm);
+  overflow: hidden;
+
+  .section-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--fw-surface-sunken);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h3 {
+      font-size: 0.75rem;
+      font-weight: 850;
+      color: var(--fw-text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin: 0;
+    }
+  }
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th {
+    text-align: left;
+    padding: 0.75rem 1.5rem;
+    font-size: 10px;
+    font-weight: 850;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--fw-text-tertiary);
+    border-bottom: 1px solid var(--fw-surface-sunken);
+  }
+
+  td {
+    padding: 1rem 1.5rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--fw-midnight);
+    border-bottom: 1px solid var(--fw-surface-sunken);
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tr:hover td {
+    background: var(--fw-primary-alpha);
+  }
+
+  .cell-class {
+    font-weight: 800;
+  }
+}
+
+.rate-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 850;
+  background: var(--fw-success-bg);
+  color: var(--fw-success);
+
+  &.rate-na {
+    background: var(--fw-surface-sunken);
+    color: var(--fw-text-tertiary);
+  }
+}

@@ -1,0 +1,51 @@
+<app-fw-form-shell
+  title="Résilier un service"
+  [subtitle]="'Arrêt de la souscription \'' + data.serviceLabel + '\'.'"
+  [icon]="Ban"
+  saveLabel="Confirmer la résiliation"
+  [isLoading]="isLoading()"
+  [canSave]="terminateForm.valid"
+  (save)="onSave()"
+  (cancel)="onCancel()"
+>
+  <form [formGroup]="terminateForm" class="space-y-6 py-2">
+
+    <div class="fw-field">
+      <label class="fw-label">Date d'effet</label>
+      <div class="fw-input-wrapper relative">
+        <input
+          [matDatepicker]="effectivePicker"
+          [min]="today"
+          formControlName="effectiveDate"
+          class="fw-input cursor-pointer"
+          [class.error]="isInvalid('effectiveDate')"
+          (click)="effectivePicker.open()"
+          placeholder="Sélectionner..."
+          readonly
+        />
+        <mat-datepicker-toggle matSuffix [for]="effectivePicker" class="absolute right-1 top-1/2 -translate-y-1/2"></mat-datepicker-toggle>
+        <mat-datepicker #effectivePicker></mat-datepicker>
+      </div>
+    </div>
+
+    <div class="fw-field">
+      <label class="fw-label">Motif (optionnel)</label>
+      <div class="fw-input-wrapper">
+        <textarea
+          formControlName="reason"
+          rows="3"
+          class="fw-input"
+          placeholder="Ex : famille ne souhaite plus ce service à partir de la rentrée prochaine."
+        ></textarea>
+      </div>
+    </div>
+
+    <div class="p-4 bg-surface-sunken rounded-xl border border-border flex items-start gap-3">
+      <lucide-icon [name]="AlertTriangle" [size]="16" class="text-text-tertiary mt-0.5"></lucide-icon>
+      <p class="text-[11px] text-text-secondary leading-relaxed font-medium">
+        La période déjà facturée reste due. Seules les mensualités à partir de la date d'effet s'arrêtent — aucune résiliation rétroactive.
+      </p>
+    </div>
+
+  </form>
+</app-fw-form-shell>

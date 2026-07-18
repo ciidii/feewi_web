@@ -1,0 +1,154 @@
+<app-fw-page-shell
+  title="Demandes de documents"
+  description="Réception, vérification et validation des demandes de documents administratifs."
+  [icon]="FileText"
+  density="compact"
+>
+  <div actions class="flex items-center gap-3">
+    <app-fw-button
+      *ngIf="canSubmit()"
+      variant="primary"
+      size="sm"
+      [icon]="Plus"
+      (click)="showNewRequestForm.set(true)"
+    >
+      Nouvelle demande
+    </app-fw-button>
+  </div>
+
+  <!-- FORMULAIRE NOUVELLE DEMANDE -->
+  <div class="new-request-panel" *ngIf="showNewRequestForm()">
+    <header class="flex items-center justify-between mb-4">
+      <h3 class="text-sm font-bold text-midnight">Nouvelle demande de document</h3>
+      <button class="icon-btn" (click)="showNewRequestForm.set(false)">
+        <lucide-icon [name]="X" [size]="16"></lucide-icon>
+      </button>
+    </header>
+
+    <div class="space-y-4">
+      <div *ngIf="!selectedStudent()">
+        <label class="field-label">Élève</label>
+        <div class="relative">
+          <lucide-icon [name]="Search" [size]="14" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></lucide-icon>
+          <input
+            type="text"
+            [ngModel]="searchQuery()"
+            (ngModelChange)="onSearchChange($event)"
+            placeholder="Rechercher un élève (nom, matricule...)"
+            class="search-input"
+          />
+        </div>
+        <div class="search-results" *ngIf="searchResults().length > 0">
+          <div *ngFor="let s of searchResults()" class="search-result-item" (click)="selectStudent(s)">
+            <span class="font-bold">{{ s.firstName }} {{ s.lastName }}</span>
+            <span class="text-xs text-slate-400">#{{ s.registrationNumber }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="selectedStudent()" class="selected-student-chip">
+        <span class="font-bold">{{ selectedStudent()!.firstName }} {{ selectedStudent()!.lastName }}</span>
+        <button class="icon-btn" (click)="selectedStudent.set(null)">
+          <lucide-icon [name]="X" [size]="14"></lucide-icon>
+        </button>
+      </div>
+
+      <div>
+        <label class="field-label">Type de document</label>
+        <select
+          [ngModel]="selectedDocumentType()"
+          (ngModelChange)="selectedDocumentType.set($event)"
+          class="select-input"
+        >
+          <option *ngFor="let type of documentTypeLabels | keyvalue" [value]="type.key">{{ type.value }}</option>
+        </select>
+      </div>
+
+      <app-fw-button
+        variant="primary"
+        size="sm"
+        [loading]="isSubmitting()"
+        [disabled]="!selectedStudent()"
+        (click)="submitNewRequest()"
+      >
+        Soumettre la demande
+      </app-fw-button>
+    </div>
+  </div>
+
+  <!-- ONGLETS -->
+  <app-fw-tabs
+    [tabs]="tabs()"
+    [activeTabId]="activeTab()"
+    (tabChange)="onTabChange($event)"
+  ></app-fw-tabs>
+
+  <!-- VUE SECRÉTARIAT : VÉRIFICATION D'ÉLIGIBILITÉ -->
+  <div class="requests-list" *ngIf="activeTab() === 'secretariat'">
+    <div *ngFor="let req of pendingRequests()" class="request-card">
+      <div class="request-info">
+        <span class="font-bold text-midnight">{{ studentLabel(req.studentId) }}</span>
+        <span class="text-xs text-slate-400">{{ documentTypeLabels[req.documentType] }} · demandé par {{ req.requestedBy }}</span>
+      </div>
+      <app-fw-badge [status]="req.status"></app-fw-badge>
+      <div class="request-actions">
+        <app-fw-button variant="primary" size="sm" [icon]="CheckCircle" (click)="markEligible(req)">Éligible</app-fw-button>
+        <app-fw-button variant="danger" size="sm" [icon]="XCircle" (click)="markIneligible(req)">Non éligible</app-fw-button>
+      </div>
+    </div>
+
+    <div *ngIf="pendingRequests().length === 0" class="empty-state">
+      <lucide-icon [name]="Clock" [size]="40" class="mx-auto text-slate-200 mb-4"></lucide-icon>
+      <p class="text-sm text-text-tertiary">Aucune demande en attente de vérification.</p>
+    </div>
+  </div>
+
+  <!-- VUE DIRECTION : VALIDATION -->
+  <div class="requests-list" *ngIf="activeTab() === 'direction'">
+    <div *ngFor="let req of eligibleRequests()" class="request-card">
+      <div class="request-info">
+        <span class="font-bold text-midnight">{{ studentLabel(req.studentId) }}</span>
+        <span class="text-xs text-slate-400">{{ documentTypeLabels[req.documentType] }} · demandé par {{ req.requestedBy }}</span>
+      </div>
+      <app-fw-badge [status]="req.status"></app-fw-badge>
+      <div class="request-actions">
+        <app-fw-button variant="primary" size="sm" [icon]="CheckCircle" (click)="approveRequest(req)">Valider</app-fw-button>
+        <app-fw-button variant="danger" size="sm" [icon]="XCircle" (click)="rejectRequest(req)">Refuser</app-fw-button>
+      </div>
+    </div>
+
+    <div *ngIf="eligibleRequests().length === 0" class="empty-state">
+      <lucide-icon [name]="ShieldCheck" [size]="40" class="mx-auto text-slate-200 mb-4"></lucide-icon>
+      <p class="text-sm text-text-tertiary">Aucune demande en attente de validation.</p>
+    </div>
+  </div>
+
+  <!-- VUE REMISE : DOCUMENTS PRÊTS -->
+  <div class="requests-list" *ngIf="activeTab() === 'ready'">
+    <div *ngFor="let req of readyRequests()" class="request-card">
+      <div class="request-info">
+        <span class="font-bold text-midnight">{{ studentLabel(req.studentId) }}</span>
+        <span class="text-xs text-slate-400">{{ documentTypeLabels[req.documentType] }} · demandé par {{ req.requestedBy }}</span>
+      </div>
+      <app-fw-badge [status]="req.status"></app-fw-badge>
+      <div class="request-actions">
+        <app-fw-button
+          variant="secondary"
+          size="sm"
+          [icon]="Download"
+          [disabled]="!req.fileId"
+          [title]="!req.fileId ? 'Aucun fichier associé à cette demande' : ''"
+          (click)="downloadDocument(req)"
+        >
+          Télécharger
+        </app-fw-button>
+        <app-fw-button variant="primary" size="sm" [icon]="CheckCircle" (click)="deliverRequest(req)">Marquer comme remis</app-fw-button>
+      </div>
+    </div>
+
+    <div *ngIf="readyRequests().length === 0" class="empty-state">
+      <lucide-icon [name]="CheckCircle" [size]="40" class="mx-auto text-slate-200 mb-4"></lucide-icon>
+      <p class="text-sm text-text-tertiary">Aucun document prêt à remettre.</p>
+    </div>
+  </div>
+</app-fw-page-shell>

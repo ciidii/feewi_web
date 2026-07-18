@@ -9,7 +9,7 @@
         </div>
       }
 
-      <div class="workflow-step" [class]="getStepStatus(i)">
+      <div class="workflow-step" [class]="getStepStatus(i)" [class.negative]="isNegativeOutcome() && getStepStatus(i) === 'active'">
         <div class="step-icon-wrapper">
           <div class="step-icon" [title]="step.label">
             <lucide-icon [name]="step.icon" [size]="mode() === 'compact' ? 14 : 18"></lucide-icon>
@@ -20,7 +20,7 @@
             </div>
           }
         </div>
-        
+
         <div class="step-info" *ngIf="showLabels()">
           <span class="step-label">{{ step.label }}</span>
         </div>
@@ -32,4 +32,12 @@
       </div>
     }
   </div>
+
+  <!-- Libellé de l'étape courante, toujours visible en mode compact (les icônes seules ne suffisent
+       pas à identifier l'étape active sans survoler) -->
+  @if (mode() === 'compact') {
+    <div class="current-step-caption" [class.negative]="isNegativeOutcome()">
+      {{ currentStepLabel() }}
+    </div>
+  }
 </div>

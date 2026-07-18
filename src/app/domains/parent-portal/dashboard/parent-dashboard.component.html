@@ -1,0 +1,34 @@
+<div class="dashboard">
+  <header class="dashboard-header">
+    <h1 class="title">Mes enfants</h1>
+    <p class="subtitle">Suivi scolaire de vos enfants inscrits.</p>
+  </header>
+
+  <div class="children-grid" *ngIf="isLoading()">
+    <div class="child-card skeleton-card" *ngFor="let i of [1,2]">
+      <fw-skeleton shape="circle" width="48px" height="48px"></fw-skeleton>
+      <div class="flex-1 space-y-2">
+        <fw-skeleton width="60%" height="12px"></fw-skeleton>
+        <fw-skeleton width="40%" height="10px"></fw-skeleton>
+      </div>
+    </div>
+  </div>
+
+  <div class="children-grid" *ngIf="!isLoading() && children().length > 0">
+    <button type="button" class="child-card" *ngFor="let child of children()" (click)="openChild(child.studentId)">
+      <div class="child-icon">
+        <lucide-icon [name]="GraduationCap" [size]="22"></lucide-icon>
+      </div>
+      <div class="child-info">
+        <span class="child-name">{{ child.firstName }} {{ child.lastName }}</span>
+        <span class="child-meta">{{ child.registrationNumber }} · {{ statusLabel(child.status) }}</span>
+      </div>
+      <lucide-icon [name]="ChevronRight" [size]="18" class="chevron"></lucide-icon>
+    </button>
+  </div>
+
+  <div class="empty-state" *ngIf="!isLoading() && children().length === 0">
+    <lucide-icon [name]="Users" [size]="32"></lucide-icon>
+    <p>Aucun enfant lié à votre compte pour le moment.</p>
+  </div>
+</div>

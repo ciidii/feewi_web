@@ -1,0 +1,22 @@
+<div class="parent-shell">
+  <header class="parent-header">
+    <div class="brand">
+      <div class="brand-icon">
+        <lucide-icon [name]="School" [size]="18"></lucide-icon>
+      </div>
+      <span class="brand-name">Portail Parent</span>
+    </div>
+
+    <div class="header-actions">
+      <span class="user-email" *ngIf="currentUser()">{{ currentUser()?.email }}</span>
+      <button type="button" class="logout-btn" (click)="logout()">
+        <lucide-icon [name]="LogOut" [size]="16"></lucide-icon>
+        Déconnexion
+      </button>
+    </div>
+  </header>
+
+  <main class="parent-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

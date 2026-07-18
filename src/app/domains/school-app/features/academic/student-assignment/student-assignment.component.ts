@@ -1,9 +1,10 @@
-import {Component, computed, effect, inject, signal} from '@angular/core';
+import {Component, computed, inject, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ActivatedRoute, RouterLink} from '@angular/router';
 import {FormsModule} from '@angular/forms';
 import {toObservable, toSignal} from '@angular/core/rxjs-interop';
 import {CdkDragDrop, DragDropModule, moveItemInArray} from '@angular/cdk/drag-drop';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {
   Users,
   Search,
@@ -21,12 +22,15 @@ import {
   GraduationCap,
   Calendar,
   Plus,
-  ShieldCheck
+  ShieldCheck,
+  Lock,
+  Unlock
 } from 'lucide-angular';
 import {
   BehaviorSubject,
   catchError,
   combineLatest,
+  distinctUntilChanged,
   filter,
   finalize,
   firstValueFrom,
@@ -53,6 +57,7 @@ import {FwTabsComponent, FwTab} from '../../../../../shared/components/tabs/tabs
 import {LucideAngularModule} from 'lucide-angular';
 import {AuthService} from '../../../../../core/services/auth.service';
 import {HasPermissionDirective} from '../../../../../shared/directives/has-permission.directive';
+import {ConfirmDialogComponent, ConfirmDialogData} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 
 @Component({
   selector: 'app-student-assignment',
@@ -68,6 +73,7 @@ import {HasPermissionDirective} from '../../../../../shared/directives/has-permi
     RouterLink,
     HasPermissionDirective,
     FwTabsComponent,
+    MatDialogModule,
   ],
   templateUrl: './student-assignment.component.html',
   styleUrls: ['./student-assignment.component.scss']
@@ -78,39 +84,29 @@ export class StudentAssignmentComponent {
   private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
   private route = inject(ActivatedRoute);
+  private dialog = inject(MatDialog);
   protected loadingService = inject(LoadingService);
 
   // --- Vue Direction (supervision) ---
   readonly canSupervise = computed(() => this.authService.hasPermission('academic:assignment:supervise'));
+  readonly canValidate = computed(() => this.authService.hasPermission('academic:assignment:validate'));
+
+  // Verrouillage des affectations (BL-FE-ACAD-02). Pas de champ backend pour connaître l'état
+  // de verrouillage (GET /summary ne l'expose pas) : état optimiste local, ne survit pas à un
+  // rechargement de page tant qu'un futur ticket backend n'ajoute pas cette information.
+  readonly lockedLevelIds = signal<Set<string>>(new Set());
+  readonly isLockActionLoading = signal<string | null>(null);
   readonly activeTab = signal<'secretariat' | 'direction'>('secretariat');
   readonly tabs = computed<FwTab[]>(() => [
     {id: 'secretariat', label: 'Affectation', icon: this.UserCheck},
     {id: 'direction', label: 'Vue Direction', icon: this.ShieldCheck, disabled: !this.canSupervise()}
   ]);
 
-  readonly summary = signal<AssignmentSummary[]>([]);
   readonly isSummaryLoading = signal(false);
 
   onTabChange(tabId: string) {
     this.activeTab.set(tabId as 'secretariat' | 'direction');
   }
-
-  loadSummary() {
-    const yearId = this.selectedYearId();
-    if (!yearId) return;
-    this.isSummaryLoading.set(true);
-    this.academicService.getAssignmentSummary(yearId).subscribe({
-      next: (data) => this.summary.set(data),
-      error: () => this.notificationService.error('Impossible de charger la supervision des affectations.'),
-      complete: () => this.isSummaryLoading.set(false)
-    });
-  }
-
-  private readonly reloadSummaryOnYearChange = effect(() => {
-    if (this.activeTab() === 'direction' && this.selectedYearId()) {
-      this.loadSummary();
-    }
-  });
 
   // --- Icons ---
   readonly Users = Users;
@@ -130,6 +126,8 @@ export class StudentAssignmentComponent {
   readonly Calendar = Calendar;
   readonly Plus = Plus;
   readonly ShieldCheck = ShieldCheck;
+  readonly Lock = Lock;
+  readonly Unlock = Unlock;
 
   // --- Triggers ---
   private refresh$ = new BehaviorSubject<void>(undefined);
@@ -204,6 +202,25 @@ export class StudentAssignmentComponent {
   readonly operational = toSignal(this.operational$, { initialValue: { waiting: [], targetClasses: [] } });
   readonly waitingList = computed(() => this.operational().waiting);
   readonly targetClasses = computed(() => this.operational().targetClasses);
+
+  // --- Vue Direction : Supervision des affectations ---
+  private readonly summary$ = combineLatest([
+    toObservable(this.activeTab),
+    toObservable(this.selectedYearId)
+  ]).pipe(
+    distinctUntilChanged(([prevTab, prevYear], [tab, year]) => prevTab === tab && prevYear === year),
+    filter(([tab, yearId]) => tab === 'direction' && !!yearId),
+    tap(() => this.isSummaryLoading.set(true)),
+    switchMap(([, yearId]) => this.academicService.getAssignmentSummary(yearId).pipe(
+      catchError(() => {
+        this.notificationService.error('Impossible de charger la supervision des affectations.');
+        return of([] as AssignmentSummary[]);
+      }),
+      finalize(() => this.isSummaryLoading.set(false))
+    ))
+  );
+
+  readonly summary = toSignal(this.summary$, { initialValue: [] as AssignmentSummary[] });
   readonly emptyArray: any[] = [];
 
   // --- Derived Calculations ---
@@ -231,13 +248,74 @@ export class StudentAssignmentComponent {
       this.notificationService.success("Élève affecté avec succès.");
       this.refresh();
     } catch (error: any) {
-      if (error.status === 409) {
-        this.notificationService.error("La classe est déjà complète.");
-      } else {
-        this.notificationService.error("Échec de l'affectation.");
-      }
+      this.notificationService.error(this.describeAssignmentError(error));
     } finally {
       this.isAssigning.set(false);
+    }
+  }
+
+  /**
+   * L'API renvoie 403 (pas 409) pour les deux causes métier possibles — capacité atteinte ou
+   * niveau verrouillé (BL-FE-ACAD-02) — on distingue via le message d'erreur du backend.
+   */
+  private describeAssignmentError(error: any): string {
+    if (error?.status === 403 && typeof error?.error?.message === 'string' && error.error.message.includes('verrouill')) {
+      return 'Les affectations de ce niveau sont verrouillées par la Direction.';
+    }
+    if (error?.status === 403) {
+      return 'La classe est déjà complète.';
+    }
+    return "Échec de l'affectation.";
+  }
+
+  private confirmAction(title: string, message: string, confirmLabel: string, type: ConfirmDialogData['type']): Promise<boolean> {
+    const ref = this.dialog.open(ConfirmDialogComponent, {width: '450px', data: {title, message, confirmLabel, type}});
+    return new Promise(resolve => ref.afterClosed().subscribe(res => resolve(!!res)));
+  }
+
+  async onValidateLevel(levelId: string) {
+    const confirmed = await this.confirmAction(
+      'Valider les affectations de ce niveau',
+      'Plus aucune affectation ni désaffectation ne sera possible pour ce niveau tant qu\'il n\'est pas déverrouillé.',
+      'Verrouiller',
+      'warning'
+    );
+    if (!confirmed) return;
+
+    this.isLockActionLoading.set(levelId);
+    try {
+      await firstValueFrom(this.academicService.validateAssignments(this.selectedYearId(), levelId));
+      this.lockedLevelIds.update(ids => new Set(ids).add(levelId));
+      this.notificationService.success('Affectations verrouillées.');
+    } catch (error: any) {
+      this.notificationService.error('Échec du verrouillage des affectations.');
+    } finally {
+      this.isLockActionLoading.set(null);
+    }
+  }
+
+  async onUnlockLevel(levelId: string) {
+    const confirmed = await this.confirmAction(
+      'Déverrouiller ce niveau',
+      'Le Secrétariat pourra de nouveau affecter/désaffecter des élèves pour ce niveau.',
+      'Déverrouiller',
+      'info'
+    );
+    if (!confirmed) return;
+
+    this.isLockActionLoading.set(levelId);
+    try {
+      await firstValueFrom(this.academicService.unlockAssignments(this.selectedYearId(), levelId));
+      this.lockedLevelIds.update(ids => {
+        const next = new Set(ids);
+        next.delete(levelId);
+        return next;
+      });
+      this.notificationService.success('Affectations déverrouillées.');
+    } catch (error: any) {
+      this.notificationService.error('Échec du déverrouillage des affectations.');
+    } finally {
+      this.isLockActionLoading.set(null);
     }
   }
 

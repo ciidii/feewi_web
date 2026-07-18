@@ -1,0 +1,15 @@
+// La carte "dossier" et les paires .info-label/.info-value sont désormais fournies par
+// app-fw-info-card (shared/components/info-card) et les styles globaux (styles.scss).
+
+.role-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--fw-primary-alpha);
+  color: var(--fw-primary);
+  border-radius: var(--fw-radius-lg);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}

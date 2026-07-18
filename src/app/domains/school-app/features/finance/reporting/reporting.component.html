@@ -1,0 +1,140 @@
+<app-fw-page-shell
+  title="Reporting Financier"
+  description="Taux de recouvrement et créances par classe, pour piloter le recouvrement."
+  [icon]="TrendingUp"
+  density="compact"
+>
+  <!-- ACTIONS : Sélection de périmètre + génération -->
+  <div actions class="flex items-center gap-3">
+    <div class="flex items-center gap-2 bg-white border border-border-subtle rounded-xl px-3 h-10">
+      <lucide-icon [name]="GraduationCap" [size]="14" class="text-slate-400"></lucide-icon>
+      <select
+        [ngModel]="selectedLevelId()"
+        (ngModelChange)="onLevelChange($event)"
+        class="bg-transparent border-none text-xs font-bold text-midnight focus:ring-0 cursor-pointer outline-none">
+        <option value="">Tous les niveaux</option>
+        <option *ngFor="let level of levels()" [value]="level.id">{{ level.name }}</option>
+      </select>
+    </div>
+
+    <div class="divider-v"></div>
+
+    <app-fw-button
+      variant="primary"
+      size="sm"
+      [icon]="BarChart3"
+      [loading]="isGenerating()"
+      [disabled]="isLoadingClasses() || classesInScope().length === 0"
+      (click)="generateReport()"
+    >
+      Générer le rapport
+    </app-fw-button>
+  </div>
+
+  <!-- CONTENU DE PAGE ALIGNÉ -->
+  <div class="list-page-content animate-in fade-in duration-500">
+
+    <!-- ÉTAT VIDE : aucun rapport généré pour l'instant -->
+    <div *ngIf="!report() && !isGenerating()" class="py-24">
+      <app-fw-empty-state
+        [icon]="TrendingUp"
+        title="Aucun rapport généré pour l'instant"
+        description="Choisissez un niveau (ou laissez « Tous les niveaux » pour l'établissement entier), puis cliquez sur « Générer le rapport »."
+      ></app-fw-empty-state>
+    </div>
+
+    <!-- CHARGEMENT : rosters + agrégation en cours -->
+    <div *ngIf="isGenerating()" class="py-24 flex flex-col items-center justify-center gap-3">
+      <lucide-icon [name]="Loader2" [size]="28" class="animate-spin text-slate-400"></lucide-icon>
+      <span class="text-xs font-bold text-slate-400 uppercase tracking-wide">Calcul du rapport en cours...</span>
+    </div>
+
+    <ng-container *ngIf="report() && !isGenerating()">
+      <!-- CARTE DE SYNTHÈSE : PÉRIMÈTRE SÉLECTIONNÉ -->
+      <div class="stats-strip">
+        <div class="stat-metric-card">
+          <div class="metric-info">
+            <div class="label">Taux de recouvrement</div>
+            <div class="value-wrap">
+              <span class="value">{{ formatRate(report()!.overall.recoveryRate) }}</span>
+            </div>
+          </div>
+          <div class="metric-icon"><lucide-icon [name]="TrendingUp" [size]="18"></lucide-icon></div>
+        </div>
+
+        <div class="stat-metric-card">
+          <div class="metric-info">
+            <div class="label">Total dû</div>
+            <div class="value-wrap">
+              <span class="value">{{ formatAmount(report()!.overall.totalDue) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-metric-card">
+          <div class="metric-info">
+            <div class="label">Total payé</div>
+            <div class="value-wrap">
+              <span class="value">{{ formatAmount(report()!.overall.totalPaid) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-metric-card">
+          <div class="metric-info">
+            <div class="label">Solde restant</div>
+            <div class="value-wrap">
+              <span class="value">{{ formatAmount(report()!.overall.totalBalance) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLEAU : CRÉANCES PAR CLASSE -->
+      <div class="work-section">
+        <div class="section-header">
+          <h3>Créances par classe</h3>
+          <span class="text-xs font-bold text-slate-400">{{ rows().length }} classe(s)</span>
+        </div>
+        <div class="section-body">
+          <table class="report-table" *ngIf="rows().length > 0">
+            <thead>
+              <tr>
+                <th>Classe</th>
+                <th>Effectif</th>
+                <th>Dû</th>
+                <th>Payé</th>
+                <th>Solde restant</th>
+                <th>Taux de recouvrement</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of rows()">
+                <td class="cell-class">{{ row.className }}</td>
+                <td>{{ row.studentCount }}</td>
+                <td>{{ formatAmount(row.totalDue) }}</td>
+                <td>{{ formatAmount(row.totalPaid) }}</td>
+                <td>{{ formatAmount(row.totalBalance) }}</td>
+                <td>
+                  <span class="rate-badge" [class.rate-na]="row.recoveryRate === null">
+                    {{ formatRate(row.recoveryRate) }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- État vide : aucune classe dans le périmètre du rapport généré -->
+          <div *ngIf="rows().length === 0" class="py-24">
+            <app-fw-empty-state
+              [icon]="GraduationCap"
+              density="compact"
+              title="Aucune classe dans ce périmètre"
+              description="Aucune classe ne correspond au niveau sélectionné."
+            ></app-fw-empty-state>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</app-fw-page-shell>

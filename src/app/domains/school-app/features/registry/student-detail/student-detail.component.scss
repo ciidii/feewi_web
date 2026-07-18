@@ -1,8 +1,10 @@
 @use '../../../../../../styles/tokens' as *;
 
-:host {
+// ViewEncapsulation.None : `:host` ne fonctionne pas dans ce mode — cibler le nom de balise réel.
+app-student-detail {
   display: block;
   height: 100%;
+  min-height: 0;
   background: var(--fw-ice);
 }
 
@@ -81,7 +83,7 @@
   display: grid;
   grid-template-columns: 1fr 360px;
   gap: 0;
-  height: calc(100vh - 84px);
+  height: var(--fw-page-body-height);
   overflow: hidden;
   transition: all 0.3s ease;
 
@@ -109,44 +111,11 @@
   }
 }
 
-// ── THE MINIMALIST DOSSIER CARD (Institutional Style) ─────────────────────
-.fw-standard-card {
-  background: white;
-  border-radius: 16px;
-  border: 1px solid var(--fw-border-subtle);
-  box-shadow: var(--fw-shadow-sm);
-  margin-bottom: 1.5rem;
-  overflow: hidden;
-  transition: all 0.2s ease;
-
-  &:hover { box-shadow: var(--fw-shadow-md); border-color: var(--fw-border); }
-
-  .card-header {
-    padding: 1.25rem 1.5rem;
-    background: white;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-
-    .header-icon { color: var(--fw-text-tertiary); flex-shrink: 0; }
-
-    .pillar-title-group {
-      h3 {
-        font-family: var(--fw-font-ui);
-        font-size: 0.75rem;
-        font-weight: 700;
-        color: var(--fw-text-primary);
-        margin: 0;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-      }
-      p { font-size: 11px; font-weight: 500; color: var(--fw-text-tertiary); margin: 1px 0 0; }
-    }
-  }
-
-  .card-content { padding: 1.5rem 1.5rem 2rem; }
-}
+// La carte "dossier" est désormais fournie par app-fw-info-card (shared/components/info-card).
+// app-fw-info-card ajoute déjà margin-bottom: 0 sur lui-même ; on garde l'espacement entre
+// cartes ici car le contexte (colonne flex-column implicite via <section> répétées) n'a pas
+// de gap défini.
+app-fw-info-card { display: block; margin-bottom: 1.5rem; }
 
 .info-grid-dense {
   display: grid;
@@ -219,6 +188,115 @@
     .h-level { font-size: 13px; font-weight: 750; color: var(--fw-midnight); }
     .h-result { margin-top: 4px; }
   }
+}
+
+/* ==========================================================================
+   FINANCE
+   ========================================================================== */
+.finance-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.finance-tile {
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--fw-surface-sunken);
+  border: 1px solid var(--fw-border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  &.is-alert { border-color: rgba(225, 29, 72, 0.3); background: rgba(225, 29, 72, 0.04); }
+
+  .finance-tile-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--fw-text-tertiary); }
+  .finance-tile-value { font-size: 1.05rem; font-weight: 800; color: var(--fw-midnight); }
+}
+
+.finance-alert-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(225, 29, 72, 0.08);
+  color: #be123c;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.finance-section-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--fw-text-tertiary);
+  margin: 16px 0 8px;
+}
+
+.finance-breakdown-row {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--fw-midnight);
+
+  &:nth-child(odd) { background: var(--fw-surface-sunken); }
+
+  .fb-label { font-weight: 800; }
+}
+
+.finance-payment-row {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--fw-border);
+  margin-bottom: 8px;
+
+  .fp-main { display: flex; align-items: center; justify-content: space-between; }
+  .fp-right { display: flex; align-items: center; gap: 10px; }
+  .fp-amount { font-weight: 800; font-size: 0.9rem; color: var(--fw-midnight); }
+  .fp-type { font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--fw-text-tertiary); }
+  .fp-meta { font-size: 11px; color: var(--fw-text-tertiary); margin-top: 2px; }
+  .fp-notes { font-size: 11px; color: var(--fw-text-secondary); margin-top: 4px; font-style: italic; }
+}
+
+.installment-plan-group {
+  border: 1px solid var(--fw-border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+
+  .ip-group-header {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--fw-text-tertiary);
+    margin: 0 0 8px;
+  }
+}
+
+.installment-tranche-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 0;
+  border-top: 1px solid var(--fw-border-subtle);
+
+  &:first-of-type { border-top: none; padding-top: 0; }
+
+  .it-main { display: flex; align-items: center; justify-content: space-between; }
+  .it-seq { font-weight: 800; font-size: 0.8125rem; color: var(--fw-midnight); }
+  .it-meta { font-size: 11px; color: var(--fw-text-tertiary); }
 }
 
 /* Custom Scrollbar */

@@ -12,11 +12,10 @@ import {
   CreateYearRequest,
   CurriculumItem,
   Cycle,
+  CalendarEntry,
   CycleGroup,
   Filiere,
-  Holiday,
   Level,
-  Period,
   SchoolClass, StudentAssignment,
   Subject,
   SyllabusDomain,
@@ -114,6 +113,12 @@ export class AcademicService {
     );
   }
 
+  deleteYear(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/years/${id}`, { headers: this.getHeaders(true) }).pipe(
+      catchError(this.handleError('Suppression impossible. Vérifiez que l\'année est en statut PLANNING et sans élèves inscrits.'))
+    );
+  }
+
   // ===========================================
   // JALONS (MILESTONES) - NOUVEAU V2
   // ===========================================
@@ -127,6 +132,12 @@ export class AcademicService {
   createMilestone(yearId: string, milestone: Partial<AcademicMilestone>): Observable<AcademicMilestone> {
     return this.http.post<AcademicMilestone>(`${this.API_URL}/years/${yearId}/milestones`, milestone, { headers: this.getHeaders(true) }).pipe(
       catchError(this.handleError('Erreur lors de la création du jalon'))
+    );
+  }
+
+  updateMilestone(yearId: string, milestoneId: string, milestone: Partial<AcademicMilestone>): Observable<AcademicMilestone> {
+    return this.http.put<AcademicMilestone>(`${this.API_URL}/years/${yearId}/milestones/${milestoneId}`, milestone, { headers: this.getHeaders(true) }).pipe(
+      catchError(this.handleError('Erreur lors de la mise à jour du jalon'))
     );
   }
 
@@ -149,54 +160,30 @@ export class AcademicService {
   }
 
   // ===========================================
-  // PÉRIODES & CONGÉS (Anciens, gardés pour compatibilité ou migration)
+  // CALENDRIER UNIFIÉ
   // ===========================================
 
-  getPeriods(yearId: string): Observable<Period[]> {
-    return this.http.get<Period[]>(`${this.API_URL}/years/${yearId}/periods`, { headers: this.getHeaders() }).pipe(
-      catchError(this.handleError('Erreur lors du chargement des périodes'))
+  getCalendarEntries(yearId: string): Observable<CalendarEntry[]> {
+    return this.http.get<CalendarEntry[]>(`${this.API_URL}/years/${yearId}/calendar`, { headers: this.getHeaders() }).pipe(
+      catchError(this.handleError('Erreur lors du chargement du calendrier'))
     );
   }
 
-  createPeriod(yearId: string, period: Partial<Period>): Observable<Period> {
-    return this.http.post<Period>(`${this.API_URL}/years/${yearId}/periods`, period, { headers: this.getHeaders(true) }).pipe(
-      catchError(this.handleError('Erreur lors de la création de la période'))
+  createCalendarEntry(yearId: string, entry: Partial<CalendarEntry>): Observable<CalendarEntry> {
+    return this.http.post<CalendarEntry>(`${this.API_URL}/years/${yearId}/calendar`, entry, { headers: this.getHeaders(true) }).pipe(
+      catchError(this.handleError('Erreur lors de la création'))
     );
   }
 
-  updatePeriod(yearId: string, id: string, period: Partial<Period>): Observable<Period> {
-    return this.http.put<Period>(`${this.API_URL}/years/${yearId}/periods/${id}`, period, { headers: this.getHeaders(true) }).pipe(
-      catchError(this.handleError('Erreur lors de la mise à jour de la période'))
+  updateCalendarEntry(yearId: string, id: string, entry: Partial<CalendarEntry>): Observable<CalendarEntry> {
+    return this.http.put<CalendarEntry>(`${this.API_URL}/years/${yearId}/calendar/${id}`, entry, { headers: this.getHeaders(true) }).pipe(
+      catchError(this.handleError('Erreur lors de la mise à jour'))
     );
   }
 
-  deletePeriod(yearId: string, id: string): Observable<void> {
-    return this.http.delete<void>(`${this.API_URL}/years/${yearId}/periods/${id}`, { headers: this.getHeaders(true) }).pipe(
-      catchError(this.handleError('Erreur lors de la suppression de la période'))
-    );
-  }
-
-  getHolidays(yearId: string): Observable<Holiday[]> {
-    return this.http.get<Holiday[]>(`${this.API_URL}/years/${yearId}/holidays`, { headers: this.getHeaders() }).pipe(
-      catchError(this.handleError('Erreur lors du chargement des congés'))
-    );
-  }
-
-  createHoliday(yearId: string, holiday: Partial<Holiday>): Observable<Holiday> {
-    return this.http.post<Holiday>(`${this.API_URL}/years/${yearId}/holidays`, holiday, { headers: this.getHeaders(true) }).pipe(
-      catchError(this.handleError('Erreur lors de la création du congé'))
-    );
-  }
-
-  updateHoliday(yearId: string, id: string, holiday: Partial<Holiday>): Observable<Holiday> {
-    return this.http.put<Holiday>(`${this.API_URL}/years/${yearId}/holidays/${id}`, holiday, { headers: this.getHeaders(true) }).pipe(
-      catchError(this.handleError('Erreur lors de la mise à jour du congé'))
-    );
-  }
-
-  deleteHoliday(yearId: string, id: string): Observable<void> {
-    return this.http.delete<void>(`${this.API_URL}/years/${yearId}/holidays/${id}`, { headers: this.getHeaders(true) }).pipe(
-      catchError(this.handleError('Erreur lors de la suppression du congé'))
+  deleteCalendarEntry(yearId: string, id: string): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/years/${yearId}/calendar/${id}`, { headers: this.getHeaders(true) }).pipe(
+      catchError(this.handleError('Erreur lors de la suppression'))
     );
   }
 
@@ -359,6 +346,13 @@ export class AcademicService {
     );
   }
 
+  toggleFiliereStatus(id: string, active: boolean): Observable<Filiere> {
+    const params = new HttpParams().set('active', active);
+    return this.http.patch<Filiere>(`${this.API_URL}/filieres/${id}/status`, {}, { params, headers: this.getHeaders(true) }).pipe(
+      catchError(this.handleError(active ? 'Erreur lors de l\'activation de la filière' : 'Erreur lors de la désactivation de la filière'))
+    );
+  }
+
   // ===========================================
   // GESTION DES MATIÈRES (RÉFÉRENTIEL)
   // ===========================================
@@ -491,6 +485,36 @@ export class AcademicService {
     const params = new HttpParams().set('academicYearId', academicYearId);
     return this.http.get<AssignmentSummary[]>(`${this.API_URL}/assignments/summary`, { params, headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Erreur lors du chargement de la supervision des affectations'))
+    );
+  }
+
+  /**
+   * Verrouille les affectations d'un (année, niveau) — validation formelle de la Direction.
+   * Bloque ensuite assignStudent/unassignStudent pour ce niveau (409→403 côté backend).
+   */
+  validateAssignments(academicYearId: string, levelId: string): Observable<void> {
+    const params = new HttpParams().set('academicYearId', academicYearId).set('levelId', levelId);
+    return this.http.post<void>(`${this.API_URL}/assignments/validate`, {}, { params, headers: this.getHeaders(true) }).pipe(
+      catchError(this.handleError('Erreur lors de la validation des affectations'))
+    );
+  }
+
+  /**
+   * Retire le verrou posé par validateAssignments.
+   */
+  unlockAssignments(academicYearId: string, levelId: string): Observable<void> {
+    const params = new HttpParams().set('academicYearId', academicYearId).set('levelId', levelId);
+    return this.http.delete<void>(`${this.API_URL}/assignments/validate`, { params, headers: this.getHeaders(true) }).pipe(
+      catchError(this.handleError('Erreur lors du déverrouillage des affectations'))
+    );
+  }
+
+  /**
+   * Roster d'une classe pour un enseignant qui y est affecté (permission academic:roster:read).
+   */
+  getRoster(classId: string): Observable<StudentAssignment[]> {
+    return this.http.get<StudentAssignment[]>(`${this.API_URL}/assignments/roster/${classId}`, { headers: this.getHeaders() }).pipe(
+      catchError(this.handleError('Erreur lors du chargement du roster de la classe'))
     );
   }
 }

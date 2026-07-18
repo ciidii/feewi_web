@@ -8,28 +8,33 @@ import {FwTab, FwTabsComponent} from '../tabs/tabs.component';
   standalone: true,
   imports: [CommonModule, FwPageHeaderComponent, FwTabsComponent],
   template: `
-    <div class="page-shell" [class.has-tabs]="tabs && tabs.length > 0">
+    <div class="page-shell"
+         [class.has-tabs]="tabs && tabs.length > 0"
+         [class.compact]="density === 'compact'">
 
       <!-- HEADER FIXE -->
       <div class="shell-header-area">
-        <app-fw-page-header
-          [title]="title"
-          [description]="description"
-          [icon]="icon"
-          [backLink]="backLink"
-          [density]="density">
-          <div actions>
-            <ng-content select="[actions]"></ng-content>
-          </div>
-        </app-fw-page-header>
+        <div class="header-container">
+          <app-fw-page-header
+            [title]="title"
+            [description]="description"
+            [icon]="icon"
+            [backLink]="backLink"
+            [density]="density"
+            [showSearch]="showSearch">
+            <div actions>
+              <ng-content select="[actions]"></ng-content>
+            </div>
+          </app-fw-page-header>
 
-        <!-- ONGLETS (Optionnels) -->
-        <div class="shell-tabs-area" *ngIf="tabs && tabs.length > 0">
-          <app-fw-tabs
-            [tabs]="tabs"
-            [activeTabId]="activeTabId"
-            (tabChange)="onTabChange($event)">
-          </app-fw-tabs>
+          <!-- ONGLETS (Optionnels) -->
+          <div class="shell-tabs-area" *ngIf="tabs && tabs.length > 0">
+            <app-fw-tabs
+              [tabs]="tabs"
+              [activeTabId]="activeTabId"
+              (tabChange)="onTabChange($event)">
+            </app-fw-tabs>
+          </div>
         </div>
       </div>
 
@@ -52,6 +57,7 @@ export class FwPageShellComponent {
   @Input() icon?: any;
   @Input() backLink?: string | any[];
   @Input() density: 'comfortable' | 'compact' = 'comfortable';
+  @Input() showSearch: boolean = true;
 
   // Configuration Navigation
   @Input() tabs: FwTab[] = [];

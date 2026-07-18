@@ -2,7 +2,7 @@ import {inject, Injectable, signal} from '@angular/core';
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {catchError, finalize, Observable, tap, throwError} from 'rxjs';
 import {Staff, StaffCreateRequest, User, UserCreateRequest, UserType} from '../models/user.model';
-import {Permission, Role} from '../models/role.model';
+import {Permission, PermissionCapability, Role, RolePreset} from '../models/role.model';
 import {Page} from '../models/school.model';
 import {AuditLog} from '../models/audit.model';
 import {EnvironmentService} from './environment.service';
@@ -163,6 +163,24 @@ export class IdentityService {
   getAvailablePermissions(): Observable<Permission[]> {
     return this.http.get<Permission[]>(`${this.API_URL}/permissions`, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError('Impossible de charger les permissions'))
+    );
+  }
+
+  /**
+   * Liste le catalogue de capacités métier (regroupement business des permissions)
+   */
+  getCapabilities(): Observable<PermissionCapability[]> {
+    return this.http.get<PermissionCapability[]>(`${this.API_URL}/permissions/capabilities`, { headers: this.getHeaders() }).pipe(
+      catchError(this.handleError('Impossible de charger les capacités métier'))
+    );
+  }
+
+  /**
+   * Liste les modèles de rôles métier préconfigurés (presets)
+   */
+  getRolePresets(): Observable<RolePreset[]> {
+    return this.http.get<RolePreset[]>(`${this.API_URL}/roles/presets`, { headers: this.getHeaders() }).pipe(
+      catchError(this.handleError('Impossible de charger les modèles de rôle'))
     );
   }
 

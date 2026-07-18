@@ -1,0 +1,415 @@
+<app-fw-page-shell
+  [backLink]="['/admin/enrollment/list']"
+  density="compact"
+  [showSearch]="false"
+>
+  <!-- STICKY HEADER ACTIONS — 3 zones explicites : gauche (identité), centre (workflow), droite (actions) -->
+  <div actions class="header-action-hub" *ngIf="application(); let app">
+
+    <!-- ZONE GAUCHE : Identité étudiant + type -->
+    <div class="hub-left">
+      <div class="header-student-identity">
+        <div class="stu-avatar">{{ app.identity.firstName.charAt(0) }}</div>
+        <div class="stu-info">
+          <span class="stu-name">{{ fullName() }}</span>
+          <span class="stu-ref">#{{ app.reference }}</span>
+        </div>
+      </div>
+
+      <div class="divider-v"></div>
+
+      <span class="admission-type-chip" [class.is-re]="app.type === 'RE_ENROLLMENT'">
+        {{ app.type === 'RE_ENROLLMENT' ? 'Réinscription' : 'Admission' }}
+      </span>
+    </div>
+
+    <!-- ZONE CENTRE : Workflow -->
+    <div class="hub-center">
+      <app-admission-workflow [state]="app.status" mode="compact" [showLabels]="false"></app-admission-workflow>
+    </div>
+
+    <!-- ZONE DROITE : Actions — toujours ancrée à l'extrémité droite -->
+    <div class="hub-right">
+      <div class="action-buttons-group">
+        @if (canVerify()) {
+          <app-fw-button
+              variant="primary"
+              size="sm"
+              [icon]="ClipboardCheck"
+              [loading]="isActionLoading()"
+              [disabled]="!canVerifyAction()"
+              [title]="!canVerifyAction() ? 'Permissions insuffisantes pour vérifier le dossier' : ''"
+              (click)="verifyApplication()">
+            Vérifier
+          </app-fw-button>
+        }
+
+        @if (canValidate()) {
+          <span class="payment-status-chip" [class.is-confirmed]="app.paymentConfirmed">
+            <lucide-icon [name]="Wallet" [size]="12"></lucide-icon>
+            {{ app.paymentConfirmed ? 'Paiement confirmé' : 'Paiement en attente' }}
+          </span>
+
+          <app-fw-button *ngIf="!app.paymentConfirmed && canConfirmPaymentAction()"
+                         variant="secondary"
+                         size="sm"
+                         [icon]="Wallet"
+                         [loading]="isActionLoading()"
+                         (click)="confirmPayment()">
+            Confirmer le paiement
+          </app-fw-button>
+
+          <!-- Alerte purement informative (BL-BILL-01) : n'affecte jamais isReadyForFinalValidation()
+               ni la disponibilité du bouton "Validation Finale" ci-dessous. -->
+          <span *ngIf="billingAlertMessage() as billingAlert"
+                class="billing-alert-chip"
+                [title]="billingAlert">
+            <lucide-icon [name]="AlertTriangle" [size]="12"></lucide-icon>
+            {{ billingAlert }}
+          </span>
+
+          <app-fw-button *ngIf="isReadyForFinalValidation()"
+                         variant="primary"
+                         size="sm"
+                         [icon]="GraduationCap"
+                         [loading]="isActionLoading()"
+                         [disabled]="!canDecideAction()"
+                         [title]="!canDecideAction() ? 'Permissions insuffisantes pour prendre la décision finale' : ''"
+                         (click)="validateFinal()">
+            Validation Finale
+          </app-fw-button>
+          <app-fw-button *ngIf="!isReadyForFinalValidation() && application()?.status !== 'VALIDATED'"
+                         size="sm"
+                         [icon]="ShieldCheck"
+                         [loading]="isActionLoading()"
+                         [disabled]="!canDecideAction()"
+                         [title]="!canDecideAction() ? 'Permissions insuffisantes pour passer outre' : ''"
+                         (click)="overruleFinal()">
+            Dérogation
+          </app-fw-button>
+        }
+      </div>
+
+      @if (!['VALIDATED', 'REJECTED', 'CANCELLED'].includes(app.status)) {
+        <div class="danger-zone">
+          <app-fw-button variant="danger"
+                         size="sm"
+                         [icon]="XCircle"
+                         [loading]="isActionLoading()"
+                         [disabled]="!canDecideAction() && !canCancelAction()"
+                         [title]="(!canDecideAction() && !canCancelAction()) ? 'Permissions insuffisantes pour rejeter' : ''"
+                         (click)="rejectFinal()">
+            Rejeter
+          </app-fw-button>
+        </div>
+      } @else {
+        <!-- Dossier clos : la zone droite reste occupée par le verdict final, jamais vide -->
+        <div class="decision-status-chip" [class]="app.status.toLowerCase()">
+          <lucide-icon [name]="decisionStatusIcon(app.status)" [size]="14"></lucide-icon>
+          {{ decisionStatusLabel(app.status) }}
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- MAIN LAYOUT -->
+  <div class="decision-hub-layout animate-in fade-in duration-700"
+       [class.is-loading]="isActionLoading()"
+       *ngIf="application(); let app; else skeletons">
+
+    <!-- 🚀 HYBRID LOADING FEEDBACK -->
+    <fw-block-loader *ngIf="isActionLoading()" [center]="true" message="Mise à jour..."></fw-block-loader>
+
+    <!-- Global action loader overlay -->
+    <!-- (Supprimé car remplacé par BlockLoader discret) -->
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="pillar-content-area">
+      <div class="pillar-scroll-wrapper custom-scrollbar">
+
+        <!-- 🏢 OVERVIEW PANEL DELETED (MOVED TO HEADER) -->
+
+        <!-- 🏫 SCOLARITÉ (Section 1) -->
+        <app-fw-info-card [icon]="School" title="Vœux Scolaires" subtitle="Parcours cible et établissement d'origine">
+            <div class="info-grid-dense">
+              <div class="info-field highlight">
+                <label>Niveau demandé</label>
+                <span class="field-value">{{ levelName() }}</span>
+              </div>
+              <div class="info-field" *ngIf="filiereName()">
+                <label>Filière</label>
+                <span class="field-value">{{ filiereName() }}</span>
+              </div>
+              <div class="info-field">
+                <label>Type d'admission</label>
+                <span
+                  class="field-value">{{ app.type === 'RE_ENROLLMENT' ? 'Réinscription' : 'Nouvelle admission' }}</span>
+              </div>
+              <div class="info-field">
+                <label>Établissement d'origine</label>
+                <span
+                  class="field-value text-primary font-bold">{{ app.schooling.customFields?.['previousSchool'] || 'Non renseigné' }}</span>
+              </div>
+              <ng-container *ngFor="let key of getObjectKeys(app.schooling.customFields || {})">
+                <div class="info-field" *ngIf="key !== 'previousSchool'">
+                  <label>{{ key | camelToLabel }}</label>
+                  <span class="field-value">{{ app.schooling.customFields![key] }}</span>
+                </div>
+              </ng-container>
+            </div>
+        </app-fw-info-card>
+
+        <!-- 👤 IDENTITÉ (Section 2) -->
+        <app-fw-info-card [icon]="User" title="Identité de l'élève" subtitle="Informations d'état civil">
+            <div class="info-grid-dense">
+              <div class="info-field">
+                <label>Prénoms</label>
+                <span class="field-value">{{ app.identity.firstName }}</span>
+              </div>
+              <div class="info-field">
+                <label>Nom de famille</label>
+                <span class="field-value">{{ app.identity.lastName }}</span>
+              </div>
+              <div class="info-field">
+                <label>Date de naissance</label>
+                <span class="field-value">{{ app.identity.birthDate | fwDate:'full' }}</span>
+              </div>
+              <div class="info-field">
+                <label>Lieu de naissance</label>
+                <span class="field-value">{{ app.identity.birthPlace }}</span>
+              </div>
+              <ng-container *ngFor="let key of getObjectKeys(app.identity.customFields || {})">
+                <div class="info-field">
+                  <label>{{ key | camelToLabel }}</label>
+                  <span class="field-value">{{ app.identity.customFields![key] }}</span>
+                </div>
+              </ng-container>
+            </div>
+        </app-fw-info-card>
+
+        <!-- 👨‍👩‍👧 FAMILLE (Section 3) -->
+        <app-fw-info-card *ngIf="app.primaryGuardian" [icon]="Users" title="Responsable Légal" subtitle="Tuteur principal et finances">
+            <div class="guardian-compact-card mb-6">
+              <div class="card-left">
+                <div class="avatar-md">{{ app.primaryGuardian.firstName[0] }}{{ app.primaryGuardian.lastName[0] }}</div>
+                <div class="main-info">
+                  <h4>{{ app.primaryGuardian.firstName }} {{ app.primaryGuardian.lastName }}</h4>
+                  <span class="relation-tag">{{ app.primaryGuardian.relation }}</span>
+                </div>
+              </div>
+              <div class="card-right">
+                <div class="contact-pill">
+                  <lucide-icon [name]="Phone" [size]="12"></lucide-icon>
+                  {{ app.primaryGuardian.phone }}
+                </div>
+                <div class="contact-pill">
+                  <lucide-icon [name]="Mail" [size]="12"></lucide-icon>
+                  {{ app.primaryGuardian.email }}
+                </div>
+                <span class="finance-badge" [class.active]="app.primaryGuardian.financialResponsible">
+                  {{ app.primaryGuardian.financialResponsible ? 'Payeur désigné' : 'Non payeur' }}
+                </span>
+              </div>
+            </div>
+
+            <div class="info-grid-dense"
+                 *ngIf="app.primaryGuardian && getObjectKeys(app.primaryGuardian.customFields || {}).length > 0">
+              <div class="info-field" *ngFor="let key of getObjectKeys(app.primaryGuardian.customFields || {})">
+                <label>{{ key | camelToLabel }}</label>
+                <span class="field-value">{{ app.primaryGuardian.customFields?.[key] }}</span>
+              </div>
+            </div>
+        </app-fw-info-card>
+
+        <!-- 🏥 SANTÉ (Section 4) -->
+        <app-fw-info-card *ngIf="getObjectKeys(app.medical?.customFields || {}).length > 0" [icon]="HeartPulse" title="Dossier Médical" subtitle="Santé et besoins spécifiques">
+            <div class="info-grid-dense">
+              <div class="info-field" *ngFor="let key of getObjectKeys(app.medical.customFields || {})">
+                <label>{{ key | camelToLabel }}</label>
+                <span class="field-value">{{ app.medical.customFields?.[key] }}</span>
+              </div>
+            </div>
+        </app-fw-info-card>
+
+        <!-- ✨ PILIERS SUPPLÉMENTAIRES (Dynamiques) -->
+        <ng-container *ngFor="let pillar of effectiveSchema()?.extraPillars">
+          <app-fw-info-card *ngIf="pillar.enabled && app.extraPillars?.[pillar.key]" [icon]="Sparkles" [title]="pillar.label" subtitle="Informations complémentaires">
+              <div class="info-grid-dense">
+                <div class="info-field" *ngFor="let field of pillar.customFields">
+                  <label>{{ field.label }}</label>
+                  <span class="field-value">{{ app.extraPillars![pillar.key].customFields[field.name] || '—' }}</span>
+                </div>
+              </div>
+          </app-fw-info-card>
+        </ng-container>
+
+        <!-- 🏁 ÉVALUATION PÉDAGOGIQUE (Le Bilan Final) -->
+        <div class="assessment-action-card animate-in slide-in-from-bottom-8 duration-700"
+             *ngIf="effectiveSchema()?.assessment">
+          <header class="card-header">
+            <lucide-icon [name]="GraduationCap" [size]="16" class="header-icon"></lucide-icon>
+            <div class="pillar-title-group">
+              <h3>Décision de la Commission</h3>
+              <p *ngIf="canAssess()">Étude du dossier et évaluation pédagogique</p>
+              <p *ngIf="!canAssess()" class="flex items-center gap-1 text-amber-500">
+                <lucide-icon [name]="Lock" [size]="10"></lucide-icon>
+                {{ application()?.status === 'SUBMITTED' ? 'Dossier en attente de vérification' : 'Évaluation verrouillée (Décision enregistrée)' }}
+              </p>
+            </div>
+          </header>
+
+          <div class="assessment-body">
+            <!-- Notes -->
+            <div class="grades-display">
+              <table class="grades-table">
+                <thead>
+                <tr>
+                  <th>Discipline / Matière</th>
+                  <th class="text-right">Note / 20</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let subject of assessmentSubjects()">
+                  <td class="subject-name">{{ subject }}</td>
+                  <td class="text-right">
+                    <input type="number"
+                           [ngModel]="evaluationGrades()[subject]"
+                           (ngModelChange)="updateGrade(subject, $event)"
+                           class="grade-input"
+                           step="0.5" min="0" max="20"
+                           [disabled]="!canAssess()">
+                  </td>
+                </tr>
+                </tbody>
+                <tfoot>
+                <tr class="average-row">
+                  <td>Moyenne Générale Estimée</td>
+                  <td class="text-right">
+                        <span class="average-score" [class.passing]="+averageScore() >= minPassingGrade()"
+                              [class.failing]="+averageScore() < minPassingGrade()">
+                          {{ averageScore() }} / 20
+                        </span>
+                  </td>
+                </tr>
+                </tfoot>
+              </table>
+            </div>
+
+            <!-- Décision -->
+            <div class="decision-box">
+              <div class="field">
+                <label class="decision-label">Observations et Motivations</label>
+                <textarea [(ngModel)]="evaluationComment" rows="4"
+                          placeholder="Points forts, faiblesses, ou motif du refus..."
+                          [disabled]="!canAssess()"></textarea>
+              </div>
+
+              <div class="field">
+                <label class="decision-label">Verdict</label>
+                <div class="decision-actions">
+                  <button (click)="pedagogicalDecision.set('REJECTED')"
+                          [class.active]="pedagogicalDecision() === 'REJECTED'"
+                          [disabled]="!canAssess()"
+                          class="btn-opt reject">Refusé
+                  </button>
+                  <button (click)="pedagogicalDecision.set('WAITLIST')"
+                          [class.active]="pedagogicalDecision() === 'WAITLIST'"
+                          [disabled]="!canAssess()"
+                          class="btn-opt wait">Attente
+                  </button>
+                  <button (click)="pedagogicalDecision.set('ADMITTED')"
+                          [class.active]="pedagogicalDecision() === 'ADMITTED'"
+                          [disabled]="!canAssess()"
+                          class="btn-opt admit">Admis
+                  </button>
+                </div>
+              </div>
+
+              <app-fw-button variant="primary" size="lg" class="w-full mt-4"
+                             [disabled]="!canAssess()"
+                             [loading]="isActionLoading()"
+                             [title]="!canAssess() ? 'Permissions insuffisantes pour enregistrer une décision' : ''"
+                             (click)="submitPedagogicalDecision()">
+                Enregistrer la décision finale
+              </app-fw-button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- RIGHT SIDEBAR (Sticky Tools) -->
+    <aside class="conformity-sidebar">
+      <!-- Conformité -->
+      <div class="compliance-card" [class.compliant]="isReadyForFinalValidation()">
+        <lucide-icon [name]="isReadyForFinalValidation() ? CheckCircle : ShieldCheck" [size]="20"></lucide-icon>
+        <div class="compliance-text">
+          <strong>{{ isReadyForFinalValidation() ? 'Dossier Conforme' : 'Vérification en cours' }}</strong>
+          <span>{{ mandatoryDocsSummary().received }} / {{ mandatoryDocsSummary().total }} pièces obligatoires</span>
+        </div>
+      </div>
+
+      <!-- Pièces Jointes -->
+      <section class="sidebar-card">
+        <div class="card-header">
+          <lucide-icon [name]="FileText" [size]="16"></lucide-icon>
+          <h4>Documents</h4>
+          <span class="doc-counter">{{ mandatoryDocsSummary().received }}/{{ mandatoryDocsSummary().total }}</span>
+        </div>
+        <div class="documents-list">
+          <div *ngFor="let doc of app.documents"
+               class="document-item" [class.missing]="doc.status === 'MISSING'"
+               (click)="previewDocument(doc)">
+            <lucide-icon [name]="getFileIcon(doc.name)" [size]="16"></lucide-icon>
+            <div class="document-info">
+              <span class="document-name">{{ doc.name }}</span>
+              <span class="document-status">{{ doc.status === 'MISSING' ? 'Manquant' : 'Reçu' }}</span>
+            </div>
+            <button class="upload-btn" (click)="$event.stopPropagation(); adminFileInput.click()" [disabled]="!canVerifyAction()" [title]="!canVerifyAction() ? 'Permissions insuffisantes pour uploader' : ''">
+              <lucide-icon [name]="Upload" [size]="14"></lucide-icon>
+            </button>
+            <input type="file" #adminFileInput hidden (change)="onAdminFileSelected(doc.code, $event)">
+          </div>
+        </div>
+      </section>
+
+      <!-- Services & Extras -->
+      <section class="sidebar-card" *ngIf="app.subscriptions?.length">
+        <div class="card-header">
+          <lucide-icon [name]="Activity" [size]="16"></lucide-icon>
+          <h4>Services & Options</h4>
+          <span class="doc-counter">{{ app.subscriptions?.length }}</span>
+        </div>
+        <div class="services-list-sidebar">
+          <div *ngFor="let sub of app.subscriptions" class="sidebar-svc-item">
+            <div class="svc-main">
+              <span class="svc-name">{{ getServiceConfig(sub.serviceCode)?.label || sub.serviceCode }}</span>
+              <ng-container *ngIf="sub.status === 'CANCELLED'; else activeSvc">
+                <span class="svc-cancelled">Résilié à partir du {{ sub.effectiveTo | fwDate }}</span>
+              </ng-container>
+              <ng-template #activeSvc>
+                <app-fw-button
+                  *ngIf="app.status === 'VALIDATED' && canTerminateSubscriptionAction()"
+                  variant="tertiary"
+                  size="sm"
+                  [icon]="Ban"
+                  (click)="terminateSubscription(sub)"
+                >
+                  Résilier
+                </app-fw-button>
+              </ng-template>
+            </div>
+            <span class="svc-opt" *ngIf="sub.optionCode">{{ sub.optionCode }}</span>
+          </div>
+        </div>
+      </section>
+    </aside>
+
+  </div>
+
+</app-fw-page-shell>
+
+<ng-template #skeletons>
+  <fw-admission-detail-skeleton></fw-admission-detail-skeleton>
+</ng-template>

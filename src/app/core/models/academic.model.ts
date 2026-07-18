@@ -11,7 +11,7 @@ export interface AcademicYear {
   createdAt?: string;
 }
 
-export type MilestoneType = 'ENROLLMENT' | 'LESSONS' | 'EXAMS' | 'RE_ENROLLMENT' | 'VACATION';
+export type MilestoneType = 'ENROLLMENT' | 'LESSONS' | 'EXAMS' | 'RE_ENROLLMENT' | 'VACATION' | 'COMMENCEMENT';
 
 export interface AcademicMilestone {
   id: string;
@@ -23,20 +23,12 @@ export interface AcademicMilestone {
   createdAt?: string;
 }
 
-export interface Period {
-  id: string;
-  yearId: string;
-  label: string;
-  startDate: string;
-  endDate: string;
-  examStartDate: string;
-  examEndDate: string;
-  gradingDeadline: string;
-}
+export type CalendarEntryType = 'COURS' | 'CONGE';
 
-export interface Holiday {
+export interface CalendarEntry {
   id: string;
-  yearId: string;
+  academicYearId: string;
+  type: CalendarEntryType;
   label: string;
   startDate: string;
   endDate: string;
@@ -74,6 +66,7 @@ export interface Filiere {
   id: string;
   name: string;
   code: string;
+  active: boolean;
 }
 
 export interface Subject {

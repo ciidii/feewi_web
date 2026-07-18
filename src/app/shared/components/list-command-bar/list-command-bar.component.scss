@@ -103,6 +103,106 @@
   gap: 0.5rem;
 }
 
+// Pilule de filtre rapide à bascule (ex: "Incomplets") — projetée via [quick-filters]
+.filter-pill-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  background: white;
+  border: 1px solid var(--fw-border);
+  border-radius: var(--fw-radius-md);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--fw-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover { background: var(--fw-surface-sunken); }
+
+  &.active {
+    background: var(--fw-error-bg);
+    border-color: var(--fw-error-border);
+    color: var(--fw-error);
+  }
+}
+
+// Déclencheur de filtres avancés (ex: "Avancé") — projeté via [quick-filters]
+.more-filters-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 12px;
+  background: white;
+  border: 1px solid var(--fw-border);
+  border-radius: var(--fw-radius-md);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--fw-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover { background: var(--fw-surface-sunken); }
+
+  &.has-active {
+    background: var(--fw-primary-alpha);
+    border-color: var(--fw-primary);
+    color: var(--fw-primary);
+  }
+}
+
+.divider-v {
+  width: 1px;
+  height: 20px;
+  background: var(--fw-border-subtle);
+  flex-shrink: 0;
+
+  &.small { height: 16px; }
+}
+
+.cmdbar-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cmdbar-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--fw-text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--fw-transition-fast), color var(--fw-transition-fast);
+
+  &:hover { background: var(--fw-surface-sunken); }
+
+  &.active {
+    background: var(--fw-primary-alpha);
+    color: var(--fw-primary);
+  }
+
+  .cmdbar-tab-count {
+    font-size: 10px;
+    font-weight: 800;
+    background: rgba(0, 0, 0, 0.06);
+    padding: 1px 6px;
+    border-radius: 99px;
+  }
+
+  &.active .cmdbar-tab-count {
+    background: rgba(255, 255, 255, 0.7);
+  }
+}
+
 .pagination-controls-integrated {
   display: flex;
   align-items: center;

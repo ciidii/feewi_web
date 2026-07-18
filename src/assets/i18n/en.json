@@ -84,12 +84,16 @@
       },
       "actions": {
         "submit": "Reset Password",
-        "back_to_login": "Back to login"
+        "back_to_login": "Back to login",
+        "send_code": "Send code",
+        "resend_code": "Resend code ({{seconds}}s)"
       },
       "notifications": {
         "success_title": "Success",
         "success_message": "Your password has been successfully updated.",
-        "error_title": "Update error"
+        "error_title": "Update error",
+        "code_sent_title": "Code sent",
+        "code_sent_message": "If an account exists for this email, a verification code has just been sent."
       }
     }
   },

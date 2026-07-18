@@ -1,3 +1,16 @@
+// ViewEncapsulation.None sur FwPageShellComponent : `:host` ne fonctionne pas (Angular ne peut
+// pas scoper :host sans encapsulation), donc la balise <app-fw-page-shell> elle-même n'a par
+// défaut AUCUN style (un élément custom inconnu est `inline`, sans hauteur bornée). Sans cette
+// règle, `.page-shell` ci-dessous (height:100%) n'a rien contre quoi se résoudre : tout le
+// contenu grandit à sa taille naturelle au lieu de déclencher le scroll interne de .shell-body —
+// bug qui se reproduit silencieusement sur toute nouvelle page utilisant ce composant tant que
+// la page elle-même ne le repatch pas localement (cf. role-designer avant ce correctif global).
+app-fw-page-shell {
+  display: block;
+  height: 100%;
+  min-height: 0;
+}
+
 .page-shell {
   display: flex;
   flex-direction: column;
@@ -5,15 +18,39 @@
   width: 100%;
   background: var(--fw-surface-sunken); // Fond gris léger par défaut
 
+  /* 1. Définition de la grille horizontale unique */
+  --fw-page-padding-x: var(--fw-space-xl); /* 32px par défaut */
+
+  /* 2. Variables de hauteur de la page (Zéro Layout Shift & Scroll parfait) */
+  --fw-page-header-height: 96px;
+  --fw-page-tabs-height: 0px;
+  --fw-page-body-padding-y: calc(var(--fw-space-xl) * 2); // 64px (top + bottom padding)
+  
+  --fw-page-body-height: calc(100vh - var(--fw-page-header-height) - var(--fw-page-tabs-height) - var(--fw-page-body-padding-y));
+
+  &.has-tabs {
+    --fw-page-tabs-height: 44px; /* 52px - 8px (recouvrement) */
+  }
+
   /* HEADER AREA (Sticky) */
   .shell-header-area {
-    background: transparent;
+    background: var(--fw-surface-card);
+    box-shadow: var(--fw-shadow-md); // Élévation : seule bande "chrome" de la page, plus de header global avec qui rivaliser
     z-index: 10;
     flex-shrink: 0;
+    transition: all 0.3s ease;
+    width: 100%;
+  }
+
+  .header-container {
+    max-width: 1600px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 0 var(--fw-page-padding-x); // Contraint le header aux mêmes alignements
 
     .shell-tabs-area {
-      padding: 0 2rem;
-      margin-top: -1rem; // Rapproche les onglets du header
+      padding: 0; // Padding horizontal maintenant géré par le parent .header-container
+      margin-top: calc(-1 * var(--fw-space-sm)); // Rapproche les onglets du header via tokens
       background: transparent;
     }
   }
@@ -23,25 +60,29 @@
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 2rem; // Padding standard de page
+    padding: var(--fw-space-xl) 0; // Paddings horizontaux déplacés sur le content-container pour correspondre au header
 
     .content-container {
       max-width: 1600px;
       margin: 0 auto;
       width: 100%;
       min-height: 100%;
+      padding: 0 var(--fw-page-padding-x); // Alignement horizontal parfait
     }
   }
 
   /* SPECIFICITY FOR COMPACT MODE */
   &.compact {
-    .shell-header-area {
-      background: white;
-      box-shadow: var(--fw-shadow-sm);
+    --fw-page-padding-x: var(--fw-space-lg); // 24px d'alignement en compact
+    --fw-page-header-height: 72px;
+    --fw-page-body-padding-y: calc(var(--fw-space-md) * 2); // 32px
+
+    &.has-tabs {
+      --fw-page-tabs-height: 36px; /* 40px - 4px (recouvrement) */
     }
 
     .shell-body {
-      padding: 1.5rem;
+      padding: var(--fw-space-md) 0;
     }
   }
 }
@@ -49,14 +90,10 @@
 /* RESPONSIVE */
 @media (max-width: 768px) {
   .page-shell {
-    .shell-header-area {
-      .shell-tabs-area {
-        padding: 0 1rem;
-      }
-    }
+    --fw-page-padding-x: var(--fw-space-md); // 16px sur mobile
 
     .shell-body {
-      padding: 1rem;
+      padding: var(--fw-space-md) 0;
     }
   }
 }

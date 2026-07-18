@@ -8,6 +8,8 @@ export interface Environment {
   apiVersion: string;
   appName: string;
   logLevel: 'debug' | 'info' | 'warn' | 'error';
+  /** Slug d'école utilisé en dernier recours pour résoudre le tenant public en développement local (pas de sous-domaine sur localhost). */
+  devTenantSlug: string;
   services: {
     enrollment: string;
     identity: string;
@@ -16,6 +18,7 @@ export interface Environment {
     documents: string;
     student: string;
     notifications: string;
+    billing: string;
   };
   features: {
     enableAnalytics: boolean;

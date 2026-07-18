@@ -6,6 +6,9 @@
   // ── MODE COMPACT (Header) ──────────────────
   &.compact {
     padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 
     .workflow-steps {
       gap: 8px;
@@ -159,6 +162,39 @@
     .step-label {
       color: var(--fw-midnight);
     }
+  }
+
+  // Issue terminale négative (rejet/annulation) : l'étape courante ne doit pas ressembler à une
+  // progression normale (bleu) — distinction visuelle immédiate en rouge.
+  &.active.negative {
+    .step-icon {
+      background: var(--fw-error);
+      border-color: var(--fw-error);
+      color: var(--fw-white);
+      box-shadow: 0 0 0 4px var(--fw-error-bg);
+    }
+
+    .step-label {
+      color: var(--fw-error-text);
+    }
+  }
+}
+
+.current-step-caption {
+  flex-shrink: 0;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--fw-primary-alpha);
+  color: var(--fw-primary);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+
+  &.negative {
+    background: var(--fw-error-bg);
+    color: var(--fw-error-text);
   }
 }
 

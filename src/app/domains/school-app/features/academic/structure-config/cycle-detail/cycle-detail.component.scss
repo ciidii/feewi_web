@@ -7,7 +7,7 @@
 }
 
 .list-page-content {
-  padding: 1.5rem;
+  padding: 0;
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -20,60 +20,39 @@
   margin: 0 0.5rem;
 }
 
-// ── THE MINIMALIST DOSSIER CARD ─────────────────────────────────────────────
-.fw-standard-card {
-  background: white;
-  border-radius: 16px;
+// La carte "dossier" (fond, bordure, header) est désormais fournie par app-fw-info-card
+// (shared/components/info-card). Ne restent ici que les éléments projetés dans son en-tête
+// personnalisé ([header-left]), qui héritent de l'encapsulation de CE composant et non de
+// celle d'app-fw-info-card.
+app-fw-info-card { display: block; margin-bottom: 1.5rem; }
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.level-rank {
+  width: 32px; height: 32px;
+  background: var(--fw-surface-sunken);
+  color: var(--fw-text-tertiary);
+  border-radius: 8px;
+  display: grid; place-items: center;
+  font-size: 0.75rem; font-weight: 800;
   border: 1px solid var(--fw-border-subtle);
-  box-shadow: var(--fw-shadow-sm);
-  margin-bottom: 1.5rem;
-  overflow: hidden;
-  transition: all 0.2s ease;
+}
 
-  &:hover { box-shadow: var(--fw-shadow-md); border-color: var(--fw-border); }
-
-  .card-header {
-    padding: 1.25rem 1.5rem;
-    background: white;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .level-rank {
-      width: 32px; height: 32px;
-      background: var(--fw-surface-sunken);
-      color: var(--fw-text-tertiary);
-      border-radius: 8px;
-      display: grid; place-items: center;
-      font-size: 0.75rem; font-weight: 800;
-      border: 1px solid var(--fw-border-subtle);
-    }
-
-    .header-icon { color: var(--fw-text-tertiary); flex-shrink: 0; }
-
-    .pillar-title-group {
-      h3 {
-        font-family: var(--fw-font-ui);
-        font-size: 0.75rem;
-        font-weight: 700;
-        color: var(--fw-text-primary);
-        margin: 0;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-      }
-      p { font-size: 11px; font-weight: 500; color: var(--fw-text-tertiary); margin: 1px 0 0; }
-    }
+.pillar-title-group {
+  h3 {
+    font-family: var(--fw-font-ui);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--fw-text-primary);
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
-
-  .card-content { padding: 1.5rem; }
+  p { font-size: 11px; font-weight: 500; color: var(--fw-text-tertiary); margin: 1px 0 0; }
 }
 
 // ── CLASS TILES GRID ───────────────────────────────────────────────────────
@@ -131,7 +110,7 @@
   border-radius: 12px;
   background: transparent;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 0.5rem; padding: 1.25rem;
+  gap: var(--fw-space-sm); padding: 1.25rem;
   transition: all 0.2s;
   cursor: pointer;
 
