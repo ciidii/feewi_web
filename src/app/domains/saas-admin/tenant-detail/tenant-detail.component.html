@@ -15,13 +15,15 @@
 
     <div class="h-8 w-px bg-slate-200"></div>
 
-    <button *fwHasPermission="'identity:saas:school:manage'" (click)="onChangeStatus()" [disabled]="isActionLoading()"
-            class="w-10 h-10 flex items-center justify-center rounded-xl border transition-all active:scale-95 disabled:opacity-50"
-            [ngClass]="isSuspended() ? 'bg-emerald-50 border-emerald-100 text-emerald-600 hover:bg-emerald-100' : 'bg-rose-50 border-rose-100 text-rose-600 hover:bg-rose-100'"
-            [title]="isSuspended() ? 'Réactiver l\'accès' : 'Suspendre l\'accès'">
-      <lucide-icon *ngIf="!isActionLoading()" [name]="isSuspended() ? CheckCircle : XCircle" class="w-5 h-5"></lucide-icon>
-      <lucide-icon *ngIf="isActionLoading()" [name]="RefreshCw" class="w-5 h-5 animate-spin"></lucide-icon>
-    </button>
+    <ng-container *fwHasPermission="'identity:saas:school:manage'">
+      <button *ngFor="let action of statusTransitions()" (click)="changeStatus(action.target)" [disabled]="isActionLoading()"
+              class="flex items-center gap-2 px-3.5 py-2 rounded-xl border text-xs font-bold transition-all active:scale-95 disabled:opacity-50"
+              [ngClass]="action.kind === 'primary' ? 'bg-emerald-50 border-emerald-100 text-emerald-700 hover:bg-emerald-100' : 'bg-rose-50 border-rose-100 text-rose-600 hover:bg-rose-100'">
+        <lucide-icon *ngIf="!isActionLoading()" [name]="action.icon" class="w-4 h-4"></lucide-icon>
+        <lucide-icon *ngIf="isActionLoading()" [name]="RefreshCw" class="w-4 h-4 animate-spin"></lucide-icon>
+        {{ action.label }}
+      </button>
+    </ng-container>
   </div>
 
   <!-- ======================================= -->

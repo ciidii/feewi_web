@@ -143,28 +143,50 @@ export class TenantDetailComponent implements OnInit {
     return map[mode] ?? mode;
   }
 
-  onChangeStatus() {
+  /**
+   * Transitions de statut valides depuis l'état courant (PATCH /schools/{id}/status
+   * accepte ACTIVE | SUSPENDED | TRIAL). Une école en essai peut être activée ou suspendue.
+   */
+  statusTransitions(): { target: 'ACTIVE' | 'SUSPENDED' | 'TRIAL'; label: string; icon: any; kind: 'primary' | 'danger' }[] {
+    switch (this.school()?.status) {
+      case 'TRIAL':
+        return [
+          {target: 'ACTIVE', label: 'Activer', icon: this.CheckCircle, kind: 'primary'},
+          {target: 'SUSPENDED', label: 'Suspendre', icon: this.XCircle, kind: 'danger'}
+        ];
+      case 'SUSPENDED':
+        return [{target: 'ACTIVE', label: 'Réactiver', icon: this.CheckCircle, kind: 'primary'}];
+      case 'ACTIVE':
+      default:
+        return [{target: 'SUSPENDED', label: 'Suspendre', icon: this.XCircle, kind: 'danger'}];
+    }
+  }
+
+  changeStatus(target: 'ACTIVE' | 'SUSPENDED' | 'TRIAL') {
     const s = this.school();
     if (!s || !s.id) return;
 
-    // Le seul endpoint de mutation super-admin disponible : PATCH /schools/{id}/status.
-    const isSuspended = s.status === 'SUSPENDED';
-    const newStatus = isSuspended ? 'ACTIVE' : 'SUSPENDED';
+    const verbs: Record<string, { title: string; verb: string; confirm: string; type: string }> = {
+      ACTIVE: {title: "Activer l'établissement", verb: 'activer', confirm: 'Activer', type: 'primary'},
+      SUSPENDED: {title: "Suspendre l'établissement", verb: 'suspendre', confirm: 'Suspendre', type: 'danger'},
+      TRIAL: {title: "Repasser en essai", verb: 'repasser en essai', confirm: 'Confirmer', type: 'primary'}
+    };
+    const v = verbs[target];
 
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: isSuspended ? 'Réactiver l\'établissement' : 'Suspendre l\'établissement',
-        message: `Êtes-vous sûr de vouloir ${isSuspended ? 'réactiver' : 'suspendre'} l'accès pour ${s.name} ?`,
-        confirmLabel: isSuspended ? 'Réactiver' : 'Suspendre',
-        type: isSuspended ? 'primary' : 'danger'
+        title: v.title,
+        message: `Êtes-vous sûr de vouloir ${v.verb} l'accès pour ${s.name} ?`,
+        confirmLabel: v.confirm,
+        type: v.type
       }
     });
 
     dialogRef.afterClosed().subscribe(confirmed => {
       if (confirmed) {
         this.isActionLoading.set(true);
-        this.schoolService.updateSchoolStatus(s.id!, newStatus).pipe(
+        this.schoolService.updateSchoolStatus(s.id!, target).pipe(
           finalize(() => this.isActionLoading.set(false))
         ).subscribe(() => {
           this.loadSchool(s.id!);
