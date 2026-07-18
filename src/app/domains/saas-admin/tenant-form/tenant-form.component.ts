@@ -1,10 +1,12 @@
-import {Component, inject, OnInit, signal} from '@angular/core';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators} from '@angular/forms';
 import {Router, RouterModule} from '@angular/router';
 import {
   AlertCircle,
   ArrowLeft,
+  ArrowRight,
+  Check,
   CheckCircle2,
   Globe,
   Loader2,
@@ -22,12 +24,19 @@ import {
 } from 'lucide-angular';
 import {SchoolService} from '../../../core/services/school.service';
 import {NotificationService} from '../../../shared/services/notification.service';
-import {FormShellComponent} from '../../../shared/components/form-shell/form-shell';
+
+interface WizardStep {
+  key: string;
+  label: string;
+  hint: string;
+  icon: any;
+  controls: string[];
+}
 
 @Component({
   selector: 'app-tenant-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, LucideAngularModule, FormShellComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, LucideAngularModule],
   templateUrl: './tenant-form.component.html',
   styleUrl: './tenant-form.component.scss'
 })
@@ -51,11 +60,24 @@ export class TenantFormComponent implements OnInit {
   readonly CheckCircle2 = CheckCircle2;
   readonly AlertCircle = AlertCircle;
   readonly ArrowLeft = ArrowLeft;
+  readonly ArrowRight = ArrowRight;
+  readonly Check = Check;
   readonly Flag = Flag;
 
   isLoading = signal(false);
   error = signal<string | null>(null);
   isIdManuallyEdited = false;
+
+  // --- État du stepper ---
+  currentStep = signal(0);
+  readonly steps: WizardStep[] = [
+    {key: 'identity', label: 'Identité', hint: 'Nom, URL et contact', icon: SchoolIcon, controls: ['name', 'tenantId', 'phone']},
+    {key: 'pedagogy', label: 'Pédagogie', hint: 'Système et cycles', icon: Globe, controls: ['educationTemplate', 'allowedCycles']},
+    {key: 'location', label: 'Localisation', hint: 'Adresse et email', icon: MapPin, controls: ['streetAddress', 'city', 'country', 'email']},
+    {key: 'admin', label: 'Administrateur', hint: 'Compte racine', icon: ShieldCheck, controls: ['adminFirstName', 'adminLastName', 'adminStaffType', 'adminEmail', 'adminPassword', 'confirmAdminPassword']}
+  ];
+  readonly isLastStep = computed(() => this.currentStep() === this.steps.length - 1);
+  readonly progressPct = computed(() => Math.round(((this.currentStep() + 1) / this.steps.length) * 100));
 
   tenantForm: FormGroup = this.fb.group({
     tenantId: ['', [Validators.required, Validators.pattern(/^[a-z0-9-]+$/)]],
@@ -74,26 +96,26 @@ export class TenantFormComponent implements OnInit {
     adminStaffType: ['ADMINISTRATION', Validators.required],
     adminPassword: ['', [Validators.required, Validators.minLength(8)]],
     confirmAdminPassword: ['', Validators.required]
-  }, { validators: this.passwordMatchValidator });
+  }, {validators: this.passwordMatchValidator});
 
   educationTemplates = [
-    { code: 'SN_FR', label: 'Sénégal (Français)' },
-    { code: 'GMB_EN', label: 'Gambie (Anglais)' },
-    { code: 'GUI_FR', label: 'Guinée (Français)' }
+    {code: 'SN_FR', label: 'Sénégal (Français)'},
+    {code: 'GMB_EN', label: 'Gambie (Anglais)'},
+    {code: 'GUI_FR', label: 'Guinée (Français)'}
   ];
 
   staffTypes = [
-    { code: 'ADMINISTRATION', label: 'Personnel Administratif' },
-    { code: 'TEACHER', label: 'Corps Enseignant' },
-    { code: 'SUPPORT', label: 'Personnel Support' },
-    { code: 'OTHER', label: 'Autre' }
+    {code: 'ADMINISTRATION', label: 'Personnel Administratif'},
+    {code: 'TEACHER', label: 'Corps Enseignant'},
+    {code: 'SUPPORT', label: 'Personnel Support'},
+    {code: 'OTHER', label: 'Autre'}
   ];
 
   cycleOptions = [
-    { code: 'MATERNAL', label: 'Maternelle / Préscolaire' },
-    { code: 'PRIMARY', label: 'Primaire / Élémentaire' },
-    { code: 'MIDDLE_SCHOOL', label: 'Moyen / Collège' },
-    { code: 'HIGH_SCHOOL', label: 'Secondaire / Lycée' }
+    {code: 'MATERNAL', label: 'Maternelle / Préscolaire'},
+    {code: 'PRIMARY', label: 'Primaire / Élémentaire'},
+    {code: 'MIDDLE_SCHOOL', label: 'Moyen / Collège'},
+    {code: 'HIGH_SCHOOL', label: 'Secondaire / Lycée'}
   ];
 
   ngOnInit() {
@@ -101,7 +123,7 @@ export class TenantFormComponent implements OnInit {
     this.tenantForm.get('name')?.valueChanges.subscribe(name => {
       if (!this.isIdManuallyEdited) {
         const slug = this.slugify(name);
-        this.tenantForm.get('tenantId')?.setValue(slug, { emitEvent: false });
+        this.tenantForm.get('tenantId')?.setValue(slug, {emitEvent: false});
       }
     });
 
@@ -115,7 +137,7 @@ export class TenantFormComponent implements OnInit {
       .toString()
       .toLowerCase()
       .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[̀-ͯ]/g, '')
       .replace(/\s+/g, '-')
       .replace(/[^\w-]+/g, '')
       .replace(/--+/g, '-')
@@ -127,9 +149,60 @@ export class TenantFormComponent implements OnInit {
     const password = control.get('adminPassword');
     const confirm = control.get('confirmAdminPassword');
     if (password && confirm && password.value !== confirm.value) {
-      return { passwordMismatch: true };
+      return {passwordMismatch: true};
     }
     return null;
+  }
+
+  // --- Navigation stepper ---
+
+  /** Une étape est valide si tous ses contrôles le sont (+ concordance des mots de passe pour l'étape admin). */
+  isStepValid(index: number): boolean {
+    const step = this.steps[index];
+    const controlsOk = step.controls.every(c => !!this.tenantForm.get(c)?.valid);
+    if (step.key === 'admin') {
+      return controlsOk && !this.tenantForm.hasError('passwordMismatch');
+    }
+    return controlsOk;
+  }
+
+  private markStepTouched(index: number) {
+    this.steps[index].controls.forEach(c => this.tenantForm.get(c)?.markAsTouched());
+  }
+
+  next() {
+    const i = this.currentStep();
+    if (!this.isStepValid(i)) {
+      this.markStepTouched(i);
+      this.notificationService.warning('Complétez cette étape avant de continuer.', 'Étape incomplète');
+      return;
+    }
+    if (i < this.steps.length - 1) {
+      this.currentStep.set(i + 1);
+    }
+  }
+
+  prev() {
+    if (this.currentStep() > 0) {
+      this.currentStep.update(v => v - 1);
+    }
+  }
+
+  /** Clic sur l'indicateur : retour libre en arrière, avance seulement si les étapes précédentes sont valides. */
+  goToStep(index: number) {
+    if (index === this.currentStep()) return;
+    if (index < this.currentStep()) {
+      this.currentStep.set(index);
+      return;
+    }
+    for (let s = 0; s < index; s++) {
+      if (!this.isStepValid(s)) {
+        this.currentStep.set(s);
+        this.markStepTouched(s);
+        return;
+      }
+    }
+    this.currentStep.set(index);
   }
 
   toggleCycle(code: string) {
@@ -171,6 +244,9 @@ export class TenantFormComponent implements OnInit {
   onSubmit() {
     if (this.tenantForm.invalid) {
       this.tenantForm.markAllAsTouched();
+      // Positionne l'utilisateur sur la première étape en erreur.
+      const firstInvalid = this.steps.findIndex((_, i) => !this.isStepValid(i));
+      if (firstInvalid >= 0) this.currentStep.set(firstInvalid);
       this.notificationService.warning('Verifiez les champs du formulaire.', 'Formulaire incomplet');
       return;
     }
@@ -179,7 +255,7 @@ export class TenantFormComponent implements OnInit {
     this.error.set(null);
 
     // Filter confirmAdminPassword out of the payload
-    const { confirmAdminPassword, ...payload } = this.tenantForm.value;
+    const {confirmAdminPassword, ...payload} = this.tenantForm.value;
 
     this.schoolService.createSchool(payload).subscribe({
       next: () => {

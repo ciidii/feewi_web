@@ -1,24 +1,54 @@
-<app-fw-form-shell
-  title="Nouvel Établissement"
-  subtitle="Saisissez les informations de base pour initialiser le tenant."
-  [icon]="SchoolIcon"
-  saveLabel="Créer l'établissement"
-  cancelLabel="Annuler"
-  mode="page"
-  [isLoading]="isLoading()"
-  (save)="onSubmit()"
-  (cancel)="close()"
->
-  <div class="max-w-4xl mx-auto py-8 space-y-10">
-    <!-- Bouton Retour Rapide -->
-    <button (click)="close()" class="flex items-center gap-2 text-slate-400 hover:text-primary-600 transition-colors group">
-      <lucide-icon [name]="ArrowLeft" class="w-4 h-4 group-hover:-translate-x-1 transition-transform"></lucide-icon>
-      <span class="text-xs font-bold uppercase tracking-widest">Retour à la liste</span>
-    </button>
+<div class="min-h-full bg-slate-50/40">
+  <div class="max-w-3xl mx-auto px-4 py-8 space-y-8">
 
-    <form [formGroup]="tenantForm" class="space-y-10">
-      <!-- Erreur API Globale -->
-      <div *ngIf="error()" class="bg-rose-50 border border-rose-100 rounded-xl p-4 flex gap-3 animate-in shake">
+    <!-- En-tête -->
+    <div class="space-y-4">
+      <button (click)="close()" type="button" class="flex items-center gap-2 text-slate-400 hover:text-primary-600 transition-colors group">
+        <lucide-icon [name]="ArrowLeft" class="w-4 h-4 group-hover:-translate-x-1 transition-transform"></lucide-icon>
+        <span class="text-xs font-bold uppercase tracking-widest">Retour à la liste</span>
+      </button>
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-primary-50 text-primary-600 flex items-center justify-center">
+          <lucide-icon [name]="SchoolIcon" class="w-5 h-5"></lucide-icon>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold text-slate-900">Nouvel Établissement</h1>
+          <p class="text-xs text-slate-500">Étape {{ currentStep() + 1 }} sur {{ steps.length }} · {{ steps[currentStep()].label }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Indicateur d'étapes -->
+    <nav class="flex items-center">
+      @for (step of steps; track step.key; let i = $index) {
+        <button type="button" (click)="goToStep(i)" class="flex items-center gap-3 min-w-0">
+          <div class="w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all"
+               [ngClass]="{
+                 'bg-primary-600 border-primary-600 text-white': i === currentStep(),
+                 'bg-emerald-50 border-emerald-500 text-emerald-600': i < currentStep(),
+                 'bg-white border-slate-200 text-slate-400': i > currentStep()
+               }">
+            @if (i < currentStep()) {
+              <lucide-icon [name]="Check" class="w-4 h-4"></lucide-icon>
+            } @else {
+              {{ i + 1 }}
+            }
+          </div>
+          <div class="hidden sm:flex flex-col items-start leading-tight min-w-0">
+            <span class="text-xs font-bold truncate" [class.text-slate-900]="i === currentStep()" [class.text-slate-400]="i !== currentStep()">{{ step.label }}</span>
+            <span class="text-[10px] text-slate-400 truncate">{{ step.hint }}</span>
+          </div>
+        </button>
+        @if (!$last) {
+          <div class="flex-1 h-0.5 mx-2 rounded-full transition-colors" [class.bg-emerald-400]="i < currentStep()" [class.bg-slate-200]="i >= currentStep()"></div>
+        }
+      }
+    </nav>
+
+    <!-- Carte formulaire -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8">
+      <!-- Erreur API globale -->
+      <div *ngIf="error()" class="mb-6 bg-rose-50 border border-rose-100 rounded-xl p-4 flex gap-3">
         <lucide-icon [name]="AlertCircle" class="w-5 h-5 text-rose-500 shrink-0"></lucide-icon>
         <div class="text-sm">
           <p class="font-bold text-rose-900">Erreur de création</p>
@@ -26,168 +56,194 @@
         </div>
       </div>
 
-      <!-- SECTION 1 : IDENTITÉ -->
-      <section class="space-y-6">
-        <div class="border-b border-slate-100 pb-2">
-          <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
-            <lucide-icon [name]="SchoolIcon" class="w-4 h-4 text-primary-500"></lucide-icon>
-            Identité de l'établissement
-          </h3>
-        </div>
+      <form [formGroup]="tenantForm">
+        @switch (currentStep()) {
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="md:col-span-2 space-y-1.5">
-            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Nom officiel *</label>
-            <input type="text" formControlName="name" placeholder="Ex: Institution Sainte Marie" class="fw-input-clean" [class.error]="isInvalid('name')"/>
-            <p *ngIf="isInvalid('name')" class="text-[10px] font-medium text-rose-500">{{ getErrorMessage('name') }}</p>
-          </div>
+          <!-- ÉTAPE 1 : IDENTITÉ -->
+          @case (0) {
+            <div class="space-y-6 animate-in fade-in duration-300">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="md:col-span-2 space-y-1.5">
+                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Nom officiel *</label>
+                  <input type="text" formControlName="name" placeholder="Ex: Institution Sainte Marie" class="fw-input-clean" [class.error]="isInvalid('name')"/>
+                  <p *ngIf="isInvalid('name')" class="text-[10px] font-medium text-rose-500">{{ getErrorMessage('name') }}</p>
+                </div>
 
-          <div class="space-y-1.5">
-            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">URL d'accès (Slug) *</label>
-            <div class="flex items-center">
-              <input type="text" formControlName="tenantId" class="fw-input-clean rounded-r-none border-r-0" [class.error]="isInvalid('tenantId')"/>
-              <span class="h-[42px] px-3 flex items-center bg-slate-50 border border-slate-200 rounded-r-xl text-xs font-bold text-slate-400">.feewi.io</span>
-            </div>
-          </div>
+                <div class="space-y-1.5">
+                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">URL d'accès (Slug) *</label>
+                  <div class="flex items-center">
+                    <input type="text" formControlName="tenantId" class="fw-input-clean rounded-r-none border-r-0" [class.error]="isInvalid('tenantId')"/>
+                    <span class="h-[42px] px-3 flex items-center bg-slate-50 border border-slate-200 rounded-r-xl text-xs font-bold text-slate-400">.feewi.io</span>
+                  </div>
+                  <p *ngIf="isInvalid('tenantId')" class="text-[10px] font-medium text-rose-500">{{ getErrorMessage('tenantId') }}</p>
+                </div>
 
-          <div class="space-y-1.5">
-            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Téléphone *</label>
-            <input type="text" formControlName="phone" placeholder="+221 ..." class="fw-input-clean" [class.error]="isInvalid('phone')"/>
-          </div>
+                <div class="space-y-1.5">
+                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Téléphone *</label>
+                  <input type="text" formControlName="phone" placeholder="+221 ..." class="fw-input-clean" [class.error]="isInvalid('phone')"/>
+                  <p *ngIf="isInvalid('phone')" class="text-[10px] font-medium text-rose-500">{{ getErrorMessage('phone') }}</p>
+                </div>
 
-          <div class="md:col-span-2 space-y-1.5">
-            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Slogan ou Devise</label>
-            <input type="text" formControlName="slogan" class="fw-input-clean"/>
-          </div>
-        </div>
-      </section>
-
-      <!-- SECTION 2 : CONFIGURATION -->
-      <section class="space-y-6">
-        <div class="border-b border-slate-100 pb-2">
-          <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
-            <lucide-icon [name]="CheckCircle2" class="w-4 h-4 text-primary-500"></lucide-icon>
-            Paramètres pédagogiques
-          </h3>
-        </div>
-
-        <div class="space-y-6">
-          <div class="space-y-3">
-            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Système éducatif *</label>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-              @for (t of educationTemplates; track t.code) {
-                <button
-                  type="button"
-                  (click)="tenantForm.get('educationTemplate')?.setValue(t.code)"
-                  class="p-4 rounded-xl border text-left transition-all"
-                  [class.bg-primary-50]="tenantForm.get('educationTemplate')?.value === t.code"
-                  [class.border-primary-200]="tenantForm.get('educationTemplate')?.value === t.code"
-                  [class.border-slate-200]="tenantForm.get('educationTemplate')?.value !== t.code"
-                >
-                  <p class="text-xs font-bold" [class.text-primary-700]="tenantForm.get('educationTemplate')?.value === t.code">
-                    {{ t.label }}
-                  </p>
-                  <p class="text-[10px] text-slate-400 mt-1">Niveaux standards</p>
-                </button>
-              }
-            </div>
-          </div>
-
-          <div class="space-y-3">
-            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Cycles actifs *</label>
-            <div class="flex flex-wrap gap-2">
-              @for (cycle of cycleOptions; track cycle.code) {
-                <button
-                  type="button"
-                  (click)="toggleCycle(cycle.code)"
-                  class="px-4 py-2 rounded-lg border text-xs font-bold transition-all"
-                  [class.bg-slate-900]="isCycleSelected(cycle.code)"
-                  [class.text-white]="isCycleSelected(cycle.code)"
-                  [class.border-slate-900]="isCycleSelected(cycle.code)"
-                  [class.bg-white]="!isCycleSelected(cycle.code)"
-                  [class.text-slate-600]="!isCycleSelected(cycle.code)"
-                  [class.border-slate-200]="!isCycleSelected(cycle.code)"
-                >
-                  {{ cycle.label }}
-                </button>
-              }
-            </div>
-            <p *ngIf="isInvalid('allowedCycles')" class="text-[10px] font-medium text-rose-500">{{ getErrorMessage('allowedCycles') }}</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- SECTION 3 : ADRESSE ET ADMIN -->
-      <section class="space-y-6">
-        <div class="border-b border-slate-100 pb-2">
-          <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
-            <lucide-icon [name]="MapPin" class="w-4 h-4 text-primary-500"></lucide-icon>
-            Localisation & Administration
-          </h3>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="md:col-span-2 space-y-1.5">
-            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Adresse *</label>
-            <input type="text" formControlName="streetAddress" class="fw-input-clean" [class.error]="isInvalid('streetAddress')"/>
-          </div>
-          <div class="space-y-1.5">
-            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Ville *</label>
-            <input type="text" formControlName="city" class="fw-input-clean" [class.error]="isInvalid('city')"/>
-          </div>
-          <div class="space-y-1.5">
-            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Pays *</label>
-            <input type="text" formControlName="country" class="fw-input-clean" [class.error]="isInvalid('country')"/>
-          </div>
-          <div class="md:col-span-2 space-y-1.5">
-            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Email Institutionnel *</label>
-            <input type="email" formControlName="email" class="fw-input-clean" [class.error]="isInvalid('email')"/>
-          </div>
-
-          <!-- ZONE ADMIN (Groupe visuel léger) -->
-          <div class="md:col-span-2 mt-4 p-6 bg-slate-50 border border-slate-100 rounded-2xl space-y-6">
-            <div class="flex items-center gap-3 border-b border-slate-200 pb-3">
-              <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center">
-                <lucide-icon [name]="Lock" class="w-4 h-4"></lucide-icon>
-              </div>
-              <div>
-                <p class="text-xs font-bold text-slate-900 uppercase tracking-tight">Compte Administrateur Racine</p>
-                <p class="text-[10px] text-slate-500">Identifiants de première connexion</p>
+                <div class="md:col-span-2 space-y-1.5">
+                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Slogan ou Devise</label>
+                  <input type="text" formControlName="slogan" placeholder="Optionnel" class="fw-input-clean"/>
+                </div>
               </div>
             </div>
+          }
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="space-y-1.5">
-                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Prénom *</label>
-                <input type="text" formControlName="adminFirstName" class="fw-input-clean bg-white"/>
+          <!-- ÉTAPE 2 : PÉDAGOGIE -->
+          @case (1) {
+            <div class="space-y-8 animate-in fade-in duration-300">
+              <div class="space-y-3">
+                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Système éducatif *</label>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  @for (t of educationTemplates; track t.code) {
+                    <button
+                      type="button"
+                      (click)="tenantForm.get('educationTemplate')?.setValue(t.code)"
+                      class="p-4 rounded-xl border text-left transition-all"
+                      [class.bg-primary-50]="tenantForm.get('educationTemplate')?.value === t.code"
+                      [class.border-primary-200]="tenantForm.get('educationTemplate')?.value === t.code"
+                      [class.border-slate-200]="tenantForm.get('educationTemplate')?.value !== t.code"
+                    >
+                      <p class="text-xs font-bold" [class.text-primary-700]="tenantForm.get('educationTemplate')?.value === t.code">
+                        {{ t.label }}
+                      </p>
+                      <p class="text-[10px] text-slate-400 mt-1">Niveaux standards</p>
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <div class="space-y-3">
+                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Cycles actifs *</label>
+                <div class="flex flex-wrap gap-2">
+                  @for (cycle of cycleOptions; track cycle.code) {
+                    <button
+                      type="button"
+                      (click)="toggleCycle(cycle.code)"
+                      class="px-4 py-2 rounded-lg border text-xs font-bold transition-all"
+                      [class.bg-slate-900]="isCycleSelected(cycle.code)"
+                      [class.text-white]="isCycleSelected(cycle.code)"
+                      [class.border-slate-900]="isCycleSelected(cycle.code)"
+                      [class.bg-white]="!isCycleSelected(cycle.code)"
+                      [class.text-slate-600]="!isCycleSelected(cycle.code)"
+                      [class.border-slate-200]="!isCycleSelected(cycle.code)"
+                    >
+                      {{ cycle.label }}
+                    </button>
+                  }
+                </div>
+                <p *ngIf="isInvalid('allowedCycles')" class="text-[10px] font-medium text-rose-500">Sélectionnez au moins un cycle.</p>
+              </div>
+            </div>
+          }
+
+          <!-- ÉTAPE 3 : LOCALISATION -->
+          @case (2) {
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in duration-300">
+              <div class="md:col-span-2 space-y-1.5">
+                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Adresse *</label>
+                <input type="text" formControlName="streetAddress" placeholder="123 Rue ..." class="fw-input-clean" [class.error]="isInvalid('streetAddress')"/>
+                <p *ngIf="isInvalid('streetAddress')" class="text-[10px] font-medium text-rose-500">{{ getErrorMessage('streetAddress') }}</p>
               </div>
               <div class="space-y-1.5">
-                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nom *</label>
-                <input type="text" formControlName="adminLastName" class="fw-input-clean bg-white"/>
+                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Ville *</label>
+                <input type="text" formControlName="city" class="fw-input-clean" [class.error]="isInvalid('city')"/>
+                <p *ngIf="isInvalid('city')" class="text-[10px] font-medium text-rose-500">{{ getErrorMessage('city') }}</p>
+              </div>
+              <div class="space-y-1.5">
+                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Pays *</label>
+                <input type="text" formControlName="country" class="fw-input-clean" [class.error]="isInvalid('country')"/>
+                <p *ngIf="isInvalid('country')" class="text-[10px] font-medium text-rose-500">{{ getErrorMessage('country') }}</p>
               </div>
               <div class="md:col-span-2 space-y-1.5">
-                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Type de poste *</label>
-                <select formControlName="adminStaffType" class="fw-input-clean bg-white h-9 px-2">
-                  <option *ngFor="let type of staffTypes" [value]="type.code">{{ type.label }}</option>
-                </select>
-              </div>
-              <div class="md:col-span-2 space-y-1.5">
-                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Email (Login) *</label>
-                <input type="email" formControlName="adminEmail" class="fw-input-clean bg-white"/>
-              </div>
-              <div class="space-y-1.5">
-                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mot de passe *</label>
-                <input type="password" formControlName="adminPassword" class="fw-input-clean bg-white"/>
-              </div>
-              <div class="space-y-1.5">
-                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Confirmation *</label>
-                <input type="password" formControlName="confirmAdminPassword" class="fw-input-clean bg-white" [class.error]="isInvalid('confirmAdminPassword')"/>
-                <p *ngIf="isInvalid('confirmAdminPassword')" class="text-[9px] font-bold text-rose-500">{{ getErrorMessage('confirmAdminPassword') }}</p>
+                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Email Institutionnel *</label>
+                <input type="email" formControlName="email" placeholder="contact@ecole.sn" class="fw-input-clean" [class.error]="isInvalid('email')"/>
+                <p *ngIf="isInvalid('email')" class="text-[10px] font-medium text-rose-500">{{ getErrorMessage('email') }}</p>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-    </form>
+          }
+
+          <!-- ÉTAPE 4 : COMPTE ADMINISTRATEUR -->
+          @case (3) {
+            <div class="space-y-6 animate-in fade-in duration-300">
+              <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
+                <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center">
+                  <lucide-icon [name]="Lock" class="w-4 h-4"></lucide-icon>
+                </div>
+                <div>
+                  <p class="text-xs font-bold text-slate-900 uppercase tracking-tight">Compte Administrateur Racine</p>
+                  <p class="text-[10px] text-slate-500">Identifiants de première connexion</p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-1.5">
+                  <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Prénom *</label>
+                  <input type="text" formControlName="adminFirstName" class="fw-input-clean" [class.error]="isInvalid('adminFirstName')"/>
+                  <p *ngIf="isInvalid('adminFirstName')" class="text-[9px] font-bold text-rose-500">{{ getErrorMessage('adminFirstName') }}</p>
+                </div>
+                <div class="space-y-1.5">
+                  <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nom *</label>
+                  <input type="text" formControlName="adminLastName" class="fw-input-clean" [class.error]="isInvalid('adminLastName')"/>
+                  <p *ngIf="isInvalid('adminLastName')" class="text-[9px] font-bold text-rose-500">{{ getErrorMessage('adminLastName') }}</p>
+                </div>
+                <div class="md:col-span-2 space-y-1.5">
+                  <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Type de poste *</label>
+                  <select formControlName="adminStaffType" class="fw-input-clean h-9 px-2">
+                    <option *ngFor="let type of staffTypes" [value]="type.code">{{ type.label }}</option>
+                  </select>
+                </div>
+                <div class="md:col-span-2 space-y-1.5">
+                  <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Email (Login) *</label>
+                  <input type="email" formControlName="adminEmail" class="fw-input-clean" [class.error]="isInvalid('adminEmail')"/>
+                  <p *ngIf="isInvalid('adminEmail')" class="text-[9px] font-bold text-rose-500">{{ getErrorMessage('adminEmail') }}</p>
+                </div>
+                <div class="space-y-1.5">
+                  <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mot de passe *</label>
+                  <input type="password" formControlName="adminPassword" class="fw-input-clean" [class.error]="isInvalid('adminPassword')"/>
+                  <p *ngIf="isInvalid('adminPassword')" class="text-[9px] font-bold text-rose-500">{{ getErrorMessage('adminPassword') }}</p>
+                </div>
+                <div class="space-y-1.5">
+                  <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Confirmation *</label>
+                  <input type="password" formControlName="confirmAdminPassword" class="fw-input-clean" [class.error]="isInvalid('confirmAdminPassword')"/>
+                  <p *ngIf="isInvalid('confirmAdminPassword')" class="text-[9px] font-bold text-rose-500">{{ getErrorMessage('confirmAdminPassword') }}</p>
+                </div>
+              </div>
+            </div>
+          }
+        }
+      </form>
+    </div>
+
+    <!-- Barre de navigation -->
+    <div class="flex items-center justify-between gap-3">
+      <button type="button" (click)="close()" class="px-4 py-2.5 text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors">
+        Annuler
+      </button>
+
+      <div class="flex items-center gap-2">
+        <button *ngIf="currentStep() > 0" type="button" (click)="prev()"
+                class="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50 transition-all active:scale-95">
+          <lucide-icon [name]="ArrowLeft" class="w-4 h-4"></lucide-icon>
+          Précédent
+        </button>
+
+        <button *ngIf="!isLastStep()" type="button" (click)="next()"
+                class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-all active:scale-95 shadow-sm">
+          Suivant
+          <lucide-icon [name]="ArrowRight" class="w-4 h-4"></lucide-icon>
+        </button>
+
+        <button *ngIf="isLastStep()" type="button" (click)="onSubmit()" [disabled]="isLoading()"
+                class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-600 text-white text-xs font-bold hover:bg-primary-700 transition-all active:scale-95 shadow-sm disabled:opacity-60">
+          <lucide-icon *ngIf="isLoading()" [name]="Loader2" class="w-4 h-4 animate-spin"></lucide-icon>
+          <lucide-icon *ngIf="!isLoading()" [name]="CheckCircle2" class="w-4 h-4"></lucide-icon>
+          Créer l'établissement
+        </button>
+      </div>
+    </div>
   </div>
-</app-fw-form-shell>
+</div>
