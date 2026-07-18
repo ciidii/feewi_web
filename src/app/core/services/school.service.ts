@@ -129,6 +129,32 @@ export class SchoolService {
   }
 
   /**
+   * Édite une école arbitraire (Super Admin).
+   * Endpoint: PATCH /schools/{id}
+   */
+  updateSchool(id: string, school: Partial<School>): Observable<School> {
+    this._loading.set(true);
+    return this.http.patch<School>(`${this.API_URL}/${id}`, school).pipe(
+      tap(() => this.notificationService.success('Établissement mis à jour')),
+      catchError(this.handleError('Erreur lors de la mise à jour de l\'établissement')),
+      finalize(() => this._loading.set(false))
+    );
+  }
+
+  /**
+   * Supprime une école et ses données d'identité (Super Admin).
+   * Endpoint: DELETE /schools/{id}
+   */
+  deleteSchool(id: string): Observable<void> {
+    this._loading.set(true);
+    return this.http.delete<void>(`${this.API_URL}/${id}`).pipe(
+      tap(() => this.notificationService.success('Établissement supprimé')),
+      catchError(this.handleError('Erreur lors de la suppression de l\'établissement')),
+      finalize(() => this._loading.set(false))
+    );
+  }
+
+  /**
    * Change le statut d'un établissement (Suspendre/Activer)
    * Endpoint: PATCH /schools/{id}/status
    */

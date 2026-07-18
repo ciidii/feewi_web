@@ -13,9 +13,11 @@ import {
   LucideAngularModule,
   Mail,
   MapPin,
+  Pencil,
   Phone,
   RefreshCw,
   ShieldCheck,
+  Trash2,
   XCircle
 } from 'lucide-angular';
 import {SchoolService} from '../../../core/services/school.service';
@@ -23,6 +25,7 @@ import {School} from '../../../core/models/school.model';
 import {NotificationService} from '../../../shared/services/notification.service';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '../../../shared/components/confirm-dialog/confirm-dialog';
+import {TenantEditFormComponent} from '../tenant-edit-form/tenant-edit-form.component';
 import {finalize} from 'rxjs';
 import {EnrollmentPublicService} from '../../../core/services/enrollment-public.service';
 import {PublicPortalSummary} from '../../../core/models/enrollment/dtos';
@@ -65,6 +68,8 @@ export class TenantDetailComponent implements OnInit {
   readonly RefreshCw = RefreshCw;
   readonly Lock = Lock;
   readonly GraduationCap = GraduationCap;
+  readonly Pencil = Pencil;
+  readonly Trash2 = Trash2;
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -191,6 +196,37 @@ export class TenantDetailComponent implements OnInit {
         ).subscribe(() => {
           this.loadSchool(s.id!);
         });
+      }
+    });
+  }
+
+  onEdit() {
+    const s = this.school();
+    if (!s) return;
+    const ref = this.dialog.open(TenantEditFormComponent, {data: s, autoFocus: false, panelClass: 'fw-dialog'});
+    ref.afterClosed().subscribe(updated => {
+      if (updated) this.loadSchool(s.id!);
+    });
+  }
+
+  onDelete() {
+    const s = this.school();
+    if (!s || !s.id) return;
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      width: '440px',
+      data: {
+        title: "Supprimer l'établissement",
+        message: `Cette action supprime définitivement « ${s.name} » et tous ses comptes (utilisateurs, personnel, rôles). Elle est irréversible. Continuer ?`,
+        confirmLabel: 'Supprimer définitivement',
+        type: 'danger'
+      }
+    });
+    ref.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.isActionLoading.set(true);
+        this.schoolService.deleteSchool(s.id!).pipe(
+          finalize(() => this.isActionLoading.set(false))
+        ).subscribe(() => this.router.navigate(['/saas/tenants']));
       }
     });
   }

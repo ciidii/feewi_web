@@ -24,6 +24,18 @@
         {{ action.label }}
       </button>
     </ng-container>
+
+    <button *fwHasPermission="'identity:saas:school:manage'" (click)="onEdit()" [disabled]="isActionLoading()"
+            class="flex items-center gap-2 px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50 transition-all active:scale-95 disabled:opacity-50">
+      <lucide-icon [name]="Pencil" class="w-4 h-4"></lucide-icon>
+      Modifier
+    </button>
+
+    <button *fwHasPermission="'identity:saas:school:delete'" (click)="onDelete()" [disabled]="isActionLoading()"
+            class="w-10 h-10 flex items-center justify-center rounded-xl border border-rose-100 bg-rose-50 text-rose-600 hover:bg-rose-100 transition-all active:scale-95 disabled:opacity-50"
+            title="Supprimer l'établissement">
+      <lucide-icon [name]="Trash2" class="w-4 h-4"></lucide-icon>
+    </button>
   </div>
 
   <!-- ======================================= -->
