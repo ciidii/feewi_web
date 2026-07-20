@@ -23,18 +23,24 @@
     <mat-menu #actionsMenu="matMenu" xPosition="before">
       <ng-container *fwHasPermission="'identity:saas:school:manage'">
         <button *ngFor="let action of statusTransitions()" mat-menu-item (click)="changeStatus(action.target)">
-          <lucide-icon [name]="action.icon" class="w-4 h-4 mr-2 align-middle"
-                       [ngClass]="action.kind === 'danger' ? 'text-rose-600' : 'text-emerald-600'"></lucide-icon>
-          <span>{{ action.label }}</span>
+          <span class="flex items-center gap-2.5">
+            <lucide-icon [name]="action.icon" class="w-4 h-4 shrink-0"
+                         [ngClass]="action.kind === 'danger' ? 'text-rose-600' : 'text-emerald-600'"></lucide-icon>
+            <span>{{ action.label }}</span>
+          </span>
         </button>
         <button mat-menu-item (click)="onEdit()">
-          <lucide-icon [name]="Pencil" class="w-4 h-4 mr-2 align-middle text-slate-500"></lucide-icon>
-          <span>Modifier</span>
+          <span class="flex items-center gap-2.5">
+            <lucide-icon [name]="Pencil" class="w-4 h-4 shrink-0 text-slate-500"></lucide-icon>
+            <span>Modifier</span>
+          </span>
         </button>
       </ng-container>
       <button *fwHasPermission="'identity:saas:school:delete'" mat-menu-item (click)="onDelete()">
-        <lucide-icon [name]="Trash2" class="w-4 h-4 mr-2 align-middle text-rose-600"></lucide-icon>
-        <span class="text-rose-600">Supprimer</span>
+        <span class="flex items-center gap-2.5 text-rose-600">
+          <lucide-icon [name]="Trash2" class="w-4 h-4 shrink-0"></lucide-icon>
+          <span>Supprimer</span>
+        </span>
       </button>
     </mat-menu>
   </div>
