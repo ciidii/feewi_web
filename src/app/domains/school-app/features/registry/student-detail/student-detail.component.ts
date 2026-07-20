@@ -44,6 +44,7 @@ import {BlockLoaderComponent} from '../../../../../shared/components/loader/bloc
 import {FwDatePipe} from '../../../../../shared/pipes/fw-date.pipe';
 import {PaymentFormComponent} from './components/payment-form/payment-form.component';
 import {InstallmentPlanFormComponent} from './components/installment-plan-form/installment-plan-form.component';
+import {FeeItemFormComponent} from './components/fee-item-form/fee-item-form.component';
 
 @Component({
   selector: 'app-student-detail',
@@ -202,6 +203,21 @@ export class StudentDetailComponent implements OnInit {
     if (!s) return;
 
     const dialogRef = this.dialog.open(InstallmentPlanFormComponent, {
+      width: '500px',
+      panelClass: 'feewi-dialog-panel',
+      data: {studentId: s.id, studentName: this.fullName(), feeTypes: this.feeTypes()}
+    });
+
+    dialogRef.afterClosed().subscribe(saved => {
+      if (saved) this.loadFinance(s.id);
+    });
+  }
+
+  openFeeItemDialog() {
+    const s = this.student();
+    if (!s) return;
+
+    const dialogRef = this.dialog.open(FeeItemFormComponent, {
       width: '500px',
       panelClass: 'feewi-dialog-panel',
       data: {studentId: s.id, studentName: this.fullName(), feeTypes: this.feeTypes()}

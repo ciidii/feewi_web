@@ -1,0 +1,53 @@
+<app-fw-form-shell
+  [title]="'Ajouter un frais'"
+  [subtitle]="dialogData.studentName"
+  [icon]="ReceiptText"
+  saveLabel="Enregistrer le frais"
+  [isLoading]="isLoading()"
+  [canSave]="feeItemForm.valid"
+  (save)="onSave()"
+  (cancel)="onCancel()"
+>
+  <form [formGroup]="feeItemForm" class="space-y-6 py-2">
+
+    <div class="fw-field">
+      <label class="fw-label">Type de frais</label>
+      <div class="fw-input-wrapper">
+        <select formControlName="feeTypeCode" class="fw-input" [class.error]="isInvalid('feeTypeCode')">
+          <option *ngFor="let ft of dialogData.feeTypes" [value]="ft.code">{{ ft.label }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="fw-field">
+      <label class="fw-label">Libellé</label>
+      <div class="fw-input-wrapper">
+        <input type="text" formControlName="label" class="fw-input" [class.error]="isInvalid('label')" placeholder="Ex: Pénalité de retard" />
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div class="fw-field">
+        <label class="fw-label">Montant (FCFA)</label>
+        <div class="fw-input-wrapper">
+          <input type="number" formControlName="amount" min="1" step="1" class="fw-input" [class.error]="isInvalid('amount')" placeholder="Ex: 50000" />
+        </div>
+      </div>
+
+      <div class="fw-field">
+        <label class="fw-label">Échéance <span class="fw-optional">(optionnel)</span></label>
+        <div class="fw-input-wrapper">
+          <input type="date" formControlName="dueDate" class="fw-input" />
+        </div>
+      </div>
+    </div>
+
+    <div class="p-4 bg-surface-sunken rounded-xl border border-border flex items-start gap-3">
+      <lucide-icon [name]="Info" [size]="16" class="text-text-tertiary mt-0.5"></lucide-icon>
+      <p class="text-[11px] text-text-secondary leading-relaxed font-medium">
+        Ce frais est immédiatement ajouté au solde dû de l'élève. Utilisez-le pour une charge ponctuelle (pénalité, fourniture, frais exceptionnel) — la scolarité et les services souscrits sont facturés automatiquement.
+      </p>
+    </div>
+
+  </form>
+</app-fw-form-shell>
