@@ -3,130 +3,114 @@
   description="Gérez les catégories de frais scolaires facturables aux familles."
   [icon]="CreditCard"
   density="compact"
+  [showSearch]="false"
+  [tabs]="tabs()"
+  [activeTabId]="activeTab()"
+  (tabChange)="onTabChange($event)"
 >
   <!-- CONTENU DE PAGE ALIGNÉ -->
   <div class="list-page-content animate-in fade-in duration-500">
 
-    <!-- RÉGLAGES DE FACTURATION (ADR-009 §5) -->
-    <div class="bg-surface-sunken rounded-2xl p-5 border border-border flex items-center justify-between gap-4 flex-wrap">
-      <div class="flex items-center gap-4">
-        <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm text-text-tertiary">
-          <lucide-icon [name]="Settings" [size]="18"></lucide-icon>
-        </div>
-        <div>
-          <p class="text-sm font-bold text-midnight">Mensualisation</p>
-          <p class="text-[11px] text-text-secondary">
-            Nombre de mensualités sur lesquelles la scolarité et les services souscrits sont répartis.
-          </p>
-        </div>
-      </div>
-      <div class="flex items-center gap-2" *fwHasPermission="'finance:fee:manage'">
-        <input
-          type="number"
-          min="1"
-          class="fw-input w-24"
-          [ngModel]="nombreMensualitesInput()"
-          (ngModelChange)="nombreMensualitesInput.set($event)"
-        />
-        <app-fw-button
-          variant="secondary"
-          size="sm"
-          [loading]="isSavingSettings()"
-          [disabled]="nombreMensualitesInput() === billingSettings()?.nombreMensualites"
-          (click)="saveBillingSettings()"
-        >
-          Enregistrer
-        </app-fw-button>
-      </div>
-    </div>
-
-    <!-- BARRE DE COMMANDE UNIFIÉE -->
-    <app-fw-list-command-bar
-      [searchQuery]="searchQuery()"
-      [searchPlaceholder]="'Rechercher un type de frais...'"
-      [totalElements]="feeTypes().length"
-      [activeFilters]="activeFilterChips()"
-      (searchChange)="onSearch($event)"
-      (clearSearch)="onSearch('')"
-      (removeFilter)="removeFilter($event)"
-      (clearAllFilters)="clearAllFilters()"
-    >
-      <!-- ACTIONS PRIMAIRES -->
-      <div primary-actions class="flex items-center gap-2">
-        <app-fw-button variant="tertiary" size="sm" [icon]="RefreshCw" [loading]="isLoading()" (click)="loadData()" title="Actualiser"></app-fw-button>
-        <div class="divider-v"></div>
-        <app-fw-button
-          *fwHasPermission="'finance:fee:manage'"
-          (click)="openFeeTypeForm()"
-          variant="primary"
-          size="sm"
-          [icon]="Plus"
-        >
-          Nouveau type de frais
-        </app-fw-button>
-      </div>
-    </app-fw-list-command-bar>
-
-    <!-- ALERTE : tarif non configuré (risque de non-facturation, ADR-012 §3) -->
-    <app-fw-alert-banner *ngIf="unconfiguredTypes().length > 0" variant="warning">
-      <strong>Tarif non configuré.</strong>
-      {{ unconfiguredTypes().length }} frais académique{{ unconfiguredTypes().length > 1 ? 's' : '' }} par niveau
-      ({{ unconfiguredTypesLabel() }}) n'{{ unconfiguredTypes().length > 1 ? 'ont' : 'a' }} aucun tarif de niveau
-      et ne sera{{ unconfiguredTypes().length > 1 ? 'ont' : '' }} donc pas facturé.
-      Ouvrez le type concerné pour renseigner la grille par niveau.
-    </app-fw-alert-banner>
-
-    <!-- LISTE DES TYPES DE FRAIS, ORGANISÉE PAR NATURE (ADR-012 §3) -->
-    <ng-container *ngIf="totalDisplayed() > 0 || isLoading()">
-      <div *ngFor="let section of displaySections()" class="catalog-section">
-        <header class="section-title">
-          <div class="section-icon">
-            <lucide-icon [name]="section.icon" [size]="18"></lucide-icon>
+    <!-- ================= ONGLET RÉGLAGES ================= -->
+    <ng-container *ngIf="activeTab() === 'settings'">
+      <div class="bg-surface-sunken rounded-2xl p-5 border border-border flex items-center justify-between gap-4 flex-wrap">
+        <div class="flex items-center gap-4">
+          <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm text-text-tertiary">
+            <lucide-icon [name]="Settings" [size]="18"></lucide-icon>
           </div>
           <div>
-            <p class="section-name">{{ section.title }}</p>
-            <p class="section-desc">{{ section.description }}</p>
+            <p class="text-sm font-bold text-midnight">Mensualisation</p>
+            <p class="text-[11px] text-text-secondary">
+              Nombre de mensualités sur lesquelles la scolarité et les services souscrits sont répartis.
+            </p>
           </div>
-          <span class="section-count">{{ section.rows.length }}</span>
-        </header>
-
-        <div class="list-container-integrated">
-          <app-data-list
-            [data]="section.rows"
-            [total]="section.rows.length"
-            [actions]="feeTypeActions"
-            [isLoading]="false"
-            [showSearch]="false"
-            [showFilterButton]="false"
-            [cardMode]="false"
-            (onAction)="handleAction($event)"
-          ></app-data-list>
         </div>
-      </div>
-
-      <!-- Chargement initial : une seule liste squelette -->
-      <div *ngIf="isLoading()" class="list-container-integrated">
-        <app-data-list
-          [data]="[]"
-          [total]="0"
-          [actions]="feeTypeActions"
-          [isLoading]="true"
-          [showSearch]="false"
-          [showFilterButton]="false"
-          [cardMode]="false"
-        ></app-data-list>
+        <div class="flex items-center gap-2" *fwHasPermission="'finance:fee:manage'">
+          <input
+            type="number"
+            min="1"
+            class="fw-input w-24"
+            [ngModel]="nombreMensualitesInput()"
+            (ngModelChange)="nombreMensualitesInput.set($event)"
+          />
+          <app-fw-button
+            variant="secondary"
+            size="sm"
+            [loading]="isSavingSettings()"
+            [disabled]="nombreMensualitesInput() === billingSettings()?.nombreMensualites"
+            (click)="saveBillingSettings()"
+          >
+            Enregistrer
+          </app-fw-button>
+        </div>
       </div>
     </ng-container>
 
-    <!-- État vide -->
-    <div *ngIf="totalDisplayed() === 0 && !isLoading()" class="list-container-integrated py-24">
-      <app-fw-empty-state
-        [icon]="CreditCard"
-        title="Aucun type de frais trouvé"
-        description="Créez vos catégories de frais (scolarité, cantine, transport...) à partir d'un modèle prêt à remplir."
-        [ctaLabel]="canManage() ? 'Créer mon premier type de frais' : ''"
-        (ctaClick)="openFeeTypeForm()"
-      ></app-fw-empty-state>
-    </div>
+    <!-- ================= ONGLETS DE LISTE (par nature) ================= -->
+    <ng-container *ngIf="activeTab() !== 'settings'">
+
+      <!-- BARRE DE COMMANDE (recherche + création) -->
+      <app-fw-list-command-bar
+        [searchQuery]="searchQuery()"
+        [searchPlaceholder]="'Rechercher un type de frais...'"
+        [totalElements]="currentRows().length"
+        [activeFilters]="activeFilterChips()"
+        (searchChange)="onSearch($event)"
+        (clearSearch)="onSearch('')"
+        (removeFilter)="removeFilter($event)"
+        (clearAllFilters)="clearAllFilters()"
+      >
+        <div primary-actions class="flex items-center gap-2">
+          <app-fw-button variant="tertiary" size="sm" [icon]="RefreshCw" [loading]="isLoading()" (click)="loadData()" title="Actualiser"></app-fw-button>
+          <div class="divider-v"></div>
+          <app-fw-button
+            *fwHasPermission="'finance:fee:manage'"
+            (click)="openFeeTypeForm()"
+            variant="primary"
+            size="sm"
+            [icon]="Plus"
+          >
+            Nouveau type de frais
+          </app-fw-button>
+        </div>
+      </app-fw-list-command-bar>
+
+      <!-- ALERTE : tarif non configuré — uniquement sur l'onglet académique (ADR-012 §3) -->
+      <app-fw-alert-banner
+        *ngIf="activeTab() === 'academic' && unconfiguredTypes().length > 0"
+        variant="warning"
+      >
+        <strong>Tarif non configuré.</strong>
+        {{ unconfiguredTypes().length }} frais académique{{ unconfiguredTypes().length > 1 ? 's' : '' }} par niveau
+        ({{ unconfiguredTypesLabel() }}) n'{{ unconfiguredTypes().length > 1 ? 'ont' : 'a' }} aucun tarif de niveau
+        et ne sera{{ unconfiguredTypes().length > 1 ? 'ont' : '' }} donc pas facturé.
+        Ouvrez le type concerné pour renseigner la grille par niveau.
+      </app-fw-alert-banner>
+
+      <!-- LISTE DE L'ONGLET ACTIF -->
+      <div *ngIf="currentRows().length > 0 || isLoading()" class="list-container-integrated">
+        <app-data-list
+          [data]="currentRows()"
+          [total]="currentRows().length"
+          [actions]="feeTypeActions"
+          [isLoading]="isLoading()"
+          [showSearch]="false"
+          [showFilterButton]="false"
+          [cardMode]="false"
+          (onAction)="handleAction($event)"
+        ></app-data-list>
+      </div>
+
+      <!-- État vide de l'onglet -->
+      <div *ngIf="currentRows().length === 0 && !isLoading()" class="list-container-integrated py-24">
+        <app-fw-empty-state
+          [icon]="CreditCard"
+          title="Aucun frais dans cette catégorie"
+          description="Créez un type de frais à partir d'un modèle prêt à remplir."
+          [ctaLabel]="canManage() ? 'Créer un type de frais' : ''"
+          (ctaClick)="openFeeTypeForm()"
+        ></app-fw-empty-state>
+      </div>
+    </ng-container>
   </div>
 </app-fw-page-shell>

@@ -2,7 +2,6 @@ import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {AlertTriangle, CreditCard, Edit, GraduationCap, Layers, LucideAngularModule, Plus, Receipt, RefreshCw, Search, Settings, ToggleLeft, ToggleRight, Trash2} from 'lucide-angular';
-import type {LucideIconData} from 'lucide-angular';
 import {firstValueFrom} from 'rxjs';
 import {BillingService} from '../../../../../core/services/billing.service';
 import {NotificationService} from '../../../../../shared/services/notification.service';
@@ -20,17 +19,12 @@ import {FwListCommandBarComponent} from '../../../../../shared/components/list-c
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
 import {AuthService} from '../../../../../core/services/auth.service';
 import {HasPermissionDirective} from '../../../../../shared/directives/has-permission.directive';
+import {FwTab} from '../../../../../shared/components/tabs/tabs.component';
 
 const MANAGE_PERMISSION = 'finance:fee:manage';
 
-/** Section du catalogue regroupée par nature (ADR-012 §3), clé = priceShape. */
-interface CatalogSection {
-  key: PriceShape;
-  title: string;
-  description: string;
-  icon: LucideIconData;
-  rows: TableRow[];
-}
+/** Onglet de gestion du catalogue — un par nature de frais (ADR-012 §3) + les réglages. */
+type CatalogTab = 'academic' | 'services' | 'ponctuels' | 'settings';
 
 @Component({
   selector: 'app-fee-type-catalog',
@@ -165,29 +159,42 @@ export class FeeTypeCatalogComponent implements OnInit {
     };
   }
 
-  /** Définition ordonnée des sections de nature (ADR-012 §3). */
-  private readonly sectionDefs: {key: PriceShape; title: string; description: string; icon: LucideIconData}[] = [
-    {key: 'PER_LEVEL', title: 'Frais académiques', description: 'Scolarité, inscription et réinscription — tarifés par niveau.', icon: GraduationCap},
-    {key: 'PER_OPTION', title: 'Services optionnels', description: 'Cantine, transport… — tarifés par formule ou zone.', icon: Layers},
-    {key: 'FLAT', title: 'Frais ponctuels', description: 'Forfaits et frais uniques — montant simple.', icon: Receipt},
-  ];
+  // --- ONGLETS DE GESTION (un par nature + réglages) ---
+  activeTab = signal<CatalogTab>('academic');
 
-  // Catalogue regroupé par nature, filtré par la recherche — une section vide n'est pas rendue.
-  displaySections = computed<CatalogSection[]>(() => {
+  /** priceShape géré par chaque onglet de liste ('settings' n'en a pas). */
+  private readonly tabShape: Record<Exclude<CatalogTab, 'settings'>, PriceShape> = {
+    academic: 'PER_LEVEL',
+    services: 'PER_OPTION',
+    ponctuels: 'FLAT',
+  };
+
+  private countForShape(shape: PriceShape): number {
+    return this.feeTypes().filter(ft => ft.priceShape === shape).length;
+  }
+
+  tabs = computed<FwTab[]>(() => [
+    {id: 'academic', label: 'Frais académiques', icon: GraduationCap, count: this.countForShape('PER_LEVEL')},
+    {id: 'services', label: 'Services optionnels', icon: Layers, count: this.countForShape('PER_OPTION')},
+    {id: 'ponctuels', label: 'Frais ponctuels', icon: Receipt, count: this.countForShape('FLAT')},
+    {id: 'settings', label: 'Réglages', icon: Settings},
+  ]);
+
+  /** Lignes de l'onglet actif (nature + recherche) — une seule liste par onglet. */
+  currentRows = computed<TableRow[]>(() => {
+    const tab = this.activeTab();
+    if (tab === 'settings') return [];
+    const shape = this.tabShape[tab];
     const query = this.searchQuery().toLowerCase();
-    const matches = this.feeTypes()
-      .filter(ft => ft.label.toLowerCase().includes(query) || ft.code.toLowerCase().includes(query));
-
-    return this.sectionDefs
-      .map(def => ({
-        ...def,
-        rows: matches.filter(ft => ft.priceShape === def.key).map(ft => this.toRow(ft))
-      }))
-      .filter(section => section.rows.length > 0);
+    return this.feeTypes()
+      .filter(ft => ft.priceShape === shape)
+      .filter(ft => ft.label.toLowerCase().includes(query) || ft.code.toLowerCase().includes(query))
+      .map(ft => this.toRow(ft));
   });
 
-  // Total filtré (tous nature confondues) — pilote l'état vide global.
-  totalDisplayed = computed<number>(() => this.displaySections().reduce((sum, s) => sum + s.rows.length, 0));
+  onTabChange(tabId: string) {
+    this.activeTab.set(tabId as CatalogTab);
+  }
 
   ngOnInit() {
     this.loadData();
