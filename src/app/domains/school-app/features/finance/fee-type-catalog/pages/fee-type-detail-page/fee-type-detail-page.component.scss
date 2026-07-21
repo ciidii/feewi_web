@@ -1,4 +1,10 @@
-:host { display: block; }
+// height:100% indispensable : le .shell-body du page-shell ne déclenche son scroll interne
+// que si la chaîne de hauteur remonte jusqu'au host du composant routé (cf. student-detail).
+:host {
+  display: block;
+  height: 100%;
+  min-height: 0;
+}
 
 .detail-page {
   max-width: 760px;
