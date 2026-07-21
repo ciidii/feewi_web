@@ -136,7 +136,13 @@ export class FeeTypeFormPageComponent implements OnInit {
 
   async ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
-    if (!id) return; // création
+    if (!id) {
+      // Création : préselection éventuelle du modèle selon l'onglet d'origine (?preset=).
+      const presetId = this.route.snapshot.queryParamMap.get('preset');
+      const preset = presetId ? this.presets.find(p => p.id === presetId) : undefined;
+      if (preset) this.selectPreset(preset);
+      return;
+    }
 
     this.isEditMode.set(true);
     this.editingId.set(id);

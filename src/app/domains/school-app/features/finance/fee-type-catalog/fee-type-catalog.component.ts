@@ -199,6 +199,29 @@ export class FeeTypeCatalogComponent implements OnInit {
     this.activeTab.set(tabId as CatalogTab);
   }
 
+  /** Modèle du formulaire préselectionné selon l'onglet (création contextuelle). */
+  private readonly tabPreset: Record<Exclude<CatalogTab, 'settings'>, string> = {
+    academic: 'SCOLARITE',
+    services: 'SERVICE',
+    ponctuels: 'PONCTUEL',
+  };
+
+  /** Libellé contextuel du bouton de création selon l'onglet actif. */
+  newButtonLabel = computed<string>(() => {
+    switch (this.activeTab()) {
+      case 'services': return 'Nouveau service';
+      case 'ponctuels': return 'Nouveau frais ponctuel';
+      default: return 'Nouveau frais académique';
+    }
+  });
+
+  /** Création contextuelle : ouvre la page /new avec le modèle correspondant à l'onglet actif préselectionné. */
+  createNew() {
+    const tab = this.activeTab();
+    if (tab === 'settings') return;
+    this.router.navigate(['/admin/finance/fee-types/new'], {queryParams: {preset: this.tabPreset[tab]}});
+  }
+
   ngOnInit() {
     this.loadData();
     this.loadBillingSettings();

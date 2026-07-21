@@ -65,12 +65,12 @@
           <div class="divider-v"></div>
           <app-fw-button
             *fwHasPermission="'finance:fee:manage'"
-            (click)="openFeeTypeForm()"
+            (click)="createNew()"
             variant="primary"
             size="sm"
             [icon]="Plus"
           >
-            Nouveau type de frais
+            {{ newButtonLabel() }}
           </app-fw-button>
         </div>
       </app-fw-list-command-bar>
@@ -108,8 +108,8 @@
           [icon]="CreditCard"
           title="Aucun frais dans cette catégorie"
           description="Créez un type de frais à partir d'un modèle prêt à remplir."
-          [ctaLabel]="canManage() ? 'Créer un type de frais' : ''"
-          (ctaClick)="openFeeTypeForm()"
+          [ctaLabel]="canManage() ? newButtonLabel() : ''"
+          (ctaClick)="createNew()"
         ></app-fw-empty-state>
       </div>
     </ng-container>
