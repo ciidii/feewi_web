@@ -5,7 +5,7 @@ import {AlertTriangle, CreditCard, Edit, Eye, GraduationCap, Layers, LucideAngul
 import {firstValueFrom} from 'rxjs';
 import {BillingService} from '../../../../../core/services/billing.service';
 import {NotificationService} from '../../../../../shared/services/notification.service';
-import {BILLING_SCHEDULE_LABELS, BillingSettings, FeeType, PriceShape} from '../../../../../core/models/billing.model';
+import {BILLING_SCHEDULE_LABELS, BillingSettings, FeeType} from '../../../../../core/models/billing.model';
 import {DataListComponent} from '../../../../../shared/components/data-list/data-list.component';
 import {Badge, RowAction, TableRow} from '../../../../../shared/models/data-list.models';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
@@ -165,21 +165,25 @@ export class FeeTypeCatalogComponent implements OnInit {
   // --- ONGLETS DE GESTION (un par nature + réglages) ---
   activeTab = signal<CatalogTab>('academic');
 
-  /** priceShape géré par chaque onglet de liste ('settings' n'en a pas). */
-  private readonly tabShape: Record<Exclude<CatalogTab, 'settings'>, PriceShape> = {
-    academic: 'PER_LEVEL',
-    services: 'PER_OPTION',
-    ponctuels: 'FLAT',
-  };
+  /**
+   * Onglet de nature d'un type de frais (ADR-012). Regroupement par NATURE, pas par priceShape brut :
+   * un service forfaitaire (FLAT + ONE_OFF, ex. cantine à prix fixe facturée à l'admission) reste un
+   * service, pas un frais ponctuel. Seul FLAT + ON_DEMAND (pénalité, fourniture) est un ponctuel.
+   */
+  private natureTab(ft: FeeType): Exclude<CatalogTab, 'settings'> {
+    if (ft.priceShape === 'PER_LEVEL') return 'academic';
+    if (ft.priceShape === 'PER_OPTION') return 'services';
+    return ft.billingSchedule === 'ONE_OFF' ? 'services' : 'ponctuels';
+  }
 
-  private countForShape(shape: PriceShape): number {
-    return this.feeTypes().filter(ft => ft.priceShape === shape).length;
+  private countForTab(tab: Exclude<CatalogTab, 'settings'>): number {
+    return this.feeTypes().filter(ft => this.natureTab(ft) === tab).length;
   }
 
   tabs = computed<FwTab[]>(() => [
-    {id: 'academic', label: 'Frais académiques', icon: GraduationCap, count: this.countForShape('PER_LEVEL')},
-    {id: 'services', label: 'Services optionnels', icon: Layers, count: this.countForShape('PER_OPTION')},
-    {id: 'ponctuels', label: 'Frais ponctuels', icon: Receipt, count: this.countForShape('FLAT')},
+    {id: 'academic', label: 'Frais académiques', icon: GraduationCap, count: this.countForTab('academic')},
+    {id: 'services', label: 'Services optionnels', icon: Layers, count: this.countForTab('services')},
+    {id: 'ponctuels', label: 'Frais ponctuels', icon: Receipt, count: this.countForTab('ponctuels')},
     {id: 'settings', label: 'Réglages', icon: Settings},
   ]);
 
@@ -187,10 +191,9 @@ export class FeeTypeCatalogComponent implements OnInit {
   currentRows = computed<TableRow[]>(() => {
     const tab = this.activeTab();
     if (tab === 'settings') return [];
-    const shape = this.tabShape[tab];
     const query = this.searchQuery().toLowerCase();
     return this.feeTypes()
-      .filter(ft => ft.priceShape === shape)
+      .filter(ft => this.natureTab(ft) === tab)
       .filter(ft => ft.label.toLowerCase().includes(query) || ft.code.toLowerCase().includes(query))
       .map(ft => this.toRow(ft));
   });
