@@ -9,8 +9,7 @@ import {BILLING_SCHEDULE_LABELS, BillingSettings, FeeType, PriceShape} from '../
 import {DataListComponent} from '../../../../../shared/components/data-list/data-list.component';
 import {Badge, RowAction, TableRow} from '../../../../../shared/models/data-list.models';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
-import {FeeTypeFormComponent} from './components/fee-type-form/fee-type-form.component';
-import {FeeTypeDetailComponent, FeeTypeDetailResult} from './components/fee-type-detail/fee-type-detail.component';
+import {Router} from '@angular/router';
 import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 
 import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
@@ -51,6 +50,7 @@ export class FeeTypeCatalogComponent implements OnInit {
   private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
   private dialog = inject(MatDialog);
+  private router = inject(Router);
 
   // Icônes
   readonly CreditCard = CreditCard;
@@ -263,44 +263,18 @@ export class FeeTypeCatalogComponent implements OnInit {
     }
   }
 
-  /**
-   * Consultation en lecture seule (grille des tarifs par niveau/option, statut, nature). Les
-   * opérations lancées depuis le détail (Modifier / Activer / Supprimer) sont réexécutées ici,
-   * point unique de la logique — le dialogue de détail ne fait que renvoyer l'intention.
-   */
+  /** Consultation sur page dédiée (grille des tarifs par niveau/option, statut, opérations). */
   openFeeTypeDetail(feeType: FeeType) {
-    const dialogRef = this.dialog.open(FeeTypeDetailComponent, {
-      width: '640px',
-      panelClass: 'feewi-dialog-panel',
-      data: {feeType, canManage: this.canManage()}
-    });
-
-    dialogRef.afterClosed().subscribe((result?: FeeTypeDetailResult) => {
-      if (!result) return;
-      switch (result.action) {
-        case 'edit':
-          this.openFeeTypeForm(feeType);
-          break;
-        case 'delete':
-          this.confirmDelete(feeType);
-          break;
-        case 'toggle':
-          this.toggleActive(feeType, result.nextActive);
-          break;
-      }
-    });
+    this.router.navigate(['/admin/finance/fee-types', feeType.id]);
   }
 
+  /** Création (page dédiée) ou édition (page dédiée) — plus de popup. */
   openFeeTypeForm(feeType?: FeeType) {
-    const dialogRef = this.dialog.open(FeeTypeFormComponent, {
-      width: '640px',
-      panelClass: 'feewi-dialog-panel',
-      data: {feeType}
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) this.loadData();
-    });
+    if (feeType) {
+      this.router.navigate(['/admin/finance/fee-types', feeType.id, 'edit']);
+    } else {
+      this.router.navigate(['/admin/finance/fee-types/new']);
+    }
   }
 
   private async toggleActive(feeType: FeeType, nextActive: boolean) {

@@ -1,8 +1,7 @@
 import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {MatSelectModule} from '@angular/material/select';
-import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import {ActivatedRoute, Router} from '@angular/router';
 import {ArrowLeft, ChevronRight, CreditCard, GraduationCap, Info, Layers, LucideAngularModule, Plus, Power, Receipt, Tag, Trash2, Type, Wallet} from 'lucide-angular';
 import type {LucideIconData} from 'lucide-angular';
 import {firstValueFrom} from 'rxjs';
@@ -11,20 +10,13 @@ import {AcademicService} from '../../../../../../../core/services/academic.servi
 import {NotificationService} from '../../../../../../../shared/services/notification.service';
 import {BillingSchedule, FeeType, PriceShape} from '../../../../../../../core/models/billing.model';
 import {Level} from '../../../../../../../core/models/academic.model';
-import {FormShellComponent} from '../../../../../../../shared/components/form-shell/form-shell';
+import {FwPageShellComponent} from '../../../../../../../shared/components/page-shell/page-shell.component';
 import {FwButtonComponent} from '../../../../../../../shared/components/button/button.component';
 import {FwAlertBannerComponent} from '../../../../../../../shared/components/alert-banner/alert-banner.component';
+import {BlockLoaderComponent} from '../../../../../../../shared/components/loader/block-loader.component';
 
-export interface FeeTypeFormDialogData {
-  feeType?: FeeType;
-}
-
-/**
- * Modèle prêt à remplir (ADR-012 §3) : préfixe (priceShape, billingSchedule) et affiche
- * le formulaire dédié correspondant. `scheduleChoices` (le cas échéant) propose les rythmes
- * légaux pour cette forme de prix (liste blanche ADR-012 §2).
- */
-export interface FeeTypePreset {
+/** Modèle prêt à remplir (ADR-012 §3) : préfixe (priceShape, billingSchedule). */
+interface FeeTypePreset {
   id: string;
   title: string;
   description: string;
@@ -32,32 +24,32 @@ export interface FeeTypePreset {
   priceShape: PriceShape;
   billingSchedule: BillingSchedule;
   suggestedCode?: string;
-  scheduleChoices?: {value: BillingSchedule; label: string}[];
 }
 
+const LIST_URL = ['/admin/finance/fee-types'];
+
 @Component({
-  selector: 'app-fee-type-form',
+  selector: 'app-fee-type-form-page',
   standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatDialogModule,
-    MatSelectModule,
     LucideAngularModule,
-    FormShellComponent,
+    FwPageShellComponent,
     FwButtonComponent,
-    FwAlertBannerComponent
+    FwAlertBannerComponent,
+    BlockLoaderComponent
   ],
-  templateUrl: './fee-type-form.component.html',
-  styleUrls: ['./fee-type-form.component.scss']
+  templateUrl: './fee-type-form-page.component.html',
+  styleUrls: ['./fee-type-form-page.component.scss']
 })
-export class FeeTypeFormComponent implements OnInit {
+export class FeeTypeFormPageComponent implements OnInit {
   private fb = inject(FormBuilder);
-  private dialogRef = inject(MatDialogRef<FeeTypeFormComponent>);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private billingService = inject(BillingService);
   private academicService = inject(AcademicService);
   private notificationService = inject(NotificationService);
-  private dialogData: FeeTypeFormDialogData | null = inject(MAT_DIALOG_DATA, {optional: true});
 
   // Icônes
   readonly CreditCard = CreditCard;
@@ -72,75 +64,40 @@ export class FeeTypeFormComponent implements OnInit {
   readonly ChevronRight = ChevronRight;
   readonly GraduationCap = GraduationCap;
 
-  /** Les 4 modèles proposés en création (ADR-012 §3). */
   readonly presets: FeeTypePreset[] = [
-    {
-      id: 'SCOLARITE',
-      title: 'Scolarité par niveau',
-      description: 'Montant annuel par niveau, étalé sur les mensualités.',
-      icon: GraduationCap,
-      priceShape: 'PER_LEVEL',
-      billingSchedule: 'SPREAD_ANNUAL',
-      suggestedCode: 'SCOLARITE'
-    },
-    {
-      id: 'INSCRIPTION',
-      title: 'Inscription / Réinscription par niveau',
-      description: 'Frais par niveau, facturé une fois à l\'admission.',
-      icon: Receipt,
-      priceShape: 'PER_LEVEL',
-      billingSchedule: 'ONE_OFF',
-      suggestedCode: 'INSCRIPTION'
-    },
-    {
-      id: 'SERVICE',
-      title: 'Service par formule / zone',
-      description: 'Cantine, transport… tarifé par formule ou zone.',
-      icon: Layers,
-      priceShape: 'PER_OPTION',
-      billingSchedule: 'SPREAD_ANNUAL',
-      scheduleChoices: [
-        {value: 'SPREAD_ANNUAL', label: 'Étalé sur l\'année'},
-        {value: 'ONE_OFF', label: 'Forfait à l\'admission'}
-      ]
-    },
-    {
-      id: 'PONCTUEL',
-      title: 'Frais ponctuel',
-      description: 'Montant simple : forfait unique ou frais à la demande.',
-      icon: Wallet,
-      priceShape: 'FLAT',
-      billingSchedule: 'ON_DEMAND',
-      scheduleChoices: [
-        {value: 'ON_DEMAND', label: 'À la demande (saisie manuelle)'},
-        {value: 'ONE_OFF', label: 'Forfait auto à l\'admission'}
-      ]
-    }
+    {id: 'SCOLARITE', title: 'Scolarité par niveau', description: 'Montant annuel par niveau, étalé sur les mensualités.', icon: GraduationCap, priceShape: 'PER_LEVEL', billingSchedule: 'SPREAD_ANNUAL', suggestedCode: 'SCOLARITE'},
+    {id: 'INSCRIPTION', title: 'Inscription / Réinscription par niveau', description: 'Frais par niveau, facturé une fois à l\'admission.', icon: Receipt, priceShape: 'PER_LEVEL', billingSchedule: 'ONE_OFF', suggestedCode: 'INSCRIPTION'},
+    {id: 'SERVICE', title: 'Service par formule / zone', description: 'Cantine, transport… tarifé par formule ou zone.', icon: Layers, priceShape: 'PER_OPTION', billingSchedule: 'SPREAD_ANNUAL'},
+    {id: 'PONCTUEL', title: 'Frais ponctuel', description: 'Montant simple : forfait unique ou frais à la demande.', icon: Wallet, priceShape: 'FLAT', billingSchedule: 'ON_DEMAND'}
   ];
 
   feeTypeForm: FormGroup = this.fb.group({
     code: ['', [Validators.required, Validators.pattern(/^[A-Z0-9_]+$/)]],
     label: ['', [Validators.required, Validators.minLength(2)]],
     active: [true],
-    /** Forme du prix déclarée (ADR-012) — verrouillée en édition. */
     priceShape: [null as PriceShape | null, [Validators.required]],
     billingSchedule: [null as BillingSchedule | null, [Validators.required]],
-    /** FLAT : montant unique. */
     defaultAmount: [null, [Validators.min(1)]],
-    /** PER_OPTION : catalogue d'options {code, label, price}. */
     options: this.fb.array([]),
-    /** PER_LEVEL : grille par niveau {levelId, levelName, price}. */
     levelPrices: this.fb.array([])
   });
 
   isLoading = signal(false);
-  isEditMode = !!this.dialogData?.feeType;
+  isPageLoading = signal(false);
+  isEditMode = signal(false);
+  private editingId = signal<string | null>(null);
   levels = signal<Level[]>([]);
-  /** Modèle retenu — null tant que l'utilisateur n'a pas choisi (création uniquement). */
   selectedPreset = signal<FeeTypePreset | null>(null);
 
-  /** Le formulaire dédié n'est affiché qu'une fois un modèle choisi (ou en édition). */
-  showForm = computed<boolean>(() => this.isEditMode || this.selectedPreset() !== null);
+  showForm = computed<boolean>(() => this.isEditMode() || this.selectedPreset() !== null);
+
+  get pageTitle(): string {
+    return this.isEditMode() ? 'Modifier le type de frais' : 'Nouveau type de frais';
+  }
+
+  get saveLabel(): string {
+    return this.isEditMode() ? 'Enregistrer' : 'Créer le type de frais';
+  }
 
   get optionsArray(): FormArray {
     return this.feeTypeForm.get('options') as FormArray;
@@ -158,24 +115,16 @@ export class FeeTypeFormComponent implements OnInit {
     return this.feeTypeForm.get('billingSchedule')?.value ?? null;
   }
 
-  /** Rythmes légaux sélectionnables pour la forme courante (édition PER_OPTION / FLAT). */
   get scheduleChoices(): {value: BillingSchedule; label: string}[] {
     if (this.priceShape === 'PER_OPTION') {
-      return [
-        {value: 'SPREAD_ANNUAL', label: 'Étalé sur l\'année'},
-        {value: 'ONE_OFF', label: 'Forfait à l\'admission'}
-      ];
+      return [{value: 'SPREAD_ANNUAL', label: 'Étalé sur l\'année'}, {value: 'ONE_OFF', label: 'Forfait à l\'admission'}];
     }
     if (this.priceShape === 'FLAT') {
-      return [
-        {value: 'ON_DEMAND', label: 'À la demande (saisie manuelle)'},
-        {value: 'ONE_OFF', label: 'Forfait auto à l\'admission'}
-      ];
+      return [{value: 'ON_DEMAND', label: 'À la demande (saisie manuelle)'}, {value: 'ONE_OFF', label: 'Forfait auto à l\'admission'}];
     }
     return [];
   }
 
-  /** Titre lisible de la nature retenue, pour l'en-tête du formulaire dédié. */
   get natureLabel(): string {
     switch (this.priceShape) {
       case 'PER_LEVEL': return this.billingSchedule === 'SPREAD_ANNUAL' ? 'Scolarité par niveau' : 'Inscription / Réinscription par niveau';
@@ -185,40 +134,55 @@ export class FeeTypeFormComponent implements OnInit {
     }
   }
 
-  ngOnInit() {
-    if (this.isEditMode && this.dialogData?.feeType) {
-      const feeType = this.dialogData.feeType;
-      this.feeTypeForm.patchValue({
-        code: feeType.code,
-        label: feeType.label,
-        active: feeType.active,
-        priceShape: feeType.priceShape,
-        billingSchedule: feeType.billingSchedule,
-        defaultAmount: feeType.defaultAmount
-      });
-      // Code et priceShape verrouillés une fois le type créé (ADR-012 §3).
-      this.feeTypeForm.get('code')?.disable();
-      this.feeTypeForm.get('priceShape')?.disable();
+  async ngOnInit() {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id) return; // création
 
-      if (feeType.priceShape === 'PER_LEVEL') {
-        this.loadLevelsAndBuildGrid(feeType.options ?? []);
-      } else if (feeType.priceShape === 'PER_OPTION') {
-        (feeType.options ?? []).forEach(opt => this.addOption(opt));
+    this.isEditMode.set(true);
+    this.editingId.set(id);
+    this.isPageLoading.set(true);
+    try {
+      const all = await firstValueFrom(this.billingService.getFeeTypes(true));
+      const feeType = all.find(f => f.id === id);
+      if (!feeType) {
+        this.notificationService.error('Type de frais introuvable.');
+        this.router.navigate(LIST_URL);
+        return;
       }
+      this.patchForEdit(feeType);
+    } catch {
+      this.router.navigate(LIST_URL);
+    } finally {
+      this.isPageLoading.set(false);
     }
   }
 
-  /** Sélection d'un modèle (création) : préfixe la nature et prépare le formulaire dédié. */
+  private patchForEdit(feeType: FeeType) {
+    this.feeTypeForm.patchValue({
+      code: feeType.code,
+      label: feeType.label,
+      active: feeType.active,
+      priceShape: feeType.priceShape,
+      billingSchedule: feeType.billingSchedule,
+      defaultAmount: feeType.defaultAmount
+    });
+    // Code et priceShape verrouillés une fois le type créé (ADR-012 §3).
+    this.feeTypeForm.get('code')?.disable();
+    this.feeTypeForm.get('priceShape')?.disable();
+
+    if (feeType.priceShape === 'PER_LEVEL') {
+      this.loadLevelsAndBuildGrid(feeType.options ?? []);
+    } else if (feeType.priceShape === 'PER_OPTION') {
+      (feeType.options ?? []).forEach(opt => this.addOption(opt));
+    }
+  }
+
   selectPreset(preset: FeeTypePreset) {
     this.selectedPreset.set(preset);
-    this.feeTypeForm.patchValue({
-      priceShape: preset.priceShape,
-      billingSchedule: preset.billingSchedule
-    });
+    this.feeTypeForm.patchValue({priceShape: preset.priceShape, billingSchedule: preset.billingSchedule});
     if (preset.suggestedCode && !this.feeTypeForm.get('code')?.value) {
       this.feeTypeForm.get('code')?.setValue(preset.suggestedCode);
     }
-    // Réinitialise les tableaux propres à chaque forme.
     this.optionsArray.clear();
     this.levelPricesArray.clear();
     if (preset.priceShape === 'PER_LEVEL') {
@@ -228,7 +192,6 @@ export class FeeTypeFormComponent implements OnInit {
     }
   }
 
-  /** Retour à la sélection de modèle (création uniquement). */
   changePreset() {
     this.selectedPreset.set(null);
     this.feeTypeForm.patchValue({priceShape: null, billingSchedule: null, defaultAmount: null});
@@ -266,7 +229,6 @@ export class FeeTypeFormComponent implements OnInit {
     this.optionsArray.removeAt(index);
   }
 
-  /** Nombre de niveaux déjà tarifés — pour le compteur / l'alerte inline. */
   get pricedLevelCount(): number {
     return this.levelPricesArray.controls.filter(c => {
       const p = c.get('price')?.value;
@@ -284,8 +246,6 @@ export class FeeTypeFormComponent implements OnInit {
     try {
       const shape = this.priceShape;
       const schedule = this.billingSchedule!;
-
-      // Construit prix selon la forme déclarée (ADR-012) — une seule source de montant.
       let defaultAmount: number | null = null;
       let options: {code: string; label: string; price: number}[] | undefined;
 
@@ -298,16 +258,15 @@ export class FeeTypeFormComponent implements OnInit {
           code: o.code, label: o.label, price: Number(o.price)
         }));
       } else if (shape === 'PER_LEVEL') {
-        // code = levelId ; ne garder que les niveaux tarifés (les autres restent à configurer).
         options = this.levelPricesArray.controls
           .map(c => c.value as {levelId: string; levelName: string; price: number | null})
           .filter(v => v.price != null && Number(v.price) > 0)
           .map(v => ({code: v.levelId, label: v.levelName, price: Number(v.price)}));
       }
 
-      if (this.isEditMode && this.dialogData?.feeType) {
-        // priceShape verrouillé : on ne le renvoie pas (UpdateFeeTypeRequest).
-        await firstValueFrom(this.billingService.updateFeeType(this.dialogData.feeType.id, {
+      const editId = this.editingId();
+      if (this.isEditMode() && editId) {
+        await firstValueFrom(this.billingService.updateFeeType(editId, {
           label: this.feeTypeForm.value.label,
           active: this.feeTypeForm.value.active,
           billingSchedule: schedule,
@@ -315,8 +274,9 @@ export class FeeTypeFormComponent implements OnInit {
           options
         }));
         this.notificationService.success('Le type de frais a été mis à jour.');
+        this.router.navigate(['/admin/finance/fee-types', editId]);
       } else {
-        await firstValueFrom(this.billingService.createFeeType({
+        const created = await firstValueFrom(this.billingService.createFeeType({
           code: this.feeTypeForm.value.code,
           label: this.feeTypeForm.value.label,
           priceShape: shape!,
@@ -325,17 +285,22 @@ export class FeeTypeFormComponent implements OnInit {
           options
         }));
         this.notificationService.success('Le type de frais a été ajouté au catalogue.');
+        this.router.navigate(['/admin/finance/fee-types', created.id]);
       }
-      this.dialogRef.close(true);
-    } catch (error) {
-      // La notification d'erreur est déjà déclenchée par BillingService.handleError
+    } catch {
+      // Notification déjà affichée par BillingService.handleError
     } finally {
       this.isLoading.set(false);
     }
   }
 
   onCancel() {
-    this.dialogRef.close(false);
+    const editId = this.editingId();
+    if (this.isEditMode() && editId) {
+      this.router.navigate(['/admin/finance/fee-types', editId]);
+    } else {
+      this.router.navigate(LIST_URL);
+    }
   }
 
   isInvalid(controlName: string): boolean {

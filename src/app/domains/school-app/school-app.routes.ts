@@ -193,6 +193,24 @@ export const SCHOOL_APP_ROUTES: Routes = [
         loadComponent: () => import('./features/finance/fee-type-catalog/fee-type-catalog.component').then(m => m.FeeTypeCatalogComponent)
       },
       {
+        path: 'fee-types/new',
+        title: 'Nouveau type de frais',
+        data: {permissions: ['finance:fee:manage']},
+        loadComponent: () => import('./features/finance/fee-type-catalog/pages/fee-type-form-page/fee-type-form-page.component').then(m => m.FeeTypeFormPageComponent)
+      },
+      {
+        path: 'fee-types/:id',
+        title: 'Détail du type de frais',
+        data: {permissions: ['finance:fee:manage']},
+        loadComponent: () => import('./features/finance/fee-type-catalog/pages/fee-type-detail-page/fee-type-detail-page.component').then(m => m.FeeTypeDetailPageComponent)
+      },
+      {
+        path: 'fee-types/:id/edit',
+        title: 'Modifier le type de frais',
+        data: {permissions: ['finance:fee:manage']},
+        loadComponent: () => import('./features/finance/fee-type-catalog/pages/fee-type-form-page/fee-type-form-page.component').then(m => m.FeeTypeFormPageComponent)
+      },
+      {
         path: 'payment-tracking',
         title: 'Suivi des paiements',
         data: {permissions: ['finance:payment:read']},

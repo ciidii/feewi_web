@@ -1,0 +1,96 @@
+<app-fw-page-shell
+  [title]="feeType()?.label || 'Type de frais'"
+  description="Consultation du type de frais et de sa tarification."
+  [icon]="CreditCard"
+  [backLink]="['/admin/finance/fee-types']"
+  density="compact"
+  [showSearch]="false"
+>
+  <!-- OPÉRATIONS (en-tête) -->
+  <div actions class="flex items-center gap-2" *ngIf="feeType() as ft">
+    <ng-container *ngIf="canManage()">
+      <app-fw-button *ngIf="!ft.isSystemDefined" variant="tertiary" size="sm" [icon]="Power" [loading]="isActionLoading()" (click)="onToggle()">
+        {{ ft.active ? 'Désactiver' : 'Activer' }}
+      </app-fw-button>
+      <app-fw-button *ngIf="!ft.isSystemDefined" variant="tertiary" size="sm" [icon]="Trash2" (click)="onDelete()">
+        Supprimer
+      </app-fw-button>
+      <app-fw-button variant="primary" size="sm" [icon]="Edit" (click)="onEdit()">Modifier</app-fw-button>
+    </ng-container>
+  </div>
+
+  <div class="detail-page animate-in fade-in duration-300">
+    <fw-block-loader *ngIf="isPageLoading()" message="Chargement du type de frais..."></fw-block-loader>
+
+    <div class="detail-card" *ngIf="!isPageLoading() && feeType() as ft">
+
+      <!-- EN-TÊTE -->
+      <header class="ft-detail-header">
+        <div class="ft-detail-avatar"><lucide-icon [name]="natureIcon(ft)" [size]="22"></lucide-icon></div>
+        <div class="ft-detail-title">
+          <div class="ft-detail-name-row">
+            <h2>{{ ft.label }}</h2>
+            <span class="ft-status" [class.on]="ft.active" [class.off]="!ft.active">
+              <lucide-icon [name]="ft.active ? CheckCircle : XCircle" [size]="13"></lucide-icon>
+              {{ ft.active ? 'Actif' : 'Inactif' }}
+            </span>
+            <span class="ft-system-badge" *ngIf="ft.isSystemDefined">Système</span>
+          </div>
+          <p class="ft-detail-code">Code : {{ ft.code }}</p>
+        </div>
+      </header>
+
+      <!-- NATURE -->
+      <section class="ft-block">
+        <p class="ft-block-label">Nature</p>
+        <div class="ft-nature-chips">
+          <span class="ft-chip">{{ PRICE_SHAPE_LABELS[ft.priceShape] }}</span>
+          <span class="ft-chip subtle">{{ BILLING_SCHEDULE_LABELS[ft.billingSchedule] }}</span>
+        </div>
+      </section>
+
+      <!-- TARIFICATION -->
+      <section class="ft-block">
+        <p class="ft-block-label">Tarification</p>
+
+        <!-- PER_LEVEL -->
+        <ng-container *ngIf="ft.priceShape === 'PER_LEVEL'">
+          <div *ngIf="configuredLevelCount() === 0" class="ft-alert">
+            <lucide-icon [name]="AlertTriangle" [size]="15"></lucide-icon>
+            <span>Aucun niveau n'a de tarif — ce frais ne sera pas facturé tant qu'un tarif n'est pas renseigné.</span>
+          </div>
+
+          <div class="ft-grid" *ngIf="levelRows().length > 0; else noLevels">
+            <div class="ft-grid-row" *ngFor="let row of levelRows()">
+              <span class="ft-grid-key">{{ row.levelName }}</span>
+              <span class="ft-grid-val" *ngIf="row.price != null && row.price > 0; else unset">{{ row.price | number:'1.0-0':'fr-FR' }} FCFA</span>
+              <ng-template #unset><span class="ft-grid-unset">Non configuré</span></ng-template>
+            </div>
+          </div>
+          <ng-template #noLevels><p class="ft-muted">Aucun niveau scolaire n'est encore défini dans l'établissement.</p></ng-template>
+
+          <p class="ft-summary" *ngIf="levelRows().length > 0">
+            {{ configuredLevelCount() }} / {{ levelRows().length }} niveau{{ levelRows().length > 1 ? 'x' : '' }} tarifé{{ configuredLevelCount() > 1 ? 's' : '' }}
+          </p>
+        </ng-container>
+
+        <!-- PER_OPTION -->
+        <ng-container *ngIf="ft.priceShape === 'PER_OPTION'">
+          <div class="ft-grid" *ngIf="(ft.options?.length ?? 0) > 0; else noOptions">
+            <div class="ft-grid-row" *ngFor="let opt of ft.options">
+              <span class="ft-grid-key">{{ opt.label }} <em class="ft-opt-code">{{ opt.code }}</em></span>
+              <span class="ft-grid-val">{{ opt.price | number:'1.0-0':'fr-FR' }} FCFA</span>
+            </div>
+          </div>
+          <ng-template #noOptions><p class="ft-muted">Aucune formule / zone tarifée pour l'instant.</p></ng-template>
+        </ng-container>
+
+        <!-- FLAT -->
+        <ng-container *ngIf="ft.priceShape === 'FLAT'">
+          <div class="ft-flat" *ngIf="ft.defaultAmount != null; else noFlat">{{ ft.defaultAmount | number:'1.0-0':'fr-FR' }} FCFA</div>
+          <ng-template #noFlat><p class="ft-muted">Montant non défini.</p></ng-template>
+        </ng-container>
+      </section>
+    </div>
+  </div>
+</app-fw-page-shell>
