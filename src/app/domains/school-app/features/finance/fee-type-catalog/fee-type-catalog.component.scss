@@ -21,3 +21,63 @@
   border: 1px solid var(--fw-border-subtle);
   box-shadow: var(--fw-shadow-sm);
 }
+
+/* SECTIONS PAR NATURE (ADR-012 §3) */
+.catalog-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fw-space-sm);
+
+  & + & {
+    margin-top: var(--fw-space-lg);
+  }
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 2px;
+
+  .section-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border: 1px solid var(--fw-border-subtle);
+    border-radius: 10px;
+    box-shadow: var(--fw-shadow-sm);
+    color: var(--fw-primary);
+  }
+
+  .section-name {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--fw-midnight, #0f172a);
+  }
+
+  .section-desc {
+    margin: 0;
+    font-size: 0.6875rem;
+    color: var(--fw-text-secondary);
+  }
+
+  .section-count {
+    margin-left: auto;
+    min-width: 1.5rem;
+    height: 1.5rem;
+    padding: 0 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--fw-text-secondary);
+    background: var(--fw-surface-sunken, #f1f5f9);
+    border-radius: 999px;
+  }
+}

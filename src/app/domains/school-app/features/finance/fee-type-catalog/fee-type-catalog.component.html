@@ -67,29 +67,66 @@
       </div>
     </app-fw-list-command-bar>
 
-    <!-- LISTE DES TYPES DE FRAIS -->
-    <div class="list-container-integrated">
-      <app-data-list
-        [data]="displayFeeTypes()"
-        [total]="displayFeeTypes().length"
-        [actions]="feeTypeActions"
-        [isLoading]="isLoading()"
-        [showSearch]="false"
-        [showFilterButton]="false"
-        [cardMode]="false"
-        (onAction)="handleAction($event)"
-      ></app-data-list>
+    <!-- ALERTE : tarif non configuré (risque de non-facturation, ADR-012 §3) -->
+    <app-fw-alert-banner *ngIf="unconfiguredTypes().length > 0" variant="warning">
+      <strong>Tarif non configuré.</strong>
+      {{ unconfiguredTypes().length }} frais académique{{ unconfiguredTypes().length > 1 ? 's' : '' }} par niveau
+      ({{ unconfiguredTypesLabel() }}) n'{{ unconfiguredTypes().length > 1 ? 'ont' : 'a' }} aucun tarif de niveau
+      et ne sera{{ unconfiguredTypes().length > 1 ? 'ont' : '' }} donc pas facturé.
+      Ouvrez le type concerné pour renseigner la grille par niveau.
+    </app-fw-alert-banner>
 
-      <!-- État vide -->
-      <div *ngIf="displayFeeTypes().length === 0 && !isLoading()" class="py-24">
-        <app-fw-empty-state
-          [icon]="CreditCard"
-          title="Aucun type de frais trouvé"
-          description="Créez vos catégories de frais (cantine, transport, uniforme...) pour pouvoir les facturer aux familles."
-          [ctaLabel]="canManage() ? 'Créer mon premier type de frais' : ''"
-          (ctaClick)="openFeeTypeForm()"
-        ></app-fw-empty-state>
+    <!-- LISTE DES TYPES DE FRAIS, ORGANISÉE PAR NATURE (ADR-012 §3) -->
+    <ng-container *ngIf="totalDisplayed() > 0 || isLoading()">
+      <div *ngFor="let section of displaySections()" class="catalog-section">
+        <header class="section-title">
+          <div class="section-icon">
+            <lucide-icon [name]="section.icon" [size]="18"></lucide-icon>
+          </div>
+          <div>
+            <p class="section-name">{{ section.title }}</p>
+            <p class="section-desc">{{ section.description }}</p>
+          </div>
+          <span class="section-count">{{ section.rows.length }}</span>
+        </header>
+
+        <div class="list-container-integrated">
+          <app-data-list
+            [data]="section.rows"
+            [total]="section.rows.length"
+            [actions]="feeTypeActions"
+            [isLoading]="false"
+            [showSearch]="false"
+            [showFilterButton]="false"
+            [cardMode]="false"
+            (onAction)="handleAction($event)"
+          ></app-data-list>
+        </div>
       </div>
+
+      <!-- Chargement initial : une seule liste squelette -->
+      <div *ngIf="isLoading()" class="list-container-integrated">
+        <app-data-list
+          [data]="[]"
+          [total]="0"
+          [actions]="feeTypeActions"
+          [isLoading]="true"
+          [showSearch]="false"
+          [showFilterButton]="false"
+          [cardMode]="false"
+        ></app-data-list>
+      </div>
+    </ng-container>
+
+    <!-- État vide -->
+    <div *ngIf="totalDisplayed() === 0 && !isLoading()" class="list-container-integrated py-24">
+      <app-fw-empty-state
+        [icon]="CreditCard"
+        title="Aucun type de frais trouvé"
+        description="Créez vos catégories de frais (scolarité, cantine, transport...) à partir d'un modèle prêt à remplir."
+        [ctaLabel]="canManage() ? 'Créer mon premier type de frais' : ''"
+        (ctaClick)="openFeeTypeForm()"
+      ></app-fw-empty-state>
     </div>
   </div>
 </app-fw-page-shell>

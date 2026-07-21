@@ -2,6 +2,99 @@
   display: block;
 }
 
+/* CARTES DE MODÈLE (ADR-012 §3) */
+.preset-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 14px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+
+  &:hover {
+    border-color: #2563eb;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.08);
+    transform: translateY(-1px);
+  }
+
+  .preset-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #eff6ff;
+    color: #2563eb;
+    border-radius: 12px;
+  }
+
+  .preset-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .preset-title {
+    margin: 0;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  .preset-desc {
+    margin: 2px 0 0;
+    font-size: 0.6875rem;
+    line-height: 1.35;
+    color: #64748b;
+  }
+
+  .preset-chevron {
+    flex-shrink: 0;
+    color: #cbd5e1;
+  }
+
+  &:hover .preset-chevron {
+    color: #2563eb;
+  }
+}
+
+/* BANDEAU NATURE VERROUILLÉE */
+.nature-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+
+  .nature-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    color: #2563eb;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+  }
+}
+
+/* LIGNE DE GRILLE PAR NIVEAU */
+.level-row {
+  padding: 8px 12px;
+  background: #f8fafc;
+  border: 1px solid #eef2f7;
+  border-radius: 10px;
+}
+
 .fw-input-field {
   width: 100%;
   height: 3.25rem;

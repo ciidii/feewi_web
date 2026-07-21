@@ -5,6 +5,22 @@
 export type PaymentMethod = 'CASH' | 'BANK_TRANSFER' | 'WAVE' | 'ORANGE_MONEY';
 
 /**
+ * Forme du prix d'un FeeType (ADR-012 §1). Déclaré explicitement — la facturation n'est plus déduite.
+ * - PER_LEVEL : grille par niveau, chaque option a `code = levelId` (scolarité, inscription, réinscription).
+ * - PER_OPTION : catalogue d'options, `code` = code métier stable (formule cantine, zone transport).
+ * - FLAT : montant unique porté par `defaultAmount`.
+ */
+export type PriceShape = 'PER_LEVEL' | 'PER_OPTION' | 'FLAT';
+
+/**
+ * Rythme de facturation d'un FeeType (ADR-012 §1).
+ * - SPREAD_ANNUAL : étalé sur les mensualités (scolarité, service mensualisé).
+ * - ONE_OFF : facturé une fois à l'admission (inscription/réinscription, forfait service).
+ * - ON_DEMAND : saisie manuelle ponctuelle.
+ */
+export type BillingSchedule = 'SPREAD_ANNUAL' | 'ONE_OFF' | 'ON_DEMAND';
+
+/**
  * Option tarifaire d'un FeeType (ADR-009 §1/§2). Deux modes de résolution du champ `code`,
  * non unifiés côté backend :
  * - Services parascolaires (TRANSPORT, CANTEEN...) : `code` = code métier texte stable
@@ -38,11 +54,18 @@ export interface FeeType {
   defaultAmount?: number | null;
   /** Catalogue d'options tarifaires (ADR-009) — toujours présent, [] si aucune option configurée. */
   options: FeeTypeOption[];
+  /** Forme du prix déclarée (ADR-012 §1) — pilote l'UI dédiée et la facturation. */
+  priceShape: PriceShape;
+  /** Rythme de facturation déclaré (ADR-012 §1). */
+  billingSchedule: BillingSchedule;
 }
 
 export interface CreateFeeTypeRequest {
   code: string;
   label: string;
+  /** Combinaison légale (ADR-012 §2) : préfixée par le modèle choisi côté UI. */
+  priceShape: PriceShape;
+  billingSchedule: BillingSchedule;
   defaultAmount?: number | null;
   options?: FeeTypeOption[];
 }
@@ -50,6 +73,8 @@ export interface CreateFeeTypeRequest {
 export interface UpdateFeeTypeRequest {
   label?: string;
   active?: boolean;
+  /** Le `priceShape` est verrouillé après création (comme le code) — jamais renvoyé ici. */
+  billingSchedule?: BillingSchedule;
   defaultAmount?: number | null;
   options?: FeeTypeOption[];
 }
@@ -226,4 +251,11 @@ export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   BANK_TRANSFER: 'Virement bancaire',
   WAVE: 'Wave',
   ORANGE_MONEY: 'Orange Money',
+};
+
+/** Libellé court du rythme de facturation (ADR-012) — pour les badges du catalogue. */
+export const BILLING_SCHEDULE_LABELS: Record<BillingSchedule, string> = {
+  SPREAD_ANNUAL: 'Étalé sur l\'année',
+  ONE_OFF: 'Ponctuel à l\'admission',
+  ON_DEMAND: 'À la demande',
 };

@@ -1,25 +1,36 @@
 import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
-import {CreditCard, Edit, LucideAngularModule, Plus, RefreshCw, Search, Settings, ToggleLeft, ToggleRight, Trash2} from 'lucide-angular';
+import {AlertTriangle, CreditCard, Edit, GraduationCap, Layers, LucideAngularModule, Plus, Receipt, RefreshCw, Search, Settings, ToggleLeft, ToggleRight, Trash2} from 'lucide-angular';
+import type {LucideIconData} from 'lucide-angular';
 import {firstValueFrom} from 'rxjs';
 import {BillingService} from '../../../../../core/services/billing.service';
 import {NotificationService} from '../../../../../shared/services/notification.service';
-import {BillingSettings, FeeType} from '../../../../../core/models/billing.model';
+import {BILLING_SCHEDULE_LABELS, BillingSettings, FeeType, PriceShape} from '../../../../../core/models/billing.model';
 import {DataListComponent} from '../../../../../shared/components/data-list/data-list.component';
-import {RowAction, TableRow} from '../../../../../shared/models/data-list.models';
+import {Badge, RowAction, TableRow} from '../../../../../shared/models/data-list.models';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {FeeTypeFormComponent} from './components/fee-type-form/fee-type-form.component';
 import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 
 import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
 import {FwEmptyStateComponent} from '../../../../../shared/components/empty-state/empty-state.component';
+import {FwAlertBannerComponent} from '../../../../../shared/components/alert-banner/alert-banner.component';
 import {FwListCommandBarComponent} from '../../../../../shared/components/list-command-bar/list-command-bar.component';
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
 import {AuthService} from '../../../../../core/services/auth.service';
 import {HasPermissionDirective} from '../../../../../shared/directives/has-permission.directive';
 
 const MANAGE_PERMISSION = 'finance:fee:manage';
+
+/** Section du catalogue regroupée par nature (ADR-012 §3), clé = priceShape. */
+interface CatalogSection {
+  key: PriceShape;
+  title: string;
+  description: string;
+  icon: LucideIconData;
+  rows: TableRow[];
+}
 
 @Component({
   selector: 'app-fee-type-catalog',
@@ -32,6 +43,7 @@ const MANAGE_PERMISSION = 'finance:fee:manage';
     MatDialogModule,
     FwPageShellComponent,
     FwEmptyStateComponent,
+    FwAlertBannerComponent,
     FwListCommandBarComponent,
     FwButtonComponent,
     HasPermissionDirective
@@ -55,6 +67,7 @@ export class FeeTypeCatalogComponent implements OnInit {
   readonly Search = Search;
   readonly RefreshCw = RefreshCw;
   readonly Settings = Settings;
+  readonly AlertTriangle = AlertTriangle;
 
   // États
   feeTypes = signal<FeeType[]>([]);
@@ -105,25 +118,76 @@ export class FeeTypeCatalogComponent implements OnInit {
     }
   ];
 
-  // Transformation du catalogue pour le DataList avec filtrage
-  displayFeeTypes = computed<TableRow[]>(() => {
+  /**
+   * Un type structurant PER_LEVEL est "tarif non configuré" tant qu'aucune option de niveau
+   * n'a de prix (> 0) — risque de non-facturation silencieuse (ADR-012 §3).
+   */
+  private isPriceUnconfigured(ft: FeeType): boolean {
+    return ft.priceShape === 'PER_LEVEL' && !(ft.options ?? []).some(o => o.price > 0);
+  }
+
+  /** Types PER_LEVEL actifs sans aucun tarif de niveau — alimentent l'alerte en tête de page. */
+  unconfiguredTypes = computed<FeeType[]>(() =>
+    this.feeTypes().filter(ft => ft.active && this.isPriceUnconfigured(ft))
+  );
+
+  /** Libellés des types non configurés, pour le corps de l'alerte. */
+  unconfiguredTypesLabel = computed<string>(() =>
+    this.unconfiguredTypes().map(ft => ft.label).join(', ')
+  );
+
+  private toRow(ft: FeeType): TableRow {
+    const badges: Badge[] = [
+      {label: ft.active ? 'Actif' : 'Inactif', type: ft.active ? 'success' : 'default'},
+      ...(ft.isSystemDefined ? [{label: 'Système', type: 'info' as const}] : []),
+      {label: BILLING_SCHEDULE_LABELS[ft.billingSchedule], type: 'default' as const},
+    ];
+
+    if (this.isPriceUnconfigured(ft)) {
+      badges.push({label: 'Tarif non configuré', type: 'warning', tooltip: 'Aucun niveau n\'a de tarif — ce frais ne sera pas facturé.'});
+    } else if (ft.priceShape === 'PER_LEVEL') {
+      const priced = (ft.options ?? []).filter(o => o.price > 0).length;
+      badges.push({label: `${priced} niveau${priced > 1 ? 'x' : ''} tarifé${priced > 1 ? 's' : ''}`, type: 'primary'});
+    } else if (ft.priceShape === 'PER_OPTION') {
+      const n = ft.options?.length ?? 0;
+      badges.push({label: `${n} option${n > 1 ? 's' : ''}`, type: 'primary'});
+    } else if (ft.defaultAmount != null) {
+      badges.push({label: `${ft.defaultAmount.toLocaleString('fr-FR')} FCFA`, type: 'primary'});
+    }
+
+    return {
+      id: ft.id,
+      title: ft.label,
+      subtitle: `Code : ${ft.code}`,
+      avatarLabel: ft.code.substring(0, 2).toUpperCase(),
+      badges,
+      rawData: ft
+    };
+  }
+
+  /** Définition ordonnée des sections de nature (ADR-012 §3). */
+  private readonly sectionDefs: {key: PriceShape; title: string; description: string; icon: LucideIconData}[] = [
+    {key: 'PER_LEVEL', title: 'Frais académiques', description: 'Scolarité, inscription et réinscription — tarifés par niveau.', icon: GraduationCap},
+    {key: 'PER_OPTION', title: 'Services optionnels', description: 'Cantine, transport… — tarifés par formule ou zone.', icon: Layers},
+    {key: 'FLAT', title: 'Frais ponctuels', description: 'Forfaits et frais uniques — montant simple.', icon: Receipt},
+  ];
+
+  // Catalogue regroupé par nature, filtré par la recherche — une section vide n'est pas rendue.
+  displaySections = computed<CatalogSection[]>(() => {
     const query = this.searchQuery().toLowerCase();
-    return this.feeTypes()
-      .filter(ft => ft.label.toLowerCase().includes(query) || ft.code.toLowerCase().includes(query))
-      .map(ft => ({
-        id: ft.id,
-        title: ft.label,
-        subtitle: `Code : ${ft.code}`,
-        avatarLabel: ft.code.substring(0, 2).toUpperCase(),
-        badges: [
-          {label: ft.active ? 'Actif' : 'Inactif', type: ft.active ? 'success' : 'default'},
-          ...(ft.isSystemDefined ? [{label: 'Système', type: 'info' as const}] : []),
-          ...(ft.options?.length ? [{label: `${ft.options.length} option${ft.options.length > 1 ? 's' : ''}`, type: 'primary' as const}]
-            : ft.defaultAmount != null ? [{label: 'Facturation auto', type: 'primary' as const}] : [])
-        ],
-        rawData: ft
-      }));
+    const matches = this.feeTypes()
+      .filter(ft => ft.label.toLowerCase().includes(query) || ft.code.toLowerCase().includes(query));
+
+    return this.sectionDefs
+      .map(def => ({
+        ...def,
+        rows: matches.filter(ft => ft.priceShape === def.key).map(ft => this.toRow(ft))
+      }))
+      .filter(section => section.rows.length > 0);
   });
+
+  // Total filtré (tous nature confondues) — pilote l'état vide global.
+  totalDisplayed = computed<number>(() => this.displaySections().reduce((sum, s) => sum + s.rows.length, 0));
 
   ngOnInit() {
     this.loadData();
@@ -188,7 +252,7 @@ export class FeeTypeCatalogComponent implements OnInit {
 
   openFeeTypeForm(feeType?: FeeType) {
     const dialogRef = this.dialog.open(FeeTypeFormComponent, {
-      width: '480px',
+      width: '640px',
       panelClass: 'feewi-dialog-panel',
       data: {feeType}
     });

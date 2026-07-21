@@ -4,11 +4,62 @@
   [icon]="CreditCard"
   [saveLabel]="isEditMode ? 'Enregistrer' : 'Créer le type de frais'"
   [isLoading]="isLoading()"
-  [canSave]="feeTypeForm.valid"
+  [canSave]="showForm() && feeTypeForm.valid"
   (save)="onSave()"
   (cancel)="onCancel()"
 >
-  <form [formGroup]="feeTypeForm" class="space-y-10 py-2">
+
+  <!-- ÉTAPE 1 (CRÉATION) : CHOIX DU MODÈLE (ADR-012 §3) -->
+  <div *ngIf="!showForm()" class="space-y-6 py-2">
+    <header class="section-header">
+      <lucide-icon [name]="CreditCard" [size]="14"></lucide-icon>
+      <span class="label">Choisissez un modèle</span>
+    </header>
+    <p class="text-[12px] text-text-secondary -mt-2">
+      Chaque modèle prépare le bon formulaire selon la nature du frais.
+    </p>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <button
+        *ngFor="let preset of presets"
+        type="button"
+        class="preset-card"
+        (click)="selectPreset(preset)"
+      >
+        <div class="preset-icon">
+          <lucide-icon [name]="preset.icon" [size]="18"></lucide-icon>
+        </div>
+        <div class="preset-body">
+          <p class="preset-title">{{ preset.title }}</p>
+          <p class="preset-desc">{{ preset.description }}</p>
+        </div>
+        <lucide-icon [name]="ChevronRight" [size]="16" class="preset-chevron"></lucide-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 2 : FORMULAIRE DÉDIÉ À LA NATURE -->
+  <form *ngIf="showForm()" [formGroup]="feeTypeForm" class="space-y-10 py-2">
+
+    <!-- Bandeau nature (verrouillée) -->
+    <div class="nature-banner">
+      <div class="nature-icon">
+        <lucide-icon [name]="selectedPreset()?.icon ?? GraduationCap" [size]="18"></lucide-icon>
+      </div>
+      <div class="flex-1">
+        <p class="text-[11px] uppercase tracking-wide text-text-tertiary font-bold">Modèle</p>
+        <p class="text-sm font-bold text-midnight">{{ natureLabel }}</p>
+      </div>
+      <app-fw-button
+        *ngIf="!isEditMode"
+        variant="tertiary"
+        size="sm"
+        [icon]="ArrowLeft"
+        (click)="changePreset()"
+      >
+        Changer
+      </app-fw-button>
+    </div>
 
     <!-- 1. Identification -->
     <div class="space-y-6">
@@ -27,7 +78,6 @@
               placeholder="Ex: CANTINE"
               class="fw-input uppercase"
               [class.error]="isInvalid('code')"
-              (blur)="onCodeChanged()"
             />
           </div>
           <p class="fw-hint" *ngIf="!isEditMode">Lettres majuscules, chiffres et underscores uniquement. Non modifiable après création.</p>
@@ -49,81 +99,67 @@
       </div>
     </div>
 
-    <!-- 1bis. Tarification (facturation automatique) -->
+    <!-- 2. Tarification dédiée à la nature -->
     <div class="space-y-6">
       <header class="section-header">
         <lucide-icon [name]="Wallet" [size]="14"></lucide-icon>
-        <span class="label">Tarification (optionnel)</span>
+        <span class="label">Tarification</span>
       </header>
 
-      <div class="flex gap-2 p-1 bg-surface-sunken rounded-xl w-fit">
-        <button
-          type="button"
-          class="px-4 py-2 rounded-lg text-xs font-bold transition-all"
-          [class.bg-white]="pricingMode === 'amount'"
-          [class.shadow-sm]="pricingMode === 'amount'"
-          [class.text-midnight]="pricingMode === 'amount'"
-          [class.text-text-secondary]="pricingMode !== 'amount'"
-          (click)="setPricingMode('amount')"
-        >
-          Montant unique
-        </button>
-        <button
-          type="button"
-          class="px-4 py-2 rounded-lg text-xs font-bold transition-all"
-          [class.bg-white]="pricingMode === 'options'"
-          [class.shadow-sm]="pricingMode === 'options'"
-          [class.text-midnight]="pricingMode === 'options'"
-          [class.text-text-secondary]="pricingMode !== 'options'"
-          (click)="setPricingMode('options')"
-        >
-          Catalogue d'options
-        </button>
-      </div>
-
-      <!-- Mode montant unique -->
-      <div class="fw-field" *ngIf="pricingMode === 'amount'">
-        <label class="fw-label">Montant par défaut (FCFA)</label>
-        <div class="fw-input-wrapper">
-          <input
-            type="number"
-            formControlName="defaultAmount"
-            placeholder="Ex: 25000"
-            class="fw-input"
-            min="1"
-            [class.error]="isInvalid('defaultAmount')"
-          />
+      <!-- Rythme de facturation (PER_OPTION / FLAT) -->
+      <div *ngIf="scheduleChoices.length > 0" class="fw-field">
+        <label class="fw-label">Rythme de facturation</label>
+        <div class="flex gap-2 p-1 bg-surface-sunken rounded-xl w-fit">
+          <button
+            *ngFor="let choice of scheduleChoices"
+            type="button"
+            class="px-4 py-2 rounded-lg text-xs font-bold transition-all"
+            [class.bg-white]="billingSchedule === choice.value"
+            [class.shadow-sm]="billingSchedule === choice.value"
+            [class.text-midnight]="billingSchedule === choice.value"
+            [class.text-text-secondary]="billingSchedule !== choice.value"
+            (click)="setSchedule(choice.value)"
+          >
+            {{ choice.label }}
+          </button>
         </div>
-        <p class="fw-hint">
-          Si renseigné, ce type de frais peut être facturé automatiquement quand un élève souscrit
-          au service correspondant à l'inscription (Cantine, Transport...) — le code technique doit
-          alors correspondre exactement au code du service côté inscription. Laisser vide pour un
-          type de frais saisi manuellement (Inscription, Scolarité, frais ponctuels).
-        </p>
       </div>
 
-      <!-- Mode catalogue d'options -->
-      <div class="space-y-3" *ngIf="pricingMode === 'options'" formArrayName="options">
-        <p class="fw-hint" *ngIf="isScolarite">
-          Scolarité : chaque option correspond à un niveau scolaire — le tarif s'applique
-          automatiquement selon le niveau souhaité par la famille.
+      <!-- PER_LEVEL : grille par niveau -->
+      <div *ngIf="priceShape === 'PER_LEVEL'" class="space-y-3">
+        <p class="fw-hint">
+          Renseignez le tarif annuel de chaque niveau. Un niveau laissé vide ne sera pas facturé.
         </p>
-        <p class="fw-hint" *ngIf="!isScolarite">
-          Chaque option correspond à un choix possible pour ce service (ex. zone de transport,
-          formule de cantine) — le code doit correspondre exactement à l'option choisie côté
-          inscription.
+
+        <app-fw-alert-banner *ngIf="pricedLevelCount === 0" variant="warning">
+          Aucun niveau n'est encore tarifé — ce frais ne sera pas facturé tant qu'au moins un tarif n'est pas saisi.
+        </app-fw-alert-banner>
+
+        <div formArrayName="levelPrices" class="space-y-2">
+          <div *ngFor="let row of levelPricesArray.controls; let i = index" [formGroupName]="i"
+               class="grid grid-cols-[1fr_160px] gap-3 items-center level-row">
+            <span class="text-sm font-semibold text-midnight">{{ row.get('levelName')?.value }}</span>
+            <div class="fw-field">
+              <input type="number" formControlName="price" placeholder="Prix (FCFA)" class="fw-input" min="1" />
+            </div>
+          </div>
+          <p *ngIf="levelPricesArray.controls.length === 0" class="fw-hint italic">
+            Aucun niveau scolaire n'est configuré pour cet établissement.
+          </p>
+        </div>
+      </div>
+
+      <!-- PER_OPTION : liste d'options (formule / zone) -->
+      <div *ngIf="priceShape === 'PER_OPTION'" class="space-y-3" formArrayName="options">
+        <p class="fw-hint">
+          Chaque option correspond à un choix possible (zone de transport, formule de cantine) — le code
+          doit correspondre exactement à l'option choisie côté inscription.
         </p>
 
         <div *ngFor="let opt of optionsArray.controls; let i = index" [formGroupName]="i"
              class="grid grid-cols-[1fr_1fr_140px_auto] gap-2 items-start">
-          <div class="fw-field" *ngIf="!isScolarite">
+          <div class="fw-field">
             <input type="text" formControlName="code" placeholder="Ex: ALLER_RETOUR" class="fw-input uppercase" />
-          </div>
-          <div class="fw-field" *ngIf="isScolarite">
-            <select formControlName="code" class="fw-input">
-              <option value="" disabled>Sélectionner un niveau</option>
-              <option *ngFor="let level of levels()" [value]="level.id">{{ level.name }}</option>
-            </select>
           </div>
           <div class="fw-field">
             <input type="text" formControlName="label" placeholder="Libellé" class="fw-input" />
@@ -140,9 +176,31 @@
           Ajouter une option
         </app-fw-button>
       </div>
+
+      <!-- FLAT : montant simple -->
+      <div *ngIf="priceShape === 'FLAT'" class="fw-field">
+        <label class="fw-label">Montant (FCFA)</label>
+        <div class="fw-input-wrapper">
+          <input
+            type="number"
+            formControlName="defaultAmount"
+            placeholder="Ex: 25000"
+            class="fw-input"
+            min="1"
+            [class.error]="isInvalid('defaultAmount')"
+          />
+        </div>
+        <p class="fw-hint" *ngIf="billingSchedule === 'ONE_OFF'">
+          Ce montant sera facturé automatiquement à l'admission (forfait). Le code technique doit
+          correspondre au service souscrit côté inscription.
+        </p>
+        <p class="fw-hint" *ngIf="billingSchedule !== 'ONE_OFF'">
+          Montant de référence proposé lors d'une saisie manuelle ponctuelle. Peut être laissé vide.
+        </p>
+      </div>
     </div>
 
-    <!-- 2. Statut (édition uniquement) -->
+    <!-- 3. Statut (édition uniquement) -->
     <div class="space-y-6" *ngIf="isEditMode">
       <header class="section-header">
         <lucide-icon [name]="Power" [size]="14"></lucide-icon>
@@ -175,7 +233,7 @@
     <div class="p-4 bg-surface-sunken rounded-xl border border-border flex items-start gap-3">
       <lucide-icon [name]="Info" [size]="16" class="text-text-tertiary mt-0.5"></lucide-icon>
       <p class="text-[11px] text-text-secondary leading-relaxed font-medium">
-        Les types "Inscription" et "Scolarité" sont créés automatiquement pour votre établissement et ne peuvent pas être supprimés.
+        La nature d'un type de frais (par niveau, par option, ponctuel) est fixée à la création et ne peut plus être modifiée ensuite.
       </p>
     </div>
 
