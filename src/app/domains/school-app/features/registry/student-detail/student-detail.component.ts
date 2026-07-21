@@ -122,6 +122,11 @@ export class StudentDetailComponent implements OnInit {
     return [...st.payments].sort((a, b) => new Date(b.receivedAt).getTime() - new Date(a.receivedAt).getTime());
   });
 
+  /** ADR-013 : total facturé cette année = Σ des mensualités affichées (facturé à ce jour). */
+  readonly billedThisYear = computed(() =>
+    (this.statement()?.monthlyBreakdown ?? []).reduce((sum, m) => sum + m.amount, 0)
+  );
+
   // --- CALCULS ---
   fullName = computed(() => {
     const s = this.student();

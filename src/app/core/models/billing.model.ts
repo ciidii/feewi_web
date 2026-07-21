@@ -137,6 +137,22 @@ export interface FeeTypeBalance {
   balance: number;
 }
 
+/** Une composante d'une mensualité combinée (ADR-013) : la part d'un service dans le total du mois. */
+export interface MonthlyBillingComponent {
+  feeTypeCode: string;
+  label: string;
+  amount: number;
+}
+
+/** Une mensualité combinée au relevé (ADR-013) : total du mois + détail par service. */
+export interface MonthlyBillingLine {
+  /** Mois facturé, format `YYYY-MM`. */
+  period: string;
+  label: string;
+  amount: number;
+  composition: MonthlyBillingComponent[];
+}
+
 export interface StudentStatement {
   studentId: string;
   totalDue: number;
@@ -144,6 +160,8 @@ export interface StudentStatement {
   balance: number;
   byFeeType: FeeTypeBalance[];
   payments: Payment[];
+  /** ADR-013 : mensualités combinées (total + détail par service), triées par mois. */
+  monthlyBreakdown?: MonthlyBillingLine[];
 }
 
 /** Solde d'un élève sans historique de paiements — retourné par le batch BL-BILL-02. */

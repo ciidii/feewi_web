@@ -212,6 +212,34 @@
               }
             </div>
 
+            <!-- Mensualités (ADR-013) : total du mois + détail par service -->
+            <div class="finance-months" *ngIf="(statement()?.monthlyBreakdown?.length ?? 0) > 0">
+              <p class="finance-section-label">
+                <lucide-icon [name]="Calendar" [size]="13"></lucide-icon>
+                Mensualités — détail par service
+              </p>
+              <p class="text-[11px] text-text-secondary mb-2">
+                Total facturé cette année : <strong>{{ billedThisYear() | number:'1.0-0':'fr-FR' }} FCFA</strong>
+              </p>
+              <div class="space-y-2">
+                @for (m of statement()!.monthlyBreakdown!; track m.period) {
+                  <div class="rounded-xl border border-border bg-surface-sunken px-3 py-2">
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs font-bold text-midnight">{{ m.period }}</span>
+                      <span class="text-xs font-bold text-midnight">{{ m.amount | number:'1.0-0':'fr-FR' }} FCFA</span>
+                    </div>
+                    <div class="flex flex-wrap gap-x-3 gap-y-1 mt-1" *ngIf="m.composition.length > 0">
+                      @for (c of m.composition; track c.feeTypeCode) {
+                        <span class="text-[11px] text-text-secondary">
+                          {{ c.label || c.feeTypeCode }} : {{ c.amount | number:'1.0-0':'fr-FR' }}
+                        </span>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+
             <!-- Historique des paiements -->
             <div class="finance-history">
               <p class="finance-section-label">
