@@ -153,6 +153,20 @@ export interface MonthlyBillingLine {
   composition: MonthlyBillingComponent[];
 }
 
+/**
+ * Recouvrement d'un service (ADR-013 §recovery / ADR-014) : dû / payé / reste + taux, le paiement
+ * mensuel combiné étant alloué par priorité (scolarité puis services), earmark-aware, hors tranches.
+ */
+export interface ServiceRecoveryLine {
+  feeTypeCode: string;
+  label: string;
+  due: number;
+  paid: number;
+  balance: number;
+  /** paid/due (0..1) — null si due = 0 (pas de taux significatif, distinct de 0%). */
+  recoveryRate: number | null;
+}
+
 export interface StudentStatement {
   studentId: string;
   totalDue: number;
@@ -164,6 +178,11 @@ export interface StudentStatement {
   monthlyBreakdown?: MonthlyBillingLine[];
   /** ADR-013 : total annuel projeté (objectif de l'année) — null si l'élève n'a pas de plan. */
   annualTotal?: number | null;
+  /**
+   * ADR-014 : recouvrement par service (dû / payé / reste + taux). Paiement combiné alloué par
+   * priorité (inscription earmark-only, puis scolarité, puis services). Tranches exclues.
+   */
+  serviceRecovery?: ServiceRecoveryLine[];
 }
 
 /** Solde d'un élève sans historique de paiements — retourné par le batch BL-BILL-02. */

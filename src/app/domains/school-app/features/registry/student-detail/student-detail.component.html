@@ -244,6 +244,39 @@
               </div>
             </div>
 
+            <!-- Recouvrement par service (ADR-014) : dû / payé / reste + taux (payé alloué par priorité) -->
+            <div class="finance-months" *ngIf="serviceRecovery().length > 0">
+              <p class="finance-section-label">
+                <lucide-icon [name]="Wallet" [size]="13"></lucide-icon>
+                Recouvrement par service
+              </p>
+              <p class="text-[11px] text-text-secondary mb-2">
+                Payé alloué par priorité (scolarité puis services) · les tranches ont leur propre suivi.
+              </p>
+              <div class="space-y-2">
+                @for (r of serviceRecovery(); track r.feeTypeCode) {
+                  <div class="rounded-xl border border-border bg-surface-sunken px-3 py-2">
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs font-bold text-midnight">{{ r.label || r.feeTypeCode }}</span>
+                      <span class="text-[11px] text-text-secondary">
+                        {{ r.paid | number:'1.0-0':'fr-FR' }} / {{ r.due | number:'1.0-0':'fr-FR' }} FCFA
+                        <strong class="text-midnight ml-1">{{ recoveryPercent(r) }}%</strong>
+                      </span>
+                    </div>
+                    <div class="mt-1.5 h-1.5 w-full rounded-full bg-border overflow-hidden">
+                      <div class="h-full rounded-full"
+                           [class.bg-success]="recoveryPercent(r) >= 100"
+                           [class.bg-primary]="recoveryPercent(r) < 100"
+                           [style.width.%]="recoveryPercent(r)"></div>
+                    </div>
+                    <div class="text-[11px] text-text-secondary mt-1" *ngIf="r.balance > 0">
+                      Reste : {{ r.balance | number:'1.0-0':'fr-FR' }} FCFA
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+
             <!-- Historique des paiements -->
             <div class="finance-history">
               <p class="finance-section-label">

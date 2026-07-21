@@ -29,7 +29,7 @@ import {StudentResponse} from '../../../../../core/models/student.model';
 import {AcademicService} from '../../../../../core/services/academic.service';
 import {Level} from '../../../../../core/models/academic.model';
 import {BillingService} from '../../../../../core/services/billing.service';
-import {FeeType, InstallmentPlan, InstallmentStatus, InstallmentTranche, StudentStatement} from '../../../../../core/models/billing.model';
+import {FeeType, InstallmentPlan, InstallmentStatus, InstallmentTranche, ServiceRecoveryLine, StudentStatement} from '../../../../../core/models/billing.model';
 import {DocumentEngineService} from '../../../../../core/services/document-engine.service';
 import {NotificationService} from '../../../../../shared/services/notification.service';
 import {AuthService} from '../../../../../core/services/auth.service';
@@ -126,6 +126,14 @@ export class StudentDetailComponent implements OnInit {
   readonly billedThisYear = computed(() =>
     (this.statement()?.monthlyBreakdown ?? []).reduce((sum, m) => sum + m.amount, 0)
   );
+
+  /** ADR-014 : recouvrement par service (payé alloué par priorité). */
+  readonly serviceRecovery = computed<ServiceRecoveryLine[]>(() => this.statement()?.serviceRecovery ?? []);
+
+  /** Pourcentage 0..100 pour la barre de progression (null si dû = 0 → traité comme 0%). */
+  recoveryPercent(line: ServiceRecoveryLine): number {
+    return line.recoveryRate == null ? 0 : Math.round(line.recoveryRate * 100);
+  }
 
   // --- CALCULS ---
   fullName = computed(() => {
