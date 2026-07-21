@@ -259,3 +259,10 @@ export const BILLING_SCHEDULE_LABELS: Record<BillingSchedule, string> = {
   ONE_OFF: 'Ponctuel à l\'admission',
   ON_DEMAND: 'À la demande',
 };
+
+/** Libellé court de la forme de prix (ADR-012) — nature du frais. */
+export const PRICE_SHAPE_LABELS: Record<PriceShape, string> = {
+  PER_LEVEL: 'Tarifé par niveau',
+  PER_OPTION: 'Tarifé par formule / zone',
+  FLAT: 'Montant unique',
+};

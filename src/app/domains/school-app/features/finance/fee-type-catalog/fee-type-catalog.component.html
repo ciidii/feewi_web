@@ -98,6 +98,7 @@
           [showFilterButton]="false"
           [cardMode]="false"
           (onAction)="handleAction($event)"
+          (onRowClick)="openFeeTypeDetail($event.rawData)"
         ></app-data-list>
       </div>
 

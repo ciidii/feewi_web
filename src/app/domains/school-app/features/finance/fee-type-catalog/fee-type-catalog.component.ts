@@ -1,7 +1,7 @@
 import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
-import {AlertTriangle, CreditCard, Edit, GraduationCap, Layers, LucideAngularModule, Plus, Receipt, RefreshCw, Search, Settings, ToggleLeft, ToggleRight, Trash2} from 'lucide-angular';
+import {AlertTriangle, CreditCard, Edit, Eye, GraduationCap, Layers, LucideAngularModule, Plus, Receipt, RefreshCw, Search, Settings, ToggleLeft, ToggleRight, Trash2} from 'lucide-angular';
 import {firstValueFrom} from 'rxjs';
 import {BillingService} from '../../../../../core/services/billing.service';
 import {NotificationService} from '../../../../../shared/services/notification.service';
@@ -10,6 +10,7 @@ import {DataListComponent} from '../../../../../shared/components/data-list/data
 import {Badge, RowAction, TableRow} from '../../../../../shared/models/data-list.models';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {FeeTypeFormComponent} from './components/fee-type-form/fee-type-form.component';
+import {FeeTypeDetailComponent, FeeTypeDetailResult} from './components/fee-type-detail/fee-type-detail.component';
 import {ConfirmDialogComponent} from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 
 import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
@@ -62,6 +63,7 @@ export class FeeTypeCatalogComponent implements OnInit {
   readonly RefreshCw = RefreshCw;
   readonly Settings = Settings;
   readonly AlertTriangle = AlertTriangle;
+  readonly Eye = Eye;
 
   // États
   feeTypes = signal<FeeType[]>([]);
@@ -85,6 +87,7 @@ export class FeeTypeCatalogComponent implements OnInit {
 
   // Actions par ligne — activer/désactiver sont mutuellement exclusives selon l'état courant
   readonly feeTypeActions: RowAction[] = [
+    {id: 'view', label: 'Consulter', icon: Eye, type: 'default'},
     {id: 'edit', label: 'Modifier', icon: Edit, type: 'primary', permission: MANAGE_PERMISSION},
     {
       id: 'activate',
@@ -242,6 +245,9 @@ export class FeeTypeCatalogComponent implements OnInit {
   handleAction(event: { actionId: string, row: TableRow }) {
     const feeType: FeeType = event.row.rawData;
     switch (event.actionId) {
+      case 'view':
+        this.openFeeTypeDetail(feeType);
+        break;
       case 'edit':
         this.openFeeTypeForm(feeType);
         break;
@@ -255,6 +261,34 @@ export class FeeTypeCatalogComponent implements OnInit {
         this.confirmDelete(feeType);
         break;
     }
+  }
+
+  /**
+   * Consultation en lecture seule (grille des tarifs par niveau/option, statut, nature). Les
+   * opérations lancées depuis le détail (Modifier / Activer / Supprimer) sont réexécutées ici,
+   * point unique de la logique — le dialogue de détail ne fait que renvoyer l'intention.
+   */
+  openFeeTypeDetail(feeType: FeeType) {
+    const dialogRef = this.dialog.open(FeeTypeDetailComponent, {
+      width: '640px',
+      panelClass: 'feewi-dialog-panel',
+      data: {feeType, canManage: this.canManage()}
+    });
+
+    dialogRef.afterClosed().subscribe((result?: FeeTypeDetailResult) => {
+      if (!result) return;
+      switch (result.action) {
+        case 'edit':
+          this.openFeeTypeForm(feeType);
+          break;
+        case 'delete':
+          this.confirmDelete(feeType);
+          break;
+        case 'toggle':
+          this.toggleActive(feeType, result.nextActive);
+          break;
+      }
+    });
   }
 
   openFeeTypeForm(feeType?: FeeType) {
