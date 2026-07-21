@@ -162,6 +162,8 @@ export interface StudentStatement {
   payments: Payment[];
   /** ADR-013 : mensualités combinées (total + détail par service), triées par mois. */
   monthlyBreakdown?: MonthlyBillingLine[];
+  /** ADR-013 : total annuel projeté (objectif de l'année) — null si l'élève n'a pas de plan. */
+  annualTotal?: number | null;
 }
 
 /** Solde d'un élève sans historique de paiements — retourné par le batch BL-BILL-02. */

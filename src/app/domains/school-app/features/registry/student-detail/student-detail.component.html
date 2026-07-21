@@ -219,7 +219,11 @@
                 Mensualités — détail par service
               </p>
               <p class="text-[11px] text-text-secondary mb-2">
-                Total facturé cette année : <strong>{{ billedThisYear() | number:'1.0-0':'fr-FR' }} FCFA</strong>
+                <ng-container *ngIf="statement()?.annualTotal != null">
+                  Total de l'année (objectif) : <strong>{{ statement()!.annualTotal | number:'1.0-0':'fr-FR' }} FCFA</strong>
+                  <span class="mx-1">·</span>
+                </ng-container>
+                Facturé cette année : <strong>{{ billedThisYear() | number:'1.0-0':'fr-FR' }} FCFA</strong>
               </p>
               <div class="space-y-2">
                 @for (m of statement()!.monthlyBreakdown!; track m.period) {
