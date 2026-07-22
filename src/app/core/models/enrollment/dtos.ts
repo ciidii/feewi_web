@@ -1,6 +1,6 @@
 import {AcademicYearState, AdmissionType, CycleType, RegistrationMode} from './base-types';
 import {Admission, AdmissionBundle, Guardian} from './entities';
-import {EnrollmentSchema} from './config';
+import {EnrollmentSchema, PresetDocumentConfig} from './config';
 
 // --- PORTAIL PUBLIC ---
 
@@ -30,6 +30,8 @@ export interface DefaultConfigResponse {
   portalActive: boolean;
   registrationMode: RegistrationMode;
   schema: EnrollmentSchema;
+  /** Checklist des pièces requises, mergée base → cycle → niveau (source de la checklist guichet). */
+  documentChecklist?: PresetDocumentConfig[];
   instructions: Record<string, string>;
   legalText?: string;
 }
@@ -138,6 +140,8 @@ export interface DirectEntryRequest {
   familyCustomFields?: Record<string, any>;
   /** Piliers entièrement personnalisés définis par l'école (clé pilier → valeurs). */
   extraPillars?: Record<string, Record<string, any>>;
+  /** Codes des pièces remises au guichet → PHYSICAL_RECEIVED ; les autres restent MISSING. */
+  receivedDocumentCodes?: string[];
 }
 
 // --- RESPONSES ---

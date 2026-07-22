@@ -3,7 +3,9 @@ import {CommonModule} from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Router, RouterModule} from '@angular/router';
 import {
+  BadgeCheck,
   BookOpen,
+  ClipboardCheck,
   GraduationCap,
   HeartPulse,
   Layers,
@@ -18,11 +20,13 @@ import {
   User,
   UserPlus,
   Users,
+  Wallet,
   X
 } from 'lucide-angular';
 import {EnrollmentAdminService} from '../../../../../core/services/enrollment-admin.service';
 import {AcademicService} from '../../../../../core/services/academic.service';
 import {TenantContextService} from '../../../../../core/services/tenant-context.service';
+import {AuthService} from '../../../../../core/services/auth.service';
 import {NotificationService} from '../../../../../shared/services/notification.service';
 import {AcademicYear, CycleGroup, Filiere, Level} from '../../../../../core/models/academic.model';
 import {
@@ -30,9 +34,10 @@ import {
   DirectEntryRequest,
   ExtraPillarConfig,
   FieldConfig,
-  LevelConfigResponse
+  LevelConfigResponse,
+  PresetDocumentConfig
 } from '../../../../../core/models/enrollment.model';
-import {finalize, forkJoin} from 'rxjs';
+import {catchError, finalize, forkJoin, map, of, switchMap} from 'rxjs';
 import {FwButtonComponent} from '../../../../../shared/components/button/button.component';
 import {FwPageShellComponent} from '../../../../../shared/components/page-shell/page-shell.component';
 
@@ -63,8 +68,13 @@ export class EnrollmentDirectEntryComponent implements OnInit {
   private enrollmentService = inject(EnrollmentAdminService);
   private academicService = inject(AcademicService);
   private tenantContext = inject(TenantContextService);
+  private auth = inject(AuthService);
   private notificationService = inject(NotificationService);
   private router = inject(Router);
+
+  // --- PERMISSIONS (RBAC — gating comptoir one-stop) ---
+  readonly canConfirmPayment = this.auth.hasPermission('enrollment:admission:confirm-payment');
+  readonly canVerify = this.auth.hasPermission('enrollment:admission:verify');
 
   // --- ÉTATS ---
   entryForm!: FormGroup;
@@ -91,6 +101,11 @@ export class EnrollmentDirectEntryComponent implements OnInit {
   guardianFields = signal<FieldConfig[]>([]);
   familyFields = signal<FieldConfig[]>([]);
   extraPillars = signal<ExtraPillarConfig[]>([]);
+
+  // Pièces justificatives (checklist « reçue au guichet »)
+  documentsEnabled = signal(false);
+  documents = signal<PresetDocumentConfig[]>([]);
+  docsCF = signal<FormGroup>(this.fb.group({}));
 
   // FormGroups des customFields (bindés directement dans le template)
   identityCF = signal<FormGroup>(this.fb.group({}));
@@ -133,7 +148,10 @@ export class EnrollmentDirectEntryComponent implements OnInit {
         phone: ['', Validators.required],
         email: ['', [Validators.required, Validators.email]],
         financialResponsible: [true]
-      })
+      }),
+      // Comptoir one-stop (le parent est présent) — actions optionnelles selon permissions
+      paymentReceived: [false],
+      markVerified: [false]
     });
   }
 
@@ -211,7 +229,35 @@ export class EnrollmentDirectEntryComponent implements OnInit {
     }
     this.extraCF.set(extraGroups);
 
+    // Pièces justificatives — checklist mergée (base → cycle → niveau) renvoyée par le backend
+    this.documentsEnabled.set(schema.documents?.enabled !== false);
+    const docs = this.documentsEnabled() ? (cfg.documentChecklist ?? []) : [];
+    this.documents.set(docs);
+    const docsGroup = this.fb.group({});
+    for (const d of docs) {
+      // false = MANQUANTE, coché = reçue. Désactivé si l'agent n'a pas la permission de vérif
+      // (les contrôles désactivés sont exclus de .value → aucun code reçu envoyé).
+      docsGroup.addControl(d.code, this.fb.control({value: false, disabled: !this.canVerify}));
+    }
+    this.docsCF.set(docsGroup);
+
     this.schemaReady.set(true);
+  }
+
+  /** Nombre de pièces cochées « reçue au guichet ». */
+  receivedDocsCount(): number {
+    return Object.values(this.docsCF().value).filter(Boolean).length;
+  }
+
+  /** Pièces requises non cochées (à rapporter plus tard). */
+  missingDocs(): PresetDocumentConfig[] {
+    const v = this.docsCF().value as Record<string, boolean>;
+    return this.documents().filter(d => !v[d.code]);
+  }
+
+  /** Libellés des pièces à rapporter, pour le récap. */
+  missingDocsLabel(): string {
+    return this.missingDocs().map(d => d.name).join(', ');
   }
 
   /** Crée un FormGroup à partir d'une liste de champs configurés (validators mandatory inclus). */
@@ -249,6 +295,12 @@ export class EnrollmentDirectEntryComponent implements OnInit {
       extraPillars[key] = group.value;
     }
 
+    // Pièces cochées « reçue » → PHYSICAL_RECEIVED. Envoyées seulement si l'agent a la permission
+    // de vérification (sinon le backend refuse 403 — cf. garde RBAC).
+    const receivedDocumentCodes = this.canVerify
+      ? Object.entries(this.docsCF().value).filter(([, checked]) => checked).map(([code]) => code)
+      : [];
+
     const payload: DirectEntryRequest = {
       type: 'NEW_ENROLLMENT',
       academicYearId: year.id,
@@ -275,15 +327,35 @@ export class EnrollmentDirectEntryComponent implements OnInit {
         customFields: this.guardianCF().value
       },
       familyCustomFields: this.familyCF().value,
-      extraPillars: Object.keys(extraPillars).length ? extraPillars : undefined
+      extraPillars: Object.keys(extraPillars).length ? extraPillars : undefined,
+      receivedDocumentCodes: receivedDocumentCodes.length ? receivedDocumentCodes : undefined
     };
 
+    // Création puis, le parent étant présent, actions optionnelles au comptoir (one-stop) :
+    // encaissement du paiement et/ou vérification en personne (→ dossier VERIFIED).
     this.enrollmentService.createDirectApplication(payload).pipe(
+      switchMap((created) => {
+        const followUps: any[] = [];
+        if (this.canConfirmPayment && v.paymentReceived) {
+          followUps.push(this.enrollmentService.confirmPayment(created.id));
+        }
+        if (this.canVerify && v.markVerified) {
+          followUps.push(this.enrollmentService.verifyApplication(created.id));
+        }
+        if (!followUps.length) return of(created);
+        return forkJoin(followUps).pipe(
+          map(() => created),
+          catchError(() => {
+            this.notificationService.warning('Dossier créé — paiement/vérification à finaliser sur la fiche.');
+            return of(created);
+          })
+        );
+      }),
       finalize(() => this.isSaving.set(false))
     ).subscribe({
-      next: (res) => {
-        this.notificationService.success(`Dossier créé (Réf: ${res.reference})`);
-        this.router.navigate(['/admin/admissions', res.id]);
+      next: (created) => {
+        this.notificationService.success(`Dossier créé (Réf: ${created.reference})`);
+        this.router.navigate(['/admin/admissions', created.id]);
       }
     });
   }
@@ -301,6 +373,9 @@ export class EnrollmentDirectEntryComponent implements OnInit {
   readonly BookOpen = BookOpen;
   readonly HeartPulse = HeartPulse;
   readonly Layers = Layers;
+  readonly ClipboardCheck = ClipboardCheck;
+  readonly Wallet = Wallet;
+  readonly BadgeCheck = BadgeCheck;
   protected readonly Users = Users;
   protected readonly School = School;
 }

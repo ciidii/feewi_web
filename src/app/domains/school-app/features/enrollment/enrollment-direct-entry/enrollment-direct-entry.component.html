@@ -176,9 +176,68 @@
         <div class="guichet-info-card" *ngIf="schemaReady()">
           <lucide-icon [name]="ShieldCheck" class="text-primary"></lucide-icon>
           <div class="info-content">
-            <p><strong>Mode Saisie Directe :</strong> le dossier sera créé et soumis immédiatement (canal Guichet). Les pièces pourront être numérisées ultérieurement.</p>
+            <p><strong>Mode Saisie Directe :</strong> le dossier sera créé et soumis immédiatement (canal Guichet). Les pièces manquantes pourront être apportées ultérieurement.</p>
           </div>
         </div>
+      </div>
+
+      <!-- PIÈCES + COMPTOIR (pleine largeur) -->
+      <div class="col-span-12 space-y-6" *ngIf="schemaReady()">
+
+        <!-- PIÈCES JUSTIFICATIVES — checklist « reçue au guichet » -->
+        <section class="zen-form-card" *ngIf="documentsEnabled() && documents().length">
+          <header class="card-header">
+            <lucide-icon [name]="ClipboardCheck"></lucide-icon>
+            <h3>Pièces justificatives</h3>
+          </header>
+          <div class="card-body space-y-4">
+            <p *ngIf="!canVerify" class="text-sm text-slate-400">
+              La réception des pièces nécessite la permission de vérification — à cocher plus tard depuis la fiche du dossier.
+            </p>
+
+            <div [formGroup]="docsCF()" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <label *ngFor="let d of documents()"
+                     class="flex items-center gap-3 p-3 rounded-xl border border-slate-200"
+                     [class.opacity-60]="!canVerify">
+                <input type="checkbox" [formControlName]="d.code">
+                <span class="flex-1">
+                  {{ d.name }}<span *ngIf="d.mandatory" class="text-rose-500"> *</span>
+                </span>
+                <span class="text-xs font-medium"
+                      [class.text-emerald-600]="docsCF().value[d.code]"
+                      [class.text-slate-400]="!docsCF().value[d.code]">
+                  {{ docsCF().value[d.code] ? 'Reçue' : 'À rapporter' }}
+                </span>
+              </label>
+            </div>
+
+            <div class="text-sm text-slate-500">
+              <strong>{{ receivedDocsCount() }}</strong> reçue(s) ·
+              <strong>{{ missingDocs().length }}</strong> à rapporter<ng-container *ngIf="missingDocs().length"> : {{ missingDocsLabel() }}</ng-container>
+            </div>
+          </div>
+        </section>
+
+        <!-- AU COMPTOIR — parent présent (actions optionnelles selon permissions) -->
+        <section class="zen-form-card" *ngIf="canConfirmPayment || canVerify">
+          <header class="card-header">
+            <lucide-icon [name]="Wallet"></lucide-icon>
+            <h3>Au comptoir</h3>
+          </header>
+          <div class="card-body flex flex-col gap-3">
+            <label *ngIf="canConfirmPayment" class="flex items-center gap-3 cursor-pointer">
+              <input type="checkbox" formControlName="paymentReceived">
+              <lucide-icon [name]="Wallet" class="w-4 h-4 text-slate-500"></lucide-icon>
+              <span>Paiement encaissé au comptoir</span>
+            </label>
+            <label *ngIf="canVerify" class="flex items-center gap-3 cursor-pointer">
+              <input type="checkbox" formControlName="markVerified">
+              <lucide-icon [name]="BadgeCheck" class="w-4 h-4 text-slate-500"></lucide-icon>
+              <span>Dossier vérifié en personne (passe en « Vérifié »)</span>
+            </label>
+          </div>
+        </section>
+
       </div>
 
     </form>

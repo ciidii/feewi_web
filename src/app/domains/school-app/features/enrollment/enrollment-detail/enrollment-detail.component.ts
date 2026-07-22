@@ -184,7 +184,7 @@ export class EnrollmentDetailComponent implements OnInit {
 
     const mandatoryDocs = app.documents.filter(d => d.mandatory);
     const documentsReady = mandatoryDocs.every(d =>
-      ['UPLOADED', 'RECEIVED', 'VERIFIED'].includes(d.status)
+      ['UPLOADED', 'PHYSICAL_RECEIVED'].includes(d.status)
     );
     return documentsReady && !!app.paymentConfirmed;
   });
@@ -619,7 +619,7 @@ export class EnrollmentDetailComponent implements OnInit {
     const mandatory = app.documents.filter(d => d.mandatory);
     return {
       total: mandatory.length,
-      received: mandatory.filter(d => d.status === 'UPLOADED' || d.status === 'RECEIVED').length
+      received: mandatory.filter(d => d.status === 'UPLOADED' || d.status === 'PHYSICAL_RECEIVED').length
     };
   });
 

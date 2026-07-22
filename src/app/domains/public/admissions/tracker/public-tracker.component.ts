@@ -313,9 +313,8 @@ export class PublicTrackerComponent implements OnInit {
 
   docStatusLabel(status: string): string {
     const labels: Record<string, string> = {
-      MISSING: 'Manquant', UPLOADED: 'Déposé',
-      PHYSICAL_RECEIVED: 'Reçu', RECEIVED: 'Reçu',
-      VERIFIED: 'Vérifié', REJECTED: 'Refusé'
+      MISSING: 'Manquant', UPLOADED: 'Numérisée',
+      PHYSICAL_RECEIVED: 'Reçue', REJECTED: 'Refusé'
     };
     return labels[status] ?? status;
   }

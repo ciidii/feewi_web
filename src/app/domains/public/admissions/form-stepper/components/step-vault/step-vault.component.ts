@@ -66,7 +66,7 @@ import {FwBadgeComponent} from '../../../../../../shared/components/badge/badge.
                    (change)="onFileChange(doc.code, fileInput)">
             <app-fw-button
               (click)="fileInput.click()"
-              [disabled]="uploadingDocCode !== null || doc.status === 'VERIFIED' || doc.status === 'RECEIVED'"
+              [disabled]="uploadingDocCode !== null || doc.status === 'PHYSICAL_RECEIVED'"
               [loading]="uploadingDocCode === doc.code"
               [variant]="isSuccess(doc.status) ? 'secondary' : 'primary'"
               size="md"
@@ -110,7 +110,7 @@ export class StepVaultComponent {
   }
 
   isSuccess(status: string): boolean {
-    return status === 'UPLOADED' || status === 'RECEIVED' || status === 'VERIFIED';
+    return status === 'UPLOADED' || status === 'PHYSICAL_RECEIVED';
   }
 
   docIcon(status: string): any {
@@ -121,11 +121,10 @@ export class StepVaultComponent {
 
   docStatusLabel(status: string): string {
     switch (status) {
-      case 'MISSING':  return 'Absent';
-      case 'UPLOADED': return 'Téléchargé';
-      case 'RECEIVED': return 'Reçu';
-      case 'VERIFIED': return 'Validé';
-      case 'REJECTED': return 'Refusé';
+      case 'MISSING':          return 'Absent';
+      case 'UPLOADED':         return 'Numérisée';
+      case 'PHYSICAL_RECEIVED': return 'Reçue';
+      case 'REJECTED':         return 'Refusé';
       default: return status;
     }
   }

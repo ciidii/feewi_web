@@ -187,7 +187,7 @@ export class StepReviewComponent {
   }
 
   isDocOk(status: string): boolean {
-    return ['UPLOADED', 'RECEIVED', 'VERIFIED'].includes(status);
+    return ['UPLOADED', 'PHYSICAL_RECEIVED'].includes(status);
   }
 
   readonly Users = Users;

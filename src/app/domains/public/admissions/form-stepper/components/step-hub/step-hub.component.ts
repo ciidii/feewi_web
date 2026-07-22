@@ -146,8 +146,7 @@ export class StepHubComponent {
 
     return mandatoryDocs.every(d =>
       d.status === 'UPLOADED' ||
-      d.status === 'RECEIVED' ||
-      d.status === 'VERIFIED'
+      d.status === 'PHYSICAL_RECEIVED'
     );
   }
 

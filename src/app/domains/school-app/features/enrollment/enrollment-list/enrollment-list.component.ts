@@ -392,7 +392,7 @@ export class EnrollmentListComponent implements OnInit, OnDestroy {
         'Niveau': app.schooling?.levelLabel || '—',
         'Filière': app.schooling?.filiereId ? 'Standard' : 'Tronc commun',
         'Origine': app.schooling?.customFields?.['previousSchool'] || 'Non renseignée',
-        'Documents': `${app.documents.filter(d => ['UPLOADED', 'RECEIVED', 'VERIFIED'].includes(d.status)).length} fournis sur ${app.documents.length}`
+        'Documents': `${app.documents.filter(d => ['UPLOADED', 'PHYSICAL_RECEIVED'].includes(d.status)).length} fournis sur ${app.documents.length}`
       },
       badges: [
         { label: this.getStatusLabel(app.status), type: this.getStatusType(app.status) },

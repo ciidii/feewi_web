@@ -15,7 +15,7 @@ export type AdmissionChannel = 'DIGITAL' | 'DIRECT';
 
 export type GuardianRelation = 'FATHER' | 'MOTHER' | 'UNCLE' | 'AUNT' | 'GRANDPARENT' | 'GUARDIAN' | 'OTHER';
 
-export type DocumentStatus = 'MISSING' | 'UPLOADED' | 'RECEIVED' | 'VERIFIED' | 'REJECTED';
+export type DocumentStatus = 'MISSING' | 'PHYSICAL_RECEIVED' | 'UPLOADED' | 'REJECTED';
 
 export type AssessmentType = 'EXAM' | 'DOSSIER' | 'INTERVIEW' | 'MIXED';
 
