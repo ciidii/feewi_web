@@ -1,0 +1,102 @@
+<app-fw-page-shell
+  title="Facturation SaaS"
+  description="Revenu récurrent, statut des abonnements et relances"
+  [icon]="CreditCard"
+  [backLink]="['/saas/tenants']"
+  density="compact"
+  [showSearch]="false"
+>
+  <div class="max-w-7xl mx-auto space-y-6">
+
+    <!-- KPIs -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- MRR -->
+      <div class="p-5 rounded-2xl bg-white border border-slate-100 shadow-sm">
+        <div class="flex items-center gap-2 mb-2">
+          <lucide-icon [name]="TrendingUp" class="w-4 h-4 text-blue-600"></lucide-icon>
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">MRR</span>
+        </div>
+        <p class="text-2xl font-black text-slate-900">
+          {{ (overview()?.mrr ?? 0) | number:'1.0-0' }}
+          <span class="text-sm font-bold text-slate-400">{{ overview()?.currency || 'XOF' }}</span>
+        </p>
+        <p class="text-[10px] text-slate-400 mt-1">Revenu mensuel récurrent</p>
+      </div>
+
+      <!-- Total -->
+      <div class="p-5 rounded-2xl bg-white border border-slate-100 shadow-sm">
+        <div class="flex items-center gap-2 mb-2">
+          <lucide-icon [name]="Building2" class="w-4 h-4 text-slate-500"></lucide-icon>
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Établissements</span>
+        </div>
+        <p class="text-2xl font-black text-slate-900">{{ overview()?.total ?? 0 }}</p>
+        <p class="text-[10px] text-slate-400 mt-1">{{ overview()?.trial ?? 0 }} en essai</p>
+      </div>
+
+      <!-- Actifs -->
+      <div class="p-5 rounded-2xl bg-white border border-slate-100 shadow-sm">
+        <div class="flex items-center gap-2 mb-2">
+          <lucide-icon [name]="Users" class="w-4 h-4 text-emerald-600"></lucide-icon>
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">À jour</span>
+        </div>
+        <p class="text-2xl font-black text-emerald-600">{{ overview()?.active ?? 0 }}</p>
+        <p class="text-[10px] text-slate-400 mt-1">Abonnements actifs</p>
+      </div>
+
+      <!-- Impayés / suspendus -->
+      <div class="p-5 rounded-2xl bg-white border border-slate-100 shadow-sm">
+        <div class="flex items-center gap-2 mb-2">
+          <lucide-icon [name]="AlertTriangle" class="w-4 h-4 text-orange-500"></lucide-icon>
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">À relancer</span>
+        </div>
+        <p class="text-2xl font-black text-orange-600">{{ (overview()?.pastDue ?? 0) + (overview()?.suspended ?? 0) }}</p>
+        <p class="text-[10px] text-slate-400 mt-1">{{ overview()?.pastDue ?? 0 }} impayés · {{ overview()?.suspended ?? 0 }} suspendus</p>
+      </div>
+    </div>
+
+    <!-- Liste de relance -->
+    <div class="rounded-2xl bg-white border border-slate-100 shadow-sm overflow-hidden">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-slate-50">
+        <h3 class="text-sm font-bold text-slate-900">Liste de relance</h3>
+        <button (click)="load()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-50" title="Rafraîchir">
+          <lucide-icon [name]="RefreshCw" class="w-4 h-4" [class.animate-spin]="isLoading()"></lucide-icon>
+        </button>
+      </div>
+
+      <div *ngIf="!hasRelances()" class="px-5 py-12 text-center">
+        <lucide-icon [name]="CreditCard" class="w-8 h-8 text-slate-200 mx-auto mb-3"></lucide-icon>
+        <p class="text-xs text-slate-400 italic">Aucune école à relancer — tous les abonnements sont à jour.</p>
+      </div>
+
+      <table *ngIf="hasRelances()" class="w-full text-sm">
+        <thead>
+          <tr class="text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50">
+            <th class="px-5 py-3">Établissement</th>
+            <th class="px-5 py-3">Statut</th>
+            <th class="px-5 py-3 text-right">Montant</th>
+            <th class="px-5 py-3">Depuis</th>
+            <th class="px-5 py-3"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of relances()" class="border-b border-slate-50 last:border-0 hover:bg-slate-50/60 transition-colors">
+            <td class="px-5 py-3 font-bold text-slate-800">{{ item.schoolName || item.schoolId }}</td>
+            <td class="px-5 py-3">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border" [ngClass]="statusBadgeClass(item.status)">
+                {{ statusLabel(item.status) }}
+              </span>
+            </td>
+            <td class="px-5 py-3 text-right font-medium text-slate-700">{{ item.amount | number:'1.0-0' }} {{ item.currency }}</td>
+            <td class="px-5 py-3 text-slate-500 text-xs">{{ formatDate(item.since) }}</td>
+            <td class="px-5 py-3 text-right">
+              <a [routerLink]="['/saas/tenants', item.schoolId]"
+                 class="text-[10px] font-bold text-blue-600 uppercase tracking-widest hover:underline">
+                Ouvrir
+              </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</app-fw-page-shell>

@@ -113,6 +113,7 @@ export class SidebarComponent {
   saasItems = [
     { label: 'Établissements', icon: Building2, route: '/saas/tenants', permission: 'identity:saas:school:list' },
     { label: 'Statistiques Globales', icon: BarChart3, route: '/saas/stats', permission: 'identity:saas:school:list' },
+    { label: 'Facturation SaaS', icon: Wallet, route: '/saas/billing', permission: 'identity:saas:school:manage' },
     { label: 'Audit Système', icon: FileText, route: '/saas/audit', permission: 'identity:audit:read' },
   ];
 

@@ -162,6 +162,46 @@
       <!-- Colonne Droite (1/3) : Statut & Configuration -->
       <div class="space-y-6">
 
+        <!-- Carte : Abonnement SaaS (facturation Feewi → école) -->
+        <app-fw-info-card *ngIf="subscription() as sub" [icon]="CreditCard" title="Abonnement Feewi">
+          <div card-actions>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border" [ngClass]="subStatusBadgeClass(sub.status)">
+              {{ subStatusLabel(sub.status) }}
+            </span>
+          </div>
+
+          <div class="space-y-4">
+            <div class="flex items-baseline justify-between">
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Montant</span>
+              <span class="text-sm font-bold text-slate-900">
+                {{ sub.amount | number:'1.0-0' }} {{ sub.currency }}
+                <span class="text-[10px] font-medium text-slate-400">/ {{ planLabel(sub.plan) | lowercase }}</span>
+              </span>
+            </div>
+
+            <div *ngIf="sub.status === 'TRIAL'" class="flex items-center justify-between">
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Fin d'essai</span>
+              <span class="text-xs font-medium text-slate-700">{{ formatDate(sub.trialEndsAt) }}</span>
+            </div>
+
+            <div *ngIf="sub.status !== 'TRIAL'" class="flex items-center justify-between">
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Prochaine échéance</span>
+              <span class="text-xs font-medium text-slate-700">{{ formatDate(sub.currentPeriodEnd) }}</span>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Dernier paiement</span>
+              <span class="text-xs font-medium text-slate-700">{{ sub.lastPaymentAt ? formatDate(sub.lastPaymentAt) : 'Aucun' }}</span>
+            </div>
+
+            <button *fwHasPermission="'identity:saas:school:manage'" (click)="onRecordPayment()"
+                    class="w-full flex items-center justify-center gap-2 py-2.5 mt-1 rounded-xl bg-blue-600 text-white text-[11px] font-bold uppercase tracking-widest hover:bg-blue-700 transition-all active:scale-95">
+              <lucide-icon [name]="Wallet" class="w-4 h-4"></lucide-icon>
+              Enregistrer un paiement
+            </button>
+          </div>
+        </app-fw-info-card>
+
         <!-- Carte : Configuration du Tenant (données réelles) -->
         <app-fw-info-card [icon]="Activity" title="Configuration du Tenant" [accent]="'primary'">
             <div class="space-y-4">

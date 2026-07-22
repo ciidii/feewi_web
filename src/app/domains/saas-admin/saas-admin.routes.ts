@@ -22,6 +22,12 @@ export const SAAS_ADMIN_ROUTES: Routes = [
     loadComponent: () => import('./saas-stats/saas-stats.component').then(m => m.SaasStatsComponent)
   },
   {
+    path: 'billing',
+    title: 'Facturation SaaS',
+    data: {permissions: ['identity:saas:school:manage']},
+    loadComponent: () => import('./saas-billing/saas-billing.component').then(m => m.SaasBillingComponent)
+  },
+  {
     path: 'audit',
     title: 'Audit Système',
     data: {permissions: ['identity:audit:read']},

@@ -6,6 +6,7 @@ import {
   Building2,
   Calendar,
   CheckCircle,
+  CreditCard,
   Globe,
   GraduationCap,
   History,
@@ -19,10 +20,14 @@ import {
   RefreshCw,
   ShieldCheck,
   Trash2,
+  Wallet,
   XCircle
 } from 'lucide-angular';
 import {SchoolService} from '../../../core/services/school.service';
+import {SubscriptionService} from '../../../core/services/subscription.service';
 import {School} from '../../../core/models/school.model';
+import {Subscription} from '../../../core/models/subscription.model';
+import {SubscriptionPaymentFormComponent} from '../subscription-payment-form/subscription-payment-form.component';
 import {NotificationService} from '../../../shared/services/notification.service';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {MatMenuModule} from '@angular/material/menu';
@@ -46,12 +51,14 @@ export class TenantDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private schoolService = inject(SchoolService);
+  private subscriptionService = inject(SubscriptionService);
   private notificationService = inject(NotificationService);
   private dialog = inject(MatDialog);
   private enrollmentPublicService = inject(EnrollmentPublicService);
 
   school = signal<School | null>(null);
   enrollmentPortal = signal<PublicPortalSummary | null>(null);
+  subscription = signal<Subscription | null>(null);
   isLoading = signal(true);
   isActionLoading = signal(false);
 
@@ -73,6 +80,8 @@ export class TenantDetailComponent implements OnInit {
   readonly Pencil = Pencil;
   readonly Trash2 = Trash2;
   readonly MoreVertical = MoreVertical;
+  readonly CreditCard = CreditCard;
+  readonly Wallet = Wallet;
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -93,6 +102,7 @@ export class TenantDetailComponent implements OnInit {
         if (data.tenantId) {
           this.loadEnrollmentPortal(data.tenantId);
         }
+        this.loadSubscription(id);
       },
       error: () => {
         this.notificationService.error("Impossible de charger les détails de l'établissement.");
@@ -106,6 +116,59 @@ export class TenantDetailComponent implements OnInit {
     this.enrollmentPublicService.getPortalSummaryForTenant(tenantId).subscribe({
       next: (summary) => this.enrollmentPortal.set(summary),
       error: () => { /* portail indisponible — carte masquée */ }
+    });
+  }
+
+  private loadSubscription(schoolId: string): void {
+    this.subscription.set(null);
+    this.subscriptionService.getSubscription(schoolId).subscribe({
+      next: (sub) => this.subscription.set(sub),
+      error: () => { /* abonnement non provisionné — carte masquée */ }
+    });
+  }
+
+  /** Libellés & styles du statut d'abonnement (miroir de SubscriptionStatus backend). */
+  subStatusLabel(status?: string): string {
+    switch (status) {
+      case 'TRIAL': return 'Essai';
+      case 'ACTIVE': return 'À jour';
+      case 'PAST_DUE': return 'Impayé';
+      case 'SUSPENDED': return 'Suspendu';
+      case 'CANCELLED': return 'Résilié';
+      default: return status ?? '—';
+    }
+  }
+
+  subStatusBadgeClass(status?: string): string {
+    switch (status) {
+      case 'ACTIVE': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      case 'TRIAL': return 'bg-amber-50 text-amber-700 border-amber-200';
+      case 'PAST_DUE': return 'bg-orange-50 text-orange-700 border-orange-200';
+      case 'SUSPENDED': return 'bg-rose-50 text-rose-700 border-rose-200';
+      default: return 'bg-slate-100 text-slate-500 border-slate-200';
+    }
+  }
+
+  planLabel(plan?: string): string {
+    return plan === 'ANNUAL' ? 'Annuel' : 'Mensuel';
+  }
+
+  /** Ouvre le dialogue d'enregistrement d'un paiement d'abonnement. */
+  onRecordPayment(): void {
+    const s = this.school();
+    const sub = this.subscription();
+    if (!s || !s.id || !sub) return;
+
+    const ref = this.dialog.open(SubscriptionPaymentFormComponent, {
+      autoFocus: false,
+      panelClass: 'fw-dialog',
+      data: {schoolId: s.id, schoolName: s.name, amount: sub.amount, currency: sub.currency}
+    });
+    ref.afterClosed().subscribe(payment => {
+      if (payment) {
+        this.notificationService.success(`Paiement enregistré — reçu ${payment.receiptNumber}.`);
+        this.loadSchool(s.id!);
+      }
     });
   }
 
