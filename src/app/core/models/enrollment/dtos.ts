@@ -95,27 +95,49 @@ export interface AssessmentRequest {
   recommendedLevelId?: string | null;
 }
 
+/**
+ * Saisie directe au guichet (Secrétariat) — dossier complet aligné sur le formulaire configuré
+ * par l'école (piliers activés + customFields). Le backend prend le tenant depuis le JWT
+ * (`tenantId` ci-dessous est ignoré, conservé pour compat) et force le canal `DIRECT`.
+ */
 export interface DirectEntryRequest {
-  tenantId: string;
+  /** @deprecated ignoré côté backend — le tenant provient du JWT. */
+  tenantId?: string;
   type: AdmissionType;
   academicYearId: string;
   levelId: string;
+  filiereId?: string | null;
+  /** Cycle du niveau — résout les overrides de config par cycle côté backend. */
+  cycleType?: CycleType;
   identity: {
     firstName: string;
     lastName: string;
     gender: 'MALE' | 'FEMALE';
     birthDate: string;
     birthPlace: string;
+    /** Champs personnalisés du pilier identité configurés par l'école (ex: nationality). */
     customFields?: Record<string, any>;
   };
+  /** Pilier médical — omis si désactivé dans le schéma de l'école. */
+  medical?: {
+    customFields?: Record<string, any>;
+  };
+  /** Champs personnalisés du pilier scolarité (ex: previousSchool). */
+  schoolingCustomFields?: Record<string, any>;
   primaryGuardian: {
     firstName: string;
     lastName: string;
+    email?: string;
     phone: string;
     relation: string;
     financialResponsible: boolean;
+    /** Champs personnalisés sur le tuteur (guardianCustomFields). */
     customFields?: Record<string, any>;
   };
+  /** Champs personnalisés du pilier famille (ex: homeAddress). */
+  familyCustomFields?: Record<string, any>;
+  /** Piliers entièrement personnalisés définis par l'école (clé pilier → valeurs). */
+  extraPillars?: Record<string, Record<string, any>>;
 }
 
 // --- RESPONSES ---

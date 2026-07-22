@@ -1,6 +1,6 @@
 <app-fw-page-shell
   title="Saisie Directe au Guichet"
-  description="Enregistrement express d'un nouveau candidat par le secrétariat."
+  description="Enregistrement d'un candidat par le secrétariat, selon le formulaire configuré par l'école."
   [icon]="UserPlus"
   [backLink]="['/admin/admissions/list']"
   density="compact"
@@ -18,7 +18,7 @@
   <!-- FORM CONTENT -->
   <main class="entry-content animate-in fade-in duration-700" *ngIf="!isLoading(); else skeletons">
     <form [formGroup]="entryForm" class="grid grid-cols-12 gap-8">
-      
+
       <!-- PILIER : ORIENTATION & SCOLARITÉ -->
       <div class="col-span-12 lg:col-span-3 space-y-6">
         <section class="zen-form-card">
@@ -33,53 +33,50 @@
             </div>
             <div class="form-group">
               <label>Niveau demandé *</label>
-              <select formControlName="levelId" class="zen-select highlight">
+              <select formControlName="levelId" class="zen-select highlight"
+                      (change)="onLevelChange($any($event.target).value)">
                 <option value="">Sélectionner...</option>
-                <optgroup *ngFor="let group of groupedLevels()" [label]="group.cycle.name || group.cycle.systemName">
+                <optgroup *ngFor="let group of groupedLevels()" [label]="group.cycle.name || group.cycle.systemName || ''">
                   <option *ngFor="let lvl of group.levels" [value]="lvl.id">{{ lvl.name }}</option>
                 </optgroup>
               </select>
             </div>
-            <div class="form-group">
-              <label>Dernier établissement</label>
-              <input type="text" formControlName="previousSchool" class="zen-input" placeholder="École d'origine">
+            <div class="form-group" *ngIf="filieres().length">
+              <label>Filière</label>
+              <select formControlName="filiereId" class="zen-select">
+                <option [ngValue]="null">Aucune / N/A</option>
+                <option *ngFor="let f of filieres()" [ngValue]="f.id">{{ f.name }}</option>
+              </select>
             </div>
+
+            <!-- Champs personnalisés SCOLARITÉ (config école) -->
+            <ng-container *ngIf="schemaReady()">
+              <ng-container *ngTemplateOutlet="dynFields; context: {fields: schoolingFields(), group: schoolingCF()}"></ng-container>
+            </ng-container>
           </div>
         </section>
 
-        <!-- PILIER MÉDICAL (Express) -->
-        <section class="zen-form-card" formGroupName="medical">
+        <!-- PILIER MÉDICAL — affiché uniquement si activé par l'école -->
+        <section class="zen-form-card" *ngIf="schemaReady() && medicalEnabled()">
           <header class="card-header">
             <lucide-icon [name]="HeartPulse"></lucide-icon>
             <h3>Santé</h3>
           </header>
-          <div class="card-body space-y-5">
-            <div class="form-group">
-              <label>Groupe Sanguin</label>
-              <select formControlName="bloodGroup" class="zen-select">
-                <option value="">Inconnu</option>
-                <option value="O+">O+</option><option value="O-">O-</option>
-                <option value="A+">A+</option><option value="A-">A-</option>
-                <option value="B+">B+</option><option value="B-">B-</option>
-                <option value="AB+">AB+</option><option value="AB-">AB-</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Allergies Critiques</label>
-              <textarea formControlName="criticalAllergies" rows="2" class="zen-textarea" placeholder="Détails importants..."></textarea>
-            </div>
+          <div class="card-body">
+            <p *ngIf="!medicalFields().length" class="text-sm text-slate-400">Aucun champ médical configuré.</p>
+            <ng-container *ngTemplateOutlet="dynFields; context: {fields: medicalFields(), group: medicalCF()}"></ng-container>
           </div>
         </section>
       </div>
 
       <!-- PILIER : FAMILLE -->
-      <div class="col-span-12 lg:col-span-4 space-y-6" formGroupName="family">
+      <div class="col-span-12 lg:col-span-4 space-y-6">
         <section class="zen-form-card">
           <header class="card-header">
             <lucide-icon [name]="Users"></lucide-icon>
             <h3>Famille & Responsable</h3>
           </header>
-          <div class="card-body space-y-5" formGroupName="primaryGuardian">
+          <div class="card-body space-y-5" formGroupName="guardian">
             <div class="grid grid-cols-2 gap-4">
               <div class="form-group">
                 <label>Nom *</label>
@@ -106,22 +103,24 @@
               <label>Email *</label>
               <input type="email" formControlName="email" class="zen-input" placeholder="parent@mail.com">
             </div>
-            <div class="form-group">
-              <label>Adresse Physique *</label>
-              <input type="text" formControlName="homeAddress" class="zen-input" placeholder="Ville, Quartier">
-            </div>
+          </div>
+
+          <!-- Champs personnalisés TUTEUR + FAMILLE (config école) -->
+          <div class="card-body pt-0 space-y-5" *ngIf="schemaReady() && (guardianFields().length || familyFields().length)">
+            <ng-container *ngTemplateOutlet="dynFields; context: {fields: guardianFields(), group: guardianCF()}"></ng-container>
+            <ng-container *ngTemplateOutlet="dynFields; context: {fields: familyFields(), group: familyCF()}"></ng-container>
           </div>
         </section>
       </div>
 
       <!-- PILIER : IDENTITÉ ENFANT -->
-      <div class="col-span-12 lg:col-span-5 space-y-6" formGroupName="identity">
+      <div class="col-span-12 lg:col-span-5 space-y-6">
         <section class="zen-form-card identity-border">
           <header class="card-header">
             <lucide-icon [name]="User"></lucide-icon>
             <h3>Identité du Candidat</h3>
           </header>
-          <div class="card-body grid grid-cols-2 gap-x-6 gap-y-5">
+          <div class="card-body grid grid-cols-2 gap-x-6 gap-y-5" formGroupName="identity">
             <div class="form-group">
               <label>Nom de famille *</label>
               <input type="text" formControlName="lastName" class="zen-input">
@@ -133,6 +132,7 @@
             <div class="form-group">
               <label>Sexe / Genre *</label>
               <select formControlName="gender" class="zen-select">
+                <option value="">Sélectionner...</option>
                 <option value="MALE">Masculin</option>
                 <option value="FEMALE">Féminin</option>
               </select>
@@ -145,17 +145,38 @@
               <label>Lieu de naissance *</label>
               <input type="text" formControlName="birthPlace" class="zen-input">
             </div>
-            <div class="form-group">
-              <label>Nationalité *</label>
-              <input type="text" formControlName="nationality" class="zen-input">
-            </div>
+          </div>
+
+          <!-- Champs personnalisés IDENTITÉ (ex: nationalité) — config école -->
+          <div class="card-body pt-0 grid grid-cols-2 gap-x-6 gap-y-5" *ngIf="schemaReady() && identityFields().length">
+            <ng-container *ngTemplateOutlet="dynFields; context: {fields: identityFields(), group: identityCF()}"></ng-container>
           </div>
         </section>
 
-        <div class="guichet-info-card">
+        <!-- PILIERS PERSONNALISÉS DÉFINIS PAR L'ÉCOLE -->
+        <section class="zen-form-card" *ngFor="let section of extraSections()">
+          <header class="card-header">
+            <lucide-icon [name]="Layers"></lucide-icon>
+            <h3>{{ section.label }}</h3>
+          </header>
+          <div class="card-body space-y-5">
+            <ng-container *ngTemplateOutlet="dynFields; context: {fields: section.fields, group: section.group}"></ng-container>
+          </div>
+        </section>
+
+        <!-- ÉTAT : niveau non sélectionné -->
+        <div class="guichet-info-card" *ngIf="!schemaReady()">
+          <lucide-icon [name]="BookOpen" class="text-primary"></lucide-icon>
+          <div class="info-content">
+            <p *ngIf="isLoadingConfig()"><strong>Chargement du formulaire configuré…</strong></p>
+            <p *ngIf="!isLoadingConfig()"><strong>Sélectionnez un niveau</strong> pour afficher le formulaire d'admission configuré par l'établissement (champs personnalisés, pièces requises).</p>
+          </div>
+        </div>
+
+        <div class="guichet-info-card" *ngIf="schemaReady()">
           <lucide-icon [name]="ShieldCheck" class="text-primary"></lucide-icon>
           <div class="info-content">
-            <p><strong>Mode Saisie Directe :</strong> Ce dossier sera créé immédiatement en état vérifiable. Les documents pourront être numérisés ultérieurement.</p>
+            <p><strong>Mode Saisie Directe :</strong> le dossier sera créé et soumis immédiatement (canal Guichet). Les pièces pourront être numérisées ultérieurement.</p>
           </div>
         </div>
       </div>
@@ -164,6 +185,36 @@
   </main>
 
 </app-fw-page-shell>
+
+<!-- Rendu générique d'une liste de champs configurés -->
+<ng-template #dynFields let-fields="fields" let-group="group">
+  <div [formGroup]="group" class="contents">
+    <div class="form-group" *ngFor="let f of fields" [ngSwitch]="f.type">
+      <label *ngIf="f.type !== 'BOOLEAN'">{{ f.label }}<ng-container *ngIf="f.mandatory"> *</ng-container></label>
+
+      <select *ngSwitchCase="'SELECT'" [formControlName]="f.name" class="zen-select">
+        <option value="">—</option>
+        <option *ngFor="let o of f.options" [value]="o">{{ o }}</option>
+      </select>
+
+      <textarea *ngSwitchCase="'TEXTAREA'" [formControlName]="f.name" rows="2" class="zen-textarea"
+                [placeholder]="f.placeholder || ''"></textarea>
+
+      <input *ngSwitchCase="'DATE'" type="date" [formControlName]="f.name" class="zen-input">
+
+      <input *ngSwitchCase="'NUMBER'" type="number" [formControlName]="f.name" class="zen-input"
+             [placeholder]="f.placeholder || ''">
+
+      <label *ngSwitchCase="'BOOLEAN'" class="flex items-center gap-2 cursor-pointer">
+        <input type="checkbox" [formControlName]="f.name">
+        <span>{{ f.label }}<ng-container *ngIf="f.mandatory"> *</ng-container></span>
+      </label>
+
+      <input *ngSwitchDefault type="text" [formControlName]="f.name" class="zen-input"
+             [placeholder]="f.placeholder || ''">
+    </div>
+  </div>
+</ng-template>
 
 <ng-template #skeletons>
   <div class="grid grid-cols-12 gap-8 animate-pulse">

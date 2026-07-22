@@ -29,6 +29,8 @@ export interface FamilySchemaConfig {
   allowedWithoutGuardian: boolean;
   guardianCoreFieldControls: Record<string, CoreFieldControl>;
   guardianCustomFields: FieldConfig[];
+  /** Champs personnalisés au niveau du pilier famille lui-même (ex: homeAddress). */
+  customFields?: FieldConfig[];
 }
 
 export interface MedicalSchemaConfig {
